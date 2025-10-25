@@ -61,6 +61,27 @@
 
 #include "umbrasupport.h"
 
+enum PhysSimpleShapeType
+{
+	PHYS_SIMPLE_SHAPE_NONE = 0,
+	PHYS_SIMPLE_SHAPE_AA_BOX,
+	PHYS_SIMPLE_SHAPE_SPHERE,
+};
+
+struct PhysSimpleShapeDefinition
+{
+	PhysSimpleShapeType	Type;
+	Vector3				BoxHalfExtents;
+	float				SphereRadius;
+
+	PhysSimpleShapeDefinition() :
+		Type(PHYS_SIMPLE_SHAPE_NONE),
+		BoxHalfExtents(Vector3(0.0f,0.0f,0.0f)),
+		SphereRadius(0.0f)
+	{
+	}
+};
+
 
 class	CullSystemClass;
 class	CullLinkClass;
@@ -280,6 +301,8 @@ August 29, 2000
 class PhysClass : public CullableClass, public PersistClass, public MultiListObjectClass
 {
 public:
+	using SimpleShapeType = PhysSimpleShapeType;
+	using SimpleShapeDefinition = PhysSimpleShapeDefinition;
 
 	PhysClass(void);
 //	PhysClass(const PhysDefClass & def);
@@ -309,12 +332,17 @@ public:
 	/*
 	** Access to the Position/Orientation state of the object
 	*/
-	virtual const Matrix3D &	Get_Transform(void) const					= 0;
-	virtual void					Set_Transform(const Matrix3D & m)		= 0;
+	virtual const Matrix3D &	Get_Transform(void) const;
+	virtual void					Set_Transform(const Matrix3D & m);
 	void								Get_Position(Vector3 * set_pos) const	{ Get_Transform().Get_Translation(set_pos); }
 	void								Set_Position(const Vector3 & pos)		{ Matrix3D tm = Get_Transform(); tm.Set_Translation(pos); Set_Transform(tm); }
 	float								Get_Facing(void) const						{ return Get_Transform().Get_Z_Rotation(); }
 	void								Set_Facing(float new_facing);
+
+	bool								Has_Simple_Shape(void) const		{ return SimpleShape.Type != PHYS_SIMPLE_SHAPE_NONE; }
+	const SimpleShapeDefinition &Get_Simple_Shape(void) const	{ return SimpleShape; }
+	void								Set_Simple_Shape_AABox(const Vector3 &half_extents);
+	void								Set_Simple_Shape_Sphere(float radius);
 
 	/*
 	** Collision detection - all collideable objects provide the following collision detection
@@ -360,6 +388,7 @@ public:
 	void								Set_Model_By_Name(const char * model_type_name);
 	RenderObjClass *				Get_Model(void);
 	WWINLINE RenderObjClass *	Peek_Model(void) { return Model; }
+	WWINLINE bool					Has_Render_Model(void) const	{ return Model != NULL; }
 
 	/*
 	** Set the name of this physics model instance
@@ -628,6 +657,7 @@ protected:
 	
 	void									Push_Effects(RenderInfoClass & rinfo);
 	void									Pop_Effects(RenderInfoClass & rinfo);
+	void								Update_Simple_Shape_Cull_Box(void);
 
 	virtual void						Update_Sun_Status(void);
 
@@ -680,6 +710,8 @@ protected:
 	** update their id based on their current location.
 	*/
 	uint32							VisObjectID;
+	SimpleShapeDefinition	SimpleShape;
+	Matrix3D					FallbackTransform;
 
 	/*
 	** Observer object 
@@ -759,6 +791,8 @@ inline void PhysClass::Update_Cull_Box(void)
 {
 	if (Model) {
 		Set_Cull_Box(Model->Get_Bounding_Box());
+	} else if (Has_Simple_Shape()) {
+		Update_Simple_Shape_Cull_Box();
 	}
 }
 
@@ -790,6 +824,7 @@ inline bool PhysClass::Is_Pre_Lit(void)
 class PhysDefClass : public DefinitionClass
 {
 public:
+	using SimpleShapeDefinition = PhysSimpleShapeDefinition;
 	
 	PhysDefClass(void);
 	
@@ -807,6 +842,9 @@ public:
 	// accessors
 	const StringClass &			Get_Model_Name()					{ return ModelName; }
 	bool								Get_Is_Pre_Lit()					{ return IsPreLit; }
+	const SimpleShapeDefinition &Get_Simple_Shape_Definition() const { return ShapeDefinition; }
+	void								Set_Simple_Shape_Definition(const SimpleShapeDefinition &def) { ShapeDefinition = def; }
+	bool								Uses_Simple_Shape(void) const	{ return ShapeDefinition.Type != PHYS_SIMPLE_SHAPE_NONE; }
 	
 	//	Editable interface requirements
 	DECLARE_EDITABLE(PhysDefClass,DefinitionClass);
@@ -815,6 +853,7 @@ protected:
 	
 	StringClass						ModelName;
 	bool								IsPreLit;
+	SimpleShapeDefinition	ShapeDefinition;
 	
 	friend class PhysClass;
 };

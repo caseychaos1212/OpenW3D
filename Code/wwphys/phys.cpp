@@ -42,6 +42,7 @@
 #include "assetmgr.h"
 #include "ww3d.h"
 #include "wwdebug.h"
+#include <string>
 #include "pscene.h"
 #include "cullsys.h"
 #include "chunkio.h"
@@ -95,6 +96,7 @@ enum
 {
 	PHYS_CHUNK_VARIABLES				= 0x00660055,
 	PHYS_CHUNK_MODEL,
+	PHYS_CHUNK_SIMPLE_SHAPE,
 
 	PHYS_VARIABLE_CULLABLE_PTR		= 0x00,
 	PHYS_VARIABLE_WIDGETUSER_PTR,
@@ -104,6 +106,9 @@ enum
 	PHYS_VARIABLE_OBSERVER,
 	PHYS_VARIABLE_DEFID,
 	PHYS_VARIABLE_INSTANCEID,
+	PHYS_SIMPLE_SHAPE_TYPE,
+	PHYS_SIMPLE_SHAPE_BOX_EXTENTS,
+	PHYS_SIMPLE_SHAPE_SPHERE_RADIUS,
 };
 
 
@@ -128,6 +133,8 @@ PhysClass::PhysClass(void) :
 	UmbraObject->setUserPointer(this);
 	UmbraSupport::Install_Umbra_Object(this);
 #endif
+	SimpleShape = SimpleShapeDefinition();
+	FallbackTransform.Make_Identity();
 }
 
 PhysClass::~PhysClass(void)
@@ -169,31 +176,54 @@ void PhysClass::Init(const PhysDefClass & def)
 		Set_Model(model);
 		REF_PTR_RELEASE(model);
 	}
+
+	const SimpleShapeDefinition &shape_def = def.Get_Simple_Shape_Definition();
+	SimpleShape = shape_def;
+	switch (shape_def.Type) {
+	case PHYS_SIMPLE_SHAPE_AA_BOX:
+		Set_Simple_Shape_AABox(shape_def.BoxHalfExtents);
+		break;
+	case PHYS_SIMPLE_SHAPE_SPHERE:
+		Set_Simple_Shape_Sphere(shape_def.SphereRadius);
+		break;
+	default:
+		SimpleShape = SimpleShapeDefinition();
+		Update_Cull_Box();
+		break;
+	}
 }
 
-void PhysClass::Set_Model(RenderObjClass * model)		
+void PhysClass::Set_Model(RenderObjClass * model)	
 { 
 	PhysicsSceneClass * the_scene = PhysicsSceneClass::Get_Instance();
-	bool in_scene = the_scene->Contains(this);
+	bool in_scene = (the_scene != NULL) ? the_scene->Contains(this) : false;
+	Matrix3D previous_transform(true);
 
 	if (Model) {
+		previous_transform = Model->Get_Transform();
 		// If we had an old model, copy the transform
-		if ( model ) {		
+		if ( model ) {	
 			model->Set_Transform( Model->Get_Transform() );
 		}
 		if (in_scene) Model->Notify_Removed(the_scene);
 		Model->Release_Ref();
+	} else if (model != NULL) {
+		model->Set_Transform(FallbackTransform);
 	}
 	Model = model; 
 	if (Model) {
 		Model->Add_Ref(); 
 		if (in_scene) Model->Notify_Added(the_scene);
+		FallbackTransform = Model->Get_Transform();
+	} else {
+		FallbackTransform = previous_transform;
 	}
 
 	if ((Definition != NULL) && (Definition->IsPreLit)) {
 		Enable_Is_Pre_Lit(true);
 	}
 	Invalidate_Static_Lighting_Cache ();
+	Update_Cull_Box();
 }
 	
 void PhysClass::Set_Model_By_Name(const char * model_type_name)
@@ -210,7 +240,81 @@ void PhysClass::Set_Model_By_Name(const char * model_type_name)
 	}
 }
 
-RenderObjClass * PhysClass::Get_Model(void)								
+const Matrix3D & PhysClass::Get_Transform(void) const
+{
+	if (Model) {
+		return Model->Get_Transform();
+	}
+	return FallbackTransform;
+}
+
+void PhysClass::Set_Transform(const Matrix3D & m)
+{
+	if (Model) {
+		Model->Set_Transform(m);
+	}
+	FallbackTransform = m;
+	Update_Cull_Box();
+	Invalidate_Static_Lighting_Cache();
+}
+
+void PhysClass::Set_Simple_Shape_AABox(const Vector3 &half_extents)
+{
+	Vector3 clamped;
+	clamped.X = WWMath::Max(half_extents.X, 0.0f);
+	clamped.Y = WWMath::Max(half_extents.Y, 0.0f);
+	clamped.Z = WWMath::Max(half_extents.Z, 0.0f);
+	SimpleShape.Type = PHYS_SIMPLE_SHAPE_AA_BOX;
+	SimpleShape.BoxHalfExtents = clamped;
+	SimpleShape.SphereRadius = WWMath::Max(clamped.X, WWMath::Max(clamped.Y, clamped.Z));
+	Update_Simple_Shape_Cull_Box();
+}
+
+void PhysClass::Set_Simple_Shape_Sphere(float radius)
+{
+	float positive_radius = WWMath::Max(radius, 0.0f);
+	SimpleShape.Type = PHYS_SIMPLE_SHAPE_SPHERE;
+	SimpleShape.SphereRadius = positive_radius;
+	SimpleShape.BoxHalfExtents.Set(positive_radius, positive_radius, positive_radius);
+	Update_Simple_Shape_Cull_Box();
+}
+
+void PhysClass::Update_Simple_Shape_Cull_Box(void)
+{
+	if (!Has_Simple_Shape()) {
+		return;
+	}
+
+	AABoxClass box;
+	Vector3 center;
+	const Matrix3D &tm = Get_Transform();
+	tm.Get_Translation(&center);
+	box.Center = center;
+
+	if (SimpleShape.Type == PHYS_SIMPLE_SHAPE_AA_BOX) {
+		Vector3 x_axis;
+		Vector3 y_axis;
+		Vector3 z_axis;
+		tm.Get_X_Vector(&x_axis);
+		tm.Get_Y_Vector(&y_axis);
+		tm.Get_Z_Vector(&z_axis);
+		x_axis *= SimpleShape.BoxHalfExtents.X;
+		y_axis *= SimpleShape.BoxHalfExtents.Y;
+		z_axis *= SimpleShape.BoxHalfExtents.Z;
+		Vector3 extent;
+		extent.X = WWMath::Fabs(x_axis.X) + WWMath::Fabs(y_axis.X) + WWMath::Fabs(z_axis.X);
+		extent.Y = WWMath::Fabs(x_axis.Y) + WWMath::Fabs(y_axis.Y) + WWMath::Fabs(z_axis.Y);
+		extent.Z = WWMath::Fabs(x_axis.Z) + WWMath::Fabs(y_axis.Z) + WWMath::Fabs(z_axis.Z);
+		box.Extent = extent;
+	} else if (SimpleShape.Type == PHYS_SIMPLE_SHAPE_SPHERE) {
+		float radius = WWMath::Fabs(SimpleShape.SphereRadius);
+		box.Extent.Set(radius, radius, radius);
+	}
+
+	Set_Cull_Box(box);
+}
+
+RenderObjClass * PhysClass::Get_Model(void)				
 { 
 	if (Model) Model->Add_Ref(); 
 	return Model; 
@@ -230,8 +334,23 @@ void PhysClass::Get_Shadow_Blob_Box(AABoxClass * set_obj_space_box)
 {
 	WWASSERT(set_obj_space_box != NULL);
 	if (set_obj_space_box != NULL) {
-		Model->Get_Obj_Space_Bounding_Box(*set_obj_space_box);
-		set_obj_space_box->Extent *= 0.75f;
+		if (Model) {
+			Model->Get_Obj_Space_Bounding_Box(*set_obj_space_box);
+			set_obj_space_box->Extent *= 0.75f;
+		} else if (Has_Simple_Shape()) {
+			set_obj_space_box->Center.Set(0.0f,0.0f,0.0f);
+			if (SimpleShape.Type == PHYS_SIMPLE_SHAPE_AA_BOX) {
+				Vector3 extents = SimpleShape.BoxHalfExtents;
+				extents *= 0.75f;
+				set_obj_space_box->Extent = extents;
+			} else if (SimpleShape.Type == PHYS_SIMPLE_SHAPE_SPHERE) {
+				float radius = SimpleShape.SphereRadius * 0.75f;
+				set_obj_space_box->Extent.Set(radius, radius, radius);
+			}
+		} else {
+			set_obj_space_box->Center.Set(0.0f,0.0f,0.0f);
+			set_obj_space_box->Extent.Set(0.0f,0.0f,0.0f);
+		}
 	}
 }
 
@@ -484,11 +603,27 @@ bool PhysClass::Save (ChunkSaveClass &csave)
 	}
 	csave.End_Chunk();
 	
-	csave.Begin_Chunk(PHYS_CHUNK_MODEL);
-	csave.Begin_Chunk(Model->Get_Factory().Chunk_ID());
-	Model->Get_Factory().Save(csave,Model);
-	csave.End_Chunk();
-	csave.End_Chunk();
+	if (Model != NULL) {
+		csave.Begin_Chunk(PHYS_CHUNK_MODEL);
+		csave.Begin_Chunk(Model->Get_Factory().Chunk_ID());
+		Model->Get_Factory().Save(csave,Model);
+		csave.End_Chunk();
+		csave.End_Chunk();
+	}
+
+	if (Has_Simple_Shape()) {
+		csave.Begin_Chunk(PHYS_CHUNK_SIMPLE_SHAPE);
+		int simple_shape_type = static_cast<int>(SimpleShape.Type);
+		WRITE_MICRO_CHUNK(csave,PHYS_SIMPLE_SHAPE_TYPE,simple_shape_type);
+	if (SimpleShape.Type == PHYS_SIMPLE_SHAPE_AA_BOX) {
+		csave.Begin_Micro_Chunk(PHYS_SIMPLE_SHAPE_BOX_EXTENTS);
+		csave.Write(&SimpleShape.BoxHalfExtents, sizeof(SimpleShape.BoxHalfExtents));
+		csave.End_Micro_Chunk();
+		} else if (SimpleShape.Type == PHYS_SIMPLE_SHAPE_SPHERE) {
+			WRITE_MICRO_CHUNK(csave,PHYS_SIMPLE_SHAPE_SPHERE_RADIUS,SimpleShape.SphereRadius);
+		}
+		csave.End_Chunk();
+	}
 
 	return true;
 }
@@ -527,16 +662,58 @@ bool PhysClass::Load (ChunkLoadClass &cload)
 				}
 				break;
 
-			case PHYS_CHUNK_MODEL:
-				cload.Open_Chunk();
-				factory = SaveLoadSystemClass::Find_Persist_Factory(cload.Cur_Chunk_ID());
-				WWASSERT(factory != NULL);
-				if (factory != NULL) {
-					render_model = (RenderObjClass *)factory->Load(cload);
-					SET_REF_OWNER(render_model);
-				}
-				cload.Close_Chunk();
+	case PHYS_CHUNK_MODEL:
+		cload.Open_Chunk();
+		factory = SaveLoadSystemClass::Find_Persist_Factory(cload.Cur_Chunk_ID());
+		WWASSERT(factory != NULL);
+		if (factory != NULL) {
+			render_model = (RenderObjClass *)factory->Load(cload);
+			SET_REF_OWNER(render_model);
+		}
+		cload.Close_Chunk();
+		break;
+
+	case PHYS_CHUNK_SIMPLE_SHAPE:
+	{
+		SimpleShapeDefinition loaded_shape;
+		while (cload.Open_Micro_Chunk()) {
+			int micro_id = cload.Cur_Micro_Chunk_ID();
+			switch (micro_id) {
+			case PHYS_SIMPLE_SHAPE_TYPE:
+			{
+				int shape_type = 0;
+				cload.Read(&shape_type, sizeof(shape_type));
+				loaded_shape.Type = static_cast<SimpleShapeType>(shape_type);
 				break;
+			}
+			case PHYS_SIMPLE_SHAPE_BOX_EXTENTS:
+			{
+				float box_extents[3] = {0.0f, 0.0f, 0.0f};
+				cload.Read(box_extents, sizeof(box_extents));
+				loaded_shape.BoxHalfExtents.Set(box_extents[0], box_extents[1], box_extents[2]);
+				break;
+			}
+			case PHYS_SIMPLE_SHAPE_SPHERE_RADIUS:
+				cload.Read(&loaded_shape.SphereRadius, sizeof(loaded_shape.SphereRadius));
+				break;
+			default:
+				cload.Seek(cload.Cur_Micro_Chunk_Length());
+				break;
+			}
+			cload.Close_Micro_Chunk();
+		}
+
+		SimpleShape = loaded_shape;
+		if (loaded_shape.Type == PHYS_SIMPLE_SHAPE_AA_BOX) {
+			Set_Simple_Shape_AABox(loaded_shape.BoxHalfExtents);
+		} else if (loaded_shape.Type == PHYS_SIMPLE_SHAPE_SPHERE) {
+			Set_Simple_Shape_Sphere(loaded_shape.SphereRadius);
+		} else {
+			SimpleShape = SimpleShapeDefinition();
+			Update_Cull_Box();
+		}
+	}
+	break;
 
 			default:
 				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
@@ -728,6 +905,9 @@ enum
 	PHYSDEF_VARIABLE_FLAGS			= 0x00,
 	PHYSDEF_VARIABLE_MODELNAME,
 	PHYSDEF_VARIABLE_ISPRELIT,
+	PHYSDEF_VARIABLE_SIMPLE_SHAPE_TYPE,
+	PHYSDEF_VARIABLE_SIMPLE_SHAPE_BOX_EXTENTS,
+	PHYSDEF_VARIABLE_SIMPLE_SHAPE_SPHERE_RADIUS,
 
 };
 
@@ -737,6 +917,7 @@ PhysDefClass::PhysDefClass(void) :
 	IsPreLit(false)
 {
 	FILENAME_PARAM(PhysDefClass,ModelName, "Westwood 3D Files", ".w3d");
+	ShapeDefinition = SimpleShapeDefinition();
 }
 
 bool PhysDefClass::Is_Valid_Config (StringClass &message)
@@ -744,12 +925,29 @@ bool PhysDefClass::Is_Valid_Config (StringClass &message)
 	bool retval = true;
 
 	if (ModelName.Is_Empty ()) {
-		message += "ModelName is invalid!\n";
-		retval = false;
+		if (ShapeDefinition.Type == PHYS_SIMPLE_SHAPE_NONE) {
+			message += "PhysDef requires either a model name or a simple shape definition.\n";
+			retval = false;
+		}
+	}
+
+	if (ShapeDefinition.Type == PHYS_SIMPLE_SHAPE_AA_BOX) {
+		if ((ShapeDefinition.BoxHalfExtents.X < 0.0f) ||
+			(ShapeDefinition.BoxHalfExtents.Y < 0.0f) ||
+			(ShapeDefinition.BoxHalfExtents.Z < 0.0f)) {
+			message += "Simple shape AA box extents must be non-negative.\n";
+			retval = false;
+		}
+	} else if (ShapeDefinition.Type == PHYS_SIMPLE_SHAPE_SPHERE) {
+		if (ShapeDefinition.SphereRadius < 0.0f) {
+			message += "Simple shape sphere radius must be non-negative.\n";
+			retval = false;
+		}
 	}
 
 	return retval;
 }
+
 
 bool PhysDefClass::Save(ChunkSaveClass &csave)
 {
@@ -760,6 +958,15 @@ bool PhysDefClass::Save(ChunkSaveClass &csave)
 	csave.Begin_Chunk(PHYSDEF_CHUNK_VARIABLES);
 	WRITE_MICRO_CHUNK_WWSTRING(csave,PHYSDEF_VARIABLE_MODELNAME,ModelName);
 	WRITE_MICRO_CHUNK(csave,PHYSDEF_VARIABLE_ISPRELIT,IsPreLit);	
+	int def_shape_type = static_cast<int>(ShapeDefinition.Type);
+	WRITE_MICRO_CHUNK(csave,PHYSDEF_VARIABLE_SIMPLE_SHAPE_TYPE,def_shape_type);
+	if (ShapeDefinition.Type == PHYS_SIMPLE_SHAPE_AA_BOX) {
+		csave.Begin_Micro_Chunk(PHYSDEF_VARIABLE_SIMPLE_SHAPE_BOX_EXTENTS);
+		csave.Write(&ShapeDefinition.BoxHalfExtents, sizeof(ShapeDefinition.BoxHalfExtents));
+		csave.End_Micro_Chunk();
+	} else if (ShapeDefinition.Type == PHYS_SIMPLE_SHAPE_SPHERE) {
+		WRITE_MICRO_CHUNK(csave,PHYSDEF_VARIABLE_SIMPLE_SHAPE_SPHERE_RADIUS,ShapeDefinition.SphereRadius);
+	}
 	csave.End_Chunk();
 	return true;
 
@@ -775,17 +982,53 @@ bool PhysDefClass::Load(ChunkLoadClass &cload)
 				DefinitionClass::Load(cload);
 				break;
 
-			case PHYSDEF_CHUNK_VARIABLES:
-				WWASSERT(cload.Cur_Chunk_ID() == PHYSDEF_CHUNK_VARIABLES);
-				while (cload.Open_Micro_Chunk()) {
-					switch(cload.Cur_Micro_Chunk_ID()) {
-						OBSOLETE_MICRO_CHUNK(PHYSDEF_VARIABLE_FLAGS);
-						READ_MICRO_CHUNK_WWSTRING(cload,PHYSDEF_VARIABLE_MODELNAME,ModelName);
-						READ_MICRO_CHUNK(cload,PHYSDEF_VARIABLE_ISPRELIT,IsPreLit);	
+	case PHYSDEF_CHUNK_VARIABLES:
+		WWASSERT(cload.Cur_Chunk_ID() == PHYSDEF_CHUNK_VARIABLES);
+		while (cload.Open_Micro_Chunk()) {
+			int micro_id = cload.Cur_Micro_Chunk_ID();
+			switch (micro_id) {
+			case PHYSDEF_VARIABLE_MODELNAME:
+			{
+				uint32 length = cload.Cur_Micro_Chunk_Length();
+				std::string temp;
+				temp.resize(length ? length - 1 : 0);
+				if (length) {
+					if (!temp.empty()) {
+						cload.Read(temp.data(), temp.size());
 					}
-					cload.Close_Micro_Chunk();
+					char terminator = 0;
+					cload.Read(&terminator, sizeof(terminator));
 				}
+				ModelName = temp.c_str();
 				break;
+			}
+			case PHYSDEF_VARIABLE_ISPRELIT:
+				cload.Read(&IsPreLit, sizeof(IsPreLit));
+				break;
+			case PHYSDEF_VARIABLE_SIMPLE_SHAPE_TYPE:
+			{
+				int type_value = 0;
+				cload.Read(&type_value, sizeof(type_value));
+				ShapeDefinition.Type = static_cast<PhysSimpleShapeType>(type_value);
+				break;
+			}
+			case PHYSDEF_VARIABLE_SIMPLE_SHAPE_BOX_EXTENTS:
+			{
+				float def_extents[3] = {0.0f, 0.0f, 0.0f};
+				cload.Read(def_extents, sizeof(def_extents));
+				ShapeDefinition.BoxHalfExtents.Set(def_extents[0], def_extents[1], def_extents[2]);
+				break;
+			}
+			case PHYSDEF_VARIABLE_SIMPLE_SHAPE_SPHERE_RADIUS:
+				cload.Read(&ShapeDefinition.SphereRadius, sizeof(ShapeDefinition.SphereRadius));
+				break;
+			default:
+				cload.Seek(cload.Cur_Micro_Chunk_Length());
+				break;
+			}
+			cload.Close_Micro_Chunk();
+		}
+		break;
 		}
 
 		cload.Close_Chunk();
@@ -801,4 +1044,3 @@ bool PhysDefClass::Is_Type(const char * type_name)
 		return false;
 	}
 }
-

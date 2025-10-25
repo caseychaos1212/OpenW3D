@@ -429,7 +429,6 @@ void PhysicsSceneClass::Update(float dt,int frameid)
 void PhysicsSceneClass::Add_Dynamic_Object(PhysClass * newobj)
 {
 	WWASSERT(newobj != NULL);
-	WWASSERT(newobj->Peek_Model() != NULL);
 	WWASSERT(newobj->Get_Culling_System() == NULL);
 
 	// Add the object to the dynamic culling system
@@ -465,7 +464,9 @@ void PhysicsSceneClass::Internal_Add_Dynamic_Object(PhysClass * newobj)
 {
 	// Add the object to the appropriate lists
 	ObjList.Add(newobj);
-	SceneClass::Add_Render_Object(newobj->Peek_Model());
+	if (newobj->Peek_Model() != NULL) {
+		SceneClass::Add_Render_Object(newobj->Peek_Model());
+	}
 	if (newobj->Needs_Timestep()) {
 		TimestepList.Add(newobj);
 	}
@@ -487,7 +488,6 @@ void PhysicsSceneClass::Internal_Add_Dynamic_Object(PhysClass * newobj)
 void PhysicsSceneClass::Add_Static_Object(StaticPhysClass * newtile,int cull_node_id/*=-1*/)
 {
 	WWASSERT(newtile != NULL);
-	WWASSERT(newtile->Peek_Model() != NULL);
 	WWASSERT(newtile->Get_Culling_System() == NULL);
 
 	// Add the object to the static culling system
@@ -516,7 +516,9 @@ void PhysicsSceneClass::Internal_Add_Static_Object(StaticPhysClass * newtile)
 {
 	// Add the object to the appropriate lists
 	StaticObjList.Add(newtile);
-	SceneClass::Add_Render_Object(newtile->Peek_Model());
+	if (newtile->Peek_Model() != NULL) {
+		SceneClass::Add_Render_Object(newtile->Peek_Model());
+	}
 	if (newtile->Needs_Timestep()) {
 		TimestepList.Add(newtile);
 	}
@@ -541,7 +543,6 @@ void PhysicsSceneClass::Internal_Add_Static_Object(StaticPhysClass * newtile)
 void PhysicsSceneClass::Add_Static_Light(LightPhysClass * newlight,int cull_node_id/*=-1*/)
 {
 	WWASSERT(newlight != NULL);
-	WWASSERT(newlight->Peek_Model() != NULL);
 	WWASSERT(newlight->Get_Culling_System() == NULL);
 
 	// Add the light to the static light culling system
@@ -646,10 +647,11 @@ void PhysicsSceneClass::Remove_Object(PhysClass * obj)
 
 	// Assert that the object is valid
 	WWASSERT(obj != NULL);
-	WWASSERT(obj->Peek_Model() != NULL);
 
 	// Notify the model that it is being removed from the scene
-	SceneClass::Remove_Render_Object(obj->Peek_Model());
+	if (obj->Peek_Model() != NULL) {
+		SceneClass::Remove_Render_Object(obj->Peek_Model());
+	}
 
 	// Notify the observer (if it has one)
 	if (obj->Get_Observer() != NULL) {
@@ -1212,7 +1214,9 @@ void PhysicsSceneClass::Optimize_LODs
 	PredictiveLODOptimizerClass::Clear();
 	RefPhysListIterator it(dyn_objs);
 	for (it.First(); !it.Is_Done(); it.Next()) {
-		it.Peek_Obj()->Peek_Model()->Prepare_LOD(camera);
+		if (it.Peek_Obj()->Peek_Model() != NULL) {
+			it.Peek_Obj()->Peek_Model()->Prepare_LOD(camera);
+		}
 		it.Peek_Obj()->Set_Last_Visible_Frame(CurrentFrameNumber);
 	}
 	PredictiveLODOptimizerClass::Optimize_LODs(DynamicPolyBudget);
@@ -1220,11 +1224,15 @@ void PhysicsSceneClass::Optimize_LODs
 	// process the static objects
 	PredictiveLODOptimizerClass::Clear();
 	for (it.First(static_objs); !it.Is_Done(); it.Next()) {
-		it.Peek_Obj()->Peek_Model()->Prepare_LOD(camera);
+		if (it.Peek_Obj()->Peek_Model() != NULL) {
+			it.Peek_Obj()->Peek_Model()->Prepare_LOD(camera);
+		}
 		it.Peek_Obj()->Set_Last_Visible_Frame(CurrentFrameNumber);
 	}
 	for (it.First(static_ws_meshes); !it.Is_Done(); it.Next()) {
-		it.Peek_Obj()->Peek_Model()->Prepare_LOD(camera);
+		if (it.Peek_Obj()->Peek_Model() != NULL) {
+			it.Peek_Obj()->Peek_Model()->Prepare_LOD(camera);
+		}
 		it.Peek_Obj()->Set_Last_Visible_Frame(CurrentFrameNumber);
 	}
 	PredictiveLODOptimizerClass::Optimize_LODs(StaticPolyBudget);
