@@ -223,7 +223,9 @@ void HumanPhysClass::Timestep(float dt)
 void HumanPhysClass::Render(RenderInfoClass & rinfo)
 {
 #ifdef WWDEBUG
-	PhysicsSceneClass::Get_Instance()->Debug_Display_Dynamic_Vis_Node(VisNodeID);
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Debug_Display_Dynamic_Vis_Node(VisNodeID);
+	}
 #endif
 	Phys3Class::Render(rinfo);
 }

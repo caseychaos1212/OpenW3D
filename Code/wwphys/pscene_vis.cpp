@@ -34,23 +34,23 @@
  *                                                                                             *
  *---------------------------------------------------------------------------------------------*
  * Functions:                                                                                  *
- *   PhysicsSceneClass::Release_Vis_Resources -- Releases resources used by the VIS code       *
- *   PhysicsSceneClass::Reset_Vis -- Sets the internal vis reset flag.                         *
- *   PhysicsSceneClass::Validate_Vis -- Clears the internal vis reset flag                     *
- *   PhysicsSceneClass::Internal_Vis_Reset -- Resets the vis system if needed                  *
- *   PhysicsSceneClass::Get_Vis_Camera -- returns a pointer (ref-counted) to the vis camera    *
- *   PhysicsSceneClass::Get_Vis_Gerd -- returns a pointer to the VIS Gerd                      *
- *   PhysicsSceneClass::Show_Vis_Window -- Makes the vis render window visible to the user     *
- *   PhysicsSceneClass::Is_Vis_Window_Visible -- Returns status of the vis render window       *
- *   PhysicsSceneClass::Get_Static_Light_Count -- returns the number of static lights          *
- *   PhysicsSceneClass::Generate_Vis_For_Light -- generate a PVS for the specified light       *
- *   PhysicsSceneClass::Update_Vis -- Performs a vis sample from the given coord system        *
- *   PhysicsSceneClass::Vis_Render_And_Scan -- Renders the scene and scans for visible objects *
- *   PhysicsSceneClass::Vis_Debug_Render -- Renders the same way VIS does                      *
- *   PhysicsSceneClass::Generate_Vis_Statistics_Report -- Stats about the visibility in the le *
- *   PhysicsSceneClass::Optimize_Visibility_Data -- combines and removes redundant vis data    *
- *   PhysicsSceneClass::Merge_Vis_Sector_IDs -- Merges two sector ID's                         *
- *   PhysicsSceneClass::Merge_Vis_Object_IDs -- combines two vis object ID's                   *
+ *   PhysicsWorldClass::Release_Vis_Resources -- Releases resources used by the VIS code       *
+ *   PhysicsWorldClass::Reset_Vis -- Sets the internal vis reset flag.                         *
+ *   PhysicsWorldClass::Validate_Vis -- Clears the internal vis reset flag                     *
+ *   PhysicsWorldClass::Internal_Vis_Reset -- Resets the vis system if needed                  *
+ *   PhysicsWorldClass::Get_Vis_Camera -- returns a pointer (ref-counted) to the vis camera    *
+ *   PhysicsWorldClass::Get_Vis_Gerd -- returns a pointer to the VIS Gerd                      *
+ *   PhysicsWorldClass::Show_Vis_Window -- Makes the vis render window visible to the user     *
+ *   PhysicsWorldClass::Is_Vis_Window_Visible -- Returns status of the vis render window       *
+ *   PhysicsWorldClass::Get_Static_Light_Count -- returns the number of static lights          *
+ *   PhysicsWorldClass::Generate_Vis_For_Light -- generate a PVS for the specified light       *
+ *   PhysicsWorldClass::Update_Vis -- Performs a vis sample from the given coord system        *
+ *   PhysicsWorldClass::Vis_Render_And_Scan -- Renders the scene and scans for visible objects *
+ *   PhysicsWorldClass::Vis_Debug_Render -- Renders the same way VIS does                      *
+ *   PhysicsWorldClass::Generate_Vis_Statistics_Report -- Stats about the visibility in the le *
+ *   PhysicsWorldClass::Optimize_Visibility_Data -- combines and removes redundant vis data    *
+ *   PhysicsWorldClass::Merge_Vis_Sector_IDs -- Merges two sector ID's                         *
+ *   PhysicsWorldClass::Merge_Vis_Object_IDs -- combines two vis object ID's                   *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 
@@ -72,144 +72,144 @@
 
 /************************************************************************************
 **
-** PhysicsSceneClass Visibility system
+** PhysicsWorldClass Visibility system
 **
 ************************************************************************************/
 
 
-void PhysicsSceneClass::Enable_Vis(bool onoff)
+void PhysicsWorldClass::Enable_Vis(bool onoff)
 {
 	VisEnabled = onoff;
 }
 
-void PhysicsSceneClass::Invert_Vis(bool onoff)
+void PhysicsWorldClass::Invert_Vis(bool onoff)
 {
 	VisInverted = onoff;
 }
 
-void PhysicsSceneClass::Set_Vis_Quick_And_Dirty(bool onoff)
+void PhysicsWorldClass::Set_Vis_Quick_And_Dirty(bool onoff)
 {
 	VisQuickAndDirty = onoff;
 }
 
-void PhysicsSceneClass::Enable_Vis_Sector_Display(bool onoff)
+void PhysicsWorldClass::Enable_Vis_Sector_Display(bool onoff)
 {
 	VisSectorDisplayEnabled = onoff;
 }
 
-void PhysicsSceneClass::Enable_Vis_Sector_History_Display(bool onoff)
+void PhysicsWorldClass::Enable_Vis_Sector_History_Display(bool onoff)
 {
 	VisSectorHistoryEnabled = onoff;
 }
 
-void PhysicsSceneClass::Enable_Vis_Sector_Fallback(bool onoff)
+void PhysicsWorldClass::Enable_Vis_Sector_Fallback(bool onoff)
 {
 	VisSectorFallbackEnabled = onoff;
 }
 
-void PhysicsSceneClass::Enable_Backface_Occluder_Debug(bool onoff)
+void PhysicsWorldClass::Enable_Backface_Occluder_Debug(bool onoff)
 {
 	BackfaceDebugEnabled = onoff;
 }
 
-void PhysicsSceneClass::Set_Vis_Grid_Display_Mode(int mode)
+void PhysicsWorldClass::Set_Vis_Grid_Display_Mode(int mode)
 {
 	VisGridDisplayMode = mode;
 }
 
-bool PhysicsSceneClass::Is_Vis_Enabled(void)
+bool PhysicsWorldClass::Is_Vis_Enabled(void)
 {
 	return VisEnabled;
 }
 
-bool PhysicsSceneClass::Is_Vis_Inverted(void)
+bool PhysicsWorldClass::Is_Vis_Inverted(void)
 {
 	return VisInverted;
 }
 
-bool PhysicsSceneClass::Is_Vis_Quick_And_Dirty(void)
+bool PhysicsWorldClass::Is_Vis_Quick_And_Dirty(void)
 {
 	return VisQuickAndDirty;
 }
 
-bool PhysicsSceneClass::Is_Vis_Sector_Display_Enabled(void)
+bool PhysicsWorldClass::Is_Vis_Sector_Display_Enabled(void)
 {
 	return VisSectorDisplayEnabled;
 }
 
-bool PhysicsSceneClass::Is_Vis_Sector_History_Display_Enabled(void)
+bool PhysicsWorldClass::Is_Vis_Sector_History_Display_Enabled(void)
 {
 	return VisSectorHistoryEnabled;
 }
 
-bool PhysicsSceneClass::Is_Vis_Sector_Fallback_Enabled(void)
+bool PhysicsWorldClass::Is_Vis_Sector_Fallback_Enabled(void)
 {
 	return VisSectorFallbackEnabled;
 }
 
-bool PhysicsSceneClass::Is_Backface_Occluder_Debug_Enabled(void)
+bool PhysicsWorldClass::Is_Backface_Occluder_Debug_Enabled(void)
 {
 	return BackfaceDebugEnabled;
 }
 
-int PhysicsSceneClass::Get_Vis_Grid_Display_Mode(void)
+int PhysicsWorldClass::Get_Vis_Grid_Display_Mode(void)
 {
 	return VisGridDisplayMode;
 }
 
-void PhysicsSceneClass::Vis_Grid_Debug_Reset_Node(void)
+void PhysicsWorldClass::Vis_Grid_Debug_Reset_Node(void)
 { 
 	DynamicObjVisSystem->Debug_Reset_Node(); 
 }
 
-bool PhysicsSceneClass::Vis_Grid_Debug_Enter_Parent(void)			
+bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Parent(void)			
 { 
 	return DynamicObjVisSystem->Debug_Enter_Parent(); 
 }
 
-bool PhysicsSceneClass::Vis_Grid_Debug_Enter_Sibling(void)			
+bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Sibling(void)			
 { 
 	return DynamicObjVisSystem->Debug_Enter_Sibling(); 
 }
 	
-bool PhysicsSceneClass::Vis_Grid_Debug_Enter_Front_Child(void)		
+bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Front_Child(void)		
 { 
 	return DynamicObjVisSystem->Debug_Enter_Front_Child(); 
 }
 
-bool PhysicsSceneClass::Vis_Grid_Debug_Enter_Back_Child(void)		
+bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Back_Child(void)		
 { 
 	return DynamicObjVisSystem->Debug_Enter_Back_Child(); 
 }
 
-bool PhysicsSceneClass::Is_Vis_Sector_Missing(void)
+bool PhysicsWorldClass::Is_Vis_Sector_Missing(void)
 {
 	return VisSectorMissing;
 }
 
-int PhysicsSceneClass::Allocate_Vis_Object_ID(int count /* = 1*/)
+int PhysicsWorldClass::Allocate_Vis_Object_ID(int count /* = 1*/)
 {
 	return VisTableManager.Allocate_Vis_Object_ID(count);
 }
 
-int PhysicsSceneClass::Allocate_Vis_Sector_ID(int count /* = 1*/)
+int PhysicsWorldClass::Allocate_Vis_Sector_ID(int count /* = 1*/)
 {
 	return VisTableManager.Allocate_Vis_Sector_ID(count);
 }
 
-int PhysicsSceneClass::Get_Vis_Table_Size(void)
+int PhysicsWorldClass::Get_Vis_Table_Size(void)
 {
 	Internal_Vis_Reset();
 	return VisTableManager.Get_Vis_Table_Size();
 }
 
-int PhysicsSceneClass::Get_Vis_Table_Count(void)
+int PhysicsWorldClass::Get_Vis_Table_Count(void)
 {
 	Internal_Vis_Reset();
 	return VisTableManager.Get_Vis_Table_Count();
 }
 
-void PhysicsSceneClass::Compute_Vis_Sample_Point(const CameraClass & camera,Vector3 * set_point)
+void PhysicsWorldClass::Compute_Vis_Sample_Point(const CameraClass & camera,Vector3 * set_point)
 {
 	WWASSERT(set_point != NULL);
 	if (!VisSamplePointLocked) {
@@ -221,25 +221,25 @@ void PhysicsSceneClass::Compute_Vis_Sample_Point(const CameraClass & camera,Vect
 	}
 }
 
-VisTableClass * PhysicsSceneClass::Get_Vis_Table(int vis_sector_id)
+VisTableClass * PhysicsWorldClass::Get_Vis_Table(int vis_sector_id)
 {
 	return VisTableManager.Get_Vis_Table(vis_sector_id);
 }
 
-VisTableClass * PhysicsSceneClass::Get_Vis_Table(const Vector3 & point)
+VisTableClass * PhysicsWorldClass::Get_Vis_Table(const Vector3 & point)
 {
 	int vis_id = StaticCullingSystem->Get_Vis_Sector_ID(point);
 	return VisTableManager.Get_Vis_Table(vis_id);
 }
 
-VisTableClass * PhysicsSceneClass::Get_Vis_Table(const CameraClass & camera)
+VisTableClass * PhysicsWorldClass::Get_Vis_Table(const CameraClass & camera)
 {
 	Vector3 sample_point;
 	Compute_Vis_Sample_Point(camera,&sample_point);
 	return Get_Vis_Table(sample_point);
 }
 
-VisTableClass * PhysicsSceneClass::Get_Vis_Table_For_Rendering(const CameraClass & camera)
+VisTableClass * PhysicsWorldClass::Get_Vis_Table_For_Rendering(const CameraClass & camera)
 {
 	// Decompress the visibility table for the current camera view 
 	// Note that if the vis system needs to be reset, we don't want to use any obsolete data
@@ -286,7 +286,7 @@ VisTableClass * PhysicsSceneClass::Get_Vis_Table_For_Rendering(const CameraClass
 }
 
 
-uint32 PhysicsSceneClass::Get_Dynamic_Object_Vis_ID
+uint32 PhysicsWorldClass::Get_Dynamic_Object_Vis_ID
 (
 	const AABoxClass & obj_bounds,
 	int * node_id
@@ -295,7 +295,7 @@ uint32 PhysicsSceneClass::Get_Dynamic_Object_Vis_ID
 	return DynamicObjVisSystem->Get_Dynamic_Object_Vis_ID(obj_bounds,node_id);
 }
 
-void PhysicsSceneClass::Debug_Display_Dynamic_Vis_Node(int node_id)
+void PhysicsWorldClass::Debug_Display_Dynamic_Vis_Node(int node_id)
 {
 	if (VisGridDisplayMode == VIS_GRID_DISPLAY_OCCUPIED) {
 		AABoxClass bounds;
@@ -305,13 +305,13 @@ void PhysicsSceneClass::Debug_Display_Dynamic_Vis_Node(int node_id)
 	}
 }
 
-void PhysicsSceneClass::Lock_Vis_Sample_Point(bool onoff)
+void PhysicsWorldClass::Lock_Vis_Sample_Point(bool onoff)
 {
 	VisSamplePointLocked = onoff;
 	LockedVisSamplePoint = LastCameraPosition;
 }
 
-bool PhysicsSceneClass::Is_Vis_Sample_Point_Locked(void)
+bool PhysicsWorldClass::Is_Vis_Sample_Point_Locked(void)
 {
 	return VisSamplePointLocked;
 }
@@ -319,7 +319,7 @@ bool PhysicsSceneClass::Is_Vis_Sample_Point_Locked(void)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Release_Vis_Resources -- Releases resources used by the VIS code         *
+ * PhysicsWorldClass::Release_Vis_Resources -- Releases resources used by the VIS code         *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -330,14 +330,14 @@ bool PhysicsSceneClass::Is_Vis_Sample_Point_Locked(void)
  * HISTORY:                                                                                    *
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Release_Vis_Resources(void)
+void PhysicsWorldClass::Release_Vis_Resources(void)
 {
 	REF_PTR_RELEASE(VisCamera);
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Reset_Vis -- Sets the internal vis reset flag.                           *
+ * PhysicsWorldClass::Reset_Vis -- Sets the internal vis reset flag.                           *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -348,7 +348,7 @@ void PhysicsSceneClass::Release_Vis_Resources(void)
  * HISTORY:                                                                                    *
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Reset_Vis(bool doitnow)
+void PhysicsWorldClass::Reset_Vis(bool doitnow)
 {
 	/*
 	** defer the actual reset until later.
@@ -364,7 +364,7 @@ void PhysicsSceneClass::Reset_Vis(bool doitnow)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Validate_Vis -- Clears the internal vis reset flag                       *
+ * PhysicsWorldClass::Validate_Vis -- Clears the internal vis reset flag                       *
  *                                                                                             *
  *    This should not normally be called.  It is needed when the level editor loads a level.   *
  *                                                                                             *
@@ -377,7 +377,7 @@ void PhysicsSceneClass::Reset_Vis(bool doitnow)
  * HISTORY:                                                                                    *
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Validate_Vis(void)
+void PhysicsWorldClass::Validate_Vis(void)
 {
 	/*
 	** Clear the reset flag, this is needed after a level is loaded.
@@ -390,7 +390,7 @@ void PhysicsSceneClass::Validate_Vis(void)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Internal_Vis_Reset -- Resets the vis system if needed                    *
+ * PhysicsWorldClass::Internal_Vis_Reset -- Resets the vis system if needed                    *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -401,7 +401,7 @@ void PhysicsSceneClass::Validate_Vis(void)
  * HISTORY:                                                                                    *
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Internal_Vis_Reset(void)
+void PhysicsWorldClass::Internal_Vis_Reset(void)
 {
 	if (VisResetNeeded) {
 
@@ -445,7 +445,7 @@ void PhysicsSceneClass::Internal_Vis_Reset(void)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Get_Vis_Camera -- returns a pointer (ref-counted) to the vis camera      *
+ * PhysicsWorldClass::Get_Vis_Camera -- returns a pointer (ref-counted) to the vis camera      *
  *                                                                                             *
  *    The VIS camera is allocated the first time it is needed.  Normally this is only done     *
  *    as a pre-processing step inside the level editor.                                        *
@@ -459,7 +459,7 @@ void PhysicsSceneClass::Internal_Vis_Reset(void)
  * HISTORY:                                                                                    *
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-CameraClass * PhysicsSceneClass::Get_Vis_Camera(void)
+CameraClass * PhysicsWorldClass::Get_Vis_Camera(void)
 {
 	if (VisCamera) {
 		VisCamera->Add_Ref();
@@ -476,7 +476,7 @@ CameraClass * PhysicsSceneClass::Get_Vis_Camera(void)
 }
 
 /***********************************************************************************************
- * PhysicsSceneClass::Update_Vis -- Performs a vis sample from the given coord system          *
+ * PhysicsWorldClass::Update_Vis -- Performs a vis sample from the given coord system          *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -488,7 +488,7 @@ CameraClass * PhysicsSceneClass::Get_Vis_Camera(void)
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
 VisSampleClass
-PhysicsSceneClass::Update_Vis
+PhysicsWorldClass::Update_Vis
 (
 	const Matrix3D &	camera_tm,
 	VisDirBitsType		direction_bits
@@ -499,7 +499,7 @@ PhysicsSceneClass::Update_Vis
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Update_Vis -- Performs a vis sample from the given coord system          *
+ * PhysicsWorldClass::Update_Vis -- Performs a vis sample from the given coord system          *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -511,7 +511,7 @@ PhysicsSceneClass::Update_Vis
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
 VisSampleClass
-PhysicsSceneClass::Update_Vis
+PhysicsWorldClass::Update_Vis
 (
 	const Vector3 &	sample_point,
 	const Matrix3D &	camera_tm,
@@ -620,7 +620,7 @@ PhysicsSceneClass::Update_Vis
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Get_Static_Light_Count -- returns the number of static lights            *
+ * PhysicsWorldClass::Get_Static_Light_Count -- returns the number of static lights            *
  *                                                                                             *
  *    Each static light allocates a PVS.  This accessor will let you loop over each light      *
  *    and update its PVS.                                                                      *
@@ -634,7 +634,7 @@ PhysicsSceneClass::Update_Vis
  * HISTORY:                                                                                    *
  *   7/19/2000  gth : Created.                                                                 *
  *=============================================================================================*/
-int PhysicsSceneClass::Get_Static_Light_Count(void)
+int PhysicsWorldClass::Get_Static_Light_Count(void)
 {
 	/*
 	** Count the lights in the list
@@ -650,7 +650,7 @@ int PhysicsSceneClass::Get_Static_Light_Count(void)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Generate_Vis_For_Light -- generate a PVS for the specified light         *
+ * PhysicsWorldClass::Generate_Vis_For_Light -- generate a PVS for the specified light         *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -661,7 +661,7 @@ int PhysicsSceneClass::Get_Static_Light_Count(void)
  * HISTORY:                                                                                    *
  *   7/19/2000  gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Generate_Vis_For_Light(int light_index)
+void PhysicsWorldClass::Generate_Vis_For_Light(int light_index)
 {
 	/*
 	** For lights, we're going to use the VIS camera but we're going to tweak the far
@@ -710,7 +710,7 @@ void PhysicsSceneClass::Generate_Vis_For_Light(int light_index)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Vis_Render_And_Scan -- Renders the scene and scans for visible objects   *
+ * PhysicsWorldClass::Vis_Render_And_Scan -- Renders the scene and scans for visible objects   *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -721,7 +721,7 @@ void PhysicsSceneClass::Generate_Vis_For_Light(int light_index)
  * HISTORY:                                                                                    *
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Vis_Render_And_Scan(VisRenderContextClass & context,VisSampleClass & vis_sample)
+void PhysicsWorldClass::Vis_Render_And_Scan(VisRenderContextClass & context,VisSampleClass & vis_sample)
 {
 	/*
 	** Have the static culling system evaluate visibility for the occluders
@@ -746,7 +746,7 @@ void PhysicsSceneClass::Vis_Render_And_Scan(VisRenderContextClass & context,VisS
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Generate_Vis_Statistics_Report -- Stats about the visibility in the leve *
+ * PhysicsWorldClass::Generate_Vis_Statistics_Report -- Stats about the visibility in the leve *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -757,7 +757,7 @@ void PhysicsSceneClass::Vis_Render_And_Scan(VisRenderContextClass & context,VisS
  * HISTORY:                                                                                    *
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Generate_Vis_Statistics_Report(DynamicVectorClass<VisSectorStatsClass> & report)
+void PhysicsWorldClass::Generate_Vis_Statistics_Report(DynamicVectorClass<VisSectorStatsClass> & report)
 {
 	/*
 	** Loop over each of the vis sectors in the level, adding up how many polygons and 
@@ -779,7 +779,7 @@ void PhysicsSceneClass::Generate_Vis_Statistics_Report(DynamicVectorClass<VisSec
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Optimize_Visibility_Data -- combines and removes redundant vis data      *
+ * PhysicsWorldClass::Optimize_Visibility_Data -- combines and removes redundant vis data      *
  *                                                                                             *
  *    This function does three things.                                                         *
  *    - The dynamic object AABTree removes useless leaf nodes (nodes with visibility identical *
@@ -797,7 +797,7 @@ void PhysicsSceneClass::Generate_Vis_Statistics_Report(DynamicVectorClass<VisSec
  * HISTORY:                                                                                    *
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Optimize_Visibility_Data(VisOptProgressClass & stats)
+void PhysicsWorldClass::Optimize_Visibility_Data(VisOptProgressClass & stats)
 {
 
 	/*
@@ -842,7 +842,7 @@ void PhysicsSceneClass::Optimize_Visibility_Data(VisOptProgressClass & stats)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Merge_Vis_Sector_IDs -- Merges two sector ID's                           *
+ * PhysicsWorldClass::Merge_Vis_Sector_IDs -- Merges two sector ID's                           *
  *                                                                                             *
  *    The greater ID will be set equal to the lesser ID.  This should only be called by the    *
  *    vis optimization process and relies on a VisOptimizationContext to track the changes     *
@@ -857,7 +857,7 @@ void PhysicsSceneClass::Optimize_Visibility_Data(VisOptProgressClass & stats)
  * HISTORY:                                                                                    *
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Merge_Vis_Sector_IDs(uint32 id0,uint32 id1)
+void PhysicsWorldClass::Merge_Vis_Sector_IDs(uint32 id0,uint32 id1)
 {
 	StaticCullingSystem->Merge_Vis_Sector_IDs(id0,id1);
 	StaticLightingSystem->Merge_Vis_Sector_IDs(id0,id1);
@@ -865,7 +865,7 @@ void PhysicsSceneClass::Merge_Vis_Sector_IDs(uint32 id0,uint32 id1)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Merge_Vis_Object_IDs -- combines two vis object ID's                     *
+ * PhysicsWorldClass::Merge_Vis_Object_IDs -- combines two vis object ID's                     *
  *                                                                                             *
  *    The greater ID will be set equal to the lesser ID.  This should only be called by the    *
  *    vis optimization process and relies on a VisOptimizationContext to track the changes     *
@@ -880,7 +880,7 @@ void PhysicsSceneClass::Merge_Vis_Sector_IDs(uint32 id0,uint32 id1)
  * HISTORY:                                                                                    *
  *   7/5/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Merge_Vis_Object_IDs(uint32 id0,uint32 id1)
+void PhysicsWorldClass::Merge_Vis_Object_IDs(uint32 id0,uint32 id1)
 {
 	StaticCullingSystem->Merge_Vis_Object_IDs(id0,id1);
 	DynamicObjVisSystem->Merge_Vis_Object_IDs(id0,id1);

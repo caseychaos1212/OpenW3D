@@ -853,7 +853,12 @@ PathSolveClass::Does_Object_Have_Access_To_Portal (PathfindPortalClass *portal)
 		//	Lookup the mechanism this portal uses
 		//
 		uint32 mechanism_id			= action_portal->Get_Mechanism_ID ();
-		StaticPhysClass *mechanism	= PhysicsSceneClass::Get_Instance ()->Find_Static_Object (mechanism_id);
+		PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World ();
+		if (world == NULL) {
+			return false;
+		}
+
+		StaticPhysClass *mechanism	= world->Find_Static_Object (mechanism_id);
 		if (mechanism != NULL) {
 			AccessiblePhysClass *accessible_obj = mechanism->As_AccessiblePhysClass ();
 

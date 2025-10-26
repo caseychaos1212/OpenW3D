@@ -133,7 +133,9 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 
 	{
  		WWPROFILE("GetVis");
-		pvs = COMBAT_SCENE->Get_Vis_Table (dest_pos);
+		if (COMBAT_WORLD != NULL) {
+			pvs = COMBAT_WORLD->Get_Vis_Table (dest_pos);
+		}
 		count = NetworkObjectMgrClass::Get_Object_Count();
 	}
 
@@ -523,7 +525,9 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 	{
 		WWPROFILE("GetVis");
 		if (update_priorities) {
-			pvs = COMBAT_SCENE->Get_Vis_Table(dest_pos);
+			if (COMBAT_WORLD != NULL) {
+				pvs = COMBAT_WORLD->Get_Vis_Table(dest_pos);
+			}
 		}
 	}
 	count = NetworkObjectMgrClass::Get_Object_Count();
@@ -1333,13 +1337,15 @@ VisTableClass * cNetwork::Peek_Temp_Vis_Table(void)
 
 	if (VisTable == NULL) {
 		alloc_new_table = true;
-	} else if (VisTable->Get_Bit_Count() != COMBAT_SCENE->Get_Vis_Table_Size()) {
+	} else if (COMBAT_WORLD != NULL && VisTable->Get_Bit_Count() != COMBAT_WORLD->Get_Vis_Table_Size()) {
 		alloc_new_table = true;
 	}
 
 	if (alloc_new_table) {
 		REF_PTR_RELEASE(VisTable);
-		VisTable = new VisTableClass(COMBAT_SCENE->Get_Vis_Table_Size(), 0);
+		if (COMBAT_WORLD != NULL) {
+			VisTable = new VisTableClass(COMBAT_WORLD->Get_Vis_Table_Size(), 0);
+		}
 	}
 
 	WWASSERT(VisTable != NULL);
@@ -1350,7 +1356,7 @@ VisTableClass * cNetwork::Peek_Temp_Vis_Table(void)
 //-----------------------------------------------------------------------------
 void cNetwork::Hibernation_Think(void)
 {
-	if (COMBAT_SCENE != NULL) {
+	if (COMBAT_WORLD != NULL) {
 
 		//
 		// The server can't let any player go into hibernation or updates will cease to be sent for that player.
@@ -1390,7 +1396,7 @@ void cNetwork::Hibernation_Think(void)
 					p_soldier->Get_Position(&player_pos);
 					player_pos.Z += 2; // Start near the player's head
 
-					VisTableClass * p_player_pvs = COMBAT_SCENE->Get_Vis_Table(player_pos);
+					VisTableClass * p_player_pvs = COMBAT_WORLD->Get_Vis_Table(player_pos);
 
 					if (p_player_pvs == NULL) {
 						p_vis_table = NULL;

@@ -257,8 +257,8 @@ void	ExplosionManager::Create_Explosion_At( int explosion_def_id, const Matrix3D
 						}
 					}
 
-					WWASSERT(COMBAT_SCENE != NULL);
-					COMBAT_SCENE->Add_Dynamic_Object( explosion );
+					WWASSERT(COMBAT_WORLD != NULL);
+					COMBAT_WORLD->Add_Dynamic_Object( explosion );
 				}
 				explosion->Release_Ref();
 
@@ -270,8 +270,10 @@ void	ExplosionManager::Create_Explosion_At( int explosion_def_id, const Matrix3D
 	if ( !explosion_def->DecalFilename.Is_Empty() ) {
 		StringClass	new_name(true);
 		::Strip_Path_From_Filename( new_name, explosion_def->DecalFilename );
-		PhysicsSceneClass::Get_Instance()->Create_Decal( blast_tm, new_name,
-																		explosion_def->DecalSize, false, NULL );
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Create_Decal( blast_tm, new_name,
+													explosion_def->DecalSize, false, NULL );
+	}
 	}
 
 
@@ -342,7 +344,9 @@ if (!WWMath::Is_Valid_Float(dist)) {
 							PhysRayCollisionTestClass raytest(ray,&res,obj->Peek_Physical_Object()->Get_Collision_Group(),COLLISION_TYPE_PROJECTILE);
 							raytest.CheckDynamicObjs = false;
 
-							PhysicsSceneClass::Get_Instance()->Cast_Ray(raytest);
+							if (COMBAT_WORLD != NULL) {
+								COMBAT_WORLD->Cast_Ray(raytest);
+							}
 
 							if (res.Fraction < 1.0f - WWMATH_EPSILON) {
 								scale *= 0.25f;
@@ -367,10 +371,12 @@ if (!WWMath::Is_Valid_Float(dist)) {
 
 	// Make the camera shake!
 	if ( explosion_def->CameraShakeIntensity > 0.0f ) {
-		COMBAT_SCENE->Add_Camera_Shake(	pos,
-													explosion_def->CameraShakeRadius,
-													explosion_def->CameraShakeDuration,
-													explosion_def->CameraShakeIntensity	);
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Add_Camera_Shake(	pos,
+														explosion_def->CameraShakeRadius,
+														explosion_def->CameraShakeDuration,
+														explosion_def->CameraShakeIntensity	);
+		}
 
 	}
 

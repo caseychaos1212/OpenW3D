@@ -446,7 +446,7 @@ VehicleGameObj::VehicleGameObj()	:
 
 VehicleGameObj::~VehicleGameObj()
 {
-	if ( Peek_Physical_Object() != NULL && COMBAT_SCENE != NULL) {
+	if ( Peek_Physical_Object() != NULL && COMBAT_WORLD != NULL) {
 
 		// Make sure the exiters don't hit me
 		Peek_Physical_Object()->Set_Collision_Group( UNCOLLIDEABLE_GROUP );

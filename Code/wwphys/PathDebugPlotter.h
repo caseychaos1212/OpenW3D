@@ -168,9 +168,9 @@ PathDebugPlotterClass::Render (RenderInfoClass &rinfo)
 inline void
 PathDebugPlotterClass::Display (bool display)
 {
-	PhysicsSceneClass *scene = PhysicsSceneClass::Get_Instance ();
+	PhysicsWorldClass *world = PhysicsWorldClass::Get_Active_World ();
 
-	if (scene != NULL) {
+	if (world != NULL) {
 		
 		if ((m_ShouldDisplay == false) && display) {
 
@@ -180,10 +180,10 @@ PathDebugPlotterClass::Display (bool display)
 				m_PhysObj->Set_Cull_Box (m_BoundingBox);
 			}
 
-			scene->Add_Dynamic_Object (m_PhysObj);
+			world->Add_Dynamic_Object (m_PhysObj);
 			m_ShouldDisplay = true;
 		} else if (m_ShouldDisplay && (display == false)) {
-			scene->Remove_Object (m_PhysObj);
+			world->Remove_Object (m_PhysObj);
 			m_ShouldDisplay = false;
 		}
 	}

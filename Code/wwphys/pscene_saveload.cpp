@@ -50,12 +50,12 @@
 
  
 /*
-** This module contains the save-load related methods of PhysicsSceneClass.  
+** This module contains the save-load related methods of PhysicsWorldClass.  
 */
 
 
 /*
-** Chunk-ID's for PhysicsSceneClass
+** Chunk-ID's for PhysicsWorldClass
 **
 ** LOAD-SAVE NOTES:
 ** The data in the physics scene will be broken into two different files, the LSD (Level Static Data)
@@ -121,18 +121,18 @@ struct IOSunLightStruct
 };
 
 
-void PhysicsSceneClass::Export_Vis_Data(ChunkSaveClass & csave)
+void PhysicsWorldClass::Export_Vis_Data(ChunkSaveClass & csave)
 {
 	VisTableManager.Save(csave);
 }
 
-void PhysicsSceneClass::Import_Vis_Data(ChunkLoadClass & cload)
+void PhysicsWorldClass::Import_Vis_Data(ChunkLoadClass & cload)
 {
 	Internal_Vis_Reset();
 	VisTableManager.Load(cload);
 }
 
-void PhysicsSceneClass::Save_Level_Static_Data(ChunkSaveClass & csave)
+void PhysicsWorldClass::Save_Level_Static_Data(ChunkSaveClass & csave)
 {
 	/*
 	** If the visibility system has been invalidated, reset it so that
@@ -150,7 +150,7 @@ void PhysicsSceneClass::Save_Level_Static_Data(ChunkSaveClass & csave)
 	** - Sunlight settings
 	*/
 	csave.Begin_Chunk(PSCENE_SD_CHUNK_SCENECLASS);
-	SceneClass::Save(csave);
+	Save_Render_Settings(csave);
 	csave.End_Chunk();
 
 	csave.Begin_Chunk(PSCENE_SD_CHUNK_STATIC_OBJECT_AABTREE);
@@ -183,7 +183,7 @@ void PhysicsSceneClass::Save_Level_Static_Data(ChunkSaveClass & csave)
 
 }
 
-void PhysicsSceneClass::Load_Level_Static_Data(ChunkLoadClass & cload)
+void PhysicsWorldClass::Load_Level_Static_Data(ChunkLoadClass & cload)
 {
 	WWMEMLOG(MEM_PHYSICSDATA);
 	VisResetNeeded = false;
@@ -200,7 +200,7 @@ void PhysicsSceneClass::Load_Level_Static_Data(ChunkLoadClass & cload)
 	while (cload.Open_Chunk()) {
 		switch (cload.Cur_Chunk_ID()) {
 			case PSCENE_SD_CHUNK_SCENECLASS:
-				SceneClass::Load(cload);
+				Load_Render_Settings(cload);
 				break;
 
 			case PSCENE_SD_CHUNK_STATIC_OBJECT_AABTREE:
@@ -240,7 +240,7 @@ void PhysicsSceneClass::Load_Level_Static_Data(ChunkLoadClass & cload)
 	}
 }
 
-void PhysicsSceneClass::Post_Load_Level_Static_Data(void)
+void PhysicsWorldClass::Post_Load_Level_Static_Data(void)
 {
 	Vector3 wmin,wmax;
 	Get_Level_Extents(wmin,wmax);
@@ -249,7 +249,7 @@ void PhysicsSceneClass::Post_Load_Level_Static_Data(void)
 	Compute_Vis_Mesh_Ram();
 }
 
-void PhysicsSceneClass::Save_Level_Static_Objects(ChunkSaveClass & csave)
+void PhysicsWorldClass::Save_Level_Static_Objects(ChunkSaveClass & csave)
 {
 	/*
 	** Things to save here:
@@ -269,7 +269,7 @@ void PhysicsSceneClass::Save_Level_Static_Objects(ChunkSaveClass & csave)
 	}
 }
 
-void PhysicsSceneClass::Load_Level_Static_Objects(ChunkLoadClass & cload)
+void PhysicsWorldClass::Load_Level_Static_Objects(ChunkLoadClass & cload)
 {
 	/*
 	** Things to load here:
@@ -293,11 +293,11 @@ void PhysicsSceneClass::Load_Level_Static_Objects(ChunkLoadClass & cload)
 	}
 }
 
-void PhysicsSceneClass::Post_Load_Level_Static_Objects(void)
+void PhysicsWorldClass::Post_Load_Level_Static_Objects(void)
 {
 }
 
-void PhysicsSceneClass::Save_Level_Dynamic_Data(ChunkSaveClass & csave)
+void PhysicsWorldClass::Save_Level_Dynamic_Data(ChunkSaveClass & csave)
 {
 	/*
 	** Things to save here
@@ -336,7 +336,7 @@ void PhysicsSceneClass::Save_Level_Dynamic_Data(ChunkSaveClass & csave)
 #endif
 }
 
-void PhysicsSceneClass::Load_Level_Dynamic_Data(ChunkLoadClass & cload)
+void PhysicsWorldClass::Load_Level_Dynamic_Data(ChunkLoadClass & cload)
 {
 	WWMEMLOG(MEM_PHYSICSDATA);
 	while (cload.Open_Chunk()) {
@@ -369,12 +369,12 @@ void PhysicsSceneClass::Load_Level_Dynamic_Data(ChunkLoadClass & cload)
 }
 
 
-void PhysicsSceneClass::Save_LDD_Variables(ChunkSaveClass & csave)
+void PhysicsWorldClass::Save_LDD_Variables(ChunkSaveClass & csave)
 {
 }
 
 
-void PhysicsSceneClass::Load_LDD_Variables(ChunkLoadClass & cload)
+void PhysicsWorldClass::Load_LDD_Variables(ChunkLoadClass & cload)
 {
 	while (cload.Open_Micro_Chunk()) {
 		switch (cload.Cur_Micro_Chunk_ID()) {
@@ -388,7 +388,7 @@ void PhysicsSceneClass::Load_LDD_Variables(ChunkLoadClass & cload)
 }
 
 
-void PhysicsSceneClass::Save_Static_Objects(ChunkSaveClass & csave)
+void PhysicsWorldClass::Save_Static_Objects(ChunkSaveClass & csave)
 {
 	/*
 	** Save each object and save each object's culling linkage
@@ -425,7 +425,7 @@ void PhysicsSceneClass::Save_Static_Objects(ChunkSaveClass & csave)
 	}
 }
 
-void PhysicsSceneClass::Load_Static_Objects(ChunkLoadClass & cload)
+void PhysicsWorldClass::Load_Static_Objects(ChunkLoadClass & cload)
 {
 	while (cload.Open_Chunk()) {
 
@@ -470,7 +470,7 @@ void PhysicsSceneClass::Load_Static_Objects(ChunkLoadClass & cload)
 	}
 }
 
-void PhysicsSceneClass::Save_Static_Lights(ChunkSaveClass & csave)
+void PhysicsWorldClass::Save_Static_Lights(ChunkSaveClass & csave)
 {
 	/*
 	** Save each object and save each object's culling linkage
@@ -500,7 +500,7 @@ void PhysicsSceneClass::Save_Static_Lights(ChunkSaveClass & csave)
 	}
 }
 
-void PhysicsSceneClass::Load_Static_Lights(ChunkLoadClass & cload)
+void PhysicsWorldClass::Load_Static_Lights(ChunkLoadClass & cload)
 {
 	while (cload.Open_Chunk()) {
 
@@ -542,7 +542,7 @@ void PhysicsSceneClass::Load_Static_Lights(ChunkLoadClass & cload)
 	}
 }
 
-void PhysicsSceneClass::Load_Sun_Light(ChunkLoadClass & cload)
+void PhysicsWorldClass::Load_Sun_Light(ChunkLoadClass & cload)
 {
 	WWASSERT(SunLight != NULL);
 	IOSunLightStruct sun;
@@ -558,7 +558,7 @@ void PhysicsSceneClass::Load_Sun_Light(ChunkLoadClass & cload)
 	Set_Sun_Light_Orientation(sun.Yaw,sun.Pitch);
 }
 
-void PhysicsSceneClass::Save_Sun_Light(ChunkSaveClass & csave)
+void PhysicsWorldClass::Save_Sun_Light(ChunkSaveClass & csave)
 {
 	WWASSERT(SunLight != NULL);
 	IOSunLightStruct sun;
@@ -579,7 +579,7 @@ void PhysicsSceneClass::Save_Sun_Light(ChunkSaveClass & csave)
 }	
 
 
-void PhysicsSceneClass::Save_Dynamic_Objects(ChunkSaveClass & csave)
+void PhysicsWorldClass::Save_Dynamic_Objects(ChunkSaveClass & csave)
 {
 	/*
 	** Save each object and save each object's culling linkage
@@ -601,7 +601,7 @@ void PhysicsSceneClass::Save_Dynamic_Objects(ChunkSaveClass & csave)
 }
 
 
-void PhysicsSceneClass::Load_Dynamic_Objects(ChunkLoadClass & cload)
+void PhysicsWorldClass::Load_Dynamic_Objects(ChunkLoadClass & cload)
 {
 	while (cload.Open_Chunk()) {
 
@@ -643,7 +643,7 @@ void PhysicsSceneClass::Load_Dynamic_Objects(ChunkLoadClass & cload)
 	}
 }
 
-void PhysicsSceneClass::Save_Static_Object_States(ChunkSaveClass & csave)
+void PhysicsWorldClass::Save_Static_Object_States(ChunkSaveClass & csave)
 {
 	RefPhysListIterator it(&StaticObjList);
 	while (!it.Is_Done()) {
@@ -669,7 +669,7 @@ void PhysicsSceneClass::Save_Static_Object_States(ChunkSaveClass & csave)
 	}
 }
 
-void PhysicsSceneClass::Load_Static_Object_States(ChunkLoadClass & cload)
+void PhysicsWorldClass::Load_Static_Object_States(ChunkLoadClass & cload)
 {
 	while (cload.Open_Chunk()) {
 		WWASSERT(cload.Cur_Chunk_ID()==PSCENE_DD_CHUNK_STATIC_OBJECT_ID);
@@ -699,7 +699,7 @@ void PhysicsSceneClass::Load_Static_Object_States(ChunkLoadClass & cload)
 	}
 }
 
-void PhysicsSceneClass::Post_Load_Level_Dynamic_Data(void)
+void PhysicsWorldClass::Post_Load_Level_Dynamic_Data(void)
 {
 	/*
 	** Possible TODO List: 
@@ -716,7 +716,7 @@ void PhysicsSceneClass::Post_Load_Level_Dynamic_Data(void)
 	Invalidate_Static_Shadow_Projectors();
 }
 
-StaticPhysClass * PhysicsSceneClass::Get_Static_Object_By_ID(uint32 id)
+StaticPhysClass * PhysicsWorldClass::Get_Static_Object_By_ID(uint32 id)
 {
 	RefPhysListIterator it(&StaticObjList);
 	while (!it.Is_Done()) {

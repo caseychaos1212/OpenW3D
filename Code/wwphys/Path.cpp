@@ -750,15 +750,19 @@ PathClass::Evaluate_Next_Point (const Vector3 &curr_pos, Vector3 &new_pos)
 		_DebugObj = new DecorationPhysClass;
 		_DebugObj->Set_Model (WW3DAssetManager::Get_Instance ()->Create_Render_Obj ("C_HAVOC"));
 		_DebugObj->Inc_Ignore_Counter ();
-		PhysicsSceneClass::Get_Instance ()->Add_Dynamic_Object (_DebugObj);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Add_Dynamic_Object (_DebugObj);
+		}
 	}
 
 	_DebugObj->Set_Transform (Matrix3D (m_ExpectedPos));*/
 
 	if (m_DisplayMoveVectors) {
-		PhysicsSceneClass::Get_Instance ()->Add_Debug_AABox (AABoxClass (curr_pos, Vector3 (0.25F,0.25F,0.25F)), Vector3 (1, 0, 0));
-		PhysicsSceneClass::Get_Instance ()->Add_Debug_AABox (AABoxClass (m_ExpectedPos, Vector3 (0.25F,0.25F,0.25F)), Vector3 (0, 1, 0));
-		PhysicsSceneClass::Get_Instance ()->Add_Debug_Vector (curr_pos, m_ExpectedPos - curr_pos, Vector3 (0, 0.6F, 1));
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Add_Debug_AABox (AABoxClass (curr_pos, Vector3 (0.25F,0.25F,0.25F)), Vector3 (1, 0, 0));
+			world->Add_Debug_AABox (AABoxClass (m_ExpectedPos, Vector3 (0.25F,0.25F,0.25F)), Vector3 (0, 1, 0));
+			world->Add_Debug_Vector (curr_pos, m_ExpectedPos - curr_pos, Vector3 (0, 0.6F, 1));
+		}
 	}
 
 	return true;

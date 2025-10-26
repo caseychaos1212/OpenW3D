@@ -186,7 +186,9 @@ CinematicGameObj::~CinematicGameObj()
 {
 	Set_Sound( 0 );
 
-	COMBAT_SCENE->Remove_From_Dirty_Cull_List( Peek_Physical_Object() );
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Remove_From_Dirty_Cull_List( Peek_Physical_Object() );
+	}
 }
 
 /*

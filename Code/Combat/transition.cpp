@@ -398,7 +398,9 @@ bool	TransitionInstanceClass::Check( SoldierGameObj *obj, bool action_trigger )
 				PhysRayCollisionTestClass raytest(ray,&result,colgroup,COLLISION_TYPE_PHYSICAL);
 				raytest.CheckDynamicObjs = false;
 
-				PhysicsSceneClass::Get_Instance()->Cast_Ray(raytest);
+				if (COMBAT_WORLD != NULL) {
+					COMBAT_WORLD->Cast_Ray(raytest);
+				}
 
 				if (result.Fraction < 1.0f) {
 					condition = false;

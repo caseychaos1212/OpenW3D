@@ -388,7 +388,9 @@ void	ScriptZoneGameObj::Think()
 		WWPROFILE( "All Enter" );
 		// Collect the dynamic physics objects overlapping this zone
 		NonRefPhysListClass objs_in_zone;
-		PhysicsSceneClass::Get_Instance()->Collect_Objects( BoundingBox, false, true, &objs_in_zone );
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Collect_Objects( BoundingBox, false, true, &objs_in_zone );
+		}
 		NonRefPhysListIterator it(&objs_in_zone);
 		for (it.First(); !it.Is_Done(); it.Next()) {
 			if ( it.Peek_Obj()->Get_Observer() != NULL ) {

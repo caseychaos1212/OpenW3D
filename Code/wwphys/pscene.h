@@ -336,7 +336,7 @@ August 31, 1998
   - when a physics object changes position, the culling database can be refreshed
   - physobj needs its linkage information built in.
 	
-	class PhysicsSceneClass : public SceneClass
+	class PhysicsWorldClass : public SceneClass
 	{
 		void Add_Render_Obj(...)		{ assert(0); }
 		void Remove_Render_Obj(...)	{ assert(0); }
@@ -358,7 +358,7 @@ August 31, 1998
 September 15, 1998
 
   Finished my work on the initial prototype of the level editor.  In the process of writing the
-  level editor, I implemented the new PhysicsSceneClass which replaces the old classes: PhysicsSystem
+  level editor, I implemented the new PhysicsWorldClass which replaces the old classes: PhysicsSystem
   PrivatePhysicsSystem and CollisionSystem and also takes over the job of the main 3D game scene
   for rendering.  This caused some major re-organization and as a result most of WWPhys was #if 0'd...
 
@@ -378,7 +378,7 @@ September 15, 1998
 	 rid of the possibility of "startbad's" on level load.
 
   - TileMapClass is now obsolete but much of its functionality will have to go into game code.
-    The PhysicsSceneClass contains an axis-aligned bounding box tree which serves the purpose
+    The PhysicsWorldClass contains an axis-aligned bounding box tree which serves the purpose
 	 that TileMap used to.  Other "TerrainPhysClass's" are still going to be single objects though.
 
 November 30, 1998
@@ -421,7 +421,7 @@ December 21, 1998
 	 - want as much as we can get into this since it should be faster and has no size restrictions
 
   File format is going to be chunk based.  Parsing of the top-levels of the file will occur
-  in Commando.  Certain chunks will be passed down to the PhysicsSceneClass to be handled.
+  in Commando.  Certain chunks will be passed down to the PhysicsWorldClass to be handled.
   These chunks will include a chunk which wraps all of the culling data, a chunk which wraps
   each static object or dynamic object, chunks for zones and lights, etc.
 
@@ -463,7 +463,7 @@ Jan 15, 1999
 
 May 27, 1999
 
-  Moving the Visibility system into PhysicsSceneClass so that it can incorporate
+  Moving the Visibility system into PhysicsWorldClass so that it can incorporate
   pre-calculated visibility for other things like dynamic objects.  Previously it
   was pretty nicely encapsulated inside of the static culling system. 
 
@@ -523,23 +523,20 @@ April 2001
 
 
 /**
-** PhysicsSceneClass
+** PhysicsWorldClass
 ** Drop all of the objects into the world in here, represented by physics objects, then
 ** you can do fun things like rendering and collision detection.
 */
-class PhysicsSceneClass : public SceneClass , public WidgetUserClass
+class PhysicsWorldClass : public WidgetUserClass
 {
 public:
 
-	PhysicsSceneClass(void);
-	virtual ~PhysicsSceneClass(void);
-	
-	/*
-	** For now, making the Physics Scene a singleton.  If we want the feature of
-	** instantiating multiple physics scenes, we will need to add a scene pointer
-	** to the base PhysClass and resolve all cases where we use this function.
-	*/
-	static PhysicsSceneClass * Get_Instance(void) { return TheScene; }
+	using RegType = SceneClass::RegType;
+
+	static PhysicsWorldClass * Get_Active_World();
+
+	PhysicsWorldClass(void);
+	virtual ~PhysicsWorldClass(void);
 	
 	/*
 	** Timestep the world
@@ -620,8 +617,8 @@ public:
 	int							Get_Lighting_Mode(void)										{ return LightingMode; }
 	void							Set_Lighting_Mode(int mode)								{ LightingMode = mode; }	
 
-	virtual void				Set_Ambient_Light(const Vector3 & color) override				{ SceneAmbientLight = color; }
-	virtual const Vector3 &	Get_Ambient_Light(void)	override									{ return SceneAmbientLight; }
+	virtual void				Set_Ambient_Light(const Vector3 & color)							{ SceneAmbientLight = color; }
+	virtual const Vector3 &	Get_Ambient_Light(void)												{ return SceneAmbientLight; }
 
 	void							Set_Lighting_LOD_Cutoff(float intensity);
 	float							Get_Lighting_LOD_Cutoff(void);
@@ -954,12 +951,12 @@ public:
 	** add other render objects to the scene like particle emitters.
 	** Still don't support the iterator interface... maybe will some day...
 	*/
-	virtual void				Add_Render_Object(RenderObjClass * obj) override;
-	virtual void				Remove_Render_Object(RenderObjClass * obj) override;
-	virtual SceneIterator *	Create_Iterator(bool /*onlyvisible = false*/) override	{ assert(0); return NULL; }
-	virtual void				Destroy_Iterator(SceneIterator * /*it*/) override			{ assert(0); }
-	virtual void				Register(RenderObjClass * obj,RegType for_what) override;
-	virtual void				Unregister(RenderObjClass * obj,RegType for_what) override;
+	virtual void				Add_Render_Object(RenderObjClass * obj);
+	virtual void				Remove_Render_Object(RenderObjClass * obj);
+	virtual SceneIterator *	Create_Iterator(bool /*onlyvisible = false*/)				{ assert(0); return NULL; }
+	virtual void				Destroy_Iterator(SceneIterator * /*it*/)					{ assert(0); }
+	virtual void				Register(RenderObjClass * obj,RegType for_what);
+	virtual void				Unregister(RenderObjClass * obj,RegType for_what);
 
 
 	/*
@@ -1001,11 +998,24 @@ public:
 	float							Compute_Vis_Mesh_Ram(void);
 
 protected:
+
+	enum class PolyRenderMode
+	{
+		POINT,
+		LINE,
+		FILL
+	};
+
+	virtual void				Attach_Render_Object(RenderObjClass * obj);
+	virtual void				Detach_Render_Object(RenderObjClass * obj);
+	virtual PolyRenderMode	Query_Polygon_Mode(void) const;
+	virtual void				Save_Render_Settings(ChunkSaveClass & csave);
+	virtual void				Load_Render_Settings(ChunkLoadClass & cload);
 	
 	/*
 	** Rendering functions
 	*/
-	virtual void				Customized_Render(RenderInfoClass & rinfo) override;
+	virtual void				Customized_Render(RenderInfoClass & rinfo);
 	void							Render_Objects(RenderInfoClass& rinfo,RefPhysListClass * static_ws_list,RefPhysListClass * static_list,RefPhysListClass * dyn_list);
 	void							Render_Object(RenderInfoClass & context,PhysClass * obj);
 	void							Render_Backface_Occluders(RenderInfoClass & context,RefPhysListClass *  static_ws_list,RefPhysListClass * static_list);
@@ -1254,14 +1264,12 @@ protected:
 	unsigned						CurrentFrameNumber;
 
 private:
-	
-	/*
-	** The physics scene is a singleton.  If we want to support multiple 
-	** physics scenes, we would need to add a scene pointer to each physics object
-	** and everywhere they are calling Get_Instance() they can just use their pointer
-	*/
-	static PhysicsSceneClass * TheScene;
+	static PhysicsWorldClass *	ActiveWorld;
 
+protected:
+
+private:
+	
 	/*
 	** WW3D is a friend because we let it call our protected Render function (which no
 	** one else is allowed to call... trying to "contain" surrender :-)
@@ -1273,6 +1281,43 @@ private:
 	*/
 	friend class VisOptimizationContextClass;
 
+};
+
+/**
+** PhysicsSceneClass
+** Bridge PhysicsWorldClass into WW3D's SceneClass interface so rendering code
+** can continue to operate unchanged.
+*/
+class PhysicsSceneClass : public SceneClass, public PhysicsWorldClass
+{
+public:
+
+	PhysicsSceneClass(void);
+	virtual ~PhysicsSceneClass(void);
+
+	static PhysicsSceneClass * Get_Instance(void) { return TheScene; }
+
+	virtual void				Set_Ambient_Light(const Vector3 & color) override;
+	virtual const Vector3 &	Get_Ambient_Light(void) override;
+
+	virtual void				Add_Render_Object(RenderObjClass * obj) override;
+	virtual void				Remove_Render_Object(RenderObjClass * obj) override;
+	virtual SceneIterator *	Create_Iterator(bool onlyvisible = false) override { return PhysicsWorldClass::Create_Iterator(onlyvisible); }
+	virtual void				Destroy_Iterator(SceneIterator * it) override { PhysicsWorldClass::Destroy_Iterator(it); }
+	virtual void				Register(RenderObjClass * obj,RegType for_what) override;
+	virtual void				Unregister(RenderObjClass * obj,RegType for_what) override;
+
+protected:
+
+	virtual void				Customized_Render(RenderInfoClass & rinfo) override;
+	virtual void				Attach_Render_Object(RenderObjClass * obj) override;
+	virtual void				Detach_Render_Object(RenderObjClass * obj) override;
+	virtual PolyRenderMode	Query_Polygon_Mode(void) const override;
+	virtual void				Save_Render_Settings(ChunkSaveClass & csave) override;
+	virtual void				Load_Render_Settings(ChunkLoadClass & cload) override;
+
+private:
+	static PhysicsSceneClass * TheScene;
 };
 
 

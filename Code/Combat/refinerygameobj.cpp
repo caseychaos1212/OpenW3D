@@ -477,7 +477,10 @@ RefineryGameObj::CnC_Initialize (BaseControllerClass *base)
 	//	Find the closest unloading static anim phys
 	//
 	float closest2 = 99999.0F;
-	RefPhysListIterator iterator = PhysicsSceneClass::Get_Instance()->Get_Static_Object_Iterator ();
+	if (COMBAT_WORLD == NULL) {
+		return;
+	}
+	RefPhysListIterator iterator = COMBAT_WORLD->Get_Static_Object_Iterator ();
 	for (iterator.First (); !iterator.Is_Done (); iterator.Next ()) {
 		StaticAnimPhysClass *anim_phys_obj = iterator.Peek_Obj ()->As_StaticAnimPhysClass ();
 		
@@ -675,7 +678,7 @@ RefineryGameObj::Play_Unloading_Animation (bool onoff)
 	//
 	//	Lookup the static animation object we need to play
 	//
-	StaticPhysClass *static_phys_obj = PhysicsSceneClass::Get_Instance ()->Find_Static_Object (UnloadAnimationID);
+	StaticPhysClass *static_phys_obj = (COMBAT_WORLD != NULL) ? COMBAT_WORLD->Find_Static_Object (UnloadAnimationID) : NULL;
 	if (static_phys_obj != NULL) {
 		StaticAnimPhysClass *anim_phys_obj = static_phys_obj->As_StaticAnimPhysClass ();
 		if (anim_phys_obj != NULL) {

@@ -263,11 +263,13 @@ void ProjectileClass::Timestep(float dt)
 			PhysRayCollisionTestClass raytest(ray,&res,Get_Collision_Group(),COLLISION_TYPE_PROJECTILE);
 
 			{ 
-				WWPROFILE("Raycast");
-				Inc_Ignore_Counter();
-				PhysicsSceneClass::Get_Instance()->Cast_Ray(raytest);
-				Dec_Ignore_Counter();
+			WWPROFILE("Raycast");
+			Inc_Ignore_Counter();
+			if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+				world->Cast_Ray(raytest);
 			}
+			Dec_Ignore_Counter();
+		}
 			
 			/*
 			** If the result was a "startbad", just do the whole step

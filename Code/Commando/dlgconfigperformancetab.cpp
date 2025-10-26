@@ -317,7 +317,7 @@ DlgConfigPerformanceTabClass::Load_Values (void)
 		//	Read the values from the registry
 		//
 		int static_shadows	= registry.Get_Int (VALUE_NAME_STATIC_SHADOWS, 1);
-		int shadow_mode		= registry.Get_Int (VALUE_NAME_SHADOW_MODE, PhysicsSceneClass::SHADOW_MODE_BLOBS_PLUS);
+		int shadow_mode		= registry.Get_Int (VALUE_NAME_SHADOW_MODE, PhysicsWorldClass::SHADOW_MODE_BLOBS_PLUS);
 		int texture_red		= registry.Get_Int (VALUE_NAME_TEXTURE_RES, 0);
 		int particle_detail	= registry.Get_Int (VALUE_NAME_PARTICLE_DETAIL, 1);
 		int npatches			= registry.Get_Int (VALUE_NAME_NPATCHES, 0);
@@ -332,7 +332,9 @@ DlgConfigPerformanceTabClass::Load_Values (void)
 		//
 		int dynamic_lod	= 0;
 		int static_lod		= 0;
-		PhysicsSceneClass::Get_Instance()->Get_Polygon_Budgets (&static_lod, &dynamic_lod);
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Get_Polygon_Budgets (&static_lod, &dynamic_lod);
+		}
 
 		//
 		//	Set the slider's positions to reflect the loaded values
@@ -624,17 +626,19 @@ DlgConfigPerformanceTabClass::On_Apply (void)
 		//
 		//	Pass the values onto the game
 		//
-		COMBAT_SCENE->Set_Polygon_Budgets (lod_budget, lod_budget);
-		COMBAT_SCENE->Enable_Dynamic_Projectors ((shadow_mode != PhysicsSceneClass::SHADOW_MODE_NONE));
-		COMBAT_SCENE->Enable_Static_Projectors ((static_shadows != 0));
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Set_Polygon_Budgets (lod_budget, lod_budget);
+		COMBAT_WORLD->Enable_Dynamic_Projectors ((shadow_mode != PhysicsWorldClass::SHADOW_MODE_NONE));
+		COMBAT_WORLD->Enable_Static_Projectors ((static_shadows != 0));
+	}
 		// Note! It is important to invalidate all textures when
 		// changing the amount of render targets, as render target
 		// creation may have problems if the card is running low on
 		// texture memory!
-		if (COMBAT_SCENE->Get_Shadow_Mode()!=(PhysicsSceneClass::ShadowEnum)shadow_mode) {
-			WW3D::_Invalidate_Textures();
-			COMBAT_SCENE->Set_Shadow_Mode ((PhysicsSceneClass::ShadowEnum)shadow_mode);
-		}
+	if (COMBAT_WORLD != NULL && COMBAT_WORLD->Get_Shadow_Mode()!=(PhysicsWorldClass::ShadowEnum)shadow_mode) {
+		WW3D::_Invalidate_Textures();
+		COMBAT_WORLD->Set_Shadow_Mode ((PhysicsWorldClass::ShadowEnum)shadow_mode);
+	}
 		WW3D::Set_Texture_Reduction (std::max (2 - texture_red, 0));
 		SurfaceEffectsManager::Set_Mode ((SurfaceEffectsManager::MODE)surface_effect);
 	}

@@ -392,7 +392,9 @@ SoldierGameObj::~SoldierGameObj()
 		Vehicle->Remove_Occupant(this);
 	}	
 
-	COMBAT_SCENE->Remove_Object( Peek_Physical_Object() );
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Remove_Object( Peek_Physical_Object() );
+	}
 
 	if ( Is_Human_Controlled() ) {
 		GameObjManager::Remove_Star( this );
@@ -506,7 +508,9 @@ void	SoldierGameObj::Re_Init( const SoldierGameObjDef & definition )
 	//
 	//	Remove the object from the world (just to be safe)
 	//
-	COMBAT_SCENE->Remove_Object( Peek_Physical_Object() );
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Remove_Object( Peek_Physical_Object() );
+	}
 
 	//
 	//	Reset the weapon model
@@ -1538,8 +1542,8 @@ int SoldierGameObj::Tally_Vis_Visible_Soldiers( void )
 	Get_Position(&position);
 	position.Z += 1.5f;
 
-	WWASSERT(COMBAT_SCENE != NULL);
-	VisTableClass * pvs = COMBAT_SCENE->Get_Vis_Table(position);
+	WWASSERT(COMBAT_WORLD != NULL);
+	VisTableClass * pvs = COMBAT_WORLD->Get_Vis_Table(position);
 	
 	if (pvs != NULL) {
 
@@ -2325,7 +2329,9 @@ void	SoldierGameObj::Think( void )
 			AABoxClass soldier_box;
 			soldier_box.Center = position + Vector3( 0, 0, 1.0F );
 			soldier_box.Extent.Set( 0.3F, 0.3F, 1.0F );
-			PhysicsSceneClass::Get_Instance ()->Add_Debug_AABox( soldier_box, Vector3( 1.0F, 0.0F, 0.25F ) );
+			if (COMBAT_WORLD != NULL) {
+				COMBAT_WORLD->Add_Debug_AABox( soldier_box, Vector3( 1.0F, 0.0F, 0.25F ) );
+			}
 		}
 
 		// Stats
@@ -2591,7 +2597,8 @@ void	SoldierGameObj::Think( void )
 			PhysRayCollisionTestClass raytest(ray,&res,BULLET_COLLISION_GROUP,COLLISION_TYPE_PROJECTILE);
 			
 			Peek_Human_Phys()->Inc_Ignore_Counter();
-			COMBAT_SCENE->Cast_Ray(raytest);
+			WWASSERT(COMBAT_WORLD != NULL);
+			COMBAT_WORLD->Cast_Ray(raytest);
 			Peek_Human_Phys()->Dec_Ignore_Counter();
 
 			// if found update emitter
@@ -3832,7 +3839,9 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 
 			// And Shake the camera
 			Vector3	pos = COMBAT_CAMERA->Get_Transform().Get_Translation();
-			COMBAT_SCENE->Add_Camera_Shake(	pos,	1, 0.5f, 0.05f );
+			if (COMBAT_WORLD != NULL) {
+				COMBAT_WORLD->Add_Camera_Shake(	pos,	1, 0.5f, 0.05f );
+			}
 		}
 
 		anim_ok = false;
@@ -4221,9 +4230,9 @@ bool SoldierGameObj::Can_See(SoldierGameObj * p_soldier)
 	CastResultStruct result;
 	PhysRayCollisionTestClass raytest(ray, &result, 
 		BULLET_COLLISION_GROUP, COLLISION_TYPE_PHYSICAL);
-	WWASSERT(COMBAT_SCENE != NULL);
+	WWASSERT(COMBAT_WORLD != NULL);
 { WWPROFILE( "Cast Ray" );
-	COMBAT_SCENE->Cast_Ray(raytest);
+	COMBAT_WORLD->Cast_Ray(raytest);
 }
 
 	bool can_see = false;
@@ -5063,7 +5072,9 @@ bool	SoldierGameObj::Is_Safe_To_Disable_Ghost_Collision( const Vector3 &curr_pos
 	//	Collect all the dynamic objects in this box
 	//
 	NonRefPhysListClass obj_list;
-	PhysicsSceneClass::Get_Instance ()->Collect_Objects (box, false, true, &obj_list);
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Collect_Objects (box, false, true, &obj_list);
+	}
 
 	//
 	//	Loop over all the collected objects
@@ -5131,7 +5142,9 @@ bool	SoldierGameObj::Is_Soldier_Blocked( const Vector3 &curr_pos )
 	//	Collect all the dynamic objects in this box
 	//
 	NonRefPhysListClass obj_list;
-	PhysicsSceneClass::Get_Instance ()->Collect_Objects (box, false, true, &obj_list);
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Collect_Objects (box, false, true, &obj_list);
+	}
 
 	uint32 my_id			= Get_ID ();
 	uint32 smallest_id	= my_id;

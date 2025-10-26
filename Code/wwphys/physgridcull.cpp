@@ -78,7 +78,7 @@ enum
 **
 *******************************************************************************************************/
 
-PhysGridCullClass::PhysGridCullClass(PhysicsSceneClass * scene) :
+PhysGridCullClass::PhysGridCullClass(PhysicsWorldClass * scene) :
 	Scene(scene)
 {
 }
@@ -196,12 +196,15 @@ bool PhysGridCullClass::Cast_Ray(PhysRayCollisionTestClass & raytest)
 
 	bool res = false;
 	PhysClass * obj = Get_First_Collected_Object();
-	PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
+	PhysicsWorldClass * world = Scene;
+	if (world == NULL) {
+		return false;
+	}
 	
 	while (obj) {
 
 		if (	
-			scene->Do_Groups_Collide(obj->Get_Collision_Group(),raytest.CollisionGroup) && 
+			world->Do_Groups_Collide(obj->Get_Collision_Group(),raytest.CollisionGroup) && 
 			!obj->Is_Ignore_Me()	
 		) 
 		{
@@ -216,6 +219,11 @@ bool PhysGridCullClass::Cast_Ray(PhysRayCollisionTestClass & raytest)
 	
 	bool res = false;
 
+	PhysicsWorldClass * world = Scene;
+	if (world == NULL) {
+		return res;
+	}
+
 	// hierarchically cull the objects in the grid
 	VolumeStruct vol;
 	init_volume(raytest.Ray,&vol);
@@ -224,12 +232,11 @@ bool PhysGridCullClass::Cast_Ray(PhysRayCollisionTestClass & raytest)
 	}
 
 	// linearly cull the objects in the NoGridList
-	PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
 	for (GridListIterator it(NoGridList); !it.Is_Done(); it.Next()) {
 		PhysClass * obj = (PhysClass *)it.Peek_Obj();
 		
 		if (	
-				scene->Do_Groups_Collide(obj->Get_Collision_Group(),raytest.CollisionGroup) && 
+				world->Do_Groups_Collide(obj->Get_Collision_Group(),raytest.CollisionGroup) && 
 				!obj->Is_Ignore_Me()	
 			) 
 		{
@@ -248,6 +255,10 @@ bool PhysGridCullClass::cast_ray_recursive
 	const GridCullSystemClass::VolumeStruct &		vol
 ) 
 {
+	if (Scene == NULL) {
+		return false;
+	}
+
 	AABoxClass box;
 	compute_box(vol,&box);
 
@@ -302,12 +313,15 @@ bool PhysGridCullClass::Cast_AABox(PhysAABoxCollisionTestClass & boxtest)
 
 	bool res = false;
 	PhysClass * obj = Get_First_Collected_Object();
-	PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
+	PhysicsWorldClass * world = Scene;
+	if (world == NULL) {
+		return false;
+	}
 
 	while (obj) {
 
 		if (	
-			scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
+			world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
 			!obj->Is_Ignore_Me()	
 		) 
 		{
@@ -322,6 +336,11 @@ bool PhysGridCullClass::Cast_AABox(PhysAABoxCollisionTestClass & boxtest)
 
 	bool res = false;
 
+	PhysicsWorldClass * world = Scene;
+	if (world == NULL) {
+		return res;
+	}
+
 	// hierarchically cull the objects in the grid
 	VolumeStruct vol;
 	init_volume(boxtest.SweepMin,boxtest.SweepMax,&vol);
@@ -334,7 +353,7 @@ bool PhysGridCullClass::Cast_AABox(PhysAABoxCollisionTestClass & boxtest)
 		PhysClass * obj = (PhysClass*)it.Peek_Obj();
 		
 		if (	
-				Scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
+				world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
 				!obj->Is_Ignore_Me()	
 			) 
 		{
@@ -352,6 +371,10 @@ bool PhysGridCullClass::cast_aabox_recursive
 	const GridCullSystemClass::VolumeStruct &		vol
 )
 {
+	if (Scene == NULL) {
+		return false;
+	}
+
 	AABoxClass box;
 	compute_box(vol,&box);
 
@@ -405,12 +428,15 @@ bool PhysGridCullClass::Cast_OBBox(PhysOBBoxCollisionTestClass & boxtest)
 
 	bool res = false;
 	PhysClass * obj = Get_First_Collected_Object();
-	PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
+	PhysicsWorldClass * world = Scene;
+	if (world == NULL) {
+		return false;
+	}
 
 	while (obj) {
 
 		if (	
-			scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
+			world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
 			!obj->Is_Ignore_Me()	
 		) 
 		{
@@ -425,6 +451,11 @@ bool PhysGridCullClass::Cast_OBBox(PhysOBBoxCollisionTestClass & boxtest)
 
 	bool res = false;
 
+	PhysicsWorldClass * world = Scene;
+	if (world == NULL) {
+		return res;
+	}
+
 	// hierarchically cull the objects in the grid
 	VolumeStruct vol;
 	init_volume(boxtest.SweepMin,boxtest.SweepMax,&vol);
@@ -437,7 +468,7 @@ bool PhysGridCullClass::Cast_OBBox(PhysOBBoxCollisionTestClass & boxtest)
 		PhysClass * obj = (PhysClass*)it.Peek_Obj();
 		
 		if (	
-				Scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
+				world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
 				!obj->Is_Ignore_Me()	
 			) 
 		{
@@ -455,6 +486,10 @@ bool PhysGridCullClass::cast_obbox_recursive
 	const GridCullSystemClass::VolumeStruct &		vol
 )
 {
+	if (Scene == NULL) {
+		return false;
+	}
+
 	AABoxClass box;
 	compute_box(vol,&box);
 

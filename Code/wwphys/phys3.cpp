@@ -1314,7 +1314,9 @@ void Phys3Class::Check_Ground(const AABoxClass & box,GroundStateStruct * gs,floa
 													COLLISION_TYPE_PHYSICAL	);
 
 	Inc_Ignore_Counter();
-	PhysicsSceneClass::Get_Instance()->Cast_AABox(test);
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Cast_AABox(test);
+	}
 	Dec_Ignore_Counter();
 
 	if (result.Fraction < 1.0f) {
@@ -1578,6 +1580,11 @@ bool Phys3Class::Apply_Move
 	bool already_stepped = false;
 
 	Inc_Ignore_Counter();
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		Dec_Ignore_Counter();
+		return false;
+	}
 	
 	/*
 	** Apply Move:
@@ -1640,7 +1647,7 @@ bool Phys3Class::Apply_Move
 			/*
 			** Sweep the box
 			*/
-			PhysicsSceneClass::Get_Instance()->Cast_AABox(test);
+			world->Cast_AABox(test);
 			
 			/*
 			** IF: the 'step' test did not start out intersecting (no low roof) then
@@ -1659,20 +1666,20 @@ bool Phys3Class::Apply_Move
 
 				result.Reset();
 				test.Translate(Vector3(0,0,-STEP_HEIGHT));
-				PhysicsSceneClass::Get_Instance()->Cast_AABox(test);
+				world->Cast_AABox(test);
 			
 			}
 		
 		} else {
 
-			PhysicsSceneClass::Get_Instance()->Cast_AABox(test);
+			world->Cast_AABox(test);
 
 		}
 		
 		VERBOSE_LOG(("  Checking collision results:  "));
 		if (result.StartBad) {
 			//WWDEBUG_WARNING(("result.StartBad\n"));
-			//PhysicsSceneClass::Get_Instance()->Add_Debug_AABox(box,Vector3(1,0,0));
+		//if (world != NULL) { world->Add_Debug_AABox(box,Vector3(1,0,0)); }
 			VERBOSE_LOG(("StartBad!\r\n"));
 			done = true;
 		
@@ -1804,10 +1811,12 @@ bool Phys3Class::Apply_Move
 								(mesh->Is_Not_Hidden_At_All())) 
 						{
 
-							PhysicsSceneClass::Get_Instance()->Shatter_Mesh(	mesh,
-																								State.Position,
-																								result.Normal,
-																								State.Velocity	);
+							if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+								world->Shatter_Mesh(	mesh,
+														State.Position,
+														result.Normal,
+														State.Velocity	);
+							}
 							if (Observer != NULL) {
 								Observer->Object_Shattered_Something(this,test.CollidedPhysObj,result.SurfaceType);
 							}
@@ -1873,7 +1882,10 @@ bool Phys3Class::Apply_Move
 inline bool Phys3Class::Debug_Verify_Position(void)
 {
 #ifdef VERBOSE_LOGGING
-	PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return false;
+	}
 
 	AABoxClass box;
 	Compute_WS_Collision_Box(State,&box);
@@ -1883,7 +1895,7 @@ inline bool Phys3Class::Debug_Verify_Position(void)
 	PhysAABoxIntersectionTestClass test(box,Get_Collision_Group(),COLLISION_TYPE_PHYSICAL,&list);
 
 	Inc_Ignore_Counter();
-	bool intersecting = scene->Intersection_Test(test);
+	bool intersecting = world->Intersection_Test(test);
 	Dec_Ignore_Counter();
 
 	if (intersecting) {
@@ -1943,7 +1955,9 @@ void Phys3Class::Snap_To_Ground(const Vector3 & actual_move,bool was_stepping)
 		Compute_WS_Collision_Box(State,&box);
 		CastResultStruct result;
 		PhysAABoxCollisionTestClass test(box,Vector3(0,0,-snap_dist),&result,Get_Collision_Group());
-		PhysicsSceneClass::Get_Instance()->Cast_AABox(test);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Cast_AABox(test);
+		}
 
 		if ((result.Fraction > 0.0f) && (result.Fraction <= 1.0f) && (!result.StartBad)) {
 			
@@ -2206,8 +2220,13 @@ bool Phys3Class::Can_Teleport(const Matrix3D &test_tm, bool check_dyn_only, NonR
 		test.CheckStaticObjs = false;
 	}
 	
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World ();
+	if (world == NULL) {
+		return false;
+	}
+
 	Inc_Ignore_Counter ();
-	bool intersect = PhysicsSceneClass::Get_Instance ()->Intersection_Test(test);
+	bool intersect = world->Intersection_Test(test);
 	Dec_Ignore_Counter ();
 
 	return (intersect == false);
@@ -2241,6 +2260,11 @@ bool Phys3Class::Can_Teleport_And_Stand(const Matrix3D &test_tm, Matrix3D *new_t
 	AABoxClass collision_box;
 	Compute_WS_Collision_Box (test_state, &collision_box);
 
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World ();
+	if (world == NULL) {
+		return false;
+	}
+
 	Inc_Ignore_Counter ();
 
 	//
@@ -2256,7 +2280,7 @@ bool Phys3Class::Can_Teleport_And_Stand(const Matrix3D &test_tm, Matrix3D *new_t
 													0,
 													COLLISION_TYPE_PHYSICAL);
 
-	PhysicsSceneClass::Get_Instance ()->Cast_AABox (test);
+	world->Cast_AABox (test);
 
 	Dec_Ignore_Counter ();
 
@@ -2359,6 +2383,11 @@ bool Phys3Class::Can_Move_To(const Matrix3D &new_tm)
 	AABoxClass box;
 	Compute_WS_Collision_Box(State,&box);
 
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return false;
+	}
+
 	Inc_Ignore_Counter();
 	CastResultStruct result;
 	PhysAABoxCollisionTestClass test(	box,
@@ -2366,7 +2395,7 @@ bool Phys3Class::Can_Move_To(const Matrix3D &new_tm)
 													&result,
 													0,
 													COLLISION_TYPE_PHYSICAL		);
-	PhysicsSceneClass::Get_Instance()->Cast_AABox(test);
+	world->Cast_AABox(test);
 	Dec_Ignore_Counter();
 
 	return (result.Fraction == 1.0f);
@@ -2386,8 +2415,13 @@ void Phys3Class::Assert_State_Valid(void)
 													0,
 													COLLISION_TYPE_PHYSICAL		);
 
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return;
+	}
+
 	Inc_Ignore_Counter();
-	PhysicsSceneClass::Get_Instance()->Cast_AABox(test);
+	world->Cast_AABox(test);
 	Dec_Ignore_Counter();
 	
 #if VERBOSE_LOGGING

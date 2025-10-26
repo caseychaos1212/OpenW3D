@@ -149,7 +149,28 @@ StringClass							CombatManager::LastLSDName;
 int									CombatManager::LoadProgress;
 bool									CombatManager::MultiplayRenderingAllowed = true;
 
+static	PhysicsWorldClass	*	GameWorld	= NULL;
 static	PhysicsSceneClass	*	GameScene	= NULL;
+
+namespace
+{
+
+void Destroy_Game_World()
+{
+	if (GameScene != NULL) {
+		GameScene->Release_Ref();
+		GameScene = NULL;
+		GameWorld = NULL;
+		return;
+	}
+
+	if (GameWorld != NULL) {
+		delete GameWorld;
+		GameWorld = NULL;
+	}
+}
+
+}
 
 /*
 **
@@ -211,11 +232,7 @@ void	CombatManager::Shutdown( void )
 	ScreenFadeManager::Shutdown();
 	HUDClass::Shutdown();
 
-	if ( GameScene != NULL ) {
-		// Debug_Say(( "Releasing the PScene with %d Refs\n", GameScene->Num_Refs() ));
-		GameScene->Release_Ref();
-		GameScene = NULL;
-	}
+	Destroy_Game_World();
 
 	//
 	// Reset the audio library
@@ -261,35 +278,49 @@ void	CombatManager::Shutdown( void )
 //	Debug_Say(( "Combat Shutdown %d refs\n", RefCountClass::Total_Refs() ));
 }
 
-void	CombatManager::Scene_Init( void )
+void	CombatManager::Scene_Init( bool render_available )
 {
-	// Game scene is where the main action occurs!
-	GameScene = new PhysicsSceneClass;
-	GameScene->Set_Ambient_Light(Vector3(0.55f,0.55f,0.55f));
-	GameScene->Set_Ambient_Light(Vector3(1,1,1));
-	GameScene->Set_Fog_Color(Vector3(0.6f,0.6f,0.6f)); //Vector3(80.0f/255.0f,130.0f/255.0f,180.0f/255.0f));
+	Destroy_Game_World();
+
+	if (render_available) {
+		GameScene = new PhysicsSceneClass;
+		GameWorld = GameScene;
+	} else {
+		GameWorld = new PhysicsWorldClass;
+		GameScene = NULL;
+	}
+
+	if (GameWorld == NULL) {
+		return;
+	}
+
+	GameWorld->Set_Ambient_Light(Vector3(0.55f,0.55f,0.55f));
+	GameWorld->Set_Ambient_Light(Vector3(1,1,1));
+	if (GameScene != NULL) {
+		GameScene->Set_Fog_Color(Vector3(0.6f,0.6f,0.6f)); //Vector3(80.0f/255.0f,130.0f/255.0f,180.0f/255.0f));
+	}
 
 	// Do all 'Enable_All's, then all 'Disable_All's, then the individual pairs
-	COMBAT_SCENE->Enable_All_Collision_Detections( DEFAULT_COLLISION_GROUP );
-	COMBAT_SCENE->Enable_All_Collision_Detections( BULLET_COLLISION_GROUP );
-	COMBAT_SCENE->Enable_All_Collision_Detections( TERRAIN_COLLISION_GROUP );
-	COMBAT_SCENE->Enable_All_Collision_Detections( PhysicsSceneClass::COLLISION_GROUP_WORLD );
-	COMBAT_SCENE->Enable_All_Collision_Detections( SOLDIER_GHOST_COLLISION_GROUP );
-	COMBAT_SCENE->Enable_All_Collision_Detections( SOLDIER_COLLISION_GROUP );
+	COMBAT_WORLD->Enable_All_Collision_Detections( DEFAULT_COLLISION_GROUP );
+	COMBAT_WORLD->Enable_All_Collision_Detections( BULLET_COLLISION_GROUP );
+	COMBAT_WORLD->Enable_All_Collision_Detections( TERRAIN_COLLISION_GROUP );
+	COMBAT_WORLD->Enable_All_Collision_Detections( PhysicsSceneClass::COLLISION_GROUP_WORLD );
+	COMBAT_WORLD->Enable_All_Collision_Detections( SOLDIER_GHOST_COLLISION_GROUP );
+	COMBAT_WORLD->Enable_All_Collision_Detections( SOLDIER_COLLISION_GROUP );
 
-	COMBAT_SCENE->Disable_All_Collision_Detections( UNCOLLIDEABLE_GROUP );
-	COMBAT_SCENE->Disable_All_Collision_Detections( TERRAIN_ONLY_COLLISION_GROUP );
-	COMBAT_SCENE->Disable_All_Collision_Detections( TERRAIN_AND_BULLET_COLLISION_GROUP );
-	COMBAT_SCENE->Disable_All_Collision_Detections( BULLET_ONLY_COLLISION_GROUP );
+	COMBAT_WORLD->Disable_All_Collision_Detections( UNCOLLIDEABLE_GROUP );
+	COMBAT_WORLD->Disable_All_Collision_Detections( TERRAIN_ONLY_COLLISION_GROUP );
+	COMBAT_WORLD->Disable_All_Collision_Detections( TERRAIN_AND_BULLET_COLLISION_GROUP );
+	COMBAT_WORLD->Disable_All_Collision_Detections( BULLET_ONLY_COLLISION_GROUP );
 
-	COMBAT_SCENE->Enable_Collision_Detection( TERRAIN_ONLY_COLLISION_GROUP, TERRAIN_COLLISION_GROUP );
-	COMBAT_SCENE->Enable_Collision_Detection( TERRAIN_AND_BULLET_COLLISION_GROUP, TERRAIN_COLLISION_GROUP );
-	COMBAT_SCENE->Enable_Collision_Detection( TERRAIN_AND_BULLET_COLLISION_GROUP, BULLET_COLLISION_GROUP );
-	COMBAT_SCENE->Disable_Collision_Detection( BULLET_COLLISION_GROUP, BULLET_COLLISION_GROUP );
-	COMBAT_SCENE->Enable_Collision_Detection( BULLET_ONLY_COLLISION_GROUP, BULLET_COLLISION_GROUP );
-	COMBAT_SCENE->Disable_Collision_Detection( PhysicsSceneClass::COLLISION_GROUP_WORLD,PhysicsSceneClass::COLLISION_GROUP_WORLD );
-	COMBAT_SCENE->Disable_Collision_Detection( SOLDIER_GHOST_COLLISION_GROUP, SOLDIER_COLLISION_GROUP );
-	COMBAT_SCENE->Disable_Collision_Detection( SOLDIER_GHOST_COLLISION_GROUP, SOLDIER_GHOST_COLLISION_GROUP );
+	COMBAT_WORLD->Enable_Collision_Detection( TERRAIN_ONLY_COLLISION_GROUP, TERRAIN_COLLISION_GROUP );
+	COMBAT_WORLD->Enable_Collision_Detection( TERRAIN_AND_BULLET_COLLISION_GROUP, TERRAIN_COLLISION_GROUP );
+	COMBAT_WORLD->Enable_Collision_Detection( TERRAIN_AND_BULLET_COLLISION_GROUP, BULLET_COLLISION_GROUP );
+	COMBAT_WORLD->Disable_Collision_Detection( BULLET_COLLISION_GROUP, BULLET_COLLISION_GROUP );
+	COMBAT_WORLD->Enable_Collision_Detection( BULLET_ONLY_COLLISION_GROUP, BULLET_COLLISION_GROUP );
+	COMBAT_WORLD->Disable_Collision_Detection( PhysicsSceneClass::COLLISION_GROUP_WORLD,PhysicsSceneClass::COLLISION_GROUP_WORLD );
+	COMBAT_WORLD->Disable_Collision_Detection( SOLDIER_GHOST_COLLISION_GROUP, SOLDIER_COLLISION_GROUP );
+	COMBAT_WORLD->Disable_Collision_Detection( SOLDIER_GHOST_COLLISION_GROUP, SOLDIER_GHOST_COLLISION_GROUP );
 }
 
 /*
@@ -622,7 +653,12 @@ void	CombatManager::Unload_Level( void )
 */
 PhysicsSceneClass	*	CombatManager::Get_Scene( void )
 {
-	return PhysicsSceneClass::Get_Instance();
+	return GameScene;
+}
+
+PhysicsWorldClass * CombatManager::Get_World( void )
+{
+	return GameWorld;
 }
 
 /*
@@ -694,7 +730,9 @@ void 	CombatManager::Think()
 
 	// Now, Process all objects physically
 }{	WWPROFILE( "Scene" );
-  	COMBAT_SCENE->Update( TimeManager::Get_Frame_Seconds(), 0 );
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Update( TimeManager::Get_Frame_Seconds(), 0 );
+	}
 
 }{	WWPROFILE( "Star" );
 	Update_Star();
@@ -763,7 +801,9 @@ void CombatManager::Render()
 
 		{
 			WWPROFILE( "Camera Shakes" );
-			COMBAT_SCENE->Apply_Camera_Shakes (*MainCamera);
+			if (COMBAT_WORLD != NULL) {
+				COMBAT_WORLD->Apply_Camera_Shakes (*MainCamera);
+			}
 		}
 
 		DazzleRenderObjClass::Install_Dazzle_Visibility_Handler(&_TheCombatDazzleHandler);

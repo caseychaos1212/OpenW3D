@@ -427,8 +427,9 @@ void Game_Shutdown(void)
 	cDiagnostics::Close();
 	//cHelpText::Close();
 
-	PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
-	scene->Set_Max_Simultaneous_Shadows(0);
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Set_Max_Simultaneous_Shadows(0);
+	}
 
 	PathMgrClass::Shutdown();
 	WWMath::Shutdown();

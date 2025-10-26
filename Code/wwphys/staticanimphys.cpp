@@ -94,7 +94,9 @@ StaticAnimPhysClass::StaticAnimPhysClass(void) :
 StaticAnimPhysClass::~StaticAnimPhysClass(void)
 {
 	if (ShadowProjector != NULL) {
-		PhysicsSceneClass::Get_Instance()->Remove_Static_Texture_Projector(ShadowProjector);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Remove_Static_Texture_Projector(ShadowProjector);
+		}
 		ShadowProjector->Release_Ref();
 		ShadowProjector = NULL;
 	}
@@ -160,7 +162,9 @@ void StaticAnimPhysClass::Update_Sun_Status(void)
 void StaticAnimPhysClass::Set_Shadow(TexProjectClass * shadow)
 {
 	if (ShadowProjector != NULL) {
-		PhysicsSceneClass::Get_Instance()->Remove_Static_Texture_Projector(ShadowProjector);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Remove_Static_Texture_Projector(ShadowProjector);
+		}
 		ShadowProjector->Release_Ref();
 		ShadowProjector = NULL;
 	}
@@ -170,7 +174,9 @@ void StaticAnimPhysClass::Set_Shadow(TexProjectClass * shadow)
 	if (ShadowProjector != NULL) {
 		ShadowProjector->Add_Ref();
 		ShadowProjector->Enable_Affect_Static_Objects(false);
-		PhysicsSceneClass::Get_Instance()->Add_Static_Texture_Projector(ShadowProjector);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Add_Static_Texture_Projector(ShadowProjector);
+		}
 	}
 }
 

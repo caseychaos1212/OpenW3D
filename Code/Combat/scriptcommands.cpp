@@ -563,7 +563,9 @@ void Add_To_Dirty_Cull_List(GameObject* obj)
 	SCRIPT_PTR_CHECK( obj );
 	PhysicalGameObj *physobj = obj->As_PhysicalGameObj();
 	if ( physobj != NULL ) {
-		COMBAT_SCENE->Add_To_Dirty_Cull_List( physobj->Peek_Physical_Object() );
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Add_To_Dirty_Cull_List( physobj->Peek_Physical_Object() );
+		}
 	}
 }
 
@@ -1381,7 +1383,9 @@ GameObject * Find_Closest_Soldier( const Vector3 & pos, float min_dist, float ma
 	//	Collect all the dynamic objects in this box
 	//
 	NonRefPhysListClass obj_list;
-	PhysicsSceneClass::Get_Instance ()->Collect_Objects (box, false, true, &obj_list);
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Collect_Objects (box, false, true, &obj_list);
+	}
 
 	float closest_dist		= max_dist;
 	GameObject *closest_obj	= NULL;
@@ -2219,7 +2223,7 @@ void	Static_Anim_Phys_Goto_Frame( int obj_id, float frame, const char * anim_nam
 {
 	SCRIPT_TRACE((	"ST>Static_Anim_Phys_Goto_Frame( %d, %d )\n", obj_id, frame ));
 
-	StaticPhysClass * spc = COMBAT_SCENE->Find_Static_Object( obj_id );
+	StaticPhysClass * spc = (COMBAT_WORLD != NULL) ? COMBAT_WORLD->Find_Static_Object( obj_id ) : NULL;
 	if ( spc != NULL ) {
 		StaticAnimPhysClass * sapc = spc->As_StaticAnimPhysClass();
 		if ( sapc  ) {
@@ -2237,7 +2241,7 @@ void	Static_Anim_Phys_Goto_Last_Frame( int obj_id, const char * anim_name )
 {
 	SCRIPT_TRACE((	"ST>Static_Anim_Phys_Goto_Last_Frame( %d )\n", obj_id ));
 
-	StaticPhysClass * spc = COMBAT_SCENE->Find_Static_Object( obj_id );
+	StaticPhysClass * spc = (COMBAT_WORLD != NULL) ? COMBAT_WORLD->Find_Static_Object( obj_id ) : NULL;
 	if ( spc != NULL ) {
 		StaticAnimPhysClass * sapc = spc->As_StaticAnimPhysClass();
 		if ( sapc  ) {
@@ -2319,8 +2323,8 @@ void	Set_Objective_HUD_Info_Position( int id, float priority, const char * textu
 void	Shake_Camera( const Vector3 & pos, float radius, float intensity, float duration )
 {
 	SCRIPT_TRACE((	"ST>Shake_Camera( (%f, %f, %f), %f, %f, %f\n",pos.X, pos.Y, pos.Z, radius, intensity, duration ));
-	if ( COMBAT_SCENE ) {
-		COMBAT_SCENE->Add_Camera_Shake( pos, radius, duration, intensity );
+	if ( COMBAT_WORLD ) {
+		COMBAT_WORLD->Add_Camera_Shake( pos, radius, duration, intensity );
 	}
 }
 

@@ -137,7 +137,7 @@ UnitCoordinationZoneMgr::Detect_Ladder_Zones (void)
 void
 UnitCoordinationZoneMgr::Detect_Elevator_Zones (void)
 {
-	RefPhysListIterator iterator = COMBAT_SCENE->Get_Static_Anim_Object_Iterator ();
+	RefPhysListIterator iterator = COMBAT_WORLD->Get_Static_Anim_Object_Iterator ();
 
 	//
 	//	Loop over all the static anim objects in the world
@@ -213,7 +213,9 @@ UnitCoordinationZoneMgr::Display_Debug_Boxes (void)
 	//	Pretty simple, just add a debug box for each zone
 	//
 	for (int index = 0; index < ZoneList.Count (); index ++) {	
-		PhysicsSceneClass::Get_Instance ()->Add_Debug_AABox (ZoneList[index], Vector3 (1.0F, 0.0F, 0.25F));
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Add_Debug_AABox (ZoneList[index], Vector3 (1.0F, 0.0F, 0.25F));
+		}
 	}
 
 	return ;

@@ -345,7 +345,9 @@ void MultiHUDClass::Show_Player_Names(void)
 
 		{
 			WWPROFILE("Cast Ray");
-			COMBAT_SCENE->Cast_Ray(raytest);
+			if (COMBAT_WORLD != NULL) {
+				COMBAT_WORLD->Cast_Ray(raytest);
+			}
 		}
 
 		if (CombatManager::Is_First_Person() && COMBAT_STAR != NULL) {

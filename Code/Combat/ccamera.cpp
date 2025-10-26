@@ -870,7 +870,9 @@ void CCameraClass::Update()
 															&res,
 															DEFAULT_COLLISION_GROUP,
 															COLLISION_TYPE_CAMERA);
-		PhysicsSceneClass::Get_Instance()->Cast_OBBox(boxtest);
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Cast_OBBox(boxtest);
+		}
 
 		// Solve the problem of the camera when getting out of the car
 		if ( res.StartBad && interpolating && boxtest.CollidedPhysObj ) {
@@ -878,7 +880,9 @@ void CCameraClass::Update()
 			PhysClass * hit = boxtest.CollidedPhysObj;
 			hit->Inc_Ignore_Counter();
 			res.Reset();
-			PhysicsSceneClass::Get_Instance()->Cast_OBBox(boxtest);
+			if (COMBAT_WORLD != NULL) {
+				COMBAT_WORLD->Cast_OBBox(boxtest);
+			}
 			hit->Dec_Ignore_Counter();
 		}
 
@@ -898,9 +902,8 @@ void CCameraClass::Update()
 
 		// When Physics_Debug is on, draw the camera collision box in its start point
 #ifdef WWDEBUG	
-		PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
-		if (scene && scene->Is_Debug_Display_Enabled()) {
-			scene->Add_Debug_OBBox(box,Vector3(1,0,0));
+		if (COMBAT_WORLD != NULL && COMBAT_WORLD->Is_Debug_Display_Enabled()) {
+			COMBAT_WORLD->Add_Debug_OBBox(box,Vector3(1,0,0));
 		}
 #endif
 
@@ -927,7 +930,9 @@ void CCameraClass::Update()
 															&res,
 															DEFAULT_COLLISION_GROUP,
 															COLLISION_TYPE_CAMERA);
-		PhysicsSceneClass::Get_Instance()->Cast_OBBox(boxtest);
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Cast_OBBox(boxtest);
+		}
 
 		// Set the near clip plane depending on whether the default near clip plane
 		// intersected any geometry
@@ -1034,11 +1039,11 @@ bool	CCameraClass::Determine_Targeting_Position( void )
 		CastResultStruct result;
 		PhysRayCollisionTestClass raytest(ray, &result, 
 			BULLET_COLLISION_GROUP, COLLISION_TYPE_PROJECTILE);
-		WWASSERT(COMBAT_SCENE != NULL);
+		WWASSERT(COMBAT_WORLD != NULL);
 
 		Ignore_Star_And_Vehicle();
 { WWPROFILE( "Cast Ray" );
-		COMBAT_SCENE->Cast_Ray( raytest );
+		COMBAT_WORLD->Cast_Ray( raytest );
 }
 		Unignore_Star_And_Vehicle();
 
@@ -1223,11 +1228,11 @@ void	CCameraClass::Apply_Weapon_Help( void )
 						CastResultStruct result;
 						PhysRayCollisionTestClass raytest(ray, &result, 
 							BULLET_COLLISION_GROUP, COLLISION_TYPE_PROJECTILE);
-						WWASSERT(COMBAT_SCENE != NULL);
+						WWASSERT(COMBAT_WORLD != NULL);
 
 						Ignore_Star_And_Vehicle();
 	{ WWPROFILE( "Cast Ray" );
-						COMBAT_SCENE->Cast_Ray( raytest );
+						COMBAT_WORLD->Cast_Ray( raytest );
 	}
 						Unignore_Star_And_Vehicle();
 
@@ -1409,7 +1414,9 @@ void	CCameraClass::Handle_Input( void )
 		if ( Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_IN ) || 
 			 Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_OUT ) ) {
 			float fog_start, fog_stop;
-			COMBAT_SCENE->Get_Fog_Range( &fog_start, &fog_stop );
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Get_Fog_Range( &fog_start, &fog_stop );
+		}
 			if ( Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_OUT ) ) {
 				FarClipPlane *= 1.1f;
 				fog_start *= 1.1f;
@@ -1417,7 +1424,9 @@ void	CCameraClass::Handle_Input( void )
 				FarClipPlane /= 1.1f;
 				fog_start /= 1.1f;
 			}
-			COMBAT_SCENE->Set_Fog_Range( fog_start, FarClipPlane );
+			if (COMBAT_WORLD != NULL) {
+				COMBAT_WORLD->Set_Fog_Range( fog_start, FarClipPlane );
+			}
 			Debug_Say(( "FarClipPlane %f\n", FarClipPlane ));
 			Set_Clip_Planes( NearClipPlane, FarClipPlane );
 		} 

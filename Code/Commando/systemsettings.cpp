@@ -285,8 +285,8 @@ class	SystemSettingEntryStaticProjectors : public SystemSettingEntryBool {
 public:
 	const char * Get_Name( void ) override	{ return "Static_Projectors"; }
 	const char * Get_Help( void ) override	{ return "STATIC_PROJECTORS - toggles static projectors."; }
-	virtual bool Get_Bool( void ) override			{ if ( COMBAT_SCENE ) return COMBAT_SCENE->Are_Static_Projectors_Enabled(); return State; }
-	virtual void Set_Bool( bool state ) override	{ if ( COMBAT_SCENE ) COMBAT_SCENE->Enable_Static_Projectors( state ); }
+	virtual bool Get_Bool( void ) override			{ if ( COMBAT_WORLD ) return COMBAT_WORLD->Are_Static_Projectors_Enabled(); return State; }
+	virtual void Set_Bool( bool state ) override	{ if ( COMBAT_WORLD ) COMBAT_WORLD->Enable_Static_Projectors( state ); }
 };
 
 /***********************************************************************************************/
@@ -295,8 +295,8 @@ class	SystemSettingEntryDynamicProjectors : public SystemSettingEntryBool {
 public:
 	const char * Get_Name( void ) override	{ return "Dynamic_Projectors"; }
 	const char * Get_Help( void ) override	{ return "DYNAMIC_PROJECTORS - toggles dynamic projectors."; }
-	virtual bool Get_Bool( void ) override			{ if ( COMBAT_SCENE ) return COMBAT_SCENE->Are_Dynamic_Projectors_Enabled(); return State; }
-	virtual void Set_Bool( bool state ) override	{ if ( COMBAT_SCENE ) COMBAT_SCENE->Enable_Dynamic_Projectors( state ); }
+	virtual bool Get_Bool( void ) override			{ if ( COMBAT_WORLD ) return COMBAT_WORLD->Are_Dynamic_Projectors_Enabled(); return State; }
+	virtual void Set_Bool( bool state ) override	{ if ( COMBAT_WORLD ) COMBAT_WORLD->Enable_Dynamic_Projectors( state ); }
 };
 
 /***********************************************************************************************/
@@ -411,16 +411,16 @@ public:
 	const char * Get_Help( void ) override	{ return "DYNAMIC_LOD_BUDGET <n> - sets the Dynamic LOD Budget."; }
 	virtual int Get_Slider( void ) override	{
 		int scount,dcount = Value;
-		if ( PhysicsSceneClass::Get_Instance() ) {
-			PhysicsSceneClass::Get_Instance()->Get_Polygon_Budgets(&scount,&dcount);
+		if ( COMBAT_WORLD != NULL ) {
+			COMBAT_WORLD->Get_Polygon_Budgets(&scount,&dcount);
 		}
 		return dcount;
 	}
 	virtual void Set_Slider( int value ) override {
-		if ( PhysicsSceneClass::Get_Instance() ) {
+		if ( COMBAT_WORLD != NULL ) {
 			int scount,dcount;
-			PhysicsSceneClass::Get_Instance()->Get_Polygon_Budgets(&scount,&dcount);
-			PhysicsSceneClass::Get_Instance()->Set_Polygon_Budgets(scount,value);
+			COMBAT_WORLD->Get_Polygon_Budgets(&scount,&dcount);
+			COMBAT_WORLD->Set_Polygon_Budgets(scount,value);
 		}
 	}
 };
@@ -438,16 +438,16 @@ public:
 	const char * Get_Help( void ) override	{ return "STATIC_LOD_BUDGET <n> - sets the Static LOD Budget."; }
 	virtual int Get_Slider( void ) override	{
 		int dcount,scount = Value;
-		if ( PhysicsSceneClass::Get_Instance() ) {
-			PhysicsSceneClass::Get_Instance()->Get_Polygon_Budgets(&scount,&dcount);
+		if ( COMBAT_WORLD != NULL ) {
+			COMBAT_WORLD->Get_Polygon_Budgets(&scount,&dcount);
 		}
 		return scount;
 	}
 	virtual void Set_Slider( int value ) override {
-		if ( PhysicsSceneClass::Get_Instance() ) {
+		if ( COMBAT_WORLD != NULL ) {
 			int scount,dcount;
-			PhysicsSceneClass::Get_Instance()->Get_Polygon_Budgets(&scount,&dcount);
-			PhysicsSceneClass::Get_Instance()->Set_Polygon_Budgets(value,dcount);
+			COMBAT_WORLD->Get_Polygon_Budgets(&scount,&dcount);
+			COMBAT_WORLD->Set_Polygon_Budgets(value,dcount);
 		}
 	}
 };
@@ -458,8 +458,8 @@ class	SystemSettingEntryShadowMode : public SystemSettingEntryEnum {
 public:
 	const char * Get_Name( void ) override	{ return "Shadow_Mode"; }
 	const char * Get_Help( void ) override	{ return "SHADOW_MODE <mode> - 0=none 1=blobs 2=blobs+ 3=projected textures"; }
-	virtual	int Get_Enum( void ) override { if (COMBAT_SCENE) return COMBAT_SCENE->Get_Shadow_Mode(); return Selection; }
-	virtual	void Set_Enum( int selection ) override { if (COMBAT_SCENE) COMBAT_SCENE->Set_Shadow_Mode( (PhysicsSceneClass::ShadowEnum)selection ); }
+	virtual	int Get_Enum( void ) override { if (COMBAT_WORLD) return COMBAT_WORLD->Get_Shadow_Mode(); return Selection; }
+	virtual	void Set_Enum( int selection ) override { if (COMBAT_WORLD) COMBAT_WORLD->Set_Shadow_Mode( (PhysicsWorldClass::ShadowEnum)selection ); }
 	virtual	int Get_Enum_Count( void ) override { return 4; }
 	virtual	const char * Get_Enum_Name( int selection ) override {
 		static const char * names[ 4 ] = { "None", "Blobs", "Blobs+", "Projections" };

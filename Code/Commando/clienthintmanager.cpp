@@ -60,7 +60,7 @@ cClientHintManager::Think
 )
 {
 	if (cNetwork::I_Am_Server() ||
-		COMBAT_SCENE == NULL ||
+		COMBAT_WORLD == NULL ||
 		cUserOptions::ClientHintFactor.Get() < 1)
 	{
 		//
@@ -107,7 +107,7 @@ cClientHintManager::Think
 	p_my_soldier->Get_Position(&my_position);
 	my_position.Z += 1.5;
 
-	VisTableClass * pvs = COMBAT_SCENE->Get_Vis_Table(my_position);
+	VisTableClass * pvs = COMBAT_WORLD->Get_Vis_Table(my_position);
 
 	int		num_objects					= 0;
 	//ULONG		total_delay_ms				= 0;

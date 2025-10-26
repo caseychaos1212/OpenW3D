@@ -88,9 +88,8 @@ float CombatDazzleClass::Compute_Dazzle_Visibility
 	LineSegClass ray(rinfo.Camera.Get_Position(),point);
 	PhysRayCollisionTestClass raytest(ray,&res,0,COLLISION_TYPE_PROJECTILE);
 
-	PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
-	if (scene != NULL) {
-		scene->Cast_Ray(raytest);
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Cast_Ray(raytest);
 	}
 
 	/*

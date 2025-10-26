@@ -164,7 +164,8 @@ void BeamEffectManagerClass::Create_Beam_Effect(const AmmoDefinitionClass * ammo
 	beam_wrapper->Set_Transform(Matrix3D(1));
 	beam_wrapper->Enable_Is_Pre_Lit(true);
 
-	COMBAT_SCENE->Add_Dynamic_Object(beam_wrapper);
+	WWASSERT(COMBAT_WORLD != NULL);
+	COMBAT_WORLD->Add_Dynamic_Object(beam_wrapper);
 
 	REF_PTR_RELEASE(beam_wrapper);
 	REF_PTR_RELEASE(beam_model);
@@ -299,10 +300,12 @@ CollisionReactionType BulletDataClass::Bullet_Collision_Occurred( const Collisio
 
 		if ((mesh->Get_W3D_Flags() & W3D_MESH_FLAG_SHATTERABLE) && (mesh->Is_Not_Hidden_At_All())) {
 
-			PhysicsSceneClass::Get_Instance()->Shatter_Mesh(	mesh,
-																				collision_point,
-																				collision_normal,
-																				Velocity	);
+			if (COMBAT_WORLD != NULL) {
+				COMBAT_WORLD->Shatter_Mesh(	mesh,
+														collision_point,
+														collision_normal,
+														Velocity	);
+			}
 
 			// remeber that we shattered the mesh so that we don't create decals later
 			shattered = true;
@@ -577,7 +580,8 @@ void BulletClass::Init( const BulletDataClass & data, float progress_time, const
 		Projectile->Set_Orientation_Mode_Aligned();
 	}
 
-	COMBAT_SCENE->Add_Dynamic_Object( Projectile );
+	WWASSERT(COMBAT_WORLD != NULL);
+	COMBAT_WORLD->Add_Dynamic_Object( Projectile );
 
 	float duration = (float) BulletData.AmmoDefinition->Range / (float) BulletData.AmmoDefinition->Velocity;
 	if (duration <= 0.0) {
@@ -606,7 +610,9 @@ void BulletClass::Init( const BulletDataClass & data, float progress_time, const
 void	BulletClass::Shutdown( void )
 {
 	if ( Projectile != NULL ) {
-		COMBAT_SCENE->Remove_Object( Projectile );
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Remove_Object( Projectile );
+		}
 		Projectile->Set_Observer( NULL );
 	}
 
@@ -872,7 +878,9 @@ void	Simulate_Instant_Bullet( BulletDataClass & data, float progress_time )
 		LineSegClass ray( data.Position, end );
 		PhysRayCollisionTestClass raytest(ray,&res,BULLET_COLLISION_GROUP,COLLISION_TYPE_PROJECTILE);
 {WWPROFILE("Cast_Ray");
-		PhysicsSceneClass::Get_Instance()->Cast_Ray(raytest);
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Cast_Ray(raytest);
+		}
 }
 
 		// If the result was a "startbad", we are done

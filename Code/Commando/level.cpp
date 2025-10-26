@@ -73,7 +73,9 @@ WWPROFILE( "Release Level" );
 	TransitionManager::Reset();
 
 {WWPROFILE( "Scene remove" );
-	COMBAT_SCENE->Remove_All();
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Remove_All();
+	}
 }
 
 {WWPROFILE( "Free assets" );

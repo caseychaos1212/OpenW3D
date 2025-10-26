@@ -438,7 +438,7 @@ void	ElevatorPhysClass::Timestep( float dt )
 		OBBoxClass world_box;
 		OBBoxClass::Transform( Get_Transform(), def->CallZones[index], &world_box );
 
-		PhysicsSceneClass::Get_Instance ()->Add_Debug_OBBox (world_box, Vector3 (1, 0, 0));
+		if (COMBAT_WORLD != NULL) { COMBAT_WORLD->Add_Debug_OBBox (world_box, Vector3 (1, 0, 0)); }
 	}*/
 	
 

@@ -112,8 +112,10 @@ void OctBoxClass::Get_Outer_Bounds(AABoxClass * set_bounds)
 
 bool OctBoxClass::Is_Intersecting(NonRefPhysListClass * result_list,bool check_static_objs,bool check_dyn_objs)
 {
-	PhysicsSceneClass * the_scene = PhysicsSceneClass::Get_Instance();
-	WWASSERT(the_scene != NULL);
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return false;
+	}
 
 	/*
 	** Test inner box for intersection
@@ -127,15 +129,17 @@ bool OctBoxClass::Is_Intersecting(NonRefPhysListClass * result_list,bool check_s
 	test.CheckDynamicObjs = check_dyn_objs;
 	
 	Parent.Inc_Ignore_Counter ();
-	bool intersect = PhysicsSceneClass::Get_Instance ()->Intersection_Test(test);
+	bool intersect = world->Intersection_Test(test);
 	Parent.Dec_Ignore_Counter ();
 	return intersect;
 }
 
 bool OctBoxClass::Is_In_Contact_Zone(void)
 {
-	PhysicsSceneClass * the_scene = PhysicsSceneClass::Get_Instance();
-	WWASSERT(the_scene != NULL);
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return false;
+	}
 
 	/*
 	** Test outer box for intersection
@@ -145,7 +149,7 @@ bool OctBoxClass::Is_In_Contact_Zone(void)
 
 	int colgroup = Parent.Get_Collision_Group();
 	int coltype = COLLISION_TYPE_PHYSICAL | COLLISION_TYPE_VEHICLE;
-	return the_scene->Intersection_Test(wrld_outer_box,colgroup,coltype,true);
+	return world->Intersection_Test(wrld_outer_box,colgroup,coltype,true);
 }
 
 
@@ -171,8 +175,10 @@ OctBoxClass::Internal_Compute_Contacts(bool lock_to_centroids)
 	** - For each octant (total of 8)
 	**   - Sweep the octant along the diagonal and record the contact point (if any)
 	*/
-	PhysicsSceneClass * the_scene = PhysicsSceneClass::Get_Instance();
-	WWASSERT(the_scene != NULL);
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return RESULT_NO_COLLISION;
+	}
 	Reset_Contacts();
 
 	/*
@@ -188,12 +194,12 @@ OctBoxClass::Internal_Compute_Contacts(bool lock_to_centroids)
 	int colgroup = Parent.Get_Collision_Group();
 	int coltype = COLLISION_TYPE_PHYSICAL | COLLISION_TYPE_VEHICLE;
 
-	if (!the_scene->Intersection_Test(wrld_outer_box,colgroup,coltype,true)) {
+	if (!world->Intersection_Test(wrld_outer_box,colgroup,coltype,true)) {
 		//Parent.Add_Debug_OBBox(wrld_outer_box,Vector3(0,1,0));
 		return RESULT_NO_COLLISION;
 	}
 
-	if (the_scene->Intersection_Test(WrldInnerBox,colgroup,coltype,true)) {
+	if (world->Intersection_Test(WrldInnerBox,colgroup,coltype,true)) {
 		//Parent.Add_Debug_OBBox(wrld_outer_box,Vector3(1,0,0));
 		return RESULT_INTERSECTION;
 	}
@@ -211,6 +217,11 @@ OctBoxClass::Internal_Compute_Contacts(bool lock_to_centroids)
 
 void OctBoxClass::Compute_Octant_Contact(int oi,bool lock_to_centroids)
 {
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return;
+	}
+
 	static Vector3 _octant_offset[8] =
 	{
 		Vector3( 1, 1, 1),
@@ -251,7 +262,7 @@ void OctBoxClass::Compute_Octant_Contact(int oi,bool lock_to_centroids)
 													&corner_result,
 													Parent.Get_Collision_Group(),
 													COLLISION_TYPE_PHYSICAL | COLLISION_TYPE_VEHICLE);
-	PhysicsSceneClass::Get_Instance()->Cast_Ray(raytest,true);
+	world->Cast_Ray(raytest,true);
 
 #ifdef WWDEBUG
 #if SHOW_CONTACT_DETECTORS
@@ -282,7 +293,7 @@ void OctBoxClass::Compute_Octant_Contact(int oi,bool lock_to_centroids)
 														&octant_result,
 														Parent.Get_Collision_Group(),
 														COLLISION_TYPE_PHYSICAL | COLLISION_TYPE_VEHICLE);
-	PhysicsSceneClass::Get_Instance()->Cast_OBBox(boxtest,true);
+	world->Cast_OBBox(boxtest,true);
 	
 	/*
 	** Wake up any vehicle in contact with us

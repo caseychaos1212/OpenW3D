@@ -952,9 +952,9 @@ void CombatGameModeClass::Post_Load_Id_Uniqueness_Check(void)
 	//
 //	Debug_Say(("Testing id uniqueness for static objects:\n"));
 
-	WWASSERT(COMBAT_SCENE != NULL);
+	WWASSERT(COMBAT_WORLD != NULL);
 	int static_obj_count = 0;
-	RefPhysListIterator iter_1 = COMBAT_SCENE->Get_Static_Object_Iterator();
+	RefPhysListIterator iter_1 = COMBAT_WORLD->Get_Static_Object_Iterator();
 	for (iter_1.First(); !iter_1.Is_Done(); iter_1.Next()) {
 
 		//StaticPhysClass * p_obj_1 = (StaticPhysClass *) iter_1.Peek_Obj();
@@ -971,7 +971,7 @@ void CombatGameModeClass::Post_Load_Id_Uniqueness_Check(void)
 				p_obj_1->Peek_Model()->Get_Name()));
 		}
 
-		RefPhysListIterator iter_2 = COMBAT_SCENE->Get_Static_Object_Iterator();
+		RefPhysListIterator iter_2 = COMBAT_WORLD->Get_Static_Object_Iterator();
 		for (iter_2.First(); !iter_2.Is_Done(); iter_2.Next()) {
 			//StaticPhysClass * p_obj_2 = (StaticPhysClass *) iter_2.Peek_Obj();
 			PhysClass * p_obj_2 = iter_2.Peek_Obj();
@@ -1051,8 +1051,10 @@ void CombatGameModeClass::Compute_World_Size(void)
 	//
 	Vector3 min;
 	Vector3 max;
-	WWASSERT(PhysicsSceneClass::Get_Instance() != NULL);
-	PhysicsSceneClass::Get_Instance()->Get_Level_Extents(min, max);
+	if (COMBAT_WORLD == NULL) {
+		return;
+	}
+	COMBAT_WORLD->Get_Level_Extents(min, max);
 	//Debug_Say(("World extends from (%5.2f, %5.2f, %5.2f) to (%5.2f, %5.2f, %5.2f)\n",
 	//	min.X, min.Y, min.Z, max.X, max.Y, max.Z));
 

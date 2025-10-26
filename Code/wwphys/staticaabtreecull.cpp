@@ -413,7 +413,9 @@ void StaticAABTreeCullClass::Evaluate_Non_Occluder_Visibility
 						context.Set_Vis_ID(0x00FFFFFF);	// set up a highly visible vis id
 						context.VisRasterizer->Set_Render_Mode(IDBufferClass::OCCLUDER_MODE);
 						obj->Vis_Render(context);
-						PhysicsSceneClass::Get_Instance()->On_Vis_Occluders_Rendered(context,sample);
+						if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+							world->On_Vis_Occluders_Rendered(context,sample);
+						}
 						context.VisRasterizer->Set_Render_Mode(IDBufferClass::NON_OCCLUDER_MODE);
 					}
 #endif

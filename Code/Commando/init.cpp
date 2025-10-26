@@ -841,8 +841,9 @@ bool Game_Init(void)
 
 	if (ConsoleBox.Is_Exclusive()) {
 		WW3D::Enable_Decals(false);
-		PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
-		scene->Set_Max_Simultaneous_Shadows(0);
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Set_Max_Simultaneous_Shadows(0);
+		}
 		DazzleRenderObjClass::Enable_Dazzle_Rendering(false);
 	} else {
 		if ( WW3D::Registry_Load_Render_Device( APPLICATION_SUB_KEY_NAME_RENDER, true ) != WW3D_ERROR_OK ) {
@@ -952,7 +953,8 @@ bool Game_Init(void)
 	//		- RenegadeDialogMgrClass
 	//
 	//
-	CombatManager::Scene_Init();
+	bool render_available = !ConsoleBox.Is_Exclusive();
+	CombatManager::Scene_Init(render_available);
 	if (!ConsoleBox.Is_Exclusive()) {
 		SystemSettings::Init();
 	}
@@ -969,7 +971,7 @@ bool Game_Init(void)
 
    cNetUtil::Wsa_Init();
 
-	CombatManager::Init(ConsoleBox.Is_Exclusive() ? false : true);
+	CombatManager::Init(render_available);
 
 	CampaignManager::Init();
 

@@ -242,7 +242,7 @@ StaticNetworkObjectClass::Compute_Object_Priority (int client_id, const Vector3 
 void
 StaticNetworkObjectClass::Generate_Static_Network_Objects (void)
 {
-	RefPhysListIterator iterator = COMBAT_SCENE->Get_Static_Anim_Object_Iterator ();
+	RefPhysListIterator iterator = COMBAT_WORLD->Get_Static_Anim_Object_Iterator ();
 
 	//
 	//	Loop over all the static anim objects in the world

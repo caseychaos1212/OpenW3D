@@ -288,7 +288,9 @@ PhysicalGameObj::~PhysicalGameObj( void )
 	}
 
 	if ( PhysObj != NULL ) {
-		COMBAT_SCENE->Remove_Object( PhysObj );
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Remove_Object( PhysObj );
+		}
 		PhysObj->Release_Ref();
 		PhysObj = NULL;
 	}
@@ -332,7 +334,9 @@ void	PhysicalGameObj::Copy_Settings( const PhysicalGameObjDef & definition )
 	//	Release our hold on the physics object
 	//
 	if ( PhysObj != NULL ) {
-		COMBAT_SCENE->Remove_Object( PhysObj );
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Remove_Object( PhysObj );
+		}
 		PhysObj->Release_Ref();
 		PhysObj = NULL;
 	}
@@ -346,7 +350,9 @@ void	PhysicalGameObj::Copy_Settings( const PhysicalGameObjDef & definition )
 
 	PhysObj->Set_Collision_Group( DEFAULT_COLLISION_GROUP );
 	PhysObj->Set_Observer( this );
-	COMBAT_SCENE->Add_Dynamic_Object( PhysObj );
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Add_Dynamic_Object( PhysObj );
+	}
 
 	// Do we still use this?????
 	if ( !definition.Animation.Is_Empty() ) {
@@ -774,12 +780,12 @@ void PhysicalGameObj::Post_Think( void )
 
 // FIXME Going to hell on a client is problematic.
 #ifndef PARAM_EDITING_ON  //(gth) don't go to hell in the editor cause it will cause a crash!
-	if (CombatManager::I_Am_Only_Client () == false && COMBAT_SCENE != NULL) {
+	if (CombatManager::I_Am_Only_Client () == false && COMBAT_WORLD != NULL) {
 		Vector3 pos;
 		Get_Position(&pos);
 		Vector3 min;
 		Vector3 max;
-		COMBAT_SCENE->Get_Level_Extents(min, max);
+		COMBAT_WORLD->Get_Level_Extents(min, max);
 		if ( pos.Z < min.Z - 20.0f ) {
 			Debug_Say(( "Object %d is going to hell at (%1.1f, %1.1f, %1.1f).  Die!\n", Get_ID(), pos.X, pos.Y, pos.Z ));
 			Set_Delete_Pending();

@@ -752,7 +752,8 @@ void	WeaponClass::Fire_Bullet( const AmmoDefinitionClass *ammo_def, bool primary
 		Ignore_Owner();
 
 {		WWPROFILE( "Cast_Ray" );
-		COMBAT_SCENE->Cast_Ray( raytest );
+		WWASSERT(COMBAT_WORLD != NULL);
+		COMBAT_WORLD->Cast_Ray( raytest );
 }
 		Unignore_Owner();
 
@@ -779,7 +780,8 @@ void	WeaponClass::Fire_Bullet( const AmmoDefinitionClass *ammo_def, bool primary
 		Ignore_Owner();
 
 { WWPROFILE( "Cast Ray" );
-		COMBAT_SCENE->Cast_Ray( raytest );
+		WWASSERT(COMBAT_WORLD != NULL);
+		COMBAT_WORLD->Cast_Ray( raytest );
 }
 
 		Unignore_Owner();
@@ -882,7 +884,8 @@ void	WeaponClass::Fire_Bullet( const AmmoDefinitionClass *ammo_def, bool primary
 			Ignore_Owner();
 
 { WWPROFILE( "Cast Ray" );
-			COMBAT_SCENE->Cast_Ray( raytest );
+			WWASSERT(COMBAT_WORLD != NULL);
+			COMBAT_WORLD->Cast_Ray( raytest );
 }
 
 			Unignore_Owner();
@@ -895,7 +898,8 @@ void	WeaponClass::Fire_Bullet( const AmmoDefinitionClass *ammo_def, bool primary
 			model->Release_Ref();
 			laser_obj->Set_Lifetime( 0.6f );
 			laser_obj->Update_Cull_Box();	// htis may be needed due to a bug in Line3DClass
-			COMBAT_SCENE->Add_Dynamic_Object( laser_obj );
+			WWASSERT(COMBAT_WORLD != NULL);
+			COMBAT_WORLD->Add_Dynamic_Object( laser_obj );
 			laser_obj->Release_Ref();
 		}
 	}
@@ -953,7 +957,8 @@ bool	WeaponClass::Is_Muzzle_Clear()
 
 	{ 
 		WWPROFILE( "Cast Ray" );
-		COMBAT_SCENE->Cast_Ray( raytest );
+		WWASSERT(COMBAT_WORLD != NULL);
+		COMBAT_WORLD->Cast_Ray( raytest );
 	}
 
 	return raytest.Result->Fraction == 1.0f;
@@ -997,7 +1002,8 @@ void WeaponClass::Compute_Bullet_Start_Point(const Matrix3D & muzzle,Vector3 * s
 			Ignore_Owner();
 
 			WWPROFILE( "Cast Ray" );
-			COMBAT_SCENE->Cast_Ray( raytest );
+			WWASSERT(COMBAT_WORLD != NULL);
+			COMBAT_WORLD->Cast_Ray( raytest );
 
 			Unignore_Owner();
 		}
@@ -1034,7 +1040,8 @@ void	WeaponClass::Do_Firing_Effects( void )
 					if ( model != NULL ) {
 //						muzzle.Rotate_X( FreeRandom.Get_Float( DEG_TO_RAD( 360 ) ) );
 						muzzle_flash->Set_Transform( muzzle );
-						COMBAT_SCENE->Add_Dynamic_Object( muzzle_flash );
+						WWASSERT(COMBAT_WORLD != NULL);
+						COMBAT_WORLD->Add_Dynamic_Object( muzzle_flash );
 
 					// If this is an emitter, start it
 						if ( model->Class_ID() == RenderObjClass::CLASSID_PARTICLEEMITTER ) {
@@ -1236,7 +1243,8 @@ void	WeaponClass::Make_Shell_Eject( const Matrix3D & tm )
 		PhysicalObject->Set_Velocity( tm.Rotate_Vector( Vector3( 2,0,0 ) ) );
 
 		// Add it to the scene
-		COMBAT_SCENE->Add_Dynamic_Object( PhysicalObject );
+		WWASSERT(COMBAT_WORLD != NULL);
+		COMBAT_WORLD->Add_Dynamic_Object( PhysicalObject );
 		PhysicalObject->Release_Ref();
 	}
 }
@@ -1626,9 +1634,10 @@ bool	WeaponClass::Cast_Weapon_Down_Muzzle( Vector3 & hit_pos )
 	CastResultStruct res;
 	PhysRayCollisionTestClass raytest(ray,&res,BULLET_COLLISION_GROUP,COLLISION_TYPE_PROJECTILE);
 
-	Ignore_Owner();
+Ignore_Owner();
 { WWPROFILE( "Cast Ray" );
-	COMBAT_SCENE->Cast_Ray( raytest );
+	WWASSERT(COMBAT_WORLD != NULL);
+	COMBAT_WORLD->Cast_Ray( raytest );
 }
 	Unignore_Owner();
 
@@ -1661,9 +1670,10 @@ PhysicalGameObj * WeaponClass::Cast_Weapon( const Vector3 & target )
 	CastResultStruct res;
 	PhysRayCollisionTestClass raytest(ray,&res,BULLET_COLLISION_GROUP,COLLISION_TYPE_PROJECTILE);
 
-	Ignore_Owner();
+Ignore_Owner();
 { WWPROFILE( "Cast Ray" );
-	COMBAT_SCENE->Cast_Ray( raytest );
+	WWASSERT(COMBAT_WORLD != NULL);
+	COMBAT_WORLD->Cast_Ray( raytest );
 }
 	Unignore_Owner();
 
@@ -1752,7 +1762,8 @@ void	WeaponClass::Display_Targeting( void )
 
 	{
 		WWPROFILE( "Cast_Ray" );
-		COMBAT_SCENE->Cast_Ray( raytest );
+		WWASSERT(COMBAT_WORLD != NULL);
+		COMBAT_WORLD->Cast_Ray( raytest );
 	}
 
 	Unignore_Owner();

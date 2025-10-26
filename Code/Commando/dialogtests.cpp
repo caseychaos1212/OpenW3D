@@ -1747,9 +1747,9 @@ EditWheeledVehicleDialogClass::On_Command (int ctrl_id, int message_id, DWORD pa
 				VehicleDef->Set_Shift_Up_Rpm(Get_Dlg_Item_Float(IDC_SHIFT_UP_RPM_EDIT));
 				VehicleDef->Set_Shift_Down_Rpm(Get_Dlg_Item_Float(IDC_SHIFT_DOWN_RPM_EDIT));
 				
-				PhysicsSceneClass * pscene = PhysicsSceneClass::Get_Instance();
-				if (pscene) {
-					RefPhysListIterator iterator = pscene->Get_Dynamic_Object_Iterator();
+			PhysicsWorldClass * pscene = COMBAT_WORLD;
+			if (pscene) {
+				RefPhysListIterator iterator = pscene->Get_Dynamic_Object_Iterator();
 					while (!iterator.Is_Done()) {
 						if (	(iterator.Peek_Obj() != NULL) && 
 								(iterator.Peek_Obj()->Get_Definition() == VehicleDef)) 
@@ -1836,7 +1836,7 @@ EditTrackedVehicleDialogClass::On_Command (int ctrl_id, int message_id, DWORD pa
 				VehicleDef->Set_Track_V_Scale_Factor(Get_Dlg_Item_Float(IDC_TRACK_V_SCALE_FACTOR_EDIT));
 				VehicleDef->Set_Turn_Torque_Scale_Factor(Get_Dlg_Item_Float(IDC_TURN_TORQUE_SCALE_FACTOR_EDIT));
 			
-				PhysicsSceneClass * pscene = PhysicsSceneClass::Get_Instance();
+			PhysicsWorldClass * pscene = COMBAT_WORLD;
 				if (pscene) {
 					RefPhysListIterator iterator = pscene->Get_Dynamic_Object_Iterator();
 					while (!iterator.Is_Done()) {

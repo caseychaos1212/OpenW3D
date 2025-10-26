@@ -83,7 +83,12 @@ void RigidBodyClass::Timestep(float dt)
 															Get_Collision_Group(),
 															COLLISION_TYPE_PHYSICAL);
 
-		PhysicsSceneClass::Get_Instance()->Cast_OBBox(boxrotate);
+		PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+		if (world == NULL) {
+			return;
+		}
+
+		world->Cast_OBBox(boxrotate);
 		if (result.StartBad) {
 			q1 = q0;
 			State.Orientation = q0;
@@ -108,7 +113,7 @@ void RigidBodyClass::Timestep(float dt)
 															&result,
 															Get_Collision_Group(),
 															COLLISION_TYPE_PHYSICAL);
-		PhysicsSceneClass::Get_Instance()->Cast_OBBox(boxmove);
+		world->Cast_OBBox(boxmove);
 	
 		if (result.StartBad) {
 			remaining_time = 0;

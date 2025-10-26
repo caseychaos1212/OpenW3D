@@ -195,8 +195,9 @@ void PhysClass::Init(const PhysDefClass & def)
 
 void PhysClass::Set_Model(RenderObjClass * model)	
 { 
-	PhysicsSceneClass * the_scene = PhysicsSceneClass::Get_Instance();
-	bool in_scene = (the_scene != NULL) ? the_scene->Contains(this) : false;
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	bool in_scene = (world != NULL) ? world->Contains(this) : false;
+	PhysicsSceneClass * scene = dynamic_cast<PhysicsSceneClass *>(world);
 	Matrix3D previous_transform(true);
 
 	if (Model) {
@@ -205,7 +206,9 @@ void PhysClass::Set_Model(RenderObjClass * model)
 		if ( model ) {	
 			model->Set_Transform( Model->Get_Transform() );
 		}
-		if (in_scene) Model->Notify_Removed(the_scene);
+		if (in_scene && scene != NULL) {
+			Model->Notify_Removed(scene);
+		}
 		Model->Release_Ref();
 	} else if (model != NULL) {
 		model->Set_Transform(FallbackTransform);
@@ -213,7 +216,9 @@ void PhysClass::Set_Model(RenderObjClass * model)
 	Model = model; 
 	if (Model) {
 		Model->Add_Ref(); 
-		if (in_scene) Model->Notify_Added(the_scene);
+		if (in_scene && scene != NULL) {
+			Model->Notify_Added(scene);
+		}
 		FallbackTransform = Model->Get_Transform();
 	} else {
 		FallbackTransform = previous_transform;
@@ -407,12 +412,13 @@ LightEnvironmentClass * PhysClass::Get_Static_Lighting_Environment(void)
 		/*
 		** Finally, ask the physics scene to re-compute our lighting cache
 		*/
-		PhysicsSceneClass::Get_Instance()->Compute_Static_Lighting(	StaticLightingCache,
-																						Model->Get_Bounding_Sphere().Center,
-																						Get_Flag(IS_IN_THE_SUN),
-																						Get_Vis_Object_ID() );
-										
-		Set_Flag(STATIC_LIGHTING_DIRTY,false);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Compute_Static_Lighting(StaticLightingCache,
+														Model->Get_Bounding_Sphere().Center,
+														Get_Flag(IS_IN_THE_SUN),
+														Get_Vis_Object_ID());
+			Set_Flag(STATIC_LIGHTING_DIRTY,false);
+		}
 	} 
 
 	/*
@@ -428,10 +434,13 @@ void PhysClass::Update_Sun_Status(void)
 	if ((current_time-SunStatusLastUpdated)<250) return;
 	SunStatusLastUpdated=current_time;
 
-	PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return;
+	}
 	
 	Vector3 sunlight;
-	scene->Get_Sun_Light_Vector(&sunlight);
+	world->Get_Sun_Light_Vector(&sunlight);
 	Vector3 center = Model->Get_Bounding_Sphere().Center; 
 
 // FIXME (gth) Need a collision group for sun-rays
@@ -442,20 +451,20 @@ void PhysClass::Update_Sun_Status(void)
 	sunraytest.CheckDynamicObjs = false;
 
 	Inc_Ignore_Counter();
-	scene->Cast_Ray(sunraytest);
+	world->Cast_Ray(sunraytest);
 
 	// if the ray hits a static object which is casting a projected shadow, ignore that object 
 	// and check again.
 	if (	(sunresult.Fraction < 1.0f) && 
 			(sunraytest.CollidedPhysObj != NULL) ) 
 	{ 
-		PhysClass * obj = sunraytest.CollidedPhysObj;
-		if (obj->Is_Casting_Shadow()) {
-			obj->Inc_Ignore_Counter();
-			sunresult.Reset();
-			scene->Cast_Ray(sunraytest);			
-			obj->Dec_Ignore_Counter();
-		}		
+			PhysClass * obj = sunraytest.CollidedPhysObj;
+			if (obj->Is_Casting_Shadow()) {
+				obj->Inc_Ignore_Counter();
+				sunresult.Reset();
+				world->Cast_Ray(sunraytest);			
+				obj->Dec_Ignore_Counter();
+			}		
 	}	
 	Dec_Ignore_Counter();
 
@@ -788,7 +797,9 @@ bool PhysClass::Load (ChunkLoadClass &cload)
 void PhysClass::Add_Debug_Point(const Vector3 & p,const Vector3 & color)
 {
 	if (Is_Debug_Display_Enabled()) {
-		PhysicsSceneClass::Get_Instance()->Add_Debug_Point(p,color);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Add_Debug_Point(p,color);
+		}
 	}
 }
 #endif
@@ -797,7 +808,9 @@ void PhysClass::Add_Debug_Point(const Vector3 & p,const Vector3 & color)
 void PhysClass::Add_Debug_Vector(const Vector3 & p,const Vector3 & v,const Vector3 & color)
 {
 	if (Is_Debug_Display_Enabled() && (v.Length2() > 0.0f)) {
-		PhysicsSceneClass::Get_Instance()->Add_Debug_Vector(p,v,color);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Add_Debug_Vector(p,v,color);
+		}
 	}
 }
 #endif
@@ -806,7 +819,9 @@ void PhysClass::Add_Debug_Vector(const Vector3 & p,const Vector3 & v,const Vecto
 void PhysClass::Add_Debug_AABox(const AABoxClass & box,const Vector3 & color,float opacity)
 {
 	if (Is_Debug_Display_Enabled()) {
-		PhysicsSceneClass::Get_Instance()->Add_Debug_AABox(box,color,opacity);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Add_Debug_AABox(box,color,opacity);
+		}
 	}
 }
 #endif
@@ -815,7 +830,9 @@ void PhysClass::Add_Debug_AABox(const AABoxClass & box,const Vector3 & color,flo
 void PhysClass::Add_Debug_OBBox(const OBBoxClass & box,const Vector3 & color,float opacity)
 {
 	if (Is_Debug_Display_Enabled()) {
-		PhysicsSceneClass::Get_Instance()->Add_Debug_OBBox(box,color,opacity);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Add_Debug_OBBox(box,color,opacity);
+		}
 	}
 }
 #endif
@@ -824,27 +841,29 @@ void PhysClass::Add_Debug_OBBox(const OBBoxClass & box,const Vector3 & color,flo
 void PhysClass::Add_Debug_Axes(const Matrix3D & transform,const Vector3 & color)
 {
 	if (Is_Debug_Display_Enabled()) {
-		PhysicsSceneClass::Get_Instance()->Add_Debug_Axes(transform,color);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Add_Debug_Axes(transform,color);
+		}
 	}
 }
 #endif
 
 bool PhysClass::Is_Debug_Display_Enabled(void) const					
 { 
-	PhysicsSceneClass * the_scene = PhysicsSceneClass::Get_Instance();
+	const bool self_debug = ((Flags & DEBUGDISPLAY) == DEBUGDISPLAY);
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return self_debug;
+	}
 
 	Vector3 pos;
 	Get_Position(&pos);
-	float dist = (pos - the_scene->Get_Last_Camera_Position()).Length2();
+	float dist = (pos - world->Get_Last_Camera_Position()).Length2();
 	if (dist > DEBUG_RENDER_DIST2) {
 		return false;
 	}
 
-	if (the_scene) {
-		return (((Flags & DEBUGDISPLAY) == DEBUGDISPLAY) || the_scene->Is_Debug_Display_Enabled()); 
-	} else {
-		return ((Flags & DEBUGDISPLAY) == DEBUGDISPLAY); 
-	}
+	return (self_debug || world->Is_Debug_Display_Enabled());
 }
 
 bool PhysClass::Expire(void)
@@ -854,7 +873,9 @@ bool PhysClass::Expire(void)
 		result = Observer->Object_Expired(this);
 	}
 	if (result == EXPIRATION_APPROVED) {
-		PhysicsSceneClass::Get_Instance()->Delayed_Remove_Object(this);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Delayed_Remove_Object(this);
+		}
 		return true;
 	} else {
 		return false;

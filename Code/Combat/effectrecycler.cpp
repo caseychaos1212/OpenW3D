@@ -161,7 +161,8 @@ void EffectRecyclerClass::Spawn_Effect(const char * robj_name,const Matrix3D & t
 		tdeco->Set_Collision_Group(UNCOLLIDEABLE_GROUP);
 		tdeco->Set_Observer(this);
 
-		COMBAT_SCENE->Add_Dynamic_Object(tdeco);
+		WWASSERT(COMBAT_WORLD != NULL);
+		COMBAT_WORLD->Add_Dynamic_Object(tdeco);
 		tdeco->Set_Transform(tm);
 
 		REF_PTR_RELEASE(model);

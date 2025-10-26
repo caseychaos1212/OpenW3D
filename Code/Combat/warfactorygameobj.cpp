@@ -387,8 +387,12 @@ WarFactoryGameObj::CnC_Initialize (BaseControllerClass *base)
 	//
 	//	Find the closest creation static anim phys
 	//
+	if (COMBAT_WORLD == NULL) {
+		return;
+	}
+
 	float closest2 = 99999.0F;
-	RefPhysListIterator iterator = PhysicsSceneClass::Get_Instance()->Get_Static_Object_Iterator ();
+	RefPhysListIterator iterator = COMBAT_WORLD->Get_Static_Object_Iterator ();
 	for (iterator.First (); !iterator.Is_Done (); iterator.Next ()) {
 		StaticAnimPhysClass *anim_phys_obj = iterator.Peek_Obj ()->As_StaticAnimPhysClass ();
 		
@@ -500,7 +504,7 @@ WarFactoryGameObj::Play_Creation_Animation (bool onoff)
 	//
 	//	Lookup the static animation object we need to play
 	//
-	StaticPhysClass *static_phys_obj = PhysicsSceneClass::Get_Instance ()->Find_Static_Object (CreationAnimationID);
+	StaticPhysClass *static_phys_obj = (COMBAT_WORLD != NULL) ? COMBAT_WORLD->Find_Static_Object (CreationAnimationID) : NULL;
 	if (static_phys_obj != NULL) {
 		StaticAnimPhysClass *anim_phys_obj = static_phys_obj->As_StaticAnimPhysClass ();
 		if (anim_phys_obj != NULL) {
@@ -543,7 +547,7 @@ WarFactoryGameObj::Begin_Generation (void)
 	//
 	//	Lookup the static animation object for the ending animation
 	//
-	StaticPhysClass *static_phys_obj = PhysicsSceneClass::Get_Instance ()->Find_Static_Object (CreationAnimationID);
+	StaticPhysClass *static_phys_obj = (COMBAT_WORLD != NULL) ? COMBAT_WORLD->Find_Static_Object (CreationAnimationID) : NULL;
 	if (static_phys_obj != NULL) {
 		StaticAnimPhysClass *anim_phys_obj = static_phys_obj->As_StaticAnimPhysClass ();
 		if (anim_phys_obj != NULL) {

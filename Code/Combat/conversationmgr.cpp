@@ -484,7 +484,9 @@ ConversationMgrClass::Build_Buddy_List
 	//	Collect all the dynamic objects in this box
 	//
 	NonRefPhysListClass obj_list;
-	PhysicsSceneClass::Get_Instance ()->Collect_Objects (box, false, true, &obj_list);
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Collect_Objects (box, false, true, &obj_list);
+	}
 	
 	//
 	//	Loop over all the collected objects

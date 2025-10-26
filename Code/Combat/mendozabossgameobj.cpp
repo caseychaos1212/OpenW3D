@@ -1229,7 +1229,9 @@ MendozaBossGameObjClass::On_MENDOZA_STATE_PACK_EXPLODING_Think (void)
 	CameraShakeTimer -= TimeManager::Get_Frame_Real_Seconds ();
 	if (CameraShakeTimer <= 0 && CameraShakeTimer > UNINITIALIZED_TIMER) {
 
-		COMBAT_SCENE->Add_Camera_Shake (MendozaPos, 50.0, 1.0F, 0.25F);
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Add_Camera_Shake (MendozaPos, 50.0, 1.0F, 0.25F);
+		}
 		
 		CameraShakeTimer = UNINITIALIZED_TIMER;
 	}
@@ -3867,7 +3869,7 @@ MendozaBossGameObjClass::Spawn_Health_Powerups (void)
 			LineSegClass ray_cast (rand_pos, end_pos);
 			CastResultStruct result;
 			PhysRayCollisionTestClass ray_test (ray_cast, &result, TERRAIN_ONLY_COLLISION_GROUP, COLLISION_TYPE_PHYSICAL);
-			COMBAT_SCENE->Cast_Ray (ray_test);
+			COMBAT_WORLD->Cast_Ray (ray_test);
 			
 			//
 			//	Calculate the powerup's new position

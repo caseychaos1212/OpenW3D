@@ -170,7 +170,9 @@ PathfindSectorBuilderClass::PathfindSectorBuilderClass (void)
 		max_extent			= std::max (m_SimBoundingBox.Z, max_extent);
 		Vector3 min;
 		Vector3 max;
-		PhysicsSceneClass::Get_Instance ()->Get_Level_Extents (min, max);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World ()) {
+			world->Get_Level_Extents (min, max);
+		}
 		m_BodyBoxCullingSystem.Re_Partition (min, max, max_extent * 5);
 	}
 
@@ -401,7 +403,9 @@ PathfindSectorBuilderClass::Do_Physics_Sim
 														m_PhysicsSim->Get_Collision_Group (),
 														COLLISION_TYPE_PHYSICAL);
 
-		PhysicsSceneClass::Get_Instance ()->Cast_AABox (test);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World ()) {
+			world->Cast_AABox (test);
+		}
 
 		found = (result.StartBad == false) && (result.Normal.Z > 0.7F);
 		if (found) {

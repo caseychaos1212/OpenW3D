@@ -172,8 +172,13 @@ bool PhysTexProjectClass::Compute_Texture(PhysClass * obj,bool additive_projecti
 		return false;
 	}
 
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return false; // headless build has no render bridge, skip projection generation
+	}
+
 	int tex_size = Get_Texture_Size();
-	SpecialRenderInfoClass * context = PhysicsSceneClass::Get_Instance()->Get_Shadow_Render_Context(tex_size,tex_size);
+	SpecialRenderInfoClass * context = world->Get_Shadow_Render_Context(tex_size,tex_size);
 	if (context == NULL) {
 		return false;
 	}
@@ -186,7 +191,7 @@ bool PhysTexProjectClass::Compute_Texture(PhysClass * obj,bool additive_projecti
 	if (!additive_projection) {
 		lenv.Reset(Vector3(0,0,0),Vector3(0,0,0));		// light env that makes everything black
 	
-		MaterialPassClass * shadow_mtl = PhysicsSceneClass::Get_Instance()->Get_Shadow_Material_Pass();
+		MaterialPassClass * shadow_mtl = world->Get_Shadow_Material_Pass();
 		if (shadow_mtl) {
 			pushed_mtls = true;
 			context->Push_Material_Pass(shadow_mtl);

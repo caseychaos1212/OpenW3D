@@ -47,7 +47,7 @@
 #include "physlist.h"
 #include "wwdebug.h"
 
-class PhysicsSceneClass;
+class PhysicsWorldClass;
 class VisRenderContextClass;
 class VisTableClass;
 class AABoxRenderObjClass;
@@ -60,7 +60,7 @@ class AABoxRenderObjClass;
 class PhysGridCullClass : public TypedGridCullSystemClass<PhysClass>
 {
 public:
-	PhysGridCullClass(PhysicsSceneClass * scene);
+	PhysGridCullClass(PhysicsWorldClass * scene);
 	virtual ~PhysGridCullClass(void);
 	
 	void	Re_Partition(const Vector3 & min,const Vector3 & max,float objdim) override;
@@ -93,7 +93,7 @@ protected:
 	void	collect_visible_objects_in_leaf(const FrustumClass & frustum,VisTableClass & pvs,int address);
 
 	// pointer to the physics scene that this culling system is part of
-	PhysicsSceneClass * Scene;
+	PhysicsWorldClass * Scene;
 
 };
 

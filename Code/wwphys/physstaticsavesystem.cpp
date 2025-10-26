@@ -66,9 +66,11 @@ bool PhysStaticDataSaveSystemClass::Save(ChunkSaveClass &csave)
 {	
 	WWMEMLOG(MEM_GAMEDATA);
 
-	csave.Begin_Chunk(PSDSSC_CHUNKID_SCENE);
-	PhysicsSceneClass::Get_Instance()->Save_Level_Static_Data(csave);
-	csave.End_Chunk();
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		csave.Begin_Chunk(PSDSSC_CHUNKID_SCENE);
+		world->Save_Level_Static_Data(csave);
+		csave.End_Chunk();
+	}
 
 	csave.Begin_Chunk(PSDSSC_CHUNKID_PATHFIND);
 	PathfindClass::Get_Instance()->Save(csave);
@@ -84,7 +86,9 @@ bool PhysStaticDataSaveSystemClass::Load(ChunkLoadClass &cload)
 		switch (cload.Cur_Chunk_ID()) 
 		{
 			case PSDSSC_CHUNKID_SCENE:
-				PhysicsSceneClass::Get_Instance()->Load_Level_Static_Data(cload);
+				if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+					world->Load_Level_Static_Data(cload);
+				}
 				break;
 
 			case PSDSSC_CHUNKID_PATHFIND:
@@ -99,7 +103,9 @@ bool PhysStaticDataSaveSystemClass::Load(ChunkLoadClass &cload)
 
 void PhysStaticDataSaveSystemClass::On_Post_Load(void)
 {
-	PhysicsSceneClass::Get_Instance()->Post_Load_Level_Static_Data();
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Post_Load_Level_Static_Data();
+	}
 	//PathfindClass::Get_Instance()->On_Post_Load();
 }
 
@@ -116,9 +122,11 @@ uint32 PhysStaticObjectsSaveSystemClass::Chunk_ID(void) const
 
 bool PhysStaticObjectsSaveSystemClass::Save(ChunkSaveClass &csave)
 {	
-	csave.Begin_Chunk(PSOSSC_CHUNKID_SCENE);
-	PhysicsSceneClass::Get_Instance()->Save_Level_Static_Objects(csave);
-	csave.End_Chunk();
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		csave.Begin_Chunk(PSOSSC_CHUNKID_SCENE);
+		world->Save_Level_Static_Objects(csave);
+		csave.End_Chunk();
+	}
 
 	return true;
 }
@@ -129,7 +137,9 @@ bool PhysStaticObjectsSaveSystemClass::Load(ChunkLoadClass &cload)
 		switch (cload.Cur_Chunk_ID()) 
 		{
 			case PSOSSC_CHUNKID_SCENE:
-				PhysicsSceneClass::Get_Instance()->Load_Level_Static_Objects(cload);
+				if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+					world->Load_Level_Static_Objects(cload);
+				}
 				break;
 
 		}
@@ -140,6 +150,8 @@ bool PhysStaticObjectsSaveSystemClass::Load(ChunkLoadClass &cload)
 
 void PhysStaticObjectsSaveSystemClass::On_Post_Load(void)
 {
-	PhysicsSceneClass::Get_Instance()->Post_Load_Level_Static_Objects();
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Post_Load_Level_Static_Objects();
+	}
 }
 

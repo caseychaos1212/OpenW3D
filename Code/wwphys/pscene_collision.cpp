@@ -48,14 +48,14 @@
 
 
 
-bool PhysicsSceneClass::Do_Groups_Collide(int group0,int group1)
+bool PhysicsWorldClass::Do_Groups_Collide(int group0,int group1)
 {
 	int index = group0 | (group1 << COLLISION_FLAG_SHIFT);
 	return AllowCollisionFlags[index];
 }
 
 
-void PhysicsSceneClass::Enable_Collision_Detection(int group0,int group1)
+void PhysicsWorldClass::Enable_Collision_Detection(int group0,int group1)
 {
 	assert(group0 >= 0);
 	assert(group1 >= 0);
@@ -71,7 +71,7 @@ void PhysicsSceneClass::Enable_Collision_Detection(int group0,int group1)
 	AllowCollisionFlags[index] = 1;
 }
 
-void PhysicsSceneClass::Disable_Collision_Detection(int group0,int group1)
+void PhysicsWorldClass::Disable_Collision_Detection(int group0,int group1)
 {
 	assert(group0 >= 0);
 	assert(group1 >= 0);
@@ -87,7 +87,7 @@ void PhysicsSceneClass::Disable_Collision_Detection(int group0,int group1)
 	AllowCollisionFlags[index] = 0;
 }
 
-void PhysicsSceneClass::Enable_All_Collision_Detections(int group)
+void PhysicsWorldClass::Enable_All_Collision_Detections(int group)
 {
 	assert(group >= 0);
 	assert(group <= MAX_COLLISION_GROUP);
@@ -104,7 +104,7 @@ void PhysicsSceneClass::Enable_All_Collision_Detections(int group)
 }
 
 
-void PhysicsSceneClass::Disable_All_Collision_Detections(int group)
+void PhysicsWorldClass::Disable_All_Collision_Detections(int group)
 {
 	assert(group >= 0);
 	assert(group <= MAX_COLLISION_GROUP);
@@ -120,17 +120,17 @@ void PhysicsSceneClass::Disable_All_Collision_Detections(int group)
 	}
 }
 
-void PhysicsSceneClass::Set_Collision_Region(const AABoxClass & bounds,int colgroup)
+void PhysicsWorldClass::Set_Collision_Region(const AABoxClass & bounds,int colgroup)
 {
 	Collect_Collideable_Objects(bounds,colgroup,true,true,&CollisionRegionList);
 }
 
-void PhysicsSceneClass::Release_Collision_Region(void)
+void PhysicsWorldClass::Release_Collision_Region(void)
 {
 	CollisionRegionList.Reset_List();
 }
 
-bool PhysicsSceneClass::Cast_Ray(PhysRayCollisionTestClass & raytest,bool use_collision_region)
+bool PhysicsWorldClass::Cast_Ray(PhysRayCollisionTestClass & raytest,bool use_collision_region)
 {
 	/*
 	** Assert that the result structure has been initialized with the 
@@ -183,7 +183,7 @@ bool PhysicsSceneClass::Cast_Ray(PhysRayCollisionTestClass & raytest,bool use_co
 	return res;
 }
 
-bool PhysicsSceneClass::Cast_AABox(PhysAABoxCollisionTestClass & boxtest,bool use_collision_region)
+bool PhysicsWorldClass::Cast_AABox(PhysAABoxCollisionTestClass & boxtest,bool use_collision_region)
 {
 	/*
 	** Assert that the result structure has been initialized with the 
@@ -235,7 +235,7 @@ bool PhysicsSceneClass::Cast_AABox(PhysAABoxCollisionTestClass & boxtest,bool us
 	return res;
 }
 
-bool PhysicsSceneClass::Cast_OBBox(PhysOBBoxCollisionTestClass & boxtest,bool use_collision_region)
+bool PhysicsWorldClass::Cast_OBBox(PhysOBBoxCollisionTestClass & boxtest,bool use_collision_region)
 {
 	/*
 	** Assert that the result structure has been initialized with the 
@@ -287,7 +287,7 @@ bool PhysicsSceneClass::Cast_OBBox(PhysOBBoxCollisionTestClass & boxtest,bool us
 	return res;
 }
 
-bool PhysicsSceneClass::Intersection_Test(PhysAABoxIntersectionTestClass & boxtest,bool use_collision_region)
+bool PhysicsWorldClass::Intersection_Test(PhysAABoxIntersectionTestClass & boxtest,bool use_collision_region)
 {
 	if (use_collision_region) {
 	
@@ -327,7 +327,7 @@ bool PhysicsSceneClass::Intersection_Test(PhysAABoxIntersectionTestClass & boxte
 	return false;
 }
 
-bool PhysicsSceneClass::Intersection_Test(PhysOBBoxIntersectionTestClass & boxtest,bool use_collision_region)
+bool PhysicsWorldClass::Intersection_Test(PhysOBBoxIntersectionTestClass & boxtest,bool use_collision_region)
 {
 	if (use_collision_region) {
 		
@@ -365,7 +365,7 @@ bool PhysicsSceneClass::Intersection_Test(PhysOBBoxIntersectionTestClass & boxte
 	return false;
 }
 
-bool PhysicsSceneClass::Intersection_Test(PhysMeshIntersectionTestClass & meshtest,bool use_collision_region)
+bool PhysicsWorldClass::Intersection_Test(PhysMeshIntersectionTestClass & meshtest,bool use_collision_region)
 {
 	if (use_collision_region) {
 		
@@ -401,21 +401,21 @@ bool PhysicsSceneClass::Intersection_Test(PhysMeshIntersectionTestClass & meshte
 	return false;
 }
 
-bool PhysicsSceneClass::Intersection_Test(const AABoxClass & box,int collision_group,int collision_type,bool use_collision_region)
+bool PhysicsWorldClass::Intersection_Test(const AABoxClass & box,int collision_group,int collision_type,bool use_collision_region)
 {
 	NonRefPhysListClass intersect_list;
 	PhysAABoxIntersectionTestClass test(box,collision_group,collision_type,&intersect_list);
 	return Intersection_Test(test,use_collision_region);
 }
 
-bool PhysicsSceneClass::Intersection_Test(const OBBoxClass & box,int collision_group,int collision_type,bool use_collision_region)
+bool PhysicsWorldClass::Intersection_Test(const OBBoxClass & box,int collision_group,int collision_type,bool use_collision_region)
 {
 	NonRefPhysListClass intersect_list;
 	PhysOBBoxIntersectionTestClass test(box,collision_group,collision_type,&intersect_list);
 	return Intersection_Test(test,use_collision_region);
 }
 
-void PhysicsSceneClass::Add_Collected_Objects_To_List
+void PhysicsWorldClass::Add_Collected_Objects_To_List
 (
 	bool static_objs,
 	bool dynamic_objs,
@@ -446,7 +446,7 @@ void PhysicsSceneClass::Add_Collected_Objects_To_List
 }
 
 
-void PhysicsSceneClass::Add_Collected_Collideable_Objects_To_List
+void PhysicsWorldClass::Add_Collected_Collideable_Objects_To_List
 (
 	int colgroup,
 	bool static_objs,
@@ -485,7 +485,7 @@ void PhysicsSceneClass::Add_Collected_Collideable_Objects_To_List
 	}
 }
 
-void PhysicsSceneClass::Collect_Objects
+void PhysicsWorldClass::Collect_Objects
 (
 	const Vector3 & point,
 	bool static_objs, 
@@ -508,7 +508,7 @@ void PhysicsSceneClass::Collect_Objects
 	Add_Collected_Objects_To_List(static_objs,dynamic_objs,list);
 }
 
-void PhysicsSceneClass::Collect_Objects
+void PhysicsWorldClass::Collect_Objects
 (
 	const AABoxClass & box,
 	bool static_objs, 
@@ -531,7 +531,7 @@ void PhysicsSceneClass::Collect_Objects
 	Add_Collected_Objects_To_List(static_objs,dynamic_objs,list);
 }
 
-void PhysicsSceneClass::Collect_Objects
+void PhysicsWorldClass::Collect_Objects
 (
 	const OBBoxClass & box,
 	bool static_objs, 
@@ -553,7 +553,7 @@ void PhysicsSceneClass::Collect_Objects
 	Add_Collected_Objects_To_List(static_objs,dynamic_objs,list);
 }
 
-void PhysicsSceneClass::Collect_Objects
+void PhysicsWorldClass::Collect_Objects
 (
 	const FrustumClass & frustum,
 	bool static_objs, 
@@ -575,7 +575,7 @@ void PhysicsSceneClass::Collect_Objects
 	Add_Collected_Objects_To_List(static_objs,dynamic_objs,list);
 }
 
-void PhysicsSceneClass::Collect_Collideable_Objects
+void PhysicsWorldClass::Collect_Collideable_Objects
 (
 	const AABoxClass & box,
 	int colgroup,
@@ -598,7 +598,7 @@ void PhysicsSceneClass::Collect_Collideable_Objects
 	Add_Collected_Collideable_Objects_To_List(colgroup,static_objs,dynamic_objs,list);
 }
 
-void PhysicsSceneClass::Collect_Collideable_Objects
+void PhysicsWorldClass::Collect_Collideable_Objects
 (
 	const OBBoxClass & box,
 	int colgroup,
@@ -621,7 +621,7 @@ void PhysicsSceneClass::Collect_Collideable_Objects
 	Add_Collected_Collideable_Objects_To_List(colgroup,static_objs,dynamic_objs,list);
 }
 
-void PhysicsSceneClass::Add_Collected_Lights_To_List
+void PhysicsWorldClass::Add_Collected_Lights_To_List
 (
 	bool static_lights,
 	bool dynamic_lights,
@@ -643,7 +643,7 @@ void PhysicsSceneClass::Add_Collected_Lights_To_List
 	// TODO!!
 }
 
-void PhysicsSceneClass::Collect_Lights
+void PhysicsWorldClass::Collect_Lights
 (
 	const Vector3 & point,
 	bool static_lights,
@@ -664,7 +664,7 @@ void PhysicsSceneClass::Collect_Lights
 }
 
 
-void PhysicsSceneClass::Collect_Lights
+void PhysicsWorldClass::Collect_Lights
 (
 	const AABoxClass & bounds,
 	bool static_lights,

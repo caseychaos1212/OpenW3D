@@ -197,7 +197,9 @@ HeightDBClass::Generate (void)
 {
 	Free_Data ();
 
-	PhysicsSceneClass::Get_Instance ()->Get_Level_Extents (m_LevelMin, m_LevelMax);
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Get_Level_Extents (m_LevelMin, m_LevelMax);
+	}
 
 	float generate_patch_size = m_PatchSize / 2;
 
@@ -229,7 +231,9 @@ HeightDBClass::Generate (void)
 			CastResultStruct result;
 			LineSegClass ray (Vector3 (x_pos, y_pos, start_z), Vector3 (x_pos, y_pos, end_z));
 			PhysRayCollisionTestClass raytest (ray, &result, 0, COLLISION_TYPE_PROJECTILE);
-			PhysicsSceneClass::Get_Instance ()->Cast_Ray (raytest);
+			if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+				world->Cast_Ray (raytest);
+			}
 
 			//
 			//	Return a pointer to the collided physics object if the
@@ -358,8 +362,13 @@ HeightDBClass::Free_Data (void)
 void
 HeightDBClass::Examine_Level_Geometry (void)
 {
-	RefPhysListIterator it1 = PhysicsSceneClass::Get_Instance ()->Get_Static_Object_Iterator ();
-	RefPhysListIterator it2 = PhysicsSceneClass::Get_Instance ()->Get_Static_Anim_Object_Iterator ();
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return;
+	}
+
+	RefPhysListIterator it1 = world->Get_Static_Object_Iterator ();
+	RefPhysListIterator it2 = world->Get_Static_Anim_Object_Iterator ();
 	
 	//
 	//	Process the static meshes

@@ -641,7 +641,11 @@ VehicleFactoryGameObj::Destroy_Blocking_Objects (void)
 	// Collect the dynamic physics objects in the generation region
 	//
 	NonRefPhysListClass objs_to_kill;
-	PhysicsSceneClass::Get_Instance ()->Collect_Objects (GeneratingRegion, false, true, &objs_to_kill);
+	if (COMBAT_WORLD == NULL) {
+		return;
+	}
+
+	COMBAT_WORLD->Collect_Objects (GeneratingRegion, false, true, &objs_to_kill);
 	
 	//
 	//	Loop over all the objects

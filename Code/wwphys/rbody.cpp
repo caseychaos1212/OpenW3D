@@ -59,7 +59,7 @@ DECLARE_FORCE_LINK(rbody);
 
 
 #define RBODY_DEBUGGING					0
-#define RBODY_DEBUG_FILTER				(stricmp(Model->Get_Name(),"V_GDI_ORCA_M") == 0) && (PhysicsSceneClass::Get_Instance()->Is_Debug_Display_Enabled())
+#define RBODY_DEBUG_FILTER				(stricmp(Model->Get_Name(),"V_GDI_ORCA_M") == 0) && (PhysicsWorldClass::Get_Active_World() && PhysicsWorldClass::Get_Active_World()->Is_Debug_Display_Enabled())
 
 #define JITTER_ELIMINATION_CODE		0
 
@@ -1471,14 +1471,18 @@ void RigidBodyClass::Set_Moving_Collision_Region(float dt)
 	// Now, scale to account for any rotational effects
 	region.Extent *= 2.0f;
 
-	PhysicsSceneClass::Get_Instance()->Set_Collision_Region(region,Get_Collision_Group());
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Set_Collision_Region(region,Get_Collision_Group());
+	}
 }
 
 void RigidBodyClass::Set_Stationary_Collision_Region(void)
 {
 	AABoxClass region;
 	ContactBox->Get_Outer_Bounds(&region);		// start with bounds of collision box
-	PhysicsSceneClass::Get_Instance()->Set_Collision_Region(region,Get_Collision_Group());
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Set_Collision_Region(region,Get_Collision_Group());
+	}
 }
 
 
@@ -1858,7 +1862,9 @@ Vector3 avel0 = AngularVelocity;
 	/*
 	** Release our active collision region
 	*/
-	PhysicsSceneClass::Get_Instance()->Release_Collision_Region();
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Release_Collision_Region();
+	}
 
 	/*
 	** See if we can go to sleep and stop simulating!
@@ -1926,7 +1932,8 @@ bool RigidBodyClass::Push_Phys3_Object_Away(Phys3Class * p3obj,const CastResultS
 	** logic kills the phys3 object, its collision group will be changed so we check
 	** for that first.
 	*/
-	if (PhysicsSceneClass::Get_Instance()->Do_Groups_Collide(p3obj->Get_Collision_Group(),Get_Collision_Group())) {
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		if (world->Do_Groups_Collide(p3obj->Get_Collision_Group(),Get_Collision_Group())) {
 		AABoxClass p3box;
 		p3obj->Get_Collision_Box(&p3box);
 		OBBoxClass rbox;
@@ -1947,8 +1954,9 @@ bool RigidBodyClass::Push_Phys3_Object_Away(Phys3Class * p3obj,const CastResultS
 	}
 #endif
 		return true;
+			}
+		}
 	}
-}
 
 
 void RigidBodyClass::Assert_Not_Intersecting(void)
@@ -1962,7 +1970,9 @@ void RigidBodyClass::Assert_Not_Intersecting(void)
 													&result,
 													Get_Collision_Group(),
 													COLLISION_TYPE_PHYSICAL);
-	PhysicsSceneClass::Get_Instance()->Cast_OBBox(test);
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Cast_OBBox(test);
+	}
 //	WWASSERT(result.StartBad != true);			
 	if (result.StartBad) {
 		WWDEBUG_SAY(("   !!!!!!!!!!!!!!!!!!!!!!!!!   Rigid Body %s intersecting!\r\n",Model->Get_Name()));
@@ -2046,7 +2056,9 @@ bool RigidBodyClass::Push(const Vector3 & move)
 	** Sweep the box
 	*/
 	Inc_Ignore_Counter();
-	PhysicsSceneClass::Get_Instance()->Cast_OBBox(test);
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Cast_OBBox(test);
+	}
 	Dec_Ignore_Counter();
 
 	/*

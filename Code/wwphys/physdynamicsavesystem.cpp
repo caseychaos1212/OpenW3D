@@ -66,10 +66,13 @@ bool PhysDynamicSaveSystemClass::Contains_Data(void) const
 bool PhysDynamicSaveSystemClass::Save(ChunkSaveClass &csave)
 {	
 	WWMEMLOG(MEM_GAMEDATA);
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
 
-	csave.Begin_Chunk(PDSSC_CHUNKID_SCENE);
-	PhysicsSceneClass::Get_Instance()->Save_Level_Dynamic_Data(csave);
-	csave.End_Chunk();
+	if (world != NULL) {
+		csave.Begin_Chunk(PDSSC_CHUNKID_SCENE);
+		world->Save_Level_Dynamic_Data(csave);
+		csave.End_Chunk();
+	}
 
 	csave.Begin_Chunk(PDSSC_CHUNKID_CONSTANTS);
 	PhysicsConstants::Save(csave);
@@ -85,11 +88,14 @@ bool PhysDynamicSaveSystemClass::Save(ChunkSaveClass &csave)
 bool PhysDynamicSaveSystemClass::Load(ChunkLoadClass &cload)
 {
 	WWMEMLOG(MEM_GAMEDATA);
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
 
 	while (cload.Open_Chunk()) {
 		switch (cload.Cur_Chunk_ID()) {
 		case PDSSC_CHUNKID_SCENE:
-			PhysicsSceneClass::Get_Instance()->Load_Level_Dynamic_Data(cload);
+			if (world != NULL) {
+				world->Load_Level_Dynamic_Data(cload);
+			}
 			break;
 		case PDSSC_CHUNKID_CONSTANTS:
 			PhysicsConstants::Load(cload);
@@ -108,7 +114,9 @@ bool PhysDynamicSaveSystemClass::Load(ChunkLoadClass &cload)
 
 void PhysDynamicSaveSystemClass::On_Post_Load(void)
 {
-	PhysicsSceneClass::Get_Instance()->Post_Load_Level_Dynamic_Data();
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Post_Load_Level_Dynamic_Data();
+	}
 }
 
 

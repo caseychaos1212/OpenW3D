@@ -197,16 +197,18 @@ void VisSectorStatsClass::Compute_Stats(StaticPhysClass * obj,VisTableClass * vi
 		** Walk through every static object in the level, adding its resources
 		** to our stats if it is visible from this sector
 		*/
-		RefPhysListIterator it = PhysicsSceneClass::Get_Instance()->Get_Static_Object_Iterator();
-		for (it.First(); !it.Is_Done(); it.Next()) {
-			
-			StaticPhysClass * obj = it.Peek_Obj()->As_StaticPhysClass();
-			if (obj && vistable->Get_Bit(obj->Get_Vis_Object_ID())) {
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			RefPhysListIterator it = world->Get_Static_Object_Iterator();
+			for (it.First(); !it.Is_Done(); it.Next()) {
+				
+				StaticPhysClass * obj = it.Peek_Obj()->As_StaticPhysClass();
+				if (obj && vistable->Get_Bit(obj->Get_Vis_Object_ID())) {
 
-				PolygonCount += obj->Peek_Model()->Get_Num_Polys();
+					PolygonCount += obj->Peek_Model()->Get_Num_Polys();
 
-				Count_Textures(obj->Peek_Model());
+					Count_Textures(obj->Peek_Model());
 
+				}
 			}
 		}
 

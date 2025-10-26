@@ -496,7 +496,7 @@ bool	C4GameObj::Load( ChunkLoadClass &cload )
 	}
 
 	if (static_anim_obj_id != 0xFFFFFFFF) {
-		StaticPhysClass * pobj = PhysicsSceneClass::Get_Instance()->Get_Static_Object_By_ID(static_anim_obj_id);
+	StaticPhysClass * pobj = (COMBAT_WORLD != NULL) ? COMBAT_WORLD->Get_Static_Object_By_ID(static_anim_obj_id) : NULL;
 		if (pobj && (pobj->As_StaticAnimPhysClass() != NULL)) {
 			REF_PTR_SET(StuckStaticAnimObj,(StaticAnimPhysClass *)pobj);
 		}
@@ -814,7 +814,7 @@ void	C4GameObj::Import_Rare( BitStreamClass &packet )
 			packet.Get(static_anim_obj_id);
 
 			if (static_anim_obj_id != 0xFFFFFFFF) {
-				StaticPhysClass * pobj = PhysicsSceneClass::Get_Instance()->Get_Static_Object_By_ID(static_anim_obj_id);
+				StaticPhysClass * pobj = (COMBAT_WORLD != NULL) ? COMBAT_WORLD->Get_Static_Object_By_ID(static_anim_obj_id) : NULL;
 				if (pobj && (pobj->As_StaticAnimPhysClass() != NULL)) {
 					REF_PTR_SET(StuckStaticAnimObj,(StaticAnimPhysClass *)pobj);
 				}

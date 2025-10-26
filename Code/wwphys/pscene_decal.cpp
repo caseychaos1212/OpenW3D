@@ -49,23 +49,23 @@
 
 
 /*
-** PhysicsSceneClass Decal Methods 
+** PhysicsWorldClass Decal Methods 
 */
 
-void PhysicsSceneClass::Allocate_Decal_Resources(void)
+void PhysicsWorldClass::Allocate_Decal_Resources(void)
 {
 	WWASSERT(DecalSystem == NULL);
 	DecalSystem = new PhysDecalSysClass(this);
 }	
 
-void PhysicsSceneClass::Release_Decal_Resources(void)
+void PhysicsWorldClass::Release_Decal_Resources(void)
 {
 	if (DecalSystem != NULL) {
 		delete DecalSystem;
 	}
 }
 
-int PhysicsSceneClass::Create_Decal
+int PhysicsWorldClass::Create_Decal
 (	
 	const Matrix3D &	tm,
 	const char *		texture_name,
@@ -79,7 +79,7 @@ int PhysicsSceneClass::Create_Decal
 	return DecalSystem->Create_Decal(tm,texture_name,radius,is_permanent,apply_to_translucent_meshes,only_this_obj);
 }
 
-bool PhysicsSceneClass::Remove_Decal(uint32 id)
+bool PhysicsWorldClass::Remove_Decal(uint32 id)
 {
 	WWASSERT(DecalSystem != NULL);
 	return DecalSystem->Remove_Decal(id);

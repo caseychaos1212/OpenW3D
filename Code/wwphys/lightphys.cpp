@@ -90,7 +90,12 @@ int LightPhysClass::Is_Vis_Object_Visible(int vis_object_id)
 	if (VisSectorID == 0xFFFFFFFF) {
 		return 1;
 	}
-	VisTableClass * pvs = PhysicsSceneClass::Get_Instance()->Get_Vis_Table(VisSectorID);
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return 1;
+	}
+
+	VisTableClass * pvs = world->Get_Vis_Table(VisSectorID);
 	if (pvs != NULL) {
 		int vis_bit = pvs->Get_Bit(vis_object_id);
 		REF_PTR_RELEASE(pvs);

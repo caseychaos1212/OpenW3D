@@ -564,9 +564,13 @@ void	SurfaceEffectsManager::Apply_Effect
 		// object.  Otherwise, we use normal decal processing which collects the meshes
 		// that overlap the volume and applies the decal to all of them
 		if ((surface_type == SURFACE_TYPE_GLASS) || (surface_type == SURFACE_TYPE_GLASS_PERMEABLE)) {
-			PhysicsSceneClass::Get_Instance()->Create_Decal( tm, new_name, size, false, true, hit_obj );
+			if (COMBAT_WORLD != NULL) {
+				COMBAT_WORLD->Create_Decal( tm, new_name, size, false, true, hit_obj );
+			}
 		} else {
-			PhysicsSceneClass::Get_Instance()->Create_Decal( tm, new_name, size );
+			if (COMBAT_WORLD != NULL) {
+				COMBAT_WORLD->Create_Decal( tm, new_name, size );
+			}
 		}
 	}
 }

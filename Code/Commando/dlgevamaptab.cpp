@@ -240,7 +240,9 @@ EvaMapTabClass::On_MapCtrl_Pos_Clicked
 	CastResultStruct result;
 	LineSegClass ray (Vector3 (position.X, position.Y, start_z), Vector3 (position.X, position.Y, end_z));
 	PhysRayCollisionTestClass raytest (ray, &result, 0, COLLISION_TYPE_PROJECTILE);
-	PhysicsSceneClass::Get_Instance ()->Cast_Ray (raytest);
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Cast_Ray (raytest);
+	}
 
 	Vector3 world_space_pos = position;
 

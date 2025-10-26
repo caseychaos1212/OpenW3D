@@ -326,7 +326,14 @@ void SuspensionElementClass::Intersect_Spring(void)
 	LineSegClass line(WheelP0,p1);
 	CastResultStruct result;
 	PhysRayCollisionTestClass raytest(line,&result,Parent->Get_Collision_Group(),COLLISION_TYPE_PHYSICAL | COLLISION_TYPE_VEHICLE);
-	PhysicsSceneClass::Get_Instance()->Cast_Ray(raytest,false);
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Cast_Ray(raytest,false);
+	} else {
+		Set_Flag(INCONTACT,false);
+		WheelTM.Set_Translation(p1);
+		Contact = p1;
+		return;
+	}
 
 	// evaluate the result of the raycast
 	if (result.Fraction >= 1.0f) {

@@ -32,54 +32,54 @@
  *                                                                                             *
  *---------------------------------------------------------------------------------------------*
  * Functions:                                                                                  *
- *   PhysicsSceneClass::PhysicsSceneClass -- Constructor                                       *
- *   PhysicsSceneClass::~PhysicsSceneClass -- Destructor                                       *
- *   PhysicsSceneClass::Update -- Simulates the entire scene forward one timestep              *
- *   PhysicsSceneClass::Add_Dynamic_Object -- Adds a dynamic object to the scene               *
- *   PhysicsSceneClass::Internal_Add_Dynamic_Object -- internal function finishes adding a dyn *
- *   PhysicsSceneClass::Add_Static_Object -- Adds a static object to the scene                 *
- *   PhysicsSceneClass::Internal_Add_Static_Object -- internal add static object...            *
- *   PhysicsSceneClass::Add_Static_Light -- Adds a static light to the system                  *
- *   PhysicsSceneClass::Internal_Add_Static_Light -- internal add static light...              *
- *   PhysicsSceneClass::Delayed_Remove_Object -- registers an object for removal               *
- *   PhysicsSceneClass::Process_Release_List -- Removes all objects in the ReleaseList         *
- *   PhysicsSceneClass::Remove_Object -- Remove an object from the scene                       *
- *   PhysicsSceneClass::Remove_All -- Removes all objects from the scene                       *
- *   PhysicsSceneClass::Contains -- Tests if the scene contains the given object               *
- *   PhysicsSceneClass::Get_Dynamic_Object_Iterator -- returns an iterator for the dynamic obj *
- *   PhysicsSceneClass::Get_Static_Object_Iterator -- return an iterator for the static objs   *
- *   PhysicsSceneClass::Get_Static_Anim_Object_Iterator -- returns an iterator for static anim *
- *   PhysicsSceneClass::Get_Static_Light_Iterator -- returns an iterator for static lights     *
- *   PhysicsSceneClass::Get_Static_Projector_Iterator -- returns an iterator for static projec *
- *   PhysicsSceneClass::Get_Dynamic_Projector_Iterator -- returns an iterator for dynamic proj *
- *   PhysicsSceneClass::Add_To_Dirty_Cull_List -- adds something to the "dirty cull" list      *
- *   PhysicsSceneClass::Remove_From_Dirty_Cull_List -- removes an object from the dirty cull l *
- *   PhysicsSceneClass::Is_In_Dirty_Cull_List -- tests whether an object is in the dirty cull  *
- *   PhysicsSceneClass::Add_Render_Object -- Adds a render object to the scene                 *
- *   PhysicsSceneClass::Remove_Render_Object -- removes a render object from the scene         *
- *   PhysicsSceneClass::Register -- rengisters given render object                             *
- *   PhysicsSceneClass::Unregister -- Unregisters the given render object                      *
- *   PhysicsSceneClass::Set_Vis_Sample_Point -- Set the current vis sample point               *
- *   PhysicsSceneClass::Pre_Render_Processing -- processing which occurs prior to rendering    *
- *   PhysicsSceneClass::Post_Render_Processing -- processing that occurs after rendering       *
- *   PhysicsSceneClass::Optimize_LODs -- Set the LOD level for each object                     *
- *   PhysicsSceneClass::Render -- Render the scene                                             *
- *   PhysicsSceneClass::Render_Objects -- Render the visible objects                           *
- *   PhysicsSceneClass::Render_Object -- Render an individual object                           *
- *   PhysicsSceneClass::Render_Backface_Occluders -- Render backfaces of all occluders         *
- *   PhysicsSceneClass::Re_Partition_Static_Objects -- partition the static objects            *
- *   PhysicsSceneClass::Re_Partition_Static_Lights -- partition the static lights              *
- *   PhysicsSceneClass::Re_Partition_Dynamic_Culling_System -- partition the dynamic culling s *
- *   PhysicsSceneClass::Re_Partition_Static_Projectors -- partition the static projectors      *
- *   PhysicsSceneClass::Update_Culling_System_Bounding_Boxes -- updates the cull systems       *
- *   PhysicsSceneClass::Get_Level_Extents -- returns the bounds of the level                   *
- *   PhysicsSceneClass::Set_Polygon_Budgets -- set the budgets for the LOD system              *
- *   PhysicsSceneClass::Get_Polygon_Budgets -- returns the budgets for the LOD system          *
- *   PhysicsSceneClass::Per_Frame_Statistics_Update -- statistics tracking                     *
- *   PhysicsSceneClass::Get_Statistics -- returns statistics                                   *
- *   PhysicsSceneClass::Find_Static_Object -- Find static object with the given ID             *
- *   PhysicsSceneClass::Shatter_Mesh -- Clips a mesh into pieces and scatters them             *
- *   PhysicsSceneClass::Verify_Culling_Systems -- Verify the culling systems                   *
+ *   PhysicsWorldClass::PhysicsWorldClass -- Constructor                                       *
+ *   PhysicsWorldClass::~PhysicsWorldClass -- Destructor                                       *
+ *   PhysicsWorldClass::Update -- Simulates the entire scene forward one timestep              *
+ *   PhysicsWorldClass::Add_Dynamic_Object -- Adds a dynamic object to the scene               *
+ *   PhysicsWorldClass::Internal_Add_Dynamic_Object -- internal function finishes adding a dyn *
+ *   PhysicsWorldClass::Add_Static_Object -- Adds a static object to the scene                 *
+ *   PhysicsWorldClass::Internal_Add_Static_Object -- internal add static object...            *
+ *   PhysicsWorldClass::Add_Static_Light -- Adds a static light to the system                  *
+ *   PhysicsWorldClass::Internal_Add_Static_Light -- internal add static light...              *
+ *   PhysicsWorldClass::Delayed_Remove_Object -- registers an object for removal               *
+ *   PhysicsWorldClass::Process_Release_List -- Removes all objects in the ReleaseList         *
+ *   PhysicsWorldClass::Remove_Object -- Remove an object from the scene                       *
+ *   PhysicsWorldClass::Remove_All -- Removes all objects from the scene                       *
+ *   PhysicsWorldClass::Contains -- Tests if the scene contains the given object               *
+ *   PhysicsWorldClass::Get_Dynamic_Object_Iterator -- returns an iterator for the dynamic obj *
+ *   PhysicsWorldClass::Get_Static_Object_Iterator -- return an iterator for the static objs   *
+ *   PhysicsWorldClass::Get_Static_Anim_Object_Iterator -- returns an iterator for static anim *
+ *   PhysicsWorldClass::Get_Static_Light_Iterator -- returns an iterator for static lights     *
+ *   PhysicsWorldClass::Get_Static_Projector_Iterator -- returns an iterator for static projec *
+ *   PhysicsWorldClass::Get_Dynamic_Projector_Iterator -- returns an iterator for dynamic proj *
+ *   PhysicsWorldClass::Add_To_Dirty_Cull_List -- adds something to the "dirty cull" list      *
+ *   PhysicsWorldClass::Remove_From_Dirty_Cull_List -- removes an object from the dirty cull l *
+ *   PhysicsWorldClass::Is_In_Dirty_Cull_List -- tests whether an object is in the dirty cull  *
+ *   PhysicsWorldClass::Add_Render_Object -- Adds a render object to the scene                 *
+ *   PhysicsWorldClass::Remove_Render_Object -- removes a render object from the scene         *
+ *   PhysicsWorldClass::Register -- rengisters given render object                             *
+ *   PhysicsWorldClass::Unregister -- Unregisters the given render object                      *
+ *   PhysicsWorldClass::Set_Vis_Sample_Point -- Set the current vis sample point               *
+ *   PhysicsWorldClass::Pre_Render_Processing -- processing which occurs prior to rendering    *
+ *   PhysicsWorldClass::Post_Render_Processing -- processing that occurs after rendering       *
+ *   PhysicsWorldClass::Optimize_LODs -- Set the LOD level for each object                     *
+ *   PhysicsWorldClass::Render -- Render the scene                                             *
+ *   PhysicsWorldClass::Render_Objects -- Render the visible objects                           *
+ *   PhysicsWorldClass::Render_Object -- Render an individual object                           *
+ *   PhysicsWorldClass::Render_Backface_Occluders -- Render backfaces of all occluders         *
+ *   PhysicsWorldClass::Re_Partition_Static_Objects -- partition the static objects            *
+ *   PhysicsWorldClass::Re_Partition_Static_Lights -- partition the static lights              *
+ *   PhysicsWorldClass::Re_Partition_Dynamic_Culling_System -- partition the dynamic culling s *
+ *   PhysicsWorldClass::Re_Partition_Static_Projectors -- partition the static projectors      *
+ *   PhysicsWorldClass::Update_Culling_System_Bounding_Boxes -- updates the cull systems       *
+ *   PhysicsWorldClass::Get_Level_Extents -- returns the bounds of the level                   *
+ *   PhysicsWorldClass::Set_Polygon_Budgets -- set the budgets for the LOD system              *
+ *   PhysicsWorldClass::Get_Polygon_Budgets -- returns the budgets for the LOD system          *
+ *   PhysicsWorldClass::Per_Frame_Statistics_Update -- statistics tracking                     *
+ *   PhysicsWorldClass::Get_Statistics -- returns statistics                                   *
+ *   PhysicsWorldClass::Find_Static_Object -- Find static object with the given ID             *
+ *   PhysicsWorldClass::Shatter_Mesh -- Clips a mesh into pieces and scatters them             *
+ *   PhysicsWorldClass::Verify_Culling_Systems -- Verify the culling systems                   *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 
@@ -125,10 +125,10 @@
 #define SHATTER_DEBUG		0					// debugging, freeze shattered particles in place for 60sec
 
 /*
-** Static members of PhysicsSceneClass 
+** Static members of PhysicsWorldClass 
 */
-bool						PhysicsSceneClass::AllowCollisionFlags[NUM_COLLISION_FLAGS];
-PhysicsSceneClass *	PhysicsSceneClass::TheScene = NULL;
+bool						PhysicsWorldClass::AllowCollisionFlags[NUM_COLLISION_FLAGS];
+PhysicsWorldClass *	PhysicsWorldClass::ActiveWorld = NULL;
 
 /*
 ** Constants
@@ -146,14 +146,19 @@ const int				DEFAULT_STATIC_LOD_BUDGET = 4000;
 /******************************************************************************************
 **
 **
-** PhysicsSceneClass Implementation
+** PhysicsWorldClass Implementation
 **
 **
 ******************************************************************************************/
 
 
+PhysicsWorldClass * PhysicsWorldClass::Get_Active_World()
+{
+	return ActiveWorld;
+}
+
 /***********************************************************************************************
- * PhysicsSceneClass::PhysicsSceneClass -- Constructor                                         *
+ * PhysicsWorldClass::PhysicsWorldClass -- Constructor                                         *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -164,7 +169,7 @@ const int				DEFAULT_STATIC_LOD_BUDGET = 4000;
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-PhysicsSceneClass::PhysicsSceneClass(void) :
+PhysicsWorldClass::PhysicsWorldClass(void) :
 	FrameNum(0),
 	LastCameraPosition(0,0,0),
 	LastValidVisId(-1),
@@ -216,9 +221,9 @@ PhysicsSceneClass::PhysicsSceneClass(void) :
 	UpdateOnlyVisibleObjects(false),
 	CurrentFrameNumber(0)
 {
-	WWASSERT_PRINT(TheScene == NULL,"Only one instance of the PhysicsSceneClass is allowed.\r\n");
+	WWASSERT_PRINT(ActiveWorld == NULL,"Only one instance of PhysicsWorldClass is allowed.\r\n");
+	ActiveWorld = this;
 	WWMEMLOG(MEM_PHYSICSDATA);
-	TheScene = this;
 	
 	/*
 	** Initialize Umbra
@@ -272,7 +277,7 @@ PhysicsSceneClass::PhysicsSceneClass(void) :
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::~PhysicsSceneClass -- Destructor                                         *
+ * PhysicsWorldClass::~PhysicsWorldClass -- Destructor                                         *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -283,7 +288,7 @@ PhysicsSceneClass::PhysicsSceneClass(void) :
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-PhysicsSceneClass::~PhysicsSceneClass(void)
+PhysicsWorldClass::~PhysicsWorldClass(void)
 {
 	Remove_All();
 
@@ -303,20 +308,46 @@ PhysicsSceneClass::~PhysicsSceneClass(void)
 	Release_Decal_Resources();
 	WidgetSystem::Release_Debug_Widgets();
 
-	WWASSERT(TheScene == this);
-	TheScene = NULL;	
-
 	/*
 	** Shutdown UMBRA
 	*/
 #if (UMBRASUPPORT)
 	UmbraSupport::Shutdown();
 #endif
+
+	if (ActiveWorld == this) {
+		ActiveWorld = NULL;
+	}
 }	
+
+void PhysicsWorldClass::Attach_Render_Object(RenderObjClass * /*obj*/)
+{
+	// default implementation intentionally blank; derived scenes can hook into a renderer
+}
+
+void PhysicsWorldClass::Detach_Render_Object(RenderObjClass * /*obj*/)
+{
+	// default implementation intentionally blank; derived scenes can hook into a renderer
+}
+
+PhysicsWorldClass::PolyRenderMode PhysicsWorldClass::Query_Polygon_Mode(void) const
+{
+	return PolyRenderMode::FILL;
+}
+
+void PhysicsWorldClass::Save_Render_Settings(ChunkSaveClass & /*csave*/)
+{
+	// default implementation does nothing
+}
+
+void PhysicsWorldClass::Load_Render_Settings(ChunkLoadClass & /*cload*/)
+{
+	// default implementation does nothing
+}
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Update -- Simulates the entire scene forward one timestep                *
+ * PhysicsWorldClass::Update -- Simulates the entire scene forward one timestep                *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -327,7 +358,7 @@ PhysicsSceneClass::~PhysicsSceneClass(void)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Update(float dt,int frameid)
+void PhysicsWorldClass::Update(float dt,int frameid)
 {
 	WWPROFILE("PhysicsScene::Update");
 
@@ -415,7 +446,7 @@ void PhysicsSceneClass::Update(float dt,int frameid)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Add_Dynamic_Object -- Adds a dynamic object to the scene                 *
+ * PhysicsWorldClass::Add_Dynamic_Object -- Adds a dynamic object to the scene                 *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -426,7 +457,7 @@ void PhysicsSceneClass::Update(float dt,int frameid)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Add_Dynamic_Object(PhysClass * newobj)
+void PhysicsWorldClass::Add_Dynamic_Object(PhysClass * newobj)
 {
 	WWASSERT(newobj != NULL);
 	WWASSERT(newobj->Get_Culling_System() == NULL);
@@ -447,7 +478,7 @@ void PhysicsSceneClass::Add_Dynamic_Object(PhysClass * newobj)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Internal_Add_Dynamic_Object -- internal function finishes adding a dynam *
+ * PhysicsWorldClass::Internal_Add_Dynamic_Object -- internal function finishes adding a dynam *
  *                                                                                             *
  *    This function is called both by the loading code and the Add_Dynamic_Object function.    *
  *                                                                                             *
@@ -460,12 +491,12 @@ void PhysicsSceneClass::Add_Dynamic_Object(PhysClass * newobj)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Internal_Add_Dynamic_Object(PhysClass * newobj)
+void PhysicsWorldClass::Internal_Add_Dynamic_Object(PhysClass * newobj)
 {
 	// Add the object to the appropriate lists
 	ObjList.Add(newobj);
 	if (newobj->Peek_Model() != NULL) {
-		SceneClass::Add_Render_Object(newobj->Peek_Model());
+		Attach_Render_Object(newobj->Peek_Model());
 	}
 	if (newobj->Needs_Timestep()) {
 		TimestepList.Add(newobj);
@@ -474,7 +505,7 @@ void PhysicsSceneClass::Internal_Add_Dynamic_Object(PhysClass * newobj)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Add_Static_Object -- Adds a static object to the scene                   *
+ * PhysicsWorldClass::Add_Static_Object -- Adds a static object to the scene                   *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -485,7 +516,7 @@ void PhysicsSceneClass::Internal_Add_Dynamic_Object(PhysClass * newobj)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Add_Static_Object(StaticPhysClass * newtile,int cull_node_id/*=-1*/)
+void PhysicsWorldClass::Add_Static_Object(StaticPhysClass * newtile,int cull_node_id/*=-1*/)
 {
 	WWASSERT(newtile != NULL);
 	WWASSERT(newtile->Get_Culling_System() == NULL);
@@ -499,7 +530,7 @@ void PhysicsSceneClass::Add_Static_Object(StaticPhysClass * newtile,int cull_nod
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Internal_Add_Static_Object -- internal add static object...              *
+ * PhysicsWorldClass::Internal_Add_Static_Object -- internal add static object...              *
  *                                                                                             *
  *    This function is called by both the loading code and the Add_Static_Object function      *
  *                                                                                             *
@@ -512,12 +543,12 @@ void PhysicsSceneClass::Add_Static_Object(StaticPhysClass * newtile,int cull_nod
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Internal_Add_Static_Object(StaticPhysClass * newtile)
+void PhysicsWorldClass::Internal_Add_Static_Object(StaticPhysClass * newtile)
 {
 	// Add the object to the appropriate lists
 	StaticObjList.Add(newtile);
 	if (newtile->Peek_Model() != NULL) {
-		SceneClass::Add_Render_Object(newtile->Peek_Model());
+		Attach_Render_Object(newtile->Peek_Model());
 	}
 	if (newtile->Needs_Timestep()) {
 		TimestepList.Add(newtile);
@@ -529,7 +560,7 @@ void PhysicsSceneClass::Internal_Add_Static_Object(StaticPhysClass * newtile)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Add_Static_Light -- Adds a static light to the system                    *
+ * PhysicsWorldClass::Add_Static_Light -- Adds a static light to the system                    *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -540,7 +571,7 @@ void PhysicsSceneClass::Internal_Add_Static_Object(StaticPhysClass * newtile)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Add_Static_Light(LightPhysClass * newlight,int cull_node_id/*=-1*/)
+void PhysicsWorldClass::Add_Static_Light(LightPhysClass * newlight,int cull_node_id/*=-1*/)
 {
 	WWASSERT(newlight != NULL);
 	WWASSERT(newlight->Get_Culling_System() == NULL);
@@ -554,7 +585,7 @@ void PhysicsSceneClass::Add_Static_Light(LightPhysClass * newlight,int cull_node
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Internal_Add_Static_Light -- internal add static light...                *
+ * PhysicsWorldClass::Internal_Add_Static_Light -- internal add static light...                *
  *                                                                                             *
  *    This function is called by both the loading code and the Add_Static_Light function       *
  *                                                                                             *
@@ -568,7 +599,7 @@ void PhysicsSceneClass::Add_Static_Light(LightPhysClass * newlight,int cull_node
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Internal_Add_Static_Light(LightPhysClass * newlight)
+void PhysicsWorldClass::Internal_Add_Static_Light(LightPhysClass * newlight)
 {	
 	// Add the object to the appropriate lists
 	StaticLightList.Add(newlight);
@@ -585,7 +616,7 @@ void PhysicsSceneClass::Internal_Add_Static_Light(LightPhysClass * newlight)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Delayed_Remove_Object -- registers an object for removal                 *
+ * PhysicsWorldClass::Delayed_Remove_Object -- registers an object for removal                 *
  *                                                                                             *
  *    The object will be released by the scene at the end of the next frame.                   *
  *                                                                                             *
@@ -598,7 +629,7 @@ void PhysicsSceneClass::Internal_Add_Static_Light(LightPhysClass * newlight)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Delayed_Remove_Object(PhysClass * obj)
+void PhysicsWorldClass::Delayed_Remove_Object(PhysClass * obj)
 {
 	if (!ReleaseList.Contains(obj)) {
 		ReleaseList.Add(obj);
@@ -607,7 +638,7 @@ void PhysicsSceneClass::Delayed_Remove_Object(PhysClass * obj)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Process_Release_List -- Removes all objects in the ReleaseList           *
+ * PhysicsWorldClass::Process_Release_List -- Removes all objects in the ReleaseList           *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -618,7 +649,7 @@ void PhysicsSceneClass::Delayed_Remove_Object(PhysClass * obj)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Process_Release_List(void)
+void PhysicsWorldClass::Process_Release_List(void)
 {
 	while(!ReleaseList.Is_Empty()) {
 		PhysClass * obj = ReleaseList.Remove_Head();
@@ -629,7 +660,7 @@ void PhysicsSceneClass::Process_Release_List(void)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Remove_Object -- Remove an object from the scene                         *
+ * PhysicsWorldClass::Remove_Object -- Remove an object from the scene                         *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -640,7 +671,7 @@ void PhysicsSceneClass::Process_Release_List(void)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Remove_Object(PhysClass * obj)
+void PhysicsWorldClass::Remove_Object(PhysClass * obj)
 {
 	// NOTE: sometimes the game tries to 'remove' objects that havent been added...
 	if (!Contains(obj)) return;
@@ -649,9 +680,9 @@ void PhysicsSceneClass::Remove_Object(PhysClass * obj)
 	WWASSERT(obj != NULL);
 
 	// Notify the model that it is being removed from the scene
-	if (obj->Peek_Model() != NULL) {
-		SceneClass::Remove_Render_Object(obj->Peek_Model());
-	}
+		if (obj->Peek_Model() != NULL) {
+			Detach_Render_Object(obj->Peek_Model());
+		}
 
 	// Notify the observer (if it has one)
 	if (obj->Get_Observer() != NULL) {
@@ -692,7 +723,7 @@ void PhysicsSceneClass::Remove_Object(PhysClass * obj)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Remove_All -- Removes all objects from the scene                         *
+ * PhysicsWorldClass::Remove_All -- Removes all objects from the scene                         *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -703,7 +734,7 @@ void PhysicsSceneClass::Remove_Object(PhysClass * obj)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Remove_All(void)
+void PhysicsWorldClass::Remove_All(void)
 {
 	PhysClass * obj = ObjList.Peek_Head();
 	while (obj) {
@@ -740,7 +771,7 @@ void PhysicsSceneClass::Remove_All(void)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Contains -- Tests if the scene contains the given object                 *
+ * PhysicsWorldClass::Contains -- Tests if the scene contains the given object                 *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -751,7 +782,7 @@ void PhysicsSceneClass::Remove_All(void)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-bool PhysicsSceneClass::Contains(PhysClass * obj)
+bool PhysicsWorldClass::Contains(PhysClass * obj)
 {
 	if (ObjList.Is_In_List(obj)) return true;
 	if (StaticObjList.Is_In_List(obj)) return true;
@@ -761,7 +792,7 @@ bool PhysicsSceneClass::Contains(PhysClass * obj)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Get_Dynamic_Object_Iterator -- returns an iterator for the dynamic objec *
+ * PhysicsWorldClass::Get_Dynamic_Object_Iterator -- returns an iterator for the dynamic objec *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -772,14 +803,14 @@ bool PhysicsSceneClass::Contains(PhysClass * obj)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-RefPhysListIterator PhysicsSceneClass::Get_Dynamic_Object_Iterator(void)		
+RefPhysListIterator PhysicsWorldClass::Get_Dynamic_Object_Iterator(void)		
 { 
 	return RefPhysListIterator(&ObjList); 
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Get_Static_Object_Iterator -- return an iterator for the static objs     *
+ * PhysicsWorldClass::Get_Static_Object_Iterator -- return an iterator for the static objs     *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -790,14 +821,14 @@ RefPhysListIterator PhysicsSceneClass::Get_Dynamic_Object_Iterator(void)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-RefPhysListIterator PhysicsSceneClass::Get_Static_Object_Iterator(void)			
+RefPhysListIterator PhysicsWorldClass::Get_Static_Object_Iterator(void)			
 { 
 	return RefPhysListIterator(&StaticObjList); 
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Get_Static_Anim_Object_Iterator -- returns an iterator for static anim o *
+ * PhysicsWorldClass::Get_Static_Anim_Object_Iterator -- returns an iterator for static anim o *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -808,14 +839,14 @@ RefPhysListIterator PhysicsSceneClass::Get_Static_Object_Iterator(void)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-RefPhysListIterator PhysicsSceneClass::Get_Static_Anim_Object_Iterator(void)	
+RefPhysListIterator PhysicsWorldClass::Get_Static_Anim_Object_Iterator(void)	
 { 
 	return RefPhysListIterator(&StaticAnimList); 
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Get_Static_Light_Iterator -- returns an iterator for static lights       *
+ * PhysicsWorldClass::Get_Static_Light_Iterator -- returns an iterator for static lights       *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -826,14 +857,14 @@ RefPhysListIterator PhysicsSceneClass::Get_Static_Anim_Object_Iterator(void)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-RefPhysListIterator PhysicsSceneClass::Get_Static_Light_Iterator(void)			
+RefPhysListIterator PhysicsWorldClass::Get_Static_Light_Iterator(void)			
 { 
 	return RefPhysListIterator(&StaticLightList); 
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Get_Static_Projector_Iterator -- returns an iterator for static projecto *
+ * PhysicsWorldClass::Get_Static_Projector_Iterator -- returns an iterator for static projecto *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -844,14 +875,14 @@ RefPhysListIterator PhysicsSceneClass::Get_Static_Light_Iterator(void)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-TexProjListIterator PhysicsSceneClass::Get_Static_Projector_Iterator(void)		
+TexProjListIterator PhysicsWorldClass::Get_Static_Projector_Iterator(void)		
 { 
 	return TexProjListIterator(&StaticProjectorList); 
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Get_Dynamic_Projector_Iterator -- returns an iterator for dynamic projec *
+ * PhysicsWorldClass::Get_Dynamic_Projector_Iterator -- returns an iterator for dynamic projec *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -862,14 +893,14 @@ TexProjListIterator PhysicsSceneClass::Get_Static_Projector_Iterator(void)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-TexProjListIterator PhysicsSceneClass::Get_Dynamic_Projector_Iterator(void)	
+TexProjListIterator PhysicsWorldClass::Get_Dynamic_Projector_Iterator(void)	
 { 
 	return TexProjListIterator(&DynamicProjectorList); 
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Add_To_Dirty_Cull_List -- adds something to the "dirty cull" list        *
+ * PhysicsWorldClass::Add_To_Dirty_Cull_List -- adds something to the "dirty cull" list        *
  *                                                                                             *
  *    objects in the dirty cull list have their visiblity and cull box re-computed each        *
  *    frame.  We should try to keep things like this to a minimum.  Particle buffers are       *
@@ -884,14 +915,14 @@ TexProjListIterator PhysicsSceneClass::Get_Dynamic_Projector_Iterator(void)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Add_To_Dirty_Cull_List(PhysClass *obj)
+void PhysicsWorldClass::Add_To_Dirty_Cull_List(PhysClass *obj)
 { 
 	DirtyCullList.Add (obj); 
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Remove_From_Dirty_Cull_List -- removes an object from the dirty cull lis *
+ * PhysicsWorldClass::Remove_From_Dirty_Cull_List -- removes an object from the dirty cull lis *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -902,14 +933,14 @@ void PhysicsSceneClass::Add_To_Dirty_Cull_List(PhysClass *obj)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Remove_From_Dirty_Cull_List(PhysClass *obj)			
+void PhysicsWorldClass::Remove_From_Dirty_Cull_List(PhysClass *obj)			
 { 
 	DirtyCullList.Remove (obj); 
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Is_In_Dirty_Cull_List -- tests whether an object is in the dirty cull li *
+ * PhysicsWorldClass::Is_In_Dirty_Cull_List -- tests whether an object is in the dirty cull li *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -920,13 +951,13 @@ void PhysicsSceneClass::Remove_From_Dirty_Cull_List(PhysClass *obj)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-bool PhysicsSceneClass::Is_In_Dirty_Cull_List(PhysClass *obj)					
+bool PhysicsWorldClass::Is_In_Dirty_Cull_List(PhysClass *obj)					
 { 
 	return DirtyCullList.Contains (obj); 
 }
 
 /***********************************************************************************************
- * PhysicsSceneClass::Add_Render_Object -- Adds a render object to the scene                   *
+ * PhysicsWorldClass::Add_Render_Object -- Adds a render object to the scene                   *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -939,7 +970,7 @@ bool PhysicsSceneClass::Is_In_Dirty_Cull_List(PhysClass *obj)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Add_Render_Object(RenderObjClass * obj)
+void PhysicsWorldClass::Add_Render_Object(RenderObjClass * obj)
 {
 	WWMEMLOG(MEM_PHYSICSDATA);	// Right category?
 
@@ -965,12 +996,12 @@ void PhysicsSceneClass::Add_Render_Object(RenderObjClass * obj)
 
 	cullnode->Release_Ref();
 
-	SceneClass::Add_Render_Object(obj);
+	Attach_Render_Object(obj);
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Remove_Render_Object -- removes a render object from the scene           *
+ * PhysicsWorldClass::Remove_Render_Object -- removes a render object from the scene           *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -981,14 +1012,14 @@ void PhysicsSceneClass::Add_Render_Object(RenderObjClass * obj)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Remove_Render_Object(RenderObjClass * obj)
+void PhysicsWorldClass::Remove_Render_Object(RenderObjClass * obj)
 {
 	// NOTE: The *ONLY* way this code should get activated is when the user
 	// or some deep dark w3d code is directly adding and removing render objects
 	// in the physics scene.  In this case, I wrap the render objects with 
 	// RenderObjPhysClass's and set the UserData pointer to point back to this
 	// wrapper.
-	SceneClass::Remove_Render_Object(obj);
+	Detach_Render_Object(obj);
 
 	WWASSERT(obj != NULL);
 	PhysClass * cullnode = (PhysClass *)obj->Get_User_Data();
@@ -1000,7 +1031,7 @@ void PhysicsSceneClass::Remove_Render_Object(RenderObjClass * obj)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Register -- rengisters given render object                               *
+ * PhysicsWorldClass::Register -- rengisters given render object                               *
  *                                                                                             *
  *    Render objects can be registered for On_Frame_Update calls, added to the vertex          *
  *    processor list, or added to the release list.                                            *
@@ -1014,7 +1045,7 @@ void PhysicsSceneClass::Remove_Render_Object(RenderObjClass * obj)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Register(RenderObjClass * obj,RegType for_what)
+void PhysicsWorldClass::Register(RenderObjClass * obj,RegType for_what)
 {
 	WWASSERT(obj != NULL);
 	switch (for_what)
@@ -1046,7 +1077,7 @@ void PhysicsSceneClass::Register(RenderObjClass * obj,RegType for_what)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Unregister -- Unregisters the given render object                        *
+ * PhysicsWorldClass::Unregister -- Unregisters the given render object                        *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1057,7 +1088,7 @@ void PhysicsSceneClass::Register(RenderObjClass * obj,RegType for_what)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Unregister(RenderObjClass * obj,RegType for_what)
+void PhysicsWorldClass::Unregister(RenderObjClass * obj,RegType for_what)
 {
 	WWASSERT(obj != NULL);
 	switch (for_what)
@@ -1076,7 +1107,7 @@ void PhysicsSceneClass::Unregister(RenderObjClass * obj,RegType for_what)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Pre_Render_Processing -- processing which occurs prior to rendering      *
+ * PhysicsWorldClass::Pre_Render_Processing -- processing which occurs prior to rendering      *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1087,7 +1118,7 @@ void PhysicsSceneClass::Unregister(RenderObjClass * obj,RegType for_what)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Pre_Render_Processing(CameraClass & camera)
+void PhysicsWorldClass::Pre_Render_Processing(CameraClass & camera)
 {
 	WWPROFILE("Pre_Render_Processing");
 
@@ -1162,7 +1193,7 @@ void PhysicsSceneClass::Pre_Render_Processing(CameraClass & camera)
 }
 
 /***********************************************************************************************
- * PhysicsSceneClass::Post_Render_Processing -- processing that occurs after rendering         *
+ * PhysicsWorldClass::Post_Render_Processing -- processing that occurs after rendering         *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1173,7 +1204,7 @@ void PhysicsSceneClass::Pre_Render_Processing(CameraClass & camera)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Post_Render_Processing(void)
+void PhysicsWorldClass::Post_Render_Processing(void)
 {
 	WWPROFILE("Post_Render_Processing");
 
@@ -1189,7 +1220,7 @@ void PhysicsSceneClass::Post_Render_Processing(void)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Optimize_LODs -- Set the LOD level for each object                       *
+ * PhysicsWorldClass::Optimize_LODs -- Set the LOD level for each object                       *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1200,7 +1231,7 @@ void PhysicsSceneClass::Post_Render_Processing(void)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Optimize_LODs
+void PhysicsWorldClass::Optimize_LODs
 (
 	CameraClass & camera,
 	RefPhysListClass * dyn_objs,
@@ -1241,7 +1272,7 @@ void PhysicsSceneClass::Optimize_LODs
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Render -- Render the scene                                               *
+ * PhysicsWorldClass::Render -- Render the scene                                               *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1252,9 +1283,9 @@ void PhysicsSceneClass::Optimize_LODs
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Customized_Render(RenderInfoClass & rinfo)
+void PhysicsWorldClass::Customized_Render(RenderInfoClass & rinfo)
 {
-	WWPROFILE("PhysicsSceneClass::Render");
+	WWPROFILE("PhysicsWorldClass::Render");
 
 	/*
 	** Render the normal models
@@ -1336,14 +1367,14 @@ void PhysicsSceneClass::Customized_Render(RenderInfoClass & rinfo)
 				rinfo.Pop_Override_Flags();
 
 				// restore previous render mode
-				switch(Get_Polygon_Mode()) {
-					case POINT:
+				switch(Query_Polygon_Mode()) {
+					case PolyRenderMode::POINT:
 						DX8Wrapper::Set_DX8_Render_State(D3DRS_FILLMODE,D3DFILL_POINT);
 						break;
-					case LINE:
+					case PolyRenderMode::LINE:
 						DX8Wrapper::Set_DX8_Render_State(D3DRS_FILLMODE,D3DFILL_WIREFRAME);
 						break;
-					case FILL:
+					case PolyRenderMode::FILL:
 						DX8Wrapper::Set_DX8_Render_State(D3DRS_FILLMODE,D3DFILL_SOLID);
 						break;
 				}
@@ -1386,7 +1417,7 @@ void PhysicsSceneClass::Customized_Render(RenderInfoClass & rinfo)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Render_Objects -- Render the visible objects                             *
+ * PhysicsWorldClass::Render_Objects -- Render the visible objects                             *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1397,7 +1428,7 @@ void PhysicsSceneClass::Customized_Render(RenderInfoClass & rinfo)
  * HISTORY:                                                                                    *
  *   4/24/2001  gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Render_Objects(
+void PhysicsWorldClass::Render_Objects(
 	RenderInfoClass& rinfo,
 	RefPhysListClass * static_ws_list,
 	RefPhysListClass * static_list,
@@ -1467,7 +1498,7 @@ void PhysicsSceneClass::Render_Objects(
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Render_Object -- Render an individual object                             *
+ * PhysicsWorldClass::Render_Object -- Render an individual object                             *
  *                                                                                             *
  * This function installs the lighting environment and renders the object.                     *
  *                                                                                             *
@@ -1480,7 +1511,7 @@ void PhysicsSceneClass::Render_Objects(
  * HISTORY:                                                                                    *
  *   4/24/2001  gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Render_Object(RenderInfoClass & context,PhysClass * obj)
+void PhysicsWorldClass::Render_Object(RenderInfoClass & context,PhysClass * obj)
 {
 	if ((obj->Peek_Model() == NULL) || (obj->Is_Rendering_Disabled())) {
 		return;
@@ -1540,7 +1571,7 @@ void PhysicsSceneClass::Render_Object(RenderInfoClass & context,PhysClass * obj)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Render_Backface_Occluders -- Render backfaces of all occluders           *
+ * PhysicsWorldClass::Render_Backface_Occluders -- Render backfaces of all occluders           *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1551,7 +1582,7 @@ void PhysicsSceneClass::Render_Object(RenderInfoClass & context,PhysClass * obj)
  * HISTORY:                                                                                    *
  *   4/24/2001  gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Render_Backface_Occluders
+void PhysicsWorldClass::Render_Backface_Occluders
 (
 	RenderInfoClass & context,
 	RefPhysListClass * static_ws_list,
@@ -1624,7 +1655,7 @@ void PhysicsSceneClass::Render_Backface_Occluders
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Re_Partition_Static_Objects -- partition the static objects              *
+ * PhysicsWorldClass::Re_Partition_Static_Objects -- partition the static objects              *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1636,14 +1667,14 @@ void PhysicsSceneClass::Render_Backface_Occluders
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Re_Partition_Static_Objects(void)
+void PhysicsWorldClass::Re_Partition_Static_Objects(void)
 {
 	StaticCullingSystem->Re_Partition();
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Re_Partition_Static_Lights -- partition the static lights                *
+ * PhysicsWorldClass::Re_Partition_Static_Lights -- partition the static lights                *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1655,14 +1686,14 @@ void PhysicsSceneClass::Re_Partition_Static_Objects(void)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Re_Partition_Static_Lights(void)
+void PhysicsWorldClass::Re_Partition_Static_Lights(void)
 {
 	StaticLightingSystem->Re_Partition();
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Re_Partition_Dynamic_Culling_System -- partition the dynamic culling sys *
+ * PhysicsWorldClass::Re_Partition_Dynamic_Culling_System -- partition the dynamic culling sys *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1674,7 +1705,7 @@ void PhysicsSceneClass::Re_Partition_Static_Lights(void)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Re_Partition_Dynamic_Culling_System(void)
+void PhysicsWorldClass::Re_Partition_Dynamic_Culling_System(void)
 {
 	Vector3 wmin,wmax;
 	Get_Level_Extents(wmin,wmax);
@@ -1693,7 +1724,7 @@ void PhysicsSceneClass::Re_Partition_Dynamic_Culling_System(void)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Re_Partition_Dynamic_Culling_System -- partition the dynamic culling sys *
+ * PhysicsWorldClass::Re_Partition_Dynamic_Culling_System -- partition the dynamic culling sys *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1705,7 +1736,7 @@ void PhysicsSceneClass::Re_Partition_Dynamic_Culling_System(void)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Re_Partition_Dynamic_Culling_System(DynamicVectorClass<AABoxClass> & virtual_occludees)
+void PhysicsWorldClass::Re_Partition_Dynamic_Culling_System(DynamicVectorClass<AABoxClass> & virtual_occludees)
 {
 	Vector3 wmin,wmax;
 	Get_Level_Extents(wmin,wmax);
@@ -1730,7 +1761,7 @@ void PhysicsSceneClass::Re_Partition_Dynamic_Culling_System(DynamicVectorClass<A
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Re_Partition_Static_Projectors -- partition the static projectors        *
+ * PhysicsWorldClass::Re_Partition_Static_Projectors -- partition the static projectors        *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1741,14 +1772,14 @@ void PhysicsSceneClass::Re_Partition_Dynamic_Culling_System(DynamicVectorClass<A
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Re_Partition_Static_Projectors(void)
+void PhysicsWorldClass::Re_Partition_Static_Projectors(void)
 {
 	StaticProjectorCullingSystem->Re_Partition();
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Update_Culling_System_Bounding_Boxes -- updates the cull systems         *
+ * PhysicsWorldClass::Update_Culling_System_Bounding_Boxes -- updates the cull systems         *
  *                                                                                             *
  * This should be performed by the level editor when geometry may have changed but we do not   *
  * want to do a re-partition due to the loss of hierarchical VIS data.  Basically, the editor  *
@@ -1764,7 +1795,7 @@ void PhysicsSceneClass::Re_Partition_Static_Projectors(void)
  * HISTORY:                                                                                    *
  *   9/3/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Update_Culling_System_Bounding_Boxes(void)
+void PhysicsWorldClass::Update_Culling_System_Bounding_Boxes(void)
 {
 	StaticCullingSystem->Update_Bounding_Boxes();
 	StaticLightingSystem->Update_Bounding_Boxes();
@@ -1772,7 +1803,7 @@ void PhysicsSceneClass::Update_Culling_System_Bounding_Boxes(void)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Verify_Culling_Systems -- Verify the culling systems                     *
+ * PhysicsWorldClass::Verify_Culling_Systems -- Verify the culling systems                     *
  *                                                                                             *
  *    This function asks the culling systems to verify that all of thier bounding boxes        *
  *    are properly constructed.  I.e. they contain the objects they claim to contain, etc.     *
@@ -1787,13 +1818,13 @@ void PhysicsSceneClass::Update_Culling_System_Bounding_Boxes(void)
  * HISTORY:                                                                                    *
  *   9/28/2000  gth : Created.                                                                 *
  *=============================================================================================*/
-bool PhysicsSceneClass::Verify_Culling_Systems(StringClass & set_error_report)
+bool PhysicsWorldClass::Verify_Culling_Systems(StringClass & set_error_report)
 {
 	return StaticCullingSystem->Verify(set_error_report);
 }
 
 /***********************************************************************************************
- * PhysicsSceneClass::Get_Level_Extents -- returns the bounds of the level                     *
+ * PhysicsWorldClass::Get_Level_Extents -- returns the bounds of the level                     *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1804,7 +1835,7 @@ bool PhysicsSceneClass::Verify_Culling_Systems(StringClass & set_error_report)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Get_Level_Extents(Vector3 &min, Vector3 &max)
+void PhysicsWorldClass::Get_Level_Extents(Vector3 &min, Vector3 &max)
 {
 	const AABoxClass & level_bounds = StaticCullingSystem->Get_Bounding_Box();
 	min = level_bounds.Center - level_bounds.Extent;
@@ -1813,7 +1844,7 @@ void PhysicsSceneClass::Get_Level_Extents(Vector3 &min, Vector3 &max)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Set_Polygon_Budgets -- set the budgets for the LOD system                *
+ * PhysicsWorldClass::Set_Polygon_Budgets -- set the budgets for the LOD system                *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1824,7 +1855,7 @@ void PhysicsSceneClass::Get_Level_Extents(Vector3 &min, Vector3 &max)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Set_Polygon_Budgets(int static_count,int dynamic_count)
+void PhysicsWorldClass::Set_Polygon_Budgets(int static_count,int dynamic_count)
 {
 	StaticPolyBudget = static_count;
 	DynamicPolyBudget = dynamic_count;
@@ -1832,7 +1863,7 @@ void PhysicsSceneClass::Set_Polygon_Budgets(int static_count,int dynamic_count)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Get_Polygon_Budgets -- returns the budgets for the LOD system            *
+ * PhysicsWorldClass::Get_Polygon_Budgets -- returns the budgets for the LOD system            *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1843,7 +1874,7 @@ void PhysicsSceneClass::Set_Polygon_Budgets(int static_count,int dynamic_count)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Get_Polygon_Budgets(int * static_count,int * dynamic_count)
+void PhysicsWorldClass::Get_Polygon_Budgets(int * static_count,int * dynamic_count)
 {
 	*static_count = StaticPolyBudget;
 	*dynamic_count = DynamicPolyBudget;
@@ -1851,7 +1882,7 @@ void PhysicsSceneClass::Get_Polygon_Budgets(int * static_count,int * dynamic_cou
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Per_Frame_Statistics_Update -- statistics tracking                       *
+ * PhysicsWorldClass::Per_Frame_Statistics_Update -- statistics tracking                       *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1862,7 +1893,7 @@ void PhysicsSceneClass::Get_Polygon_Budgets(int * static_count,int * dynamic_cou
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Per_Frame_Statistics_Update(void)
+void PhysicsWorldClass::Per_Frame_Statistics_Update(void)
 {
 	CurrentStats.FrameCount ++;
 
@@ -1894,7 +1925,7 @@ void PhysicsSceneClass::Per_Frame_Statistics_Update(void)
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Get_Statistics -- returns statistics                                     *
+ * PhysicsWorldClass::Get_Statistics -- returns statistics                                     *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1905,14 +1936,14 @@ void PhysicsSceneClass::Per_Frame_Statistics_Update(void)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-const PhysicsSceneClass::StatsStruct & PhysicsSceneClass::Get_Statistics(void)
+const PhysicsWorldClass::StatsStruct & PhysicsWorldClass::Get_Statistics(void)
 {
 	return LastValidStats;
 }
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Find_Static_Object -- Find static object with the given ID               *
+ * PhysicsWorldClass::Find_Static_Object -- Find static object with the given ID               *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1923,7 +1954,7 @@ const PhysicsSceneClass::StatsStruct & PhysicsSceneClass::Get_Statistics(void)
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-StaticPhysClass * PhysicsSceneClass::Find_Static_Object( int instance_id )
+StaticPhysClass * PhysicsWorldClass::Find_Static_Object( int instance_id )
 {
 	RefPhysListIterator it(&StaticObjList);
 	for (it.First(); !it.Is_Done(); it.Next()) {
@@ -1937,7 +1968,7 @@ StaticPhysClass * PhysicsSceneClass::Find_Static_Object( int instance_id )
 
 
 /***********************************************************************************************
- * PhysicsSceneClass::Shatter_Mesh -- Clips a mesh into pieces and scatters them               *
+ * PhysicsWorldClass::Shatter_Mesh -- Clips a mesh into pieces and scatters them               *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -1948,7 +1979,7 @@ StaticPhysClass * PhysicsSceneClass::Find_Static_Object( int instance_id )
  * HISTORY:                                                                                    *
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsSceneClass::Shatter_Mesh
+void PhysicsWorldClass::Shatter_Mesh
 (
 	MeshClass * mesh,
 	const Vector3 & impact_point,
@@ -2065,7 +2096,7 @@ void PhysicsSceneClass::Shatter_Mesh
 }
 
 
-void PhysicsSceneClass::Add_Camera_Shake
+void PhysicsWorldClass::Add_Camera_Shake
 (
 	const Vector3 & position,
 	float radius,
@@ -2077,12 +2108,12 @@ void PhysicsSceneClass::Add_Camera_Shake
 	CameraShakeSystem->Add_Camera_Shake(position,radius,duration,power);
 }
 
-void PhysicsSceneClass::Apply_Camera_Shakes(CameraClass & camera)
+void PhysicsWorldClass::Apply_Camera_Shakes(CameraClass & camera)
 {
 	CameraShakeSystem->Update_Camera(camera);
 }
 
-float PhysicsSceneClass::Compute_Vis_Mesh_Ram(void)
+float PhysicsWorldClass::Compute_Vis_Mesh_Ram(void)
 {
 	float total = 0.0f;
 
@@ -2093,7 +2124,7 @@ float PhysicsSceneClass::Compute_Vis_Mesh_Ram(void)
 	return total;
 }
 
-void PhysicsSceneClass::Force_Dynamic_Objects_Awake(const AABoxClass & box)
+void PhysicsWorldClass::Force_Dynamic_Objects_Awake(const AABoxClass & box)
 {
 	/*
 	** Collect the objects that touch this box and wake them up.
@@ -2115,16 +2146,111 @@ void PhysicsSceneClass::Force_Dynamic_Objects_Awake(const AABoxClass & box)
 /******************************************************************************************
 **
 **
-** PhysicsSceneClass::StatsStruct Implementation
+** PhysicsSceneClass bridge implementation
 **
 **
 ******************************************************************************************/
-PhysicsSceneClass::StatsStruct::StatsStruct(void)
+PhysicsSceneClass * PhysicsSceneClass::TheScene = NULL;
+
+PhysicsSceneClass::PhysicsSceneClass(void) :
+	SceneClass(),
+	PhysicsWorldClass()
+{
+	WWASSERT_PRINT(TheScene == NULL,"Only one instance of the PhysicsSceneClass is allowed.\r\n");
+	TheScene = this;
+}
+
+PhysicsSceneClass::~PhysicsSceneClass(void)
+{
+	WWASSERT(TheScene == this);
+	TheScene = NULL;
+}
+
+void PhysicsSceneClass::Set_Ambient_Light(const Vector3 & color)
+{
+	PhysicsWorldClass::Set_Ambient_Light(color);
+	SceneClass::Set_Ambient_Light(color);
+}
+
+const Vector3 & PhysicsSceneClass::Get_Ambient_Light(void)
+{
+	return PhysicsWorldClass::Get_Ambient_Light();
+}
+
+void PhysicsSceneClass::Add_Render_Object(RenderObjClass * obj)
+{
+	PhysicsWorldClass::Add_Render_Object(obj);
+}
+
+void PhysicsSceneClass::Remove_Render_Object(RenderObjClass * obj)
+{
+	PhysicsWorldClass::Remove_Render_Object(obj);
+}
+
+void PhysicsSceneClass::Register(RenderObjClass * obj,RegType for_what)
+{
+	PhysicsWorldClass::Register(obj,for_what);
+}
+
+void PhysicsSceneClass::Unregister(RenderObjClass * obj,RegType for_what)
+{
+	PhysicsWorldClass::Unregister(obj,for_what);
+}
+
+void PhysicsSceneClass::Customized_Render(RenderInfoClass & rinfo)
+{
+	PhysicsWorldClass::Customized_Render(rinfo);
+}
+
+void PhysicsSceneClass::Attach_Render_Object(RenderObjClass * obj)
+{
+	if (obj != NULL) {
+		SceneClass::Add_Render_Object(obj);
+	}
+}
+
+void PhysicsSceneClass::Detach_Render_Object(RenderObjClass * obj)
+{
+	if (obj != NULL) {
+		SceneClass::Remove_Render_Object(obj);
+	}
+}
+
+PhysicsWorldClass::PolyRenderMode PhysicsSceneClass::Query_Polygon_Mode(void) const
+{
+	switch(SceneClass::Get_Polygon_Mode()) {
+		case SceneClass::POINT: return PolyRenderMode::POINT;
+		case SceneClass::LINE:	return PolyRenderMode::LINE;
+		case SceneClass::FILL:
+		default:
+			return PolyRenderMode::FILL;
+	}
+}
+
+void PhysicsSceneClass::Save_Render_Settings(ChunkSaveClass & csave)
+{
+	SceneClass::Save(csave);
+}
+
+void PhysicsSceneClass::Load_Render_Settings(ChunkLoadClass & cload)
+{
+	SceneClass::Load(cload);
+}
+
+
+/******************************************************************************************
+**
+**
+** PhysicsWorldClass::StatsStruct Implementation
+**
+**
+******************************************************************************************/
+PhysicsWorldClass::StatsStruct::StatsStruct(void)
 { 
 	Reset();
 }
 
-void PhysicsSceneClass::StatsStruct::Reset(void)
+void PhysicsWorldClass::StatsStruct::Reset(void)
 {
 	FrameCount = 0; 
 	CullNodeCount = 0;
@@ -2159,5 +2285,3 @@ void Force_Link_Modules(void)
 	FORCE_LINK(shakeablestaticphys);
 	FORCE_LINK(RenegadeTerrainPatch);
 }
-
-

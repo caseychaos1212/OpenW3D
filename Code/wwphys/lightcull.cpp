@@ -91,26 +91,26 @@ StaticLightCullClass::~StaticLightCullClass(void)
 
 void StaticLightCullClass::Add_Object(LightPhysClass * obj)
 {
-	WWASSERT(PhysicsSceneClass::Get_Instance() != NULL);
+	WWASSERT(PhysicsWorldClass::Get_Active_World() != NULL);
 	TypedAABTreeCullSystemClass<LightPhysClass>::Add_Object(obj);
 // (gth) not resetting vis when adding a new static light
-//	PhysicsSceneClass::Get_Instance()->Reset_Vis();
+//	PhysicsWorldClass::Get_Active_World()->Reset_Vis();
 }
 
 void StaticLightCullClass::Remove_Object(LightPhysClass * obj)
 {
-	WWASSERT(PhysicsSceneClass::Get_Instance() != NULL);
+	WWASSERT(PhysicsWorldClass::Get_Active_World() != NULL);
 	TypedAABTreeCullSystemClass<LightPhysClass>::Remove_Object(obj);
 // (gth) not resetting vis when removing a static light
-//	PhysicsSceneClass::Get_Instance()->Reset_Vis();
+//	PhysicsWorldClass::Get_Active_World()->Reset_Vis();
 }
 
 void StaticLightCullClass::Update_Culling(CullableClass * obj)
 {
-	WWASSERT(PhysicsSceneClass::Get_Instance() != NULL);
+	WWASSERT(PhysicsWorldClass::Get_Active_World() != NULL);
 	TypedAABTreeCullSystemClass<LightPhysClass>::Update_Culling(obj);
 // (gth) not resetting vis when moving a static light
-//	PhysicsSceneClass::Get_Instance()->Reset_Vis();
+//	PhysicsWorldClass::Get_Active_World()->Reset_Vis();
 }
 
 void StaticLightCullClass::Save_Static_Data(ChunkSaveClass & csave)
@@ -144,6 +144,11 @@ void StaticLightCullClass::Load_Static_Data(ChunkLoadClass & cload)
  
 void StaticLightCullClass::Assign_Vis_IDs(void)
 {
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return;
+	}
+
 	/*
 	** Allocate sector ID's for each light.
 	*/
@@ -154,7 +159,7 @@ void StaticLightCullClass::Assign_Vis_IDs(void)
 
 		LightPhysClass * obj = get_first_object(node);
 		while(obj) {
-			obj->Set_Vis_Sector_ID(PhysicsSceneClass::Get_Instance()->Allocate_Vis_Sector_ID());
+			obj->Set_Vis_Sector_ID(world->Allocate_Vis_Sector_ID());
 			obj = get_next_object(obj);
 		}
 	}

@@ -2783,7 +2783,9 @@ RaveshawBossGameObjClass::STATE_IMPL_BEGIN(RAVESHAW_STATE_DEATH_LANDING) (void)
 	//	Play a landing sound.
 	//
 	WWAudioClass::Get_Instance ()->Create_Instant_Sound ("Rav_Death_Fall", Get_Transform ());
-	COMBAT_SCENE->Add_Camera_Shake (RaveshawPos, 40.0, 0.75F, 0.125F);
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Add_Camera_Shake (RaveshawPos, 40.0, 0.75F, 0.125F);
+	}
 	return ;
 }
 
@@ -3089,7 +3091,9 @@ RaveshawBossGameObjClass::STATE_IMPL_THINK(JUMP_STATE_LANDING) (void)
 		//	Play the landing sound
 		//
 		WWAudioClass::Get_Instance ()->Create_Instant_Sound ("Rav_Land_On_Metal", Get_Transform ());
-		COMBAT_SCENE->Add_Camera_Shake (RaveshawPos, 40.0, 0.75F, 0.125F);
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Add_Camera_Shake (RaveshawPos, 40.0, 0.75F, 0.125F);
+		}
 	}
 
 	LastMeleeAnimFrame = curr_frame;
@@ -3743,7 +3747,7 @@ RaveshawBossGameObjClass::Get_Distance_From_Ground (void)
 	PhysRayCollisionTestClass raytest (ray, &res, DEFAULT_COLLISION_GROUP, COLLISION_TYPE_PHYSICAL);
 
 	Peek_Physical_Object ()->Inc_Ignore_Counter ();
-	COMBAT_SCENE->Cast_Ray (raytest);
+	COMBAT_WORLD->Cast_Ray (raytest);
 	Peek_Physical_Object ()->Dec_Ignore_Counter ();
 
 	//
@@ -3882,7 +3886,7 @@ RaveshawBossGameObjClass::Link_Player_To_Hands (void)
 	//
 	CastResultStruct result;
 	PhysAABoxCollisionTestClass col_test (collision_box, vector, &result, DEFAULT_COLLISION_GROUP, COLLISION_TYPE_PHYSICAL);
-	bool retval = COMBAT_SCENE->Cast_AABox (col_test);
+bool retval = COMBAT_WORLD->Cast_AABox (col_test);
 	if (retval == false && result.StartBad == false && result.Fraction == 1.0F) {
 
 		//
@@ -4063,7 +4067,7 @@ RaveshawBossGameObjClass::Fly_Move (PhysicalGameObj *game_obj, const Vector3 &ve
 	//
 	//	Find where we hit
 	//
-	bool retval = COMBAT_SCENE->Cast_AABox (col_test);
+bool retval = COMBAT_WORLD->Cast_AABox (col_test);
 	if (result.StartBad == false) {
 		
 		//
@@ -4256,7 +4260,7 @@ RaveshawBossGameObjClass::Collect_Lightning_Rods (void)
 	//	Collect all the static objects in this box
 	//
 	NonRefPhysListClass obj_list;
-	COMBAT_SCENE->Collect_Objects (box, true, false, &obj_list);
+	COMBAT_WORLD->Collect_Objects (box, true, false, &obj_list);
 
 	//
 	//	Loop over all the objects

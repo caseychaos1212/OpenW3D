@@ -2742,7 +2742,9 @@ SakuraBossGameObj::Find_Closest_Human_Player (void)
 	// Collect the dynamic physics objects in the valley
 	//
 	NonRefPhysListClass objs_in_valley;
-	PhysicsSceneClass::Get_Instance ()->Collect_Objects (valley_box, false, true, &objs_in_valley);
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Collect_Objects (valley_box, false, true, &objs_in_valley);
+	}
 	
 	//
 	//	Loop over all the objects

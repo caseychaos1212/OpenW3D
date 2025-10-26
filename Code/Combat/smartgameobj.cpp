@@ -838,7 +838,9 @@ bool	SmartGameObj::Is_Obj_Visible( PhysicalGameObj *obj )
 			LineSegClass ray( me, him );
 			PhysRayCollisionTestClass raytest(ray, &res, BULLET_COLLISION_GROUP);
 { WWPROFILE( "Cast Ray" );
-			PhysicsSceneClass::Get_Instance()->Cast_Ray(raytest);
+			if (COMBAT_WORLD != NULL) {
+				COMBAT_WORLD->Cast_Ray(raytest);
+			}
 }
 
 			Peek_Physical_Object()->Dec_Ignore_Counter();

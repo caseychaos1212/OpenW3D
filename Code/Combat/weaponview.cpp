@@ -166,7 +166,7 @@ bool	WeaponViewClass::Save( ChunkSaveClass &csave )
 {
 	csave.Begin_Chunk( CHUNKID_VARIABLES );
 		// If the scene has our hands, we must save and swizzle them
-		if ( HandsPhysObj != NULL && COMBAT_SCENE->Contains( HandsPhysObj ) ) {
+		if ( HandsPhysObj != NULL && COMBAT_WORLD != NULL && COMBAT_WORLD->Contains( HandsPhysObj ) ) {
 			WRITE_MICRO_CHUNK_PTR( csave, MICROCHUNKID_HANDS_PHYS_OBJ, HandsPhysObj );
 		}
 		WRITE_MICRO_CHUNK( csave, MICROCHUNKID_ENABLED, WeaponViewEnabled );
@@ -281,8 +281,8 @@ void 	WeaponViewClass::Think()
 
 	// If not in first person mode, hide the model and bail
 	if ( bail ) {
-		if ( HandsPhysObj != NULL && COMBAT_SCENE->Contains( HandsPhysObj ) ) {
-			COMBAT_SCENE->Remove_Object( HandsPhysObj );
+			if ( HandsPhysObj != NULL && COMBAT_WORLD != NULL && COMBAT_WORLD->Contains( HandsPhysObj ) ) {
+				COMBAT_WORLD->Remove_Object( HandsPhysObj );
 		}
 
 		// To force an enter when we come back
@@ -421,8 +421,8 @@ void 	WeaponViewClass::Think()
 		}
 
 		// Add all rendobjs from the scene
-		if ( !COMBAT_SCENE->Contains( HandsPhysObj ) ) {
-			COMBAT_SCENE->Add_Dynamic_Object( HandsPhysObj );
+			if ( COMBAT_WORLD != NULL && !COMBAT_WORLD->Contains( HandsPhysObj ) ) {
+				COMBAT_WORLD->Add_Dynamic_Object( HandsPhysObj );
 
 			if ( new_weapon_state == WEAPON_STATE_ENTER ) {
 				new_weapon_state = WEAPON_STATE_IDLE;
@@ -578,8 +578,8 @@ void 	WeaponViewClass::Think()
 					COMBAT_STAR->Peek_Physical_Object()->Inc_Ignore_Counter();
 				}
 				WWPROFILE( "Cast Ray" );
-				WWASSERT(COMBAT_SCENE != NULL);
-				COMBAT_SCENE->Cast_Ray( raytest );
+					WWASSERT(COMBAT_WORLD != NULL);
+					COMBAT_WORLD->Cast_Ray( raytest );
 				if (COMBAT_STAR != NULL && COMBAT_STAR->Peek_Physical_Object()!=NULL) {
 					COMBAT_STAR->Peek_Physical_Object()->Dec_Ignore_Counter();
 				}
@@ -798,8 +798,8 @@ static void	Release_Hands_Assets( void )
 	HandAnimControl.Set_Animation( (HAnimClass*)NULL );
 
 	if ( HandsPhysObj != NULL ) {
-		if ( COMBAT_SCENE->Contains( HandsPhysObj ) ) {
-			COMBAT_SCENE->Remove_Object( HandsPhysObj );
+			if ( COMBAT_WORLD != NULL && COMBAT_WORLD->Contains( HandsPhysObj ) ) {
+				COMBAT_WORLD->Remove_Object( HandsPhysObj );
 		}
 		HandsPhysObj->Release_Ref();
 		HandsPhysObj = NULL;

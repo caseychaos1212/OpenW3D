@@ -158,7 +158,9 @@ void VehiclePhysClass::Update_Wheels (void)
 		Wheels[i]->Update_Model();
 	}
 	
-	PhysicsSceneClass::Get_Instance()->Release_Collision_Region();
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Release_Collision_Region();
+	}
 	Dec_Ignore_Counter();
 
 	return ;

@@ -86,7 +86,9 @@ ProjectorManagerClass::~ProjectorManagerClass(void)
 void ProjectorManagerClass::Free(void)
 {
 	if (Projector) {
-		PhysicsSceneClass::Get_Instance()->Remove_Texture_Projector(Projector);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Remove_Texture_Projector(Projector);
+		}
 		Projector->Release_Ref();
 		Projector = NULL;
 	}
@@ -170,9 +172,13 @@ void ProjectorManagerClass::Init(const ProjectorManagerDefClass & def,RenderObjC
 			Set_Flag(IS_ANIMATED,(def.IsAnimated) && (ProjectorBoneIndex != 0));
 			
 			if (Get_Flag(IS_ANIMATED)) {
-				PhysicsSceneClass::Get_Instance()->Add_Dynamic_Texture_Projector(Projector);
+				if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+					world->Add_Dynamic_Texture_Projector(Projector);
+				}
 			} else {
-				PhysicsSceneClass::Get_Instance()->Add_Static_Texture_Projector(Projector);
+				if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+					world->Add_Static_Texture_Projector(Projector);
+				}
 			}
 		}
 	}

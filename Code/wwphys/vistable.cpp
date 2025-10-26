@@ -399,9 +399,10 @@ int CompressedVisTableClass::Get_Byte_Count(void) const
 void CompressedVisTableClass::Load(ChunkLoadClass & cload)
 {
 	WWMEMLOG(MEM_VIS);
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
 	VisTableClass * old_table = NULL;
-	if (Buffer != NULL) {
-		old_table = NEW_REF(VisTableClass,(this,PhysicsSceneClass::Get_Instance()->Get_Vis_Table_Size(),0));
+	if ((Buffer != NULL) && (world != NULL)) {
+		old_table = NEW_REF(VisTableClass,(this,world->Get_Vis_Table_Size(),0));
 		delete[] Buffer;
 	}
 	
@@ -426,7 +427,9 @@ void CompressedVisTableClass::Load(ChunkLoadClass & cload)
 		switch (cload.Cur_Chunk_ID()) {
 		case VISTABLE_CHUNK_BYTES:
 			cload.Read(Buffer,BufferSize);
-			PhysicsSceneClass::Get_Instance()->Reset_Vis();
+			if (world != NULL) {
+				world->Reset_Vis();
+			}
 			load_error = true;
 			break;
 		case VISTABLE_CHUNK_LZOBYTES:
@@ -445,8 +448,8 @@ void CompressedVisTableClass::Load(ChunkLoadClass & cload)
 	** if we loaded a valid vis table and we had a previous valid table, merge
 	** the two together
 	*/
-	if ((load_error == false) && (old_table != NULL)) {
-		VisTableClass * new_table = NEW_REF(VisTableClass,(this,PhysicsSceneClass::Get_Instance()->Get_Vis_Table_Size(),0));
+	if ((load_error == false) && (old_table != NULL) && (world != NULL)) {
+		VisTableClass * new_table = NEW_REF(VisTableClass,(this,world->Get_Vis_Table_Size(),0));
 		new_table->Merge(*old_table);
 		Compress(new_table->Get_Bytes(),new_table->Get_Byte_Count());
 		REF_PTR_RELEASE(new_table);

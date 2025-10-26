@@ -109,7 +109,9 @@ void TimedDecorationPhysClass::Timestep(float dt)
 				result = Observer->Object_Expired(this);
 			}
 			if (result == EXPIRATION_APPROVED) {
-				PhysicsSceneClass::Get_Instance()->Delayed_Remove_Object(this);
+				if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+					world->Delayed_Remove_Object(this);
+				}
 			}
 		}
 	}

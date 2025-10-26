@@ -79,8 +79,12 @@ void DynamicShadowManagerClass::Update_Shadow(void)
 	**   - initialize the projection parameters, depending on: blob/real,point/directional
 	**   - set the shadow's intensity by attenuating it with distance from lightsource
 	*/
-	PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
-	PhysicsSceneClass::ShadowEnum shadow_mode = scene->Get_Shadow_Mode();
+	PhysicsWorldClass * scene = PhysicsWorldClass::Get_Active_World();
+	if (scene == NULL) {
+		Release_Shadow();
+		return;
+	}
+	PhysicsWorldClass::ShadowEnum shadow_mode = scene->Get_Shadow_Mode();
 	
 	float near_atten;
 	float far_atten;
@@ -279,7 +283,10 @@ void DynamicShadowManagerClass::Update_Shadow(void)
 void DynamicShadowManagerClass::Allocate_Shadow(void)
 {
 	if (Shadow == NULL) {
-		PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
+		PhysicsWorldClass * scene = PhysicsWorldClass::Get_Active_World();
+		if (scene == NULL) {
+			return;
+		}
 		
 		Shadow = NEW_REF(DynTexProjectClass,(&Parent));
 		Shadow->Enable_Attenuation(true);
@@ -296,8 +303,10 @@ void DynamicShadowManagerClass::Allocate_Shadow(void)
 void DynamicShadowManagerClass::Release_Shadow(void)
 {
 	if (Shadow) {
-		if (PhysicsSceneClass::Get_Instance()->Contains(Shadow)) {
-			PhysicsSceneClass::Get_Instance()->Remove_Dynamic_Texture_Projector(Shadow);
+		if (PhysicsWorldClass * scene = PhysicsWorldClass::Get_Active_World()) {
+			if (scene->Contains(Shadow)) {
+				scene->Remove_Dynamic_Texture_Projector(Shadow);
+			}
 		}
 		Shadow->Release_Ref();
 		Shadow = NULL;

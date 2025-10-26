@@ -415,10 +415,10 @@ TextureClass * DynamicShadowTexMgrClass::Allocate_Render_Target_Texture(void)
 
 /************************************************************************************
 **
-** PhysicsSceneClass Texture Projection Code
+** PhysicsWorldClass Texture Projection Code
 **
 ************************************************************************************/
-void PhysicsSceneClass::Release_Projector_Resources(void)
+void PhysicsWorldClass::Release_Projector_Resources(void)
 {
 	if (ShadowRenderContext != NULL) {
 		delete ShadowRenderContext;
@@ -433,29 +433,29 @@ void PhysicsSceneClass::Release_Projector_Resources(void)
 }
 
 
-void PhysicsSceneClass::Set_Shadow_Resolution(unsigned int res)
+void PhysicsWorldClass::Set_Shadow_Resolution(unsigned int res)
 {
 	_DynamicShadowTexMgr.Set_Shadow_Resolution(res);
 }
 
-unsigned int PhysicsSceneClass::Get_Shadow_Resolution(void)
+unsigned int PhysicsWorldClass::Get_Shadow_Resolution(void)
 {
 	return _DynamicShadowTexMgr.Get_Shadow_Resolution();
 }
 
-void PhysicsSceneClass::Set_Max_Simultaneous_Shadows(unsigned int count)
+void PhysicsWorldClass::Set_Max_Simultaneous_Shadows(unsigned int count)
 {
 	_DynamicShadowTexMgr.Set_Max_Simultaneous_Shadows(count);
 }
 
-unsigned int PhysicsSceneClass::Get_Max_Simultaneous_Shadows(void)
+unsigned int PhysicsWorldClass::Get_Max_Simultaneous_Shadows(void)
 {
 	return _DynamicShadowTexMgr.Get_Max_Simultaneous_Shadows();
 }
 
 
 SpecialRenderInfoClass *
-PhysicsSceneClass::Get_Shadow_Render_Context(int width,int height)
+PhysicsWorldClass::Get_Shadow_Render_Context(int width,int height)
 {
 	if (ShadowRenderContext == NULL) {
 		/*
@@ -477,7 +477,7 @@ PhysicsSceneClass::Get_Shadow_Render_Context(int width,int height)
 	return ShadowRenderContext;
 }
 
-MaterialPassClass * PhysicsSceneClass::Get_Shadow_Material_Pass(void)
+MaterialPassClass * PhysicsWorldClass::Get_Shadow_Material_Pass(void)
 {
 	if (ShadowMaterialPass == NULL) {
 
@@ -505,27 +505,27 @@ MaterialPassClass * PhysicsSceneClass::Get_Shadow_Material_Pass(void)
 	return ShadowMaterialPass;
 }
 
-void PhysicsSceneClass::Enable_Static_Projectors(bool onoff)
+void PhysicsWorldClass::Enable_Static_Projectors(bool onoff)
 {
 	StaticProjectorsEnabled = onoff;
 }
 
-bool PhysicsSceneClass::Are_Static_Projectors_Enabled(void)
+bool PhysicsWorldClass::Are_Static_Projectors_Enabled(void)
 {
 	return StaticProjectorsEnabled;
 }
 
-void PhysicsSceneClass::Enable_Dynamic_Projectors(bool onoff)
+void PhysicsWorldClass::Enable_Dynamic_Projectors(bool onoff)
 {
 	DynamicProjectorsEnabled = onoff;
 }
 
-bool PhysicsSceneClass::Are_Dynamic_Projectors_Enabled(void)
+bool PhysicsWorldClass::Are_Dynamic_Projectors_Enabled(void)
 {
 	return DynamicProjectorsEnabled;
 }
 
-void PhysicsSceneClass::Set_Shadow_Mode(ShadowEnum shadow_mode)
+void PhysicsWorldClass::Set_Shadow_Mode(ShadowEnum shadow_mode)
 {
 	if (((int)shadow_mode >= 0) && ((int)shadow_mode < SHADOW_MODE_COUNT)) {
 		if (ShadowMode!=shadow_mode) {
@@ -548,13 +548,13 @@ void PhysicsSceneClass::Set_Shadow_Mode(ShadowEnum shadow_mode)
 	}
 }
 
-PhysicsSceneClass::ShadowEnum
-PhysicsSceneClass::Get_Shadow_Mode(void)
+PhysicsWorldClass::ShadowEnum
+PhysicsWorldClass::Get_Shadow_Mode(void)
 {
 	return ShadowMode;
 }
 
-void PhysicsSceneClass::Set_Shadow_Attenuation(float atten_start_distance,float atten_end_distance)
+void PhysicsWorldClass::Set_Shadow_Attenuation(float atten_start_distance,float atten_end_distance)
 {
 	if (atten_start_distance < 0.0f) {
 		atten_start_distance = 0.0f;
@@ -566,7 +566,7 @@ void PhysicsSceneClass::Set_Shadow_Attenuation(float atten_start_distance,float 
 	ShadowAttenEnd = atten_end_distance;
 }
 
-void PhysicsSceneClass::Get_Shadow_Attenuation(float * set_atten_start,float * set_atten_end)
+void PhysicsWorldClass::Get_Shadow_Attenuation(float * set_atten_start,float * set_atten_end)
 {
 	if (set_atten_start != NULL) {
 		*set_atten_start = ShadowAttenStart;
@@ -577,7 +577,7 @@ void PhysicsSceneClass::Get_Shadow_Attenuation(float * set_atten_start,float * s
 	}
 }
 
-void PhysicsSceneClass::Set_Shadow_Normal_Intensity(float normal_intensity)
+void PhysicsWorldClass::Set_Shadow_Normal_Intensity(float normal_intensity)
 {
 	if (normal_intensity < 0.0f) {
 		normal_intensity = 0.0f;
@@ -588,12 +588,12 @@ void PhysicsSceneClass::Set_Shadow_Normal_Intensity(float normal_intensity)
 	ShadowNormalIntensity = normal_intensity;
 }
 
-float PhysicsSceneClass::Get_Shadow_Normal_Intensity(void)
+float PhysicsWorldClass::Get_Shadow_Normal_Intensity(void)
 {
 	return ShadowNormalIntensity;
 }
 
-void PhysicsSceneClass::Add_Static_Texture_Projector(TexProjectClass * newprojector)
+void PhysicsWorldClass::Add_Static_Texture_Projector(TexProjectClass * newprojector)
 {
 	WWASSERT(newprojector);
 	WWASSERT(!StaticProjectorList.Is_In_List(newprojector));
@@ -602,7 +602,7 @@ void PhysicsSceneClass::Add_Static_Texture_Projector(TexProjectClass * newprojec
 	StaticProjectorCullingSystem->Add_Object(newprojector);
 }
 
-void PhysicsSceneClass::Remove_Static_Texture_Projector(TexProjectClass * projector)
+void PhysicsWorldClass::Remove_Static_Texture_Projector(TexProjectClass * projector)
 {
 	WWASSERT(projector);
 
@@ -613,7 +613,7 @@ void PhysicsSceneClass::Remove_Static_Texture_Projector(TexProjectClass * projec
 	}
 }
 
-void PhysicsSceneClass::Add_Dynamic_Texture_Projector(TexProjectClass * newprojector)
+void PhysicsWorldClass::Add_Dynamic_Texture_Projector(TexProjectClass * newprojector)
 {
 	WWASSERT(newprojector);
 	WWASSERT(!DynamicProjectorList.Is_In_List(newprojector));
@@ -622,7 +622,7 @@ void PhysicsSceneClass::Add_Dynamic_Texture_Projector(TexProjectClass * newproje
 	DynamicProjectorCullingSystem->Add_Object(newprojector);
 }
 
-void PhysicsSceneClass::Remove_Dynamic_Texture_Projector(TexProjectClass * projector)
+void PhysicsWorldClass::Remove_Dynamic_Texture_Projector(TexProjectClass * projector)
 {
 	WWASSERT(projector);
 
@@ -633,7 +633,7 @@ void PhysicsSceneClass::Remove_Dynamic_Texture_Projector(TexProjectClass * proje
 	}
 }
 
-void PhysicsSceneClass::Remove_Texture_Projector(TexProjectClass * projector)
+void PhysicsWorldClass::Remove_Texture_Projector(TexProjectClass * projector)
 {
 	WWASSERT(projector);
 
@@ -646,12 +646,12 @@ void PhysicsSceneClass::Remove_Texture_Projector(TexProjectClass * projector)
 	}
 }
 
-bool PhysicsSceneClass::Contains(TexProjectClass * projector)
+bool PhysicsWorldClass::Contains(TexProjectClass * projector)
 {
 	return (DynamicProjectorList.Is_In_List(projector) || StaticProjectorList.Is_In_List(projector));
 }
 
-float PhysicsSceneClass::Compute_Projector_Attenuation(TexProjectClass * dynamic_projector,const Vector3 & view_pos,const Vector3 & view_dir)
+float PhysicsWorldClass::Compute_Projector_Attenuation(TexProjectClass * dynamic_projector,const Vector3 & view_pos,const Vector3 & view_dir)
 {
 	Vector3 r;
 	Vector3::Subtract(dynamic_projector->Get_Bounding_Volume().Center,view_pos,&r);
@@ -666,7 +666,7 @@ float PhysicsSceneClass::Compute_Projector_Attenuation(TexProjectClass * dynamic
 }
 
 
-void PhysicsSceneClass::Apply_Projectors
+void PhysicsWorldClass::Apply_Projectors
 (
 	const CameraClass &	camera
 )
@@ -831,7 +831,7 @@ void PhysicsSceneClass::Apply_Projectors
 	DX8Wrapper::Set_Render_Target((IDirect3DSurface9 *)NULL);
 }
 
-void PhysicsSceneClass::Apply_Projector_To_Objects
+void PhysicsWorldClass::Apply_Projector_To_Objects
 (
 	TexProjectClass * tex_proj,
 	const CameraClass &	camera
@@ -1070,7 +1070,7 @@ static bool Test_Render_Target_Surface(TextureClass* render_target)
 	return true;
 }
 
-void PhysicsSceneClass::Invalidate_Static_Shadow_Projectors()
+void PhysicsWorldClass::Invalidate_Static_Shadow_Projectors()
 {
 	/*
 	** Collect a list of all static objects who want to generate a shadow
@@ -1098,7 +1098,7 @@ void PhysicsSceneClass::Invalidate_Static_Shadow_Projectors()
 	_StaticShadowTexMgr.Reset();
 }
 
-void PhysicsSceneClass::Generate_Static_Shadow_Projectors(void)
+void PhysicsWorldClass::Generate_Static_Shadow_Projectors(void)
 {
 	if (!StaticProjectorsDirty) return;
 
@@ -1203,7 +1203,7 @@ void PhysicsSceneClass::Generate_Static_Shadow_Projectors(void)
 	StaticProjectorsDirty=false;
 }
 
-void PhysicsSceneClass::Setup_Static_Directional_Shadow
+void PhysicsWorldClass::Setup_Static_Directional_Shadow
 (
 	StaticAnimPhysClass & obj,
 	const Vector3 & light_dir,

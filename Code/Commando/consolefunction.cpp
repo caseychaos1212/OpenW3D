@@ -215,8 +215,8 @@ public:
 	virtual	const char * Get_Help( void ) override	{ return "DSAPO_RESET - force all DSAPO's back to their initial state."; }
 	virtual	void Activate( const char * input ) override {
 
-		if (COMBAT_SCENE) {
-			RefPhysListIterator	it = COMBAT_SCENE->Get_Static_Anim_Object_Iterator();
+		if (COMBAT_WORLD) {
+			RefPhysListIterator	it = COMBAT_WORLD->Get_Static_Anim_Object_Iterator();
 			for (it.First();!it.Is_Done();it.Next()) {
 
 				if (it.Peek_Obj()->Get_Factory().Chunk_ID() == PHYSICS_CHUNKID_DAMAGEABLESTATICPHYS) {
@@ -414,17 +414,22 @@ class LightModeConsoleFunctionClass : public ConsoleFunctionClass {
 	virtual	const char * Get_Name (void) override	{ return "light_mode"; }
 	virtual	const char * Get_Help (void) override	{ return "LIGHT_MODE <0,1,2> - 0=none, 1=surrender, 2=cheap."; }
 	virtual	void Activate (const char *input) override {
-		int mode;
-		if (sscanf(input, "%d", &mode) == 1) {
-			COMBAT_SCENE->Set_Lighting_Mode(mode);
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
 		}
 
-		switch(COMBAT_SCENE->Get_Lighting_Mode()) {
-		case PhysicsSceneClass::LIGHTING_MODE_SURRENDER:
+		int mode;
+		if (sscanf(input, "%d", &mode) == 1) {
+			COMBAT_WORLD->Set_Lighting_Mode(mode);
+		}
+
+		switch(COMBAT_WORLD->Get_Lighting_Mode()) {
+		case PhysicsWorldClass::LIGHTING_MODE_SURRENDER:
 			Print ("Lighting Mode: SURRENDER");
 			break;
 
-		case PhysicsSceneClass::LIGHTING_MODE_CHEAP:
+		case PhysicsWorldClass::LIGHTING_MODE_CHEAP:
 			Print ("Lighting Mode: CHEAP");
 			break;
 
@@ -439,8 +444,12 @@ class LightDebugToggleConsoleFunctionClass : public ConsoleFunctionClass {
 	virtual	const char * Get_Name (void) override	{ return "light_debug"; }
 	virtual	const char * Get_Help (void) override	{ return "LIGHT_DEBUG - toggles lighting debugging on/off."; }
 	virtual	void Activate (const char *input) override {
-		COMBAT_SCENE->Enable_Lighting_Debug_Display(!COMBAT_SCENE->Is_Lighting_Debug_Display_Enabled());
-		if (COMBAT_SCENE->Is_Lighting_Debug_Display_Enabled()) {
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		COMBAT_WORLD->Enable_Lighting_Debug_Display(!COMBAT_WORLD->Is_Lighting_Debug_Display_Enabled());
+		if (COMBAT_WORLD->Is_Lighting_Debug_Display_Enabled()) {
 			Print ("Lighting debug display ENABLED");
 		} else {
 			Print ("Lighting debug display DISABLED");
@@ -452,11 +461,15 @@ class LightLODConsoleFunctionClass : public ConsoleFunctionClass {
 	virtual	const char * Get_Name (void) override	{ return "light_lod"; }
 	virtual	const char * Get_Help (void) override	{ return "LIGHT_LOD <intensity> - sets the LOD cutoff for lighting."; }
 	virtual	void Activate (const char *input) override {
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
 		float inten;
 		if (sscanf(input, "%f", &inten) == 1) {
-			COMBAT_SCENE->Set_Lighting_LOD_Cutoff(inten);
+			COMBAT_WORLD->Set_Lighting_LOD_Cutoff(inten);
 		}
-		Print("Lighting LOD: %d\r\n",COMBAT_SCENE->Get_Lighting_LOD_Cutoff());
+		Print("Lighting LOD: %d\r\n",COMBAT_WORLD->Get_Lighting_LOD_Cutoff());
 	}
 };
 
@@ -465,7 +478,7 @@ public:
 	virtual	const char * Get_Name( void ) override	{ return "light_calc"; }
 	virtual	const char * Get_Help( void ) override	{ return "LIGHT_CALC - computes a static vertex lighting solve"; }
 	virtual	void Activate( const char * input ) override {
-		if (COMBAT_SCENE) {
+		if (COMBAT_WORLD) {
 			LightSolveContextClass context;
 			LightSolveClass::Generate_Static_Light_Solve(context);
 		}
@@ -492,8 +505,12 @@ public:
 	virtual	const char * Get_Name( void ) override	{ return "vis_toggle"; }
 	virtual	const char * Get_Help( void ) override	{ return "VIS_TOGGLE - toggles vis culling."; }
 	virtual	void Activate( const char * input ) override {
-		COMBAT_SCENE->Enable_Vis(!COMBAT_SCENE->Is_Vis_Enabled());
-		if (COMBAT_SCENE->Is_Vis_Enabled()) {
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		COMBAT_WORLD->Enable_Vis(!COMBAT_WORLD->Is_Vis_Enabled());
+		if (COMBAT_WORLD->Is_Vis_Enabled()) {
 			Print("vis enabled\n");
 		} else {
 			Print("vis disabled\n");
@@ -508,8 +525,12 @@ public:
 	virtual	const char * Get_Help( void ) override	{ return "VIS_INVERT - toggles vis invert setting."; }
 	virtual	void Activate( const char * input ) override {
 
-		COMBAT_SCENE->Invert_Vis(!COMBAT_SCENE->Is_Vis_Inverted());
-		if (COMBAT_SCENE->Is_Vis_Inverted()) {
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		COMBAT_WORLD->Invert_Vis(!COMBAT_WORLD->Is_Vis_Inverted());
+		if (COMBAT_WORLD->Is_Vis_Inverted()) {
 			Print("vis_invert enabled\n");
 		} else {
 			Print("vis_invert disabled\n");
@@ -524,9 +545,13 @@ public:
 	virtual	const char * Get_Help( void ) override	{ return "VIS_GRID_DISPLAY <0,1,2,3> - 0=off, 1=boxes, 2=centers, 3=occupied."; }
 	virtual	void Activate( const char * input ) override {
 
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
 		int mode = 0;
 		if (sscanf(input, "%d", &mode) == 1) {
-			COMBAT_SCENE->Set_Vis_Grid_Display_Mode(mode);
+			COMBAT_WORLD->Set_Vis_Grid_Display_Mode(mode);
 			if (mode == 0) {
 				Print("vis_grid_display off\n");
 			} else if (mode == 1) {
@@ -547,36 +572,40 @@ public:
 	virtual	const char * Get_Help( void ) override	{ return "VIS_GRID_DEBUG <p,s,f,b,r> - p=parent,s=sibling,f=front,b=back,r=reset"; }
 	virtual	void Activate( const char * input ) override {
 
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
 		char mode = 0;
 		if (sscanf(input, "%c", &mode) == 1) {
 			mode = toupper(mode);
 
 			if (mode == 'P') {
-				if (COMBAT_SCENE->Vis_Grid_Debug_Enter_Parent()) {
+				if (COMBAT_WORLD->Vis_Grid_Debug_Enter_Parent()) {
 					Print("Entered parent node\n");
 				} else {
 					Print("No parent node\n");
 				}
 			} else if (mode == 'S') {
-				if (COMBAT_SCENE->Vis_Grid_Debug_Enter_Sibling()) {
+				if (COMBAT_WORLD->Vis_Grid_Debug_Enter_Sibling()) {
 					Print("Entered sibling\n");
 				} else {
 					Print("No sibling\n");
 				}
 			} else if (mode == 'F') {
-				if (COMBAT_SCENE->Vis_Grid_Debug_Enter_Front_Child()) {
+				if (COMBAT_WORLD->Vis_Grid_Debug_Enter_Front_Child()) {
 					Print("Entered front child\n");
 				} else {
 					Print("No front child\n");
 				}
 			} else if (mode == 'B') {
-				if (COMBAT_SCENE->Vis_Grid_Debug_Enter_Back_Child()) {
+				if (COMBAT_WORLD->Vis_Grid_Debug_Enter_Back_Child()) {
 					Print("Entered back child\n");
 				} else {
 					Print("No back child\n");
 				}
 			} else if (mode == 'R') {
-				COMBAT_SCENE->Vis_Grid_Debug_Reset_Node();
+				COMBAT_WORLD->Vis_Grid_Debug_Reset_Node();
 				Print("Reset to root\n");
 			}
 		}
@@ -606,8 +635,12 @@ public:
 	virtual	const char * Get_Help( void ) override	{ return "VIS_LOCK_SAMPLE_POINT - locks/unlocks the current pvs."; }
 	virtual	void Activate( const char * input ) override {
 
-		COMBAT_SCENE->Lock_Vis_Sample_Point(!COMBAT_SCENE->Is_Vis_Sample_Point_Locked());
-		if (COMBAT_SCENE->Is_Vis_Sample_Point_Locked()) {
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		COMBAT_WORLD->Lock_Vis_Sample_Point(!COMBAT_WORLD->Is_Vis_Sample_Point_Locked());
+		if (COMBAT_WORLD->Is_Vis_Sample_Point_Locked()) {
 			Print("Vis sample point locked.\n");
 		} else {
 			Print("Vis sample point unlocked.\n");
@@ -622,8 +655,12 @@ public:
 	virtual	const char * Get_Help( void ) override	{ return "VIS_SECTOR_DISPLAY - toggles diplay of the current vis sector."; }
 	virtual	void Activate( const char * input ) override {
 
-		COMBAT_SCENE->Enable_Vis_Sector_Display(!COMBAT_SCENE->Is_Vis_Sector_Display_Enabled());
-		if (COMBAT_SCENE->Is_Vis_Sector_Display_Enabled()) {
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		COMBAT_WORLD->Enable_Vis_Sector_Display(!COMBAT_WORLD->Is_Vis_Sector_Display_Enabled());
+		if (COMBAT_WORLD->Is_Vis_Sector_Display_Enabled()) {
 			Print("vis_sector_display enabled\n");
 		} else {
 			Print("vis_sector_display disabled\n");
@@ -638,8 +675,12 @@ public:
 	virtual	const char * Get_Help( void ) override	{ return "VIS_SECTOR_HISTORY - toggles diplay of the previous 3 vis sectors."; }
 	virtual	void Activate( const char * input ) override {
 
-		COMBAT_SCENE->Enable_Vis_Sector_History_Display(!COMBAT_SCENE->Is_Vis_Sector_History_Display_Enabled());
-		if (COMBAT_SCENE->Is_Vis_Sector_History_Display_Enabled()) {
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		COMBAT_WORLD->Enable_Vis_Sector_History_Display(!COMBAT_WORLD->Is_Vis_Sector_History_Display_Enabled());
+		if (COMBAT_WORLD->Is_Vis_Sector_History_Display_Enabled()) {
 			Print("vis_sector_history enabled\n");
 		} else {
 			Print("vis_sector_history disabled\n");
@@ -672,11 +713,15 @@ class ShadowAttenuationConsoleFunctionClass : public ConsoleFunctionClass
 	virtual	const char * Get_Name( void ) override	{ return "shadow_attenuation"; }
 	virtual	const char * Get_Help( void ) override	{ return "SHADOW_ATTENUATION <near> <far> - set the attenuation ranges for shadows."; }
 	virtual	void Activate( const char * input ) override {
-		PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
+		PhysicsWorldClass * world = COMBAT_WORLD;
+		if (world == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
 		float znear,zfar;
 		if (sscanf(input, "%f %f",&znear,&zfar) == 2) {
-			scene->Set_Shadow_Attenuation(znear,zfar);
-			scene->Get_Shadow_Attenuation(&znear,&zfar);
+			world->Set_Shadow_Attenuation(znear,zfar);
+			world->Get_Shadow_Attenuation(&znear,&zfar);
 			Print("shadow attenuation set to %f %f\n",znear,zfar);
 		}
 	}
@@ -705,12 +750,16 @@ class ShadowElevationConsoleFunctionClass : public ConsoleFunctionClass
 		** NOTE: THIS IS JUST TEST CODE TO SEE HOW VARIOUS SHADOW ALGORITHMS
 		** WORK WITH VARIOUS SUN-LIGHT ANGLES.  THE SUN IS NOT TO BE MOVED IN-GAME!!!
 		*/
-		PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
+		PhysicsWorldClass * world = COMBAT_WORLD;
+		if (world == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
 
 		float elevation,rotation;
-		scene->Get_Sun_Light_Orientation(&rotation,&elevation);
+		world->Get_Sun_Light_Orientation(&rotation,&elevation);
 		if (sscanf(input, "%f",&elevation) == 1) {
-			scene->Set_Sun_Light_Orientation(rotation,DEG_TO_RADF(elevation));
+			world->Set_Sun_Light_Orientation(rotation,DEG_TO_RADF(elevation));
 		}
 	}
 };
@@ -722,9 +771,13 @@ class ShadowIntensityConsoleFunctionClass : public ConsoleFunctionClass
 	virtual	const char * Get_Help( void ) override	{ return "SHADOW_INTENSITY <intensity> - sets the darkness of dynamic shadows (0 - 1)."; }
 	virtual	void Activate( const char * input ) override
 	{
-		PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
-		scene->Set_Shadow_Normal_Intensity(atof(input));
-		Print("shadow intensity set to: %f\n",scene->Get_Shadow_Normal_Intensity());
+		PhysicsWorldClass * world = COMBAT_WORLD;
+		if (world == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		world->Set_Shadow_Normal_Intensity(atof(input));
+		Print("shadow intensity set to: %f\n",world->Get_Shadow_Normal_Intensity());
 	}
 };
 
@@ -749,9 +802,13 @@ class ShadowResolutionConsoleFunctionClass : public ConsoleFunctionClass
 	virtual	const char * Get_Help( void ) override	{ return "SHADOW_RESOLUTION <res> - sets the resolution of dynamic shadows (use a power of 2!)"; }
 	virtual	void Activate( const char * input ) override
 	{
-		PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
-		scene->Set_Shadow_Resolution(atof(input));
-		Print("shadow resolution set to: %f\n",scene->Get_Shadow_Resolution());
+		PhysicsWorldClass * world = COMBAT_WORLD;
+		if (world == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		world->Set_Shadow_Resolution(atof(input));
+		Print("shadow resolution set to: %f\n",world->Get_Shadow_Resolution());
 	}
 };
 
@@ -761,9 +818,13 @@ class ShadowCountConsoleFunctionClass : public ConsoleFunctionClass
 	virtual	const char * Get_Help( void ) override	{ return "SHADOW_COUNT <count> - sets the maximum simultaneous shadows"; }
 	virtual	void Activate( const char * input ) override
 	{
-		PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
-		scene->Set_Max_Simultaneous_Shadows(atof(input));
-		Print("simultaneous shadow count set to: %f\n",scene->Get_Max_Simultaneous_Shadows());
+		PhysicsWorldClass * world = COMBAT_WORLD;
+		if (world == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		world->Set_Max_Simultaneous_Shadows(atof(input));
+		Print("simultaneous shadow count set to: %f\n",world->Get_Max_Simultaneous_Shadows());
 	}
 };
 
@@ -775,8 +836,12 @@ public:
 	virtual	const char * Get_Help( void ) override	{ return "PHYSICS_DEBUG - toggles physics debugging display."; }
 	virtual	void Activate( const char * input ) override {
 
-		COMBAT_SCENE->Enable_Debug_Display(!COMBAT_SCENE->Is_Debug_Display_Enabled());
-		if (COMBAT_SCENE->Is_Debug_Display_Enabled()) {
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		COMBAT_WORLD->Enable_Debug_Display(!COMBAT_WORLD->Is_Debug_Display_Enabled());
+		if (COMBAT_WORLD->Is_Debug_Display_Enabled()) {
 			Print("physics debug display enabled!\n");
 		} else {
 			Print("physics debug display disabled :-(\n");
@@ -825,8 +890,12 @@ public:
 	virtual	const char * Get_Help( void ) override	{ return "PROJECTOR_DEBUG - toggles projector debugging display."; }
 	virtual	void Activate( const char * input ) override {
 
-		COMBAT_SCENE->Enable_Projector_Debug_Display(!COMBAT_SCENE->Is_Projector_Debug_Display_Enabled());
-		if (COMBAT_SCENE->Is_Projector_Debug_Display_Enabled()) {
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		COMBAT_WORLD->Enable_Projector_Debug_Display(!COMBAT_WORLD->Is_Projector_Debug_Display_Enabled());
+		if (COMBAT_WORLD->Is_Projector_Debug_Display_Enabled()) {
 			Print("projector debug display enabled!\n");
 		} else {
 			Print("projector debug display disabled :-(\n");
@@ -841,8 +910,12 @@ public:
 	virtual	const char * Get_Help( void ) override	{ return "DIRTY_CULL_DEBUG - toggles debugging of the dirty-cull-list."; }
 	virtual	void Activate( const char * input ) override {
 
-		COMBAT_SCENE->Enable_Dirty_Cull_Debug_Display(!COMBAT_SCENE->Is_Dirty_Cull_Debug_Display_Enabled());
-		if (COMBAT_SCENE->Is_Dirty_Cull_Debug_Display_Enabled()) {
+		if (COMBAT_WORLD == NULL) {
+			Print("No physics world.\n");
+			return;
+		}
+		COMBAT_WORLD->Enable_Dirty_Cull_Debug_Display(!COMBAT_WORLD->Is_Dirty_Cull_Debug_Display_Enabled());
+		if (COMBAT_WORLD->Is_Dirty_Cull_Debug_Display_Enabled()) {
 			Print("dirty cull debug display enabled!\n");
 		} else {
 			Print("dirty cull debug display disabled.\n");
@@ -1159,14 +1232,14 @@ public:
 	virtual	const char * Get_Name( void ) override	{ return "ambient_light"; }
 	virtual	const char * Get_Help( void ) override	{ return "AMBIENT_LIGHT <R> <G> <B> - sets the ambeint light color to <r> <g> <b>."; }
 	virtual	void Activate( const char * input ) override {
-		if ( COMBAT_SCENE ) {
+		if ( COMBAT_WORLD ) {
 			float r, g, b;
 			if (sscanf(input, "%f %f %f", &r, &g, &b) == 3) {
-		      COMBAT_SCENE->Set_Ambient_Light(Vector3(r, g, b));
-		      Print( "Ambient Light changed\n" );
+	      COMBAT_WORLD->Set_Ambient_Light(Vector3(r, g, b));
+	      Print( "Ambient Light changed\n" );
 			}
 		} else {
-		   Print( "Error : no COMBAT_SCENE\n" );
+	   Print( "Error : no physics world\n" );
 		}
 	}
 };
@@ -1384,7 +1457,7 @@ public:
    virtual	const char * Get_Alias( void ) override { return "rm"; }
 	virtual	const char * Get_Help( void ) override	{ return "RENDER_MODE [0 fill | 1 lines | 2 points] - set the current render mode."; }
 	virtual	void Activate( const char * input ) override {
-		if (COMBAT_SCENE != NULL) {
+		if (COMBAT_WORLD != NULL) {
 			if ((stricmp(input,"points") == 0) || (stricmp(input,"2") == 0)) {
 				COMBAT_SCENE->Set_Polygon_Mode(SceneClass::POINT);
 				Print("Polygon mode set to POINT\n");
@@ -1405,7 +1478,7 @@ public:
    virtual	const char * Get_Alias( void ) override { return "rm"; }
 	virtual	const char * Get_Help( void ) override	{ return "RENDER_MODE_EXTRA_PASS [0 disable | 1 lines | 2 zbuffered]"; }
 	virtual	void Activate( const char * input ) override {
-		if (COMBAT_SCENE != NULL) {
+		if (COMBAT_WORLD != NULL) {
 			if ((stricmp(input,"disable") == 0) || (stricmp(input,"0") == 0)) {
 				COMBAT_SCENE->Set_Extra_Pass_Polygon_Mode(SceneClass::EXTRA_PASS_DISABLE);
 				Print("Extra pass polygon mode set to DISABLE\n");
@@ -1497,10 +1570,10 @@ public:
 
       //ConsoleFunctionManager::Parse_Input("Mesh_Draw_Mode 0");
 
-		if (COMBAT_SCENE != NULL) {
-			COMBAT_SCENE->Enable_Dynamic_Projectors(false);
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Enable_Dynamic_Projectors(false);
 			Print("Dynamic Projectors disabled.\n");
-			COMBAT_SCENE->Enable_Static_Projectors(false);
+			COMBAT_WORLD->Enable_Static_Projectors(false);
 			Print("Static Projectors disabled.\n");
 		}
 
@@ -1527,7 +1600,7 @@ public:
 		** stop rendering non-occluders so that we can get a better idea of what VIS
 		** is seeing when it renders the occluders and checks for backfaces
 		*/
-		PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
+		PhysicsWorldClass * scene = COMBAT_WORLD;
 		if (scene) {
 			scene->Enable_Backface_Occluder_Debug(!scene->Is_Backface_Occluder_Debug_Enabled());
 			if (scene->Is_Backface_Occluder_Debug_Enabled()) {
@@ -3554,9 +3627,15 @@ public:
 				state=!!state;
 			}
 			else {
-				state=!COMBAT_SCENE->Get_Update_Only_Visible_Objects();
+				if (COMBAT_WORLD == NULL) {
+					Print("No physics world.\n");
+					return;
+				}
+				state=!COMBAT_WORLD->Get_Update_Only_Visible_Objects();
 			}
-         COMBAT_SCENE->Set_Update_Only_Visible_Objects(state==1);
+         if (COMBAT_WORLD != NULL) {
+            COMBAT_WORLD->Set_Update_Only_Visible_Objects(state==1);
+         }
 
 			Print( "Client physics optimization %s\n", state ? "ENABLED" : "DISABLED");
 		}
@@ -4366,7 +4445,7 @@ public:
 	virtual	const char * Get_Help (void) override	{return ("TIME_OF_DAY <hours [0..23]> <minutes [0..59]> - sets the time of day for the background.");}
 	virtual	void Activate (const char *input) override {
 
-		if (COMBAT_SCENE != NULL) {
+		if (COMBAT_WORLD != NULL) {
 
 			unsigned hours, minutes;
 
@@ -4376,7 +4455,7 @@ public:
 					const float theta = (((hours * 60.0f) + minutes) / 1440.0f) * 2.0f * WWMATH_PI;
 
 					BackgroundMgrClass::Set_Light_Source_Type (BackgroundMgrClass::LIGHT_SOURCE_TYPE_SUN);
-					COMBAT_SCENE->Set_Sun_Light_Orientation (0.0f, theta + (WWMATH_PI * 1.5f));
+					COMBAT_WORLD->Set_Sun_Light_Orientation (0.0f, theta + (WWMATH_PI * 1.5f));
 					Print ("Time of day changed\n");
 				}
 			}

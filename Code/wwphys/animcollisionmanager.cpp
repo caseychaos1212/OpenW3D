@@ -328,8 +328,14 @@ AnimCollisionManagerClass::CollideableObjClass::Intersect_Scene
 	NonRefPhysListClass * intersect_list
 )
 {
-	if (CollisionMesh == NULL) return;
-	PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
+	if (CollisionMesh == NULL) {
+		return;
+	}
+
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return;
+	}
 
 #if VERBOSE_LOGGING
 	Vector3 pos = CollisionMesh->Get_Transform().Get_Translation();
@@ -342,7 +348,7 @@ AnimCollisionManagerClass::CollideableObjClass::Intersect_Scene
 			MeshClass * mesh = (MeshClass *)CollisionMesh;
 			PhysMeshIntersectionTestClass test(mesh,colgroup,COLLISION_TYPE_PHYSICAL,intersect_list);
 			test.CheckStaticObjs = false;
-			scene->Intersection_Test(test);
+			world->Intersection_Test(test);
 			VERBOSE_LOG(("Mesh intersection: %d\r\n",!intersect_list->Is_Empty()));
 		}
 		break;
@@ -352,7 +358,7 @@ AnimCollisionManagerClass::CollideableObjClass::Intersect_Scene
 			OBBoxRenderObjClass * boxrobj = (OBBoxRenderObjClass *)CollisionMesh;
 			PhysOBBoxIntersectionTestClass test(boxrobj->Get_Box(),colgroup,COLLISION_TYPE_PHYSICAL,intersect_list);
 			test.CheckStaticObjs = false;
-			scene->Intersection_Test(test);
+			world->Intersection_Test(test);
 			VERBOSE_LOG(("OBBox intersection: %d\r\n",!intersect_list->Is_Empty()));
 		}
 		break;
@@ -361,7 +367,7 @@ AnimCollisionManagerClass::CollideableObjClass::Intersect_Scene
 			AABoxRenderObjClass * boxrobj = (AABoxRenderObjClass *)CollisionMesh;
 			PhysAABoxIntersectionTestClass test(boxrobj->Get_Box(),colgroup,COLLISION_TYPE_PHYSICAL,intersect_list);
 			test.CheckStaticObjs = false;
-			scene->Intersection_Test(test);
+			world->Intersection_Test(test);
 			VERBOSE_LOG(("AABox intersection: %d\r\n",!intersect_list->Is_Empty()));
 		}
 		break;

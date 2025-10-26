@@ -237,7 +237,9 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned lon
 	//
 	//	Reset some rendering data
 	//
-	PhysicsSceneClass::Get_Instance()->Release_Projector_Resources ();
+	if (COMBAT_WORLD != NULL) {
+		COMBAT_WORLD->Release_Projector_Resources ();
+	}
 	TheDX8MeshRenderer.Invalidate ();
 
 	//

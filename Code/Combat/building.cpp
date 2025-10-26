@@ -799,7 +799,9 @@ BuildingGameObj::Update_State (bool force_update)
 			light_bounds.Add_Box(light_iterator.Peek_Obj()->Peek_Model()->Get_Bounding_Box());
 		}
 
-		PhysicsSceneClass::Get_Instance()->Invalidate_Lighting_Caches(light_bounds);
+		if (COMBAT_WORLD != NULL) {
+			COMBAT_WORLD->Invalidate_Lighting_Caches(light_bounds);
+		}
 	}
 
 	return ;
@@ -1250,7 +1252,7 @@ BuildingGameObj::Collect_Building_Components (void)
 	// Iterate through all static objects in the level, assigning the building components to
 	// the appropriate building controller
 	//
-	RefPhysListIterator staticobj_iterator = PhysicsSceneClass::Get_Instance()->Get_Static_Object_Iterator();
+	RefPhysListIterator staticobj_iterator = COMBAT_WORLD->Get_Static_Object_Iterator();
 	for (staticobj_iterator.First(); !staticobj_iterator.Is_Done(); staticobj_iterator.Next()) {
 		
 		StaticPhysClass * obj = staticobj_iterator.Peek_Obj()->As_StaticPhysClass ();
@@ -1353,7 +1355,11 @@ BuildingGameObj::Collect_Building_Components (void)
 	// Iterate through all static lights in the level, assigning each building light to 
 	// the appropriate building controller
 	//
-	RefPhysListIterator staticlight_iterator = PhysicsSceneClass::Get_Instance ()->Get_Static_Light_Iterator ();
+	if (COMBAT_WORLD == NULL) {
+		return;
+	}
+
+	RefPhysListIterator staticlight_iterator = COMBAT_WORLD->Get_Static_Light_Iterator ();
 	for (staticlight_iterator.First (); !staticlight_iterator.Is_Done (); staticlight_iterator.Next ()) {
 		
 		LightPhysClass * light = staticlight_iterator.Peek_Obj()->As_LightPhysClass();

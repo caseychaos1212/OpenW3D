@@ -58,6 +58,7 @@
 **
 */
 class PhysicsSceneClass;
+class PhysicsWorldClass;
 class CameraClass;
 class CCameraClass;
 class	SmartGameObj;
@@ -78,6 +79,7 @@ class SoundEnvironmentClass;
 #define	COMBAT_CAMERA				   CombatManager::Get_Camera()
 #define	COMBAT_STAR						CombatManager::Get_The_Star()
 #define	COMBAT_SCENE					CombatManager::Get_Scene()
+#define	COMBAT_WORLD					CombatManager::Get_World()
 #define	COMBAT_DAZZLE_LAYER			CombatManager::Get_Dazzle_Layer()
 
 /*
@@ -128,7 +130,7 @@ public:
 	static	void 	Shutdown( void );
 
 	// Scene_Init is called by the game, but not the editor
-	static	void	Scene_Init( void );
+	static	void	Scene_Init( bool render_available = true );
 
 	// Level Loading functions get called for each level loaded.
 	static	void	Pre_Load_Level( bool render_available = true );
@@ -200,6 +202,7 @@ public:
 
 	// The Scene
 	static	PhysicsSceneClass			*Get_Scene( void );
+	static	PhysicsWorldClass			*Get_World( void );
 	static	SimpleSceneClass			*Get_Background_Scene( void )		{ return BackgroundScene; }
 	static	CCameraClass				*Get_Camera( void )					{ return MainCamera; }
 	static   SoundEnvironmentClass	*Get_Sound_Environment( void )	{ return SoundEnvironment;	}

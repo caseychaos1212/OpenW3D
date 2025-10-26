@@ -173,8 +173,8 @@ void VertexSolveClass::Light_Mesh(LightSolveContextClass & context,MeshClass * m
 	/*
 	** Compute the light solve
 	*/
-	LightClass * sun = PhysicsSceneClass::Get_Instance()->Get_Sun_Light();
-	Vector3 scene_ambient = PhysicsSceneClass::Get_Instance()->Get_Ambient_Light();
+	LightClass * sun = world->Get_Sun_Light();
+	Vector3 scene_ambient = world->Get_Ambient_Light();
 	int callback_counter = 0;
 
 	for (vi=0; vi<model->Get_Vertex_Count(); vi++) {
@@ -274,8 +274,8 @@ void VertexSolveClass::Light_Terrain(LightSolveContextClass & context,RenegadeTe
 	/*
 	** Compute the light solve
 	*/
-	LightClass * sun = PhysicsSceneClass::Get_Instance()->Get_Sun_Light();
-	Vector3 scene_ambient = PhysicsSceneClass::Get_Instance()->Get_Ambient_Light();
+	LightClass * sun = world->Get_Sun_Light();
+	Vector3 scene_ambient = world->Get_Ambient_Light();
 	int callback_counter = 0;
 
 	for (vi = 0; vi < vcount; vi ++) {
@@ -378,7 +378,7 @@ void VertexSolveClass::Add_Light_To_Vertex(LightSolveContextClass & context,int 
 			LineSegClass ray(p0,p1);
 			PhysRayCollisionTestClass raytest(ray,&res,0,COLLISION_TYPE_PROJECTILE);
 			raytest.CheckDynamicObjs = false;
-			PhysicsSceneClass::Get_Instance()->Cast_Ray(raytest);
+			world->Cast_Ray(raytest);
 
 			if (res.Fraction < 1.0f) {
 				is_occluded = true;
@@ -435,7 +435,12 @@ void VertexSolveClass::Grow_Arrays(int vcount)
 
 void LightSolveClass::Generate_Static_Light_Solve(LightSolveContextClass & context)
 {
-	RefPhysListIterator it = PhysicsSceneClass::Get_Instance()->Get_Static_Object_Iterator();
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return;
+	}
+
+	RefPhysListIterator it = world->Get_Static_Object_Iterator();
 	
 	/*
 	** Build a list of the objects to be solved
@@ -515,6 +520,10 @@ void LightSolveClass::Compute_Solve(LightSolveContextClass & context,RefPhysList
 void LightSolveClass::Compute_Solve(LightSolveContextClass & context,StaticPhysClass * obj)
 {
 	WWASSERT(obj != NULL);
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	if (world == NULL) {
+		return;
+	}
 	if (context.Get_Progress().Get_Object_Count() == 0) {
 		context.Get_Progress().Set_Object_Count(1);
 	}
@@ -524,7 +533,7 @@ void LightSolveClass::Compute_Solve(LightSolveContextClass & context,StaticPhysC
 	*/
 	if (obj->Is_Model_Pre_Lit() == false) {
 		NonRefPhysListClass light_list;
-		PhysicsSceneClass::Get_Instance()->Collect_Lights(obj->Get_Cull_Box(),true,false,&light_list);
+		world->Collect_Lights(obj->Get_Cull_Box(),true,false,&light_list);
 		Compute_Solve(context,obj->Peek_Model(),light_list);
 	}
 }
@@ -600,8 +609,3 @@ bool LightSolveClass::Does_Model_Get_Static_Light_Solve(RenderObjClass * model)
 
 	return true;
 }
-
-
-
-
-

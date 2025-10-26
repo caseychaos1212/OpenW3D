@@ -301,7 +301,7 @@ VehicleDriverClass::Drive_Wheeled (void)
 	Matrix3D::Rotate_Vector (tm, Vector3 (bounding_box.Extent.X, 0, 0), &offset);
 	tm.Set_Translation (tm.Get_Translation () - offset);
 
-	PhysicsSceneClass::Get_Instance ()->Add_Debug_AABox (AABoxClass (tm.Get_Translation (), Vector3 (0.5F,0.5F,0.5F)), Vector3 (1, 0, 1));*/
+	if (COMBAT_WORLD != NULL) { COMBAT_WORLD->Add_Debug_AABox (AABoxClass (tm.Get_Translation (), Vector3 (0.5F,0.5F,0.5F)), Vector3 (1, 0, 1)); }*/
 
 	//
 	//	Make sure we have the final destination point

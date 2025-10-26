@@ -685,9 +685,12 @@ int DoorPhysClass::Check_Door_Trigger( const OBBoxClass &trigger_zone )
 
 #else
 
+	if (COMBAT_WORLD == NULL) {
+		return result;
+	}
+
 	NonRefPhysListClass obj_list;
-	WWASSERT(PhysicsSceneClass::Get_Instance() != NULL);
-	PhysicsSceneClass::Get_Instance()->Collect_Objects(trigger_zone,false,true,&obj_list);
+	COMBAT_WORLD->Collect_Objects(trigger_zone,false,true,&obj_list);
 	NonRefPhysListIterator it(&obj_list);
 
 	while (!it.Is_Done() && result == DOOR_OPEN_NOONE) {

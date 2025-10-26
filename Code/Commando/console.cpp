@@ -363,7 +363,7 @@ WWPROFILE( "Input Active" );
 #ifdef WWDEBUG
 {	WWPROFILE( "Vis Check" );
 	if (Get_Text_Display()) {
-		PhysicsSceneClass * scene = PhysicsSceneClass::Get_Instance();
+		PhysicsWorldClass * scene = COMBAT_WORLD;
 		Get_Text_Display()->Display_Vis_Warning( scene && scene->Is_Vis_Sector_Missing() );
 	}
 }
@@ -744,7 +744,9 @@ WWPROFILE( "Input Active" );
 					message += "\n";
 
 					Vector3 curr_pos = sound_obj->Get_Position ();
-					PhysicsSceneClass::Get_Instance ()->Add_Debug_AABox (AABoxClass (curr_pos, Vector3 (0.25F,0.25F,0.25F)), Vector3 (1, 0, 0));
+					if (COMBAT_WORLD != NULL) {
+						COMBAT_WORLD->Add_Debug_AABox (AABoxClass (curr_pos, Vector3 (0.25F,0.25F,0.25F)), Vector3 (1, 0, 0));
+					}
 
 				} else {
 					message += "  --\n";
@@ -776,7 +778,9 @@ WWPROFILE( "Input Active" );
 					message += "\n";
 
 					Vector3 curr_pos = sound_obj->Get_Position ();
-					PhysicsSceneClass::Get_Instance ()->Add_Debug_AABox (AABoxClass (curr_pos, Vector3 (0.25F,0.25F,0.25F)), Vector3 (0, 0, 1));
+					if (COMBAT_WORLD != NULL) {
+						COMBAT_WORLD->Add_Debug_AABox (AABoxClass (curr_pos, Vector3 (0.25F,0.25F,0.25F)), Vector3 (0, 0, 1));
+					}
 
 				} else {
 					message += "  --\n";
@@ -879,13 +883,13 @@ WWPROFILE( "Input Active" );
 			StringClass working_string(true);
 			StringClass message(true);
 
-			PhysicsSceneClass * the_scene = PhysicsSceneClass::Get_Instance();
+			PhysicsWorldClass * the_scene = COMBAT_WORLD;
 
 			working_string.Format("Culling Stats\n");
 			message = working_string;
 
 			if (the_scene != NULL) {
-				const PhysicsSceneClass::StatsStruct & stats = the_scene->Get_Statistics();
+				const PhysicsWorldClass::StatsStruct & stats = the_scene->Get_Statistics();
 				if (stats.FrameCount > 0) {
 					working_string.Format("Frames: %d\n",stats.FrameCount);
 					message += working_string;
@@ -910,7 +914,7 @@ WWPROFILE( "Input Active" );
 		if (StatisticsDisplayManager::Is_Current_Display("physics")) {
 			StringClass working_string(true);
 			StringClass message(true);
-			PhysicsSceneClass * the_scene = PhysicsSceneClass::Get_Instance();
+			PhysicsWorldClass * the_scene = COMBAT_WORLD;
 
 			working_string.Format("Physics Stats\n");
 			message = working_string;
