@@ -417,7 +417,9 @@ void Game_Shutdown(void)
 	DiagLogClass::Shutdown();
 
 //	CommandoAssetManager::Shutdown();
-	WW3D::_Invalidate_Textures();
+	if (!ConsoleBox.Is_Exclusive()) {
+		WW3D::_Invalidate_Textures();
+	}
 	WWASSERT( WW3DAssetManager::Get_Instance() );
 	WW3DAssetManager::Delete_This();
 //	if ( WW3DAssetManager::Get_Instance() ) {
@@ -434,7 +436,9 @@ void Game_Shutdown(void)
 	PathMgrClass::Shutdown();
 	WWMath::Shutdown();
 	WWSaveLoad::Shutdown();
-	WW3D::Shutdown();
+	if (!ConsoleBox.Is_Exclusive()) {
+		WW3D::Shutdown();
+	}
 	WWPhys::Shutdown();
 
 //	WW3DAssetManager::Get_Instance()->Free_Assets();

@@ -825,27 +825,23 @@ bool Game_Init(void)
 	// Initialize the pathfind system
 	PathMgrClass::Initialize ();
 
-	// Initialize WW3D
-	switch ( WW3D::Init(MainWindow, NULL, ConsoleBox.Is_Exclusive() ? true : false)) {
-	case WW3D_ERROR_OK:	// Success!
-		break;
-	case WW3D_ERROR_DIRECTX8_INITIALIZATION_FAILED:
-	default:
-		WWDEBUG_SAY(("WW3D::Init Failed!\r\n"));
-		::MessageBoxA(NULL,
-			"DirectX 8.0 or later is required to play C&C:Renegade.",
-			"Renegade Graphics Initialization Error.",
-			MB_OK);
-		return false;
-	}
+	const bool render_available = !ConsoleBox.Is_Exclusive();
 
-	if (ConsoleBox.Is_Exclusive()) {
-		WW3D::Enable_Decals(false);
-		if (COMBAT_WORLD != NULL) {
-			COMBAT_WORLD->Set_Max_Simultaneous_Shadows(0);
+	if (render_available) {
+		// Initialize WW3D
+		switch ( WW3D::Init(MainWindow, NULL, false)) {
+		case WW3D_ERROR_OK:	// Success!
+			break;
+		case WW3D_ERROR_DIRECTX8_INITIALIZATION_FAILED:
+		default:
+			WWDEBUG_SAY(("WW3D::Init Failed!\r\n"));
+			::MessageBoxA(NULL,
+				"DirectX 8.0 or later is required to play C&C:Renegade.",
+				"Renegade Graphics Initialization Error.",
+				MB_OK);
+			return false;
 		}
-		DazzleRenderObjClass::Enable_Dazzle_Rendering(false);
-	} else {
+
 		if ( WW3D::Registry_Load_Render_Device( APPLICATION_SUB_KEY_NAME_RENDER, true ) != WW3D_ERROR_OK ) {
 			WWDEBUG_SAY(("WW3D::Registry_Load_Render_Device Failed!\r\n"));
 			return false;
@@ -856,6 +852,8 @@ bool Game_Init(void)
 			return false;
 		}
 		WW3D::Enable_Static_Sort_Lists (true);
+	} else {
+		DazzleRenderObjClass::Enable_Dazzle_Rendering(false);
 	}
 	if (AutoRestart.Get_Restart_Flag() || ServerSettingsClass::Is_Command_Line_Mode() || ConsoleBox.Is_Exclusive()) {
 		if (!ConsoleBox.Is_Exclusive()) {
@@ -866,10 +864,12 @@ bool Game_Init(void)
 		::ShowWindow( MainWindow, SW_SHOW );	// show the (initially hidden) window
 	}
 
-	// Clear screen
-	for (int frame=0;frame<3;++frame) {
-		WW3D::Begin_Render(true,true,Vector3(0.0f,0.0f,0.0f));
-		WW3D::End_Render();
+	if (render_available) {
+		// Clear screen
+		for (int frame=0;frame<3;++frame) {
+			WW3D::Begin_Render(true,true,Vector3(0.0f,0.0f,0.0f));
+			WW3D::End_Render();
+		}
 	}
 
 	ParticleEmitterClass::Set_Default_Remove_On_Complete(false);	// (gth) 09/17/2000 - by default emitters shouldn't self-destruct
@@ -953,8 +953,7 @@ bool Game_Init(void)
 	//		- RenegadeDialogMgrClass
 	//
 	//
-	bool render_available = !ConsoleBox.Is_Exclusive();
-	CombatManager::Scene_Init(render_available);
+CombatManager::Scene_Init(render_available);
 	if (!ConsoleBox.Is_Exclusive()) {
 		SystemSettings::Init();
 	}
