@@ -69,6 +69,10 @@ const float SUN_CHECK_DISTANCE = 50.0f;	//If a ray this long doesn't intersect, 
 */
 RenderObjClass * create_render_obj_from_filename( const char * filename )
 {
+	if (!WW3D::Is_Initted()) {
+		return NULL;
+	}
+
 	StringClass	render_obj_name(filename,true);
 	if ( ::strchr( filename, '\\' ) != 0 ) {
 		render_obj_name = ::strrchr( filename, '\\' ) + 1;
@@ -159,7 +163,8 @@ void PhysClass::Init(const PhysDefClass & def)
 {
 	Definition = &def;
 	Flags = DEFAULT_FLAGS; 
-	if (!def.ModelName.Is_Empty()) {
+	const bool render_available = WW3D::Is_Initted();
+	if (!def.ModelName.Is_Empty() && render_available) {
 
 		RenderObjClass * model = NULL;
 	
@@ -175,6 +180,8 @@ void PhysClass::Init(const PhysDefClass & def)
 
 		Set_Model(model);
 		REF_PTR_RELEASE(model);
+	} else if (!def.ModelName.Is_Empty() && !render_available) {
+		WWDEBUG_SAY(("PhysClass::Init skipping model '%s'; renderer unavailable.\n", (const char *)def.ModelName));
 	}
 
 	const SimpleShapeDefinition &shape_def = def.Get_Simple_Shape_Definition();
@@ -233,6 +240,11 @@ void PhysClass::Set_Model(RenderObjClass * model)
 	
 void PhysClass::Set_Model_By_Name(const char * model_type_name)
 {
+	if (!WW3D::Is_Initted()) {
+		WWDEBUG_SAY(("PhysClass::Set_Model_By_Name skipping model '%s'; renderer unavailable.\n", model_type_name != NULL ? model_type_name : "<null>"));
+		return;
+	}
+
 	RenderObjClass * model = WW3DAssetManager::Get_Instance()->Create_Render_Obj(model_type_name);
 	if ( model == NULL ) {
 		WWDEBUG_SAY(( "%s failed to load\n", model_type_name ));
@@ -390,7 +402,8 @@ LightEnvironmentClass * PhysClass::Get_Static_Lighting_Environment(void)
 		** This object doesn't need a lighting cache, make sure it doesn't have one
 		*/
 		if (StaticLightingCache != NULL) {
-			WWDEBUG_SAY(("Pre-Lit object %s has a lighting cache!\r\n",Model->Get_Name()));
+			const char *debug_name = (Model != NULL) ? Model->Get_Name() : Get_Name();
+			WWDEBUG_SAY(("Pre-Lit object %s has a lighting cache!\r\n",debug_name != NULL ? debug_name : "<unnamed>"));
 			delete StaticLightingCache;
 			StaticLightingCache = NULL;
 		}
@@ -412,9 +425,15 @@ LightEnvironmentClass * PhysClass::Get_Static_Lighting_Environment(void)
 		/*
 		** Finally, ask the physics scene to re-compute our lighting cache
 		*/
+		Vector3 lighting_center;
 		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			if (Model != NULL) {
+				lighting_center = Model->Get_Bounding_Sphere().Center;
+			} else {
+				Get_Transform().Get_Translation(&lighting_center);
+			}
 			world->Compute_Static_Lighting(StaticLightingCache,
-														Model->Get_Bounding_Sphere().Center,
+														lighting_center,
 														Get_Flag(IS_IN_THE_SUN),
 														Get_Vis_Object_ID());
 			Set_Flag(STATIC_LIGHTING_DIRTY,false);
@@ -441,7 +460,16 @@ void PhysClass::Update_Sun_Status(void)
 	
 	Vector3 sunlight;
 	world->Get_Sun_Light_Vector(&sunlight);
-	Vector3 center = Model->Get_Bounding_Sphere().Center; 
+	if (sunlight.Length2() == 0.0f) {
+		return;
+	}
+
+	Vector3 center;
+	if (Model != NULL) {
+		center = Model->Get_Bounding_Sphere().Center; 
+	} else {
+		Get_Transform().Get_Translation(&center);
+	}
 
 // FIXME (gth) Need a collision group for sun-rays
 	CastResultStruct sunresult;

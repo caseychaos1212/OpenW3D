@@ -44,27 +44,6 @@
 #include "camera.h"
 #include "physdecalsys.h"
 #include "phys.h"
-
-
-
-
-/*
-** PhysicsWorldClass Decal Methods 
-*/
-
-void PhysicsWorldClass::Allocate_Decal_Resources(void)
-{
-	WWASSERT(DecalSystem == NULL);
-	DecalSystem = new PhysDecalSysClass(this);
-}	
-
-void PhysicsWorldClass::Release_Decal_Resources(void)
-{
-	if (DecalSystem != NULL) {
-		delete DecalSystem;
-	}
-}
-
 int PhysicsWorldClass::Create_Decal
 (	
 	const Matrix3D &	tm,
@@ -75,14 +54,18 @@ int PhysicsWorldClass::Create_Decal
 	PhysClass *			only_this_obj
 )
 {
-	WWASSERT(DecalSystem != NULL);
-	return DecalSystem->Create_Decal(tm,texture_name,radius,is_permanent,apply_to_translucent_meshes,only_this_obj);
+	if (RenderBridge == NULL) {
+		return -1;
+	}
+	return RenderBridge->Create_Decal(tm,texture_name,radius,is_permanent,apply_to_translucent_meshes,only_this_obj);
 }
 
 bool PhysicsWorldClass::Remove_Decal(uint32 id)
 {
-	WWASSERT(DecalSystem != NULL);
-	return DecalSystem->Remove_Decal(id);
+	if (RenderBridge == NULL) {
+		return false;
+	}
+	return RenderBridge->Remove_Decal(id);
 }
 
 

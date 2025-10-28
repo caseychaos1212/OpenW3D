@@ -164,13 +164,19 @@ void DynamicShadowManagerClass::Update_Shadow(void)
 		** update later if it needs to fade out
 		*/
 		LightClass * sun = scene->Get_Sun_Light();
-		Shadow->Enable_Perspective(false);
-		Shadow->Set_Light_Source_ID((uintptr_t)sun);
-		Shadow->Set_Light_Vector(sunlight);
-		sun->Release_Ref();
-		found_light = true;
+		if (sun != NULL) {
+			Shadow->Enable_Perspective(false);
+			Shadow->Set_Light_Source_ID((uintptr_t)sun);
+			Shadow->Set_Light_Vector(sunlight);
+			sun->Release_Ref();
+			found_light = true;
+		}
 
 	} else {
+		LightClass * sun = scene->Get_Sun_Light();
+		if (sun != NULL) {
+			sun->Release_Ref();
+		}
 
 // FIXME (gth) Disabling local shadows
 #if 0

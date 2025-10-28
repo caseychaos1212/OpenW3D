@@ -70,13 +70,41 @@ class VisOptimizationContextClass;
 class AABoxClass;
 class VertexMaterialClass;
 class PathfindClass;
-class PhysDecalSysClass;
 class MeshClass;
+class TextureClass;
 class VisOptProgressClass;
 class CameraShakeSystemClass;
 class LightEnvironmentClass;
 class StaticAnimPhysClass;
 class StringClass;
+class CameraClass;
+class PhysicsWorldRenderBridge
+{
+public:
+	virtual ~PhysicsWorldRenderBridge(void) {}
+	virtual void	Update_Decal_Fade_Distances(CameraClass & /*camera*/) {}
+	virtual int		Create_Decal(const Matrix3D & /*tm*/,const char * /*texture_name*/,
+										float /*radius*/,bool /*is_permanent*/,
+										bool /*apply_to_translucent_meshes*/,PhysClass * /*only_this_obj*/)	{ return -1; }
+	virtual bool	Remove_Decal(uint32 /*id*/) { return false; }
+	virtual void	Release_Projector_Resources(PhysicsWorldClass & /*world*/) {}
+	virtual void	Apply_Projectors(PhysicsWorldClass & /*world*/, const CameraClass & /*camera*/) {}
+	virtual SpecialRenderInfoClass *	Get_Shadow_Render_Context(PhysicsWorldClass & /*world*/,int /*width*/,int /*height*/) { return NULL; }
+	virtual MaterialPassClass *	Get_Shadow_Material_Pass(PhysicsWorldClass & /*world*/) { return NULL; }
+	virtual CameraClass *		Get_Shadow_Camera(PhysicsWorldClass & /*world*/) { return NULL; }
+	virtual void	Set_Shadow_Resolution(PhysicsWorldClass & /*world*/,unsigned int /*res*/) {}
+	virtual unsigned int	Get_Shadow_Resolution(const PhysicsWorldClass & /*world*/) const { return 0; }
+	virtual void	Set_Max_Simultaneous_Shadows(PhysicsWorldClass & /*world*/,unsigned int /*count*/) {}
+	virtual unsigned int	Get_Max_Simultaneous_Shadows(const PhysicsWorldClass & /*world*/) const { return 0; }
+	virtual void	Invalidate_Static_Shadow_Projectors(PhysicsWorldClass & /*world*/) {}
+	virtual void	Generate_Static_Shadow_Projectors(PhysicsWorldClass & /*world*/) {}
+	virtual void	Setup_Static_Directional_Shadow(PhysicsWorldClass & /*world*/, StaticAnimPhysClass & /*obj*/,const Vector3 & /*light_dir*/,TextureClass * /*render_target*/) {}
+	virtual void	Initialize_Sun(PhysicsWorldClass & /*world*/) {}
+	virtual void	Reset_Sun_Light(PhysicsWorldClass & /*world*/) {}
+	virtual void	Update_Sun_Orientation(PhysicsWorldClass & /*world*/, float /*yaw*/, float /*pitch*/) {}
+	virtual void	Add_Sun_To_Light_Environment(PhysicsWorldClass & /*world*/, LightEnvironmentClass & /*env*/, bool /*use_sun*/) {}
+	virtual void	Compute_Static_Lighting(PhysicsWorldClass & /*world*/, LightEnvironmentClass * /*env*/, const Vector3 & /*obj_center*/, bool /*use_sun*/, int /*vis_object_id*/) {}
+};
 
 // forward referencing the collision detection queries
 class	PhysRayCollisionTestClass;
@@ -679,6 +707,12 @@ public:
 	StaticPhysClass * 		Find_Static_Object( int instance_id );
 
 	/*
+	** Rendering bridge access
+	*/
+	void							Set_Render_Bridge(PhysicsWorldRenderBridge * bridge);
+	PhysicsWorldRenderBridge *	Peek_Render_Bridge(void) const { return RenderBridge; }
+
+	/*
 	** Collision Groups:
 	** 
 	** Each physical object can be assigned to a collision group.  Then
@@ -1045,12 +1079,6 @@ protected:
 	float							Compute_Projector_Attenuation(TexProjectClass * dynamic_projector,const Vector3 & view_pos,const Vector3 & view_dir);
 
 	/*
-	** Internal decal functions
-	*/
-	void							Allocate_Decal_Resources(void);
-	void							Release_Decal_Resources(void);
-
-	/*
 	** Internal save-load code
 	*/
 	void							Save_LDD_Variables(ChunkSaveClass & csave);
@@ -1152,11 +1180,7 @@ protected:
 	MaterialPassClass *		ShadowMaterialPass;			// material pass for shadows
 	int							ShadowResWidth;
 	int							ShadowResHeight;
-
-	/*
-	** Decal System
-	*/
-	PhysDecalSysClass *		DecalSystem;					
+	unsigned int				MaxShadowCount;
 
 	/*
 	** Pathfinding
@@ -1180,6 +1204,12 @@ protected:
 	*/
 	MaterialPassClass *		HighlightMaterialPass;
 
+	/*
+	** Render bridge
+	*/
+	PhysicsWorldRenderBridge *	RenderBridge;
+
+	friend class PhysicsSceneRenderBridge;
 
 	//- Level Static Data ---------------------------------------------------------------------------------
 	// 
@@ -1220,6 +1250,8 @@ protected:
 	bool							UseSun;
 	float							SunPitch;
 	float							SunYaw;
+	Vector3						SunDiffuse;
+	float							SunIntensity;
 	LightClass *				SunLight;
 	
 

@@ -192,7 +192,9 @@ void VertexSolveClass::Light_Mesh(LightSolveContextClass & context,MeshClass * m
 		/*
 		** Sun
 		*/
-		Add_Light_To_Vertex(context,vi,sun);
+		if (sun != NULL) {
+			Add_Light_To_Vertex(context,vi,sun);
+		}
 
 		/*
 		** Other lights
@@ -293,7 +295,9 @@ void VertexSolveClass::Light_Terrain(LightSolveContextClass & context,RenegadeTe
 		/*
 		** Sun
 		*/
-		Add_Light_To_Vertex(context,vi,sun);
+		if (sun != NULL) {
+			Add_Light_To_Vertex(context,vi,sun);
+		}
 
 		/*
 		** Other lights
@@ -345,6 +349,7 @@ void VertexSolveClass::Light_Terrain(LightSolveContextClass & context,RenegadeTe
 	//	Let the patch know that it is now prelit
 	//
 	patch->Set_Is_Prelit (true);
+	REF_PTR_RELEASE(sun);
 	return ;
 }
 

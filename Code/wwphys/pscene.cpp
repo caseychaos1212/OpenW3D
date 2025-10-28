@@ -120,6 +120,8 @@
 #include "umbrasupport.h"
 #include <algorithm>
 
+PhysicsWorldRenderBridge * Create_PhysicsScene_Render_Bridge(PhysicsSceneClass & scene);
+
 
 #define STATISTICS_FRAMES  20					// number of frames to average statistics across
 #define SHATTER_DEBUG		0					// debugging, freeze shattered particles in place for 60sec
@@ -188,6 +190,8 @@ PhysicsWorldClass::PhysicsWorldClass(void) :
 	SceneAmbientLight(0.5f,0.5f,0.5f),
 	UseSun(false),
 	SunLight(NULL),
+	SunDiffuse(1.0f,1.0f,1.0f),
+	SunIntensity(1.0f),
 	VisEnabled(true),
 	VisInverted(false),
 	VisQuickAndDirty(false),
@@ -214,7 +218,8 @@ PhysicsWorldClass::PhysicsWorldClass(void) :
 	ShadowMaterialPass(NULL),
 	ShadowResWidth(128),
 	ShadowResHeight(128),
-	DecalSystem(NULL),
+	MaxShadowCount(0),
+	RenderBridge(NULL),
 	Pathfinder(NULL),
 	CameraShakeSystem(NULL),
 	HighlightMaterialPass(NULL),
@@ -224,6 +229,7 @@ PhysicsWorldClass::PhysicsWorldClass(void) :
 	WWASSERT_PRINT(ActiveWorld == NULL,"Only one instance of PhysicsWorldClass is allowed.\r\n");
 	ActiveWorld = this;
 	WWMEMLOG(MEM_PHYSICSDATA);
+	Set_Render_Bridge(new PhysicsWorldRenderBridge());
 	
 	/*
 	** Initialize Umbra
@@ -258,21 +264,11 @@ PhysicsWorldClass::PhysicsWorldClass(void) :
 	CameraShakeSystem = new CameraShakeSystemClass;
 
 	/*
-	** Allocate the sun light
-	*/
-	SunLight = NEW_REF(LightClass,(LightClass::DIRECTIONAL));
-	Reset_Sun_Light();
-
-	/*
 	** Initialize the debug code
 	*/
 	WidgetSystem::Init_Debug_Widgets();
-	
-	/*
-	** Allocate decal resources
-	*/
-	Allocate_Decal_Resources();
 
+	Reset_Sun_Light();
 }
 
 
@@ -305,8 +301,12 @@ PhysicsWorldClass::~PhysicsWorldClass(void)
 
 	Release_Vis_Resources();
 	Release_Projector_Resources();
-	Release_Decal_Resources();
 	WidgetSystem::Release_Debug_Widgets();
+
+	if (RenderBridge != NULL) {
+		delete RenderBridge;
+		RenderBridge = NULL;
+	}
 
 	/*
 	** Shutdown UMBRA
@@ -319,6 +319,18 @@ PhysicsWorldClass::~PhysicsWorldClass(void)
 		ActiveWorld = NULL;
 	}
 }	
+
+void PhysicsWorldClass::Set_Render_Bridge(PhysicsWorldRenderBridge * bridge)
+{
+	if (RenderBridge == bridge) {
+		return;
+	}
+	if (RenderBridge != NULL) {
+		delete RenderBridge;
+	}
+    RenderBridge = (bridge != NULL) ? bridge : new PhysicsWorldRenderBridge();
+    RenderBridge->Initialize_Sun(*this);
+}
 
 void PhysicsWorldClass::Attach_Render_Object(RenderObjClass * /*obj*/)
 {
@@ -1124,7 +1136,9 @@ void PhysicsWorldClass::Pre_Render_Processing(CameraClass & camera)
 
 	LastCameraPosition = camera.Get_Position();
 
-	DecalSystem->Update_Decal_Fade_Distances(camera);
+	if (RenderBridge != NULL) {
+		RenderBridge->Update_Decal_Fade_Distances(camera);
+	}
 
 	// Do the needed 'On_Frame_Update's
 	RefRenderObjListIterator rit(&UpdateList);
@@ -1305,7 +1319,11 @@ void PhysicsWorldClass::Customized_Render(RenderInfoClass & rinfo)
 	{
 		static LightEnvironmentClass _defaultlightenvironment;
 		_defaultlightenvironment.Reset(Vector3(0,0,0),Get_Ambient_Light());
-		_defaultlightenvironment.Add_Light(*SunLight);
+		if (RenderBridge != NULL) {
+			RenderBridge->Add_Sun_To_Light_Environment(*this,_defaultlightenvironment,UseSun);
+		} else if (SunLight != NULL && UseSun) {
+			_defaultlightenvironment.Add_Light(*SunLight);
+		}
 
 		rinfo.light_environment = &_defaultlightenvironment;
 
@@ -2158,6 +2176,7 @@ PhysicsSceneClass::PhysicsSceneClass(void) :
 {
 	WWASSERT_PRINT(TheScene == NULL,"Only one instance of the PhysicsSceneClass is allowed.\r\n");
 	TheScene = this;
+	Set_Render_Bridge(Create_PhysicsScene_Render_Bridge(*this));
 }
 
 PhysicsSceneClass::~PhysicsSceneClass(void)

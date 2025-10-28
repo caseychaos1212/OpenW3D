@@ -150,8 +150,9 @@ void PhysicsWorldClass::Enable_Sun_Light(bool onoff)
  *=============================================================================================*/
 LightClass * PhysicsWorldClass::Get_Sun_Light(void)
 {
-	WWASSERT(SunLight);
-	SunLight->Add_Ref();
+	if (SunLight != NULL) {
+		SunLight->Add_Ref();
+	}
 	return SunLight;
 }
 
@@ -173,12 +174,15 @@ void PhysicsWorldClass::Set_Sun_Light_Orientation(float yaw,float pitch)
 	SunYaw = yaw;
 	SunPitch = pitch;
 
-	Matrix3D tm(1);
-	tm.Rotate_Z(yaw);
-	tm.Rotate_Y(DEG_TO_RADF(90.0f) - pitch);
-	tm.Rotate_X(DEG_TO_RADF(180.0f));
-		
-	SunLight->Set_Transform(tm);
+	if (RenderBridge != NULL) {
+		RenderBridge->Update_Sun_Orientation(*this,yaw,pitch);
+	} else if (SunLight != NULL) {
+		Matrix3D tm(1);
+		tm.Rotate_Z(yaw);
+		tm.Rotate_Y(DEG_TO_RADF(90.0f) - pitch);
+		tm.Rotate_X(DEG_TO_RADF(180.0f));
+		SunLight->Set_Transform(tm);
+	}
 }
 
 
@@ -216,7 +220,16 @@ void PhysicsWorldClass::Get_Sun_Light_Orientation(float * set_yaw,float * set_pi
 void PhysicsWorldClass::Get_Sun_Light_Vector(Vector3 * set_vector)
 {
 	WWASSERT(set_vector != NULL);
-	const Matrix3D & tm = SunLight->Get_Transform();
+	if (SunLight != NULL) {
+		const Matrix3D & tm = SunLight->Get_Transform();
+		*set_vector = tm * Vector3(0,0,1);
+		return;
+	}
+
+	Matrix3D tm(1);
+	tm.Rotate_Z(SunYaw);
+	tm.Rotate_Y(DEG_TO_RADF(90.0f) - SunPitch);
+	tm.Rotate_X(DEG_TO_RADF(180.0f));
 	*set_vector = tm * Vector3(0,0,1);
 }
 
@@ -236,13 +249,13 @@ void PhysicsWorldClass::Get_Sun_Light_Vector(Vector3 * set_vector)
 void PhysicsWorldClass::Reset_Sun_Light(void)
 {
 	UseSun = false;
-	SunLight->Set_Transform(Matrix3D(1));
-	SunLight->Set_Ambient(Vector3(0,0,0));
-	SunLight->Set_Diffuse(Vector3(1,1,1));
-	SunLight->Set_Specular(Vector3(0,0,0));
-	SunLight->Set_Flag(LightClass::NEAR_ATTENUATION,false);
-	SunLight->Set_Flag(LightClass::FAR_ATTENUATION,false);
-	Set_Sun_Light_Orientation(DEG_TO_RADF(0.0f),DEG_TO_RADF(70.0f));
+	SunYaw = DEG_TO_RADF(0.0f);
+	SunPitch = DEG_TO_RADF(70.0f);
+	SunDiffuse.Set(1.0f,1.0f,1.0f);
+	SunIntensity = 1.0f;
+	if (RenderBridge != NULL) {
+		RenderBridge->Reset_Sun_Light(*this);
+	}
 }
 
 
@@ -266,31 +279,11 @@ void PhysicsWorldClass::Compute_Static_Lighting
 	int vis_object_id
 )
 {
-	WWASSERT(light_env != NULL);
-	light_env->Reset(obj_center,Get_Ambient_Light());
-
-	/*
-	** Add in the sun
-	*/
-	if (use_sun) {
-		light_env->Add_Light(*SunLight);
+	if (light_env != NULL) {
+		light_env->Reset(obj_center,Get_Ambient_Light());
 	}
-		
-	/*
-	** Add in the static lights affecting this object
-	*/
-	StaticLightingSystem->Reset_Collection();
-	StaticLightingSystem->Collect_Objects(obj_center);
-	LightPhysClass * light = StaticLightingSystem->Get_First_Collected_Object();
-	while (light != NULL) {
-
-		if ((light->Is_Disabled() == false) && (light->Is_Vis_Object_Visible(vis_object_id))) {
-
-			LightClass * light_obj = (LightClass *)light->Peek_Model();
-			light_env->Add_Light(*light_obj);
-		}
-		
-		light = StaticLightingSystem->Get_Next_Collected_Object(light);
+	if (RenderBridge != NULL) {
+		RenderBridge->Compute_Static_Lighting(*this,light_env,obj_center,use_sun,vis_object_id);
 	}
 }
 

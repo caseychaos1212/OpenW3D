@@ -544,39 +544,40 @@ void PhysicsWorldClass::Load_Static_Lights(ChunkLoadClass & cload)
 
 void PhysicsWorldClass::Load_Sun_Light(ChunkLoadClass & cload)
 {
-	WWASSERT(SunLight != NULL);
 	IOSunLightStruct sun;
 	cload.Read(&sun,sizeof(sun));
 
 	UseSun = (sun.Enabled == 1);
-	Vector3 color;
-	color.X = sun.Color.X;
-	color.Y = sun.Color.Y;
-	color.Z = sun.Color.Z;
-	SunLight->Set_Diffuse(color);
-	SunLight->Set_Intensity(sun.Intensity);
-	Set_Sun_Light_Orientation(sun.Yaw,sun.Pitch);
+	SunYaw = sun.Yaw;
+	SunPitch = sun.Pitch;
+	SunIntensity = sun.Intensity;
+	SunDiffuse.Set(sun.Color.X,sun.Color.Y,sun.Color.Z);
+
+	if (RenderBridge != NULL) {
+		RenderBridge->Initialize_Sun(*this);
+		RenderBridge->Update_Sun_Orientation(*this,SunYaw,SunPitch);
+	} else if (SunLight != NULL) {
+		SunLight->Set_Diffuse(SunDiffuse);
+		SunLight->Set_Intensity(SunIntensity);
+		Set_Sun_Light_Orientation(SunYaw,SunPitch);
+	}
 }
 
 void PhysicsWorldClass::Save_Sun_Light(ChunkSaveClass & csave)
 {
-	WWASSERT(SunLight != NULL);
 	IOSunLightStruct sun;
 	memset(&sun,0,sizeof(sun));
-	
+
 	sun.Enabled = (UseSun ? 1 : 0);
 	sun.Yaw = SunYaw;
 	sun.Pitch = SunPitch;
-	sun.Intensity = SunLight->Get_Intensity();
+	sun.Intensity = SunIntensity;
+	sun.Color.X = SunDiffuse.X;
+	sun.Color.Y = SunDiffuse.Y;
+	sun.Color.Z = SunDiffuse.Z;
 
-	Vector3 c;
-	SunLight->Get_Diffuse(&c);
-	sun.Color.X = c.X;
-	sun.Color.Y = c.Y;
-	sun.Color.Z = c.Z;
-	
-	csave.Write(&sun,sizeof(sun));	
-}	
+	csave.Write(&sun,sizeof(sun));
+}
 
 
 void PhysicsWorldClass::Save_Dynamic_Objects(ChunkSaveClass & csave)
