@@ -41,7 +41,15 @@
 #include "texture.h"
 #include "matpass.h"
 #include "assetmgr.h"
+#include "ww3d.h"
 
+namespace
+{
+inline bool Physics_Render_Assets_Available()
+{
+	return WW3D::Is_Initted() && (WW3DAssetManager::Get_Instance() != NULL);
+}
+}
 
 /**
 ** Resources that the physics resource manager can allocate-on-demand
@@ -67,7 +75,10 @@ void PhysResourceMgrClass::Shutdown(void)
 bool PhysResourceMgrClass::Set_Shadow_Blob_Texture(const char * texname)
 {
 	if (texname == NULL) return false;
-	
+	if (!Physics_Render_Assets_Available()) {
+		return false;
+	}
+
 	TextureClass * tex = WW3DAssetManager::Get_Instance()->Get_Texture(texname);
 	if (tex == NULL) return false;
 
@@ -81,6 +92,9 @@ bool PhysResourceMgrClass::Set_Shadow_Blob_Texture(const char * texname)
 
 TextureClass *	PhysResourceMgrClass::Get_Shadow_Blob_Texture(void)
 {
+	if (!Physics_Render_Assets_Available()) {
+		return NULL;
+	}
 	if (_ShadowBlobTexture == NULL) {
 		_ShadowBlobTexture = WW3DAssetManager::Get_Instance()->Get_Texture("shadowblob.tga");
 		_ShadowBlobTexture->Set_U_Addr_Mode(TextureClass::TEXTURE_ADDRESS_CLAMP);
@@ -125,6 +139,9 @@ MaterialPassClass * PhysResourceMgrClass::Get_Highlight_Material_Pass(void)
 
 TextureClass * PhysResourceMgrClass::Get_Stealth_Texture(void)
 {
+	if (!Physics_Render_Assets_Available()) {
+		return NULL;
+	}
 	TextureClass * tex = Peek_Stealth_Texture();
 	if (tex) {
 		tex->Add_Ref();
@@ -134,6 +151,9 @@ TextureClass * PhysResourceMgrClass::Get_Stealth_Texture(void)
 
 TextureClass * PhysResourceMgrClass::Peek_Stealth_Texture(void)
 {
+	if (!Physics_Render_Assets_Available()) {
+		return NULL;
+	}
 	if (_StealthTexture == NULL) {
 		_StealthTexture = WW3DAssetManager::Get_Instance()->Get_Texture("stealth_effect.tga");
 	}
@@ -156,6 +176,9 @@ VertexMaterialClass * PhysResourceMgrClass::Create_Emissive_Material(void)
 
 TextureClass * PhysResourceMgrClass::Get_Grid_Texture(void)
 {
+	if (!Physics_Render_Assets_Available()) {
+		return NULL;
+	}
 	TextureClass * tex = Peek_Grid_Texture();
 	if (tex != NULL) {
 		tex->Add_Ref();
@@ -165,6 +188,9 @@ TextureClass * PhysResourceMgrClass::Get_Grid_Texture(void)
 
 TextureClass * PhysResourceMgrClass::Peek_Grid_Texture(void)
 {
+	if (!Physics_Render_Assets_Available()) {
+		return NULL;
+	}
 	if (_GridTexture == NULL) {
 		_GridTexture = WW3DAssetManager::Get_Instance()->Get_Texture("grid_effect.tga");
 	}

@@ -63,13 +63,21 @@
 const float DEBUG_RENDER_DIST2 = (50.0f*50.0f);
 const float SUN_CHECK_DISTANCE = 50.0f;	//If a ray this long doesn't intersect, you can see the sun...
 
+namespace
+{
+inline bool Physics_Render_Assets_Available()
+{
+	return WW3D::Is_Initted() && (WW3DAssetManager::Get_Instance() != NULL);
+}
+}
+
 
 /*
 ** create_render_obj_from_filename
 */
 RenderObjClass * create_render_obj_from_filename( const char * filename )
 {
-	if (!WW3D::Is_Initted()) {
+	if (!Physics_Render_Assets_Available()) {
 		return NULL;
 	}
 
@@ -163,7 +171,7 @@ void PhysClass::Init(const PhysDefClass & def)
 {
 	Definition = &def;
 	Flags = DEFAULT_FLAGS; 
-	const bool render_available = WW3D::Is_Initted();
+	const bool render_available = Physics_Render_Assets_Available();
 	if (!def.ModelName.Is_Empty() && render_available) {
 
 		RenderObjClass * model = NULL;
@@ -240,7 +248,7 @@ void PhysClass::Set_Model(RenderObjClass * model)
 	
 void PhysClass::Set_Model_By_Name(const char * model_type_name)
 {
-	if (!WW3D::Is_Initted()) {
+	if (!Physics_Render_Assets_Available()) {
 		WWDEBUG_SAY(("PhysClass::Set_Model_By_Name skipping model '%s'; renderer unavailable.\n", model_type_name != NULL ? model_type_name : "<null>"));
 		return;
 	}
@@ -700,14 +708,20 @@ bool PhysClass::Load (ChunkLoadClass &cload)
 				break;
 
 	case PHYS_CHUNK_MODEL:
-		cload.Open_Chunk();
-		factory = SaveLoadSystemClass::Find_Persist_Factory(cload.Cur_Chunk_ID());
-		WWASSERT(factory != NULL);
-		if (factory != NULL) {
-			render_model = (RenderObjClass *)factory->Load(cload);
-			SET_REF_OWNER(render_model);
+		if (Physics_Render_Assets_Available()) {
+			if (cload.Open_Chunk()) {
+				factory = SaveLoadSystemClass::Find_Persist_Factory(cload.Cur_Chunk_ID());
+				WWASSERT(factory != NULL);
+				if (factory != NULL) {
+					render_model = (RenderObjClass *)factory->Load(cload);
+					SET_REF_OWNER(render_model);
+				}
+				cload.Close_Chunk();
+			}
+		} else {
+			WWDEBUG_SAY(("PhysClass::Load skipping render model chunk; renderer unavailable.\n"));
+			cload.Seek(cload.Cur_Chunk_Length());
 		}
-		cload.Close_Chunk();
 		break;
 
 	case PHYS_CHUNK_SIMPLE_SHAPE:
