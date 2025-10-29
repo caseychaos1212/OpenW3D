@@ -1415,7 +1415,7 @@ void	CCameraClass::Handle_Input( void )
 			 Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_OUT ) ) {
 			float fog_start, fog_stop;
 		if (COMBAT_WORLD != NULL) {
-			COMBAT_WORLD->Get_Fog_Range( &fog_start, &fog_stop );
+			COMBAT_SCENE->SceneClass::Get_Fog_Range( &fog_start, &fog_stop );
 		}
 			if ( Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_OUT ) ) {
 				FarClipPlane *= 1.1f;
@@ -1425,7 +1425,7 @@ void	CCameraClass::Handle_Input( void )
 				fog_start /= 1.1f;
 			}
 			if (COMBAT_WORLD != NULL) {
-				COMBAT_WORLD->Set_Fog_Range( fog_start, FarClipPlane );
+				COMBAT_SCENE->SceneClass::Set_Fog_Range( fog_start, FarClipPlane );
 			}
 			Debug_Say(( "FarClipPlane %f\n", FarClipPlane ));
 			Set_Clip_Planes( NearClipPlane, FarClipPlane );
