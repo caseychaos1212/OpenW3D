@@ -816,8 +816,14 @@ void PhysicsWorldClass::Optimize_Visibility_Data(VisOptProgressClass & stats)
 	/*
 	** Create a VisOptimizationContextClass and optimize the vis data
 	*/
-	VisOptimizationContextClass optcontext(this,stats);
-	optcontext.Optimize(&VisTableManager,DynamicObjVisSystem);
+#if WWPHYS_SCENE_BRIDGE
+	if (PhysicsSceneClass * scene = dynamic_cast<PhysicsSceneClass *>(this)) {
+		VisOptimizationContextClass optcontext(scene,stats);
+		optcontext.Optimize(&VisTableManager,DynamicObjVisSystem);
+	}
+#else
+	(void)stats;
+#endif
 
 	/*
 	** Reset all of dynamic objects' cached vis-ID and cull node.

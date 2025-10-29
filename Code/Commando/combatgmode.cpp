@@ -58,6 +58,7 @@
 #include "vehicle.h"
 #include "doors.h"
 #include "elevator.h"
+#include "combat.h"
 #include "msgloop.h"
 #include "assetmgr.h"
 #include "font3d.h"

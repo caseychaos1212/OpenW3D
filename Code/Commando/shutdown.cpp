@@ -58,6 +58,8 @@
 #include "pathmgr.h"
 #include "renegadedialogmgr.h"
 #include "campaign.h"
+#include "combat.h"
+#include "ConsoleMode.h"
 #include "diaglog.h"
 #include "BINKMovie.h"
 //#include "helptext.h"

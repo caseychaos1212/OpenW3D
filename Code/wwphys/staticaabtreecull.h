@@ -68,7 +68,7 @@ class StaticAABTreeCullClass : public PhysAABTreeCullClass
 
 public:
 
-	StaticAABTreeCullClass(PhysicsSceneClass * pscene);
+	StaticAABTreeCullClass(PhysicsWorldClass * world);
 	~StaticAABTreeCullClass(void);
 
 	/*
@@ -164,6 +164,7 @@ protected:
 	** can be accessed by it without exposing them to everyone else...
 	*/
 	friend class PhysicsSceneClass;
+	friend class PhysicsWorldClass;
 };
 
 #endif //STATICAABTREECULL_H

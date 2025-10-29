@@ -73,7 +73,7 @@ class DynamicAABTreeCullClass : public PhysAABTreeCullClass
 {
 public:
 
-	DynamicAABTreeCullClass(PhysicsSceneClass * pscene);
+	DynamicAABTreeCullClass(PhysicsWorldClass * world);
 	~DynamicAABTreeCullClass(void);
 
 	/*

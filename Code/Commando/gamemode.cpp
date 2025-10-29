@@ -236,7 +236,7 @@ void	GameModeManager::Render( void )
 			// the game isn't active.  (This gives us a menu performance boost).
 			//
 			if (Find( "Combat" )->Is_Active()) {
-				COMBAT_SCENE->Pre_Render_Processing(*COMBAT_CAMERA);
+				COMBAT_SCENE->PhysicsWorldClass::Pre_Render_Processing(*COMBAT_CAMERA);
 			}
 		}
 
@@ -301,7 +301,7 @@ void	GameModeManager::Render( void )
 
 
 		if (do_pscene) {
-			COMBAT_SCENE->Post_Render_Processing();
+			COMBAT_SCENE->PhysicsWorldClass::Post_Render_Processing();
 		}
 
 		{

@@ -95,8 +95,8 @@ inline StaticPhysClass * get_next_object(StaticPhysClass * tile)
 /*
 ** Implementation of StaticAABTreeCullClass
 */
-StaticAABTreeCullClass::StaticAABTreeCullClass(PhysicsSceneClass * pscene) :
-	PhysAABTreeCullClass(pscene)
+StaticAABTreeCullClass::StaticAABTreeCullClass(PhysicsWorldClass * world) :
+   PhysAABTreeCullClass(world)
 {
 }
 
@@ -698,4 +698,3 @@ void StaticAABTreeCullClass::Save_Static_Data(ChunkSaveClass & csave)
 	TypedAABTreeCullSystemClass<PhysClass>::Save(csave);
 	csave.End_Chunk();
 }
-

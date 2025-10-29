@@ -43,7 +43,14 @@
 #define PSCENE_H
 
 #include "always.h"
+
+#ifndef WWPHYS_SCENE_BRIDGE
+#define WWPHYS_SCENE_BRIDGE 1
+#endif
+
+#if WWPHYS_SCENE_BRIDGE
 #include "scene.h"
+#endif
 #include "widgetuser.h"
 #include "physlist.h"
 #include "aabtreecull.h"
@@ -78,6 +85,7 @@ class LightEnvironmentClass;
 class StaticAnimPhysClass;
 class StringClass;
 class CameraClass;
+class PhysicsWorldClass;
 class PhysicsWorldRenderBridge
 {
 public:
@@ -559,7 +567,12 @@ class PhysicsWorldClass : public WidgetUserClass
 {
 public:
 
-	using RegType = SceneClass::RegType;
+	enum RegType
+	{
+		ON_FRAME_UPDATE = 0,
+		LIGHT,
+		RELEASE
+	};
 
 	static PhysicsWorldClass * Get_Active_World();
 
@@ -987,8 +1000,10 @@ public:
 	*/
 	virtual void				Add_Render_Object(RenderObjClass * obj);
 	virtual void				Remove_Render_Object(RenderObjClass * obj);
+#if WWPHYS_SCENE_BRIDGE
 	virtual SceneIterator *	Create_Iterator(bool /*onlyvisible = false*/)				{ assert(0); return NULL; }
 	virtual void				Destroy_Iterator(SceneIterator * /*it*/)					{ assert(0); }
+#endif
 	virtual void				Register(RenderObjClass * obj,RegType for_what);
 	virtual void				Unregister(RenderObjClass * obj,RegType for_what);
 
@@ -1311,15 +1326,18 @@ private:
 	/*
 	** VisOptimizationContextClass is a friend so that it can merge vis-id's.  
 	*/
-	friend class VisOptimizationContextClass;
+friend class VisOptimizationContextClass;
 
 };
+
+using PhysicsWorldPolyRenderMode = PhysicsWorldClass::PolyRenderMode;
 
 /**
 ** PhysicsSceneClass
 ** Bridge PhysicsWorldClass into WW3D's SceneClass interface so rendering code
 ** can continue to operate unchanged.
 */
+#if WWPHYS_SCENE_BRIDGE
 class PhysicsSceneClass : public SceneClass, public PhysicsWorldClass
 {
 public:
@@ -1336,21 +1354,23 @@ public:
 	virtual void				Remove_Render_Object(RenderObjClass * obj) override;
 	virtual SceneIterator *	Create_Iterator(bool onlyvisible = false) override { return PhysicsWorldClass::Create_Iterator(onlyvisible); }
 	virtual void				Destroy_Iterator(SceneIterator * it) override { PhysicsWorldClass::Destroy_Iterator(it); }
-	virtual void				Register(RenderObjClass * obj,RegType for_what) override;
-	virtual void				Unregister(RenderObjClass * obj,RegType for_what) override;
+	virtual void				Register(RenderObjClass * obj,SceneClass::RegType for_what) override;
+	virtual void				Unregister(RenderObjClass * obj,SceneClass::RegType for_what) override;
 
 protected:
 
 	virtual void				Customized_Render(RenderInfoClass & rinfo) override;
 	virtual void				Attach_Render_Object(RenderObjClass * obj) override;
 	virtual void				Detach_Render_Object(RenderObjClass * obj) override;
-	virtual PolyRenderMode	Query_Polygon_Mode(void) const override;
+	virtual PhysicsWorldPolyRenderMode	Query_Polygon_Mode(void) const override;
 	virtual void				Save_Render_Settings(ChunkSaveClass & csave) override;
 	virtual void				Load_Render_Settings(ChunkLoadClass & cload) override;
 
 private:
 	static PhysicsSceneClass * TheScene;
 };
+
+#endif // WWPHYS_SCENE_BRIDGE
 
 
 

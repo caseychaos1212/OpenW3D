@@ -37,12 +37,15 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "pscene.h"
+
+#if WWPHYS_SCENE_BRIDGE
 #include "colmathaabox.h"
 #include "rinfo.h"
 #include "staticaabtreecull.h"
 #include "dynamicaabtreecull.h"
 #include "physgridcull.h"
 #include "lightcull.h"
+#include "lightphys.h"
 #include "staticanimphys.h"
 #include "assetmgr.h"
 #include "refcount.h"
@@ -50,6 +53,7 @@
 #include "quat.h"
 #include "win.h"
 #include "vertmaterial.h"
+#include "light.h"
 #include "wwprofile.h"
 #include "texture.h"
 #include "dx8wrapper.h"
@@ -248,8 +252,10 @@ public:
 			LightPhysClass * light = Scene.StaticLightingSystem->Get_First_Collected_Object();
 			while (light != NULL) {
 				if (!light->Is_Disabled() && light->Is_Vis_Object_Visible(vis_object_id)) {
-					if (LightClass * light_obj = static_cast<LightClass *>(light->Peek_Model())) {
-						light_env->Add_Light(*light_obj);
+					if (RenderObjClass * model = light->Peek_Model()) {
+						if (LightClass * light_obj = dynamic_cast<LightClass *>(model)) {
+							light_env->Add_Light(*light_obj);
+						}
 					}
 				}
 				light = Scene.StaticLightingSystem->Get_Next_Collected_Object(light);
@@ -910,6 +916,10 @@ void PhysicsSceneRenderBridge::Apply_Projectors(PhysicsWorldClass & world,const 
 {
 	WWPROFILE("pscene::Apply_Projectors");
 
+	Vector3 view_pos = camera.Get_Transform().Get_Translation();
+	Vector3 view_dir = camera.Get_Transform().Get_Z_Vector();
+	view_dir.Normalize();
+
 	if (world.StaticProjectorsEnabled) {
 
 		/*
@@ -1526,3 +1536,5 @@ PhysicsWorldRenderBridge * Create_PhysicsScene_Render_Bridge(PhysicsSceneClass &
 {
 	return new PhysicsSceneRenderBridge(scene);
 }
+
+#endif // WWPHYS_SCENE_BRIDGE

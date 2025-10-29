@@ -483,7 +483,7 @@ CLevelEditView::Repaint_View (void)
 		//
 		//	Collect visible objects and such...
 		//		
-		PhysicsSceneClass::Get_Instance ()->Pre_Render_Processing (*camera);
+		PhysicsSceneClass::Get_Instance ()->PhysicsWorldClass::Pre_Render_Processing(*camera);
 
 		//
 		// Set-up the rendering process
@@ -522,7 +522,7 @@ CLevelEditView::Repaint_View (void)
 		//
 		//	Cleanup the rendering processing
 		//
-		PhysicsSceneClass::Get_Instance ()->Post_Render_Processing ();
+		PhysicsSceneClass::Get_Instance ()->PhysicsWorldClass::Post_Render_Processing();
 
 		_iPaintingLock --;
 	} else {

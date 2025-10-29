@@ -47,7 +47,7 @@
 #include "phys.h"
 #include "wwdebug.h"
 
-class PhysicsSceneClass;
+class PhysicsWorldClass;
 class StringClass;
 
 /*
@@ -60,7 +60,7 @@ class PhysAABTreeCullClass : public TypedAABTreeCullSystemClass<PhysClass>
 
 public:
 
-	PhysAABTreeCullClass(PhysicsSceneClass * pscene);
+	PhysAABTreeCullClass(PhysicsWorldClass * world);
 	~PhysAABTreeCullClass(void);
 
 	/*
@@ -98,7 +98,7 @@ protected:
 	/*
 	** Members
 	*/
-	PhysicsSceneClass *	Scene;				// scene that we are a member of
+	PhysicsWorldClass *	Scene;				// scene/world that we are a member of
 
 	static bool				_HierarchicalVisCullingEnabled;
 };

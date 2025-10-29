@@ -47,6 +47,7 @@
 #include "combatchunkid.h"
 #include "hanim.h"
 #include "vehiclephys.h"
+#include "combat.h"
 
 
 ////////////////////////////////////////////////////////////////
@@ -561,5 +562,4 @@ WarFactoryGameObj::Begin_Generation (void)
 	}
 	return ;
 }
-
 

@@ -85,8 +85,8 @@ inline PhysClass * get_next_object(PhysClass * tile)
 /*
 ** DynamicAABTreeCullClass Implementation
 */
-DynamicAABTreeCullClass::DynamicAABTreeCullClass(PhysicsSceneClass * pscene) :
-	PhysAABTreeCullClass(pscene),
+DynamicAABTreeCullClass::DynamicAABTreeCullClass(PhysicsWorldClass * world) :
+   PhysAABTreeCullClass(world),
 	MaxObjRadius(DEFUALT_MAXOBJRADIUS),
 	RenderBox(NULL),
 	DebugIterator(this)
@@ -955,4 +955,3 @@ void DynamicAABTreeCullClass::Merge_Vis_Object_IDs(uint32 id0,uint32 id1)
 		}
 	}
 }
-

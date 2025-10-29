@@ -40,6 +40,7 @@
 #include "chunkio.h"
 #include "vector3.h"
 #include "pscene.h"
+#include "combat.h"
 #include "physicalgameobj.h"
 #include "aabox.h"
 #include "conversation.h"
@@ -484,8 +485,9 @@ ConversationMgrClass::Build_Buddy_List
 	//	Collect all the dynamic objects in this box
 	//
 	NonRefPhysListClass obj_list;
-	if (COMBAT_WORLD != NULL) {
-		COMBAT_WORLD->Collect_Objects (box, false, true, &obj_list);
+	PhysicsWorldClass *world = CombatManager::Get_World();
+	if (world != NULL) {
+		world->Collect_Objects(box, false, true, &obj_list);
 	}
 	
 	//

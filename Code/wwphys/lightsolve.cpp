@@ -173,8 +173,9 @@ void VertexSolveClass::Light_Mesh(LightSolveContextClass & context,MeshClass * m
 	/*
 	** Compute the light solve
 	*/
-	LightClass * sun = world->Get_Sun_Light();
-	Vector3 scene_ambient = world->Get_Ambient_Light();
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	LightClass * sun = (world != NULL) ? world->Get_Sun_Light() : NULL;
+	Vector3 scene_ambient = (world != NULL) ? world->Get_Ambient_Light() : Vector3(0.0f,0.0f,0.0f);
 	int callback_counter = 0;
 
 	for (vi=0; vi<model->Get_Vertex_Count(); vi++) {
@@ -276,8 +277,9 @@ void VertexSolveClass::Light_Terrain(LightSolveContextClass & context,RenegadeTe
 	/*
 	** Compute the light solve
 	*/
-	LightClass * sun = world->Get_Sun_Light();
-	Vector3 scene_ambient = world->Get_Ambient_Light();
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	LightClass * sun = (world != NULL) ? world->Get_Sun_Light() : NULL;
+	Vector3 scene_ambient = (world != NULL) ? world->Get_Ambient_Light() : Vector3(0.0f,0.0f,0.0f);
 	int callback_counter = 0;
 
 	for (vi = 0; vi < vcount; vi ++) {
@@ -363,6 +365,7 @@ void VertexSolveClass::Add_Light_To_Vertex(LightSolveContextClass & context,int 
 
 // FIXME need a collision group for light occlusion here...
 		if (context.Is_Occlusion_Enabled()) {
+			PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
 			CastResultStruct res;
 			Vector3 p0 = Position[vi];
 			Vector3 p1 = light_obj->Get_Position();
@@ -383,10 +386,10 @@ void VertexSolveClass::Add_Light_To_Vertex(LightSolveContextClass & context,int 
 			LineSegClass ray(p0,p1);
 			PhysRayCollisionTestClass raytest(ray,&res,0,COLLISION_TYPE_PROJECTILE);
 			raytest.CheckDynamicObjs = false;
-			world->Cast_Ray(raytest);
-
-			if (res.Fraction < 1.0f) {
-				is_occluded = true;
+			if ((world != NULL) && world->Cast_Ray(raytest)) {
+				if (res.Fraction < 1.0f) {
+					is_occluded = true;
+				}
 			}
 		}
 

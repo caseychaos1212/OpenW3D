@@ -55,6 +55,7 @@
 #include "rendobj.h"
 #include "phys.h"
 #include "pscene.h"
+#include "combat.h"
 #include "dx8renderer.h"
 #include "gdsingleplayer.h"
 #include "gdskirmish.h"
@@ -1024,7 +1025,6 @@ void _reload_game_configuration_files(void)
 	ScriptManager::Shutdown();
 	ScriptManager::Init();
 }
-
 
 
 

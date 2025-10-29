@@ -120,7 +120,9 @@
 #include "umbrasupport.h"
 #include <algorithm>
 
+#if WWPHYS_SCENE_BRIDGE
 PhysicsWorldRenderBridge * Create_PhysicsScene_Render_Bridge(PhysicsSceneClass & scene);
+#endif
 
 
 #define STATISTICS_FRAMES  20					// number of frames to average statistics across
@@ -2161,6 +2163,7 @@ void PhysicsWorldClass::Force_Dynamic_Objects_Awake(const AABoxClass & box)
 }
 
 
+#if WWPHYS_SCENE_BRIDGE
 /******************************************************************************************
 **
 **
@@ -2206,14 +2209,14 @@ void PhysicsSceneClass::Remove_Render_Object(RenderObjClass * obj)
 	PhysicsWorldClass::Remove_Render_Object(obj);
 }
 
-void PhysicsSceneClass::Register(RenderObjClass * obj,RegType for_what)
+void PhysicsSceneClass::Register(RenderObjClass * obj,SceneClass::RegType for_what)
 {
-	PhysicsWorldClass::Register(obj,for_what);
+	PhysicsWorldClass::Register(obj,static_cast<PhysicsWorldClass::RegType>(for_what));
 }
 
-void PhysicsSceneClass::Unregister(RenderObjClass * obj,RegType for_what)
+void PhysicsSceneClass::Unregister(RenderObjClass * obj,SceneClass::RegType for_what)
 {
-	PhysicsWorldClass::Unregister(obj,for_what);
+	PhysicsWorldClass::Unregister(obj,static_cast<PhysicsWorldClass::RegType>(for_what));
 }
 
 void PhysicsSceneClass::Customized_Render(RenderInfoClass & rinfo)
@@ -2237,12 +2240,13 @@ void PhysicsSceneClass::Detach_Render_Object(RenderObjClass * obj)
 
 PhysicsWorldClass::PolyRenderMode PhysicsSceneClass::Query_Polygon_Mode(void) const
 {
-	switch(SceneClass::Get_Polygon_Mode()) {
-		case SceneClass::POINT: return PolyRenderMode::POINT;
-		case SceneClass::LINE:	return PolyRenderMode::LINE;
+	SceneClass::PolyRenderType mode = const_cast<PhysicsSceneClass *>(this)->SceneClass::Get_Polygon_Mode();
+	switch(mode) {
+		case SceneClass::POINT: return PhysicsWorldClass::PolyRenderMode::POINT;
+		case SceneClass::LINE:	return PhysicsWorldClass::PolyRenderMode::LINE;
 		case SceneClass::FILL:
 		default:
-			return PolyRenderMode::FILL;
+			return PhysicsWorldClass::PolyRenderMode::FILL;
 	}
 }
 
@@ -2256,6 +2260,7 @@ void PhysicsSceneClass::Load_Render_Settings(ChunkLoadClass & cload)
 	SceneClass::Load(cload);
 }
 
+#endif // WWPHYS_SCENE_BRIDGE
 
 /******************************************************************************************
 **

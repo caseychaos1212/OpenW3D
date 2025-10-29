@@ -68,8 +68,8 @@ inline PhysClass * get_next_object(PhysClass * tile)
 /*
 ** Implementation of PhysAABTreeCullClass
 */
-PhysAABTreeCullClass::PhysAABTreeCullClass(PhysicsSceneClass * pscene) :
-	Scene(pscene)
+PhysAABTreeCullClass::PhysAABTreeCullClass(PhysicsWorldClass * world) :
+	Scene(world)
 {
 }
 
