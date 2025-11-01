@@ -3121,9 +3121,11 @@ BackgroundMgrClass::BackgroundMgrClass()
  *=============================================================================================*/
 void BackgroundMgrClass::Init (SimpleSceneClass *renderscene, SoundEnvironmentClass *soundenvironment, bool render_available)
 {
-	WWASSERT (renderscene != NULL);
 	WWASSERT (_Sky == NULL);
 	WWASSERT (_Dazzle == NULL);
+
+#if WWPHYS_SCENE_BRIDGE
+	WWASSERT (renderscene != NULL);
 
 	if (render_available) {
 		_Sky = NEW_REF (SkyClass, (soundenvironment));
@@ -3132,6 +3134,11 @@ void BackgroundMgrClass::Init (SimpleSceneClass *renderscene, SoundEnvironmentCl
 		_Dazzle = NEW_REF (DazzleRenderObjClass, ("SUN"));
 		renderscene->Add_Render_Object (_Dazzle);
 	}
+#else
+	(void)renderscene;
+	(void)soundenvironment;
+	(void)render_available;
+#endif
 	Reset();
 }
 
@@ -3682,6 +3689,7 @@ void BackgroundMgrClass::Get_War_Blitz (float &intensity, float &startdistance, 
  * HISTORY:                                                                                    *
  *   09/15/00    IML : Created.                                                                *
  *=============================================================================================*/
+#if WWPHYS_SCENE_BRIDGE
 void BackgroundMgrClass::Update (PhysicsSceneClass *mainscene, CameraClass *camera)
 {
 	const float minlensflareintensity = 0.10f;
@@ -3779,6 +3787,12 @@ void BackgroundMgrClass::Update (PhysicsSceneClass *mainscene, CameraClass *came
 	// Everything necessary has been updated. Clear the dirty flag.
 	Set_Dirty (false);
 }
+#else
+void BackgroundMgrClass::Update (PhysicsSceneClass * /*mainscene*/, CameraClass * /*camera*/ )
+{
+}
+#endif
+
 
 
 /***********************************************************************************************

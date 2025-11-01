@@ -46,7 +46,7 @@
 
 #include "vehicledazzle.h"
 #include "dazzle.h"
-#include "ww3d.h"
+#include "pscene.h"
 #include "vehiclephys.h"
 #include "physcontrol.h"
 
@@ -116,7 +116,10 @@ void VehicleDazzleClass::Set_Model(DazzleRenderObjClass * model)
 	REF_PTR_SET(Model,model);
 	if (Model != NULL) {
 		Type = Determine_Type(model);
-		CreationTime = WW3D::Get_Sync_Time();
+		CreationTime = 0;
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			CreationTime = world->Get_Render_Time_Millis();
+		}
 	}
 }
 
@@ -188,7 +191,11 @@ void VehicleDazzleClass::Pre_Render_Update(VehiclePhysClass * parent)
 
 			case BLINKLIGHT_TYPE:
 			{
-				unsigned int elapsed_time = (WW3D::Get_Sync_Time() - CreationTime) & 0x000003FF;
+			unsigned int current_time = CreationTime;
+			if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+				current_time = world->Get_Render_Time_Millis();
+			}
+			unsigned int elapsed_time = (current_time - CreationTime) & 0x000003FF;
 				Model->Set_Hidden(elapsed_time > 0x0000001FF);
 //Model->Set_Hidden(true);
 				break;

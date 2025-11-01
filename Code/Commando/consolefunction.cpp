@@ -1457,7 +1457,8 @@ public:
    virtual	const char * Get_Alias( void ) override { return "rm"; }
 	virtual	const char * Get_Help( void ) override	{ return "RENDER_MODE [0 fill | 1 lines | 2 points] - set the current render mode."; }
 	virtual	void Activate( const char * input ) override {
-		if (COMBAT_WORLD != NULL) {
+#if WWPHYS_SCENE_BRIDGE
+		if ((COMBAT_WORLD != NULL) && (COMBAT_SCENE != NULL)) {
 			if ((stricmp(input,"points") == 0) || (stricmp(input,"2") == 0)) {
 				COMBAT_SCENE->Set_Polygon_Mode(SceneClass::POINT);
 				Print("Polygon mode set to POINT\n");
@@ -1469,6 +1470,9 @@ public:
 				Print("Polygon mode set to FILL\n");
 			}
 		}
+#else
+		(void)input;
+#endif
 	}
 };
 
@@ -1478,7 +1482,8 @@ public:
    virtual	const char * Get_Alias( void ) override { return "rm"; }
 	virtual	const char * Get_Help( void ) override	{ return "RENDER_MODE_EXTRA_PASS [0 disable | 1 lines | 2 zbuffered]"; }
 	virtual	void Activate( const char * input ) override {
-		if (COMBAT_WORLD != NULL) {
+#if WWPHYS_SCENE_BRIDGE
+		if ((COMBAT_WORLD != NULL) && (COMBAT_SCENE != NULL)) {
 			if ((stricmp(input,"disable") == 0) || (stricmp(input,"0") == 0)) {
 				COMBAT_SCENE->Set_Extra_Pass_Polygon_Mode(SceneClass::EXTRA_PASS_DISABLE);
 				Print("Extra pass polygon mode set to DISABLE\n");
@@ -1490,6 +1495,9 @@ public:
 				Print("Extra pass polygon mode set to ZBUFFERED\n");
 			}
 		}
+#else
+		(void)input;
+#endif
 	}
 };
 
@@ -5568,4 +5576,3 @@ void	ConsoleFunctionManager::Print( const char *format, ... )
 	ConsoleBox.Print(string.Peek_Buffer());
 	va_end (arg_list);
 }
-

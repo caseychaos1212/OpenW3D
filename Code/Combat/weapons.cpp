@@ -1258,15 +1258,17 @@ void	WeaponClass::Do_Continuous_Effects( bool enable )
 	if ( !enable ) {
 
 		for ( int i = 0; i < ContinuousEmitters.Length(); i++ ) {
-			if ( ContinuousEmitters[i] != NULL ) {
-				// Check if it is in the scene, it may ahve already been remove by completion
-				if ( ContinuousEmitters[i]->Peek_Scene() != NULL ) {
-					PhysicsSceneClass::Get_Instance()->Remove_Render_Object( ContinuousEmitters[i] );
-				}
-				ContinuousEmitters[i]->Stop();
-				ContinuousEmitters[i]->Release_Ref();
-				ContinuousEmitters[i] = NULL;
+		if ( ContinuousEmitters[i] != NULL ) {
+#if WWPHYS_SCENE_BRIDGE
+			// Check if it is in the scene, it may have already been removed by completion
+			if ( ContinuousEmitters[i]->Peek_Scene() != NULL ) {
+				PhysicsSceneClass::Get_Instance()->Remove_Render_Object( ContinuousEmitters[i] );
 			}
+#endif
+			ContinuousEmitters[i]->Stop();
+			ContinuousEmitters[i]->Release_Ref();
+			ContinuousEmitters[i] = NULL;
+		}
 		}
 
 		if ( ContinuousSound != NULL ) {
@@ -1307,12 +1309,14 @@ void	WeaponClass::Do_Continuous_Effects( bool enable )
 					ContinuousEmitters[i] = (ParticleEmitterClass *)renderobj;
 					ContinuousEmitters[i]->Set_Velocity_Inheritance_Factor( 1 );
 				}
-				if ( ContinuousEmitters[i] ) {
-					SET_REF_OWNER( ContinuousEmitters[i] );
-					ContinuousEmitters[i]->Start();
-					PhysicsSceneClass::Get_Instance()->Add_Render_Object( ContinuousEmitters[i] );
-				}
+			if ( ContinuousEmitters[i] ) {
+				SET_REF_OWNER( ContinuousEmitters[i] );
+				ContinuousEmitters[i]->Start();
+#if WWPHYS_SCENE_BRIDGE
+				PhysicsSceneClass::Get_Instance()->Add_Render_Object( ContinuousEmitters[i] );
+#endif
 			}
+		}
 		}
 
 		if ( ContinuousSound == NULL && ammo_def->ContinuousSoundDefID != 0 ) {

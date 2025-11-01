@@ -789,8 +789,11 @@ void DynamicAABTreeCullClass::render_visible_cells_recursive
 			if ((mode != DISPLAY_OCCUPIED) || (node->Object != NULL)) {
 			
 				// force boxes to get rendered (yuck)
-				int oldmask = WW3D::Get_Collision_Box_Display_Mask();
-				WW3D::Set_Collision_Box_Display_Mask(oldmask | 0x01);
+				PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+				int oldmask = (world != NULL) ? world->Get_Render_Collision_Box_Display_Mask() : 0;
+				if (world != NULL) {
+					world->Set_Render_Collision_Box_Display_Mask(oldmask | 0x01);
+				}
 
 				AABoxRenderObjClass * rbox = get_render_box();		
 				
@@ -820,7 +823,9 @@ void DynamicAABTreeCullClass::render_visible_cells_recursive
 				REF_PTR_RELEASE(rbox);
 
 				// restore the old box mask
-				WW3D::Set_Collision_Box_Display_Mask(oldmask);
+				if (world != NULL) {
+					world->Set_Render_Collision_Box_Display_Mask(oldmask);
+				}
 			}
 		}
 	}

@@ -40,11 +40,11 @@
 #include "projectormanager.h"
 #include "colmathaabox.h"
 #include "pscene.h"
-#include "assetmgr.h"
 #include "chunkio.h"
 #include "phystexproject.h"
 #include "phys.h"
 #include "texture.h"
+#include "wwdebug.h"
 
 
 /*
@@ -58,9 +58,12 @@ TextureClass * create_projector_texture_from_filename( const char * filename )
 		tex_name = ::strrchr(filename, '\\') + 1;
 	}
 
-	TextureClass * texture = WW3DAssetManager::Get_Instance()->Get_Texture(tex_name,TextureClass::MIP_LEVELS_1);
+	TextureClass * texture = NULL;
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		texture = world->Acquire_Texture(tex_name);
+	}
 	if (texture == NULL) {
-		WWDEBUG_SAY(("Failed to create %s from %s\n", (const char *)tex_name, filename));
+		WWDEBUG_SAY(("Failed to load projector texture '%s'\n", (tex_name != NULL) ? tex_name : "<null>"));
 	}
 	return texture;
 }

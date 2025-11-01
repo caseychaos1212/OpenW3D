@@ -38,6 +38,7 @@
 
 
 #include "dynamicphys.h"
+#include "pscene.h"
 #include "chunkio.h"
 #include "pscene.h"
 #include "wwprofile.h"
@@ -139,7 +140,8 @@ void DynamicPhysClass::Internal_Update_Visibility_Status(void)
 	/*
 	** Don't update our VIS-ID more often than 4 times per second
 	*/
-	unsigned current_time=WW3D::Get_Sync_Time();
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	unsigned current_time = (world != NULL) ? world->Get_Render_Time_Millis() : VisStatusLastUpdated;
 	unsigned delta = current_time - VisStatusLastUpdated;
 
 	if (delta < MIN_VIS_UPDATE_TICK_DELAY) return;
@@ -148,7 +150,6 @@ void DynamicPhysClass::Internal_Update_Visibility_Status(void)
 	/*
 	** Update our VIS-ID
 	*/
-	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
 	if ((world == NULL) || (Model == NULL)) {
 		DirtyVisObjectID = false;
 		return;
@@ -274,4 +275,3 @@ bool DynamicPhysDefClass::Load(ChunkLoadClass &cload)
 	}
 	return true;
 }
-

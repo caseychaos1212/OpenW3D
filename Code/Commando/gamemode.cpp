@@ -227,7 +227,9 @@ void	GameModeManager::Render( void )
 		// enabled, so it is safe to always call it
 		DX8RendererDebugger::Update();
 
-		bool do_pscene = (COMBAT_SCENE != NULL) && !cNetwork::I_Am_Only_Server();
+		bool do_pscene = false;
+#if WWPHYS_SCENE_BRIDGE
+		do_pscene = (COMBAT_SCENE != NULL) && !cNetwork::I_Am_Only_Server();
 		if (!GameInFocus) do_pscene=false;	// Don't render the game scene if the applicationisn't active
 		if (do_pscene) {
 
@@ -239,6 +241,7 @@ void	GameModeManager::Render( void )
 				COMBAT_SCENE->PhysicsWorldClass::Pre_Render_Processing(*COMBAT_CAMERA);
 			}
 		}
+#endif
 
 		{
 			WWPROFILE( "Begin_Render" );
@@ -299,10 +302,11 @@ void	GameModeManager::Render( void )
 			WW3D::End_Render();
 		}
 
-
+#if WWPHYS_SCENE_BRIDGE
 		if (do_pscene) {
 			COMBAT_SCENE->PhysicsWorldClass::Post_Render_Processing();
 		}
+#endif
 
 		{
 			WWPROFILE( "Switch_Thread" );

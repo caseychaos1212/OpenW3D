@@ -217,6 +217,8 @@ bool WindClass::Update()
 }
 
 
+#if WWPHYS_SCENE_BRIDGE
+
 /***********************************************************************************************
  * WeatherSystemClass::WeatherSystemClass --																	  *
  *                                                                                             *
@@ -2108,6 +2110,155 @@ void WeatherMgrClass::Update (PhysicsSceneClass *scene, CameraClass *camera)
 	// Everything necessary has been updated. Clear the dirty flag.
 	Set_Dirty (false);
 }
+#else
+
+WeatherSystemClass::WeatherSystemClass	(PhysicsSceneClass *scene,
+													 float emittersize,
+													 float emitterheight,
+													 float particledensity,
+													 float particlesperunitlength,
+													 float particlewidth,
+													 float particleheight,
+													 float particlespeed,
+													 const Vector2 &pageoffset,
+													 const Vector2 &pagesize,
+													 unsigned pagecount,
+													 bool	staticpageexists,
+													 float minstatictime,
+													 float maxstatictime,
+													 RenderModeEnum rendermode,
+													 bool decayaftercollision,
+													 bool prime)
+	: Scene (scene),
+	  EmitterSize (emittersize),
+	  EmitterHeight (emitterheight),
+	  EmitterPosition (Vector3 (0.0f, 0.0f, 0.0f)),
+	  ParticlesPerUnitLength (particlesperunitlength),
+	  ParticleSpeed (particlespeed),
+	  HalfParticleWidth (particlewidth * 0.5f),
+	  HalfParticleHeight (particleheight * 0.5f),
+	  RayHead (NULL),
+	  RayCount (0),
+	  RaySpawnPtr (NULL),
+	  RayUpdatePtr (NULL),
+	  ParticleHead (NULL),
+	  ParticleCount (0),
+	  MinRayEndZ (FLT_MAX),
+	  SpawnCountFraction (0.0f),
+#if WEATHER_PARTICLE_SORT
+	  IndexBuffer (NULL),
+#else
+	  IndexBuffer (NULL),
+#endif
+	  Material (NULL),
+	  Shader (),
+	  Texture (NULL),
+	  TextureArray (NULL),
+	  RenderMode (rendermode),
+	  DecayAfterCollision (decayaftercollision),
+	  PageCount (pagecount),
+	  StaticPageExists (staticpageexists),
+	  MinStaticTime (minstatictime),
+	  MaxStaticTime (maxstatictime),
+	  CameraPosition (),
+	  CameraPositionValid (false)
+{
+	(void)pageoffset;
+	(void)pagesize;
+	Age = prime ? MAX_AGE : 0.0f;
+	Set_Density (particledensity);
+	SceneMin.Set (0.0f, 0.0f, 0.0f);
+	SceneMax.Set (0.0f, 0.0f, 0.0f);
+	ObjectMin.Set (0.0f, 0.0f, 0.0f);
+	ObjectMax.Set (0.0f, 0.0f, 0.0f);
+}
+
+WeatherSystemClass::~WeatherSystemClass() = default;
+
+void WeatherSystemClass::Set_Density (float density)
+{
+	ParticleDensity = density;
+	RayCount = 0;
+	RayHead = NULL;
+	RaySpawnPtr = NULL;
+	RayUpdatePtr = NULL;
+}
+
+bool WeatherSystemClass::Update (WindClass * /*wind*/, const Vector3 &cameraposition)
+{
+	CameraPosition = cameraposition;
+	CameraPositionValid = true;
+	return false;
+}
+
+bool WeatherSystemClass::Spawn (RayStruct * /*suppliedrayptr*/)
+{
+	return false;
+}
+
+void WeatherSystemClass::Kill (ParticleStruct * /*particleptr*/)
+{
+}
+
+void WeatherSystemClass::Render (RenderInfoClass & /*rinfo*/)
+{
+}
+
+void WeatherSystemClass::Get_Obj_Space_Bounding_Sphere (SphereClass &sphere) const
+{
+	sphere.Center.Set (0.0f, 0.0f, 0.0f);
+	sphere.Radius = 0.0f;
+}
+
+void WeatherSystemClass::Get_Obj_Space_Bounding_Box (AABoxClass &box) const
+{
+	box.Init (Vector3 (0.0f, 0.0f, 0.0f), Vector3 (0.0f, 0.0f, 0.0f));
+}
+
+RainSystemClass::RainSystemClass (PhysicsSceneClass *scene, float particledensity, WindClass *wind, SoundEnvironmentClass *soundenvironment, bool prime)
+	: WeatherSystemClass (scene, 20.0f, 20.0f, particledensity, 0.2f, 0.15f, 0.45f, 15.0f, Vector2 (0.0f, 0.0f), Vector2 (1.0f, 0.5f), PAGE_COUNT, true, 0.1f, 0.2f, WeatherSystemClass::RENDER_MODE_AXIS_ALIGNED, false, prime),
+	  Sound (NULL),
+	  SoundEnvironment (soundenvironment)
+{
+	(void)wind;
+}
+
+RainSystemClass::~RainSystemClass() = default;
+
+bool RainSystemClass::Update (WindClass *wind, const Vector3 &cameraposition)
+{
+	return WeatherSystemClass::Update (wind, cameraposition);
+}
+
+SnowSystemClass::SnowSystemClass (PhysicsSceneClass *scene, float particledensity, WindClass *wind, bool prime)
+	: WeatherSystemClass (scene, 40.0f, 20.0f, particledensity, 0.1f, 0.32f, 0.32f, 3.5f, Vector2 (0.0f, 0.5f), Vector2 (1.0f, 0.25f), PAGE_COUNT, false, 1.0f, 2.0f, WeatherSystemClass::RENDER_MODE_CAMERA_ALIGNED, true, prime)
+{
+	(void)wind;
+}
+
+bool SnowSystemClass::Update (WindClass *wind, const Vector3 &cameraposition)
+{
+	return WeatherSystemClass::Update (wind, cameraposition);
+}
+
+AshSystemClass::AshSystemClass (PhysicsSceneClass *scene, float particledensity, WindClass *wind, bool prime)
+	: WeatherSystemClass (scene, 40.0f, 20.0f, particledensity, 0.1f, 0.32f, 0.32f, 3.0f, Vector2 (0.0f, 0.75f), Vector2 (1.0f, 0.25f), PAGE_COUNT, false, 1.0f, 2.0f, WeatherSystemClass::RENDER_MODE_CAMERA_ALIGNED, true, prime)
+{
+	(void)wind;
+}
+
+bool AshSystemClass::Update (WindClass *wind, const Vector3 &cameraposition)
+{
+	return WeatherSystemClass::Update (wind, cameraposition);
+}
+
+void WeatherMgrClass::Update (PhysicsSceneClass *, CameraClass *)
+{
+	// Headless builds do not maintain a render scene, so weather updates
+	// are skipped intentionally.
+}
+
+#endif // WWPHYS_SCENE_BRIDGE
 
 
 /***********************************************************************************************

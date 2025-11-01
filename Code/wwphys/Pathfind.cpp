@@ -42,7 +42,6 @@
 #include "boxrobj.h"
 #include "decophys.h"
 #include "mesh.h"
-#include "assetmgr.h"
 #include "chunkio.h"
 #include "wwphysids.h"
 #include "PathDebugPlotter.h"
@@ -1994,5 +1993,4 @@ PathfindClass::Render_Debug_Widgets (RenderInfoClass &rinfo)
 	m_PortalDisplayWidgets.Render_Debug_Widgets (rinfo);
 	return ;
 }
-
 

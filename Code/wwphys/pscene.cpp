@@ -334,6 +334,79 @@ void PhysicsWorldClass::Set_Render_Bridge(PhysicsWorldRenderBridge * bridge)
     RenderBridge->Initialize_Sun(*this);
 }
 
+bool PhysicsWorldClass::Render_Assets_Available(void) const
+{
+	return (RenderBridge != NULL) && RenderBridge->Are_Render_Assets_Available();
+}
+
+RenderObjClass * PhysicsWorldClass::Create_Render_Obj(const char * name) const
+{
+	return (RenderBridge != NULL) ? RenderBridge->Create_Render_Obj(name) : NULL;
+}
+
+RenderObjClass * PhysicsWorldClass::Create_Render_Obj_From_Filename(const char * filename) const
+{
+	return (RenderBridge != NULL) ? RenderBridge->Create_Render_Obj_From_Filename(filename) : NULL;
+}
+
+TextureClass * PhysicsWorldClass::Acquire_Texture(const char * name) const
+{
+	return (RenderBridge != NULL) ? RenderBridge->Acquire_Texture(name) : NULL;
+}
+
+HAnimClass * PhysicsWorldClass::Acquire_HAnim(const char * name) const
+{
+	return (RenderBridge != NULL) ? RenderBridge->Acquire_HAnim(name) : NULL;
+}
+
+unsigned PhysicsWorldClass::Get_Render_Time_Millis(void) const
+{
+	return (RenderBridge != NULL) ? RenderBridge->Get_Render_Time_Millis() : 0;
+}
+
+bool PhysicsWorldClass::Is_Render_Sorting_Enabled(void) const
+{
+	return (RenderBridge != NULL) && RenderBridge->Is_Render_Sorting_Enabled();
+}
+
+void PhysicsWorldClass::Set_Render_Decal_Rejection_Distance(float distance) const
+{
+	if (RenderBridge != NULL) {
+		RenderBridge->Set_Decal_Rejection_Distance(distance);
+	}
+}
+
+int PhysicsWorldClass::Get_Render_Collision_Box_Display_Mask(void) const
+{
+	return (RenderBridge != NULL) ? RenderBridge->Get_Collision_Box_Display_Mask() : 0;
+}
+
+void PhysicsWorldClass::Set_Render_Collision_Box_Display_Mask(int mask) const
+{
+	if (RenderBridge != NULL) {
+		RenderBridge->Set_Collision_Box_Display_Mask(mask);
+	}
+}
+
+void PhysicsWorldClass::Flush_Render_Info(RenderInfoClass & info) const
+{
+	if (RenderBridge != NULL) {
+		RenderBridge->Flush(info);
+	}
+}
+
+void PhysicsWorldClass::Flush_Special_Render_Info(SpecialRenderInfoClass & info) const
+{
+	if (RenderBridge != NULL) {
+		RenderBridge->Flush(info);
+	}
+}
+
+bool PhysicsWorldClass::Has_Debug_Mesh_Draw_Mode(void) const
+{
+	return (RenderBridge != NULL) && RenderBridge->Has_Debug_Mesh_Draw_Mode();
+}
+
 void PhysicsWorldClass::Attach_Render_Object(RenderObjClass * /*obj*/)
 {
 	// default implementation intentionally blank; derived scenes can hook into a renderer
@@ -1356,8 +1429,9 @@ void PhysicsWorldClass::Customized_Render(RenderInfoClass & rinfo)
 			MaterialPassClass * matpass = PhysResourceMgrClass::Get_Highlight_Material_Pass();
 			if (matpass) {			
 				
-				// flush all rendering, set wireframe render mode
-				WW3D::Flush(rinfo);
+				if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+					world->Flush_Render_Info(rinfo);
+				}
 				DX8Wrapper::Set_DX8_Render_State(D3DRS_FILLMODE,D3DFILL_WIREFRAME);
 
 				// set wireframe mode and draw the vis sector
@@ -1382,7 +1456,9 @@ void PhysicsWorldClass::Customized_Render(RenderInfoClass & rinfo)
 					vis_sector->Render_Vis_Meshes(rinfo);
 				}
 
-				WW3D::Flush(rinfo);
+				if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+					world->Flush_Render_Info(rinfo);
+				}
 				rinfo.Pop_Material_Pass();
 				rinfo.Pop_Override_Flags();
 
@@ -1459,7 +1535,7 @@ void PhysicsWorldClass::Render_Objects(
 	RefPhysListIterator it(static_ws_list);
 
 	
-	if (WW3D::Get_Mesh_Draw_Mode()!=WW3D::MESH_DRAW_MODE_NONE) {
+	if (Has_Debug_Mesh_Draw_Mode()) {
 		if (Is_Backface_Occluder_Debug_Enabled()) {
 
 			// render the static world-space meshes
@@ -1619,7 +1695,9 @@ void PhysicsWorldClass::Render_Backface_Occluders
 			/*
 			** Flush the system and invert the backface culling check
 			*/
-			WW3D::Flush(context);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Flush_Special_Render_Info(context);
+		}
 			ShaderClass::Invert_Backface_Culling(true);
 			
 			/*
@@ -1662,7 +1740,9 @@ void PhysicsWorldClass::Render_Backface_Occluders
 			/*
 			** Flush all rendering and restore the normal backface culling state
 			*/
-			WW3D::Flush(context);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Flush_Special_Render_Info(context);
+		}
 			ShaderClass::Invert_Backface_Culling(false);
 			context.Pop_Material_Pass();
 			context.Pop_Override_Flags();

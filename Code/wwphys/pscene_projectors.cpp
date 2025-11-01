@@ -55,6 +55,7 @@
 #include "vertmaterial.h"
 #include "light.h"
 #include "wwprofile.h"
+#include "wwdebug.h"
 #include "texture.h"
 #include "dx8wrapper.h"
 #include "physdecalsys.h"
@@ -65,6 +66,9 @@
 #include "bitmaphandler.h"
 #include "dx8caps.h"
 #include "vertmaterial.h"
+#include "ww3d.h"
+#include "wwstring.h"
+#include <cstring>
 
 
 #define DEBUG_SHADOW_RENDERING				0
@@ -268,6 +272,103 @@ public:
 		if (DecalSystem != NULL) {
 			DecalSystem->Update_Decal_Fade_Distances(camera);
 		}
+	}
+
+	bool Are_Render_Assets_Available(void) const override
+	{
+		return WW3D::Is_Initted() && (WW3DAssetManager::Get_Instance() != NULL);
+	}
+
+	RenderObjClass * Create_Render_Obj(const char * name) override
+	{
+		if (!Are_Render_Assets_Available() || (name == NULL)) {
+			return NULL;
+		}
+
+		WW3DAssetManager * manager = WW3DAssetManager::Get_Instance();
+		return (manager != NULL) ? manager->Create_Render_Obj(name) : NULL;
+	}
+
+	RenderObjClass * Create_Render_Obj_From_Filename(const char * filename) override
+	{
+		if (!Are_Render_Assets_Available() || (filename == NULL)) {
+			return NULL;
+		}
+
+		StringClass render_obj_name(filename,true);
+		if (const char * slash = ::strrchr(filename,'\\')) {
+			render_obj_name = slash + 1;
+		}
+		if (render_obj_name.Get_Length() > 4) {
+			render_obj_name.Erase(render_obj_name.Get_Length() - 4, 4);
+		}
+
+		RenderObjClass * created = Create_Render_Obj(render_obj_name);
+		if (created == NULL) {
+			WWDEBUG_SAY(("Failed to create %s from %s\n", (const char *)render_obj_name, (filename != NULL) ? filename : "<null>"));
+		}
+		return created;
+	}
+
+	TextureClass * Acquire_Texture(const char * name) override
+	{
+		if (!Are_Render_Assets_Available() || (name == NULL)) {
+			return NULL;
+		}
+		WW3DAssetManager * manager = WW3DAssetManager::Get_Instance();
+		if (manager == NULL) {
+			return NULL;
+		}
+		return manager->Get_Texture(name);
+	}
+
+	HAnimClass * Acquire_HAnim(const char * name) override
+	{
+		if (!Are_Render_Assets_Available() || (name == NULL)) {
+			return NULL;
+		}
+		WW3DAssetManager * manager = WW3DAssetManager::Get_Instance();
+		return (manager != NULL) ? manager->Get_HAnim(name) : NULL;
+	}
+
+	unsigned Get_Render_Time_Millis(void) const override
+	{
+		return WW3D::Get_Sync_Time();
+	}
+
+	bool Is_Render_Sorting_Enabled(void) const override
+	{
+		return WW3D::Is_Sorting_Enabled();
+	}
+
+	void Set_Decal_Rejection_Distance(float distance) override
+	{
+		WW3D::Set_Decal_Rejection_Distance(distance);
+	}
+
+	int Get_Collision_Box_Display_Mask(void) const override
+	{
+		return WW3D::Get_Collision_Box_Display_Mask();
+	}
+
+	void Set_Collision_Box_Display_Mask(int mask) override
+	{
+		WW3D::Set_Collision_Box_Display_Mask(mask);
+	}
+
+	void Flush(RenderInfoClass & info) override
+	{
+		WW3D::Flush(info);
+	}
+
+	void Flush(SpecialRenderInfoClass & info) override
+	{
+		WW3D::Flush(info);
+	}
+
+	bool Has_Debug_Mesh_Draw_Mode(void) const override
+	{
+		return WW3D::Get_Mesh_Draw_Mode() != WW3D::MESH_DRAW_MODE_NONE;
 	}
 
 	int Create_Decal(const Matrix3D & tm,const char * texture_name,

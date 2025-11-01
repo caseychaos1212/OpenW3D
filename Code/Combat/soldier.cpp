@@ -36,7 +36,9 @@
 
 #include "soldier.h"
 #include "debug.h"
+#if WWPHYS_SCENE_BRIDGE
 #include "pscene.h"
+#endif
 #include "combat.h"
 #include "weapons.h"
 #include "damage.h"
@@ -392,9 +394,11 @@ SoldierGameObj::~SoldierGameObj()
 		Vehicle->Remove_Occupant(this);
 	}	
 
+#if WWPHYS_SCENE_BRIDGE
 	if (COMBAT_WORLD != NULL) {
 		COMBAT_WORLD->Remove_Object( Peek_Physical_Object() );
 	}
+#endif
 
 	if ( Is_Human_Controlled() ) {
 		GameObjManager::Remove_Star( this );
@@ -508,9 +512,11 @@ void	SoldierGameObj::Re_Init( const SoldierGameObjDef & definition )
 	//
 	//	Remove the object from the world (just to be safe)
 	//
+#if WWPHYS_SCENE_BRIDGE
 	if (COMBAT_WORLD != NULL) {
 		COMBAT_WORLD->Remove_Object( Peek_Physical_Object() );
 	}
+#endif
 
 	//
 	//	Reset the weapon model
@@ -1534,6 +1540,7 @@ void SoldierGameObj::Interpret_Sc_State_Data(
 }
 
 //-----------------------------------------------------------------------------
+#if WWPHYS_SCENE_BRIDGE
 int SoldierGameObj::Tally_Vis_Visible_Soldiers( void )
 {
 	int retcode = -1;
@@ -1567,6 +1574,12 @@ int SoldierGameObj::Tally_Vis_Visible_Soldiers( void )
 
 	return retcode;
 }
+#else
+int SoldierGameObj::Tally_Vis_Visible_Soldiers( void )
+{
+	return 0;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 bool SoldierGameObj::Is_In_Elevator( void )
@@ -2322,6 +2335,7 @@ void	SoldierGameObj::Think( void )
 		//
 		//	Display a debug box to show the ghosted collision as ncessary
 		//
+#if WWPHYS_SCENE_BRIDGE
 		if (	DisplayDebugBoxForGhostCollision &&
 				(Peek_Physical_Object ()->Get_Collision_Group() == SOLDIER_GHOST_COLLISION_GROUP))
 		{
@@ -2333,6 +2347,7 @@ void	SoldierGameObj::Think( void )
 				COMBAT_WORLD->Add_Debug_AABox( soldier_box, Vector3( 1.0F, 0.0F, 0.25F ) );
 			}
 		}
+#endif
 
 		// Stats
 		if ( Get_Player_Data() != NULL ) {
@@ -2587,6 +2602,7 @@ void	SoldierGameObj::Think( void )
 		Vector3 vel;
 		Peek_Human_Phys()->Get_Velocity(&vel);
 
+#if WWPHYS_SCENE_BRIDGE
 		if ((Peek_Human_Phys()->Get_Contact_Surface_Type() == SURFACE_TYPE_UNDERWATER_DIRT) &&
 			 (vel.Length2() > 0.1f))
 		{
@@ -2614,6 +2630,7 @@ void	SoldierGameObj::Think( void )
 				in_water = true;
 			}
 		}
+#endif
 		
 		if (!in_water) {
 				SurfaceEffectsManager::Update_Persistant_Emitter(	WaterWake,
@@ -3375,7 +3392,11 @@ void	SoldierGameObj::Set_Emot_Icon ( const char *model_name, float duration )
 			Matrix3D tm = Get_Transform();
 			tm.Set_Translation (tm.Get_Translation() + Vector3 (0, 0, EMOT_ICON_HEIGHT));
 			EmotIconModel->Set_Transform( tm );
-			COMBAT_SCENE->Add_Render_Object( EmotIconModel );
+#if WWPHYS_SCENE_BRIDGE
+			if (PhysicsSceneClass * scene = COMBAT_SCENE) {
+				scene->Add_Render_Object(EmotIconModel);
+			}
+#endif
 			EmotIconTimer = duration;
 		}
 	}
@@ -3839,9 +3860,11 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 
 			// And Shake the camera
 			Vector3	pos = COMBAT_CAMERA->Get_Transform().Get_Translation();
+#if WWPHYS_SCENE_BRIDGE
 			if (COMBAT_WORLD != NULL) {
 				COMBAT_WORLD->Add_Camera_Shake(	pos,	1, 0.5f, 0.05f );
 			}
+#endif
 		}
 
 		anim_ok = false;
@@ -4216,6 +4239,7 @@ bool SoldierGameObj::Can_See(SoldierGameObj * p_soldier)
 {
 	WWASSERT(p_soldier != NULL);
 
+#if WWPHYS_SCENE_BRIDGE
 	Vector3 ray_start = Get_Bullseye_Position();
 	Vector3 ray_end = p_soldier->Get_Bullseye_Position();	// This may a big high
 
@@ -4255,6 +4279,10 @@ bool SoldierGameObj::Can_See(SoldierGameObj * p_soldier)
 	}
 
 	return can_see;
+#else
+	(void)p_soldier;
+	return true;
+#endif
 }
 
 //------------------------------------------------------------------------------------
@@ -5072,9 +5100,11 @@ bool	SoldierGameObj::Is_Safe_To_Disable_Ghost_Collision( const Vector3 &curr_pos
 	//	Collect all the dynamic objects in this box
 	//
 	NonRefPhysListClass obj_list;
+#if WWPHYS_SCENE_BRIDGE
 	if (COMBAT_WORLD != NULL) {
 		COMBAT_WORLD->Collect_Objects (box, false, true, &obj_list);
 	}
+#endif
 
 	//
 	//	Loop over all the collected objects
@@ -5142,9 +5172,11 @@ bool	SoldierGameObj::Is_Soldier_Blocked( const Vector3 &curr_pos )
 	//	Collect all the dynamic objects in this box
 	//
 	NonRefPhysListClass obj_list;
+#if WWPHYS_SCENE_BRIDGE
 	if (COMBAT_WORLD != NULL) {
 		COMBAT_WORLD->Collect_Objects (box, false, true, &obj_list);
 	}
+#endif
 
 	uint32 my_id			= Get_ID ();
 	uint32 smallest_id	= my_id;
@@ -5320,4 +5352,3 @@ void	SoldierGameObj::Update_Locked_Facing( void )
 		CombatManager::Soldier_Dies(this);
 	}
 	*/
-

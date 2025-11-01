@@ -157,12 +157,14 @@ namespace
 
 void Destroy_Game_World()
 {
+#if WWPHYS_SCENE_BRIDGE
 	if (GameScene != NULL) {
 		GameScene->Release_Ref();
 		GameScene = NULL;
 		GameWorld = NULL;
 		return;
 	}
+#endif
 
 	if (GameWorld != NULL) {
 		delete GameWorld;
@@ -282,12 +284,17 @@ void	CombatManager::Scene_Init( bool render_available )
 {
 	Destroy_Game_World();
 
+#if WWPHYS_SCENE_BRIDGE
 	if (render_available) {
 		GameScene = new PhysicsSceneClass;
 		GameWorld = GameScene;
-	} else {
+	} else
+#endif
+	{
 		GameWorld = new PhysicsWorldClass;
+#if WWPHYS_SCENE_BRIDGE
 		GameScene = NULL;
+#endif
 	}
 
 	if (GameWorld == NULL) {
@@ -296,15 +303,17 @@ void	CombatManager::Scene_Init( bool render_available )
 
 	GameWorld->Set_Ambient_Light(Vector3(0.55f,0.55f,0.55f));
 	GameWorld->Set_Ambient_Light(Vector3(1,1,1));
+#if WWPHYS_SCENE_BRIDGE
 	if (GameScene != NULL) {
 		GameScene->Set_Fog_Color(Vector3(0.6f,0.6f,0.6f)); //Vector3(80.0f/255.0f,130.0f/255.0f,180.0f/255.0f));
 	}
+#endif
 
 	// Do all 'Enable_All's, then all 'Disable_All's, then the individual pairs
 	COMBAT_WORLD->Enable_All_Collision_Detections( DEFAULT_COLLISION_GROUP );
 	COMBAT_WORLD->Enable_All_Collision_Detections( BULLET_COLLISION_GROUP );
 	COMBAT_WORLD->Enable_All_Collision_Detections( TERRAIN_COLLISION_GROUP );
-	COMBAT_WORLD->Enable_All_Collision_Detections( PhysicsSceneClass::COLLISION_GROUP_WORLD );
+	COMBAT_WORLD->Enable_All_Collision_Detections( PhysicsWorldClass::COLLISION_GROUP_WORLD );
 	COMBAT_WORLD->Enable_All_Collision_Detections( SOLDIER_GHOST_COLLISION_GROUP );
 	COMBAT_WORLD->Enable_All_Collision_Detections( SOLDIER_COLLISION_GROUP );
 
@@ -318,7 +327,7 @@ void	CombatManager::Scene_Init( bool render_available )
 	COMBAT_WORLD->Enable_Collision_Detection( TERRAIN_AND_BULLET_COLLISION_GROUP, BULLET_COLLISION_GROUP );
 	COMBAT_WORLD->Disable_Collision_Detection( BULLET_COLLISION_GROUP, BULLET_COLLISION_GROUP );
 	COMBAT_WORLD->Enable_Collision_Detection( BULLET_ONLY_COLLISION_GROUP, BULLET_COLLISION_GROUP );
-	COMBAT_WORLD->Disable_Collision_Detection( PhysicsSceneClass::COLLISION_GROUP_WORLD,PhysicsSceneClass::COLLISION_GROUP_WORLD );
+	COMBAT_WORLD->Disable_Collision_Detection( PhysicsWorldClass::COLLISION_GROUP_WORLD,PhysicsWorldClass::COLLISION_GROUP_WORLD );
 	COMBAT_WORLD->Disable_Collision_Detection( SOLDIER_GHOST_COLLISION_GROUP, SOLDIER_COLLISION_GROUP );
 	COMBAT_WORLD->Disable_Collision_Detection( SOLDIER_GHOST_COLLISION_GROUP, SOLDIER_GHOST_COLLISION_GROUP );
 }
@@ -353,11 +362,19 @@ void	CombatManager::Pre_Load_Level( bool render_available )
 
 	cPacket::Init_Encoder();
 
+#if WWPHYS_SCENE_BRIDGE
 	BackgroundScene = NEW_REF (SimpleSceneClass, ());
+#else
+	BackgroundScene = NULL;
+#endif
 
 	SoundEnvironment = NEW_REF (SoundEnvironmentClass, ());
 
+#if WWPHYS_SCENE_BRIDGE
 	BackgroundMgrClass::Init (BackgroundScene, SoundEnvironment, render_available);
+#else
+	BackgroundMgrClass::Init (NULL, SoundEnvironment, false);
+#endif
 
 	WeatherMgrClass::Init (SoundEnvironment);
 
@@ -615,8 +632,10 @@ void	CombatManager::Unload_Level( void )
 	REF_PTR_RELEASE (SoundEnvironment);
 	WWLOG_INTERMEDIATE("REF_PTR_RELEASE (SoundEnvironment)");
 
+#if WWPHYS_SCENE_BRIDGE
 	REF_PTR_RELEASE (BackgroundScene);
 	WWLOG_INTERMEDIATE("REF_PTR_RELEASE (BackgroundScene)");
+#endif
 
 	WW3DAssetManager::Get_Instance()->Free_Assets();	// Free all assets
 	WWLOG_INTERMEDIATE("WW3DAssetManager::Get_Instance()->Free_Assets()");
@@ -811,12 +830,16 @@ void CombatManager::Render()
 		{
 			WWPROFILE( "Combat Render BG" );
 
+#if WWPHYS_SCENE_BRIDGE
 			WW3D::Render (BackgroundScene, MainCamera);
+#endif
 		}
 
 		{
 			WWPROFILE( "Combat Render FG" );
+#if WWPHYS_SCENE_BRIDGE
 			WW3D::Render(COMBAT_SCENE, MainCamera);
+#endif
 		}
 
 		{
@@ -1407,7 +1430,6 @@ void	CombatManager::Register_Star_Killer( ArmedGameObj * killer )
 		StarKillerID = 0;
 	}
 }
-
 
 
 

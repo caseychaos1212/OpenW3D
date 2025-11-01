@@ -198,15 +198,21 @@ set(WWPHYS_SRC
 # Targets to build.
 add_library(wwphys STATIC)
 
-target_link_libraries(wwphys PRIVATE
-    wwcommon
-    ww3d2
-)
+if(REN_PHYS_SCENE_BRIDGE)
+    target_link_libraries(wwphys PRIVATE
+        wwcommon
+        ww3d2
+    )
+else()
+    target_link_libraries(wwphys PRIVATE
+        wwcommon
+    )
+endif()
 
 target_sources(wwphys PRIVATE ${WWPHYS_SRC})
 
 # This module needs building differently for the level editor
-if (RENEGADE_TOOLS)
+if (REN_BUILD_TOOLS)
     # Targets to build.
     add_library(wwphyse STATIC)
 

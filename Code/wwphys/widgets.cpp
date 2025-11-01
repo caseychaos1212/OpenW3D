@@ -41,7 +41,9 @@
 #include "bin_obbox.h"
 #include "bin_point.h"
 #include "bin_vector.h"
+#if WWPHYS_SCENE_BRIDGE
 #include "assetmgr.h"
+#endif
 #include "rendobj.h"
 #include "ramfile.h"
 
@@ -69,6 +71,7 @@ static WidgetDefStruct _WidgetDefs[WidgetSystem::NUM_WIDGETS] =
 void WidgetSystem::Init_Debug_Widgets(void)
 {
 #ifdef WWDEBUG //don't create debug widgets in release builds...
+#if WWPHYS_SCENE_BRIDGE
 
 	for (int i=0; i<NUM_WIDGETS; i++) {
 
@@ -81,6 +84,7 @@ void WidgetSystem::Init_Debug_Widgets(void)
 			SET_REF_OWNER( _WidgetDefs[i].RObj );
 		}
 	}
+#endif
 #endif
 }
 

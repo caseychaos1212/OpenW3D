@@ -57,7 +57,6 @@
 #include "colmathaabox.h"
 #include "vistable.h"
 #include "chunkio.h"
-#include "assetmgr.h"
 #include "progcall.h"
 #include "matrix3.h"
 #include "persistfactory.h"

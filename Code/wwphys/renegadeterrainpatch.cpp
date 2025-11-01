@@ -51,6 +51,7 @@
 #include "wwhack.h"
 #include "inttest.h"
 #include "matpass.h"
+#include "pscene.h"
 #include <algorithm>
 
 
@@ -423,7 +424,8 @@ RenegadeTerrainPatchClass::Render_Procedural_Material_Pass(MaterialPassClass * m
 		if (temp_apt.Count() > 0) {
 
 			int buftype = BUFFER_TYPE_DYNAMIC_DX8;
-			if (Model->Get_Flag(MeshGeometryClass::SORT) && WW3D::Is_Sorting_Enabled()) {
+			PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+			if (Model->Get_Flag(MeshGeometryClass::SORT) && (world != NULL) && world->Is_Render_Sorting_Enabled()) {
 				buftype = BUFFER_TYPE_DYNAMIC_SORTING;
 			}
 

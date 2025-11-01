@@ -111,6 +111,7 @@ PathfindSectorBuilderClass::PathfindSectorBuilderClass (void)
 	full_path = Get_File_Mgr ()->Make_Full_Path ("Characters\\Commando");
 	_pThe3DAssetManager->Set_Current_Directory (full_path);
 
+#if WWPHYS_SCENE_BRIDGE
 	RenderObjClass *commando_obj = WW3DAssetManager::Get_Instance()->Create_Render_Obj ("COMMANDO");
 	if (commando_obj != NULL) {
 
@@ -175,6 +176,7 @@ PathfindSectorBuilderClass::PathfindSectorBuilderClass (void)
 		}
 		m_BodyBoxCullingSystem.Re_Partition (min, max, max_extent * 5);
 	}
+#endif
 
 	return ;
 }

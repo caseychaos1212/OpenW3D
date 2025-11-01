@@ -39,7 +39,6 @@
 
 #include "pscene.h"
 #include "colmathaabox.h"
-#include "assetmgr.h"
 #include "vertmaterial.h"
 #include "camera.h"
 #include "physdecalsys.h"

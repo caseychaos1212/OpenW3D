@@ -215,7 +215,7 @@ void	CinematicGameObj::Cinematic_Init( void )
 	** (gth) cinematic game objects behave like animated terrain so they are in the 
 	** terrain collision group 
 	*/
-	Peek_Physical_Object()->Set_Collision_Group( PhysicsSceneClass::COLLISION_GROUP_WORLD );
+	Peek_Physical_Object()->Set_Collision_Group( PhysicsWorldClass::COLLISION_GROUP_WORLD );
 //	COMBAT_SCENE->Add_To_Dirty_Cull_List( Peek_Physical_Object() );
 
 	Set_Sound( Get_Definition().SoundDefID, Get_Definition().SoundBoneName );

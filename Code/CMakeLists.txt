@@ -12,6 +12,7 @@ target_compile_definitions(wwcommon INTERFACE
     _CRT_NONSTDC_NO_WARNINGS
     _CRT_SECURE_NO_WARNINGS
     _WINSOCK_DEPRECATED_NO_WARNINGS
+    WWPHYS_SCENE_BRIDGE=${WWPHYS_SCENE_BRIDGE_VALUE}
     $<$<CONFIG:Debug>:WWDEBUG>
 )
 
@@ -49,8 +50,11 @@ target_include_directories(wwcommon INTERFACE
 target_link_libraries(wwcommon INTERFACE
     milesstub
     gamespy
-    d3d9lib
 )
+
+if(REN_PHYS_SCENE_BRIDGE)
+    target_link_libraries(wwcommon INTERFACE d3d9lib)
+endif()
 
 if(TARGET ffmpeg)
     target_link_libraries(wwcommon INTERFACE ffmpeg)
@@ -80,6 +84,6 @@ add_subdirectory(Launcher)
 add_subdirectory(Scripts)
 add_subdirectory(Commando)
 
-if (RENEGADE_TOOLS)
+if (REN_BUILD_TOOLS)
     add_subdirectory(Tools)
 endif()

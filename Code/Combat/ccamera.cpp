@@ -58,6 +58,9 @@
 #include "WWAudio.h"
 #include "SoundScene.h"
 #include "wwprofile.h"
+#if WWPHYS_SCENE_BRIDGE
+#include "scene.h"
+#endif
 #include "diaglog.h"
 #include "gametype.h"
 #include "wwphysids.h"
@@ -1411,12 +1414,13 @@ void	CCameraClass::Handle_Input( void )
 				));
 		}
 
+#if WWPHYS_SCENE_BRIDGE
 		if ( Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_IN ) || 
-			 Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_OUT ) ) {
-			float fog_start, fog_stop;
-		if (COMBAT_WORLD != NULL) {
-			COMBAT_SCENE->SceneClass::Get_Fog_Range( &fog_start, &fog_stop );
-		}
+		 Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_OUT ) ) {
+			float fog_start = 0.0f, fog_stop = FarClipPlane;
+			if (SceneClass *scene = static_cast<SceneClass *>(COMBAT_SCENE)) {
+				scene->Get_Fog_Range(&fog_start, &fog_stop);
+			}
 			if ( Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_OUT ) ) {
 				FarClipPlane *= 1.1f;
 				fog_start *= 1.1f;
@@ -1424,12 +1428,13 @@ void	CCameraClass::Handle_Input( void )
 				FarClipPlane /= 1.1f;
 				fog_start /= 1.1f;
 			}
-			if (COMBAT_WORLD != NULL) {
-				COMBAT_SCENE->SceneClass::Set_Fog_Range( fog_start, FarClipPlane );
+			if (SceneClass *scene = static_cast<SceneClass *>(COMBAT_SCENE)) {
+				scene->Set_Fog_Range(fog_start, FarClipPlane);
 			}
 			Debug_Say(( "FarClipPlane %f\n", FarClipPlane ));
 			Set_Clip_Planes( NearClipPlane, FarClipPlane );
 		} 
+#endif
 
 	}
 #endif
@@ -1723,4 +1728,3 @@ void	CCameraClass::Handle_Snap_Shot_Mode( void )
 
 	Set_Transform( tm );
 }
-

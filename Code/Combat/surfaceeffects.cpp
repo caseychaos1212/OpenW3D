@@ -219,6 +219,7 @@ PersistantSurfaceEmitterClass::~PersistantSurfaceEmitterClass( void )
 	Set_Emitter( NULL );
 }
 
+#if WWPHYS_SCENE_BRIDGE
 void	PersistantSurfaceEmitterClass::Set_Emitter( const char * name )
 {
 	// Stop Old Emitter
@@ -243,6 +244,18 @@ void	PersistantSurfaceEmitterClass::Set_Emitter( const char * name )
 		}
 	}
 }
+#else
+void	PersistantSurfaceEmitterClass::Set_Emitter( const char * name )
+{
+	(void)name;
+	if (Emitter != NULL) {
+		Emitter->Stop();
+		Emitter->Release_Ref();
+		Emitter = NULL;
+	}
+}
+#endif
+
 
 /*
 ** Surface Effect Database
@@ -542,7 +555,9 @@ void	SurfaceEffectsManager::Apply_Effect
 			emitter->Set_Transform( tm );
 			emitter->Start();
 			emitter->Enable_Remove_On_Complete(true);
+#if WWPHYS_SCENE_BRIDGE
 			PhysicsSceneClass::Get_Instance()->Add_Render_Object( emitter );
+#endif
 			emitter->Release_Ref();
 		}
 #endif
@@ -743,5 +758,4 @@ void SurfaceEffectsManager::Set_Override_Surface_Type(int type)
 
 	PhysicsConstants::Set_Override_Surface_Type(OverrideSurfaceType);
 }
-
 

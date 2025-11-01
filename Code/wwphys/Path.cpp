@@ -48,7 +48,6 @@
 #include "waypoint.h"
 #include "chunkio.h"
 #include "persistfactory.h"
-#include "assetmgr.h"
 #include "wwmemlog.h"
 
 

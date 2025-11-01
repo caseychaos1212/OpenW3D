@@ -1298,12 +1298,16 @@ void	ConsoleGameModeClass::Update_Profile( void )
 	if (Input::Get_State(INPUT_FUNCTION_PROFILE_ENTER_CHILD7)) WW3D::Set_NPatches_Level(7);
 	if (Input::Get_State(INPUT_FUNCTION_PROFILE_ENTER_CHILD8)) WW3D::Set_NPatches_Level(8);
 	if (Input::Get_State(INPUT_FUNCTION_PROFILE_ENTER_PARENT)) {
-		if (COMBAT_SCENE->Get_Polygon_Mode()==SceneClass::LINE) {
-			COMBAT_SCENE->Set_Polygon_Mode(SceneClass::FILL);
+	#if WWPHYS_SCENE_BRIDGE
+		if (COMBAT_SCENE != NULL) {
+			if (COMBAT_SCENE->Get_Polygon_Mode()==SceneClass::LINE) {
+				COMBAT_SCENE->Set_Polygon_Mode(SceneClass::FILL);
+			}
+			else {
+				COMBAT_SCENE->Set_Polygon_Mode(SceneClass::LINE);
+			}
 		}
-		else {
-			COMBAT_SCENE->Set_Polygon_Mode(SceneClass::LINE);
-		}
+	#endif
 	}
 	if (Input::Get_State(INPUT_FUNCTION_PROFILE_ENTER_CHILD9)) {
 		unsigned i=(unsigned)WW3D::Get_NPatches_Gap_Filling_Mode();
@@ -1755,8 +1759,6 @@ void	ConsoleGameModeClass::Update_Memory_Log( void )
 
 	StatisticsDisplayManager::Set_Stat( "memory", memory_string, 0xffffffff );
 }
-
-
 
 
 

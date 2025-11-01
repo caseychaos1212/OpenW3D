@@ -58,7 +58,6 @@
 #include "chunkio.h"
 #include "saveload.h"
 #include "wwhack.h"
-#include "assetmgr.h"
 #include "physcoltest.h"
 #include "light.h"
 
@@ -625,4 +624,3 @@ bool MoveablePhysDefClass::Is_Type(const char * type_name)
 		return DynamicPhysDefClass::Is_Type(type_name);
 	}
 }
-

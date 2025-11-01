@@ -80,7 +80,6 @@
 #include "physinttest.h"
 #include "movephys.h"
 #include "bitstream.h"
-#include "assetmgr.h"
 #include "hanim.h"
 #include "boxrobj.h"
 #include "chunkio.h"
@@ -553,7 +552,10 @@ void AnimCollisionManagerClass::Set_Animation(const char * anim_name)
  *=============================================================================================*/
 void AnimCollisionManagerClass::Internal_Set_Animation(const char * anim_name)
 {
-	HAnimClass * anim = WW3DAssetManager::Get_Instance()->Get_HAnim(anim_name);
+    HAnimClass * anim = NULL;
+    if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+        anim = world->Acquire_HAnim(anim_name);
+    }
 	if ( anim == NULL && anim_name != NULL ) {
 		WWDEBUG_SAY(( "FAILED TO FIND ANIM IN AnimCollisionManagerClass::Internal_Set_Animation(\"%s\")\n", anim_name ));
 	}
@@ -1465,7 +1467,10 @@ bool AnimCollisionManagerClass::Load(ChunkLoadClass &cload)
 	}
 
 	if (!prev_anim_name.Is_Empty()) {
-		HAnimClass * anim = WW3DAssetManager::Get_Instance()->Get_HAnim(prev_anim_name);
+    HAnimClass * anim = NULL;
+    if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+        anim = world->Acquire_HAnim(prev_anim_name);
+    }
 		if ( anim == NULL ) {
 			WWDEBUG_SAY(( "FAILED TO FIND PREV ANIM IN AnimCollisionManagerClass::Internal_Set_Animation(\"%s\")\n", prev_anim_name ));
 		}
@@ -1548,4 +1553,3 @@ bool AnimCollisionManagerDefClass::Load(ChunkLoadClass &cload)
 	}
 	return true;
 }
-

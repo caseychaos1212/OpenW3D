@@ -39,8 +39,6 @@
 #include "colmathaabox.h"
 #include "rendobj.h"
 #include "rinfo.h"
-#include "assetmgr.h"
-#include "ww3d.h"
 #include "wwdebug.h"
 #include <string>
 #include "pscene.h"
@@ -65,9 +63,17 @@ const float SUN_CHECK_DISTANCE = 50.0f;	//If a ray this long doesn't intersect, 
 
 namespace
 {
+inline PhysicsWorldClass * Peek_Active_World()
+{
+	return PhysicsWorldClass::Get_Active_World();
+}
+
 inline bool Physics_Render_Assets_Available()
 {
-	return WW3D::Is_Initted() && (WW3DAssetManager::Get_Instance() != NULL);
+	if (PhysicsWorldClass * world = Peek_Active_World()) {
+		return world->Render_Assets_Available();
+	}
+	return false;
 }
 }
 
@@ -77,21 +83,10 @@ inline bool Physics_Render_Assets_Available()
 */
 RenderObjClass * create_render_obj_from_filename( const char * filename )
 {
-	if (!Physics_Render_Assets_Available()) {
-		return NULL;
+	if (PhysicsWorldClass * world = Peek_Active_World()) {
+		return world->Create_Render_Obj_From_Filename(filename);
 	}
-
-	StringClass	render_obj_name(filename,true);
-	if ( ::strchr( filename, '\\' ) != 0 ) {
-		render_obj_name = ::strrchr( filename, '\\' ) + 1;
-	}
-	render_obj_name.Erase( render_obj_name.Get_Length() - 4, 4 );
-
-	RenderObjClass *model = WW3DAssetManager::Get_Instance()->Create_Render_Obj( render_obj_name );
-	if ( model == NULL ) {
-		WWDEBUG_SAY(("Failed to create %s from %s\n", (const char *)render_obj_name, filename));
-	}
-	return model;
+	return NULL;
 }
 
 
@@ -175,11 +170,12 @@ void PhysClass::Init(const PhysDefClass & def)
 	if (!def.ModelName.Is_Empty() && render_available) {
 
 		RenderObjClass * model = NULL;
-	
-		if (::strchr(def.ModelName, '.') != NULL) {
-			model = ::create_render_obj_from_filename(def.ModelName);
-		} else {
-			model = WW3DAssetManager::Get_Instance()->Create_Render_Obj(def.ModelName);
+		if (PhysicsWorldClass * world = Peek_Active_World()) {
+			if (::strchr(def.ModelName, '.') != NULL) {
+				model = world->Create_Render_Obj_From_Filename(def.ModelName);
+			} else {
+				model = world->Create_Render_Obj(def.ModelName);
+			}
 		}
 
 		if ( model == NULL ) {
@@ -212,7 +208,10 @@ void PhysClass::Set_Model(RenderObjClass * model)
 { 
 	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
 	bool in_scene = (world != NULL) ? world->Contains(this) : false;
-	PhysicsSceneClass * scene = dynamic_cast<PhysicsSceneClass *>(world);
+
+#if WWPHYS_SCENE_BRIDGE
+	SceneClass * render_scene = (world != NULL) ? dynamic_cast<SceneClass *>(world) : NULL;
+#endif
 	Matrix3D previous_transform(true);
 
 	if (Model) {
@@ -221,9 +220,11 @@ void PhysClass::Set_Model(RenderObjClass * model)
 		if ( model ) {	
 			model->Set_Transform( Model->Get_Transform() );
 		}
-		if (in_scene && scene != NULL) {
-			Model->Notify_Removed(scene);
+#if WWPHYS_SCENE_BRIDGE
+		if (in_scene && render_scene != NULL) {
+			Model->Notify_Removed(render_scene);
 		}
+#endif
 		Model->Release_Ref();
 	} else if (model != NULL) {
 		model->Set_Transform(FallbackTransform);
@@ -231,9 +232,11 @@ void PhysClass::Set_Model(RenderObjClass * model)
 	Model = model; 
 	if (Model) {
 		Model->Add_Ref(); 
-		if (in_scene && scene != NULL) {
-			Model->Notify_Added(scene);
+#if WWPHYS_SCENE_BRIDGE
+		if (in_scene && render_scene != NULL) {
+			Model->Notify_Added(render_scene);
 		}
+#endif
 		FallbackTransform = Model->Get_Transform();
 	} else {
 		FallbackTransform = previous_transform;
@@ -253,7 +256,10 @@ void PhysClass::Set_Model_By_Name(const char * model_type_name)
 		return;
 	}
 
-	RenderObjClass * model = WW3DAssetManager::Get_Instance()->Create_Render_Obj(model_type_name);
+	RenderObjClass * model = NULL;
+	if (PhysicsWorldClass * world = Peek_Active_World()) {
+		model = world->Create_Render_Obj(model_type_name);
+	}
 	if ( model == NULL ) {
 		WWDEBUG_SAY(( "%s failed to load\n", model_type_name ));
 	}
@@ -456,15 +462,15 @@ LightEnvironmentClass * PhysClass::Get_Static_Lighting_Environment(void)
 
 void PhysClass::Update_Sun_Status(void)
 {
-	// Update sun status only four times per second
-	unsigned current_time=WW3D::Get_Sync_Time();
-	if ((current_time-SunStatusLastUpdated)<250) return;
-	SunStatusLastUpdated=current_time;
-
 	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
 	if (world == NULL) {
 		return;
 	}
+
+	// Update sun status only four times per second
+	unsigned current_time = world->Get_Render_Time_Millis();
+	if ((current_time-SunStatusLastUpdated)<250) return;
+	SunStatusLastUpdated=current_time;
 	
 	Vector3 sunlight;
 	world->Get_Sun_Light_Vector(&sunlight);

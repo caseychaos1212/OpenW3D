@@ -98,8 +98,8 @@ void DynamicShadowManagerClass::Update_Shadow(void)
 	*/
 	AABoxClass objbox;
 
-	bool use_blob = (shadow_mode == PhysicsSceneClass::SHADOW_MODE_BLOBS) ||
-						 ((shadow_mode == PhysicsSceneClass::SHADOW_MODE_BLOBS_PLUS) && (!Parent.Is_Force_Projection_Shadow_Enabled()));
+	bool use_blob = (shadow_mode == PhysicsWorldClass::SHADOW_MODE_BLOBS) ||
+						 ((shadow_mode == PhysicsWorldClass::SHADOW_MODE_BLOBS_PLUS) && (!Parent.Is_Force_Projection_Shadow_Enabled()));
 
 	if (use_blob) {
 		Parent.Get_Shadow_Blob_Box(&objbox);
@@ -127,7 +127,7 @@ void DynamicShadowManagerClass::Update_Shadow(void)
 	*/
 	if (	(Parent.Do_Any_Effects_Suppress_Shadows()) ||
 			(Parent.Is_Shadow_Generation_Enabled() == false) || 
-			(shadow_mode == PhysicsSceneClass::SHADOW_MODE_NONE) ||
+			(shadow_mode == PhysicsWorldClass::SHADOW_MODE_NONE) ||
 			(shadow_dist2 > shadow_shutoff2) || 
 			(model == NULL) ||
 			(model->Is_Hidden()) ||

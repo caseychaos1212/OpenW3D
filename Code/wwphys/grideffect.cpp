@@ -37,7 +37,6 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "grideffect.h"
-#include "ww3d.h"
 #include "physresourcemgr.h"
 #include "vertmaterial.h"
 #include "matpass.h"
@@ -45,6 +44,7 @@
 #include "rinfo.h"
 #include "camera.h"
 #include "phys.h"
+#include "pscene.h"
 
 
 /***********************************************************************************************
@@ -67,7 +67,11 @@ GridEffectClass::GridEffectClass(void) :
 	Stage1Mapper(NULL),
 	MaterialPass(NULL)
 {
-	LastRenderTime = WW3D::Get_Sync_Time();
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		LastRenderTime = world->Get_Render_Time_Millis();
+	} else {
+		LastRenderTime = 0;
+	}
 
 	MaterialPass = NEW_REF(MaterialPassClass,());
 	
@@ -118,8 +122,10 @@ void GridEffectClass::Render_Push(RenderInfoClass & rinfo,PhysClass * obj)
 	** - compute the texture transform given this camera, update the mappers
 	** - compute the texel row, update the mappers
 	*/
-	int millisecs = WW3D::Get_Sync_Time() - LastRenderTime;
-	LastRenderTime = WW3D::Get_Sync_Time();
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	unsigned current_time = (world != NULL) ? world->Get_Render_Time_Millis() : LastRenderTime;
+	int millisecs = current_time - LastRenderTime;
+	LastRenderTime = current_time;
 	float dt = (float)millisecs / 1000.0f;
 
 	float parameter_step = ParameterRate * dt;
@@ -196,4 +202,3 @@ TextureClass * GridEffectClass::Peek_Texture(void)
 {
 	return MaterialPass->Peek_Texture();
 }
-

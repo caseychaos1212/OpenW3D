@@ -70,6 +70,7 @@ class PhysClass;
 class LightPhysClass;
 class LightClass;
 class StaticPhysClass;
+class RenderObjClass;
 class RenderInfoClass;
 class SpecialRenderInfoClass;
 class VisRenderContextClass;
@@ -79,6 +80,7 @@ class VertexMaterialClass;
 class PathfindClass;
 class MeshClass;
 class TextureClass;
+class HAnimClass;
 class VisOptProgressClass;
 class CameraShakeSystemClass;
 class LightEnvironmentClass;
@@ -86,6 +88,7 @@ class StaticAnimPhysClass;
 class StringClass;
 class CameraClass;
 class PhysicsWorldClass;
+class MaterialPassClass;
 class PhysicsWorldRenderBridge
 {
 public:
@@ -112,6 +115,19 @@ public:
 	virtual void	Update_Sun_Orientation(PhysicsWorldClass & /*world*/, float /*yaw*/, float /*pitch*/) {}
 	virtual void	Add_Sun_To_Light_Environment(PhysicsWorldClass & /*world*/, LightEnvironmentClass & /*env*/, bool /*use_sun*/) {}
 	virtual void	Compute_Static_Lighting(PhysicsWorldClass & /*world*/, LightEnvironmentClass * /*env*/, const Vector3 & /*obj_center*/, bool /*use_sun*/, int /*vis_object_id*/) {}
+	virtual bool	Are_Render_Assets_Available(void) const { return false; }
+	virtual RenderObjClass *	Create_Render_Obj(const char * /*name*/) { return NULL; }
+	virtual RenderObjClass *	Create_Render_Obj_From_Filename(const char * /*filename*/) { return NULL; }
+	virtual TextureClass *	Acquire_Texture(const char * /*name*/) { return NULL; }
+	virtual HAnimClass *	Acquire_HAnim(const char * /*name*/) { return NULL; }
+	virtual unsigned			Get_Render_Time_Millis(void) const { return 0; }
+	virtual bool				Is_Render_Sorting_Enabled(void) const { return false; }
+	virtual void				Set_Decal_Rejection_Distance(float /*distance*/) {}
+	virtual int					Get_Collision_Box_Display_Mask(void) const { return 0; }
+	virtual void				Set_Collision_Box_Display_Mask(int /*mask*/) {}
+	virtual void				Flush(RenderInfoClass & /*info*/) {}
+	virtual void				Flush(SpecialRenderInfoClass & /*info*/) {}
+	virtual bool				Has_Debug_Mesh_Draw_Mode(void) const { return false; }
 };
 
 // forward referencing the collision detection queries
@@ -724,6 +740,19 @@ public:
 	*/
 	void							Set_Render_Bridge(PhysicsWorldRenderBridge * bridge);
 	PhysicsWorldRenderBridge *	Peek_Render_Bridge(void) const { return RenderBridge; }
+	bool							Render_Assets_Available(void) const;
+	RenderObjClass *				Create_Render_Obj(const char * name) const;
+	RenderObjClass *				Create_Render_Obj_From_Filename(const char * filename) const;
+	TextureClass *					Acquire_Texture(const char * name) const;
+	HAnimClass *					Acquire_HAnim(const char * name) const;
+	unsigned						Get_Render_Time_Millis(void) const;
+	bool							Is_Render_Sorting_Enabled(void) const;
+	void							Set_Render_Decal_Rejection_Distance(float distance) const;
+	int								Get_Render_Collision_Box_Display_Mask(void) const;
+	void							Set_Render_Collision_Box_Display_Mask(int mask) const;
+	void							Flush_Render_Info(RenderInfoClass & info) const;
+	void							Flush_Special_Render_Info(SpecialRenderInfoClass & info) const;
+	bool							Has_Debug_Mesh_Draw_Mode(void) const;
 
 	/*
 	** Collision Groups:

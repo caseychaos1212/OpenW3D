@@ -38,7 +38,9 @@
 
 #include "visoptimizationcontext.h"
 #include "visoptprogress.h"
+#if WWPHYS_SCENE_BRIDGE
 #include "pscene.h"
+#endif
 #include "vistablemgr.h"
 #include "vistable.h"
 #include "dynamicaabtreecull.h"
@@ -299,7 +301,9 @@ void VisOptimizationContextClass::Combine_Sector_Tables(int sector_id_0,int sect
 	/*
 	** Tell the physics scene to merge any sector with id1 into id0
 	*/
+#if WWPHYS_SCENE_BRIDGE
 	Scene->Merge_Vis_Sector_IDs(id0,id1);
+#endif
 }
 
 void VisOptimizationContextClass::Combine_Object_Tables(int object_id_0,int object_id_1)
@@ -333,7 +337,9 @@ void VisOptimizationContextClass::Combine_Object_Tables(int object_id_0,int obje
 	/*
 	** Tell the physics scene to merge any object with id1 into id0
 	*/
+#if WWPHYS_SCENE_BRIDGE
 	Scene->Merge_Vis_Object_IDs(id0,id1);
+#endif
 }
 
 
@@ -382,4 +388,3 @@ VisOptProgressClass & VisOptimizationContextClass::Get_Progress_Object(void)
 {
 	return Stats;
 }
-

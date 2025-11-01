@@ -41,7 +41,7 @@
 #include "vertmaterial.h"
 #include "matinfo.h"
 #include "boxrobj.h"
-#include "ww3d.h"
+#include "pscene.h"
 
 
 /*
@@ -258,9 +258,12 @@ void WidgetRenderOpClass::render_aabox(RenderInfoClass & rinfo)
 	}
 
 	// force this box to get rendered (bypass the built in collision bit masking)
-	int oldmask = WW3D::Get_Collision_Box_Display_Mask();
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	int oldmask = (world != NULL) ? world->Get_Render_Collision_Box_Display_Mask() : 0;
 	int newmask = oldmask | 0x01;
-	WW3D::Set_Collision_Box_Display_Mask(newmask);
+	if (world != NULL) {
+		world->Set_Render_Collision_Box_Display_Mask(newmask);
+	}
 
 	AABoxRenderObjClass * boxmodel = (AABoxRenderObjClass *)model;
 	boxmodel->Set_Local_Center_Extent(V0,V1);
@@ -271,7 +274,9 @@ void WidgetRenderOpClass::render_aabox(RenderInfoClass & rinfo)
 	boxmodel->Release_Ref();
 
 	// restore the old mask
-	WW3D::Set_Collision_Box_Display_Mask(oldmask);
+	if (world != NULL) {
+		world->Set_Render_Collision_Box_Display_Mask(oldmask);
+	}
 #endif
 }
 
@@ -286,9 +291,12 @@ void WidgetRenderOpClass::render_obbox(RenderInfoClass & rinfo)
 	}
 
 	// force this box to get rendered (bypass the built in collision bit masking)
-	int oldmask = WW3D::Get_Collision_Box_Display_Mask();
+	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
+	int oldmask = (world != NULL) ? world->Get_Render_Collision_Box_Display_Mask() : 0;
 	int newmask = oldmask | 0x01;
-	WW3D::Set_Collision_Box_Display_Mask(newmask);
+	if (world != NULL) {
+		world->Set_Render_Collision_Box_Display_Mask(newmask);
+	}
 
 	OBBoxRenderObjClass * boxmodel = (OBBoxRenderObjClass *)model;
 	boxmodel->Set_Collision_Type(0xFF);
@@ -300,7 +308,9 @@ void WidgetRenderOpClass::render_obbox(RenderInfoClass & rinfo)
 	boxmodel->Release_Ref();
 
 	// restore the old mask
-	WW3D::Set_Collision_Box_Display_Mask(oldmask);
+	if (world != NULL) {
+		world->Set_Render_Collision_Box_Display_Mask(oldmask);
+	}
 #endif
 }
 
@@ -417,16 +427,17 @@ void WidgetUserClass::Add_Debug_Axes(const Matrix3D & transform,const Vector3 & 
 #ifdef WWDEBUG
 void WidgetUserClass::Render_Debug_Widgets(RenderInfoClass & rinfo)
 {
-	WW3D::Flush(rinfo);
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Flush_Render_Info(rinfo);
+	}
 
 	WidgetRenderOpClass * op = WidgetRenderOpList;
 	while (op) {
 		op->Render(rinfo);
 		op = op->Get_Next();
-		WW3D::Flush(rinfo);
+		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+			world->Flush_Render_Info(rinfo);
+		}
 	}
 }
 #endif
-
-
-

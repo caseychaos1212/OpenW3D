@@ -39,11 +39,11 @@
 #include "physdecalsys.h"
 #include "colmathaabox.h"
 #include "pscene.h"
+#include "rendobj.h"
 #include "phys.h"
 #include "camera.h"
 #include "mesh.h"
 #include "decalmsh.h"
-#include "assetmgr.h"
 #include "wwdebug.h"
 #include "robjlist.h"
 #include "texture.h"
@@ -82,7 +82,9 @@ void PhysDecalSysClass::Update_Decal_Fade_Distances(const CameraClass & camera)
 	*/
 	float znear,zfar;
 	camera.Get_Clip_Planes(znear,zfar);
-	WW3D::Set_Decal_Rejection_Distance(zfar);
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		world->Set_Render_Decal_Rejection_Distance(zfar);
+	}
 }
 
 int PhysDecalSysClass::Create_Decal
@@ -95,6 +97,15 @@ int PhysDecalSysClass::Create_Decal
 	PhysClass *			only_this_obj
 )
 {
+#if !WWPHYS_SCENE_BRIDGE
+	(void)tm;
+	(void)texture_name;
+	(void)radius;
+	(void)is_permanent;
+	(void)apply_to_translucent_meshes;
+	(void)only_this_obj;
+	return -1;
+#else
 	/*
 	** Allocate the decal generator
 	*/
@@ -133,12 +144,16 @@ int PhysDecalSysClass::Create_Decal
 	material->Set_Shader(DecalShader);
 	material->Set_Material(DecalMaterial);
 
-	TextureClass * tex = WW3DAssetManager::Get_Instance()->Get_Texture(texture_name,TextureClass::MIP_LEVELS_ALL);
-	tex->Set_U_Addr_Mode(TextureClass::TEXTURE_ADDRESS_CLAMP); 
-	tex->Set_V_Addr_Mode(TextureClass::TEXTURE_ADDRESS_CLAMP); 
-
-	material->Set_Texture(tex);
-	tex->Release_Ref();
+	TextureClass * tex = NULL;
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		tex = world->Acquire_Texture(texture_name);
+	}
+	if (tex != NULL) {
+		tex->Set_U_Addr_Mode(TextureClass::TEXTURE_ADDRESS_CLAMP); 
+		tex->Set_V_Addr_Mode(TextureClass::TEXTURE_ADDRESS_CLAMP); 
+		material->Set_Texture(tex);
+		tex->Release_Ref();
+	}
 	material->Release_Ref();
 
 	/*
@@ -170,6 +185,7 @@ int PhysDecalSysClass::Create_Decal
 
 	Unlock_Decal_Generator(gen);
 	return return_id;
+#endif
 }
 
 bool PhysDecalSysClass::Remove_Decal(uint32 id)
@@ -388,4 +404,3 @@ void PhysDecalSysClass::LogicalDecalClass::Reset(void)
 	Meshes.Delete_All();
 	DecalID = 0xFFFFFFFF;
 }
-

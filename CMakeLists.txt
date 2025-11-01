@@ -30,7 +30,22 @@ add_feature_info(RenegadeHeadless RENEGADE_FDS "Build Renegade headless server")
 
 # Do we want to build extra SDK stuff or just the game binary?
 option(RENEGADE_TOOLS "Build additional tools." ON)
-add_feature_info(RenegadeTools RENEGADE_TOOLS "Build Renegade Mod Tools")
+option(REN_BUILD_TOOLS "Build editor and mod tools." ${RENEGADE_TOOLS})
+if(REN_BUILD_TOOLS AND NOT RENEGADE_TOOLS)
+    set(RENEGADE_TOOLS ON CACHE BOOL "Build additional tools." FORCE)
+elseif(NOT REN_BUILD_TOOLS AND RENEGADE_TOOLS)
+    set(RENEGADE_TOOLS OFF CACHE BOOL "Build additional tools." FORCE)
+endif()
+add_feature_info(RenegadeTools REN_BUILD_TOOLS "Build Renegade Mod Tools")
+
+option(REN_PHYS_SCENE_BRIDGE "Bridge physics world into WW3D scenes." ON)
+add_feature_info(RenegadeSceneBridge REN_PHYS_SCENE_BRIDGE "Bridge physics world into WW3D scenes")
+
+if(REN_PHYS_SCENE_BRIDGE)
+    set(WWPHYS_SCENE_BRIDGE_VALUE 1)
+else()
+    set(WWPHYS_SCENE_BRIDGE_VALUE 0)
+endif()
 
 option(SYNTAX_CHECK_ONLY "Syntax check the files only?" OFF)
 add_feature_info(SyntaxCheck SYNTAX_CHECK_ONLY "Syntax check files only")

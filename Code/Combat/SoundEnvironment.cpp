@@ -119,6 +119,7 @@ SoundEnvironmentClass::~SoundEnvironmentClass()
  * HISTORY:                                                                                    *
  *   04/16/01    IML : Created.                                                                * 
  *=============================================================================================*/
+#if WWPHYS_SCENE_BRIDGE
 void SoundEnvironmentClass::Update (PhysicsSceneClass *scene, CameraClass *camera)
 {
 	// Optimization: only update if this object is being used.
@@ -168,3 +169,9 @@ void SoundEnvironmentClass::Update (PhysicsSceneClass *scene, CameraClass *camer
 		if (AmplitudeIndex >= AMPLITUDE_BUFFER_SIZE) AmplitudeIndex = 0;
 	}
 }
+#else
+void SoundEnvironmentClass::Update (PhysicsSceneClass *, CameraClass *)
+{
+}
+#endif
+

@@ -40,14 +40,29 @@
 #include "vertmaterial.h"
 #include "texture.h"
 #include "matpass.h"
-#include "assetmgr.h"
-#include "ww3d.h"
+#include "pscene.h"
 
 namespace
 {
+inline PhysicsWorldClass * Peek_Active_World()
+{
+	return PhysicsWorldClass::Get_Active_World();
+}
+
 inline bool Physics_Render_Assets_Available()
 {
-	return WW3D::Is_Initted() && (WW3DAssetManager::Get_Instance() != NULL);
+	if (PhysicsWorldClass * world = Peek_Active_World()) {
+		return world->Render_Assets_Available();
+	}
+	return false;
+}
+
+inline TextureClass * Acquire_Texture(const char * name)
+{
+	if (PhysicsWorldClass * world = Peek_Active_World()) {
+		return world->Acquire_Texture(name);
+	}
+	return NULL;
 }
 }
 
@@ -79,7 +94,7 @@ bool PhysResourceMgrClass::Set_Shadow_Blob_Texture(const char * texname)
 		return false;
 	}
 
-	TextureClass * tex = WW3DAssetManager::Get_Instance()->Get_Texture(texname);
+	TextureClass * tex = Acquire_Texture(texname);
 	if (tex == NULL) return false;
 
 	REF_PTR_SET(_ShadowBlobTexture,tex);
@@ -96,7 +111,10 @@ TextureClass *	PhysResourceMgrClass::Get_Shadow_Blob_Texture(void)
 		return NULL;
 	}
 	if (_ShadowBlobTexture == NULL) {
-		_ShadowBlobTexture = WW3DAssetManager::Get_Instance()->Get_Texture("shadowblob.tga");
+		_ShadowBlobTexture = Acquire_Texture("shadowblob.tga");
+		if (_ShadowBlobTexture == NULL) {
+			return NULL;
+		}
 		_ShadowBlobTexture->Set_U_Addr_Mode(TextureClass::TEXTURE_ADDRESS_CLAMP);
 		_ShadowBlobTexture->Set_V_Addr_Mode(TextureClass::TEXTURE_ADDRESS_CLAMP);
 	}
@@ -155,7 +173,7 @@ TextureClass * PhysResourceMgrClass::Peek_Stealth_Texture(void)
 		return NULL;
 	}
 	if (_StealthTexture == NULL) {
-		_StealthTexture = WW3DAssetManager::Get_Instance()->Get_Texture("stealth_effect.tga");
+		_StealthTexture = Acquire_Texture("stealth_effect.tga");
 	}
 	return _StealthTexture;
 }
@@ -192,7 +210,7 @@ TextureClass * PhysResourceMgrClass::Peek_Grid_Texture(void)
 		return NULL;
 	}
 	if (_GridTexture == NULL) {
-		_GridTexture = WW3DAssetManager::Get_Instance()->Get_Texture("grid_effect.tga");
+		_GridTexture = Acquire_Texture("grid_effect.tga");
 	}
 	return _GridTexture;
 }

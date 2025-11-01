@@ -55,7 +55,7 @@ target_link_libraries(wwaudio PRIVATE
 target_sources(wwaudio PRIVATE ${WWAUDIO_SRC})
 
 # This module needs building differently for the level editor
-if (RENEGADE_TOOLS)
+if (REN_BUILD_TOOLS)
     # Targets to build.
     add_library(wwaudioe STATIC)
 

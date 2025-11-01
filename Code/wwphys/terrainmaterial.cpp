@@ -36,7 +36,7 @@
 
 #include "terrainmaterial.h"
 #include "texture.h"
-#include "assetmgr.h"
+#include "pscene.h"
 #include "chunkio.h"
 #include "w3d_file.h"
 
@@ -114,7 +114,9 @@ TerrainMaterialClass::Set_Texture (const char *texture_name)
 	}
 #endif
 
-	Texture = WW3DAssetManager::Get_Instance ()->Get_Texture (TextureName);
+	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+		Texture = world->Acquire_Texture(TextureName);
+	}
 	return ;
 }
 

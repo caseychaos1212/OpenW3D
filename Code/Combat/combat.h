@@ -78,7 +78,11 @@ class SoundEnvironmentClass;
 */
 #define	COMBAT_CAMERA				   CombatManager::Get_Camera()
 #define	COMBAT_STAR						CombatManager::Get_The_Star()
+#if WWPHYS_SCENE_BRIDGE
 #define	COMBAT_SCENE					CombatManager::Get_Scene()
+#else
+#define COMBAT_SCENE static_cast<PhysicsSceneClass *>(nullptr)
+#endif
 #define	COMBAT_WORLD					CombatManager::Get_World()
 #define	COMBAT_DAZZLE_LAYER			CombatManager::Get_Dazzle_Layer()
 

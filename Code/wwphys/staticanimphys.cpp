@@ -49,7 +49,6 @@
 #include "boxrobj.h"
 #include "wwhack.h"
 #include "wwprofile.h"
-#include "assetmgr.h"
 
 #include "vertmaterial.h"
 #include "dx8wrapper.h"
@@ -584,4 +583,3 @@ bool StaticAnimPhysDefClass::Load(ChunkLoadClass &cload)
 	}
 	return true;
 }
-
