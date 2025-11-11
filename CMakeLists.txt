@@ -42,6 +42,9 @@ endif(SYNTAX_CHECK_ONLY)
 option(W3D_BUILD_OPTION_FFMPEG "Build with ffmpeg." OFF)
 add_feature_info(FFMpegBuild W3D_BUILD_OPTION_FFMPEG "Build Renegade with FFMpeg")
 
+option(W3D_BUILD_QT_TOOLS "Build Qt-based GUI tools." ON)
+add_feature_info(QtTools W3D_BUILD_QT_TOOLS "Build Qt front-end tools (WWConfig, WDump, LevelEdit, W3DView)")
+
 if(NOT WIN32)
     add_compile_definitions(__cdecl=)
     add_compile_definitions(__stdcall=)
@@ -58,6 +61,20 @@ if(W3D_BUILD_OPTION_FFMPEG)
     include(ffmpeg)
 endif()
 
+if(W3D_BUILD_QT_TOOLS)
+    if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+        message(FATAL_ERROR "Qt tooling is only supported for 64-bit builds. Configure with a 64-bit generator or set W3D_BUILD_QT_TOOLS=OFF.")
+    endif()
+    set(CMAKE_AUTOMOC ON)
+    set(CMAKE_AUTOUIC ON)
+    set(CMAKE_AUTORCC ON)
+    include(qt_tools)
+endif()
+
+# Find/Add build dependencies and stubs.
+# Only 32bit Windows can make use of these APIs as the libraries shipped with the game.
+# Linux needs miles headers to compile, until miles is removed
+include(miles)
 if(WIN32)
     # Do we want to build with bink for video decoding?
     option(W3D_BUILD_OPTION_BINK "Build with bink." ON)
