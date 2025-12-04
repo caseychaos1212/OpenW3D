@@ -47,8 +47,12 @@ cmake_dependent_option(W3D_BUILD_OPTION_WEBBROWSER "Build OpenW3D with webbrowse
 add_feature_info(BrowserBuild W3D_BUILD_OPTION_WEBBROWSER "Build OpenW3D with webbrowser")
 
 # Do we want to build with ffmpeg for audio/video decoding?
-option(W3D_BUILD_OPTION_FFMPEG "Build with ffmpeg." OFF)
+option(W3D_BUILD_OPTION_FFMPEG "Build with ffmpeg." ON)
 add_feature_info(FFMpegBuild W3D_BUILD_OPTION_FFMPEG "Build OpenW3D with FFMpeg")
+
+# Do we want to build with OpenAL/ffmpeg for audio playback?
+cmake_dependent_option(W3D_BUILD_OPTION_OPENAL "Build with openal." ON W3D_BUILD_OPTION_FFMPEG OFF)
+add_feature_info(OpenALBuild W3D_BUILD_OPTION_OPENAL "Build OpenW3D with OpenAL")
 
 if(NOT WIN32)
     add_compile_definitions(__cdecl=)
@@ -77,9 +81,13 @@ endif()
 
 add_compile_definitions(-DWEBBROWSER_ENABLED=$<BOOL:${W3D_BUILD_OPTION_WEBBROWSER}>)
 
+if(W3D_BUILD_OPTION_OPENAL)
+    include(openal)
+endif()
+
 if(WIN32)
     # Do we want to build with bink for video decoding?
-    option(W3D_BUILD_OPTION_BINK "Build with bink." ON)
+    cmake_dependent_option(W3D_BUILD_OPTION_BINK "Build with bink." ON NOT W3D_BUILD_OPTION_FFMPEG OFF)
     add_feature_info(BinkBuild W3D_BUILD_OPTION_BINK "Build OpenW3D with Bink")
 
     if(W3D_BUILD_OPTION_BINK)
@@ -88,7 +96,7 @@ if(WIN32)
     endif()
 
     # Do we want to build with miles for audio playback?
-    option(W3D_BUILD_OPTION_MILES "Build with miles." ON)
+    cmake_dependent_option(W3D_BUILD_OPTION_MILES "Build with miles." ON NOT W3D_BUILD_OPTION_OPENAL OFF)
     add_feature_info(MilesBuild W3D_BUILD_OPTION_MILES "Build OpenW3D with Miles Audio")
 
     if(W3D_BUILD_OPTION_MILES)
