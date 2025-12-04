@@ -10,6 +10,8 @@ set(WWCONFIG_QT_SRC
     AudioPage.h
     WWConfigBackend.cpp
     WWConfigBackend.h
+    wwconfig_qt.rc
+    resources.qrc
 )
 
 add_executable(wwconfig_qt WIN32)

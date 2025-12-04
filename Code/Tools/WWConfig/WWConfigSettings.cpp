@@ -1,5 +1,6 @@
 #include "WWConfigSettings.h"
 
+#include "ini.h"
 #include "registry.h"
 #include "dx8caps.h"
 #include "dx8wrapper.h"
@@ -10,6 +11,8 @@
 #include "../../Combat/specialbuilds.h"
 
 #include <algorithm>
+#include <cstdlib>
+#include <string>
 #include <d3d9.h>
 
 #ifndef RENEGADE_SUB_KEY_NAME_RENDER
@@ -76,14 +79,42 @@ constexpr const char *kValueNameAudioSoundVolume = "sound volume";
 constexpr const char *kValueNameAudioDialogVolume = "dialog volume";
 constexpr const char *kValueNameAudioCinematicVolume = "cinematic volume";
 constexpr const char *kValueNameAudioSpeakerType = "speaker type";
+constexpr const char *kValueNameDriverWarningDisabled = "DriverVersionCheckDisabled";
 
 constexpr int kVolumeScale = 100;
 
+constexpr const char *kIniSectionRender = "Render";
+constexpr const char *kIniSectionSound = "Sound";
+constexpr const char *kIniSectionSettings = "System Settings";
+
+bool SaveIni(INIClass &ini)
+{
+    const std::string path = WWConfig::GetConfigFilePath();
+    return ini.Save(path.c_str()) >= 0;
 }
 
-namespace WWConfig
+bool LoadRenderSettingsFromIni(INIClass &ini, RenderSettings &settings)
 {
-bool LoadRenderSettings(RenderSettings &settings)
+    if (!ini.Is_Loaded() || !ini.Section_Present(kIniSectionSettings)) {
+        return false;
+    }
+
+    settings.dynamicLOD = ini.Get_Int(kIniSectionSettings, kValueNameDynLOD, settings.dynamicLOD);
+    settings.staticLOD = ini.Get_Int(kIniSectionSettings, kValueNameStaticLOD, settings.staticLOD);
+    settings.dynamicShadows = ini.Get_Int(kIniSectionSettings, kValueNameDynShadows, settings.dynamicShadows);
+    settings.staticShadows = ini.Get_Int(kIniSectionSettings, kValueNameStaticShadows, settings.staticShadows);
+    settings.prelitMode = ini.Get_Int(kIniSectionSettings, kValueNamePrelitMode, settings.prelitMode);
+    settings.textureFilter = ini.Get_Int(kIniSectionSettings, kValueNameTextureFilter, settings.textureFilter);
+    settings.shadowMode = ini.Get_Int(kIniSectionSettings, kValueNameShadowMode, settings.shadowMode);
+    settings.textureResolution = ini.Get_Int(kIniSectionSettings, kValueNameTextureRes, settings.textureResolution);
+    settings.surfaceEffect = ini.Get_Int(kIniSectionSettings, kValueNameSurfaceEffect, settings.surfaceEffect);
+    settings.particleDetail = ini.Get_Int(kIniSectionSettings, kValueNameParticleDetail, settings.particleDetail);
+    settings.lightingMode = ini.Get_Int(kIniSectionSettings, kValueNamePrelitMode, settings.lightingMode);
+
+    return true;
+}
+
+bool LoadRenderSettingsFromRegistry(RenderSettings &settings)
 {
     RegistryClass registry(kKeyNameSettings);
     if (!registry.Is_Valid()) {
@@ -105,7 +136,21 @@ bool LoadRenderSettings(RenderSettings &settings)
     return true;
 }
 
-bool SaveRenderSettings(const RenderSettings &settings)
+void SaveRenderSettingsToIni(const RenderSettings &settings, INIClass &ini)
+{
+    ini.Put_Int(kIniSectionSettings, kValueNameDynLOD, settings.dynamicLOD);
+    ini.Put_Int(kIniSectionSettings, kValueNameStaticLOD, settings.staticLOD);
+    ini.Put_Int(kIniSectionSettings, kValueNameDynShadows, settings.dynamicShadows);
+    ini.Put_Int(kIniSectionSettings, kValueNameStaticShadows, settings.staticShadows);
+    ini.Put_Int(kIniSectionSettings, kValueNamePrelitMode, settings.prelitMode);
+    ini.Put_Int(kIniSectionSettings, kValueNameTextureFilter, settings.textureFilter);
+    ini.Put_Int(kIniSectionSettings, kValueNameShadowMode, settings.shadowMode);
+    ini.Put_Int(kIniSectionSettings, kValueNameTextureRes, settings.textureResolution);
+    ini.Put_Int(kIniSectionSettings, kValueNameSurfaceEffect, settings.surfaceEffect);
+    ini.Put_Int(kIniSectionSettings, kValueNameParticleDetail, settings.particleDetail);
+}
+
+bool SaveRenderSettingsToRegistry(const RenderSettings &settings)
 {
     RegistryClass registry(kKeyNameSettings);
     if (!registry.Is_Valid()) {
@@ -124,6 +169,252 @@ bool SaveRenderSettings(const RenderSettings &settings)
     registry.Set_Int(kValueNameParticleDetail, settings.particleDetail);
 
     return true;
+}
+
+bool LoadVideoSettingsFromIni(INIClass &ini, VideoSettings &settings)
+{
+    if (!ini.Is_Loaded() || !ini.Section_Present(kIniSectionRender)) {
+        return false;
+    }
+
+    char deviceName[256] = {};
+    ini.Get_String(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_NAME, "", deviceName, sizeof(deviceName));
+    if (deviceName[0] != '\0') {
+        settings.deviceName = deviceName;
+    }
+
+    const int width = ini.Get_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_WIDTH, -1);
+    const int height = ini.Get_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_HEIGHT, -1);
+    const int bitDepth = ini.Get_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_DEPTH, -1);
+    const int windowed = ini.Get_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_WINDOWED, settings.windowed ? 1 : 0);
+    const int textureDepth = ini.Get_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH, -1);
+
+    if (width > 0) {
+        settings.width = width;
+    }
+    if (height > 0) {
+        settings.height = height;
+    }
+    if (bitDepth > 0) {
+        settings.bitDepth = bitDepth;
+    }
+    settings.windowed = windowed != 0;
+    if (textureDepth > 0) {
+        settings.textureDepth = textureDepth;
+    }
+
+    return true;
+}
+
+bool LoadVideoSettingsFromRegistry(VideoSettings &settings)
+{
+    RegistryClass registry(RENEGADE_SUB_KEY_NAME_RENDER);
+    if (!registry.Is_Valid()) {
+        return false;
+    }
+
+    char deviceName[256] = {};
+    registry.Get_String(VALUE_NAME_RENDER_DEVICE_NAME, deviceName, sizeof(deviceName));
+    if (deviceName[0] != '\0') {
+        settings.deviceName = deviceName;
+    }
+
+    const int width = registry.Get_Int(VALUE_NAME_RENDER_DEVICE_WIDTH, -1);
+    const int height = registry.Get_Int(VALUE_NAME_RENDER_DEVICE_HEIGHT, -1);
+    const int bitDepth = registry.Get_Int(VALUE_NAME_RENDER_DEVICE_DEPTH, -1);
+    const int windowed = registry.Get_Int(VALUE_NAME_RENDER_DEVICE_WINDOWED, settings.windowed ? 1 : 0);
+    const int textureDepth = registry.Get_Int(VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH, -1);
+
+    if (width > 0) {
+        settings.width = width;
+    }
+    if (height > 0) {
+        settings.height = height;
+    }
+    if (bitDepth > 0) {
+        settings.bitDepth = bitDepth;
+    }
+    settings.windowed = windowed != 0;
+    if (textureDepth > 0) {
+        settings.textureDepth = textureDepth;
+    }
+
+    return true;
+}
+
+void SaveVideoSettingsToIni(const VideoSettings &settings, INIClass &ini)
+{
+    ini.Put_String(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_NAME, settings.deviceName.c_str());
+    ini.Put_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_WIDTH, settings.width);
+    ini.Put_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_HEIGHT, settings.height);
+    ini.Put_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_DEPTH, settings.bitDepth);
+    ini.Put_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_WINDOWED, settings.windowed ? 1 : 0);
+    ini.Put_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH, settings.textureDepth);
+}
+
+bool SaveVideoSettingsToRegistry(const VideoSettings &settings)
+{
+    RegistryClass registry(RENEGADE_SUB_KEY_NAME_RENDER);
+    if (!registry.Is_Valid()) {
+        return false;
+    }
+
+    registry.Set_String(VALUE_NAME_RENDER_DEVICE_NAME, settings.deviceName.c_str());
+    registry.Set_Int(VALUE_NAME_RENDER_DEVICE_WIDTH, settings.width);
+    registry.Set_Int(VALUE_NAME_RENDER_DEVICE_HEIGHT, settings.height);
+    registry.Set_Int(VALUE_NAME_RENDER_DEVICE_DEPTH, settings.bitDepth);
+    registry.Set_Int(VALUE_NAME_RENDER_DEVICE_WINDOWED, settings.windowed ? 1 : 0);
+    registry.Set_Int(VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH, settings.textureDepth);
+    return true;
+}
+
+bool LoadAudioSettingsFromIni(INIClass &ini, AudioSettings &settings)
+{
+    if (!ini.Is_Loaded() || !ini.Section_Present(kIniSectionSound)) {
+        return false;
+    }
+
+    char deviceName[256] = {};
+    ini.Get_String(kIniSectionSound, kValueNameAudioDevice, "", deviceName, sizeof(deviceName));
+    if (deviceName[0] != '\0') {
+        settings.deviceName = deviceName;
+    }
+
+    settings.stereo = ini.Get_Int(kIniSectionSound, kValueNameAudioStereo, settings.stereo ? 1 : 0) != 0;
+    settings.bitDepth = ini.Get_Int(kIniSectionSound, kValueNameAudioBits, settings.bitDepth);
+    settings.sampleRate = ini.Get_Int(kIniSectionSound, kValueNameAudioHertz, settings.sampleRate);
+    settings.musicEnabled = ini.Get_Int(kIniSectionSound, kValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0) != 0;
+    settings.soundEnabled = ini.Get_Int(kIniSectionSound, kValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0) != 0;
+    settings.dialogEnabled = ini.Get_Int(kIniSectionSound, kValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0) != 0;
+    settings.cinematicEnabled = ini.Get_Int(kIniSectionSound, kValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0) != 0;
+    settings.soundVolume = std::clamp(ini.Get_Int(kIniSectionSound, kValueNameAudioSoundVolume, static_cast<int>(settings.soundVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.musicVolume = std::clamp(ini.Get_Int(kIniSectionSound, kValueNameAudioMusicVolume, static_cast<int>(settings.musicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.dialogVolume = std::clamp(ini.Get_Int(kIniSectionSound, kValueNameAudioDialogVolume, static_cast<int>(settings.dialogVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.cinematicVolume = std::clamp(ini.Get_Int(kIniSectionSound, kValueNameAudioCinematicVolume, static_cast<int>(settings.cinematicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.speakerType = ini.Get_Int(kIniSectionSound, kValueNameAudioSpeakerType, settings.speakerType);
+
+    return true;
+}
+
+bool LoadAudioSettingsFromRegistry(AudioSettings &settings)
+{
+    RegistryClass registry(RENEGADE_SUB_KEY_NAME_AUDIO);
+    if (!registry.Is_Valid()) {
+        return false;
+    }
+
+    char deviceName[256] = {};
+    registry.Get_String(kValueNameAudioDevice, deviceName, sizeof(deviceName));
+    if (deviceName[0] != '\0') {
+        settings.deviceName = deviceName;
+    }
+
+    settings.stereo = registry.Get_Int(kValueNameAudioStereo, settings.stereo ? 1 : 0) != 0;
+    settings.bitDepth = registry.Get_Int(kValueNameAudioBits, settings.bitDepth);
+    settings.sampleRate = registry.Get_Int(kValueNameAudioHertz, settings.sampleRate);
+    settings.musicEnabled = registry.Get_Int(kValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0) != 0;
+    settings.soundEnabled = registry.Get_Int(kValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0) != 0;
+    settings.dialogEnabled = registry.Get_Int(kValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0) != 0;
+    settings.cinematicEnabled = registry.Get_Int(kValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0) != 0;
+    settings.soundVolume = std::clamp(registry.Get_Int(kValueNameAudioSoundVolume, static_cast<int>(settings.soundVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.musicVolume = std::clamp(registry.Get_Int(kValueNameAudioMusicVolume, static_cast<int>(settings.musicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.dialogVolume = std::clamp(registry.Get_Int(kValueNameAudioDialogVolume, static_cast<int>(settings.dialogVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.cinematicVolume = std::clamp(registry.Get_Int(kValueNameAudioCinematicVolume, static_cast<int>(settings.cinematicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.speakerType = registry.Get_Int(kValueNameAudioSpeakerType, settings.speakerType);
+
+    return true;
+}
+
+void SaveAudioSettingsToIni(const AudioSettings &settings, INIClass &ini)
+{
+    ini.Put_String(kIniSectionSound, kValueNameAudioDevice, settings.deviceName.c_str());
+    ini.Put_Int(kIniSectionSound, kValueNameAudioStereo, settings.stereo ? 1 : 0);
+    ini.Put_Int(kIniSectionSound, kValueNameAudioBits, settings.bitDepth);
+    ini.Put_Int(kIniSectionSound, kValueNameAudioHertz, settings.sampleRate);
+    ini.Put_Int(kIniSectionSound, kValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0);
+    ini.Put_Int(kIniSectionSound, kValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0);
+    ini.Put_Int(kIniSectionSound, kValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0);
+    ini.Put_Int(kIniSectionSound, kValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0);
+    ini.Put_Int(kIniSectionSound, kValueNameAudioSoundVolume, static_cast<int>(std::clamp(settings.soundVolume, 0.0f, 1.0f) * kVolumeScale));
+    ini.Put_Int(kIniSectionSound, kValueNameAudioMusicVolume, static_cast<int>(std::clamp(settings.musicVolume, 0.0f, 1.0f) * kVolumeScale));
+    ini.Put_Int(kIniSectionSound, kValueNameAudioDialogVolume, static_cast<int>(std::clamp(settings.dialogVolume, 0.0f, 1.0f) * kVolumeScale));
+    ini.Put_Int(kIniSectionSound, kValueNameAudioCinematicVolume, static_cast<int>(std::clamp(settings.cinematicVolume, 0.0f, 1.0f) * kVolumeScale));
+    ini.Put_Int(kIniSectionSound, kValueNameAudioSpeakerType, settings.speakerType);
+}
+
+bool SaveAudioSettingsToRegistry(const AudioSettings &settings)
+{
+    RegistryClass registry(RENEGADE_SUB_KEY_NAME_AUDIO);
+    if (!registry.Is_Valid()) {
+        return false;
+    }
+
+    registry.Set_String(kValueNameAudioDevice, settings.deviceName.c_str());
+    registry.Set_Int(kValueNameAudioStereo, settings.stereo ? 1 : 0);
+    registry.Set_Int(kValueNameAudioBits, settings.bitDepth);
+    registry.Set_Int(kValueNameAudioHertz, settings.sampleRate);
+    registry.Set_Int(kValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0);
+    registry.Set_Int(kValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0);
+    registry.Set_Int(kValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0);
+    registry.Set_Int(kValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0);
+    registry.Set_Int(kValueNameAudioSoundVolume, static_cast<int>(std::clamp(settings.soundVolume, 0.0f, 1.0f) * kVolumeScale));
+    registry.Set_Int(kValueNameAudioMusicVolume, static_cast<int>(std::clamp(settings.musicVolume, 0.0f, 1.0f) * kVolumeScale));
+    registry.Set_Int(kValueNameAudioDialogVolume, static_cast<int>(std::clamp(settings.dialogVolume, 0.0f, 1.0f) * kVolumeScale));
+    registry.Set_Int(kValueNameAudioCinematicVolume, static_cast<int>(std::clamp(settings.cinematicVolume, 0.0f, 1.0f) * kVolumeScale));
+    registry.Set_Int(kValueNameAudioSpeakerType, settings.speakerType);
+
+    return true;
+}
+
+}
+
+namespace WWConfig
+{
+std::string GetConfigFilePath()
+{
+    if (const char *envPath = std::getenv("RENEGADE_CONFIG_INI")) {
+        if (*envPath != '\0') {
+            return std::string(envPath);
+        }
+    }
+
+#ifdef _WIN32
+    char modulePath[MAX_PATH] = {};
+    if (GetModuleFileNameA(nullptr, modulePath, MAX_PATH) > 0) {
+        std::string path(modulePath);
+        const size_t slash = path.find_last_of("\\/");
+        if (slash != std::string::npos) {
+            path.resize(slash + 1);
+        } else {
+            path.clear();
+        }
+        return path + "Renegade.ini";
+    }
+#endif
+
+    return std::string("Renegade.ini");
+}
+
+bool LoadRenderSettings(RenderSettings &settings)
+{
+    const std::string iniPath = GetConfigFilePath();
+    INIClass ini(iniPath.c_str());
+    if (LoadRenderSettingsFromIni(ini, settings)) {
+        return true;
+    }
+
+    return LoadRenderSettingsFromRegistry(settings);
+}
+
+bool SaveRenderSettings(const RenderSettings &settings)
+{
+    const std::string iniPath = GetConfigFilePath();
+    INIClass ini(iniPath.c_str());
+    SaveRenderSettingsToIni(settings, ini);
+    const bool iniSaved = SaveIni(ini);
+
+    const bool registrySaved = SaveRenderSettingsToRegistry(settings);
+    return iniSaved || registrySaved;
 }
 
 static void InitializeAdapterSelection(IDirect3D9 **outD3D, D3DCAPS9 *outCaps, D3DADAPTER_IDENTIFIER9 *outAdapterId, D3DFORMAT &displayFormat)
@@ -264,111 +555,71 @@ void AutoConfigRenderSettings()
     if (d3d) {
         d3d->Release();
     }
+
+    RenderSettings updatedSettings;
+    if (LoadRenderSettingsFromRegistry(updatedSettings)) {
+        SaveRenderSettings(updatedSettings);
+    }
 }
 
 bool LoadVideoSettings(VideoSettings &settings)
 {
-    RegistryClass registry(RENEGADE_SUB_KEY_NAME_RENDER);
-    if (!registry.Is_Valid()) {
-        return false;
+    const std::string iniPath = GetConfigFilePath();
+    INIClass ini(iniPath.c_str());
+    if (LoadVideoSettingsFromIni(ini, settings)) {
+        return true;
     }
 
-    char deviceName[256] = {};
-    registry.Get_String(VALUE_NAME_RENDER_DEVICE_NAME, deviceName, sizeof(deviceName));
-    if (deviceName[0] != '\0') {
-        settings.deviceName = deviceName;
-    }
-
-    const int width = registry.Get_Int(VALUE_NAME_RENDER_DEVICE_WIDTH, -1);
-    const int height = registry.Get_Int(VALUE_NAME_RENDER_DEVICE_HEIGHT, -1);
-    const int bitDepth = registry.Get_Int(VALUE_NAME_RENDER_DEVICE_DEPTH, -1);
-    const int windowed = registry.Get_Int(VALUE_NAME_RENDER_DEVICE_WINDOWED, settings.windowed ? 1 : 0);
-    const int textureDepth = registry.Get_Int(VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH, -1);
-
-    if (width > 0) {
-        settings.width = width;
-    }
-    if (height > 0) {
-        settings.height = height;
-    }
-    if (bitDepth > 0) {
-        settings.bitDepth = bitDepth;
-    }
-    settings.windowed = windowed != 0;
-    if (textureDepth > 0) {
-        settings.textureDepth = textureDepth;
-    }
-
-    return true;
+    return LoadVideoSettingsFromRegistry(settings);
 }
 
 bool SaveVideoSettings(const VideoSettings &settings)
 {
-    RegistryClass registry(RENEGADE_SUB_KEY_NAME_RENDER);
-    if (!registry.Is_Valid()) {
-        return false;
-    }
+    const std::string iniPath = GetConfigFilePath();
+    INIClass ini(iniPath.c_str());
+    SaveVideoSettingsToIni(settings, ini);
+    const bool iniSaved = SaveIni(ini);
 
-    registry.Set_String(VALUE_NAME_RENDER_DEVICE_NAME, settings.deviceName.c_str());
-    registry.Set_Int(VALUE_NAME_RENDER_DEVICE_WIDTH, settings.width);
-    registry.Set_Int(VALUE_NAME_RENDER_DEVICE_HEIGHT, settings.height);
-    registry.Set_Int(VALUE_NAME_RENDER_DEVICE_DEPTH, settings.bitDepth);
-    registry.Set_Int(VALUE_NAME_RENDER_DEVICE_WINDOWED, settings.windowed ? 1 : 0);
-    registry.Set_Int(VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH, settings.textureDepth);
-    return true;
+    const bool registrySaved = SaveVideoSettingsToRegistry(settings);
+    return iniSaved || registrySaved;
 }
 
 bool LoadAudioSettings(AudioSettings &settings)
 {
-    RegistryClass registry(RENEGADE_SUB_KEY_NAME_AUDIO);
-    if (!registry.Is_Valid()) {
-        return false;
+    const std::string iniPath = GetConfigFilePath();
+    INIClass ini(iniPath.c_str());
+    if (LoadAudioSettingsFromIni(ini, settings)) {
+        return true;
     }
 
-    char deviceName[256] = {};
-    registry.Get_String(kValueNameAudioDevice, deviceName, sizeof(deviceName));
-    if (deviceName[0] != '\0') {
-        settings.deviceName = deviceName;
-    }
-
-    settings.stereo = registry.Get_Int(kValueNameAudioStereo, settings.stereo ? 1 : 0) != 0;
-    settings.bitDepth = registry.Get_Int(kValueNameAudioBits, settings.bitDepth);
-    settings.sampleRate = registry.Get_Int(kValueNameAudioHertz, settings.sampleRate);
-    settings.musicEnabled = registry.Get_Int(kValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0) != 0;
-    settings.soundEnabled = registry.Get_Int(kValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0) != 0;
-    settings.dialogEnabled = registry.Get_Int(kValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0) != 0;
-    settings.cinematicEnabled = registry.Get_Int(kValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0) != 0;
-    settings.soundVolume = std::clamp(registry.Get_Int(kValueNameAudioSoundVolume, static_cast<int>(settings.soundVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.musicVolume = std::clamp(registry.Get_Int(kValueNameAudioMusicVolume, static_cast<int>(settings.musicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.dialogVolume = std::clamp(registry.Get_Int(kValueNameAudioDialogVolume, static_cast<int>(settings.dialogVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.cinematicVolume = std::clamp(registry.Get_Int(kValueNameAudioCinematicVolume, static_cast<int>(settings.cinematicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.speakerType = registry.Get_Int(kValueNameAudioSpeakerType, settings.speakerType);
-
-    return true;
+    return LoadAudioSettingsFromRegistry(settings);
 }
 
 bool SaveAudioSettings(const AudioSettings &settings)
 {
-    RegistryClass registry(RENEGADE_SUB_KEY_NAME_AUDIO);
-    if (!registry.Is_Valid()) {
-        return false;
-    }
+    const std::string iniPath = GetConfigFilePath();
+    INIClass ini(iniPath.c_str());
+    SaveAudioSettingsToIni(settings, ini);
+    const bool iniSaved = SaveIni(ini);
 
-    registry.Set_String(kValueNameAudioDevice, settings.deviceName.c_str());
-    registry.Set_Int(kValueNameAudioStereo, settings.stereo ? 1 : 0);
-    registry.Set_Int(kValueNameAudioBits, settings.bitDepth);
-    registry.Set_Int(kValueNameAudioHertz, settings.sampleRate);
-    registry.Set_Int(kValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0);
-    registry.Set_Int(kValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0);
-    registry.Set_Int(kValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0);
-    registry.Set_Int(kValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0);
-    registry.Set_Int(kValueNameAudioSoundVolume, static_cast<int>(std::clamp(settings.soundVolume, 0.0f, 1.0f) * kVolumeScale));
-    registry.Set_Int(kValueNameAudioMusicVolume, static_cast<int>(std::clamp(settings.musicVolume, 0.0f, 1.0f) * kVolumeScale));
-    registry.Set_Int(kValueNameAudioDialogVolume, static_cast<int>(std::clamp(settings.dialogVolume, 0.0f, 1.0f) * kVolumeScale));
-    registry.Set_Int(kValueNameAudioCinematicVolume, static_cast<int>(std::clamp(settings.cinematicVolume, 0.0f, 1.0f) * kVolumeScale));
-    registry.Set_Int(kValueNameAudioSpeakerType, settings.speakerType);
+    const bool registrySaved = SaveAudioSettingsToRegistry(settings);
+    return iniSaved || registrySaved;
+}
 
-    return true;
+bool IsDriverWarningDisabled()
+{
+    const std::string iniPath = GetConfigFilePath();
+    INIClass ini(iniPath.c_str());
+    const int disabled = ini.Get_Int(kIniSectionRender, kValueNameDriverWarningDisabled, 0);
+    return disabled >= 87;
+}
+
+void SetDriverWarningDisabled(bool disabled)
+{
+    const std::string iniPath = GetConfigFilePath();
+    INIClass ini(iniPath.c_str());
+    ini.Put_Int(kIniSectionRender, kValueNameDriverWarningDisabled, disabled ? 87 : 0);
+    SaveIni(ini);
 }
 
 bool EnumerateVideoAdapters(std::vector<VideoAdapterInfo> &adapters)

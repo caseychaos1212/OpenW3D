@@ -7,6 +7,7 @@
 class QCheckBox;
 class QComboBox;
 class QLabel;
+class QListWidget;
 class QSlider;
 
 class AudioPage : public QWidget
@@ -21,12 +22,14 @@ public:
 private:
     void buildUi();
     void updateFromSettings();
+    void applySettings();
     void setVolumeRow(QSlider *slider, QCheckBox *check, float value, bool enabled);
 
     WWConfigBackend &m_backend;
     AudioSettings m_settings;
+    bool m_blockSignals = false;
 
-    QComboBox *m_driverCombo = nullptr;
+    QListWidget *m_driverList = nullptr;
     QCheckBox *m_stereoCheck = nullptr;
     QComboBox *m_qualityCombo = nullptr;
     QComboBox *m_rateCombo = nullptr;
