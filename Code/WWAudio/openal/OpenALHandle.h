@@ -37,7 +37,7 @@
 class OpenALHandleClass final : public SoundHandleClass
 {
 	friend class OpenALAudioClass;	
-	static constexpr ALsizei OAL_BUFFER_COUNT = 32;
+	static constexpr ALsizei OAL_BUFFER_COUNT = 4;
 	static constexpr ALuint INVALID_OAL_HANDLE = UINT_MAX;
 public:
 
@@ -83,6 +83,7 @@ public:
 
 	void 			Queue_Audio() override;
 private:
+	void Update_Position();
 	static void Set_Sample_User(ALuint handle, AudibleSoundClass *user = nullptr) { SampleUsers[handle] = user; };
 	static AudibleSoundClass *Get_Sample_User(ALuint handle)
 	{
@@ -99,6 +100,8 @@ private:
 	ALuint SampleBuffers[OAL_BUFFER_COUNT];
 	unsigned SampleBufferIndex;
 	unsigned SampleLoopCount;
+	float SampleUnqueuedTime;
+	bool SampleEnded;
 };
 
 

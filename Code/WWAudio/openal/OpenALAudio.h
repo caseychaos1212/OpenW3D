@@ -52,7 +52,7 @@ public:
 	int Get_3D_Sample_Count() const override { return m_3DSampleHandles.Count();}
 	AudibleSoundClass *Peek_2D_Sample (int index) override;
 	AudibleSoundClass *Peek_3D_Sample (int index) override;
-	bool Validate_3D_Sound_Buffer (SoundBufferClass *buffer) override { return buffer->Get_Channels () == 1; }
+	bool Validate_3D_Sound_Buffer (SoundBufferClass *buffer) override { return buffer != nullptr && buffer->Get_Channels () == 1; }
 	SoundHandleClass *Get_2D_Handle (const AudibleSoundClass &sound_obj, bool streaming) override;
 	SoundHandleClass *Get_3D_Handle (const Sound3DClass &sound_obj) override;
 	SoundBufferClass *Get_Sound_Buffer (const char *filename, bool is_3d) override;

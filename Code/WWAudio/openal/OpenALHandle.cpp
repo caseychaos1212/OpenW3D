@@ -31,7 +31,9 @@ std::unordered_map<ALuint, AudibleSoundClass *> OpenALHandleClass::SampleUsers;
 OpenALHandleClass::OpenALHandleClass()
 	: SampleHandle(INVALID_OAL_HANDLE),
 	SampleBufferIndex(0),
-	SampleLoopCount(0)
+	SampleLoopCount(0),
+	SampleUnqueuedTime(0.0f),
+	SampleEnded(true)
 {
 	alGenBuffers(OAL_BUFFER_COUNT, SampleBuffers);
 
@@ -78,8 +80,8 @@ OpenALHandleClass::Initialize(SoundBufferClass *buffer)
 void
 OpenALHandleClass::Start_Sample()
 {
+	SampleEnded = false;
 	reinterpret_cast<FFMpegBufferClass *>(Buffer)->Reset_Buffer();
-	reinterpret_cast<FFMpegBufferClass *>(Buffer)->Refresh_Buffer();
 	OpenALHandleClass::Queue_Audio();
 	alSourcePlay(SampleHandle);
 
@@ -132,7 +134,7 @@ OpenALHandleClass::End_Sample()
 	//
 	//	Stop the sample and then release our hold on the stream handle
 	//
-	Stop_Sample();
+	SampleEnded = true;
 	alSourceStop(SampleHandle);
 
 	if(alGetError() != AL_NO_ERROR) {
@@ -252,6 +254,14 @@ OpenALHandleClass::Set_Sample_MS_Position(unsigned /* ms */)
 	// TODO
 }
 
+void
+OpenALHandleClass::Update_Position()
+{
+	// Corrects the Samples that have been unqueued in the case the audio has looped.
+	while (SampleUnqueuedTime > Buffer->Get_Duration()) {
+		SampleUnqueuedTime -= Buffer->Get_Duration() / 1000.0f;
+	}
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -259,9 +269,18 @@ OpenALHandleClass::Set_Sample_MS_Position(unsigned /* ms */)
 //
 //////////////////////////////////////////////////////////////////////
 void
-OpenALHandleClass::Get_Sample_MS_Position(int * /* len */, int * /* pos */)
+OpenALHandleClass::Get_Sample_MS_Position(int *len, int *pos)
 {
-	// TODO
+	if (len != nullptr) {
+		*len = static_cast<int>(Buffer->Get_Duration());
+	}
+
+	if (pos != nullptr) {
+		Update_Position();
+		ALfloat current_position;
+		alGetSourcef(SampleHandle, AL_SEC_OFFSET, &current_position);
+		*pos = static_cast<int>((SampleUnqueuedTime + current_position) * 1000.0f);
+	}
 }
 
 
@@ -449,23 +468,40 @@ void OpenALHandleClass::Initialize_Reverb()
 
 void OpenALHandleClass::Queue_Audio()
 {
+	if (SampleEnded) {
+		return;
+	}
+
+	// Get current position before unqueuing.
+	ALfloat current_position;
+	alGetSourcef(SampleHandle, AL_SEC_OFFSET, &current_position);
+
 	// Unqueue any finished buffers.
 	ALint processed;
 	alGetSourcei(SampleHandle, AL_BUFFERS_PROCESSED, &processed);
 	while(processed > 0) {
 			ALuint buffer;
 			alSourceUnqueueBuffers(SampleHandle, 1, &buffer);
+
+			// Track how many bytes we have processed.
+			ALfloat new_position;
+			alGetSourcef(SampleHandle, AL_SEC_OFFSET, &new_position);
+			SampleUnqueuedTime += new_position - current_position;
 			processed--;
 	}
 
+	// Check if we can buffer any more data at this time.
 	ALint num_queued;
 	alGetSourcei(SampleHandle, AL_BUFFERS_QUEUED, &num_queued);
 	if(num_queued >= OAL_BUFFER_COUNT) {
 			return;
 	}
 
-	if(Buffer != NULL)
+	// We have a valid buffer and need to loop at least once, attempt to read and buffer some audio.
+	if(Buffer != NULL && SampleLoopCount != 0)
 	{
+		bool more_data = reinterpret_cast<FFMpegBufferClass *>(Buffer)->Refresh_Buffer();
+
 		alGetError();
 		alBufferData(
 			SampleBuffers[SampleBufferIndex],
@@ -487,14 +523,21 @@ void OpenALHandleClass::Queue_Audio()
 			return;
 		}
 		
+		// Check if we are intentionally paused rather than stopped.
+		ALint state;
+		alGetSourcei(SampleHandle, AL_SOURCE_STATE, &state);
+
+		if (state != AL_PAUSED) {
+			// Incase sample is so short it finished before Queue_Audio was called again. No op if already playing.
+			alSourcePlay(SampleHandle);
+		}
+
 		++SampleBufferIndex;
 		if(SampleBufferIndex >= OAL_BUFFER_COUNT) {
 			SampleBufferIndex = 0;
 		}
 
-		bool more_data = reinterpret_cast<FFMpegBufferClass *>(Buffer)->Refresh_Buffer();
-
-		if(SampleLoopCount != 0 && !more_data) {
+		if(!more_data) {
 			--SampleLoopCount;
 			reinterpret_cast<FFMpegBufferClass *>(Buffer)->Reset_Buffer();
 		}
