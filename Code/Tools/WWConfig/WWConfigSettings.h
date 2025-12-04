@@ -73,4 +73,9 @@ bool LoadAudioSettings(AudioSettings &settings);
 bool SaveAudioSettings(const AudioSettings &settings);
 
 bool EnumerateVideoAdapters(std::vector<VideoAdapterInfo> &adapters);
+
+// Path to the ini used by the Qt port.
+std::string GetConfigFilePath();
+bool IsDriverWarningDisabled();
+void SetDriverWarningDisabled(bool disabled);
 }
