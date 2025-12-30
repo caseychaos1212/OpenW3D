@@ -4,6 +4,8 @@ target_sources(wdump_core
     PRIVATE
         wdump_core.cpp
         wdump_core.h
+        wdump_chunk_names.cpp
+        wdump_fields.cpp
 )
 
 target_include_directories(wdump_core

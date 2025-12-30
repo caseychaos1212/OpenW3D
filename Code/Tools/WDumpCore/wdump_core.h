@@ -60,5 +60,9 @@ private:
 
 // Render the raw chunk bytes into a simple hex+ASCII view; useful for UI panes.
 std::string build_hex_view(const Chunk &chunk, std::size_t bytes_per_line = 16);
+// Lookup a display name for known chunk IDs; returns nullptr for unknown values.
+const char *chunk_name(uint32_t id);
+// Build a set of human-readable fields for the selected chunk.
+std::vector<FieldRow> describe_chunk(const Chunk &chunk);
 
 } // namespace wdump

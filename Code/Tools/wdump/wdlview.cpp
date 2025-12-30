@@ -98,9 +98,12 @@ void CWDumpListView::OnInitialUpdate()
 	flags |= LVS_REPORT;
 	SetWindowLong(list.GetSafeHwnd(), GWL_STYLE, flags);
 
-	static LV_COLUMN Name_Column = { LVCF_TEXT | LVCF_WIDTH | LVCF_FMT, LVCFMT_LEFT, 230, "Name", 0,0 };
-	static LV_COLUMN Type_Column = { LVCF_TEXT | LVCF_WIDTH | LVCF_FMT, LVCFMT_LEFT, 70, "Type", 0,0 };
-	static LV_COLUMN Value_Column = { LVCF_TEXT | LVCF_WIDTH | LVCF_FMT, LVCFMT_LEFT, 300, "Value", 0,0 };
+	static char Name_Text[] = "Name";
+	static char Type_Text[] = "Type";
+	static char Value_Text[] = "Value";
+	static LV_COLUMN Name_Column = { LVCF_TEXT | LVCF_WIDTH | LVCF_FMT, LVCFMT_LEFT, 230, Name_Text, 0,0 };
+	static LV_COLUMN Type_Column = { LVCF_TEXT | LVCF_WIDTH | LVCF_FMT, LVCFMT_LEFT, 70, Type_Text, 0,0 };
+	static LV_COLUMN Value_Column = { LVCF_TEXT | LVCF_WIDTH | LVCF_FMT, LVCFMT_LEFT, 300, Value_Text, 0,0 };
 
 	list.InsertColumn(0, &Name_Column);
 	list.InsertColumn(1, &Type_Column);

@@ -20,11 +20,17 @@
 
 #include <memory>
 #include <QMainWindow>
+#include <QStringList>
 
 #include "wdump_core.h"
 
+class QAction;
+class QDragEnterEvent;
+class QDropEvent;
+class QMenu;
 class QPlainTextEdit;
 class QSplitter;
+class QStandardItem;
 class QTableView;
 class QTreeView;
 class QStandardItemModel;
@@ -36,17 +42,34 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     bool loadFile(const QString &path);
 
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
+
 private:
     void buildUi();
+    void buildMenus();
+    void openFileDialog();
+    void openRecentFile();
+    void updateRecentFilesMenu();
+    void addRecentFile(const QString &path);
+    QStringList recentFiles() const;
+    void setRecentFiles(const QStringList &files);
+    void clearViews();
+    QString windowTitleForPath(const QString &path) const;
     void rebuildTree();
     void onTreeSelectionChanged(const QModelIndex &current);
     QStandardItem *addChunkItem(QStandardItem *parent, const wdump::Chunk &chunk);
     void showChunk(const wdump::Chunk *chunk);
 
+    static constexpr int kMaxRecentFiles = 10;
+
     wdump::ChunkFile _file;
+    QString _currentFile;
     QTreeView *_treeView = nullptr;
     QTableView *_tableView = nullptr;
     QPlainTextEdit *_hexView = nullptr;
     QStandardItemModel *_treeModel = nullptr;
     QStandardItemModel *_tableModel = nullptr;
+    QMenu *_recentMenu = nullptr;
 };

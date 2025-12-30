@@ -6,7 +6,6 @@
 #include <QAbstractItemView>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QFormLayout>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -72,26 +71,6 @@ void AudioPage::buildUi()
 
     deviceLayout->setColumnStretch(1, 1);
     layout->addWidget(deviceGroup);
-
-    auto *playbackGroup = new QGroupBox(tr("Playback"), this);
-    auto *playbackLayout = new QFormLayout(playbackGroup);
-
-    m_qualityCombo = new QComboBox(playbackGroup);
-    m_qualityCombo->addItems({tr("8-bit"), tr("16-bit")});
-    m_qualityCombo->setEnabled(false);
-    playbackLayout->addRow(tr("Quality"), m_qualityCombo);
-
-    m_rateCombo = new QComboBox(playbackGroup);
-    m_rateCombo->addItems({tr("11 kHz"), tr("22 kHz"), tr("44 kHz")});
-    m_rateCombo->setEnabled(false);
-    playbackLayout->addRow(tr("Sample Rate"), m_rateCombo);
-
-    m_speakerCombo = new QComboBox(playbackGroup);
-    m_speakerCombo->addItems({tr("2 Speaker"), tr("Headphones"), tr("Surround"), tr("4 Speaker")});
-    m_speakerCombo->setEnabled(false);
-    playbackLayout->addRow(tr("Speaker Setup"), m_speakerCombo);
-
-    layout->addWidget(playbackGroup);
 
     auto *volumeGroup = new QGroupBox(tr("Volume"), this);
     auto *volumeLayout = new QGridLayout(volumeGroup);

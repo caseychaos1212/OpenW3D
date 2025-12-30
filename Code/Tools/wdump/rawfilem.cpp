@@ -409,7 +409,7 @@ void RawFileMClass::Close(void)
  *=============================================================================================*/
 int RawFileMClass::Read(void * buffer, int size)
 {
-	int	bytesread = 0;			// Running count of the number of bytes read into the buffer.
+	DWORD bytesread = 0;		// Running count of the number of bytes read into the buffer.
 	int	opened = false;		// Was the file opened by this routine?
 
 	/*
@@ -439,24 +439,23 @@ int RawFileMClass::Read(void * buffer, int size)
 	int total = 0;
 	while (size > 0) {
 		bytesread = 0;
-		if (!ReadFile(Handle, buffer, size, &(unsigned int&)bytesread, NULL)) {
-			size -= bytesread;
-			total += bytesread;
+		if (!ReadFile(Handle, buffer, static_cast<DWORD>(size), &bytesread, NULL)) {
+			size -= static_cast<int>(bytesread);
+			total += static_cast<int>(bytesread);
 			Error(GetLastError(), true, Filename);
 			continue;
 		}
-		size -= bytesread;
-		total += bytesread;
+		size -= static_cast<int>(bytesread);
+		total += static_cast<int>(bytesread);
 		if (bytesread == 0) break;
 	}
-	bytesread = total;
 
 	/*
 	**	Close the file if it was opened by this routine and return
 	**	the actual number of bytes read into the buffer.
 	*/
 	if (opened) Close();
-	return(bytesread);
+	return total;
 }
 
 
@@ -480,7 +479,7 @@ int RawFileMClass::Read(void * buffer, int size)
  *=============================================================================================*/
 int RawFileMClass::Write(void const * buffer, int size)
 {
-	int	bytesread = 0;
+	DWORD bytesread = 0;
 	int	opened = false;		// Was the file manually opened?
 
 	/*
@@ -495,7 +494,7 @@ int RawFileMClass::Write(void const * buffer, int size)
 		opened = true;
 	}
 
-	if (!WriteFile(Handle, buffer, size, &(unsigned int&)bytesread, NULL)) {
+	if (!WriteFile(Handle, buffer, static_cast<DWORD>(size), &bytesread, NULL)) {
 		Error(GetLastError(), false, Filename);
 	}
 
@@ -519,7 +518,7 @@ int RawFileMClass::Write(void const * buffer, int size)
 	**	Return with the number of bytes written. This will always be the number of bytes
 	**	requested, since the case of the disk being full is caught by this routine.
 	*/
-	return(bytesread);
+	return static_cast<int>(bytesread);
 }
 
 

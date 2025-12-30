@@ -8,7 +8,6 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QGridLayout>
-#include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -62,9 +61,6 @@ void VideoPage::buildUi()
     m_driverList->setSelectionMode(QAbstractItemView::SingleSelection);
     m_driverList->setMinimumHeight(64);
     deviceLayout->addWidget(m_driverList);
-
-    m_windowedCheck = new QCheckBox(tr("Run in window"), deviceGroup);
-    deviceLayout->addRow(QString(), m_windowedCheck);
 
     layout->addWidget(deviceGroup);
 

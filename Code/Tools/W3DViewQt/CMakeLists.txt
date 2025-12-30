@@ -1,0 +1,45 @@
+set(W3DVIEW_QT_SRC
+    main.cpp
+    MainWindow.cpp
+    MainWindow.h
+    W3DViewport.cpp
+    W3DViewport.h
+)
+
+add_executable(w3dview_qt WIN32)
+
+target_sources(w3dview_qt PRIVATE ${W3DVIEW_QT_SRC})
+
+target_include_directories(w3dview_qt
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
+        ${CMAKE_CURRENT_SOURCE_DIR}/../..
+        ../../wwdebug
+        ../../wwlib
+        ../../ww3d2
+        ../../WWMath
+        ../../wwphys
+        ../../wwsaveload
+        ../../WWAudio
+)
+
+target_link_libraries(w3dview_qt
+    PRIVATE
+        w3d_qt_toolkit
+        d3d9lib
+        version
+        winmm
+        wwcommon
+        wwdebug
+        wwlib
+        wwmath
+        wwphys
+        wwsaveload
+        ww3d2
+        wwaudio
+)
+
+set_target_properties(w3dview_qt PROPERTIES
+    AUTOMOC ON
+)

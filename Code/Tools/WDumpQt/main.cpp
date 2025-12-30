@@ -30,6 +30,7 @@
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
+    QCoreApplication::setOrganizationName(QStringLiteral("OpenW3D"));
     QCoreApplication::setApplicationName(QStringLiteral("wdump_qt"));
     QCoreApplication::setApplicationVersion(QStringLiteral("0.1"));
 
