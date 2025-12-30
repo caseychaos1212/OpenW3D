@@ -2,6 +2,10 @@
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QDebug>
+#include <QCheckBox>
+#include <QIcon>
+#include <QFileInfo>
+#include <QMessageBox>
 #include <QStringList>
 
 #include "MainWindow.h"
@@ -59,6 +63,8 @@ int main(int argc, char *argv[])
 
     parser.process(app);
 
+    app.setWindowIcon(QIcon(QStringLiteral(":/wwconfig/wwconfig.ico")));
+
     int languageOverride = -1;
     if (parser.isSet(languageOption)) {
         languageOverride = LanguageFromString(parser.value(languageOption));
@@ -71,6 +77,35 @@ int main(int argc, char *argv[])
     WWConfigBackend backend;
     if (!backend.initializeLocale(languageOverride)) {
         qWarning() << "Failed to initialize locale bank, continuing with built-in strings.";
+    }
+
+    // Offer to auto-config on first run (no ini file yet).
+    const QString configPath = backend.configPath();
+    if (!QFileInfo::exists(configPath)) {
+        const auto answer = QMessageBox::question(
+            nullptr,
+            QObject::tr("Auto Config"),
+            QObject::tr("No openw3d.conf was found. Run Auto Config now?"),
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::Yes);
+        if (answer == QMessageBox::Yes) {
+            backend.autoConfigRenderSettings();
+        }
+    }
+
+    // Driver version warning flow.
+    DriverWarningInfo warningInfo;
+    if (backend.checkDriverWarning(warningInfo) && warningInfo.show) {
+        QMessageBox box(QMessageBox::Warning,
+                        QObject::tr("Driver Warning"),
+                        warningInfo.message,
+                        QMessageBox::Ok);
+        QCheckBox *dontShow = new QCheckBox(QObject::tr("Don't show this warning again"));
+        box.setCheckBox(dontShow);
+        box.exec();
+        if (dontShow->isChecked()) {
+            backend.disableDriverWarning();
+        }
     }
 
     MainWindow window(backend);

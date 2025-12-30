@@ -60,3 +60,4 @@ IDL_*.loc
 /.vscode
 .vs/
 /build*
+/vcpkg_installed

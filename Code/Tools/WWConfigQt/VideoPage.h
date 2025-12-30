@@ -9,6 +9,7 @@
 class QCheckBox;
 class QComboBox;
 class QLabel;
+class QListWidget;
 class QSlider;
 
 class VideoPage : public QWidget
@@ -38,7 +39,7 @@ private:
     int m_currentBitDepth = 32;
     bool m_blockSignals = false;
 
-    QComboBox *m_driverCombo = nullptr;
+    QListWidget *m_driverList = nullptr;
     QComboBox *m_bitDepthCombo = nullptr;
     QSlider *m_resolutionSlider = nullptr;
     QLabel *m_resolutionValue = nullptr;

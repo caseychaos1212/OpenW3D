@@ -62,22 +62,34 @@ PerformancePage::PerformancePage(WWConfigBackend &backend, QWidget *parent)
 void PerformancePage::buildUi()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setSpacing(12);
+    mainLayout->setContentsMargins(4, 4, 4, 4);
+    mainLayout->setSpacing(8);
 
-    auto *overallLayout = new QHBoxLayout();
-    overallLayout->addWidget(new QLabel(tr("Detail:"), this));
+    auto *detailGroup = new QGroupBox(tr("Detail"), this);
+    auto *detailLayout = new QGridLayout(detailGroup);
 
-    m_overallSlider = new QSlider(Qt::Horizontal, this);
+    auto *lowFast = new QLabel(tr("Low (fastest)"), detailGroup);
+    lowFast->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    detailLayout->addWidget(lowFast, 0, 0);
+
+    m_overallSlider = new QSlider(Qt::Horizontal, detailGroup);
     m_overallSlider->setRange(0, 3);
-    overallLayout->addWidget(m_overallSlider, 1);
+    m_overallSlider->setTickInterval(1);
+    m_overallSlider->setTickPosition(QSlider::TicksBelow);
+    detailLayout->addWidget(m_overallSlider, 0, 1);
 
-    m_expertCheck = new QCheckBox(tr("Expert Mode"), this);
-    overallLayout->addWidget(m_expertCheck);
+    auto *highSlow = new QLabel(tr("High (slowest)"), detailGroup);
+    highSlow->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    detailLayout->addWidget(highSlow, 0, 2);
 
-    m_autoButton = new QPushButton(tr("Auto Config"), this);
-    overallLayout->addWidget(m_autoButton);
+    m_expertCheck = new QCheckBox(tr("Expert Mode"), detailGroup);
+    detailLayout->addWidget(m_expertCheck, 1, 0, 1, 2);
 
-    mainLayout->addLayout(overallLayout);
+    m_autoButton = new QPushButton(tr("Auto Config"), detailGroup);
+    detailLayout->addWidget(m_autoButton, 1, 2, Qt::AlignRight);
+
+    detailLayout->setColumnStretch(1, 1);
+    mainLayout->addWidget(detailGroup);
 
     m_expertGroup = new QGroupBox(tr("Expert Settings"), this);
     auto *groupLayout = new QGridLayout(m_expertGroup);
@@ -96,25 +108,23 @@ void PerformancePage::buildUi()
     m_surfaceSlider = createSlider();
 
     int row = 0;
-    groupLayout->addWidget(new QLabel(tr("Geometry Detail"), m_expertGroup), row, 0);
-    groupLayout->addWidget(m_geometrySlider, row, 1);
-    ++row;
+    auto addSliderRow = [&](const QString &label, QSlider *slider) {
+        auto *title = new QLabel(label, m_expertGroup);
+        groupLayout->addWidget(title, row, 0);
+        groupLayout->addWidget(slider, row, 1);
+        auto *lowLabel = new QLabel(tr("Low"), m_expertGroup);
+        lowLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        groupLayout->addWidget(lowLabel, row, 2);
+        auto *highLabel = new QLabel(tr("High"), m_expertGroup);
+        groupLayout->addWidget(highLabel, row, 3);
+        ++row;
+    };
 
-    groupLayout->addWidget(new QLabel(tr("Character Shadows"), m_expertGroup), row, 0);
-    groupLayout->addWidget(m_shadowSlider, row, 1);
-    ++row;
-
-    groupLayout->addWidget(new QLabel(tr("Texture Detail"), m_expertGroup), row, 0);
-    groupLayout->addWidget(m_textureSlider, row, 1);
-    ++row;
-
-    groupLayout->addWidget(new QLabel(tr("Particle Detail"), m_expertGroup), row, 0);
-    groupLayout->addWidget(m_particleSlider, row, 1);
-    ++row;
-
-    groupLayout->addWidget(new QLabel(tr("Surface Effect Detail"), m_expertGroup), row, 0);
-    groupLayout->addWidget(m_surfaceSlider, row, 1);
-    ++row;
+    addSliderRow(tr("Geometry Detail"), m_geometrySlider);
+    addSliderRow(tr("Character Shadows"), m_shadowSlider);
+    addSliderRow(tr("Texture Detail"), m_textureSlider);
+    addSliderRow(tr("Particle Detail"), m_particleSlider);
+    addSliderRow(tr("Surface Effect Detail"), m_surfaceSlider);
 
     m_lightingCombo = new QComboBox(m_expertGroup);
     m_lightingCombo->addItems({tr("Vertex"), tr("Multi-pass"), tr("Multi-texture")});
@@ -129,8 +139,9 @@ void PerformancePage::buildUi()
     ++row;
 
     m_terrainCheck = new QCheckBox(tr("Terrain Casts Shadows"), m_expertGroup);
-    groupLayout->addWidget(m_terrainCheck, row, 0, 1, 2);
+    groupLayout->addWidget(m_terrainCheck, row, 0, 1, 4);
 
+    groupLayout->setColumnStretch(1, 1);
     mainLayout->addWidget(m_expertGroup);
 
     setExpertControlsEnabled(false);

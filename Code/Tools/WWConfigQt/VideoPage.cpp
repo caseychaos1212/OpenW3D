@@ -4,11 +4,16 @@
 #include <cstdlib>
 #include <limits>
 
+#include <QAbstractItemView>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QGridLayout>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QHBoxLayout>
 #include <QLabel>
+#include <QListWidget>
+#include <QStyle>
 #include <QSlider>
 #include <QVBoxLayout>
 
@@ -37,46 +42,67 @@ VideoPage::VideoPage(WWConfigBackend &backend, QWidget *parent)
 void VideoPage::buildUi()
 {
     auto *layout = new QVBoxLayout(this);
-    layout->setSpacing(12);
+    layout->setContentsMargins(4, 4, 4, 4);
+    layout->setSpacing(8);
 
     auto *deviceGroup = new QGroupBox(tr("Device"), this);
-    auto *deviceLayout = new QFormLayout(deviceGroup);
+    auto *deviceLayout = new QVBoxLayout(deviceGroup);
 
-    m_driverCombo = new QComboBox(deviceGroup);
-    deviceLayout->addRow(tr("Adapter"), m_driverCombo);
+    auto *driverRow = new QHBoxLayout();
+    auto *driverIcon = new QLabel(deviceGroup);
+    driverIcon->setPixmap(style()->standardIcon(QStyle::SP_ComputerIcon).pixmap(20, 20));
+    driverIcon->setFixedSize(20, 20);
+    driverRow->addWidget(driverIcon);
+    driverRow->addWidget(new QLabel(tr("Driver:"), deviceGroup));
+    driverRow->addStretch();
+    deviceLayout->addLayout(driverRow);
 
-    m_bitDepthCombo = new QComboBox(deviceGroup);
-    deviceLayout->addRow(tr("Color Depth"), m_bitDepthCombo);
+    m_driverList = new QListWidget(deviceGroup);
+    m_driverList->setUniformItemSizes(true);
+    m_driverList->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_driverList->setMinimumHeight(64);
+    deviceLayout->addWidget(m_driverList);
 
     m_windowedCheck = new QCheckBox(tr("Run in window"), deviceGroup);
     deviceLayout->addRow(QString(), m_windowedCheck);
 
     layout->addWidget(deviceGroup);
 
-    auto *resolutionGroup = new QGroupBox(tr("Resolution"), this);
-    auto *resolutionLayout = new QFormLayout(resolutionGroup);
+    auto *displayGroup = new QGroupBox(tr("Display"), this);
+    auto *displayLayout = new QGridLayout(displayGroup);
+    displayLayout->setHorizontalSpacing(6);
+    displayLayout->setVerticalSpacing(4);
 
-    m_resolutionSlider = new QSlider(Qt::Horizontal, resolutionGroup);
+    displayLayout->addWidget(new QLabel(tr("Resolution:"), displayGroup), 0, 0);
+    m_resolutionSlider = new QSlider(Qt::Horizontal, displayGroup);
     m_resolutionSlider->setRange(0, 0);
-    resolutionLayout->addRow(tr("Preset"), m_resolutionSlider);
+    m_resolutionSlider->setTickPosition(QSlider::TicksBelow);
+    m_resolutionSlider->setTickInterval(1);
+    displayLayout->addWidget(m_resolutionSlider, 0, 1);
+    m_resolutionValue = new QLabel(tr("N/A"), displayGroup);
+    m_resolutionValue->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    displayLayout->addWidget(m_resolutionValue, 0, 2);
 
-    m_resolutionValue = new QLabel(tr("N/A"), resolutionGroup);
-    resolutionLayout->addRow(tr("Current"), m_resolutionValue);
+    displayLayout->addWidget(new QLabel(tr("Color Depth:"), displayGroup), 1, 0);
+    m_bitDepthCombo = new QComboBox(displayGroup);
+    displayLayout->addWidget(m_bitDepthCombo, 1, 1, 1, 2);
 
-    m_textureDepthLabel = new QLabel(tr("Texture depth: --"), resolutionGroup);
-    resolutionLayout->addRow(QString(), m_textureDepthLabel);
+    m_windowedCheck = new QCheckBox(tr("Windowed Mode"), displayGroup);
+    displayLayout->addWidget(m_windowedCheck, 2, 0, 1, 3);
 
-    layout->addWidget(resolutionGroup);
+    m_textureDepthLabel = new QLabel(tr("Texture depth: --"), displayGroup);
+    displayLayout->addWidget(m_textureDepthLabel, 3, 0, 1, 3);
 
-    auto *note = new QLabel(tr("Pick any adapter and resolution combination. Changes are written to "
-                               "the same registry keys that the classic WWConfig dialog edits, so the "
-                               "game and the MFC tool will see them immediately."),
+    layout->addWidget(displayGroup);
+
+    auto *note = new QLabel(tr("Changes are saved straight to openw3d.conf so both the game and classic "
+                               "WWConfig see them immediately."),
                             this);
     note->setWordWrap(true);
     layout->addWidget(note);
     layout->addStretch();
 
-    connect(m_driverCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int) {
+    connect(m_driverList, &QListWidget::currentRowChanged, this, [this](int) {
         if (m_blockSignals) {
             return;
         }
@@ -130,10 +156,12 @@ void VideoPage::refresh()
 
 void VideoPage::populateDrivers()
 {
-    m_driverCombo->clear();
+    m_driverList->clear();
 
     if (m_adapters.empty()) {
-        m_driverCombo->addItem(tr("No adapters detected"));
+        auto *item = new QListWidgetItem(tr("No adapters detected"));
+        item->setFlags(Qt::NoItemFlags);
+        m_driverList->addItem(item);
         return;
     }
 
@@ -141,7 +169,9 @@ void VideoPage::populateDrivers()
     int selectedIndex = 0;
     for (int i = 0; i < static_cast<int>(m_adapters.size()); ++i) {
         const QString label = AdapterDisplayName(m_adapters[i]);
-        m_driverCombo->addItem(label, i);
+        auto *item = new QListWidgetItem(label);
+        item->setData(Qt::UserRole, i);
+        m_driverList->addItem(item);
         if (!desired.isEmpty()) {
             const QString adapterName = QString::fromStdString(m_adapters[i].deviceName);
             if (adapterName.compare(desired, Qt::CaseInsensitive) == 0) {
@@ -150,7 +180,7 @@ void VideoPage::populateDrivers()
         }
     }
 
-    m_driverCombo->setCurrentIndex(selectedIndex);
+    m_driverList->setCurrentRow(selectedIndex);
 }
 
 void VideoPage::updateBitDepthOptions()
@@ -292,7 +322,7 @@ void VideoPage::applySelection(bool persist)
 void VideoPage::updateControlStates()
 {
     const bool hasAdapters = !m_adapters.empty();
-    m_driverCombo->setEnabled(hasAdapters);
+    m_driverList->setEnabled(hasAdapters);
     m_bitDepthCombo->setEnabled(hasAdapters && m_bitDepthCombo->count() > 0);
     m_windowedCheck->setEnabled(hasAdapters);
     m_resolutionSlider->setEnabled(hasAdapters && !m_activeResolutions.empty());
@@ -304,7 +334,7 @@ const VideoAdapterInfo *VideoPage::currentAdapter() const
         return nullptr;
     }
 
-    const int row = m_driverCombo->currentIndex();
+    const int row = m_driverList->currentRow();
     if (row < 0 || row >= static_cast<int>(m_adapters.size())) {
         return nullptr;
     }

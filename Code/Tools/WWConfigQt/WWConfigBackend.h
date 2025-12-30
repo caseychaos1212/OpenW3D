@@ -4,6 +4,12 @@
 #include <vector>
 #include "../WWConfig/WWConfigSettings.h"
 
+struct DriverWarningInfo
+{
+    bool show = false;
+    QString message;
+};
+
 class WWConfigBackend
 {
 public:
@@ -25,6 +31,10 @@ public:
     bool saveAudioSettings(const AudioSettings &settings);
 
     std::vector<VideoAdapterInfo> enumerateVideoAdapters() const;
+
+    QString configPath() const;
+    bool checkDriverWarning(DriverWarningInfo &info) const;
+    void disableDriverWarning() const;
 
 private:
     bool m_localeInitialized = false;
