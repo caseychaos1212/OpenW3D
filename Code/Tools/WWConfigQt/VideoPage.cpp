@@ -92,7 +92,7 @@ void VideoPage::buildUi()
 
     layout->addWidget(displayGroup);
 
-    auto *note = new QLabel(tr("Changes are saved straight to Renegade.ini so both the game and classic "
+    auto *note = new QLabel(tr("Changes are saved straight to openw3d.conf so both the game and classic "
                                "WWConfig see them immediately."),
                             this);
     note->setWordWrap(true);

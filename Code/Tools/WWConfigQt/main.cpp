@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
         const auto answer = QMessageBox::question(
             nullptr,
             QObject::tr("Auto Config"),
-            QObject::tr("No Renegade.ini was found. Run Auto Config now?"),
+            QObject::tr("No openw3d.conf was found. Run Auto Config now?"),
             QMessageBox::Yes | QMessageBox::No,
             QMessageBox::Yes);
         if (answer == QMessageBox::Yes) {

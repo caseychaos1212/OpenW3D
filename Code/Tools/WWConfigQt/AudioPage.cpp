@@ -125,7 +125,7 @@ void AudioPage::buildUi()
     m_stereoCheck = new QCheckBox(tr("Stereo playback"), this);
     layout->addWidget(m_stereoCheck, 0, Qt::AlignLeft);
 
-    auto *note = new QLabel(tr("Audio changes are saved to Renegade.ini immediately."), this);
+    auto *note = new QLabel(tr("Audio changes are saved to openw3d.conf immediately."), this);
     note->setWordWrap(true);
     layout->addWidget(note);
     layout->addStretch();

@@ -7,11 +7,13 @@
 #include "cpudetect.h"
 #include "formconv.h"
 #include "wwstring.h"
+#include "openw3d.h"
 
 #include "../../Combat/specialbuilds.h"
 
 #include <algorithm>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <d3d9.h>
 
@@ -55,37 +57,60 @@ constexpr const char *kKeyNameSettings = "Software\\Westwood\\Renegade\\System S
 constexpr const char *kKeyNameOptions = "Software\\Westwood\\Renegade\\Options";
 #endif
 
-constexpr const char *kValueNameDynLOD = "Dynamic_LOD_Budget";
-constexpr const char *kValueNameStaticLOD = "Static_LOD_Budget";
-constexpr const char *kValueNameDynShadows = "Dynamic_Projectors";
-constexpr const char *kValueNameTextureFilter = "Texture_Filter_Mode";
-constexpr const char *kValueNamePrelitMode = "Prelit_Mode";
-constexpr const char *kValueNameShadowMode = "Shadow_Mode";
-constexpr const char *kValueNameStaticShadows = "Static_Projectors";
-constexpr const char *kValueNameTextureRes = "Texture_Resolution";
-constexpr const char *kValueNameSurfaceEffect = "Surface_Effect_Detail";
-constexpr const char *kValueNameParticleDetail = "Particle_Detail";
+// Registry value names (legacy).
+constexpr const char *kRegValueNameDynLOD = "Dynamic_LOD_Budget";
+constexpr const char *kRegValueNameStaticLOD = "Static_LOD_Budget";
+constexpr const char *kRegValueNameDynShadows = "Dynamic_Projectors";
+constexpr const char *kRegValueNameTextureFilter = "Texture_Filter_Mode";
+constexpr const char *kRegValueNamePrelitMode = "Prelit_Mode";
+constexpr const char *kRegValueNameShadowMode = "Shadow_Mode";
+constexpr const char *kRegValueNameStaticShadows = "Static_Projectors";
+constexpr const char *kRegValueNameTextureRes = "Texture_Resolution";
+constexpr const char *kRegValueNameSurfaceEffect = "Surface_Effect_Detail";
+constexpr const char *kRegValueNameParticleDetail = "Particle_Detail";
 
-constexpr const char *kValueNameAudioStereo = "stereo";
-constexpr const char *kValueNameAudioBits = "bits";
-constexpr const char *kValueNameAudioHertz = "hertz";
-constexpr const char *kValueNameAudioDevice = "device name";
-constexpr const char *kValueNameAudioMusicEnabled = "music enabled";
-constexpr const char *kValueNameAudioSoundEnabled = "sound enabled";
-constexpr const char *kValueNameAudioDialogEnabled = "dialog enabled";
-constexpr const char *kValueNameAudioCinematicEnabled = "cinematic enabled";
-constexpr const char *kValueNameAudioMusicVolume = "music volume";
-constexpr const char *kValueNameAudioSoundVolume = "sound volume";
-constexpr const char *kValueNameAudioDialogVolume = "dialog volume";
-constexpr const char *kValueNameAudioCinematicVolume = "cinematic volume";
-constexpr const char *kValueNameAudioSpeakerType = "speaker type";
+constexpr const char *kRegValueNameAudioStereo = "stereo";
+constexpr const char *kRegValueNameAudioBits = "bits";
+constexpr const char *kRegValueNameAudioHertz = "hertz";
+constexpr const char *kRegValueNameAudioDevice = "device name";
+constexpr const char *kRegValueNameAudioMusicEnabled = "music enabled";
+constexpr const char *kRegValueNameAudioSoundEnabled = "sound enabled";
+constexpr const char *kRegValueNameAudioDialogEnabled = "dialog enabled";
+constexpr const char *kRegValueNameAudioCinematicEnabled = "cinematic enabled";
+constexpr const char *kRegValueNameAudioMusicVolume = "music volume";
+constexpr const char *kRegValueNameAudioSoundVolume = "sound volume";
+constexpr const char *kRegValueNameAudioDialogVolume = "dialog volume";
+constexpr const char *kRegValueNameAudioCinematicVolume = "cinematic volume";
+constexpr const char *kRegValueNameAudioSpeakerType = "speaker type";
+
+// Ini value names (new format).
+constexpr const char *kIniValueNameDynLOD = "DynamicLODBudget";
+constexpr const char *kIniValueNameStaticLOD = "StaticLODBudget";
+constexpr const char *kIniValueNameDynShadows = "DynamicProjectors";
+constexpr const char *kIniValueNameTextureFilter = "TextureFilterMode";
+constexpr const char *kIniValueNamePrelitMode = "PrelitMode";
+constexpr const char *kIniValueNameShadowMode = "ShadowMode";
+constexpr const char *kIniValueNameStaticShadows = "StaticProjectors";
+constexpr const char *kIniValueNameTextureRes = "TextureResolution";
+constexpr const char *kIniValueNameSurfaceEffect = "SurfaceEffectDetail";
+constexpr const char *kIniValueNameParticleDetail = "ParticleDetail";
+
+constexpr const char *kIniValueNameAudioStereo = "Stereo";
+constexpr const char *kIniValueNameAudioBits = "Bits";
+constexpr const char *kIniValueNameAudioHertz = "Hertz";
+constexpr const char *kIniValueNameAudioDevice = "DeviceName";
+constexpr const char *kIniValueNameAudioMusicEnabled = "MusicEnabled";
+constexpr const char *kIniValueNameAudioSoundEnabled = "SoundEnabled";
+constexpr const char *kIniValueNameAudioDialogEnabled = "DialogEnabled";
+constexpr const char *kIniValueNameAudioCinematicEnabled = "CinematicEnabled";
+constexpr const char *kIniValueNameAudioMusicVolume = "MusicVolume";
+constexpr const char *kIniValueNameAudioSoundVolume = "SoundVolume";
+constexpr const char *kIniValueNameAudioDialogVolume = "DialogVolume";
+constexpr const char *kIniValueNameAudioCinematicVolume = "CinematicVolume";
+constexpr const char *kIniValueNameAudioSpeakerType = "SpeakerType";
 constexpr const char *kValueNameDriverWarningDisabled = "DriverVersionCheckDisabled";
 
 constexpr int kVolumeScale = 100;
-
-constexpr const char *kIniSectionRender = "Render";
-constexpr const char *kIniSectionSound = "Sound";
-constexpr const char *kIniSectionSettings = "System Settings";
 
 bool SaveIni(INIClass &ini)
 {
@@ -95,21 +120,21 @@ bool SaveIni(INIClass &ini)
 
 bool LoadRenderSettingsFromIni(INIClass &ini, RenderSettings &settings)
 {
-    if (!ini.Is_Loaded() || !ini.Section_Present(kIniSectionSettings)) {
+    if (!ini.Is_Loaded() || !ini.Section_Present(W3D_SECTION_SYSTEM)) {
         return false;
     }
 
-    settings.dynamicLOD = ini.Get_Int(kIniSectionSettings, kValueNameDynLOD, settings.dynamicLOD);
-    settings.staticLOD = ini.Get_Int(kIniSectionSettings, kValueNameStaticLOD, settings.staticLOD);
-    settings.dynamicShadows = ini.Get_Int(kIniSectionSettings, kValueNameDynShadows, settings.dynamicShadows);
-    settings.staticShadows = ini.Get_Int(kIniSectionSettings, kValueNameStaticShadows, settings.staticShadows);
-    settings.prelitMode = ini.Get_Int(kIniSectionSettings, kValueNamePrelitMode, settings.prelitMode);
-    settings.textureFilter = ini.Get_Int(kIniSectionSettings, kValueNameTextureFilter, settings.textureFilter);
-    settings.shadowMode = ini.Get_Int(kIniSectionSettings, kValueNameShadowMode, settings.shadowMode);
-    settings.textureResolution = ini.Get_Int(kIniSectionSettings, kValueNameTextureRes, settings.textureResolution);
-    settings.surfaceEffect = ini.Get_Int(kIniSectionSettings, kValueNameSurfaceEffect, settings.surfaceEffect);
-    settings.particleDetail = ini.Get_Int(kIniSectionSettings, kValueNameParticleDetail, settings.particleDetail);
-    settings.lightingMode = ini.Get_Int(kIniSectionSettings, kValueNamePrelitMode, settings.lightingMode);
+    settings.dynamicLOD = ini.Get_Int(W3D_SECTION_SYSTEM, kIniValueNameDynLOD, settings.dynamicLOD);
+    settings.staticLOD = ini.Get_Int(W3D_SECTION_SYSTEM, kIniValueNameStaticLOD, settings.staticLOD);
+    settings.dynamicShadows = ini.Get_Int(W3D_SECTION_SYSTEM, kIniValueNameDynShadows, settings.dynamicShadows);
+    settings.staticShadows = ini.Get_Int(W3D_SECTION_SYSTEM, kIniValueNameStaticShadows, settings.staticShadows);
+    settings.prelitMode = ini.Get_Int(W3D_SECTION_SYSTEM, kIniValueNamePrelitMode, settings.prelitMode);
+    settings.textureFilter = ini.Get_Int(W3D_SECTION_SYSTEM, kIniValueNameTextureFilter, settings.textureFilter);
+    settings.shadowMode = ini.Get_Int(W3D_SECTION_SYSTEM, kIniValueNameShadowMode, settings.shadowMode);
+    settings.textureResolution = ini.Get_Int(W3D_SECTION_SYSTEM, kIniValueNameTextureRes, settings.textureResolution);
+    settings.surfaceEffect = ini.Get_Int(W3D_SECTION_SYSTEM, kIniValueNameSurfaceEffect, settings.surfaceEffect);
+    settings.particleDetail = ini.Get_Int(W3D_SECTION_SYSTEM, kIniValueNameParticleDetail, settings.particleDetail);
+    settings.lightingMode = ini.Get_Int(W3D_SECTION_SYSTEM, kIniValueNamePrelitMode, settings.lightingMode);
 
     return true;
 }
@@ -121,33 +146,33 @@ bool LoadRenderSettingsFromRegistry(RenderSettings &settings)
         return false;
     }
 
-    settings.dynamicLOD = registry.Get_Int(kValueNameDynLOD, settings.dynamicLOD);
-    settings.staticLOD = registry.Get_Int(kValueNameStaticLOD, settings.staticLOD);
-    settings.dynamicShadows = registry.Get_Int(kValueNameDynShadows, settings.dynamicShadows);
-    settings.staticShadows = registry.Get_Int(kValueNameStaticShadows, settings.staticShadows);
-    settings.prelitMode = registry.Get_Int(kValueNamePrelitMode, settings.prelitMode);
-    settings.textureFilter = registry.Get_Int(kValueNameTextureFilter, settings.textureFilter);
-    settings.shadowMode = registry.Get_Int(kValueNameShadowMode, settings.shadowMode);
-    settings.textureResolution = registry.Get_Int(kValueNameTextureRes, settings.textureResolution);
-    settings.surfaceEffect = registry.Get_Int(kValueNameSurfaceEffect, settings.surfaceEffect);
-    settings.particleDetail = registry.Get_Int(kValueNameParticleDetail, settings.particleDetail);
-    settings.lightingMode = registry.Get_Int(kValueNamePrelitMode, settings.lightingMode);
+    settings.dynamicLOD = registry.Get_Int(kRegValueNameDynLOD, settings.dynamicLOD);
+    settings.staticLOD = registry.Get_Int(kRegValueNameStaticLOD, settings.staticLOD);
+    settings.dynamicShadows = registry.Get_Int(kRegValueNameDynShadows, settings.dynamicShadows);
+    settings.staticShadows = registry.Get_Int(kRegValueNameStaticShadows, settings.staticShadows);
+    settings.prelitMode = registry.Get_Int(kRegValueNamePrelitMode, settings.prelitMode);
+    settings.textureFilter = registry.Get_Int(kRegValueNameTextureFilter, settings.textureFilter);
+    settings.shadowMode = registry.Get_Int(kRegValueNameShadowMode, settings.shadowMode);
+    settings.textureResolution = registry.Get_Int(kRegValueNameTextureRes, settings.textureResolution);
+    settings.surfaceEffect = registry.Get_Int(kRegValueNameSurfaceEffect, settings.surfaceEffect);
+    settings.particleDetail = registry.Get_Int(kRegValueNameParticleDetail, settings.particleDetail);
+    settings.lightingMode = registry.Get_Int(kRegValueNamePrelitMode, settings.lightingMode);
 
     return true;
 }
 
 void SaveRenderSettingsToIni(const RenderSettings &settings, INIClass &ini)
 {
-    ini.Put_Int(kIniSectionSettings, kValueNameDynLOD, settings.dynamicLOD);
-    ini.Put_Int(kIniSectionSettings, kValueNameStaticLOD, settings.staticLOD);
-    ini.Put_Int(kIniSectionSettings, kValueNameDynShadows, settings.dynamicShadows);
-    ini.Put_Int(kIniSectionSettings, kValueNameStaticShadows, settings.staticShadows);
-    ini.Put_Int(kIniSectionSettings, kValueNamePrelitMode, settings.prelitMode);
-    ini.Put_Int(kIniSectionSettings, kValueNameTextureFilter, settings.textureFilter);
-    ini.Put_Int(kIniSectionSettings, kValueNameShadowMode, settings.shadowMode);
-    ini.Put_Int(kIniSectionSettings, kValueNameTextureRes, settings.textureResolution);
-    ini.Put_Int(kIniSectionSettings, kValueNameSurfaceEffect, settings.surfaceEffect);
-    ini.Put_Int(kIniSectionSettings, kValueNameParticleDetail, settings.particleDetail);
+    ini.Put_Int(W3D_SECTION_SYSTEM, kIniValueNameDynLOD, settings.dynamicLOD);
+    ini.Put_Int(W3D_SECTION_SYSTEM, kIniValueNameStaticLOD, settings.staticLOD);
+    ini.Put_Int(W3D_SECTION_SYSTEM, kIniValueNameDynShadows, settings.dynamicShadows);
+    ini.Put_Int(W3D_SECTION_SYSTEM, kIniValueNameStaticShadows, settings.staticShadows);
+    ini.Put_Int(W3D_SECTION_SYSTEM, kIniValueNamePrelitMode, settings.prelitMode);
+    ini.Put_Int(W3D_SECTION_SYSTEM, kIniValueNameTextureFilter, settings.textureFilter);
+    ini.Put_Int(W3D_SECTION_SYSTEM, kIniValueNameShadowMode, settings.shadowMode);
+    ini.Put_Int(W3D_SECTION_SYSTEM, kIniValueNameTextureRes, settings.textureResolution);
+    ini.Put_Int(W3D_SECTION_SYSTEM, kIniValueNameSurfaceEffect, settings.surfaceEffect);
+    ini.Put_Int(W3D_SECTION_SYSTEM, kIniValueNameParticleDetail, settings.particleDetail);
 }
 
 bool SaveRenderSettingsToRegistry(const RenderSettings &settings)
@@ -157,37 +182,37 @@ bool SaveRenderSettingsToRegistry(const RenderSettings &settings)
         return false;
     }
 
-    registry.Set_Int(kValueNameDynLOD, settings.dynamicLOD);
-    registry.Set_Int(kValueNameStaticLOD, settings.staticLOD);
-    registry.Set_Int(kValueNameDynShadows, settings.dynamicShadows);
-    registry.Set_Int(kValueNameStaticShadows, settings.staticShadows);
-    registry.Set_Int(kValueNamePrelitMode, settings.prelitMode);
-    registry.Set_Int(kValueNameTextureFilter, settings.textureFilter);
-    registry.Set_Int(kValueNameShadowMode, settings.shadowMode);
-    registry.Set_Int(kValueNameTextureRes, settings.textureResolution);
-    registry.Set_Int(kValueNameSurfaceEffect, settings.surfaceEffect);
-    registry.Set_Int(kValueNameParticleDetail, settings.particleDetail);
+    registry.Set_Int(kRegValueNameDynLOD, settings.dynamicLOD);
+    registry.Set_Int(kRegValueNameStaticLOD, settings.staticLOD);
+    registry.Set_Int(kRegValueNameDynShadows, settings.dynamicShadows);
+    registry.Set_Int(kRegValueNameStaticShadows, settings.staticShadows);
+    registry.Set_Int(kRegValueNamePrelitMode, settings.prelitMode);
+    registry.Set_Int(kRegValueNameTextureFilter, settings.textureFilter);
+    registry.Set_Int(kRegValueNameShadowMode, settings.shadowMode);
+    registry.Set_Int(kRegValueNameTextureRes, settings.textureResolution);
+    registry.Set_Int(kRegValueNameSurfaceEffect, settings.surfaceEffect);
+    registry.Set_Int(kRegValueNameParticleDetail, settings.particleDetail);
 
     return true;
 }
 
 bool LoadVideoSettingsFromIni(INIClass &ini, VideoSettings &settings)
 {
-    if (!ini.Is_Loaded() || !ini.Section_Present(kIniSectionRender)) {
+    if (!ini.Is_Loaded() || !ini.Section_Present(W3D_SECTION_RENDER)) {
         return false;
     }
 
     char deviceName[256] = {};
-    ini.Get_String(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_NAME, "", deviceName, sizeof(deviceName));
+    ini.Get_String(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_NAME, "", deviceName, sizeof(deviceName));
     if (deviceName[0] != '\0') {
         settings.deviceName = deviceName;
     }
 
-    const int width = ini.Get_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_WIDTH, -1);
-    const int height = ini.Get_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_HEIGHT, -1);
-    const int bitDepth = ini.Get_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_DEPTH, -1);
-    const int windowed = ini.Get_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_WINDOWED, settings.windowed ? 1 : 0);
-    const int textureDepth = ini.Get_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH, -1);
+    const int width = ini.Get_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_WIDTH, -1);
+    const int height = ini.Get_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_HEIGHT, -1);
+    const int bitDepth = ini.Get_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_DEPTH, -1);
+    const int windowed = ini.Get_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_WINDOWED, settings.windowed ? 1 : 0);
+    const int textureDepth = ini.Get_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_TEXTURE_DEPTH, -1);
 
     if (width > 0) {
         settings.width = width;
@@ -244,12 +269,12 @@ bool LoadVideoSettingsFromRegistry(VideoSettings &settings)
 
 void SaveVideoSettingsToIni(const VideoSettings &settings, INIClass &ini)
 {
-    ini.Put_String(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_NAME, settings.deviceName.c_str());
-    ini.Put_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_WIDTH, settings.width);
-    ini.Put_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_HEIGHT, settings.height);
-    ini.Put_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_DEPTH, settings.bitDepth);
-    ini.Put_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_WINDOWED, settings.windowed ? 1 : 0);
-    ini.Put_Int(kIniSectionRender, VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH, settings.textureDepth);
+    ini.Put_String(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_NAME, settings.deviceName.c_str());
+    ini.Put_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_WIDTH, settings.width);
+    ini.Put_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_HEIGHT, settings.height);
+    ini.Put_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_DEPTH, settings.bitDepth);
+    ini.Put_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_WINDOWED, settings.windowed ? 1 : 0);
+    ini.Put_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_TEXTURE_DEPTH, settings.textureDepth);
 }
 
 bool SaveVideoSettingsToRegistry(const VideoSettings &settings)
@@ -270,28 +295,28 @@ bool SaveVideoSettingsToRegistry(const VideoSettings &settings)
 
 bool LoadAudioSettingsFromIni(INIClass &ini, AudioSettings &settings)
 {
-    if (!ini.Is_Loaded() || !ini.Section_Present(kIniSectionSound)) {
+    if (!ini.Is_Loaded() || !ini.Section_Present(W3D_SECTION_SOUND)) {
         return false;
     }
 
     char deviceName[256] = {};
-    ini.Get_String(kIniSectionSound, kValueNameAudioDevice, "", deviceName, sizeof(deviceName));
+    ini.Get_String(W3D_SECTION_SOUND, kIniValueNameAudioDevice, "", deviceName, sizeof(deviceName));
     if (deviceName[0] != '\0') {
         settings.deviceName = deviceName;
     }
 
-    settings.stereo = ini.Get_Int(kIniSectionSound, kValueNameAudioStereo, settings.stereo ? 1 : 0) != 0;
-    settings.bitDepth = ini.Get_Int(kIniSectionSound, kValueNameAudioBits, settings.bitDepth);
-    settings.sampleRate = ini.Get_Int(kIniSectionSound, kValueNameAudioHertz, settings.sampleRate);
-    settings.musicEnabled = ini.Get_Int(kIniSectionSound, kValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0) != 0;
-    settings.soundEnabled = ini.Get_Int(kIniSectionSound, kValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0) != 0;
-    settings.dialogEnabled = ini.Get_Int(kIniSectionSound, kValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0) != 0;
-    settings.cinematicEnabled = ini.Get_Int(kIniSectionSound, kValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0) != 0;
-    settings.soundVolume = std::clamp(ini.Get_Int(kIniSectionSound, kValueNameAudioSoundVolume, static_cast<int>(settings.soundVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.musicVolume = std::clamp(ini.Get_Int(kIniSectionSound, kValueNameAudioMusicVolume, static_cast<int>(settings.musicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.dialogVolume = std::clamp(ini.Get_Int(kIniSectionSound, kValueNameAudioDialogVolume, static_cast<int>(settings.dialogVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.cinematicVolume = std::clamp(ini.Get_Int(kIniSectionSound, kValueNameAudioCinematicVolume, static_cast<int>(settings.cinematicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.speakerType = ini.Get_Int(kIniSectionSound, kValueNameAudioSpeakerType, settings.speakerType);
+    settings.stereo = ini.Get_Int(W3D_SECTION_SOUND, kIniValueNameAudioStereo, settings.stereo ? 1 : 0) != 0;
+    settings.bitDepth = ini.Get_Int(W3D_SECTION_SOUND, kIniValueNameAudioBits, settings.bitDepth);
+    settings.sampleRate = ini.Get_Int(W3D_SECTION_SOUND, kIniValueNameAudioHertz, settings.sampleRate);
+    settings.musicEnabled = ini.Get_Int(W3D_SECTION_SOUND, kIniValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0) != 0;
+    settings.soundEnabled = ini.Get_Int(W3D_SECTION_SOUND, kIniValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0) != 0;
+    settings.dialogEnabled = ini.Get_Int(W3D_SECTION_SOUND, kIniValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0) != 0;
+    settings.cinematicEnabled = ini.Get_Int(W3D_SECTION_SOUND, kIniValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0) != 0;
+    settings.soundVolume = std::clamp(ini.Get_Float(W3D_SECTION_SOUND, kIniValueNameAudioSoundVolume, settings.soundVolume), 0.0f, 1.0f);
+    settings.musicVolume = std::clamp(ini.Get_Float(W3D_SECTION_SOUND, kIniValueNameAudioMusicVolume, settings.musicVolume), 0.0f, 1.0f);
+    settings.dialogVolume = std::clamp(ini.Get_Float(W3D_SECTION_SOUND, kIniValueNameAudioDialogVolume, settings.dialogVolume), 0.0f, 1.0f);
+    settings.cinematicVolume = std::clamp(ini.Get_Float(W3D_SECTION_SOUND, kIniValueNameAudioCinematicVolume, settings.cinematicVolume), 0.0f, 1.0f);
+    settings.speakerType = ini.Get_Int(W3D_SECTION_SOUND, kIniValueNameAudioSpeakerType, settings.speakerType);
 
     return true;
 }
@@ -304,42 +329,42 @@ bool LoadAudioSettingsFromRegistry(AudioSettings &settings)
     }
 
     char deviceName[256] = {};
-    registry.Get_String(kValueNameAudioDevice, deviceName, sizeof(deviceName));
+    registry.Get_String(kRegValueNameAudioDevice, deviceName, sizeof(deviceName));
     if (deviceName[0] != '\0') {
         settings.deviceName = deviceName;
     }
 
-    settings.stereo = registry.Get_Int(kValueNameAudioStereo, settings.stereo ? 1 : 0) != 0;
-    settings.bitDepth = registry.Get_Int(kValueNameAudioBits, settings.bitDepth);
-    settings.sampleRate = registry.Get_Int(kValueNameAudioHertz, settings.sampleRate);
-    settings.musicEnabled = registry.Get_Int(kValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0) != 0;
-    settings.soundEnabled = registry.Get_Int(kValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0) != 0;
-    settings.dialogEnabled = registry.Get_Int(kValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0) != 0;
-    settings.cinematicEnabled = registry.Get_Int(kValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0) != 0;
-    settings.soundVolume = std::clamp(registry.Get_Int(kValueNameAudioSoundVolume, static_cast<int>(settings.soundVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.musicVolume = std::clamp(registry.Get_Int(kValueNameAudioMusicVolume, static_cast<int>(settings.musicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.dialogVolume = std::clamp(registry.Get_Int(kValueNameAudioDialogVolume, static_cast<int>(settings.dialogVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.cinematicVolume = std::clamp(registry.Get_Int(kValueNameAudioCinematicVolume, static_cast<int>(settings.cinematicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
-    settings.speakerType = registry.Get_Int(kValueNameAudioSpeakerType, settings.speakerType);
+    settings.stereo = registry.Get_Int(kRegValueNameAudioStereo, settings.stereo ? 1 : 0) != 0;
+    settings.bitDepth = registry.Get_Int(kRegValueNameAudioBits, settings.bitDepth);
+    settings.sampleRate = registry.Get_Int(kRegValueNameAudioHertz, settings.sampleRate);
+    settings.musicEnabled = registry.Get_Int(kRegValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0) != 0;
+    settings.soundEnabled = registry.Get_Int(kRegValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0) != 0;
+    settings.dialogEnabled = registry.Get_Int(kRegValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0) != 0;
+    settings.cinematicEnabled = registry.Get_Int(kRegValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0) != 0;
+    settings.soundVolume = std::clamp(registry.Get_Int(kRegValueNameAudioSoundVolume, static_cast<int>(settings.soundVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.musicVolume = std::clamp(registry.Get_Int(kRegValueNameAudioMusicVolume, static_cast<int>(settings.musicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.dialogVolume = std::clamp(registry.Get_Int(kRegValueNameAudioDialogVolume, static_cast<int>(settings.dialogVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.cinematicVolume = std::clamp(registry.Get_Int(kRegValueNameAudioCinematicVolume, static_cast<int>(settings.cinematicVolume * kVolumeScale)) / static_cast<float>(kVolumeScale), 0.0f, 1.0f);
+    settings.speakerType = registry.Get_Int(kRegValueNameAudioSpeakerType, settings.speakerType);
 
     return true;
 }
 
 void SaveAudioSettingsToIni(const AudioSettings &settings, INIClass &ini)
 {
-    ini.Put_String(kIniSectionSound, kValueNameAudioDevice, settings.deviceName.c_str());
-    ini.Put_Int(kIniSectionSound, kValueNameAudioStereo, settings.stereo ? 1 : 0);
-    ini.Put_Int(kIniSectionSound, kValueNameAudioBits, settings.bitDepth);
-    ini.Put_Int(kIniSectionSound, kValueNameAudioHertz, settings.sampleRate);
-    ini.Put_Int(kIniSectionSound, kValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0);
-    ini.Put_Int(kIniSectionSound, kValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0);
-    ini.Put_Int(kIniSectionSound, kValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0);
-    ini.Put_Int(kIniSectionSound, kValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0);
-    ini.Put_Int(kIniSectionSound, kValueNameAudioSoundVolume, static_cast<int>(std::clamp(settings.soundVolume, 0.0f, 1.0f) * kVolumeScale));
-    ini.Put_Int(kIniSectionSound, kValueNameAudioMusicVolume, static_cast<int>(std::clamp(settings.musicVolume, 0.0f, 1.0f) * kVolumeScale));
-    ini.Put_Int(kIniSectionSound, kValueNameAudioDialogVolume, static_cast<int>(std::clamp(settings.dialogVolume, 0.0f, 1.0f) * kVolumeScale));
-    ini.Put_Int(kIniSectionSound, kValueNameAudioCinematicVolume, static_cast<int>(std::clamp(settings.cinematicVolume, 0.0f, 1.0f) * kVolumeScale));
-    ini.Put_Int(kIniSectionSound, kValueNameAudioSpeakerType, settings.speakerType);
+    ini.Put_String(W3D_SECTION_SOUND, kIniValueNameAudioDevice, settings.deviceName.c_str());
+    ini.Put_Int(W3D_SECTION_SOUND, kIniValueNameAudioStereo, settings.stereo ? 1 : 0);
+    ini.Put_Int(W3D_SECTION_SOUND, kIniValueNameAudioBits, settings.bitDepth);
+    ini.Put_Int(W3D_SECTION_SOUND, kIniValueNameAudioHertz, settings.sampleRate);
+    ini.Put_Int(W3D_SECTION_SOUND, kIniValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0);
+    ini.Put_Int(W3D_SECTION_SOUND, kIniValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0);
+    ini.Put_Int(W3D_SECTION_SOUND, kIniValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0);
+    ini.Put_Int(W3D_SECTION_SOUND, kIniValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0);
+    ini.Put_Float(W3D_SECTION_SOUND, kIniValueNameAudioSoundVolume, std::clamp(settings.soundVolume, 0.0f, 1.0f));
+    ini.Put_Float(W3D_SECTION_SOUND, kIniValueNameAudioMusicVolume, std::clamp(settings.musicVolume, 0.0f, 1.0f));
+    ini.Put_Float(W3D_SECTION_SOUND, kIniValueNameAudioDialogVolume, std::clamp(settings.dialogVolume, 0.0f, 1.0f));
+    ini.Put_Float(W3D_SECTION_SOUND, kIniValueNameAudioCinematicVolume, std::clamp(settings.cinematicVolume, 0.0f, 1.0f));
+    ini.Put_Int(W3D_SECTION_SOUND, kIniValueNameAudioSpeakerType, settings.speakerType);
 }
 
 bool SaveAudioSettingsToRegistry(const AudioSettings &settings)
@@ -349,19 +374,19 @@ bool SaveAudioSettingsToRegistry(const AudioSettings &settings)
         return false;
     }
 
-    registry.Set_String(kValueNameAudioDevice, settings.deviceName.c_str());
-    registry.Set_Int(kValueNameAudioStereo, settings.stereo ? 1 : 0);
-    registry.Set_Int(kValueNameAudioBits, settings.bitDepth);
-    registry.Set_Int(kValueNameAudioHertz, settings.sampleRate);
-    registry.Set_Int(kValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0);
-    registry.Set_Int(kValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0);
-    registry.Set_Int(kValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0);
-    registry.Set_Int(kValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0);
-    registry.Set_Int(kValueNameAudioSoundVolume, static_cast<int>(std::clamp(settings.soundVolume, 0.0f, 1.0f) * kVolumeScale));
-    registry.Set_Int(kValueNameAudioMusicVolume, static_cast<int>(std::clamp(settings.musicVolume, 0.0f, 1.0f) * kVolumeScale));
-    registry.Set_Int(kValueNameAudioDialogVolume, static_cast<int>(std::clamp(settings.dialogVolume, 0.0f, 1.0f) * kVolumeScale));
-    registry.Set_Int(kValueNameAudioCinematicVolume, static_cast<int>(std::clamp(settings.cinematicVolume, 0.0f, 1.0f) * kVolumeScale));
-    registry.Set_Int(kValueNameAudioSpeakerType, settings.speakerType);
+    registry.Set_String(kRegValueNameAudioDevice, settings.deviceName.c_str());
+    registry.Set_Int(kRegValueNameAudioStereo, settings.stereo ? 1 : 0);
+    registry.Set_Int(kRegValueNameAudioBits, settings.bitDepth);
+    registry.Set_Int(kRegValueNameAudioHertz, settings.sampleRate);
+    registry.Set_Int(kRegValueNameAudioMusicEnabled, settings.musicEnabled ? 1 : 0);
+    registry.Set_Int(kRegValueNameAudioSoundEnabled, settings.soundEnabled ? 1 : 0);
+    registry.Set_Int(kRegValueNameAudioDialogEnabled, settings.dialogEnabled ? 1 : 0);
+    registry.Set_Int(kRegValueNameAudioCinematicEnabled, settings.cinematicEnabled ? 1 : 0);
+    registry.Set_Int(kRegValueNameAudioSoundVolume, static_cast<int>(std::clamp(settings.soundVolume, 0.0f, 1.0f) * kVolumeScale));
+    registry.Set_Int(kRegValueNameAudioMusicVolume, static_cast<int>(std::clamp(settings.musicVolume, 0.0f, 1.0f) * kVolumeScale));
+    registry.Set_Int(kRegValueNameAudioDialogVolume, static_cast<int>(std::clamp(settings.dialogVolume, 0.0f, 1.0f) * kVolumeScale));
+    registry.Set_Int(kRegValueNameAudioCinematicVolume, static_cast<int>(std::clamp(settings.cinematicVolume, 0.0f, 1.0f) * kVolumeScale));
+    registry.Set_Int(kRegValueNameAudioSpeakerType, settings.speakerType);
 
     return true;
 }
@@ -372,6 +397,12 @@ namespace WWConfig
 {
 std::string GetConfigFilePath()
 {
+    if (const char *envPath = std::getenv("OPENW3D_CONFIG_INI")) {
+        if (*envPath != '\0') {
+            return std::string(envPath);
+        }
+    }
+
     if (const char *envPath = std::getenv("RENEGADE_CONFIG_INI")) {
         if (*envPath != '\0') {
             return std::string(envPath);
@@ -388,11 +419,11 @@ std::string GetConfigFilePath()
         } else {
             path.clear();
         }
-        return path + "Renegade.ini";
+        return path + W3D_CONF_FILE;
     }
 #endif
 
-    return std::string("Renegade.ini");
+    return std::string(W3D_CONF_FILE);
 }
 
 bool LoadRenderSettings(RenderSettings &settings)
@@ -417,7 +448,7 @@ bool SaveRenderSettings(const RenderSettings &settings)
     return iniSaved || registrySaved;
 }
 
-static void InitializeAdapterSelection(IDirect3D9 **outD3D, D3DCAPS9 *outCaps, D3DADAPTER_IDENTIFIER9 *outAdapterId, D3DFORMAT &displayFormat)
+static void InitializeAdapterSelection(VideoSettings &videoSettings, IDirect3D9 **outD3D, D3DCAPS9 *outCaps, D3DADAPTER_IDENTIFIER9 *outAdapterId, D3DFORMAT &displayFormat)
 {
     IDirect3D9 *d3d = Direct3DCreate9(D3D_SDK_VERSION);
     if (!d3d) {
@@ -425,20 +456,16 @@ static void InitializeAdapterSelection(IDirect3D9 **outD3D, D3DCAPS9 *outCaps, D
         return;
     }
 
-    RegistryClass renderRegistry(RENEGADE_SUB_KEY_NAME_RENDER);
-    renderRegistry.Is_Valid();
     int currentAdapterIndex = D3DADAPTER_DEFAULT;
-    char deviceName[256] = {0};
-    renderRegistry.Get_String(VALUE_NAME_RENDER_DEVICE_NAME, deviceName, sizeof(deviceName));
-
-    int adapterCount = d3d->GetAdapterCount();
-    for (int adapterIndex = 0; adapterIndex < adapterCount; ++adapterIndex) {
-        D3DADAPTER_IDENTIFIER9 id = {};
-        if (SUCCEEDED(d3d->GetAdapterIdentifier(adapterIndex, 0, &id))) {
-            StringClass name(id.Description, true);
-            if (name == deviceName) {
-                currentAdapterIndex = adapterIndex;
-                break;
+    if (!videoSettings.deviceName.empty()) {
+        const int adapterCount = static_cast<int>(d3d->GetAdapterCount());
+        for (int adapterIndex = 0; adapterIndex < adapterCount; ++adapterIndex) {
+            D3DADAPTER_IDENTIFIER9 id = {};
+            if (SUCCEEDED(d3d->GetAdapterIdentifier(adapterIndex, 0, &id))) {
+                if (_stricmp(videoSettings.deviceName.c_str(), id.Description) == 0) {
+                    currentAdapterIndex = adapterIndex;
+                    break;
+                }
             }
         }
     }
@@ -456,12 +483,12 @@ static void InitializeAdapterSelection(IDirect3D9 **outD3D, D3DCAPS9 *outCaps, D
         return;
     }
 
-    renderRegistry.Set_String(VALUE_NAME_RENDER_DEVICE_NAME, outAdapterId->Description);
-    renderRegistry.Set_Int(VALUE_NAME_RENDER_DEVICE_WIDTH, 800);
-    renderRegistry.Set_Int(VALUE_NAME_RENDER_DEVICE_HEIGHT, 600);
-    renderRegistry.Set_Int(VALUE_NAME_RENDER_DEVICE_DEPTH, 16);
-    renderRegistry.Set_Int(VALUE_NAME_RENDER_DEVICE_WINDOWED, 0);
-    renderRegistry.Set_Int(VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH, 16);
+    videoSettings.deviceName = outAdapterId->Description;
+    videoSettings.width = 800;
+    videoSettings.height = 600;
+    videoSettings.bitDepth = 16;
+    videoSettings.windowed = false;
+    videoSettings.textureDepth = 16;
 
     displayFormat = D3DFMT_R5G6B5;
     *outD3D = d3d;
@@ -469,15 +496,11 @@ static void InitializeAdapterSelection(IDirect3D9 **outD3D, D3DCAPS9 *outCaps, D
 
 void AutoConfigRenderSettings()
 {
-    RegistryClass registry(kKeyNameSettings);
-    if (!registry.Is_Valid()) {
-        return;
-    }
+    RenderSettings renderSettings;
+    LoadRenderSettings(renderSettings);
 
-    RegistryClass renderRegistry(RENEGADE_SUB_KEY_NAME_RENDER);
-    if (!renderRegistry.Is_Valid()) {
-        return;
-    }
+    VideoSettings videoSettings;
+    LoadVideoSettings(videoSettings);
 
     IDirect3D9 *d3d = nullptr;
     D3DCAPS9 tmpCaps = {};
@@ -485,7 +508,7 @@ void AutoConfigRenderSettings()
     D3DADAPTER_IDENTIFIER9 adapterId = {};
     D3DFORMAT displayFormat = D3DFMT_R5G6B5;
 
-    InitializeAdapterSelection(&d3d, &tmpCaps, &adapterId, displayFormat);
+    InitializeAdapterSelection(videoSettings, &d3d, &tmpCaps, &adapterId, displayFormat);
     if (!d3d) {
         return;
     }
@@ -499,52 +522,54 @@ void AutoConfigRenderSettings()
         highEndProcessor = true;
     }
 
-    registry.Set_Int(kValueNameTextureRes, caps.Support_DXTC() ? 0 : 1);
+    renderSettings.textureResolution = caps.Support_DXTC() ? 0 : 1;
 
     if (caps.Support_TnL()) {
-        registry.Set_Int(kValueNameDynLOD, 10000);
-        registry.Set_Int(kValueNameStaticLOD, 10000);
+        renderSettings.dynamicLOD = 10000;
+        renderSettings.staticLOD = 10000;
     } else if (highEndProcessor) {
-        registry.Set_Int(kValueNameDynLOD, 5000);
-        registry.Set_Int(kValueNameStaticLOD, 5000);
+        renderSettings.dynamicLOD = 5000;
+        renderSettings.staticLOD = 5000;
     } else {
-        registry.Set_Int(kValueNameDynLOD, 0);
-        registry.Set_Int(kValueNameStaticLOD, 0);
+        renderSettings.dynamicLOD = 0;
+        renderSettings.staticLOD = 0;
     }
 
     if (caps.Support_Render_To_Texture_Format(D3DFormat_To_WW3DFormat(displayFormat))) {
         if (caps.Support_TnL()) {
-            registry.Set_Int(kValueNameShadowMode, 3);
-            registry.Set_Int(kValueNameStaticShadows, 1);
+            renderSettings.shadowMode = 3;
+            renderSettings.staticShadows = 1;
         } else {
-            registry.Set_Int(kValueNameShadowMode, 2);
-            registry.Set_Int(kValueNameStaticShadows, 0);
+            renderSettings.shadowMode = 2;
+            renderSettings.staticShadows = 0;
         }
     } else {
-        registry.Set_Int(kValueNameStaticShadows, 0);
-        registry.Set_Int(kValueNameShadowMode, highEndProcessor ? 1 : 0);
+        renderSettings.staticShadows = 0;
+        renderSettings.shadowMode = highEndProcessor ? 1 : 0;
     }
 
+    renderSettings.dynamicShadows = renderSettings.shadowMode != 0;
+
     if (caps.Support_TnL()) {
-        registry.Set_Int(kValueNameSurfaceEffect, 2);
+        renderSettings.surfaceEffect = 2;
     } else {
-        registry.Set_Int(kValueNameSurfaceEffect, highEndProcessor ? 1 : 0);
+        renderSettings.surfaceEffect = highEndProcessor ? 1 : 0;
     }
 
     if (caps.Support_TnL() && highEndProcessor) {
-        registry.Set_Int(kValueNameParticleDetail, 2);
+        renderSettings.particleDetail = 2;
     } else if (caps.Support_TnL() || highEndProcessor) {
-        registry.Set_Int(kValueNameParticleDetail, 1);
+        renderSettings.particleDetail = 1;
     } else {
-        registry.Set_Int(kValueNameParticleDetail, 0);
+        renderSettings.particleDetail = 0;
     }
 
     if (!canDoMultiPass || CPUDetectClass::Get_Total_Physical_Memory() < 100 * 1024 * 1024) {
-        registry.Set_Int(kValueNamePrelitMode, 0);
+        renderSettings.prelitMode = 0;
     } else if (caps.Get_Max_Textures_Per_Pass() >= 2) {
-        registry.Set_Int(kValueNamePrelitMode, 2);
+        renderSettings.prelitMode = 2;
     } else {
-        registry.Set_Int(kValueNamePrelitMode, 1);
+        renderSettings.prelitMode = 1;
     }
 
     RegistryClass registryOptions(kKeyNameOptions);
@@ -552,14 +577,62 @@ void AutoConfigRenderSettings()
         registryOptions.Set_Int("ScreenUVBias", 1);
     }
 
+    if (caps.Get_Vendor() == DX8Caps::VENDOR_NVIDIA) {
+        switch (caps.Get_Device()) {
+        case DX8Caps::DEVICE_NVIDIA_TNT2_ALADDIN:
+        case DX8Caps::DEVICE_NVIDIA_TNT2:
+        case DX8Caps::DEVICE_NVIDIA_TNT2_ULTRA:
+        case DX8Caps::DEVICE_NVIDIA_TNT2_VANTA:
+        case DX8Caps::DEVICE_NVIDIA_TNT2_M64:
+        case DX8Caps::DEVICE_NVIDIA_TNT:
+        case DX8Caps::DEVICE_NVIDIA_RIVA_128:
+        case DX8Caps::DEVICE_NVIDIA_TNT_VANTA:
+        case DX8Caps::DEVICE_NVIDIA_NV1:
+            renderSettings.textureFilter = 0;
+            break;
+        default:
+            renderSettings.textureFilter = 1;
+        }
+    } else if (caps.Get_Vendor() == DX8Caps::VENDOR_ATI) {
+        switch (caps.Get_Device()) {
+        case DX8Caps::DEVICE_ATI_RAGE_II:
+        case DX8Caps::DEVICE_ATI_RAGE_II_PLUS:
+        case DX8Caps::DEVICE_ATI_RAGE_IIC_PCI:
+        case DX8Caps::DEVICE_ATI_RAGE_IIC_AGP:
+        case DX8Caps::DEVICE_ATI_RAGE_128_MOBILITY:
+        case DX8Caps::DEVICE_ATI_RAGE_128_MOBILITY_M3:
+        case DX8Caps::DEVICE_ATI_RAGE_128_MOBILITY_M4:
+        case DX8Caps::DEVICE_ATI_RAGE_128_PRO_ULTRA:
+        case DX8Caps::DEVICE_ATI_RAGE_128_4X:
+        case DX8Caps::DEVICE_ATI_RAGE_128_PRO_GL:
+        case DX8Caps::DEVICE_ATI_RAGE_128_PRO_VR:
+        case DX8Caps::DEVICE_ATI_RAGE_128_GL:
+        case DX8Caps::DEVICE_ATI_RAGE_128_VR:
+        case DX8Caps::DEVICE_ATI_RAGE_PRO:
+        case DX8Caps::DEVICE_ATI_RAGE_PRO_MOBILITY:
+            renderSettings.textureFilter = 0;
+            if (caps.Get_Device() == DX8Caps::DEVICE_ATI_RAGE_PRO ||
+                caps.Get_Device() == DX8Caps::DEVICE_ATI_RAGE_PRO_MOBILITY ||
+                caps.Get_Device() == DX8Caps::DEVICE_ATI_RAGE_128_MOBILITY ||
+                caps.Get_Device() == DX8Caps::DEVICE_ATI_RAGE_128_MOBILITY_M3 ||
+                caps.Get_Device() == DX8Caps::DEVICE_ATI_RAGE_128_MOBILITY_M4 ||
+                caps.Get_Device() == DX8Caps::DEVICE_ATI_RAGE_128_PRO_ULTRA) {
+                registryOptions.Set_Int("ScreenUVBias", 0);
+            }
+            break;
+        default:
+            renderSettings.textureFilter = 1;
+        }
+    } else {
+        renderSettings.textureFilter = 1;
+    }
+
     if (d3d) {
         d3d->Release();
     }
 
-    RenderSettings updatedSettings;
-    if (LoadRenderSettingsFromRegistry(updatedSettings)) {
-        SaveRenderSettings(updatedSettings);
-    }
+    SaveVideoSettings(videoSettings);
+    SaveRenderSettings(renderSettings);
 }
 
 bool LoadVideoSettings(VideoSettings &settings)
@@ -610,7 +683,7 @@ bool IsDriverWarningDisabled()
 {
     const std::string iniPath = GetConfigFilePath();
     INIClass ini(iniPath.c_str());
-    const int disabled = ini.Get_Int(kIniSectionRender, kValueNameDriverWarningDisabled, 0);
+    const int disabled = ini.Get_Int(W3D_SECTION_RENDER, kValueNameDriverWarningDisabled, 0);
     return disabled >= 87;
 }
 
@@ -618,7 +691,7 @@ void SetDriverWarningDisabled(bool disabled)
 {
     const std::string iniPath = GetConfigFilePath();
     INIClass ini(iniPath.c_str());
-    ini.Put_Int(kIniSectionRender, kValueNameDriverWarningDisabled, disabled ? 87 : 0);
+    ini.Put_Int(W3D_SECTION_RENDER, kValueNameDriverWarningDisabled, disabled ? 87 : 0);
     SaveIni(ini);
 }
 
