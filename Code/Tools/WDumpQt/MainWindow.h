@@ -21,6 +21,7 @@
 #include <memory>
 #include <QMainWindow>
 #include <QStringList>
+#include <QVector>
 
 #include "wdump_core.h"
 
@@ -34,6 +35,7 @@ class QStandardItem;
 class QTableView;
 class QTreeView;
 class QStandardItemModel;
+class QToolBar;
 
 class MainWindow : public QMainWindow
 {
@@ -51,6 +53,10 @@ private:
     void buildMenus();
     void openFileDialog();
     void openRecentFile();
+    void openFindDialog();
+    void findNext();
+    void showAbout();
+    void splitViews();
     void updateRecentFilesMenu();
     void addRecentFile(const QString &path);
     QStringList recentFiles() const;
@@ -61,15 +67,22 @@ private:
     void onTreeSelectionChanged(const QModelIndex &current);
     QStandardItem *addChunkItem(QStandardItem *parent, const wdump::Chunk &chunk);
     void showChunk(const wdump::Chunk *chunk);
+    bool chunkMatches(const wdump::Chunk &chunk, const QString &needle) const;
+    void collectIndices(const QModelIndex &parent, QVector<QModelIndex> &out) const;
 
     static constexpr int kMaxRecentFiles = 10;
 
     wdump::ChunkFile _file;
     QString _currentFile;
+    QString _findString;
     QTreeView *_treeView = nullptr;
     QTableView *_tableView = nullptr;
     QPlainTextEdit *_hexView = nullptr;
+    QToolBar *_toolbar = nullptr;
+    QSplitter *_rightSplit = nullptr;
+    QSplitter *_mainSplit = nullptr;
     QStandardItemModel *_treeModel = nullptr;
     QStandardItemModel *_tableModel = nullptr;
     QMenu *_recentMenu = nullptr;
+    QAction *_findNextAction = nullptr;
 };

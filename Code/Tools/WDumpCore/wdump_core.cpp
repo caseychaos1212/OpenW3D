@@ -100,7 +100,10 @@ std::string build_hex_view(const Chunk &chunk, std::size_t bytes_per_line)
 {
     if (chunk.data.empty())
     {
-        return "This chunk is a wrapper for other chunks.";
+        std::ostringstream message;
+        message << "This chunk is a wrapper chunk for other chunks. It's total length is "
+                << chunk.length;
+        return message.str();
     }
 
     std::ostringstream out;

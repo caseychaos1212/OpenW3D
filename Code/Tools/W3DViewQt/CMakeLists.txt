@@ -2,6 +2,52 @@ set(W3DVIEW_QT_SRC
     main.cpp
     MainWindow.cpp
     MainWindow.h
+    AggregateNameDialog.cpp
+    AggregateNameDialog.h
+    AddToLineupDialog.cpp
+    AddToLineupDialog.h
+    AdvancedAnimationDialog.cpp
+    AdvancedAnimationDialog.h
+    AnimationPropertiesDialog.cpp
+    AnimationPropertiesDialog.h
+    AnimatedSoundOptionsDialog.cpp
+    AnimatedSoundOptionsDialog.h
+    BackgroundObjectDialog.cpp
+    BackgroundObjectDialog.h
+    BoneManagementDialog.cpp
+    BoneManagementDialog.h
+    CameraDistanceDialog.cpp
+    CameraDistanceDialog.h
+    CameraSettingsDialog.cpp
+    CameraSettingsDialog.h
+    EmitterEditDialog.cpp
+    EmitterEditDialog.h
+    GammaDialog.cpp
+    GammaDialog.h
+    KeyframeTableUtils.cpp
+    KeyframeTableUtils.h
+    HierarchyPropertiesDialog.cpp
+    HierarchyPropertiesDialog.h
+    RenderObjUtils.cpp
+    RenderObjUtils.h
+    MeshPropertiesDialog.cpp
+    MeshPropertiesDialog.h
+    OpacityVectorEditDialog.cpp
+    OpacityVectorEditDialog.h
+    RingEditDialog.cpp
+    RingEditDialog.h
+    ResolutionDialog.cpp
+    ResolutionDialog.h
+    PlaySoundDialog.cpp
+    PlaySoundDialog.h
+    ScaleDialog.cpp
+    ScaleDialog.h
+    SphereEditDialog.cpp
+    SphereEditDialog.h
+    SoundEditDialog.cpp
+    SoundEditDialog.h
+    TexturePathDialog.cpp
+    TexturePathDialog.h
     W3DViewport.cpp
     W3DViewport.h
 )

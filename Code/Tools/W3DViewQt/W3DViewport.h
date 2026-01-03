@@ -1,16 +1,132 @@
 #pragma once
 
+#include "quat.h"
+
 #include <QElapsedTimer>
+#include <QPoint>
+#include <QString>
 #include <QTimer>
 #include <QWidget>
+
+class CameraClass;
+class DazzleLayerClass;
+class HAnimClass;
+class HAnimComboClass;
+class LightClass;
+class Bitmap2DObjClass;
+class RenderObjClass;
+class SceneClass;
 
 class W3DViewport final : public QWidget
 {
     Q_OBJECT
 
 public:
+    enum ObjectRotation {
+        RotateNone = 0,
+        RotateX = 1 << 0,
+        RotateY = 1 << 1,
+        RotateZ = 1 << 2,
+    };
+
+    enum class CameraPosition {
+        Front,
+        Back,
+        Left,
+        Right,
+        Top,
+        Bottom,
+    };
+
+    enum class CameraRotation {
+        Free,
+        OnlyX,
+        OnlyY,
+        OnlyZ,
+    };
+
+    enum class AnimationState {
+        Playing,
+        Stopped,
+        Paused,
+    };
+
     explicit W3DViewport(QWidget *parent = nullptr);
     ~W3DViewport() override;
+    void setRenderObject(RenderObjClass *object);
+    void setCameraPosition(CameraPosition position);
+    void resetCamera();
+    void setAllowedCameraRotation(CameraRotation rotation);
+    CameraRotation allowedCameraRotation() const;
+    void setAutoResetEnabled(bool enabled);
+    bool isAutoResetEnabled() const;
+    void setCameraAnimationEnabled(bool enabled);
+    bool isCameraAnimationEnabled() const;
+    void setCameraBonePosX(bool enabled);
+    bool isCameraBonePosX() const;
+    void setManualFovEnabled(bool enabled);
+    bool isManualFovEnabled() const;
+    void setManualClipPlanesEnabled(bool enabled);
+    bool isManualClipPlanesEnabled() const;
+    void setCameraFovDegrees(double hfov_deg, double vfov_deg);
+    void cameraFovDegrees(double &hfov_deg, double &vfov_deg) const;
+    void setCameraClipPlanes(float znear, float zfar);
+    void cameraClipPlanes(float &znear, float &zfar) const;
+    void resetFov();
+    void setCameraDistance(float distance);
+    float cameraDistance() const;
+    float currentScreenSize() const;
+    bool applyResolution(int width, int height, int bitsPerPixel, bool fullscreen);
+    bool addToLineup(RenderObjClass *object);
+    bool canLineUpClass(int class_id) const;
+    void clearLineup();
+    void setObjectRotationFlags(int flags);
+    int objectRotationFlags() const;
+    void resetObjectTransform();
+    void toggleAlternateMaterials();
+    void setLightRotationFlags(int flags);
+    int lightRotationFlags() const;
+    void setBackgroundColor(const Vector3 &color);
+    Vector3 backgroundColor() const;
+    void setBackgroundBitmap(const QString &path);
+    QString backgroundBitmap() const;
+    void setBackgroundObjectName(const QString &name);
+    QString backgroundObjectName() const;
+    void setAmbientLight(const Vector3 &color);
+    Vector3 ambientLight() const;
+    void setFogEnabled(bool enabled);
+    bool isFogEnabled() const;
+    void setAnimationState(AnimationState state);
+    AnimationState animationState() const;
+    void setAnimationSpeed(float speed);
+    float animationSpeed() const;
+    bool stepAnimation(int delta);
+    bool hasAnimation() const;
+    bool toggleSubobjectLod();
+    bool isSubobjectLodBound() const;
+    void setSceneLightColor(const Vector3 &color);
+    Vector3 sceneLightColor() const;
+    void setSceneLightOrientation(const Quaternion &orientation);
+    Quaternion sceneLightOrientation() const;
+    void setSceneLightDistance(float distance);
+    float sceneLightDistance() const;
+    void setSceneLightIntensity(float intensity);
+    float sceneLightIntensity() const;
+    void setSceneLightAttenuation(float start, float end, bool enabled);
+    void sceneLightAttenuation(float &start, float &end, bool &enabled) const;
+    void setAnimation(HAnimClass *animation);
+    void setAnimationCombo(HAnimComboClass *combo);
+    void clearAnimation();
+    void setWireframeEnabled(bool enabled);
+    bool isWireframeEnabled() const;
+    void setLodAutoSwitchingEnabled(bool enabled);
+    bool isLodAutoSwitchingEnabled() const;
+    bool currentLodInfo(int &level, int &count) const;
+    bool setNullLodIncluded(bool enabled);
+    bool isNullLodIncluded() const;
+    bool recordLodScreenArea();
+    bool adjustLodLevel(int delta);
+    bool captureMovie(const QString &baseName, float frameRate, QString *error = nullptr);
 
 protected:
     QPaintEngine *paintEngine() const override;
@@ -18,6 +134,10 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     void hideEvent(QHideEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
 private slots:
     void renderFrame();
@@ -25,8 +145,76 @@ private slots:
 private:
     void initWW3D();
     void shutdownWW3D();
+    void initScene();
+    void shutdownScene();
+    void renderScene();
+    void renderFrameWithTicks(int ticks);
+    void updateCameraFov(int width, int height, bool force = false);
+    void resetCameraToObject(RenderObjClass &object);
+    void applySceneLightSettings();
+    void updateSceneLightPosition(const Vector3 &oldCenter);
+    void updateAnimation(float deltaSeconds);
+    void updateCameraAnimation();
+    void updateObjectRotation();
+    void updateLightRotation();
+    void refreshBackgroundBitmap();
+    void applyAnimationFrame(float frame);
 
     QTimer _timer;
     QElapsedTimer _elapsed;
     bool _initialized = false;
+    SceneClass *_scene = nullptr;
+    CameraClass *_camera = nullptr;
+    LightClass *_sceneLight = nullptr;
+    DazzleLayerClass *_dazzleLayer = nullptr;
+    RenderObjClass *_renderObject = nullptr;
+    HAnimClass *_animation = nullptr;
+    HAnimComboClass *_animationCombo = nullptr;
+    float _animationFrame = 0.0f;
+    float _animationTime = 0.0f;
+    SceneClass *_backgroundScene = nullptr;
+    CameraClass *_backgroundCamera = nullptr;
+    Bitmap2DObjClass *_backgroundBitmapObj = nullptr;
+    SceneClass *_backgroundObjectScene = nullptr;
+    CameraClass *_backgroundObjectCamera = nullptr;
+    RenderObjClass *_backgroundObject = nullptr;
+    Vector3 _clearColor = Vector3(0.08f, 0.08f, 0.08f);
+    QString _backgroundBitmap;
+    QString _backgroundObjectName;
+    Vector3 _ambientLight = Vector3(1.0f, 1.0f, 1.0f);
+    Vector3 _sceneLightColor = Vector3(1.0f, 1.0f, 1.0f);
+    Quaternion _sceneLightOrientation = Quaternion(true);
+    float _sceneLightDistance = 0.0f;
+    float _sceneLightIntensity = 1.0f;
+    float _sceneLightAttenStart = 1000000.0f;
+    float _sceneLightAttenEnd = 1000000.0f;
+    bool _sceneLightAttenEnabled = false;
+    bool _sceneLightOrientationSet = false;
+    bool _sceneLightDistanceSet = false;
+    bool _fogEnabled = false;
+    bool _wireframeEnabled = false;
+    bool _autoResetCamera = true;
+    bool _animateCamera = false;
+    bool _cameraBonePosX = false;
+    bool _manualFov = false;
+    bool _manualClipPlanes = false;
+    CameraRotation _allowedRotation = CameraRotation::Free;
+    bool _windowed = true;
+    bool _leftDown = false;
+    bool _rightDown = false;
+    QPoint _lastPos;
+    float _cameraDistance = 0.0f;
+    float _minZoomAdjust = 0.0f;
+    Vector3 _orbitCenter = Vector3(0.0f, 0.0f, 0.0f);
+    Quaternion _rotation = Quaternion(true);
+    int _objectRotation = RotateNone;
+    int _lightRotation = RotateNone;
+    double _manualHfov = 0.0;
+    double _manualVfov = 0.0;
+    float _manualNear = 0.2f;
+    float _manualFar = 10000.0f;
+    int _bitsPerPixel = 32;
+    bool _allowLodSwitching = false;
+    AnimationState _animationState = AnimationState::Playing;
+    float _animationSpeed = 1.0f;
 };

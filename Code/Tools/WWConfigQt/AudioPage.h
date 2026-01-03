@@ -9,6 +9,7 @@ class QComboBox;
 class QLabel;
 class QListWidget;
 class QSlider;
+class WWAudioClass;
 
 class AudioPage : public QWidget
 {
@@ -16,6 +17,7 @@ class AudioPage : public QWidget
 
 public:
     explicit AudioPage(WWConfigBackend &backend, QWidget *parent = nullptr);
+    ~AudioPage() override;
 
     void refresh();
 
@@ -23,10 +25,13 @@ private:
     void buildUi();
     void updateFromSettings();
     void applySettings();
+    void populateDrivers();
     void setVolumeRow(QSlider *slider, QCheckBox *check, float value, bool enabled);
 
     WWConfigBackend &m_backend;
     AudioSettings m_settings;
+    WWAudioClass *m_audio = nullptr;
+    bool m_ownsAudio = false;
     bool m_blockSignals = false;
 
     QListWidget *m_driverList = nullptr;

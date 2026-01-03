@@ -13,6 +13,9 @@
 #include <QSlider>
 #include <QVBoxLayout>
 
+#include "../WWConfig/wwconfig_ids.h"
+#include "WWAudio.h"
+
 namespace
 {
 QString DeviceDisplayName(const AudioSettings &settings)
@@ -40,14 +43,37 @@ int SampleRateFromIndex(int index)
     default: return 44100;
     }
 }
+
+QString LocalizedText(const WWConfigBackend &backend, int id, const QString &fallback)
+{
+    const QString text = backend.localizedString(id);
+    return text.isEmpty() ? fallback : text;
+}
 } // namespace
 
 AudioPage::AudioPage(WWConfigBackend &backend, QWidget *parent)
     : QWidget(parent),
       m_backend(backend)
 {
+    m_audio = WWAudioClass::Get_Instance();
+    if (!m_audio) {
+        m_audio = WWAudioClass::Create_Instance();
+        m_ownsAudio = (m_audio != nullptr);
+    }
+    if (m_audio && m_ownsAudio) {
+        m_audio->Initialize();
+    }
     buildUi();
     refresh();
+}
+
+AudioPage::~AudioPage()
+{
+    if (m_audio && m_ownsAudio) {
+        m_audio->Shutdown();
+        delete m_audio;
+    }
+    m_audio = nullptr;
 }
 
 void AudioPage::buildUi()
@@ -56,13 +82,14 @@ void AudioPage::buildUi()
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
 
-    auto *deviceGroup = new QGroupBox(tr("Device"), this);
+    auto *deviceGroup = new QGroupBox(this);
+    deviceGroup->setTitle(QString());
     auto *deviceLayout = new QGridLayout(deviceGroup);
     deviceLayout->setContentsMargins(6, 6, 6, 6);
     deviceLayout->setHorizontalSpacing(6);
     deviceLayout->setVerticalSpacing(4);
 
-    deviceLayout->addWidget(new QLabel(tr("Driver:"), deviceGroup), 0, 0, Qt::AlignLeft);
+    deviceLayout->addWidget(new QLabel(LocalizedText(m_backend, IDS_DRIVER, tr("Driver:")), deviceGroup), 0, 0, Qt::AlignLeft);
     m_driverList = new QListWidget(deviceGroup);
     m_driverList->setUniformItemSizes(true);
     m_driverList->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -72,7 +99,7 @@ void AudioPage::buildUi()
     deviceLayout->setColumnStretch(1, 1);
     layout->addWidget(deviceGroup);
 
-    auto *volumeGroup = new QGroupBox(tr("Volume"), this);
+    auto *volumeGroup = new QGroupBox(LocalizedText(m_backend, IDS_VOLUME, tr("Volume")), this);
     auto *volumeLayout = new QGridLayout(volumeGroup);
     volumeLayout->setContentsMargins(6, 6, 6, 6);
     volumeLayout->setHorizontalSpacing(6);
@@ -80,7 +107,6 @@ void AudioPage::buildUi()
 
     auto createRow = [&](int row, const QString &labelText, QCheckBox *&check, QSlider *&slider) {
         check = new QCheckBox(labelText, volumeGroup);
-        check->setEnabled(false);
         slider = new QSlider(Qt::Horizontal, volumeGroup);
         slider->setRange(0, 100);
         slider->setTickInterval(10);
@@ -88,33 +114,46 @@ void AudioPage::buildUi()
         volumeLayout->addWidget(slider, row, 1);
     };
 
-    createRow(0, tr("Sound Effects"), m_soundEnableCheck, m_soundSlider);
-    createRow(1, tr("Music"), m_musicEnableCheck, m_musicSlider);
-    createRow(2, tr("Dialog"), m_dialogEnableCheck, m_dialogSlider);
-    createRow(3, tr("Cinematic"), m_cinematicEnableCheck, m_cinematicSlider);
+    createRow(0, LocalizedText(m_backend, IDS_SOUND_EFFECTS, tr("Sound Effects")), m_soundEnableCheck, m_soundSlider);
+    createRow(1, LocalizedText(m_backend, IDS_MUSIC, tr("Music")), m_musicEnableCheck, m_musicSlider);
+    createRow(2, LocalizedText(m_backend, IDS_DIALOG, tr("Dialog")), m_dialogEnableCheck, m_dialogSlider);
+    createRow(3, LocalizedText(m_backend, IDS_CINEMATIC, tr("Cinematic")), m_cinematicEnableCheck, m_cinematicSlider);
 
     volumeLayout->setColumnStretch(1, 1);
     layout->addWidget(volumeGroup);
 
-    auto *playbackGroup = new QGroupBox(tr("Playback"), this);
+    auto *playbackGroup = new QGroupBox(this);
+    playbackGroup->setTitle(QString());
     auto *playbackLayout = new QGridLayout(playbackGroup);
     playbackLayout->setContentsMargins(6, 6, 6, 6);
     playbackLayout->setHorizontalSpacing(8);
     playbackLayout->setVerticalSpacing(4);
 
     m_qualityCombo = new QComboBox(playbackGroup);
-    m_qualityCombo->addItems({tr("8-bit"), tr("16-bit")});
-    playbackLayout->addWidget(new QLabel(tr("Quality"), playbackGroup), 0, 0, Qt::AlignLeft);
+    m_qualityCombo->addItems({
+        LocalizedText(m_backend, IDS_8_BIT, tr("8-bit")),
+        LocalizedText(m_backend, IDS_16_BIT, tr("16-bit")),
+    });
+    playbackLayout->addWidget(new QLabel(LocalizedText(m_backend, IDS_QUALITY, tr("Quality")), playbackGroup), 0, 0, Qt::AlignLeft);
     playbackLayout->addWidget(m_qualityCombo, 1, 0);
 
     m_rateCombo = new QComboBox(playbackGroup);
-    m_rateCombo->addItems({tr("11 kHz"), tr("22 kHz"), tr("44 kHz")});
-    playbackLayout->addWidget(new QLabel(tr("Playback Rate"), playbackGroup), 0, 1, Qt::AlignLeft);
+    m_rateCombo->addItems({
+        LocalizedText(m_backend, IDS_11_KHZ, tr("11 kHz")),
+        LocalizedText(m_backend, IDS_22_KHZ, tr("22 kHz")),
+        LocalizedText(m_backend, IDS_44_KHZ, tr("44 kHz")),
+    });
+    playbackLayout->addWidget(new QLabel(LocalizedText(m_backend, IDS_PLAYBACK_RATE, tr("Playback Rate")), playbackGroup), 0, 1, Qt::AlignLeft);
     playbackLayout->addWidget(m_rateCombo, 1, 1);
 
     m_speakerCombo = new QComboBox(playbackGroup);
-    m_speakerCombo->addItems({tr("2 Speaker"), tr("Headphones"), tr("Surround"), tr("4 Speaker")});
-    playbackLayout->addWidget(new QLabel(tr("Speaker Setup"), playbackGroup), 0, 2, Qt::AlignLeft);
+    m_speakerCombo->addItems({
+        LocalizedText(m_backend, IDS_2_SPEAKER, tr("2 Speaker")),
+        LocalizedText(m_backend, IDS_HEADPHONE, tr("Headphones")),
+        LocalizedText(m_backend, IDS_SURROUND_SOUND, tr("Surround")),
+        LocalizedText(m_backend, IDS_4_SPEAKER, tr("4 Speaker")),
+    });
+    playbackLayout->addWidget(new QLabel(LocalizedText(m_backend, IDS_SPEAKER_SETUP, tr("Speaker Setup")), playbackGroup), 0, 2, Qt::AlignLeft);
     playbackLayout->addWidget(m_speakerCombo, 1, 2);
 
     playbackLayout->setColumnStretch(0, 1);
@@ -122,12 +161,8 @@ void AudioPage::buildUi()
     playbackLayout->setColumnStretch(2, 1);
     layout->addWidget(playbackGroup);
 
-    m_stereoCheck = new QCheckBox(tr("Stereo playback"), this);
+    m_stereoCheck = new QCheckBox(LocalizedText(m_backend, IDS_STEREO, tr("Stereo")), this);
     layout->addWidget(m_stereoCheck, 0, Qt::AlignLeft);
-
-    auto *note = new QLabel(tr("Audio changes are saved to openw3d.conf immediately."), this);
-    note->setWordWrap(true);
-    layout->addWidget(note);
     layout->addStretch();
 
     auto applyOnChange = [this]() {
@@ -142,6 +177,7 @@ void AudioPage::buildUi()
     connect(m_musicEnableCheck, &QCheckBox::toggled, this, applyOnChange);
     connect(m_dialogEnableCheck, &QCheckBox::toggled, this, applyOnChange);
     connect(m_cinematicEnableCheck, &QCheckBox::toggled, this, applyOnChange);
+    connect(m_driverList, &QListWidget::currentRowChanged, this, applyOnChange);
     connect(m_soundSlider, &QSlider::valueChanged, this, applyOnChange);
     connect(m_musicSlider, &QSlider::valueChanged, this, applyOnChange);
     connect(m_dialogSlider, &QSlider::valueChanged, this, applyOnChange);
@@ -158,11 +194,7 @@ void AudioPage::refresh()
 
 void AudioPage::updateFromSettings()
 {
-    m_driverList->clear();
-    auto *item = new QListWidgetItem(DeviceDisplayName(m_settings));
-    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-    m_driverList->addItem(item);
-    m_driverList->setCurrentRow(0);
+    populateDrivers();
 
     m_stereoCheck->setChecked(m_settings.stereo);
 
@@ -181,6 +213,13 @@ void AudioPage::applySettings()
 {
     if (m_blockSignals) {
         return;
+    }
+
+    if (m_driverList) {
+        QListWidgetItem *item = m_driverList->currentItem();
+        if (item) {
+            m_settings.deviceName = item->data(Qt::UserRole).toString().toStdString();
+        }
     }
 
     m_settings.stereo = m_stereoCheck->isChecked();
@@ -204,6 +243,46 @@ void AudioPage::applySettings()
     m_settings.cinematicVolume = std::clamp(m_cinematicSlider->value() / 100.0f, 0.0f, 1.0f);
 
     m_backend.saveAudioSettings(m_settings);
+}
+
+void AudioPage::populateDrivers()
+{
+    m_driverList->clear();
+
+    const QString selected = QString::fromStdString(m_settings.deviceName);
+    bool selectedMatch = false;
+
+    if (m_audio) {
+        const int driverCount = m_audio->Get_3D_Device_Count();
+        for (int index = 0; index < driverCount; ++index) {
+            const char *driverInfo = nullptr;
+            if (!m_audio->Get_3D_Device(index, &driverInfo) || !driverInfo) {
+                continue;
+            }
+            const QString name = QString::fromLatin1(driverInfo);
+            auto *item = new QListWidgetItem(name);
+            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+            item->setData(Qt::UserRole, name);
+            m_driverList->addItem(item);
+            if (!selected.isEmpty() && name.compare(selected, Qt::CaseInsensitive) == 0) {
+                m_driverList->setCurrentRow(m_driverList->count() - 1);
+                selectedMatch = true;
+            }
+        }
+    }
+
+    if (m_driverList->count() == 0) {
+        auto *item = new QListWidgetItem(DeviceDisplayName(m_settings));
+        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+        item->setData(Qt::UserRole, QString());
+        m_driverList->addItem(item);
+        m_driverList->setCurrentRow(0);
+        return;
+    }
+
+    if (!selectedMatch) {
+        m_driverList->setCurrentRow(0);
+    }
 }
 
 void AudioPage::setVolumeRow(QSlider *slider, QCheckBox *check, float value, bool enabled)

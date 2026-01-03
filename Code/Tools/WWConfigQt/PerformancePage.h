@@ -32,9 +32,13 @@ private:
     int geometryLevelFromSettings() const;
 
     void setExpertControlsEnabled(bool enabled);
+    void updateCapabilityCombos();
+    int comboValue(const QComboBox *combo, int fallback) const;
+    void setComboValue(QComboBox *combo, int value, int fallback);
 
     WWConfigBackend &m_backend;
     RenderSettings m_settings;
+    VideoSettings m_videoSettings;
     bool m_blockSignals = false;
 
     QSlider *m_overallSlider = nullptr;

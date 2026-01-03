@@ -44,5 +44,4 @@ private:
     QSlider *m_resolutionSlider = nullptr;
     QLabel *m_resolutionValue = nullptr;
     QCheckBox *m_windowedCheck = nullptr;
-    QLabel *m_textureDepthLabel = nullptr;
 };

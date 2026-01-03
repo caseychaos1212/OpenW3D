@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 
+#include "AnimatedSoundOptionsDialog.h"
 #include "WWAudio.h"
 #include "assetmgr.h"
 #include "wwmath.h"
@@ -13,9 +14,11 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("W3DViewQt");
 
     WWMath::Init();
+    AnimatedSoundOptionsDialog::LoadAnimatedSoundSettings();
 
     WW3DAssetManager asset_manager;
     asset_manager.Set_WW3D_Load_On_Demand(true);
+    asset_manager.Set_Activate_Fog_On_Load(true);
 
     WWAudioClass *audio_mgr = WWAudioClass::Create_Instance();
     if (audio_mgr) {

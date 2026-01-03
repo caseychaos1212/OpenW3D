@@ -30,6 +30,11 @@ void MainWindow::setupUi()
     auto *layout = new QVBoxLayout(central);
     layout->setContentsMargins(8, 8, 8, 8);
     layout->setSpacing(6);
+    auto loc = [this](int id, const QString &fallback) {
+        const QString text = m_backend.localizedString(id);
+        return text.isEmpty() ? fallback : text;
+    };
+
 
     auto *banner = new QLabel(central);
     banner->setFrameShape(QFrame::Panel);
@@ -42,7 +47,7 @@ void MainWindow::setupUi()
         banner->setScaledContents(true);
         banner->setMinimumHeight(logo.height());
     } else {
-        banner->setText(tr("Renegade Config"));
+        banner->setText(loc(IDS_WWCONFIG_TITLE, tr("Renegade Config")));
         banner->setMinimumHeight(40);
     }
     layout->addWidget(banner);
@@ -52,26 +57,25 @@ void MainWindow::setupUi()
     layout->addWidget(m_tabWidget);
 
     m_videoPage = new VideoPage(m_backend, m_tabWidget);
-    m_tabWidget->addTab(m_videoPage, tr("Video"));
+    m_tabWidget->addTab(m_videoPage, loc(IDS_VIDEO_TAB, tr("Video")));
 
     m_audioPage = new AudioPage(m_backend, m_tabWidget);
-    m_tabWidget->addTab(m_audioPage, tr("Audio"));
+    m_tabWidget->addTab(m_audioPage, loc(IDS_SOUND_TAB, tr("Audio")));
 
     m_performancePage = new PerformancePage(m_backend, m_tabWidget);
-    m_tabWidget->addTab(m_performancePage, tr("Performance"));
+    m_tabWidget->addTab(m_performancePage, loc(IDS_PERFORMANCE_TAB, tr("Performance")));
     connect(m_performancePage, &PerformancePage::settingsChanged, this, [this]() {
         updateStatusText();
     });
 
-    m_statusLabel = new QLabel(tr("Loading locale data..."), central);
-    m_statusLabel->setWordWrap(true);
-    m_statusLabel->setStyleSheet(QStringLiteral("color: palette(mid);"));
-    layout->addWidget(m_statusLabel);
+    connect(m_tabWidget, &QTabWidget::currentChanged, this, [this](int) {
+        refreshTabs();
+    });
 
     auto *buttonRow = new QHBoxLayout();
     buttonRow->addStretch();
-    auto *okButton = new QPushButton(tr("OK"), central);
-    auto *cancelButton = new QPushButton(tr("Cancel"), central);
+    auto *okButton = new QPushButton(loc(IDS_OK, tr("OK")), central);
+    auto *cancelButton = new QPushButton(loc(IDS_CANCEL, tr("Cancel")), central);
     buttonRow->addWidget(okButton);
     buttonRow->addWidget(cancelButton);
     layout->addLayout(buttonRow);
@@ -82,7 +86,7 @@ void MainWindow::setupUi()
     setCentralWidget(central);
     resize(420, 480);
     setMinimumSize(360, 360);
-    setWindowTitle(tr("Renegade Config"));
+    setWindowTitle(loc(IDS_WWCONFIG_TITLE, tr("Renegade Config")));
     setWindowIcon(QIcon(QStringLiteral(":/wwconfig/wwconfig.ico")));
 }
 
@@ -93,17 +97,19 @@ void MainWindow::updateStatusText()
         setWindowTitle(localizedTitle);
     }
 
-    const QString state = m_backend.isLocaleReady()
-                              ? tr("Locale bank loaded.")
-                              : tr("Locale bank unavailable, using fallback strings.");
+    if (m_statusLabel) {
+        const QString state = m_backend.isLocaleReady()
+                                  ? tr("Locale bank loaded.")
+                                  : tr("Locale bank unavailable, using fallback strings.");
 
-    const RenderSettings settings = m_backend.loadRenderSettings();
-    const QString renderSummary = tr("LOD %1  Filter %2  Shadows %3")
-                                      .arg(settings.dynamicLOD)
-                                      .arg(settings.textureFilter)
-                                      .arg(settings.shadowMode);
+        const RenderSettings settings = m_backend.loadRenderSettings();
+        const QString renderSummary = tr("LOD %1  Filter %2  Shadows %3")
+                                          .arg(settings.dynamicLOD)
+                                          .arg(settings.textureFilter)
+                                          .arg(settings.shadowMode);
 
-    m_statusLabel->setText(tr("%1 · %2").arg(state, renderSummary));
+        m_statusLabel->setText(tr("%1 - %2").arg(state, renderSummary));
+    }
 
     refreshTabs();
 }

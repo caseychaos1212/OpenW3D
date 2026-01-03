@@ -16,6 +16,8 @@
 #include <QSlider>
 #include <QVBoxLayout>
 
+#include "../WWConfig/wwconfig_ids.h"
+
 namespace
 {
 QString AdapterDisplayName(const VideoAdapterInfo &adapter)
@@ -27,6 +29,12 @@ QString AdapterDisplayName(const VideoAdapterInfo &adapter)
         return QString::fromStdString(adapter.deviceName);
     }
     return QObject::tr("Display Adapter");
+}
+
+QString LocalizedText(const WWConfigBackend &backend, int id, const QString &fallback)
+{
+    const QString text = backend.localizedString(id);
+    return text.isEmpty() ? fallback : text;
 }
 } // namespace
 
@@ -44,7 +52,8 @@ void VideoPage::buildUi()
     layout->setContentsMargins(4, 4, 4, 4);
     layout->setSpacing(8);
 
-    auto *deviceGroup = new QGroupBox(tr("Device"), this);
+    auto *deviceGroup = new QGroupBox(this);
+    deviceGroup->setTitle(QString());
     auto *deviceLayout = new QVBoxLayout(deviceGroup);
 
     auto *driverRow = new QHBoxLayout();
@@ -52,7 +61,7 @@ void VideoPage::buildUi()
     driverIcon->setPixmap(style()->standardIcon(QStyle::SP_ComputerIcon).pixmap(20, 20));
     driverIcon->setFixedSize(20, 20);
     driverRow->addWidget(driverIcon);
-    driverRow->addWidget(new QLabel(tr("Driver:"), deviceGroup));
+    driverRow->addWidget(new QLabel(LocalizedText(m_backend, IDS_DRIVER, tr("Driver:")), deviceGroup));
     driverRow->addStretch();
     deviceLayout->addLayout(driverRow);
 
@@ -64,12 +73,12 @@ void VideoPage::buildUi()
 
     layout->addWidget(deviceGroup);
 
-    auto *displayGroup = new QGroupBox(tr("Display"), this);
+    auto *displayGroup = new QGroupBox(LocalizedText(m_backend, IDS_DISPLAY, tr("Display")), this);
     auto *displayLayout = new QGridLayout(displayGroup);
     displayLayout->setHorizontalSpacing(6);
     displayLayout->setVerticalSpacing(4);
 
-    displayLayout->addWidget(new QLabel(tr("Resolution:"), displayGroup), 0, 0);
+    displayLayout->addWidget(new QLabel(LocalizedText(m_backend, IDS_RESOLUTION, tr("Resolution:")), displayGroup), 0, 0);
     m_resolutionSlider = new QSlider(Qt::Horizontal, displayGroup);
     m_resolutionSlider->setRange(0, 0);
     m_resolutionSlider->setTickPosition(QSlider::TicksBelow);
@@ -79,23 +88,15 @@ void VideoPage::buildUi()
     m_resolutionValue->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     displayLayout->addWidget(m_resolutionValue, 0, 2);
 
-    displayLayout->addWidget(new QLabel(tr("Color Depth:"), displayGroup), 1, 0);
+    displayLayout->addWidget(new QLabel(LocalizedText(m_backend, IDS_COLOR_DEPTH, tr("Color Depth:")), displayGroup), 1, 0);
     m_bitDepthCombo = new QComboBox(displayGroup);
     displayLayout->addWidget(m_bitDepthCombo, 1, 1, 1, 2);
 
-    m_windowedCheck = new QCheckBox(tr("Windowed Mode"), displayGroup);
+    m_windowedCheck = new QCheckBox(LocalizedText(m_backend, IDS_WINDOWED_MODE, tr("Windowed Mode")), displayGroup);
     displayLayout->addWidget(m_windowedCheck, 2, 0, 1, 3);
-
-    m_textureDepthLabel = new QLabel(tr("Texture depth: --"), displayGroup);
-    displayLayout->addWidget(m_textureDepthLabel, 3, 0, 1, 3);
 
     layout->addWidget(displayGroup);
 
-    auto *note = new QLabel(tr("Changes are saved straight to openw3d.conf so both the game and classic "
-                               "WWConfig see them immediately."),
-                            this);
-    note->setWordWrap(true);
-    layout->addWidget(note);
     layout->addStretch();
 
     connect(m_driverList, &QListWidget::currentRowChanged, this, [this](int) {
@@ -142,8 +143,6 @@ void VideoPage::refresh()
     updateBitDepthOptions();
     updateResolutionSlider();
     m_windowedCheck->setChecked(m_settings.windowed);
-    m_textureDepthLabel->setText(tr("Texture depth: %1-bit")
-                                     .arg(m_settings.textureDepth > 0 ? m_settings.textureDepth : 0));
     updateControlStates();
     m_blockSignals = false;
     updateResolutionLabel();
@@ -208,8 +207,19 @@ void VideoPage::updateBitDepthOptions()
         targetDepth = depths.front();
     }
 
+    auto depthLabel = [this](int depth) {
+        switch (depth) {
+        case 16:
+            return LocalizedText(m_backend, IDS_16_BIT, tr("16-bit"));
+        case 32:
+            return LocalizedText(m_backend, IDS_32_BIT, tr("32-bit"));
+        default:
+            return tr("%1-bit").arg(depth);
+        }
+    };
+
     for (int depth : depths) {
-        m_bitDepthCombo->addItem(tr("%1-bit color").arg(depth), depth);
+        m_bitDepthCombo->addItem(depthLabel(depth), depth);
         if (depth == targetDepth) {
             m_bitDepthCombo->setCurrentIndex(m_bitDepthCombo->count() - 1);
         }
@@ -308,7 +318,6 @@ void VideoPage::applySelection(bool persist)
     if (m_settings.textureDepth <= 0) {
         m_settings.textureDepth = mode.bitDepth;
     }
-    m_textureDepthLabel->setText(tr("Texture depth: %1-bit").arg(m_settings.textureDepth));
 
     if (persist) {
         m_backend.saveVideoSettings(m_settings);

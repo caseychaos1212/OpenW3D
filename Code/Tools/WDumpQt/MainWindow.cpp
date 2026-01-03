@@ -23,22 +23,28 @@
 #include <QDropEvent>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QFontDatabase>
 #include <QHeaderView>
+#include <QInputDialog>
 #include <QKeySequence>
+#include <QLineEdit>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QMimeData>
 #include <QPlainTextEdit>
 #include <QSettings>
+#include <QStatusBar>
 #include <QSplitter>
 #include <QStandardItem>
 #include <QStandardItemModel>
 #include <QTableView>
+#include <QToolBar>
 #include <QTreeView>
 #include <QUrl>
 #include <QVariant>
 #include <QVBoxLayout>
+#include <QVector>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -61,6 +67,7 @@ void MainWindow::buildUi()
     _treeView = new QTreeView(this);
     _treeView->setModel(_treeModel);
     _treeView->header()->setStretchLastSection(true);
+    _treeView->header()->hide();
     connect(_treeView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::onTreeSelectionChanged);
 
     _tableView = new QTableView(this);
@@ -70,37 +77,72 @@ void MainWindow::buildUi()
 
     _hexView = new QPlainTextEdit(this);
     _hexView->setReadOnly(true);
+    _hexView->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    _hexView->setPlainText(tr("Load a chunk file and select the chunk in the tree view to see it's hex data here."));
 
-    auto *rightSplit = new QSplitter(Qt::Vertical, this);
-    rightSplit->addWidget(_tableView);
-    rightSplit->addWidget(_hexView);
-    rightSplit->setStretchFactor(0, 3);
-    rightSplit->setStretchFactor(1, 2);
+    _rightSplit = new QSplitter(Qt::Vertical, this);
+    _rightSplit->addWidget(_tableView);
+    _rightSplit->addWidget(_hexView);
+    _rightSplit->setStretchFactor(0, 3);
+    _rightSplit->setStretchFactor(1, 2);
 
-    auto *mainSplit = new QSplitter(Qt::Horizontal, this);
-    mainSplit->addWidget(_treeView);
-    mainSplit->addWidget(rightSplit);
-    mainSplit->setStretchFactor(0, 1);
-    mainSplit->setStretchFactor(1, 2);
+    _mainSplit = new QSplitter(Qt::Horizontal, this);
+    _mainSplit->addWidget(_treeView);
+    _mainSplit->addWidget(_rightSplit);
+    _mainSplit->setStretchFactor(0, 1);
+    _mainSplit->setStretchFactor(1, 2);
 
     auto *central = new QWidget(this);
     auto *layout = new QVBoxLayout(central);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(mainSplit);
+    layout->addWidget(_mainSplit);
 
     setCentralWidget(central);
+    statusBar()->showMessage(tr("Ready"));
 }
 
 void MainWindow::buildMenus()
 {
     auto *fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(tr("&Open..."), this, &MainWindow::openFileDialog, QKeySequence::Open);
+    auto *openAction = fileMenu->addAction(tr("&Open..."), this, &MainWindow::openFileDialog, QKeySequence::Open);
 
-    _recentMenu = fileMenu->addMenu(tr("Open &Recent"));
+    _recentMenu = fileMenu->addMenu(tr("Recent File"));
     updateRecentFilesMenu();
 
     fileMenu->addSeparator();
     fileMenu->addAction(tr("E&xit"), this, &QWidget::close, QKeySequence::Quit);
+
+    auto *viewMenu = menuBar()->addMenu(tr("&View"));
+    auto *toolbarAction = viewMenu->addAction(tr("&Toolbar"));
+    toolbarAction->setCheckable(true);
+    toolbarAction->setChecked(true);
+    auto *statusAction = viewMenu->addAction(tr("&Status Bar"));
+    statusAction->setCheckable(true);
+    statusAction->setChecked(true);
+    viewMenu->addSeparator();
+    viewMenu->addAction(tr("S&plit"), this, &MainWindow::splitViews);
+
+    auto *toolsMenu = menuBar()->addMenu(tr("&Tools"));
+    toolsMenu->addAction(tr("Find..."), this, &MainWindow::openFindDialog, QKeySequence::Find);
+    _findNextAction = toolsMenu->addAction(tr("Find Next"), this, &MainWindow::findNext, QKeySequence(Qt::Key_F3));
+
+    auto *helpMenu = menuBar()->addMenu(tr("&Help"));
+    auto *aboutAction = helpMenu->addAction(tr("&About wdump..."), this, &MainWindow::showAbout);
+
+    _toolbar = addToolBar(tr("Main"));
+    _toolbar->addAction(openAction);
+    _toolbar->addAction(aboutAction);
+
+    connect(toolbarAction, &QAction::toggled, this, [this](bool visible) {
+        if (_toolbar) {
+            _toolbar->setVisible(visible);
+        }
+    });
+    connect(statusAction, &QAction::toggled, this, [this](bool visible) {
+        if (statusBar()) {
+            statusBar()->setVisible(visible);
+        }
+    });
 }
 
 bool MainWindow::loadFile(const QString &path)
@@ -124,6 +166,9 @@ bool MainWindow::loadFile(const QString &path)
     _currentFile = fileInfo.absoluteFilePath();
     setWindowTitle(windowTitleForPath(_currentFile));
     addRecentFile(_currentFile);
+    if (statusBar()) {
+        statusBar()->showMessage(_currentFile);
+    }
     return true;
 }
 
@@ -168,6 +213,89 @@ void MainWindow::openFileDialog()
         return;
     }
     loadFile(filename);
+}
+
+void MainWindow::openFindDialog()
+{
+    bool ok = false;
+    const QString text =
+        QInputDialog::getText(this, tr("Find String"), tr("Find what:"), QLineEdit::Normal, _findString, &ok);
+    if (!ok) {
+        return;
+    }
+    _findString = text;
+    if (_findString.isEmpty()) {
+        return;
+    }
+    findNext();
+}
+
+void MainWindow::findNext()
+{
+    if (_findString.isEmpty()) {
+        openFindDialog();
+        return;
+    }
+
+    QVector<QModelIndex> indices;
+    collectIndices(QModelIndex(), indices);
+    if (indices.isEmpty()) {
+        return;
+    }
+
+    int startIndex = 0;
+    const QModelIndex current = _treeView->currentIndex();
+    if (current.isValid()) {
+        for (int i = 0; i < indices.size(); ++i) {
+            if (indices[i] == current) {
+                startIndex = i + 1;
+                break;
+            }
+        }
+    }
+
+    auto matchesIndex = [this](const QModelIndex &index) {
+        const auto chunkPtr =
+            reinterpret_cast<const wdump::Chunk *>(index.data(Qt::UserRole + 1).value<quintptr>());
+        return chunkPtr && chunkMatches(*chunkPtr, _findString);
+    };
+
+    for (int i = startIndex; i < indices.size(); ++i) {
+        if (matchesIndex(indices[i])) {
+            _treeView->setCurrentIndex(indices[i]);
+            _treeView->scrollTo(indices[i]);
+            return;
+        }
+    }
+
+    for (int i = 0; i < startIndex; ++i) {
+        if (matchesIndex(indices[i])) {
+            _treeView->setCurrentIndex(indices[i]);
+            _treeView->scrollTo(indices[i]);
+            return;
+        }
+    }
+
+    QMessageBox::warning(this, tr("Find String"), tr("Cannot find \"%1\".").arg(_findString));
+}
+
+void MainWindow::showAbout()
+{
+    QMessageBox::about(this,
+                       tr("About Westwood 3D File Viewer"),
+                       tr("Westwood 3D File Viewer v3.0\n"
+                          "Copyright (C) 1997 Westwood Studios\n"
+                          "Written by Eric Cosky, Greg Hjelstrom"));
+}
+
+void MainWindow::splitViews()
+{
+    if (_mainSplit) {
+        _mainSplit->setSizes({1, 2});
+    }
+    if (_rightSplit) {
+        _rightSplit->setSizes({3, 2});
+    }
 }
 
 void MainWindow::openRecentFile()
@@ -242,16 +370,16 @@ void MainWindow::clearViews()
 {
     _treeModel->removeRows(0, _treeModel->rowCount());
     _tableModel->removeRows(0, _tableModel->rowCount());
-    _hexView->clear();
+    _hexView->setPlainText(tr("Load a chunk file and select the chunk in the tree view to see it's hex data here."));
 }
 
 QString MainWindow::windowTitleForPath(const QString &path) const
 {
     if (path.isEmpty()) {
-        return QStringLiteral("WDump Qt");
+        return QStringLiteral("WDump");
     }
 
-    return QStringLiteral("WDump Qt - %1").arg(QFileInfo(path).fileName());
+    return QStringLiteral("WDump - %1").arg(QFileInfo(path).fileName());
 }
 
 void MainWindow::rebuildTree()
@@ -262,25 +390,17 @@ void MainWindow::rebuildTree()
     {
         addChunkItem(nullptr, *root);
     }
-    _treeView->expandAll();
-    if (_treeModel->rowCount() > 0) {
-        _treeView->setCurrentIndex(_treeModel->index(0, 0));
-    }
 }
 
 QStandardItem *MainWindow::addChunkItem(QStandardItem *parent, const wdump::Chunk &chunk)
 {
-    const QString idText = QString::number(chunk.id, 16).toUpper();
-    const QString lengthText = QString::number(chunk.length);
     const char *name = wdump::chunk_name(chunk.id);
     QString label;
     if (name) {
-        label = QStringLiteral("%1 (0x%2, %3 bytes)")
-                    .arg(QString::fromLatin1(name))
-                    .arg(idText)
-                    .arg(lengthText);
+        label = QString::fromLatin1(name);
     } else {
-        label = QStringLiteral("Chunk 0x%1 (%2 bytes)").arg(idText).arg(lengthText);
+        const QString idText = QString::number(chunk.id, 16).toUpper();
+        label = QStringLiteral("Unknown: id=0x%1").arg(idText);
     }
     auto *item = new QStandardItem(label);
     item->setData(QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(&chunk)), Qt::UserRole + 1);
@@ -313,7 +433,7 @@ void MainWindow::showChunk(const wdump::Chunk *chunk)
     _tableModel->removeRows(0, _tableModel->rowCount());
     if (!chunk)
     {
-        _hexView->clear();
+        _hexView->setPlainText(tr("Load a chunk file and select the chunk in the tree view to see it's hex data here."));
         return;
     }
 
@@ -325,13 +445,6 @@ void MainWindow::showChunk(const wdump::Chunk *chunk)
         _tableModel->appendRow(row);
     };
 
-    addRow(QStringLiteral("ID"), QStringLiteral("uint32"), QString::number(chunk->id));
-    const char *name = wdump::chunk_name(chunk->id);
-    if (name) {
-        addRow(QStringLiteral("Name"), QStringLiteral("string"), QString::fromLatin1(name));
-    }
-    addRow(QStringLiteral("Length"), QStringLiteral("bytes"), QString::number(chunk->length));
-
     const auto fields = wdump::describe_chunk(*chunk);
     for (const auto &field : fields) {
         addRow(QString::fromStdString(field.name),
@@ -340,4 +453,30 @@ void MainWindow::showChunk(const wdump::Chunk *chunk)
     }
 
     _hexView->setPlainText(QString::fromStdString(wdump::build_hex_view(*chunk)));
+}
+
+bool MainWindow::chunkMatches(const wdump::Chunk &chunk, const QString &needle) const
+{
+    if (needle.isEmpty()) {
+        return false;
+    }
+
+    const auto fields = wdump::describe_chunk(chunk);
+    for (const auto &field : fields) {
+        if (QString::fromStdString(field.value).contains(needle, Qt::CaseSensitive)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void MainWindow::collectIndices(const QModelIndex &parent, QVector<QModelIndex> &out) const
+{
+    const int rows = _treeModel->rowCount(parent);
+    for (int row = 0; row < rows; ++row) {
+        const QModelIndex index = _treeModel->index(row, 0, parent);
+        out.push_back(index);
+        collectIndices(index, out);
+    }
 }
