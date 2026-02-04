@@ -749,6 +749,10 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     _sortingAction->setCheckable(true);
     _sortingAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_P));
     connect(_sortingAction, &QAction::triggered, this, &W3DViewMainWindow::toggleSorting);
+    _invertBackfaceCullingAction = view_menu->addAction("Invert Backface Culling");
+    _invertBackfaceCullingAction->setCheckable(true);
+    connect(_invertBackfaceCullingAction, &QAction::triggered,
+            this, &W3DViewMainWindow::toggleBackfaceCulling);
     _gammaAction = view_menu->addAction("Set &Gamma");
     connect(_gammaAction, &QAction::triggered, this, &W3DViewMainWindow::openGammaDialog);
     view_menu->addSeparator();
@@ -1024,6 +1028,9 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     if (_sortingAction) {
         _sortingAction->setChecked(_sortingEnabled);
     }
+    if (_invertBackfaceCullingAction) {
+        _invertBackfaceCullingAction->setChecked(ShaderClass::Is_Backface_Culling_Inverted());
+    }
     if (_wireframeAction && _viewport) {
         _wireframeAction->setChecked(_viewport->isWireframeEnabled());
     }
@@ -1245,6 +1252,7 @@ void W3DViewMainWindow::onCurrentChanged(const QModelIndex &current, const QMode
             return;
         }
 
+        SetHighestLod(object);
         _viewport->setRenderObject(object);
         object->Release_Ref();
         statusBar()->showMessage(QString("Showing: %1").arg(name));
@@ -1292,6 +1300,7 @@ void W3DViewMainWindow::onCurrentChanged(const QModelIndex &current, const QMode
             return;
         }
 
+        SetHighestLod(object);
         _viewport->setRenderObject(object);
         _viewport->setAnimation(animation);
         object->Release_Ref();
@@ -1335,6 +1344,13 @@ void W3DViewMainWindow::toggleSorting(bool enabled)
 
     QSettings settings;
     settings.setValue("Config/EnableSorting", enabled);
+}
+
+void W3DViewMainWindow::toggleBackfaceCulling(bool inverted)
+{
+    ShaderClass::Invert_Backface_Culling(inverted);
+    QSettings settings;
+    settings.setValue("Config/InvertBackfaceCulling", inverted);
 }
 
 void W3DViewMainWindow::toggleRestrictAnims(bool enabled)
@@ -4079,6 +4095,7 @@ void W3DViewMainWindow::loadAppSettings()
     _sortingEnabled = settings.value("Config/EnableSorting", true).toBool();
     _animateCamera = settings.value("Config/AnimateCamera", false).toBool();
     _autoResetCamera = settings.value("Config/ResetCamera", true).toBool();
+    const bool invert_culling = settings.value("Config/InvertBackfaceCulling", false).toBool();
     const bool manual_fov = settings.value("Config/UseManualFOV", false).toBool();
     const bool manual_clip = settings.value("Config/UseManualClipPlanes", false).toBool();
     const double hfov_rad = settings.value("Config/hfov", 0.0).toDouble();
@@ -4130,6 +4147,7 @@ void W3DViewMainWindow::loadAppSettings()
         DX8Wrapper::Set_Gamma(gamma / 10.0f, 0.0f, 1.0f);
     }
 
+    ShaderClass::Invert_Backface_Culling(invert_culling);
     WW3D::Enable_Munge_Sort_On_Load(munge_sort);
 
     WW3D::Set_NPatches_Level(static_cast<unsigned int>(npatches_level));

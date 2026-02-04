@@ -34,6 +34,7 @@ private slots:
     void toggleSorting(bool enabled);
     void toggleRestrictAnims(bool enabled);
     void toggleStatusBar(bool visible);
+    void toggleBackfaceCulling(bool inverted);
     void setAmbientLight();
     void setSceneLight();
     void increaseAmbientLight();
@@ -188,6 +189,7 @@ private:
     QAction *_fogAction = nullptr;
     QAction *_changeResolutionAction = nullptr;
     QAction *_gammaAction = nullptr;
+    QAction *_invertBackfaceCullingAction = nullptr;
     QAction *_backgroundObjectAction = nullptr;
     QAction *_captureScreenshotAction = nullptr;
     QAction *_makeMovieAction = nullptr;

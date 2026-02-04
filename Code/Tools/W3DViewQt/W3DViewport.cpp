@@ -787,7 +787,17 @@ void W3DViewport::resetCameraToObject(RenderObjClass &object)
         _camera->Set_Transform(bone_transform);
     }
 
-    updateSceneLightPosition(old_center);
+    if (_sceneLight) {
+        if (!_sceneLightOrientationSet && !_sceneLightDistanceSet) {
+            Matrix3D light_tm(1);
+            light_tm.Set_Translation(_orbitCenter);
+            light_tm.Translate(Vector3(0.0f, 0.0f, 0.7f * _cameraDistance));
+            _sceneLight->Set_Transform(light_tm);
+            _sceneLightDistance = 0.7f * _cameraDistance;
+        } else {
+            updateSceneLightPosition(old_center);
+        }
+    }
 }
 
 void W3DViewport::setRenderObject(RenderObjClass *object)

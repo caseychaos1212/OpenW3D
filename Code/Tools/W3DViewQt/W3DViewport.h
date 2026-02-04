@@ -178,10 +178,10 @@ private:
     SceneClass *_backgroundObjectScene = nullptr;
     CameraClass *_backgroundObjectCamera = nullptr;
     RenderObjClass *_backgroundObject = nullptr;
-    Vector3 _clearColor = Vector3(0.08f, 0.08f, 0.08f);
+    Vector3 _clearColor = Vector3(0.5f, 0.5f, 0.5f);
     QString _backgroundBitmap;
     QString _backgroundObjectName;
-    Vector3 _ambientLight = Vector3(1.0f, 1.0f, 1.0f);
+    Vector3 _ambientLight = Vector3(0.5f, 0.5f, 0.5f);
     Vector3 _sceneLightColor = Vector3(1.0f, 1.0f, 1.0f);
     Quaternion _sceneLightOrientation = Quaternion(true);
     float _sceneLightDistance = 0.0f;

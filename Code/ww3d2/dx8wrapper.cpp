@@ -2715,6 +2715,12 @@ unsigned int DX8Wrapper::Get_Free_Texture_RAM()
 // Contrast - controls the difference between the maximum and the minimum of the curve
 void DX8Wrapper::Set_Gamma(float gamma,float bright,float contrast,bool calibrate,bool uselimit)
 {
+	// Device/caps can be unavailable during early startup (e.g., Qt viewer settings load).
+	// In that case, ignore gamma updates until initialization completes.
+	if (CurrentCaps == nullptr || _Get_D3D_Device8() == nullptr) {
+		return;
+	}
+
 	gamma=Bound(gamma,0.6f,6.0f);
 	bright=Bound(bright,-0.5f,0.5f);
 	contrast=Bound(contrast,0.5f,2.0f);
