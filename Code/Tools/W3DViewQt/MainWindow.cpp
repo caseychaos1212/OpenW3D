@@ -34,24 +34,35 @@
 #include <QColorDialog>
 #include <QCoreApplication>
 #include <QDialog>
+#include <QDialogButtonBox>
 #include <QDir>
+#include <QDragEnterEvent>
+#include <QCheckBox>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QGuiApplication>
-#include <QInputDialog>
 #include <QItemSelectionModel>
 #include <QKeySequence>
+#include <QLabel>
+#include <QMimeData>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QSet>
 #include <QSettings>
+#include <QSlider>
 #include <QSplitter>
 #include <QStandardItem>
 #include <QStandardItemModel>
 #include <QStatusBar>
+#include <QTimer>
 #include <QToolBar>
 #include <QTreeView>
+#include <QDropEvent>
+#include <QVBoxLayout>
+#include <QStringList>
+#include <QUrl>
 #include <QVector>
 #include <QVariant>
 #include <QClipboard>
@@ -434,6 +445,118 @@ QString GetSelectedHierarchyName(QTreeView *tree)
     return QString();
 }
 
+QString ResolveGroupLabel(QStandardItemModel *model, const QModelIndex &index, bool is_group)
+{
+    if (!model || !index.isValid()) {
+        return QString();
+    }
+
+    auto *item = model->itemFromIndex(index);
+    if (!item) {
+        return QString();
+    }
+
+    if (is_group) {
+        return item->text();
+    }
+
+    if (auto *parent = item->parent()) {
+        return parent->text();
+    }
+
+    return QString();
+}
+
+QString FindHierarchyAssetPath(const QString &directory, const QString &hierarchy)
+{
+    if (directory.isEmpty() || hierarchy.isEmpty()) {
+        return QString();
+    }
+
+    QDir dir(directory);
+    QString base = hierarchy;
+    if (base.endsWith(".w3d", Qt::CaseInsensitive)) {
+        base.chop(4);
+    }
+
+    const QString direct_path = dir.filePath(base + ".w3d");
+    if (QFileInfo::exists(direct_path)) {
+        return direct_path;
+    }
+
+    const auto entries = dir.entryInfoList(QStringList() << "*.w3d" << "*.W3D", QDir::Files);
+    for (const auto &info : entries) {
+        if (info.completeBaseName().compare(base, Qt::CaseInsensitive) == 0) {
+            return info.absoluteFilePath();
+        }
+    }
+
+    return QString();
+}
+
+void LoadMissingHierarchyAssets(WW3DAssetManager *asset_manager, const QString &directory)
+{
+    if (!asset_manager || directory.isEmpty()) {
+        return;
+    }
+
+    QSet<QString> loaded_hierarchies;
+    RenderObjIterator *render_iter = asset_manager->Create_Render_Obj_Iterator();
+    if (render_iter) {
+        for (render_iter->First(); !render_iter->Is_Done(); render_iter->Next()) {
+            const char *name = render_iter->Current_Item_Name();
+            if (!name || !name[0]) {
+                continue;
+            }
+
+            const RenderObjInfo info = InspectRenderObj(name);
+            if (!info.hierarchyName.isEmpty()) {
+                loaded_hierarchies.insert(info.hierarchyName.toUpper());
+            }
+        }
+        asset_manager->Release_Render_Obj_Iterator(render_iter);
+    }
+
+    QSet<QString> anim_hierarchies;
+    AssetIterator *anim_iter = asset_manager->Create_HAnim_Iterator();
+    if (anim_iter) {
+        for (anim_iter->First(); !anim_iter->Is_Done(); anim_iter->Next()) {
+            const char *anim_name = anim_iter->Current_Item_Name();
+            if (!anim_name || !anim_name[0]) {
+                continue;
+            }
+
+            HAnimClass *anim = asset_manager->Get_HAnim(anim_name);
+            if (!anim) {
+                continue;
+            }
+
+            const char *hier_name = anim->Get_HName();
+            if (hier_name && hier_name[0]) {
+                anim_hierarchies.insert(QString::fromLatin1(hier_name).toUpper());
+            }
+            anim->Release_Ref();
+        }
+        delete anim_iter;
+    }
+
+    for (const auto &hierarchy : anim_hierarchies) {
+        if (loaded_hierarchies.contains(hierarchy)) {
+            continue;
+        }
+
+        const QString path = FindHierarchyAssetPath(directory, hierarchy);
+        if (path.isEmpty()) {
+            continue;
+        }
+
+        const QByteArray path_bytes = QDir::toNativeSeparators(path).toLocal8Bit();
+        if (asset_manager->Load_3D_Assets(path_bytes.constData())) {
+            loaded_hierarchies.insert(hierarchy);
+        }
+    }
+}
+
 bool ImportFacialAnimation(const QString &hierarchy, const QString &path)
 {
     if (hierarchy.isEmpty() || path.isEmpty()) {
@@ -662,6 +785,7 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle("W3DViewQt");
+    setAcceptDrops(true);
 
     auto *file_menu = menuBar()->addMenu("&File");
     _newAction = file_menu->addAction("&New");
@@ -771,6 +895,7 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     connect(_npatchesGapAction, &QAction::triggered, this, &W3DViewMainWindow::toggleNpatchesGap);
 
     auto *object_menu = menuBar()->addMenu("&Object");
+    _objectMenuAction = object_menu->menuAction();
     _objectRotateXAction = object_menu->addAction("Rotate &X");
     _objectRotateXAction->setCheckable(true);
     _objectRotateXAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_X));
@@ -798,6 +923,67 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     _objectAlternateAction = object_menu->addAction("Toggle Alternate Materials");
     connect(_objectAlternateAction, &QAction::triggered, this, &W3DViewMainWindow::toggleAlternateMaterials);
 
+    _animationMenu = new QMenu("&Animation", this);
+    _animationPlayAction = _animationMenu->addAction("&Play");
+    connect(_animationPlayAction, &QAction::triggered, this, &W3DViewMainWindow::startAnimation);
+    _animationPauseAction = _animationMenu->addAction("P&ause");
+    connect(_animationPauseAction, &QAction::triggered, this, &W3DViewMainWindow::pauseAnimation);
+    _animationStopAction = _animationMenu->addAction("&Stop");
+    connect(_animationStopAction, &QAction::triggered, this, &W3DViewMainWindow::stopAnimation);
+    _animationMenu->addSeparator();
+    _animationStepBackAction = _animationMenu->addAction("Step &Back");
+    connect(_animationStepBackAction, &QAction::triggered, this, &W3DViewMainWindow::stepAnimationBackward);
+    _animationStepForwardAction = _animationMenu->addAction("Step &Forward");
+    connect(_animationStepForwardAction, &QAction::triggered, this, &W3DViewMainWindow::stepAnimationForward);
+    _animationMenu->addSeparator();
+    auto *animation_settings_action = _animationMenu->addAction("Se&ttings");
+    connect(animation_settings_action, &QAction::triggered, this, &W3DViewMainWindow::openAnimationSettings);
+    _animationMenu->addSeparator();
+    auto *animation_advanced_action = _animationMenu->addAction("Ad&vanced...");
+    connect(animation_advanced_action, &QAction::triggered, this, &W3DViewMainWindow::openAdvancedAnimation);
+    connect(_animationMenu, &QMenu::aboutToShow, this, &W3DViewMainWindow::refreshAnimationMenu);
+
+    _hierarchyMenu = new QMenu("&Hierarchy", this);
+    auto *hierarchy_generate_action = _hierarchyMenu->addAction("&Generate LOD...");
+    connect(hierarchy_generate_action, &QAction::triggered, this, &W3DViewMainWindow::generateLod);
+    auto *hierarchy_aggregate_action = _hierarchyMenu->addAction("&Make Aggregate...");
+    connect(hierarchy_aggregate_action, &QAction::triggered, this, &W3DViewMainWindow::makeAggregate);
+
+    _aggregateMenu = new QMenu("&Aggregate", this);
+    auto *aggregate_rename_action = _aggregateMenu->addAction("R&ename Aggregate...");
+    connect(aggregate_rename_action, &QAction::triggered, this, &W3DViewMainWindow::renameAggregate);
+    _aggregateMenu->addSeparator();
+    auto *aggregate_bone_action = _aggregateMenu->addAction("&Bone Management...");
+    connect(aggregate_bone_action, &QAction::triggered, this, &W3DViewMainWindow::openBoneManagement);
+    auto *aggregate_auto_assign_action = _aggregateMenu->addAction("&Auto Assign Bone Models");
+    connect(aggregate_auto_assign_action, &QAction::triggered, this, &W3DViewMainWindow::autoAssignBoneModels);
+    _aggregateMenu->addSeparator();
+    _aggregateBindSubobjectAction = _aggregateMenu->addAction("Bind &Subobject LOD");
+    _aggregateBindSubobjectAction->setCheckable(true);
+    connect(_aggregateBindSubobjectAction, &QAction::triggered, this, &W3DViewMainWindow::bindSubobjectLod);
+    auto *aggregate_generate_action = _aggregateMenu->addAction("&Generate LOD...");
+    connect(aggregate_generate_action, &QAction::triggered, this, &W3DViewMainWindow::generateLod);
+    connect(_aggregateMenu, &QMenu::aboutToShow, this, &W3DViewMainWindow::refreshAggregateMenu);
+
+    _lodMenu = new QMenu("&LOD", this);
+    _lodRecordAction = _lodMenu->addAction("&Record Screen Area");
+    connect(_lodRecordAction, &QAction::triggered, this, &W3DViewMainWindow::recordLodScreenArea);
+    _lodIncludeNullAction = _lodMenu->addAction("Include &NULL Object");
+    _lodIncludeNullAction->setCheckable(true);
+    connect(_lodIncludeNullAction, &QAction::triggered, this, &W3DViewMainWindow::toggleLodIncludeNull);
+    _lodMenu->addSeparator();
+    _lodPrevAction = _lodMenu->addAction("&Prev Level");
+    connect(_lodPrevAction, &QAction::triggered, this, &W3DViewMainWindow::selectPrevLod);
+    _lodNextAction = _lodMenu->addAction("&Next Level");
+    connect(_lodNextAction, &QAction::triggered, this, &W3DViewMainWindow::selectNextLod);
+    _lodAutoSwitchAction = _lodMenu->addAction("&Auto Switching");
+    _lodAutoSwitchAction->setCheckable(true);
+    connect(_lodAutoSwitchAction, &QAction::triggered, this, &W3DViewMainWindow::toggleLodAutoSwitch);
+    _lodMenu->addSeparator();
+    auto *lod_make_aggregate_action = _lodMenu->addAction("&Make Aggregate...");
+    connect(lod_make_aggregate_action, &QAction::triggered, this, &W3DViewMainWindow::makeAggregate);
+    connect(_lodMenu, &QMenu::aboutToShow, this, &W3DViewMainWindow::refreshLodMenu);
+
     auto *emitters_menu = menuBar()->addMenu("&Emitters");
     emitters_menu->addAction("&Create Emitter...", this, &W3DViewMainWindow::createEmitter);
     _scaleEmitterAction = emitters_menu->addAction("&Scale Emitter...");
@@ -807,8 +993,8 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     _editEmitterAction = emitters_menu->addAction("&Edit Emitter");
     connect(_editEmitterAction, &QAction::triggered, this, &W3DViewMainWindow::editEmitter);
     _editEmitterAction->setEnabled(false);
-    auto *emitters_edit_menu = emitters_menu->addMenu("E&dit");
-    emitters_edit_menu->addSeparator();
+    _emittersEditMenu = emitters_menu->addMenu("E&dit");
+    connect(_emittersEditMenu, &QMenu::aboutToShow, this, &W3DViewMainWindow::updateEmittersEditMenu);
 
     auto *primitives_menu = menuBar()->addMenu("&Primitives");
     primitives_menu->addAction("Create &Sphere...", this, &W3DViewMainWindow::createSphere);
@@ -1013,6 +1199,27 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
 
     _viewport = new W3DViewport(splitter);
 
+    _statusPolysLabel = new QLabel(this);
+    _statusParticlesLabel = new QLabel(this);
+    _statusCameraLabel = new QLabel(this);
+    _statusFramesLabel = new QLabel(this);
+    _statusFpsLabel = new QLabel(this);
+    _statusResolutionLabel = new QLabel(this);
+
+    if (statusBar()) {
+        statusBar()->addPermanentWidget(_statusPolysLabel);
+        statusBar()->addPermanentWidget(_statusParticlesLabel);
+        statusBar()->addPermanentWidget(_statusCameraLabel);
+        statusBar()->addPermanentWidget(_statusFramesLabel, 1);
+        statusBar()->addPermanentWidget(_statusFpsLabel);
+        statusBar()->addPermanentWidget(_statusResolutionLabel);
+    }
+
+    _statusTimer = new QTimer(this);
+    _statusTimer->setInterval(250);
+    connect(_statusTimer, &QTimer::timeout, this, &W3DViewMainWindow::updateStatusBar);
+    _statusTimer->start();
+
     splitter->setStretchFactor(0, 0);
     splitter->setStretchFactor(1, 1);
     splitter->setSizes({240, 800});
@@ -1063,6 +1270,61 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
         }
     }
     rebuildAssetTree();
+}
+
+void W3DViewMainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (!event) {
+        return;
+    }
+
+    const QMimeData *mime = event->mimeData();
+    if (!mime || !mime->hasUrls()) {
+        return;
+    }
+
+    const auto urls = mime->urls();
+    for (const auto &url : urls) {
+        if (!url.isLocalFile()) {
+            continue;
+        }
+        const QString path = url.toLocalFile();
+        if (path.endsWith(".w3d", Qt::CaseInsensitive)) {
+            event->acceptProposedAction();
+            return;
+        }
+    }
+}
+
+void W3DViewMainWindow::dropEvent(QDropEvent *event)
+{
+    if (!event) {
+        return;
+    }
+
+    const QMimeData *mime = event->mimeData();
+    if (!mime || !mime->hasUrls()) {
+        return;
+    }
+
+    bool loaded_any = false;
+    const auto urls = mime->urls();
+    for (const auto &url : urls) {
+        if (!url.isLocalFile()) {
+            continue;
+        }
+        const QString path = url.toLocalFile();
+        if (!path.endsWith(".w3d", Qt::CaseInsensitive)) {
+            continue;
+        }
+        if (loadAssetsFromFile(path)) {
+            loaded_any = true;
+        }
+    }
+
+    if (loaded_any) {
+        event->acceptProposedAction();
+    }
 }
 
 void W3DViewMainWindow::openFile()
@@ -1183,6 +1445,7 @@ void W3DViewMainWindow::saveSettingsFile()
 void W3DViewMainWindow::onCurrentChanged(const QModelIndex &current, const QModelIndex &previous)
 {
     Q_UNUSED(previous);
+    updateSpecialMenu(current);
     if (!_viewport) {
         return;
     }
@@ -1256,6 +1519,7 @@ void W3DViewMainWindow::onCurrentChanged(const QModelIndex &current, const QMode
         _viewport->setRenderObject(object);
         object->Release_Ref();
         statusBar()->showMessage(QString("Showing: %1").arg(name));
+        updateEmittersEditMenu();
         return;
     }
 
@@ -1307,6 +1571,7 @@ void W3DViewMainWindow::onCurrentChanged(const QModelIndex &current, const QMode
         animation->Release_Ref();
         statusBar()->showMessage(
             QString("Playing: %1 (%2)").arg(animation_name, render_name));
+        updateEmittersEditMenu();
         return;
     }
 
@@ -1325,7 +1590,238 @@ void W3DViewMainWindow::onCurrentChanged(const QModelIndex &current, const QMode
         _viewport->setRenderObject(bitmap);
         bitmap->Release_Ref();
         statusBar()->showMessage(QString("Showing material: %1").arg(name));
+        updateEmittersEditMenu();
         return;
+    }
+}
+
+void W3DViewMainWindow::updateSpecialMenu(const QModelIndex &current)
+{
+    if (!_objectMenuAction || !menuBar()) {
+        return;
+    }
+
+    QMenu *desired_menu = nullptr;
+    const int type_value = current.data(kRoleType).toInt();
+    const bool is_group = type_value == static_cast<int>(AssetNodeType::Group);
+
+    auto matches_group = [](const QString &text, const QString &label) {
+        return text == label || text.startsWith(label + " (");
+    };
+
+    if (type_value == static_cast<int>(AssetNodeType::Animation)) {
+        desired_menu = _animationMenu;
+    } else if (type_value == static_cast<int>(AssetNodeType::RenderObject) || is_group) {
+        const QString group_label = ResolveGroupLabel(_treeModel, current, is_group);
+        if (matches_group(group_label, "H-LOD")) {
+            desired_menu = _lodMenu;
+        } else if (matches_group(group_label, "Hierarchy")) {
+            desired_menu = _hierarchyMenu;
+        } else if (matches_group(group_label, "Aggregate")) {
+            desired_menu = _aggregateMenu;
+        }
+    }
+
+    QAction *desired_action = desired_menu ? desired_menu->menuAction() : nullptr;
+    if (_specialMenuAction && _specialMenuAction != desired_action) {
+        menuBar()->removeAction(_specialMenuAction);
+    }
+    if (desired_action && !menuBar()->actions().contains(desired_action)) {
+        menuBar()->insertMenu(_objectMenuAction, desired_menu);
+    }
+    _specialMenuAction = desired_action;
+}
+
+void W3DViewMainWindow::updateEmittersEditMenu()
+{
+    if (!_emittersEditMenu) {
+        return;
+    }
+
+    _emittersEditMenu->clear();
+
+    QStringList names;
+    if (_viewport) {
+        if (auto *render_obj = _viewport->currentRenderObject()) {
+            CollectEmitterNames(*render_obj, names);
+        }
+    }
+
+    if (names.isEmpty()) {
+        auto *empty_action = _emittersEditMenu->addAction("(No Emitters)");
+        empty_action->setEnabled(false);
+        return;
+    }
+
+    names.sort(Qt::CaseInsensitive);
+    for (const auto &name : names) {
+        auto *action = _emittersEditMenu->addAction(name);
+        connect(action, &QAction::triggered, this, [this, name]() { editEmitterByName(name); });
+    }
+}
+
+void W3DViewMainWindow::refreshAnimationMenu()
+{
+    const bool has_anim = _viewport && _viewport->hasAnimation();
+    if (_animationPlayAction) {
+        _animationPlayAction->setEnabled(has_anim);
+    }
+    if (_animationPauseAction) {
+        _animationPauseAction->setEnabled(has_anim);
+    }
+    if (_animationStopAction) {
+        _animationStopAction->setEnabled(has_anim);
+    }
+    if (_animationStepBackAction) {
+        _animationStepBackAction->setEnabled(has_anim);
+    }
+    if (_animationStepForwardAction) {
+        _animationStepForwardAction->setEnabled(has_anim);
+    }
+}
+
+void W3DViewMainWindow::refreshAggregateMenu()
+{
+    if (!_aggregateBindSubobjectAction) {
+        return;
+    }
+    const bool bound = _viewport && _viewport->isSubobjectLodBound();
+    _aggregateBindSubobjectAction->setChecked(bound);
+}
+
+void W3DViewMainWindow::refreshLodMenu()
+{
+    if (!_viewport) {
+        if (_lodPrevAction) {
+            _lodPrevAction->setEnabled(false);
+        }
+        if (_lodNextAction) {
+            _lodNextAction->setEnabled(false);
+        }
+        return;
+    }
+
+    if (_lodIncludeNullAction) {
+        _lodIncludeNullAction->setChecked(_viewport->isNullLodIncluded());
+    }
+    if (_lodAutoSwitchAction) {
+        _lodAutoSwitchAction->setChecked(_viewport->isLodAutoSwitchingEnabled());
+    }
+
+    int level = 0;
+    int count = 0;
+    const bool has_lod = _viewport->currentLodInfo(level, count);
+    if (_lodPrevAction) {
+        _lodPrevAction->setEnabled(has_lod && level > 0);
+    }
+    if (_lodNextAction) {
+        _lodNextAction->setEnabled(has_lod && (level + 1) < count);
+    }
+}
+
+void W3DViewMainWindow::editEmitterByName(const QString &name)
+{
+    if (name.isEmpty()) {
+        return;
+    }
+
+    auto *asset_manager = WW3DAssetManager::Get_Instance();
+    if (!asset_manager) {
+        QMessageBox::warning(this, "Edit Emitter", "WW3D asset manager is not available.");
+        return;
+    }
+
+    const QByteArray name_bytes = name.toLatin1();
+    RenderObjClass *render_obj = asset_manager->Create_Render_Obj(name_bytes.constData());
+    if (!render_obj) {
+        QMessageBox::warning(this, "Edit Emitter", "Failed to load emitter.");
+        return;
+    }
+
+    if (render_obj->Class_ID() != RenderObjClass::CLASSID_PARTICLEEMITTER) {
+        render_obj->Release_Ref();
+        QMessageBox::warning(this, "Edit Emitter", "Selected object is not an emitter.");
+        return;
+    }
+
+    auto *emitter = static_cast<ParticleEmitterClass *>(render_obj);
+    ParticleEmitterDefClass *definition = emitter->Build_Definition();
+    emitter->Release_Ref();
+    if (!definition) {
+        QMessageBox::warning(this, "Edit Emitter", "Failed to load emitter definition.");
+        return;
+    }
+
+    EmitterEditDialog dialog(*definition, this);
+    delete definition;
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    std::unique_ptr<ParticleEmitterDefClass> updated(dialog.definition());
+    if (!updated) {
+        QMessageBox::warning(this, "Edit Emitter", "Failed to update emitter definition.");
+        return;
+    }
+
+    if (!UpdateEmitterPrototype(*updated, dialog.originalName())) {
+        QMessageBox::warning(this, "Edit Emitter", "Failed to register emitter prototype.");
+        return;
+    }
+
+    reloadDisplayedObject();
+    statusBar()->showMessage(QString("Updated emitter: %1").arg(name));
+}
+
+void W3DViewMainWindow::updateStatusBar()
+{
+    if (!_viewport) {
+        return;
+    }
+
+    int polys = 0;
+    int particles = 0;
+    if (auto *render_obj = _viewport->currentRenderObject()) {
+        polys = render_obj->Get_Num_Polys();
+        particles = CountParticles(render_obj);
+    }
+
+    if (_statusPolysLabel) {
+        _statusPolysLabel->setText(QString("Polys %1").arg(polys));
+    }
+    if (_statusParticlesLabel) {
+        _statusParticlesLabel->setText(QString("Particles %1").arg(particles));
+    }
+    if (_statusCameraLabel) {
+        _statusCameraLabel->setText(QString("Camera %1").arg(_viewport->cameraDistance(), 0, 'f', 3));
+    }
+
+    int current_frame = 0;
+    int total_frames = 0;
+    float fps = 0.0f;
+    const bool has_anim = _viewport->animationStatus(current_frame, total_frames, fps);
+    if (_statusFramesLabel) {
+        const int max_frame = total_frames > 0 ? total_frames - 1 : 0;
+        const int display_frame = has_anim ? current_frame : 0;
+        const float display_fps = has_anim ? fps : 0.0f;
+        _statusFramesLabel->setText(
+            QString("Frame %1/%2 at %3 fps")
+                .arg(display_frame)
+                .arg(max_frame)
+                .arg(display_fps, 0, 'f', 2));
+    }
+
+    if (_statusFpsLabel) {
+        const float frame_ms = _viewport->averageFrameMilliseconds();
+        if (frame_ms > 0.0f) {
+            _statusFpsLabel->setText(QString("Clocks: %1").arg(frame_ms, 0, 'f', 2));
+        } else {
+            _statusFpsLabel->setText(QString());
+        }
+    }
+
+    if (_statusResolutionLabel) {
+        _statusResolutionLabel->setText(QString(" %1 x %2 ").arg(_viewport->width()).arg(_viewport->height()));
     }
 }
 
@@ -1971,9 +2467,11 @@ void W3DViewMainWindow::showTreeContextMenu(const QPoint &pos)
         return;
     }
 
-    _treeView->setCurrentIndex(index);
-
     const int type_value = index.data(kRoleType).toInt();
+    const bool is_group = type_value == static_cast<int>(AssetNodeType::Group);
+    if (!is_group) {
+        _treeView->setCurrentIndex(index);
+    }
     auto matches_group = [](const QString &text, const QString &label) {
         return text == label || text.startsWith(label + " (");
     };
@@ -2009,16 +2507,11 @@ void W3DViewMainWindow::showTreeContextMenu(const QPoint &pos)
         return;
     }
 
-    if (type_value != static_cast<int>(AssetNodeType::RenderObject)) {
+    if (type_value != static_cast<int>(AssetNodeType::RenderObject) && !is_group) {
         return;
     }
 
-    QString group_label;
-    if (auto *item = _treeModel->itemFromIndex(index)) {
-        if (auto *parent = item->parent()) {
-            group_label = parent->text();
-        }
-    }
+    const QString group_label = ResolveGroupLabel(_treeModel, index, is_group);
 
     if (matches_group(group_label, "H-LOD")) {
         QMenu menu(this);
@@ -2150,21 +2643,44 @@ void W3DViewMainWindow::openAnimationSettings()
         return;
     }
 
-    const double current = _viewport->animationSpeed();
-    bool ok = false;
-    const double value = QInputDialog::getDouble(
-        this,
-        "Animation Speed",
-        "Speed multiplier:",
-        current,
-        0.1,
-        10.0,
-        2,
-        &ok);
+    QDialog dialog(this);
+    dialog.setWindowTitle("Animation Settings");
 
-    if (ok) {
-        _viewport->setAnimationSpeed(static_cast<float>(value));
-        statusBar()->showMessage(QString("Animation speed: %1x").arg(value, 0, 'f', 2));
+    auto *layout = new QVBoxLayout(&dialog);
+    auto *speed_label = new QLabel(&dialog);
+    auto *speed_slider = new QSlider(Qt::Horizontal, &dialog);
+    auto *blend_checkbox = new QCheckBox("Blend frames", &dialog);
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+
+    const float initial_speed = _viewport->animationSpeed();
+    speed_label->setText(QString("Speed: %1x").arg(initial_speed, 0, 'f', 2));
+
+    speed_slider->setRange(1, 200);
+    const int initial_percent = std::clamp(static_cast<int>(initial_speed * 100.0f + 0.5f), 1, 200);
+    speed_slider->setValue(initial_percent);
+
+    blend_checkbox->setChecked(_viewport->animationBlend());
+
+    layout->addWidget(speed_label);
+    layout->addWidget(speed_slider);
+    layout->addWidget(blend_checkbox);
+    layout->addWidget(buttons);
+
+    bool slider_touched = false;
+    connect(speed_slider, &QSlider::valueChanged, &dialog, [this, speed_label, &slider_touched](int value) {
+        slider_touched = true;
+        const float speed = static_cast<float>(value) / 100.0f;
+        speed_label->setText(QString("Speed: %1x").arg(speed, 0, 'f', 2));
+        _viewport->setAnimationSpeed(speed);
+    });
+    connect(blend_checkbox, &QCheckBox::toggled, &dialog, [this](bool checked) {
+        _viewport->setAnimationBlend(checked);
+    });
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() != QDialog::Accepted && slider_touched) {
+        _viewport->setAnimationSpeed(initial_speed);
     }
 }
 
@@ -3703,12 +4219,6 @@ bool W3DViewMainWindow::loadAssetsFromFile(const QString &path)
         return false;
     }
 
-    if (_viewport) {
-        _viewport->setRenderObject(nullptr);
-        _viewport->clearAnimation();
-    }
-
-    asset_manager->Free_Assets();
     asset_manager->Load_Procedural_Textures();
 
     const QString directory = QFileInfo(path).absolutePath();
@@ -3722,6 +4232,8 @@ bool W3DViewMainWindow::loadAssetsFromFile(const QString &path)
         QMessageBox::warning(this, "W3DViewQt", "Failed to load W3D assets.");
         return false;
     }
+
+    LoadMissingHierarchyAssets(asset_manager, directory);
 
     _lastOpenedPath = info.absolutePath();
     QSettings settings;
