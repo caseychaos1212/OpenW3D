@@ -5,6 +5,9 @@
 
 class QAction;
 class QActionGroup;
+class QLabel;
+class QDragEnterEvent;
+class QDropEvent;
 class QModelIndex;
 class QPoint;
 class QMenu;
@@ -12,6 +15,7 @@ class QSettings;
 class QStandardItem;
 class QStandardItemModel;
 class QToolBar;
+class QTimer;
 class QTreeView;
 class W3DViewport;
 
@@ -21,6 +25,10 @@ class W3DViewMainWindow final : public QMainWindow
 
 public:
     explicit W3DViewMainWindow(QWidget *parent = nullptr);
+
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
 private slots:
     void newFile();
@@ -124,8 +132,15 @@ private slots:
     void showObjectProperties();
     void setNpatchesLevel(int level);
     void toggleNpatchesGap(bool enabled);
+    void updateStatusBar();
 
 private:
+    void updateSpecialMenu(const QModelIndex &current);
+    void updateEmittersEditMenu();
+    void refreshAnimationMenu();
+    void refreshAggregateMenu();
+    void refreshLodMenu();
+    void editEmitterByName(const QString &name);
     void applySettings(QSettings &settings);
     void writeSettings(QSettings &settings) const;
     bool loadAssetsFromFile(const QString &path);
@@ -155,6 +170,18 @@ private:
     QStandardItemModel *_treeModel = nullptr;
     W3DViewport *_viewport = nullptr;
     QMenu *_recentFilesMenu = nullptr;
+    QMenu *_animationMenu = nullptr;
+    QMenu *_hierarchyMenu = nullptr;
+    QMenu *_aggregateMenu = nullptr;
+    QMenu *_lodMenu = nullptr;
+    QMenu *_emittersEditMenu = nullptr;
+    QLabel *_statusPolysLabel = nullptr;
+    QLabel *_statusParticlesLabel = nullptr;
+    QLabel *_statusCameraLabel = nullptr;
+    QLabel *_statusFramesLabel = nullptr;
+    QLabel *_statusFpsLabel = nullptr;
+    QLabel *_statusResolutionLabel = nullptr;
+    QTimer *_statusTimer = nullptr;
     QToolBar *_mainToolbar = nullptr;
     QToolBar *_objectToolbar = nullptr;
     QToolBar *_animationToolbar = nullptr;
@@ -181,6 +208,8 @@ private:
     QAction *_copyAssetsAction = nullptr;
     QAction *_addToLineupAction = nullptr;
     QAction *_aboutAction = nullptr;
+    QAction *_specialMenuAction = nullptr;
+    QAction *_objectMenuAction = nullptr;
     QAction *_wireframeAction = nullptr;
     QAction *_sortingAction = nullptr;
     QAction *_restrictAnimsAction = nullptr;
@@ -199,6 +228,17 @@ private:
     QAction *_objectResetAction = nullptr;
     QAction *_objectAlternateAction = nullptr;
     QAction *_objectPropertiesAction = nullptr;
+    QAction *_animationPlayAction = nullptr;
+    QAction *_animationPauseAction = nullptr;
+    QAction *_animationStopAction = nullptr;
+    QAction *_animationStepBackAction = nullptr;
+    QAction *_animationStepForwardAction = nullptr;
+    QAction *_lodRecordAction = nullptr;
+    QAction *_lodIncludeNullAction = nullptr;
+    QAction *_lodPrevAction = nullptr;
+    QAction *_lodNextAction = nullptr;
+    QAction *_lodAutoSwitchAction = nullptr;
+    QAction *_aggregateBindSubobjectAction = nullptr;
     QAction *_cameraFrontAction = nullptr;
     QAction *_cameraBackAction = nullptr;
     QAction *_cameraLeftAction = nullptr;

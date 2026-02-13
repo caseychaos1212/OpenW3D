@@ -54,6 +54,9 @@ public:
     explicit W3DViewport(QWidget *parent = nullptr);
     ~W3DViewport() override;
     void setRenderObject(RenderObjClass *object);
+    RenderObjClass *currentRenderObject() const { return _renderObject; }
+    bool animationStatus(int &currentFrame, int &totalFrames, float &fps) const;
+    float averageFrameMilliseconds() const;
     void setCameraPosition(CameraPosition position);
     void resetCamera();
     void setAllowedCameraRotation(CameraRotation rotation);
@@ -100,6 +103,8 @@ public:
     AnimationState animationState() const;
     void setAnimationSpeed(float speed);
     float animationSpeed() const;
+    void setAnimationBlend(bool enabled);
+    bool animationBlend() const;
     bool stepAnimation(int delta);
     bool hasAnimation() const;
     bool toggleSubobjectLod();
@@ -159,9 +164,13 @@ private:
     void updateLightRotation();
     void refreshBackgroundBitmap();
     void applyAnimationFrame(float frame);
+    void updateFrameTiming(float elapsedMs);
 
     QTimer _timer;
     QElapsedTimer _elapsed;
+    float _frameTimeAccumMs = 0.0f;
+    int _frameTimeSamples = 0;
+    float _averageFrameMs = 0.0f;
     bool _initialized = false;
     SceneClass *_scene = nullptr;
     CameraClass *_camera = nullptr;
@@ -172,6 +181,7 @@ private:
     HAnimComboClass *_animationCombo = nullptr;
     float _animationFrame = 0.0f;
     float _animationTime = 0.0f;
+    bool _animationBlend = true;
     SceneClass *_backgroundScene = nullptr;
     CameraClass *_backgroundCamera = nullptr;
     Bitmap2DObjClass *_backgroundBitmapObj = nullptr;

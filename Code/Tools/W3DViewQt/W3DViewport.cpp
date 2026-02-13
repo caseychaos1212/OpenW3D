@@ -286,6 +286,9 @@ void SwitchLod(RenderObjClass *render_obj, int increment, bool &switched)
 }
 } // namespace
 
+static void SetLowestLod(RenderObjClass *render_obj);
+static void ResetSceneLod(SceneClass *scene);
+
 W3DViewport::W3DViewport(QWidget *parent)
     : QWidget(parent)
 {
@@ -512,6 +515,7 @@ void W3DViewport::renderFrame()
     }
 
     const qint64 elapsed_ms = _elapsed.restart();
+    updateFrameTiming(static_cast<float>(elapsed_ms));
     if (elapsed_ms > 0) {
         const auto next_time = WW3D::Get_Sync_Time() + static_cast<unsigned int>(elapsed_ms);
         WW3D::Sync(next_time);
@@ -526,6 +530,10 @@ void W3DViewport::renderFrame()
 
 void W3DViewport::renderScene()
 {
+    if (_allowLodSwitching && _scene) {
+        ResetSceneLod(_scene);
+    }
+
     WW3D::Begin_Render(true, true, _clearColor);
     if (_backgroundScene && _backgroundCamera) {
         WW3D::Render(_backgroundScene, _backgroundCamera, false, false);
@@ -554,6 +562,7 @@ void W3DViewport::renderFrameWithTicks(int ticks)
     }
 
     if (ticks > 0) {
+        updateFrameTiming(static_cast<float>(ticks));
         const auto next_time = WW3D::Get_Sync_Time() + static_cast<unsigned int>(ticks);
         WW3D::Sync(next_time);
         updateAnimation(static_cast<float>(ticks) / 1000.0f);
@@ -563,6 +572,61 @@ void W3DViewport::renderFrameWithTicks(int ticks)
     updateObjectRotation();
     updateLightRotation();
     renderScene();
+}
+
+void W3DViewport::updateFrameTiming(float elapsedMs)
+{
+    if (elapsedMs <= 0.0f) {
+        return;
+    }
+
+    _frameTimeAccumMs += elapsedMs;
+    ++_frameTimeSamples;
+
+    if (_frameTimeAccumMs >= 1000.0f) {
+        _averageFrameMs = _frameTimeAccumMs / static_cast<float>(_frameTimeSamples);
+        _frameTimeAccumMs = 0.0f;
+        _frameTimeSamples = 0;
+    }
+}
+
+static void SetLowestLod(RenderObjClass *render_obj)
+{
+    if (!render_obj) {
+        return;
+    }
+
+    const int count = render_obj->Get_Num_Sub_Objects();
+    for (int index = 0; index < count; ++index) {
+        RenderObjClass *sub_obj = render_obj->Get_Sub_Object(index);
+        if (sub_obj) {
+            SetLowestLod(sub_obj);
+            sub_obj->Release_Ref();
+        }
+    }
+
+    if (render_obj->Class_ID() == RenderObjClass::CLASSID_HLOD) {
+        static_cast<HLodClass *>(render_obj)->Set_LOD_Level(0);
+    }
+}
+
+static void ResetSceneLod(SceneClass *scene)
+{
+    if (!scene) {
+        return;
+    }
+
+    SceneIterator *it = scene->Create_Iterator();
+    if (!it) {
+        return;
+    }
+
+    for (it->First(); !it->Is_Done(); it->Next()) {
+        RenderObjClass *obj = it->Current_Item();
+        SetLowestLod(obj);
+    }
+
+    scene->Destroy_Iterator(it);
 }
 
 void W3DViewport::initWW3D()
@@ -827,7 +891,11 @@ void W3DViewport::setRenderObject(RenderObjClass *object)
         if (_animationCombo) {
             _renderObject->Set_Animation(_animationCombo);
         } else if (_animation) {
-            _renderObject->Set_Animation(_animation, static_cast<int>(_animationFrame));
+            if (_animationBlend) {
+                _renderObject->Set_Animation(_animation, _animationFrame);
+            } else {
+                _renderObject->Set_Animation(_animation, static_cast<int>(_animationFrame));
+            }
         }
     }
 }
@@ -1197,6 +1265,27 @@ void W3DViewport::clearAnimation()
     if (_renderObject) {
         _renderObject->Set_Animation();
     }
+}
+
+bool W3DViewport::animationStatus(int &currentFrame, int &totalFrames, float &fps) const
+{
+    if (!_animation) {
+        currentFrame = 0;
+        totalFrames = 0;
+        fps = 0.0f;
+        return false;
+    }
+
+    totalFrames = _animation->Get_Num_Frames();
+    currentFrame = static_cast<int>(_animationFrame);
+    const float frame_rate = _animation->Get_Frame_Rate();
+    fps = frame_rate * _animationSpeed;
+    return totalFrames > 0;
+}
+
+float W3DViewport::averageFrameMilliseconds() const
+{
+    return _averageFrameMs;
 }
 
 void W3DViewport::setBackgroundColor(const Vector3 &color)
@@ -1589,7 +1678,11 @@ void W3DViewport::updateAnimation(float deltaSeconds)
         }
         _renderObject->Set_Animation(_animationCombo);
     } else {
-        _renderObject->Set_Animation(_animation, static_cast<int>(_animationFrame));
+        if (_animationBlend) {
+            _renderObject->Set_Animation(_animation, _animationFrame);
+        } else {
+            _renderObject->Set_Animation(_animation, static_cast<int>(_animationFrame));
+        }
     }
 }
 
@@ -1636,6 +1729,29 @@ void W3DViewport::setAnimationSpeed(float speed)
 float W3DViewport::animationSpeed() const
 {
     return _animationSpeed;
+}
+
+void W3DViewport::setAnimationBlend(bool enabled)
+{
+    if (_animationBlend == enabled) {
+        return;
+    }
+
+    _animationBlend = enabled;
+    if (!_renderObject || !_animation || _animationCombo) {
+        return;
+    }
+
+    if (_animationBlend) {
+        _renderObject->Set_Animation(_animation, _animationFrame);
+    } else {
+        _renderObject->Set_Animation(_animation, static_cast<int>(_animationFrame));
+    }
+}
+
+bool W3DViewport::animationBlend() const
+{
+    return _animationBlend;
 }
 
 bool W3DViewport::stepAnimation(int delta)
