@@ -67,7 +67,6 @@ private slots:
     void openCameraSettings();
     void openCameraDistance();
     void copyScreenSize();
-    void openResolutionDialog();
     void openGammaDialog();
     void toggleGammaCorrection(bool enabled);
     void toggleMungeSortOnLoad(bool enabled);
@@ -187,7 +186,6 @@ private:
     QAction *_restrictAnimsAction = nullptr;
     QAction *_statusBarAction = nullptr;
     QAction *_fogAction = nullptr;
-    QAction *_changeResolutionAction = nullptr;
     QAction *_gammaAction = nullptr;
     QAction *_invertBackfaceCullingAction = nullptr;
     QAction *_backgroundObjectAction = nullptr;

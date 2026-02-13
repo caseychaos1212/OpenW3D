@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     QCoreApplication::setApplicationVersion(QStringLiteral("0.1"));
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("Qt-based WDump viewer (stub)"));
+    parser.setApplicationDescription(QStringLiteral("Qt-based WDump viewer"));
     parser.addHelpOption();
     parser.addVersionOption();
 

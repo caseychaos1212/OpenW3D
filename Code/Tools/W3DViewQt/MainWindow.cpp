@@ -42,6 +42,7 @@
 #include <QInputDialog>
 #include <QItemSelectionModel>
 #include <QKeySequence>
+#include <QList>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -77,7 +78,6 @@
 #include "ScaleDialog.h"
 #include "SphereEditDialog.h"
 #include "SoundEditDialog.h"
-#include "ResolutionDialog.h"
 #include "TexturePathDialog.h"
 
 namespace {
@@ -361,6 +361,19 @@ void SetHighestLod(RenderObjClass *render_obj)
             hlod->Set_LOD_Level(max_level);
         }
     }
+}
+
+QAction *CreateWindowShortcutAction(QWidget *window, const QList<QKeySequence> &shortcuts)
+{
+    if (!window || shortcuts.isEmpty()) {
+        return nullptr;
+    }
+
+    auto *action = new QAction(window);
+    action->setShortcuts(shortcuts);
+    action->setShortcutContext(Qt::WindowShortcut);
+    window->addAction(action);
+    return action;
 }
 
 bool GetSelectedRenderObject(QTreeView *tree, QString &name, int &class_id)
@@ -740,8 +753,6 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     _slideshowNextAction->setShortcut(QKeySequence(Qt::Key_PageDown));
     connect(_slideshowNextAction, &QAction::triggered, this, &W3DViewMainWindow::selectNextAsset);
     view_menu->addSeparator();
-    _changeResolutionAction = view_menu->addAction("Change &Resolution...");
-    connect(_changeResolutionAction, &QAction::triggered, this, &W3DViewMainWindow::openResolutionDialog);
     _wireframeAction = view_menu->addAction("&Wireframe Mode");
     _wireframeAction->setCheckable(true);
     connect(_wireframeAction, &QAction::triggered, this, &W3DViewMainWindow::toggleWireframe);
@@ -777,11 +788,13 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     connect(_objectRotateXAction, &QAction::triggered, this, &W3DViewMainWindow::toggleObjectRotateX);
     _objectRotateYAction = object_menu->addAction("Rotate &Y");
     _objectRotateYAction->setCheckable(true);
-    _objectRotateYAction->setShortcut(QKeySequence(Qt::Key_Up));
+    _objectRotateYAction->setShortcuts(
+        QList<QKeySequence>{QKeySequence(Qt::Key_Up), QKeySequence(Qt::CTRL | Qt::Key_Y)});
     connect(_objectRotateYAction, &QAction::triggered, this, &W3DViewMainWindow::toggleObjectRotateY);
     _objectRotateZAction = object_menu->addAction("Rotate &Z");
     _objectRotateZAction->setCheckable(true);
-    _objectRotateZAction->setShortcut(QKeySequence(Qt::Key_Right));
+    _objectRotateZAction->setShortcuts(
+        QList<QKeySequence>{QKeySequence(Qt::Key_Right), QKeySequence(Qt::CTRL | Qt::Key_Z)});
     connect(_objectRotateZAction, &QAction::triggered, this, &W3DViewMainWindow::toggleObjectRotateZ);
     object_menu->addSeparator();
     _objectPropertiesAction = object_menu->addAction("&Properties...");
@@ -837,15 +850,28 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     lighting_menu->addAction("&Ambient...", this, &W3DViewMainWindow::setAmbientLight);
     lighting_menu->addAction("&Scene Light...", this, &W3DViewMainWindow::setSceneLight);
     lighting_menu->addSeparator();
-    lighting_menu->addAction("&Inc Ambient Intensity", this, &W3DViewMainWindow::increaseAmbientLight);
-    lighting_menu->addAction("&Dec Ambient Intensity", this, &W3DViewMainWindow::decreaseAmbientLight);
-    lighting_menu->addAction("Inc Scene &Light Intensity", this, &W3DViewMainWindow::increaseSceneLight);
-    lighting_menu->addAction("De&c Scene Light Intensity", this, &W3DViewMainWindow::decreaseSceneLight);
+    auto *inc_ambient_action = lighting_menu->addAction("&Inc Ambient Intensity", this,
+                                                        &W3DViewMainWindow::increaseAmbientLight);
+    inc_ambient_action->setShortcuts(
+        QList<QKeySequence>{QKeySequence(Qt::Key_Plus), QKeySequence(Qt::Key_Equal)});
+    auto *dec_ambient_action = lighting_menu->addAction("&Dec Ambient Intensity", this,
+                                                        &W3DViewMainWindow::decreaseAmbientLight);
+    dec_ambient_action->setShortcut(QKeySequence(Qt::Key_Minus));
+    auto *inc_scene_action = lighting_menu->addAction("Inc Scene &Light Intensity", this,
+                                                      &W3DViewMainWindow::increaseSceneLight);
+    inc_scene_action->setShortcuts(
+        QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_Plus),
+                            QKeySequence(Qt::CTRL | Qt::Key_Equal)});
+    auto *dec_scene_action = lighting_menu->addAction("De&c Scene Light Intensity", this,
+                                                      &W3DViewMainWindow::decreaseSceneLight);
+    dec_scene_action->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Minus));
     lighting_menu->addSeparator();
     _exposePrelitAction = lighting_menu->addAction("Expose Precalculated Lighting");
     _exposePrelitAction->setCheckable(true);
     connect(_exposePrelitAction, &QAction::triggered, this, &W3DViewMainWindow::toggleExposePrelit);
-    lighting_menu->addAction("Kill Scene Light", this, &W3DViewMainWindow::killSceneLight);
+    auto *kill_scene_light_action = lighting_menu->addAction("Kill Scene Light", this,
+                                                             &W3DViewMainWindow::killSceneLight);
+    kill_scene_light_action->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Asterisk));
     lighting_menu->addSeparator();
     _prelitGroup = new QActionGroup(this);
     _prelitVertexAction = lighting_menu->addAction("&Vertex Lighting");
@@ -905,6 +931,7 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     _cameraSettingsAction = camera_menu->addAction("Settin&gs...");
     connect(_cameraSettingsAction, &QAction::triggered, this, &W3DViewMainWindow::openCameraSettings);
     _cameraDistanceAction = camera_menu->addAction("&Set Distance...");
+    _cameraDistanceAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_D));
     connect(_cameraDistanceAction, &QAction::triggered, this, &W3DViewMainWindow::openCameraDistance);
     camera_menu->addSeparator();
     _cameraResetOnDisplayAction = camera_menu->addAction("Reset on &Display");
@@ -922,6 +949,7 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     background_menu->addSeparator();
     _fogAction = background_menu->addAction("Fog", this, &W3DViewMainWindow::toggleFog);
     _fogAction->setCheckable(true);
+    _fogAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F));
 
     auto *movie_menu = menuBar()->addMenu("&Movie");
     _makeMovieAction = movie_menu->addAction("&Make Movie...");
@@ -935,6 +963,33 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     auto *help_menu = menuBar()->addMenu("&Help");
     _aboutAction = help_menu->addAction("&About...");
     connect(_aboutAction, &QAction::triggered, this, &W3DViewMainWindow::showAbout);
+
+    auto *make_aggregate_shortcut =
+        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_A)});
+    if (make_aggregate_shortcut != nullptr) {
+        connect(make_aggregate_shortcut, &QAction::triggered, this, &W3DViewMainWindow::makeAggregate);
+    }
+    auto *advanced_animation_shortcut =
+        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_V)});
+    if (advanced_animation_shortcut != nullptr) {
+        connect(advanced_animation_shortcut, &QAction::triggered,
+                this, &W3DViewMainWindow::openAdvancedAnimation);
+    }
+    auto *lod_record_shortcut =
+        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_Space)});
+    if (lod_record_shortcut != nullptr) {
+        connect(lod_record_shortcut, &QAction::triggered, this, &W3DViewMainWindow::recordLodScreenArea);
+    }
+    auto *lod_prev_shortcut =
+        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_BracketLeft)});
+    if (lod_prev_shortcut != nullptr) {
+        connect(lod_prev_shortcut, &QAction::triggered, this, &W3DViewMainWindow::selectPrevLod);
+    }
+    auto *lod_next_shortcut =
+        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_BracketRight)});
+    if (lod_next_shortcut != nullptr) {
+        connect(lod_next_shortcut, &QAction::triggered, this, &W3DViewMainWindow::selectNextLod);
+    }
 
     _listMissingTexturesAction = new QAction("List Missing Textures", this);
     connect(_listMissingTexturesAction, &QAction::triggered, this,
@@ -1791,40 +1846,6 @@ void W3DViewMainWindow::copyScreenSize()
         clipboard->setText(text);
         statusBar()->showMessage("Copied screen size to clipboard.");
     }
-}
-
-void W3DViewMainWindow::openResolutionDialog()
-{
-    if (!_viewport) {
-        return;
-    }
-
-    ResolutionDialog dialog(this);
-    if (dialog.exec() != QDialog::Accepted) {
-        return;
-    }
-
-    const int width = dialog.selectedWidth();
-    const int height = dialog.selectedHeight();
-    const int bpp = dialog.selectedBitsPerPixel();
-    const bool fullscreen = dialog.fullscreen();
-
-    if (!_viewport->applyResolution(width, height, bpp, fullscreen)) {
-        QMessageBox::warning(this, "Resolution", "Failed to apply the selected resolution.");
-        return;
-    }
-
-    if (fullscreen) {
-        showFullScreen();
-    } else {
-        showNormal();
-    }
-
-    QSettings settings;
-    settings.setValue("Config/DeviceWidth", width);
-    settings.setValue("Config/DeviceHeight", height);
-    settings.setValue("Config/DeviceBitsPerPix", bpp);
-    settings.setValue("Config/Windowed", fullscreen ? 0 : 1);
 }
 
 void W3DViewMainWindow::openGammaDialog()

@@ -1,91 +1,108 @@
+# OpenW3D
 
-# Command & Conquer Renegade
+OpenW3D is a modernization fork of the released Command & Conquer Renegade source code.
+The near-term goal is to keep retail gameplay compatibility while moving the codebase and tools to modern build systems and platforms.
 
-This repository includes source code for Command & Conquer Renegade. This release provides support to the [Steam Workshop](https://steamcommunity.com/workshop/browse/?appid=2229890) for the game.
+## Roadmap
 
+### Phase I: Build with an up-to-date C++ compiler
+- Status: mostly complete.
+- Goal: keep compatibility with the retail game so binaries can still run as a drop-in replacement in a Renegade install.
 
-## Dependencies
+### Phase II: Full 64-bit support
+- Status: in progress.
+- Goal: support 64-bit builds while preserving compatibility with the retail game.
 
-If you wish to rebuild the source code and tools successfully you will need to find or write new replacements (or remove the code using them entirely) for the following libraries;
+Phases I and II are intended to include only minimal bug fixes needed for playability and stability. Campaign completion and multiplayer operation should remain possible, but retail-era netcode limitations and exploits are expected until compatibility is intentionally broken.
 
-- DirectX SDK (Version 8.0 or higher) (expected path `\Code\DirectX\`)
-- RAD Bink SDK - (expected path `\Code\BinkMovie\`)
-- RAD Miles Sound System SDK - (expected path `\Code\Miles6\`)
-- NvDXTLib SDK - (expected path `\Code\NvDXTLib\`)
-- Lightscape SDK - (expected path `\Code\Lightscape\`)
-- Umbra SDK - (expected path `\Code\Umbra\`)
-- GameSpy SDK - (expected path `\Code\GameSpy\`)
-- GNU Regex - (expected path `\Code\WWLib\`)
-- SafeDisk API - (expected path `\Code\Launcher\SafeDisk\`)
-- Microsoft Cab Archive Library - (expected path `\Code\Installer\Cab\`)
-- RTPatch Library - (expected path `\Code\Installer\`)
-- Java Runtime Headers - (expected path `\Code\Tools\RenegadeGR\`)
+### Phase III: Cross-platform support
+- Initial direction: keep DX8-era rendering path where needed, with DXVK on Linux as a bridge.
+- Tooling direction: move developer tools (for example LevelEdit and W3DViewer) toward cross-platform Qt-based implementations.
 
+### Phase IV: Updated netcode
+- Intentionally break retail multiplayer compatibility.
+- Remove known hacks/exploits and improve behavior such as rubberbanding.
 
-## Compiling (Win32 Only)
+### Phase V: Updated renderer
+- Replace DX8-era rendering with a Vulkan-based renderer.
 
-To use the compiled binaries, you must own the game. The C&C Ultimate Collection is available for purchase on [EA App](https://www.ea.com/en-gb/games/command-and-conquer/command-and-conquer-the-ultimate-collection/buy/pc) or [Steam](https://store.steampowered.com/bundle/39394/Command__Conquer_The_Ultimate_Collection/). 
+Phases III, IV, and V are not strictly sequential and may be developed in parallel.
 
-### Renegade
+## Build Instructions
 
-The quickest way to build all configurations in the project is to open `commando.dsw` in Microsoft Visual Studio C++ 6.0 (SP5 recommended for binary matching to patch 1.037) and select Build -> Batch Build, then hit the “Rebuild All” button.
+Current Qt tool targets are `wwconfig_qt` and `wdump_qt` on Windows/Linux, plus `w3dview_qt` on Windows.
 
-If you wish to compile the code under a modern version of Microsoft Visual Studio, you can convert the legacy project file to a modern MSVC solution by opening the `commando.dsw` in Microsoft Visual Studio .NET 2003, and then opening the newly created project and solution file in MSVC 2015 or newer.
+### Prerequisites
+- CMake 3.25 or newer.
+- Ninja.
+- A C++20-capable compiler.
+- [vcpkg](https://github.com/microsoft/vcpkg) with `VCPKG_ROOT` set.
+- Network access for CMake `FetchContent` dependencies used by this tree.
 
-NOTE: As modern versions of MSVC enforce newer revisions of the C++ standard, you will need to make extensive changes to the codebase before it successfully compiles, even more so if you plan on compiling for the Win64 platform.
+### 1) Install vcpkg dependencies
 
-When the workspace has finished building, the compiled binaries will be copied to the `/Run/` directory found in the root of this repository. 
+Windows:
+```powershell
+vcpkg install --triplet x64-windows
+```
 
+Linux:
+```bash
+vcpkg install --triplet x64-linux
+```
 
-### Free Dedicated Server
-It’s possible to build the Windows version of the FDS (Free Dedicated Server) for Command & Conquer Renegade from the source code in this repository, just uncomment `#define FREEDEDICATEDSERVER` in [Combat\specialbuilds.h](Combat\specialbuilds.h) and perform a “Rebuild All” action on the Release config.
+Dependencies are declared in `vcpkg.json` (Qt + FFmpeg packages).
 
+### 2) Configure
 
-### Level Edit (Public Release)
-To build the public release build of Level Edit, modify the LevelEdit project settings and add `PUBLIC_EDITOR_VER` to the preprocessor defines.
+Windows full build:
+```powershell
+cmake --preset windows-qt
+```
 
-## Modern CMake + Qt toolchain (x64)
+Windows tools-only build:
+```powershell
+cmake --preset windows-qt-tools
+```
 
-The active development branch adds 64-bit, cross-platform Qt replacements for the legacy MFC utilities (WWConfig, WDump, LevelEdit, W3DView). To configure this toolchain:
+Linux (Qt-focused preset):
+```bash
+cmake --preset linux-qt
+```
 
-1. Install [vcpkg](https://github.com/microsoft/vcpkg) and set the `VCPKG_ROOT` environment variable to its checkout.
-2. (Windows) Create short, writable paths for the build artifacts to avoid long-path issues, e.g. `mkdir C:\vcpkg.installed` and `mkdir C:\build\openw3d`.
-3. Run `vcpkg install --triplet x64-windows` (or `x64-linux`) to build the dependencies declared in `vcpkg.json` (`qtbase`, `qttools`, `qtimageformats`, `qtsvg`, `qt5compat`, `ffmpeg`, etc.).
-4. Configure with one of the provided presets:
-   - Windows: `cmake --preset windows-qt`
-   - Windows tools-only: `cmake --preset windows-qt-tools`
-   - Linux: `cmake --preset linux-qt`
-5. Build with `cmake --build --preset windows-qt` (or `linux-qt`). The Qt-enabled tools can be toggled at configure time with `-DW3D_BUILD_QT_TOOLS=ON`.
+If you only want tools on Linux, disable game targets explicitly:
+```bash
+cmake --preset linux-qt -DRENEGADE_CLIENT=OFF -DRENEGADE_FDS=OFF
+```
 
-Presets assume Ninja and the vcpkg toolchain file. If you keep vcpkg elsewhere, override `CMAKE_TOOLCHAIN_FILE`/`VCPKG_TARGET_TRIPLET` when configuring.
+### 3) Build
 
-When the Qt option is enabled, the legacy WWConfig (MFC) binary still builds, and a new prototype `wwconfig_qt` target is produced alongside the other tools in your build output directory.
+Windows:
+```powershell
+cmake --build --preset windows-qt --config Release
+```
 
-### Offline-friendly Miles stub
+Windows tools-only:
+```powershell
+cmake --build --preset windows-qt-tools --config Release
+```
 
-The build uses a small stub of the Miles Sound System, fetched from `https://github.com/TheSuperHackers/miles-sdk-stub`. If you are on a restricted network, clone or copy that repository yourself (e.g. into `C:\deps\miles-sdk-stub`) and point CMake at it with either:
+Linux:
+```bash
+cmake --build --preset linux-qt --config Release
+```
 
-- Environment variable: `set MILES_STUB_SOURCE_DIR=C:\deps\miles-sdk-stub`
-- Configure flag: `cmake --preset windows-qt -DMILES_STUB_SOURCE_DIR=C:\deps\miles-sdk-stub`
-
-When `MILES_STUB_SOURCE_DIR` is set, CMake skips the network fetch and uses the local sources instead.
-
-
-## Known Issues
-
-The “Debug” configuration of the “Commando” project (the Renegade main project) will sometimes fail to link the final executable. This is due to Windows Defender incorrectly detecting RenegadeD.exe containing a virus (possibly due to the embedded browser code). Excluding the output `/Run/` folder found in the root of this repository in Windows Defender should resolve this for you. 
-
-
-## Contributing
-
-This repository will not be accepting contributions (pull requests, issues, etc). If you wish to create changes to the source code and encourage collaboration, please create a fork of the repository under your GitHub user/organization space.
-
-
-## Support
-
-This repository is for preservation purposes only and is archived without support. 
-
+### 4) Useful CMake options
+- `-DW3D_BUILD_QT_TOOLS=ON|OFF` to toggle Qt tool targets.
+- `-DRENEGADE_CLIENT=ON|OFF` to build or skip the game client target.
+- `-DRENEGADE_FDS=ON|OFF` to build or skip dedicated server target.
+- `-DRENEGADE_TOOLS=ON|OFF` to build or skip legacy tool targets.
+- `-DW3D_BUILD_OPTION_FFMPEG=ON|OFF` to toggle FFmpeg integration.
 
 ## License
 
-This repository and its contents are licensed under the GPL v3 license, with additional terms applied. Please see [LICENSE.md](LICENSE.md) for details.
+OpenW3D is licensed under GPL v3 with additional terms.
+
+See `LICENSE.md` for the full text, including:
+- GNU GPL v3 terms.
+- Additional Section 7 terms from Electronic Arts (including trademark/publicity restrictions and required notices).

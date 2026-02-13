@@ -43,7 +43,7 @@ option(W3D_BUILD_OPTION_FFMPEG "Build with ffmpeg." OFF)
 add_feature_info(FFMpegBuild W3D_BUILD_OPTION_FFMPEG "Build Renegade with FFMpeg")
 
 option(W3D_BUILD_QT_TOOLS "Build Qt-based GUI tools." ON)
-add_feature_info(QtTools W3D_BUILD_QT_TOOLS "Build Qt front-end tools (WWConfig, WDump, LevelEdit, W3DView)")
+add_feature_info(QtTools W3D_BUILD_QT_TOOLS "Build Qt front-end tools (WWConfig, WDump, and W3DView on Windows)")
 
 if(NOT WIN32)
     add_compile_definitions(__cdecl=)

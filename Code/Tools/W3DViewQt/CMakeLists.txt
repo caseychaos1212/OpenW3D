@@ -36,8 +36,6 @@ set(W3DVIEW_QT_SRC
     OpacityVectorEditDialog.h
     RingEditDialog.cpp
     RingEditDialog.h
-    ResolutionDialog.cpp
-    ResolutionDialog.h
     PlaySoundDialog.cpp
     PlaySoundDialog.h
     ScaleDialog.cpp

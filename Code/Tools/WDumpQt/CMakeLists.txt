@@ -21,8 +21,11 @@ target_link_libraries(wdump_qt
         wdump_core
         wwlib
         wwcommon
-        winmm
 )
+
+if(WIN32)
+    target_link_libraries(wdump_qt PRIVATE winmm)
+endif()
 
 set_target_properties(wdump_qt PROPERTIES
     AUTOMOC ON
