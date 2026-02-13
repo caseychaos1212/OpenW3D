@@ -30,70 +30,46 @@ Phases III, IV, and V are not strictly sequential and may be developed in parall
 
 ## Build Instructions
 
-Current Qt tool targets are `wwconfig_qt` and `wdump_qt` on Windows/Linux, plus `w3dview_qt` on Windows.
-
 ### Prerequisites
 - CMake 3.25 or newer.
 - Ninja.
 - A C++20-capable compiler.
-- [vcpkg](https://github.com/microsoft/vcpkg) with `VCPKG_ROOT` set.
 - Network access for CMake `FetchContent` dependencies used by this tree.
+- On Windows, Visual Studio with C++ tools installed.
 
-### 1) Install vcpkg dependencies
+### Current platform status
+- Windows: primary supported build path.
+- Linux: partial/in-progress support (some modules build, full game build is not yet the default expectation).
 
-Windows:
+### 1) Modern CMake build (up-to-date compiler path)
+
+Use a Visual Studio Developer Command Prompt (for example, x64 Native Tools) so MSVC and Windows SDK environment variables are set correctly.
+
+Configure:
 ```powershell
-vcpkg install --triplet x64-windows
+cmake --preset win
 ```
 
-Linux:
+Build:
+```powershell
+cmake --build --preset win --config Release
+```
+
+### 2) Linux (partial/in-progress)
+
+Linux support is currently best-effort and typically focuses on non-client targets.
+
+Configure:
 ```bash
-vcpkg install --triplet x64-linux
+cmake --preset linux -DRENEGADE_CLIENT=OFF -DRENEGADE_FDS=OFF
 ```
 
-Dependencies are declared in `vcpkg.json` (Qt + FFmpeg packages).
-
-### 2) Configure
-
-Windows full build:
-```powershell
-cmake --preset windows-qt
-```
-
-Windows tools-only build:
-```powershell
-cmake --preset windows-qt-tools
-```
-
-Linux (Qt-focused preset):
+Build:
 ```bash
-cmake --preset linux-qt
+cmake --build build/linux --config Release
 ```
 
-If you only want tools on Linux, disable game targets explicitly:
-```bash
-cmake --preset linux-qt -DRENEGADE_CLIENT=OFF -DRENEGADE_FDS=OFF
-```
-
-### 3) Build
-
-Windows:
-```powershell
-cmake --build --preset windows-qt --config Release
-```
-
-Windows tools-only:
-```powershell
-cmake --build --preset windows-qt-tools --config Release
-```
-
-Linux:
-```bash
-cmake --build --preset linux-qt --config Release
-```
-
-### 4) Useful CMake options
-- `-DW3D_BUILD_QT_TOOLS=ON|OFF` to toggle Qt tool targets.
+### 3) Useful CMake options
 - `-DRENEGADE_CLIENT=ON|OFF` to build or skip the game client target.
 - `-DRENEGADE_FDS=ON|OFF` to build or skip dedicated server target.
 - `-DRENEGADE_TOOLS=ON|OFF` to build or skip legacy tool targets.
