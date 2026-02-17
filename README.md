@@ -2,31 +2,17 @@
 
 OpenW3D is a modernization fork of the released Command & Conquer Renegade source code.
 The near-term goal is to keep retail gameplay compatibility while moving the codebase and tools to modern build systems and platforms.
+Active development discussion happens on Discord: https://discord.gg/wSsghDAF4B
 
-## Roadmap
+## Project Goals
 
-### Phase I: Build with an up-to-date C++ compiler
-- Status: mostly complete.
-- Goal: keep compatibility with the retail game so binaries can still run as a drop-in replacement in a Renegade install.
+Current goals are to modernize the codebase in a practical order while keeping momentum and maintaining compatibility where possible.
 
-### Phase II: Full 64-bit support
-- Status: in progress.
-- Goal: support 64-bit builds while preserving compatibility with the retail game.
+- 64-bit Windows support as the immediate focus.
+- Cross-platform support after the 64-bit baseline is stable.
+- Engine improvements after the platform and build foundations are in place.
 
-Phases I and II are intended to include only minimal bug fixes needed for playability and stability. Campaign completion and multiplayer operation should remain possible, but retail-era netcode limitations and exploits are expected until compatibility is intentionally broken.
-
-### Phase III: Cross-platform support
-- Initial direction: keep DX8-era rendering path where needed, with DXVK on Linux as a bridge.
-- Tooling direction: move developer tools (for example LevelEdit and W3DViewer) toward cross-platform Qt-based implementations.
-
-### Phase IV: Updated netcode
-- Intentionally break retail multiplayer compatibility.
-- Remove known hacks/exploits and improve behavior such as rubberbanding.
-
-### Phase V: Updated renderer
-- Replace DX8-era rendering with a Vulkan-based renderer.
-
-Phases III, IV, and V are not strictly sequential and may be developed in parallel.
+In the near term, the project targets minimal gameplay-impacting changes while compatibility work is underway.
 
 ## Build Instructions
 
