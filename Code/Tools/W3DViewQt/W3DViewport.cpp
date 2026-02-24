@@ -1950,12 +1950,18 @@ void W3DViewport::updateObjectRotation()
 
     if (_objectRotation & RotateX) {
         transform.Rotate_X(0.05f);
+    } else if (_objectRotation & RotateXBack) {
+        transform.Rotate_X(-0.05f);
     }
     if (_objectRotation & RotateY) {
         transform.Rotate_Y(-0.05f);
+    } else if (_objectRotation & RotateYBack) {
+        transform.Rotate_Y(0.05f);
     }
     if (_objectRotation & RotateZ) {
         transform.Rotate_Z(0.05f);
+    } else if (_objectRotation & RotateZBack) {
+        transform.Rotate_Z(-0.05f);
     }
 
     if (!transform.Is_Orthogonal()) {
@@ -1974,12 +1980,18 @@ void W3DViewport::updateLightRotation()
     Matrix3D rotation_matrix(1);
     if (_lightRotation & RotateX) {
         rotation_matrix.Rotate_X(0.05f);
+    } else if (_lightRotation & RotateXBack) {
+        rotation_matrix.Rotate_X(-0.05f);
     }
     if (_lightRotation & RotateY) {
         rotation_matrix.Rotate_Y(-0.05f);
+    } else if (_lightRotation & RotateYBack) {
+        rotation_matrix.Rotate_Y(0.05f);
     }
     if (_lightRotation & RotateZ) {
         rotation_matrix.Rotate_Z(0.05f);
+    } else if (_lightRotation & RotateZBack) {
+        rotation_matrix.Rotate_Z(-0.05f);
     }
 
     Matrix3D coord_inv;

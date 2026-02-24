@@ -51,7 +51,9 @@ private slots:
     void decreaseSceneLight();
     void killSceneLight();
     void toggleLightRotateY(bool enabled);
+    void toggleLightRotateYBack();
     void toggleLightRotateZ(bool enabled);
+    void toggleLightRotateZBack();
     void toggleExposePrelit(bool enabled);
     void setPrelitVertex();
     void setPrelitMultipass();
@@ -127,7 +129,9 @@ private slots:
     void toggleLodAutoSwitch(bool enabled);
     void toggleObjectRotateX(bool enabled);
     void toggleObjectRotateY(bool enabled);
+    void toggleObjectRotateYBack();
     void toggleObjectRotateZ(bool enabled);
+    void toggleObjectRotateZBack();
     void resetObject();
     void toggleAlternateMaterials();
     void showObjectProperties();
@@ -144,6 +148,8 @@ private:
     void editEmitterByName(const QString &name);
     void applySettings(QSettings &settings);
     void writeSettings(QSettings &settings) const;
+    void loadQuickSettings(int slot);
+    void cyclePaneFocus(bool reverse);
     bool loadAssetsFromFile(const QString &path);
     void rebuildAssetTree();
     void addMaterialItems(QStandardItem *parent);

@@ -32,6 +32,7 @@
 
 #include <QAction>
 #include <QActionGroup>
+#include <QApplication>
 #include <QColorDialog>
 #include <QCoreApplication>
 #include <QDialog>
@@ -51,6 +52,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QSet>
+#include <QSignalBlocker>
 #include <QSettings>
 #include <QSlider>
 #include <QSplitter>
@@ -1219,6 +1221,50 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     if (lod_next_shortcut != nullptr) {
         connect(lod_next_shortcut, &QAction::triggered, this, &W3DViewMainWindow::selectNextLod);
     }
+    auto *object_rotate_y_back_shortcut =
+        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_Down)});
+    if (object_rotate_y_back_shortcut != nullptr) {
+        connect(object_rotate_y_back_shortcut, &QAction::triggered,
+                this, &W3DViewMainWindow::toggleObjectRotateYBack);
+    }
+    auto *object_rotate_z_back_shortcut =
+        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_Left)});
+    if (object_rotate_z_back_shortcut != nullptr) {
+        connect(object_rotate_z_back_shortcut, &QAction::triggered,
+                this, &W3DViewMainWindow::toggleObjectRotateZBack);
+    }
+    auto *light_rotate_y_back_shortcut =
+        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_Down)});
+    if (light_rotate_y_back_shortcut != nullptr) {
+        connect(light_rotate_y_back_shortcut, &QAction::triggered,
+                this, &W3DViewMainWindow::toggleLightRotateYBack);
+    }
+    auto *light_rotate_z_back_shortcut =
+        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_Left)});
+    if (light_rotate_z_back_shortcut != nullptr) {
+        connect(light_rotate_z_back_shortcut, &QAction::triggered,
+                this, &W3DViewMainWindow::toggleLightRotateZBack);
+    }
+    for (int slot = 1; slot <= 9; ++slot) {
+        const Qt::Key key = static_cast<Qt::Key>(Qt::Key_1 + (slot - 1));
+        auto *settings_shortcut =
+            CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(key)});
+        if (settings_shortcut != nullptr) {
+            connect(settings_shortcut, &QAction::triggered, this, [this, slot]() {
+                loadQuickSettings(slot);
+            });
+        }
+    }
+    auto *next_pane_shortcut =
+        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_F6)});
+    if (next_pane_shortcut != nullptr) {
+        connect(next_pane_shortcut, &QAction::triggered, this, [this]() { cyclePaneFocus(false); });
+    }
+    auto *prev_pane_shortcut =
+        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::SHIFT | Qt::Key_F6)});
+    if (prev_pane_shortcut != nullptr) {
+        connect(prev_pane_shortcut, &QAction::triggered, this, [this]() { cyclePaneFocus(true); });
+    }
 
     _listMissingTexturesAction = new QAction("List Missing Textures", this);
     connect(_listMissingTexturesAction, &QAction::triggered, this,
@@ -1538,6 +1584,47 @@ void W3DViewMainWindow::saveSettingsFile()
     settings.sync();
 
     statusBar()->showMessage(QString("Saved settings: %1").arg(QFileInfo(path).fileName()));
+}
+
+void W3DViewMainWindow::loadQuickSettings(int slot)
+{
+    if (slot < 1 || slot > 9 || !_viewport) {
+        return;
+    }
+
+    const QString path =
+        QDir(QCoreApplication::applicationDirPath()).filePath(QString("settings%1.dat").arg(slot));
+    if (!QFileInfo::exists(path)) {
+        return;
+    }
+
+    QSettings settings(path, QSettings::IniFormat);
+    applySettings(settings);
+}
+
+void W3DViewMainWindow::cyclePaneFocus(bool reverse)
+{
+    if (!_treeView || !_viewport) {
+        return;
+    }
+
+    QWidget *focused = QApplication::focusWidget();
+    const bool tree_has_focus = focused == _treeView || _treeView->isAncestorOf(focused);
+    const bool viewport_has_focus = focused == _viewport || _viewport->isAncestorOf(focused);
+    if (tree_has_focus) {
+        _viewport->setFocus();
+        return;
+    }
+    if (viewport_has_focus) {
+        _treeView->setFocus();
+        return;
+    }
+
+    if (reverse) {
+        _viewport->setFocus();
+    } else {
+        _treeView->setFocus();
+    }
 }
 
 void W3DViewMainWindow::onCurrentChanged(const QModelIndex &current, const QModelIndex &previous)
@@ -2106,10 +2193,27 @@ void W3DViewMainWindow::toggleLightRotateY(bool enabled)
     int flags = _viewport->lightRotationFlags();
     if (enabled) {
         flags |= W3DViewport::RotateY;
+        flags &= ~W3DViewport::RotateYBack;
     } else {
         flags &= ~W3DViewport::RotateY;
     }
     _viewport->setLightRotationFlags(flags);
+}
+
+void W3DViewMainWindow::toggleLightRotateYBack()
+{
+    if (!_viewport) {
+        return;
+    }
+
+    int flags = _viewport->lightRotationFlags();
+    flags ^= W3DViewport::RotateYBack;
+    flags &= ~W3DViewport::RotateY;
+    _viewport->setLightRotationFlags(flags);
+    if (_lightRotateYAction) {
+        const QSignalBlocker blocker(_lightRotateYAction);
+        _lightRotateYAction->setChecked((flags & W3DViewport::RotateY) != 0);
+    }
 }
 
 void W3DViewMainWindow::toggleLightRotateZ(bool enabled)
@@ -2121,10 +2225,27 @@ void W3DViewMainWindow::toggleLightRotateZ(bool enabled)
     int flags = _viewport->lightRotationFlags();
     if (enabled) {
         flags |= W3DViewport::RotateZ;
+        flags &= ~W3DViewport::RotateZBack;
     } else {
         flags &= ~W3DViewport::RotateZ;
     }
     _viewport->setLightRotationFlags(flags);
+}
+
+void W3DViewMainWindow::toggleLightRotateZBack()
+{
+    if (!_viewport) {
+        return;
+    }
+
+    int flags = _viewport->lightRotationFlags();
+    flags ^= W3DViewport::RotateZBack;
+    flags &= ~W3DViewport::RotateZ;
+    _viewport->setLightRotationFlags(flags);
+    if (_lightRotateZAction) {
+        const QSignalBlocker blocker(_lightRotateZAction);
+        _lightRotateZAction->setChecked((flags & W3DViewport::RotateZ) != 0);
+    }
 }
 
 void W3DViewMainWindow::toggleExposePrelit(bool enabled)
@@ -4094,6 +4215,7 @@ void W3DViewMainWindow::toggleObjectRotateX(bool enabled)
     int flags = _viewport->objectRotationFlags();
     if (enabled) {
         flags |= W3DViewport::RotateX;
+        flags &= ~W3DViewport::RotateXBack;
     } else {
         flags &= ~W3DViewport::RotateX;
     }
@@ -4109,10 +4231,27 @@ void W3DViewMainWindow::toggleObjectRotateY(bool enabled)
     int flags = _viewport->objectRotationFlags();
     if (enabled) {
         flags |= W3DViewport::RotateY;
+        flags &= ~W3DViewport::RotateYBack;
     } else {
         flags &= ~W3DViewport::RotateY;
     }
     _viewport->setObjectRotationFlags(flags);
+}
+
+void W3DViewMainWindow::toggleObjectRotateYBack()
+{
+    if (!_viewport) {
+        return;
+    }
+
+    int flags = _viewport->objectRotationFlags();
+    flags ^= W3DViewport::RotateYBack;
+    flags &= ~W3DViewport::RotateY;
+    _viewport->setObjectRotationFlags(flags);
+    if (_objectRotateYAction) {
+        const QSignalBlocker blocker(_objectRotateYAction);
+        _objectRotateYAction->setChecked((flags & W3DViewport::RotateY) != 0);
+    }
 }
 
 void W3DViewMainWindow::toggleObjectRotateZ(bool enabled)
@@ -4124,10 +4263,27 @@ void W3DViewMainWindow::toggleObjectRotateZ(bool enabled)
     int flags = _viewport->objectRotationFlags();
     if (enabled) {
         flags |= W3DViewport::RotateZ;
+        flags &= ~W3DViewport::RotateZBack;
     } else {
         flags &= ~W3DViewport::RotateZ;
     }
     _viewport->setObjectRotationFlags(flags);
+}
+
+void W3DViewMainWindow::toggleObjectRotateZBack()
+{
+    if (!_viewport) {
+        return;
+    }
+
+    int flags = _viewport->objectRotationFlags();
+    flags ^= W3DViewport::RotateZBack;
+    flags &= ~W3DViewport::RotateZ;
+    _viewport->setObjectRotationFlags(flags);
+    if (_objectRotateZAction) {
+        const QSignalBlocker blocker(_objectRotateZAction);
+        _objectRotateZAction->setChecked((flags & W3DViewport::RotateZ) != 0);
+    }
 }
 
 void W3DViewMainWindow::resetObject()

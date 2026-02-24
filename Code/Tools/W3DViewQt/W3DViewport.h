@@ -27,6 +27,9 @@ public:
         RotateX = 1 << 0,
         RotateY = 1 << 1,
         RotateZ = 1 << 2,
+        RotateXBack = 1 << 3,
+        RotateYBack = 1 << 4,
+        RotateZBack = 1 << 5,
     };
 
     enum class CameraPosition {
