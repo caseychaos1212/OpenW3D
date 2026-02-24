@@ -45,7 +45,7 @@ IMPLEMENT_DYNCREATE(EmitterColorPropPageClass, CPropertyPage)
 //  EmitterColorPropPageClass
 //
 /////////////////////////////////////////////////////////////
-EmitterColorPropPageClass::EmitterColorPropPageClass (EmitterInstanceListClass *pemitter)
+EmitterColorPropPageClass::EmitterColorPropPageClass (EmitterInstanceListClass * /* pemitter */)
 	: m_pEmitterList (NULL),
 	  m_bValid (true),
 	  m_ColorBar (NULL),
@@ -619,12 +619,8 @@ EmitterColorPropPageClass::OnCommand
 	return CPropertyPage::OnCommand (wParam, lParam);
 }
 
-void EmitterColorPropPageClass::OnDeltaposRedRandomSpin(NMHDR* pNMHDR, LRESULT* pResult) 
+void EmitterColorPropPageClass::OnDeltaposRedRandomSpin(NMHDR* /* pNMHDR */, LRESULT* pResult) 
 {
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-	// TODO: Add your control notification handler code here
-	int test = 0;
-	
 	*pResult = 0;
 	return ;
 }

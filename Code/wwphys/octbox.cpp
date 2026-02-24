@@ -112,7 +112,7 @@ void OctBoxClass::Get_Outer_Bounds(AABoxClass * set_bounds)
 
 bool OctBoxClass::Is_Intersecting(NonRefPhysListClass * result_list,bool check_static_objs,bool check_dyn_objs)
 {
-	PhysicsSceneClass * the_scene = PhysicsSceneClass::Get_Instance();
+	[[maybe_unused]] PhysicsSceneClass * the_scene = PhysicsSceneClass::Get_Instance();
 	WWASSERT(the_scene != NULL);
 
 	/*
@@ -209,7 +209,7 @@ OctBoxClass::Internal_Compute_Contacts(bool lock_to_centroids)
 }
 
 
-void OctBoxClass::Compute_Octant_Contact(int oi,bool lock_to_centroids)
+void OctBoxClass::Compute_Octant_Contact(int oi,bool /* lock_to_centroids */)
 {
 	static Vector3 _octant_offset[8] =
 	{

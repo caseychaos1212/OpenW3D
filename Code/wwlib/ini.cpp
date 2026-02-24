@@ -998,9 +998,9 @@ int INIClass::Get_UUBlock(char const * section, void * block, int len) const
  * HISTORY:                                                                                    *
  *    11/6/2001 4:27PM ST : Created                                                            *
  *=============================================================================================*/
-const WideStringClass& INIClass::Get_Wide_String(WideStringClass& new_string, char const * section, char const * entry, wchar_t const * defvalue) const
+const WideStringClass& INIClass::Get_Wide_String(WideStringClass& new_string, char const * section, char const * entry, unichar_t const * defvalue) const
 {
-	wchar_t out[1024];
+	unichar_t out[1024];
 	char buffer[1024];
 
 	Base64Pipe b64pipe(Base64Pipe::DECODE);
@@ -1037,7 +1037,7 @@ const WideStringClass& INIClass::Get_Wide_String(WideStringClass& new_string, ch
  * HISTORY:                                                                                    *
  *   11/6/2001 4:29PM ST : Created                                                             *
  *=============================================================================================*/
-bool INIClass::Put_Wide_String(char const * section, char const * entry, const wchar_t * string)
+bool INIClass::Put_Wide_String(char const * section, char const * entry, const unichar_t * string)
 {
 	if (section == NULL || entry == NULL || string == NULL) {
 		return(false);
@@ -1721,12 +1721,15 @@ int INIClass::Get_String(char const * section, char const * entry, char const * 
 	if (defvalue == NULL) {
 		buffer[0] = '\0';
 		return(0);
-	} else if (defvalue != buffer) {
+	}
+	
+	if (defvalue != buffer) {
 		strncpy(buffer, defvalue, size);
 		buffer[size-1] = '\0';
 		strtrim(buffer);
-		return static_cast<int>(::strlen(buffer));
 	}
+
+	return static_cast<int>(::strlen(buffer));
 }
 
 
@@ -2353,7 +2356,7 @@ int INIClass::CRC(const char *string)
 void INIClass::DuplicateCRCError(const char *message, const char *section, const char *entry)
 {
 	char buffer[512];
-	_snprintf(buffer, sizeof(buffer), "%s - Duplicate Entry \"%s\" in section \"%s\" (%s)\n", message,
+	snprintf(buffer, sizeof(buffer), "%s - Duplicate Entry \"%s\" in section \"%s\" (%s)\n", message,
 		entry, section, Filename);
 
 	OutputDebugStringA(buffer);

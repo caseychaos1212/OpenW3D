@@ -634,7 +634,7 @@ BeaconGameObj::Think (void)
 				// sound.
 				//
 				WeaponClass	*curr_weapon = weapon_bag->Get_Weapon ();
-				if (curr_weapon != NULL && curr_weapon->Get_ID () == WeaponDefinition->Get_ID ()) {
+				if (curr_weapon != NULL && uint32(curr_weapon->Get_ID ()) == WeaponDefinition->Get_ID ()) {
 					curr_weapon->Stop_Firing_Sound ();
 				}
 			}
@@ -1033,7 +1033,7 @@ BeaconGameObj::Get_Enemy_Base (void)
 //
 ////////////////////////////////////////////////////////////////
 bool
-BeaconGameObj::Can_Place_Here (const Vector3 &position)
+BeaconGameObj::Can_Place_Here (const Vector3 &/* position */)
 {
 	// always return true;
 	return true;
@@ -1104,7 +1104,7 @@ BeaconGameObj::Display_Message (int text_id)
 	TDBObjClass *translate_obj = TranslateDBClass::Find_Object (text_id);
 	if (translate_obj != NULL) {
 
-		const wchar_t *string		= translate_obj->Get_String ();
+		const unichar_t *string		= translate_obj->Get_String ();
 		int sound_def_id			= (int)translate_obj->Get_Sound_ID ();
 		float duration				= 2.0F;
 
@@ -1315,7 +1315,7 @@ BeaconGameObj::Get_Owner (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-BeaconGameObj::Completely_Damaged (const OffenseObjectClass &damager)
+BeaconGameObj::Completely_Damaged (const OffenseObjectClass &/* damager */)
 {
 	if (!Is_Delete_Pending()) {
 		Set_State (STATE_DISARMED);

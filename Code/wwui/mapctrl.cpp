@@ -637,7 +637,7 @@ MapCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-MapCtrlClass::On_LButton_Up (const Vector2 &mouse_pos)
+MapCtrlClass::On_LButton_Up (const Vector2 &/* mouse_pos */)
 {
 	Release_Capture ();
 
@@ -853,7 +853,7 @@ MapCtrlClass::On_Frame_Update (void)
 int
 MapCtrlClass::Add_Marker
 (
-	const wchar_t *		name,
+	const unichar_t *		name,
 	const Vector3 &	pos,
 	const RectClass &	uv_rect,
 	int					color

@@ -138,7 +138,7 @@ EvaViewerTabClass::On_Init_Dialog (void)
 	} else {
 		
 		if (AffiliationCtrl != NULL) {
-			AffiliationCtrl->Set_Text (L"");
+			AffiliationCtrl->Set_Text (U_CHAR(""));
 		}		
 	}
 
@@ -220,9 +220,9 @@ EvaViewerTabClass::Build_Object_List (void)
 			//
 			//	Translate the data
 			//
-			const wchar_t *name				= TRANSLATE_BY_DESC(name_id);
-			const wchar_t *description	= TRANSLATE_BY_DESC(description_id);
-			const wchar_t *affiliation	= TRANSLATE_BY_DESC(affiliation_id);
+			const unichar_t *name				= TRANSLATE_BY_DESC(name_id);
+			const unichar_t *description	= TRANSLATE_BY_DESC(description_id);
+			const unichar_t *affiliation	= TRANSLATE_BY_DESC(affiliation_id);
 
 			//
 			//	Configure an object that will hold this data for us
@@ -258,9 +258,9 @@ EvaViewerTabClass::Build_Object_List (void)
 void
 EvaViewerTabClass::On_ListCtrl_Sel_Change
 (
-	ListCtrlClass *	list_ctrl,
-	int					ctrl_id,
-	int					old_index,
+	ListCtrlClass *	/* list_ctrl */,
+	int					/* ctrl_id */,
+	int					/* old_index */,
 	int					new_index
 )
 {
@@ -385,8 +385,8 @@ EvaViewerTabClass::View_Entry (int entry_index)
 void
 EvaViewerTabClass::On_ViewerCtrl_Model_Loaded
 (
-	ViewerCtrlClass *	viewer_ctrl,
-	int					ctrl_id,
+	ViewerCtrlClass *	/* viewer_ctrl */,
+	int					/* ctrl_id */,
 	RenderObjClass *	model
 )
 {
@@ -444,13 +444,13 @@ EvaViewerTabClass::Prepare_Model (RenderObjClass *model)
 //	ListSortCallback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 EvaViewerTabClass::ListSortCallback
 (
 	ListCtrlClass *	list_ctrl,
 	int					item_index1,
 	int					item_index2,
-	uint32				user_param
+	uint32				/* user_param */
 )
 {
 	//
@@ -467,7 +467,7 @@ EvaViewerTabClass::ListSortCallback
 	//	Sort alphatically if the types are the same
 	//
 	if (player_type1 == player_type2) {
-		result = ::wcsicmp (object1->Get_Name (), object2->Get_Name ());
+		result = ::u_strcasecmp (object1->Get_Name (), object2->Get_Name (), U_COMPARE_CODE_POINT_ORDER);
 	} else {
 
 		//

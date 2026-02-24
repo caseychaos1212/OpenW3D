@@ -68,15 +68,15 @@ class DialogTransitionClass;
 //	Usefull Macros
 ////////////////////////////////////////////////////////////////
 #define	START_DIALOG(class_name)				\
-	{	class_name *dialog = new class_name;	\
-		dialog->Start_Dialog ();					\
-		REF_PTR_RELEASE (dialog);	}
+	{	class_name *macro_dialog = new class_name;	\
+		macro_dialog->Start_Dialog ();					\
+		REF_PTR_RELEASE (macro_dialog);	}
 
 
 ////////////////////////////////////////////////////////////////
 //	Typedefs
 ////////////////////////////////////////////////////////////////
-typedef bool (CALLBACK *DEFAULT_DLG_CMD_HANDLER) (DialogBaseClass *dialog, int ctrl_id, int mesage_id, unsigned int param);
+typedef bool (*DEFAULT_DLG_CMD_HANDLER) (DialogBaseClass *dialog, int ctrl_id, int mesage_id, unsigned int param);
 
 
 class DialogEvent :
@@ -188,8 +188,8 @@ public:
 	//
 	//	Control text access
 	//
-	const wchar_t *			Get_Dlg_Item_Text (int id) const;
-	void						Set_Dlg_Item_Text (int id, const wchar_t *text);
+	const unichar_t *			Get_Dlg_Item_Text (int id) const;
+	void						Set_Dlg_Item_Text (int id, const unichar_t *text);
 
 	int						Get_Dlg_Item_Int (int id) const;
 	void						Set_Dlg_Item_Int (int id, int value);
@@ -213,7 +213,7 @@ public:
 	//	Title access
 	//
 	void						Get_Title (WideStringClass *title)	{ *title = Title; }
-	void						Set_Title (const wchar_t *title)		{ Title = title; }
+	void						Set_Title (const unichar_t *title)		{ Title = title; }
 
 	//
 	//	Activation access
@@ -224,8 +224,8 @@ public:
 	//
 	//	Transition control
 	//
-	virtual DialogTransitionClass *	Get_Transition_In (DialogBaseClass *prev_dlg)	{ return NULL; }
-	virtual DialogTransitionClass *	Get_Transition_Out (DialogBaseClass *next_dlg)	{ return NULL; }
+	virtual DialogTransitionClass *	Get_Transition_In (DialogBaseClass * /* prev_dlg */)	{ return NULL; }
+	virtual DialogTransitionClass *	Get_Transition_Out (DialogBaseClass * /* next_dlg */)	{ return NULL; }
 	
 	virtual void			Set_Controls_Hidden (bool onoff)			{ AreControlsHidden = onoff; }
 	virtual bool			Are_Controls_Hidden (void) const			{ return AreControlsHidden; }

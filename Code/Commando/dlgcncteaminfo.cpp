@@ -322,11 +322,11 @@ CNCTeamInfoDialogClass::Populate_Player_List (void)
 			//
 			//	Make a new entry for this player
 			//			
-			int item_index = list_ctrl->Insert_Entry (index ++, L"");
+			int item_index = list_ctrl->Insert_Entry (index ++, U_CHAR(""));
 			if (item_index >= 0) {
 				WideStringClass displayName(0, true);
 				Build_Player_Display_Name(player, displayName);
-				list_ctrl->Set_Entry_Text (item_index, COL_NAME,		(const wchar_t*)displayName);
+				list_ctrl->Set_Entry_Text (item_index, COL_NAME,		(const unichar_t*)displayName);
 
 				list_ctrl->Set_Entry_Int (item_index, COL_RANK,			player->Get_Rung ());
 				list_ctrl->Set_Entry_Int (item_index, COL_CREDITS,		(int) player->Get_Money ());
@@ -341,7 +341,7 @@ CNCTeamInfoDialogClass::Populate_Player_List (void)
 					//::Strip_Path_From_Filename (tga_filename, game_obj->Get_Definition ().Get_Icon_Filename ());
 					//list_ctrl->Add_Icon (item_index, COL_CHARACTER,	tga_filename);
 
-					const wchar_t *name = TRANSLATE (game_obj->Get_Translated_Name_ID ());
+					const unichar_t *name = TRANSLATE (game_obj->Get_Translated_Name_ID ());
 					list_ctrl->Set_Entry_Text (item_index, COL_CHARACTER, name);
 					
 					//
@@ -392,13 +392,13 @@ CNCTeamInfoDialogClass::Populate_Player_List (void)
 //	ListSortCallback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 CNCTeamInfoDialogClass::ListSortCallback
 (
 	ListCtrlClass *	list_ctrl,
 	int					item_index1,
 	int					item_index2,
-	uint32				user_param
+	uint32				/* user_param */
 )
 {
 	int rank1 = (int)list_ctrl->Get_Entry_Data (item_index1, COL_RANK);
@@ -446,7 +446,7 @@ void CNCTeamInfoDialogClass::Build_Player_Display_Name(const cPlayer* player, Wi
 			RefPtr<WWOnline::SquadData> clan = user->GetSquad();
 
 			if (clan.IsValid()) {
-				outName.Format(L"%s [%S]", player->Get_Name(), clan->GetAbbr());
+				outName.Format(U_CHAR("%s [%S]"), player->Get_Name(), clan->GetAbbr());
 				return;
 			}
 		}

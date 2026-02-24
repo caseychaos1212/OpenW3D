@@ -219,14 +219,14 @@ StyleMgrClass::Initialize_From_INI (const char *filename)
 		int count = ini_file->Entry_Count (FONT_FILE_SECTION);
 		int index;
 		for (index = 0; index < count; index ++) {
-			StringClass	filename (0, true);
-			ini_file->Get_String (filename, FONT_FILE_SECTION, ini_file->Get_Entry (FONT_FILE_SECTION, index));
+			StringClass	font_filename (0, true);
+			ini_file->Get_String (font_filename, FONT_FILE_SECTION, ini_file->Get_Entry (FONT_FILE_SECTION, index));
 
 			//
 			//	Install the font into windows
 			//
-			::AddFontResourceA (filename);
-			FontFileList.Add (filename);
+			::AddFontResourceA (font_filename);
+			FontFileList.Add (font_filename);
 		}
 
 		//
@@ -382,7 +382,7 @@ StyleMgrClass::Assign_Font (Render2DSentenceClass *renderer, FONT_STYLE style)
 /*void
 StyleMgrClass::Render_Text
 (
-	const wchar_t *			text,
+	const unichar_t *			text,
 	Render2DTextClass *	renderer,
 	int						x_pos,
 	int						y_pos,
@@ -437,7 +437,7 @@ StyleMgrClass::Render_Text
 void
 StyleMgrClass::Render_Title_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	const RectClass &			rect
 )
@@ -492,7 +492,7 @@ StyleMgrClass::Render_Title_Text
 void
 StyleMgrClass::Render_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	const RectClass &			rect,	
 	bool							do_shadow,
@@ -525,7 +525,7 @@ StyleMgrClass::Render_Text
 void
 StyleMgrClass::Render_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	uint32						text_color,
 	uint32						shadow_color,
@@ -604,7 +604,7 @@ StyleMgrClass::Render_Text
 /*void
 StyleMgrClass::Render_Text
 (
-	const wchar_t *			text,
+	const unichar_t *			text,
 	Render2DTextClass *	renderer,
 	uint32					text_color,
 	uint32					shadow_color,
@@ -675,7 +675,7 @@ StyleMgrClass::Render_Text
 /*void
 StyleMgrClass::Render_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	uint32						text_color,
 	uint32						shadow_color,
@@ -749,7 +749,7 @@ StyleMgrClass::Render_Text
 void
 StyleMgrClass::Render_Wrapped_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	const RectClass &			rect,
 	bool							do_shadow,
@@ -783,7 +783,7 @@ StyleMgrClass::Render_Wrapped_Text
 void
 StyleMgrClass::Render_Wrapped_Text_Ex
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	const RectClass &			rect,
 	bool							do_shadow,
@@ -820,7 +820,7 @@ StyleMgrClass::Render_Wrapped_Text_Ex
 void
 StyleMgrClass::Render_Wrapped_Text_Ex
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	uint32						text_color,
 	uint32						shadow_color, 
@@ -859,7 +859,7 @@ StyleMgrClass::Render_Wrapped_Text_Ex
 				dest = src_start;							\
 			} else {											\
 				size_t bytes	= ((char *)src_end - (char *)src_start);	\
-				size_t len		= bytes / sizeof (wchar_t);						\
+				size_t len		= bytes / sizeof (unichar_t);						\
 				WWASSERT(len + 1 <= static_cast<size_t>(std::numeric_limits<int>::max())); \
 			::memcpy (dest.Get_Buffer (static_cast<int>(len + 1)), src_start, bytes);	\
 				dest.Peek_Buffer ()[len] = 0;										\
@@ -868,13 +868,13 @@ StyleMgrClass::Render_Wrapped_Text_Ex
 	//
 	//	Loop over all the lines of text and check for wrapping...
 	//
-	const wchar_t *line_start = renderer->Find_Row_Start (text, 0);
+	const unichar_t *line_start = renderer->Find_Row_Start (text, 0);
 	while (line_start != NULL) {
 
 		//
 		//	Lookup the start of the next line...
 		//
-		const wchar_t *line_end = renderer->Find_Row_Start (line_start, 1);
+		const unichar_t *line_end = renderer->Find_Row_Start (line_start, 1);
 		
 		//
 		//	Copy this line of text into the control
@@ -908,7 +908,7 @@ StyleMgrClass::Render_Wrapped_Text_Ex
 void
 StyleMgrClass::Render_Wrapped_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	uint32						text_color,
 	uint32						shadow_color, 
@@ -1003,7 +1003,7 @@ StyleMgrClass::Render_Hilight (Render2DClass *renderer, const RectClass &rect)
 void
 StyleMgrClass::Render_Glow
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	const RectClass &			rect,
 	int							radius_x,
@@ -1046,12 +1046,11 @@ StyleMgrClass::Render_Glow
 	//	Figure out how many passes we should do to get the
 	// desired result
 	//
-	float max_radius	= std::max (radius_x, radius_y);
-	int pass_count		= 4;//max_radius / 3;
+	int pass_count		= 4;
 	//pass_count			= std::min (pass_count, 5);
 	//pass_count			= std::max (pass_count, 3);
 
-	int step_count		= 7;//max_radius;
+	int step_count		= 7;
 	//step_count			= std::min (step_count, 10);
 	//step_count			= std::max (step_count, 4);
 	float angle_inc	= DEG_TO_RADF (360) / step_count;

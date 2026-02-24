@@ -465,7 +465,7 @@ TreeCtrlClass::Create_Control_Renderers (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-TreeCtrlClass::On_Set_Cursor (const Vector2 &mouse_pos)
+TreeCtrlClass::On_Set_Cursor (const Vector2 &/* mouse_pos */)
 {
 	//
 	//	Change the mouse cursor
@@ -497,7 +497,7 @@ TreeCtrlClass::Update_Client_Rect (void)
 	//
 	const float ROW_SPACING	= 4.0F;
 	float border_height		= (ROW_SPACING * StyleMgrClass::Get_Y_Scale ());
-	RowHeight					= (TextRenderer.Get_Text_Extents (L"W").Y + border_height);
+	RowHeight					= (TextRenderer.Get_Text_Extents (U_CHAR("W")).Y + border_height);
 
 	//
 	//	Determine how many rows we can fit on a page
@@ -651,26 +651,26 @@ TreeCtrlClass::Sort_Callback (const void *elem1, const void *elem2)
 //	Alphabetic_Sort_Callback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 TreeCtrlClass::Alphabetic_Sort_Callback
 (
-	TreeCtrlClass *	tree_ctrl,
+	TreeCtrlClass *	/* tree_ctrl */,
 	TreeItemClass *	item1,
 	TreeItemClass *	item2,
-	uint32				user_param
+	uint32				/* user_param */
 )
 {
 	//
 	//	Sort by name
 	//
-	const wchar_t *name1 = item1->Get_Name ();
-	const wchar_t *name2 = item2->Get_Name ();
-	int result = ::CompareStringW (LOCALE_USER_DEFAULT, NORM_IGNORECASE, name1, -1, name2, -1);
+	const unichar_t *name1 = item1->Get_Name ();
+	const unichar_t *name2 = item2->Get_Name ();
+	int result = u_strcasecmp(name1, name2, U_COMPARE_CODE_POINT_ORDER);
 
 	int retval = 0;
-	if (result == CSTR_LESS_THAN) {
+	if (result < 0) {
 		retval = -1;
-	} else if (result == CSTR_GREATER_THAN) {
+	} else if (result > 0) {
 		retval = 1;
 	}
 	
@@ -856,7 +856,7 @@ TreeCtrlClass::On_LButton_DblClk (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-TreeCtrlClass::On_LButton_Up (const Vector2 &mouse_pos)
+TreeCtrlClass::On_LButton_Up (const Vector2 &/* mouse_pos */)
 {
 	return ;
 }
@@ -917,7 +917,7 @@ TreeCtrlClass::On_Mouse_Wheel (int direction)
 //
 ////////////////////////////////////////////////////////////////
 bool
-TreeCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
+TreeCtrlClass::On_Key_Down (uint32 key_id, uint32 /* key_data */)
 {
 	bool handled = false;
 	bool is_dirty = true;
@@ -1041,7 +1041,7 @@ TreeCtrlClass::Ensure_Visible (TreeItemClass *item_to_find)
 TreeItemClass *
 TreeCtrlClass::Insert_Item
 (
-	const wchar_t *		name,
+	const unichar_t *		name,
 	const char *		icon_name,
 	const char *		selected_icon_name,
 	TreeItemClass *	parent
@@ -1515,7 +1515,7 @@ TreeItemClass::Expand (bool onoff)
 //
 ////////////////////////////////////////////////////////////////
 void
-TreeItemClass::Set_Name (const wchar_t *name)
+TreeItemClass::Set_Name (const unichar_t *name)
 {
 	Name = name;
 	TreeCtrl->Set_Dirty ();

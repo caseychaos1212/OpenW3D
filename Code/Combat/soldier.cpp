@@ -2687,7 +2687,7 @@ void	SoldierGameObj::Post_Think( void )
 }
 
 //------------------------------------------------------------------------------------
-const Matrix3D & SoldierGameObj::Get_Muzzle( int index )
+const Matrix3D & SoldierGameObj::Get_Muzzle( int /* index */ )
 {
 	static Matrix3D _muzzle(1);
 	if ( WeaponRenderModel != NULL ) {
@@ -2969,7 +2969,7 @@ void	SoldierGameObj::Set_Blended_Animation( const char *animation_name, bool loo
 
 
 //------------------------------------------------------------------------------------
-void	SoldierGameObj::Set_Animation( const char *animation_name, bool looping, float start_frame )
+void	SoldierGameObj::Set_Animation( const char *animation_name, bool looping, float /* start_frame */ )
 {
 	if ( animation_name == NULL ) {
 //		Debug_Say(( "Stoping Scripted Human Animation\n" ));
@@ -3091,7 +3091,7 @@ void SoldierGameObj::Set_Back_Weapon_Model( const char *model_name )
 }
 
 void SoldierGameObj::Set_Back_Flag_Model(const char *model_name,
-	const Vector3 & tint)
+	const Vector3 & /* tint */)
 {
 	if ( BackFlagRenderModel != NULL ) {		// remove old gun model
 		if (Peek_Model() != NULL ) {
@@ -3417,7 +3417,7 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 	TDBObjClass *translate_obj = TranslateDBClass::Find_Object( text_id );
 	if (translate_obj != NULL) {
 		
-		const wchar_t *string		= translate_obj->Get_String ();
+		const unichar_t *string		= translate_obj->Get_String ();
 		int sound_def_id			= (int)translate_obj->Get_Sound_ID ();
 		const char *anim_name	= translate_obj->Get_Animation_Name ();
 
@@ -3480,7 +3480,7 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 		//
 		//	Check to see if this string is commented out.
 		//
-		if( string != NULL && string[0] == L'/' && string[1] == L'/' ) {
+		if( string != NULL && string[0] == U_CHAR('/') && string[1] == U_CHAR('/') ) {
 			string			+= 2;
 			display_text	= false;
 		}

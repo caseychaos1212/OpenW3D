@@ -365,11 +365,10 @@ PresetTransitionTabClass::OnModifyButton (void)
 void
 PresetTransitionTabClass::OnItemChangedTransitionList
 (
-	NMHDR *	pNMHDR,
+	NMHDR *	/* pNMHDR */,
 	LRESULT*	pResult
 )
 {
-	NM_LISTVIEW *pNMListView = (NM_LISTVIEW *)pNMHDR;
 	(*pResult) = 0;
 
 	int index = m_ListCtrl.GetNextItem (-1, LVNI_ALL | LVNI_SELECTED);
@@ -539,7 +538,7 @@ PresetTransitionTabClass::OnDeleteitemTransitionList
 void
 PresetTransitionTabClass::OnDblclkTransitionList
 (
-	NMHDR *	pNMHDR,
+	NMHDR *	/* pNMHDR */,
 	LRESULT *pResult
 )
 {

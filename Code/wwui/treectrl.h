@@ -61,7 +61,7 @@ class TreeCtrlClass;
 //////////////////////////////////////////////////////////////////////
 typedef DynamicVectorClass<TreeItemClass *>	TREE_ITEM_LIST;
 
-typedef int (CALLBACK *TREECTRL_SORT_CALLBACK) (TreeCtrlClass *tree_ctrl, TreeItemClass *item1, TreeItemClass *item2, uint32 user_param);
+typedef int (*TREECTRL_SORT_CALLBACK) (TreeCtrlClass *tree_ctrl, TreeItemClass *item1, TreeItemClass *item2, uint32 user_param);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -108,7 +108,7 @@ public:
 	//
 	//	Content control
 	//
-	TreeItemClass *	Insert_Item (const wchar_t *name, const char *icon_name, const char *selected_icon_name, TreeItemClass *parent);
+	TreeItemClass *	Insert_Item (const unichar_t *name, const char *icon_name, const char *selected_icon_name, TreeItemClass *parent);
 	void					Delete_Item (TreeItemClass *item);
 	void					Delete_All_Items (void);
 
@@ -162,7 +162,7 @@ protected:
 	bool				Render_Item (TreeItemClass *item, float x_pos, float &y_pos, int &row_index, int level);
 
 	static int __cdecl	Sort_Callback (const void *elem1, const void *elem2);
-	static int CALLBACK	Alphabetic_Sort_Callback (TreeCtrlClass *tree_ctrl, TreeItemClass *item1, TreeItemClass *item2, uint32 user_param);
+	static int 		Alphabetic_Sort_Callback (TreeCtrlClass *tree_ctrl, TreeItemClass *item1, TreeItemClass *item2, uint32 user_param);
 
 	////////////////////////////////////////////////////////////////
 	//	Protected member data
@@ -217,8 +217,8 @@ public:
 	//
 	//	Name access
 	//
-	void				Set_Name (const wchar_t *name);
-	const wchar_t *	Get_Name (void) const				{ return Name; }
+	void				Set_Name (const unichar_t *name);
+	const unichar_t *	Get_Name (void) const				{ return Name; }
 
 	//
 	//	Icon access

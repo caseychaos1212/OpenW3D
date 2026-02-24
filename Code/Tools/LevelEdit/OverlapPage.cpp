@@ -245,11 +245,10 @@ OverlapPageClass::OnInitDialog (void)
 void
 OverlapPageClass::OnDeleteitemOverlapTree
 (
-	NMHDR *	pNMHDR,
+	NMHDR *	/* pNMHDR */,
 	LRESULT *pResult
 ) 
 {
-	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 	(*pResult) = 0;
 	return ;
 }
@@ -397,7 +396,7 @@ OverlapPageClass::OnRefresh (void)
 void
 OverlapPageClass::OnDblclkOverlapTree
 (
-	NMHDR *		pNMHDR,
+	NMHDR *		/* pNMHDR */,
 	LRESULT *	pResult
 ) 
 {

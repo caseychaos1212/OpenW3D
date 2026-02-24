@@ -284,11 +284,10 @@ PresetDependencyTabClass::OnRemove (void)
 void
 PresetDependencyTabClass::OnItemchangedDepencyList
 (
-	NMHDR *	pNMHDR,
+	NMHDR *	/* pNMHDR */,
 	LRESULT* pResult
 )
 {
-	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	(*pResult) = 0;
 
 	Update_Button_State ();	

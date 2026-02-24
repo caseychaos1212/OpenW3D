@@ -128,7 +128,7 @@ bool												cNetwork::LastServerConnectionStateBad = false;
 bool												cNetwork::SensibleUpdates					= true;
 
 //-----------------------------------------------------------------------------
-void cNetwork::Init_Client(unsigned short my_port)
+void cNetwork::Init_Client([[maybe_unused]] unsigned short my_port)
 {
 	WWMEMLOG(MEM_NETWORK);
 
@@ -324,7 +324,7 @@ void cNetwork::Accept_Handler(void)
 }
 
 //-----------------------------------------------------------------------------
-void cNetwork::Refusal_Handler(REFUSAL_CODE refusal_code)
+void cNetwork::Refusal_Handler([[maybe_unused]] REFUSAL_CODE refusal_code)
 {
 #ifndef FREEDEDICATEDSERVER
 
@@ -373,7 +373,7 @@ void cNetwork::Refusal_Handler(REFUSAL_CODE refusal_code)
 	if (cGameSpyAdmin::Is_Gamespy_Game()) {
 		if (refusal_code == REFUSAL_VERSION_MISMATCH) {
 			WideStringClass tval;
-			tval.Format(L"%s...%s", TRANSLATE(IDS_MP_CONNECTION_REFUSED_BY_APPLICATION), 
+			tval.Format(U_CHAR("%s...%s"), TRANSLATE(IDS_MP_CONNECTION_REFUSED_BY_APPLICATION), 
 				TRANSLATE(IDS_MENU_VERSION_MISMATCH));
 			DlgMPConnectionRefused::DoDialog(tval, false);
 		} else {
@@ -525,7 +525,7 @@ void cNetwork::Compute_Exe_Key(void)
 	key_string += " ";
 	const char *exe_string = string;
 	const size_t exe_string_length = ::strlen(exe_string);
-	WWASSERT(exe_string_length <= std::numeric_limits<int>::max());
+	WWASSERT(exe_string_length <= size_t(std::numeric_limits<int>::max()));
 	ExeCRC = CRCEngine()(exe_string, static_cast<int>(exe_string_length));
 
 	//
@@ -547,7 +547,7 @@ void cNetwork::Compute_Exe_Key(void)
 	key_string += " ";
 	const char *tdb_string = string;
 	const size_t tdb_length = ::strlen(tdb_string);
-	WWASSERT(tdb_length <= std::numeric_limits<int>::max());
+	WWASSERT(tdb_length <= size_t(std::numeric_limits<int>::max()));
 	StringsCRC = CRCEngine()(tdb_string, static_cast<int>(tdb_length));
 
 	//
@@ -560,7 +560,7 @@ void cNetwork::Compute_Exe_Key(void)
 	//
 	const char *key_string_buffer = key_string;
 	const size_t key_length = ::strlen(key_string_buffer);
-	WWASSERT(key_length <= std::numeric_limits<int>::max());
+	WWASSERT(key_length <= size_t(std::numeric_limits<int>::max()));
 	ExeKey = CRCEngine()(key_string_buffer, static_cast<int>(key_length));
 
 	//
@@ -821,7 +821,7 @@ void cNetwork::Connection_Status_Change_Feedback(void)
 	static unsigned int _print_good_soon = 0;
 
 	unsigned int time = TIMEGETTIME();
-	const wchar_t *string = NULL;
+	const unichar_t *string = NULL;
 	if (LastServerConnectionStateBad) {
 		if (_last_print_bad && time - _last_print < 4000) {
 			return;
@@ -992,7 +992,7 @@ void cNetwork::Update(void)
 }
 
 //-----------------------------------------------------------------------------
-void cNetwork::Client_Send_Packet(cPacket & packet, int mode)
+void cNetwork::Client_Send_Packet([[maybe_unused]] cPacket & packet, [[maybe_unused]] int mode)
 {
 #ifndef FREEDEDICATEDSERVER
 
@@ -1198,7 +1198,7 @@ void cNetwork::Server_Broken_Connection_Handler(int broken_rhost_id)
 
 	WideStringClass widestring;
 	widestring.Format(
-		L"%s %d\n",
+		U_CHAR("%s %d\n"),
 		TRANSLATION(IDS_MP_CONNECTION_TO_CLIENT_BROKEN),
 		broken_rhost_id);
    WWASSERT(CombatManager::Get_Message_Window () != NULL);
@@ -1229,7 +1229,7 @@ void cNetwork::Client_Broken_Connection_Handler(void)
    /**/
 	if (PClientConnection->Have_Id()) {
 		//cHelpText::Set(TRANSLATION(IDS_MP_CONNECTION_TO_SERVER_BROKEN));
-		DlgMsgBox::DoDialog(L"", TRANSLATION(IDS_MP_CONNECTION_TO_SERVER_BROKEN));
+		DlgMsgBox::DoDialog(U_CHAR(""), TRANSLATION(IDS_MP_CONNECTION_TO_SERVER_BROKEN));
 	} else {
 		//cHelpText::Set(TRANSLATION(IDS_MP_UNABLE_CONNECT_TO_SERVER));
 	}
@@ -1525,7 +1525,7 @@ void cNetwork::Connection_Handler(int new_rhost_id)
 
 
 //-----------------------------------------------------------------------------
-void cNetwork::Set_Desired_Frame_Sleep_Ms(int b)
+void cNetwork::Set_Desired_Frame_Sleep_Ms([[maybe_unused]] int b)
 {
    WWASSERT(b >= 0);
 
@@ -1594,7 +1594,7 @@ void cNetwork::Set_Simulated_Latency_Range_Ms(int lower, int upper)
 }
 
 //-----------------------------------------------------------------------------
-void cNetwork::Set_Spam_Count(int spam_count)
+void cNetwork::Set_Spam_Count([[maybe_unused]] int spam_count)
 {
    WWASSERT(spam_count >= 0);
 
@@ -1605,7 +1605,7 @@ void cNetwork::Set_Spam_Count(int spam_count)
 }
 
 //-----------------------------------------------------------------------------
-void cNetwork::Get_Simulated_Latency_Range_Ms(int & lower, int & upper)
+void cNetwork::Get_Simulated_Latency_Range_Ms([[maybe_unused]] int & lower, [[maybe_unused]] int & upper)
 {
 #ifdef WWDEBUG
 	lower = cDevOptions::SimulatedLatencyRangeMsLower.Get();

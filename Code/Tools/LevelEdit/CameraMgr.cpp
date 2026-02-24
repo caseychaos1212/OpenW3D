@@ -458,7 +458,6 @@ CameraMgr::On_Frame (void)
 
 		// Get the camera's current position
 		Vector3 position = m_pCamera->Get_Position ();
-		float orig_z = position.Z;
 		
 		// Get the current direction the camera is looking at
 		Matrix3D matrix = m_pCamera->Get_Transform ();
@@ -470,13 +469,10 @@ CameraMgr::On_Frame (void)
 		if (::GetKeyState (VK_CAPITAL) & 0x0001) {
 
 			// Scale the position 'forward' and 'backward'
-			//position += (delta * matrix.Get_Z_Vector ());
-			//position.Z = orig_z;
 
 			Vector3 y_vector = Vector3::Cross_Product (matrix.Get_X_Vector (), Vector3 (0, 0, 1));
 			y_vector.Normalize ();
 			position += delta * y_vector;
-			//delta += y_vector * (-0.05F * modifier);
 
 		} else {
 
@@ -678,7 +674,7 @@ void
 CameraMgr::Update_Camera_MOVE_ZOOM
 (
 	CameraClass &	camera,
-	float				deltax,
+	float				/* deltax */,
 	float				deltay
 )
 {
@@ -743,9 +739,9 @@ CameraMgr::Update_Camera_MOVE_PLANE
 void
 CameraMgr::Update_Camera_FLY_THROUGH
 (
-	CameraClass &	camera,
-	float				deltax,
-	float				deltay
+	CameraClass &	/* camera */,
+	float				/* deltax */,
+	float				/* deltay */
 )
 {
 	//
@@ -763,8 +759,8 @@ CameraMgr::Update_Camera_FLY_THROUGH
 void
 CameraMgr::Update_Camera_WALK_THROUGH
 (
-	CameraClass &	camera,
-	float				deltax,
+	CameraClass &	/* camera */,
+	float				/* deltax */,
 	float				deltay
 )
 {
@@ -852,7 +848,7 @@ void
 CameraMgr::Update_Camera_ROTATE_X
 (
 	CameraClass &	camera,
-	float				deltax,
+	float				/* deltax */,
 	float				deltay
 )
 {
@@ -876,7 +872,7 @@ CameraMgr::Update_Camera_ROTATE_Y
 (
 	CameraClass &camera,
 	float deltax,
-	float deltay
+	float /* deltay */
 )
 {
 	// Rotate the camera's transformation matrix based
@@ -934,7 +930,7 @@ CameraMgr::Update_Camera_ROTATE_Z
 void
 CameraMgr::Update_Camera_FLY_TO
 (
-	CameraClass &camera,
+	CameraClass &/* camera */,
 	float /*deltax*/,
 	float /*deltay*/
 )

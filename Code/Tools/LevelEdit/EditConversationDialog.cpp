@@ -290,7 +290,7 @@ EditConversationDialogClass::OnInitDialog (void)
 void
 EditConversationDialogClass::OnDblclkRemarkList
 (
-	NMHDR *	pNMHDR,
+	NMHDR *	/* pNMHDR */,
 	LRESULT* pResult
 )
 {
@@ -599,11 +599,10 @@ EditConversationDialogClass::OnInsert (void)
 void
 EditConversationDialogClass::OnItemchangedRemarkList
 (
-	NMHDR *		pNMHDR,
+	NMHDR *		/* pNMHDR */,
 	LRESULT *	pResult
 )
 {
-	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	(*pResult) = 0;
 
 	Update_Button_States ();

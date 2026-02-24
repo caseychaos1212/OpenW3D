@@ -71,13 +71,13 @@ cGameDataSinglePlayer& cGameDataSinglePlayer::operator=(const cGameDataSinglePla
 }
 
 //-----------------------------------------------------------------------------
-const wchar_t* cGameDataSinglePlayer::Get_Static_Game_Name(void)
+const unichar_t* cGameDataSinglePlayer::Get_Static_Game_Name(void)
 {
 	return TRANSLATION(IDS_MP_GAME_TYPE_SINGLE_PLAYER);
 }
 
 //-----------------------------------------------------------------------------
-int cGameDataSinglePlayer::Choose_Player_Type(cPlayer* player, int team_choice, bool is_grunt)
+int cGameDataSinglePlayer::Choose_Player_Type(cPlayer* /* player */, int /* team_choice */, bool is_grunt)
 {
 	WWASSERT(cNetwork::I_Am_Server());
 

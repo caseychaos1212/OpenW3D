@@ -79,7 +79,7 @@ enum
 ///////////////////////////////////////////////////////////////////////
 TDBObjClass::TDBObjClass (void)	:
 	ID (0),
-	SoundID (-1),
+	SoundID (uint32(-1)),
 	CategoryID (CATEGORY_DEFAULT)
 {
 	return ;
@@ -93,7 +93,7 @@ TDBObjClass::TDBObjClass (void)	:
 ///////////////////////////////////////////////////////////////////////
 TDBObjClass::TDBObjClass (const TDBObjClass &src)	:
 	ID (0),
-	SoundID (-1),
+	SoundID (uint32(-1)),
 	CategoryID (CATEGORY_DEFAULT)
 {
 	(*this) = src;
@@ -318,7 +318,7 @@ TDBObjClass::Set_English_String (const char *string)
 	// we can index into the english string
 	//
 	while (TranslatedStrings.Count () <= TranslateDBClass::LANGID_ENGLISH) {
-		TranslatedStrings.Add (WideStringClass (L""));
+		TranslatedStrings.Add (WideStringClass (U_CHAR("")));
 	}
 
 	TranslatedStrings[TranslateDBClass::LANGID_ENGLISH].Convert_From (string);
@@ -392,14 +392,14 @@ TDBObjClass::Get_String (uint32 lang_id)
 //
 /////////////////////////////////////////////////////////////////
 void
-TDBObjClass::Set_String (uint32 lang_id, const wchar_t *string)
+TDBObjClass::Set_String (uint32 lang_id, const unichar_t *string)
 {
 	//
 	//	Grow the translated strings array until we have enough
 	// to cover the requested language
 	//
 	while ((uint32)TranslatedStrings.Count () <= lang_id) {
-		TranslatedStrings.Add (WideStringClass (L""));
+		TranslatedStrings.Add (WideStringClass (U_CHAR("")));
 	}
 
 	//

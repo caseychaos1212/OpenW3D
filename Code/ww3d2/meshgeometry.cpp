@@ -383,7 +383,7 @@ void MeshGeometryClass::Set_User_Text(char * usertext)
 		UserText->Release_Ref();
 	}
 	if (usertext) {
-		size_t text_length = strlen(usertext) + 1;
+		[[maybe_unused]] size_t text_length = strlen(usertext) + 1;
 		WWASSERT(text_length <= static_cast<size_t>(INT_MAX));
 		const size_t length = strlen(usertext) + 1;
 		WWASSERT(length <= static_cast<size_t>(std::numeric_limits<int>::max()));
@@ -1462,7 +1462,7 @@ const Vector3 * MeshGeometryClass::Get_Vertex_Normal_Array(void)
  * HISTORY:                                                                                    *
  *   6/14/2001  gth : Created.                                                                 *
  *=============================================================================================*/
-Vector4 * MeshGeometryClass::get_planes(bool create)
+Vector4 * MeshGeometryClass::get_planes([[maybe_unused]] bool create)
 {
 #if (OPTIMIZE_PLANEEQ_RAM)
 	_PlaneEQArray.Uninitialised_Grow(PolyCount);

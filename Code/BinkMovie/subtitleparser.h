@@ -42,6 +42,7 @@
 #define _SUBTITLEPARSER_H_
 
 #include "always.h"
+#include "unichar.h"
 #include <wwlib/vector.h>
 #include <stddef.h>
 
@@ -57,12 +58,12 @@ public:
 	DynamicVectorClass<SubTitleClass*>* Get_Sub_Titles(const char* moviename);
 
 private:
-	enum {LINE_MAX = 1024};
+	enum {MAXIMUM_LINE_LENGTH = 1024};
 
 	typedef struct tagTokenHook
 	{
-		const wchar_t* Token;
-		void (*Handler)(wchar_t* param, SubTitleClass* subTitle);
+		const unichar_t* Token;
+		void (*Handler)(unichar_t* param, SubTitleClass* subTitle);
 	} TokenHook;
 
 	// Prevent copy construction
@@ -70,14 +71,14 @@ private:
 	const SubTitleParserClass operator=(const SubTitleParserClass&);
 
 	bool Find_Movie_Entry(const char* moviename);
-	bool Parse_Sub_Title(wchar_t* string, SubTitleClass* subTitle);
-	void Parse_Token(wchar_t* token, wchar_t* param, SubTitleClass* subTitle);
-	wchar_t* Get_Next_Line(void);
+	bool Parse_Sub_Title(unichar_t* string, SubTitleClass* subTitle);
+	void Parse_Token(unichar_t* token, unichar_t* param, SubTitleClass* subTitle);
+	unichar_t* Get_Next_Line(void);
 	unsigned int Get_Line_Number(void) const	{return mLineNumber;}
 
 	static TokenHook mTokenHooks[];
 	Straw& mInput;
-	wchar_t mBuffer[LINE_MAX];
+	unichar_t mBuffer[MAXIMUM_LINE_LENGTH];
 	unsigned int mLineNumber;
 };
 

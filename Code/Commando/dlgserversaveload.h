@@ -90,7 +90,7 @@ private:
 	////////////////////////////////////////////////////////////////
 	//	Static methods
 	////////////////////////////////////////////////////////////////
-	static int CALLBACK ListSortCallback (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param);
+	static int	ListSortCallback (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param);
 
 	//////////////////////////////////////////////////////////////
 	//	Private methods
@@ -118,7 +118,7 @@ class ServerSettingsClass
 {
 	public:
 
-		ServerSettingsClass(const char *filename = "svrcfg_cnc.ini", const wchar_t *configname = TRANSLATE(IDS_SERVER_SAVELOAD_DEFAULT), int file_number = 0);
+		ServerSettingsClass(const char *filename = "svrcfg_cnc.ini", const unichar_t *configname = TRANSLATE(IDS_SERVER_SAVELOAD_DEFAULT), int file_number = 0);
 		ServerSettingsClass(ServerSettingsClass *other);
 		bool Is_Default(void) {return(FileNumber == 0);}
 		bool Is_Default_Custom(void) {return(FileNumber == 1);}

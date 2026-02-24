@@ -225,8 +225,8 @@ LoadSPGameMenuClass::Build_List (const char *search_string, int start_index)
 			//
 			WideStringClass time_string;
 			WideStringClass date_string;
-			time_string.Format (L"%d:%02d:%02d", system_time.wHour, system_time.wMinute, system_time.wSecond);
-			date_string.Format (L"%d/%d/%d", system_time.wMonth, system_time.wDay, system_time.wYear);
+			time_string.Format (U_CHAR("%d:%02d:%02d"), system_time.wHour, system_time.wMinute, system_time.wSecond);
+			date_string.Format (U_CHAR("%d/%d/%d"), system_time.wMonth, system_time.wDay, system_time.wYear);
 
 			//
 			//	Add this entry to the list control
@@ -439,7 +439,7 @@ LoadSPGameMenuClass::On_ListCtrl_Delete_Entry
 //	LoadListSortCallback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 LoadSPGameMenuClass::LoadListSortCallback (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param)
 {
 	int retval = 0;
@@ -464,9 +464,9 @@ LoadSPGameMenuClass::LoadListSortCallback (ListCtrlClass *list_ctrl, int item_in
 		//
 		//	Sort by name
 		//
-		const wchar_t *name1 = list_ctrl->Get_Entry_Text (item_index1, 2);
-		const wchar_t *name2 = list_ctrl->Get_Entry_Text (item_index2, 2);
-		retval = ::wcsicmp (name1, name2);
+		const unichar_t *name1 = list_ctrl->Get_Entry_Text (item_index1, 2);
+		const unichar_t *name2 = list_ctrl->Get_Entry_Text (item_index2, 2);
+		retval = ::u_strcasecmp (name1, name2, U_COMPARE_CODE_POINT_ORDER);
 	}
 
 	//
@@ -594,10 +594,10 @@ LoadSPGameMenuClass::Load_Game (void)
 void
 LoadSPGameMenuClass::On_ListCtrl_Sel_Change
 (
-	ListCtrlClass *list_ctrl,
-	int				ctrl_id,
-	int				old_index,
-	int				new_index
+	ListCtrlClass * /* list_ctrl */,
+	int				/* ctrl_id */,
+	int				/* old_index */,
+	int				/* new_index */
 )
 {
 	Update_Button_State ();
@@ -662,9 +662,9 @@ LoadSPGameMenuClass::Update_Button_State (void)
 void
 LoadSPGameMenuClass::On_ListCtrl_DblClk
 (
-	ListCtrlClass *list_ctrl,
-	int				ctrl_id,
-	int				item_index
+	ListCtrlClass * /* list_ctrl */,
+	int				/* ctrl_id */,
+	int				/* item_index */
 )
 {
 	Load_Game ();

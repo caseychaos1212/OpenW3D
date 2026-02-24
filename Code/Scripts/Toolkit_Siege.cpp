@@ -106,7 +106,7 @@ DECLARE_SCRIPT(M00_Siege_Zone_RAD, "Start_Now=1:int, Receive_Type:int, Receive_P
 		}
 	}
 
-	void Custom (GameObject * obj, int type, uintptr_t param, GameObject * sender) override
+	void Custom (GameObject * obj, int type, intptr_t param, GameObject * sender) override
 	{
 		SCRIPT_DEBUG_MESSAGE(("M00_Siege_Zone_RAD has received a custom of type %d, param %d.\n", type, param));
 
@@ -173,7 +173,7 @@ DECLARE_SCRIPT(M00_Siege_Actor_RAD, "Start_Now=1:int, Receive_Type:int, Receive_
 	bool	script_active;
 	bool	debug_mode;
 
-	void Created (GameObject* obj) override
+	void Created (GameObject* /*obj*/) override
 	{
 		registered_zone = 0;
 		my_group_id = Get_Int_Parameter("My_Group_ID");
@@ -202,7 +202,7 @@ DECLARE_SCRIPT(M00_Siege_Actor_RAD, "Start_Now=1:int, Receive_Type:int, Receive_
 		}
 	}
 
-	void Custom (GameObject * obj, int type, uintptr_t param, GameObject * sender) override
+	void Custom (GameObject * obj, int type, intptr_t param, GameObject * sender) override
 	{
 		int my_id;
 

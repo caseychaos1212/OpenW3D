@@ -748,7 +748,7 @@ STDMETHODIMP WebBrowser::OnBeforeNavigate(const wchar_t* /* url */,
 *
 ******************************************************************************/
 
-STDMETHODIMP WebBrowser::OnDocumentComplete(const wchar_t* url, BOOL isTopFrame)
+STDMETHODIMP WebBrowser::OnDocumentComplete([[maybe_unused]] const wchar_t* url, BOOL isTopFrame)
 	{
 	WWDEBUG_SAY(("WebBrowser: OnDocumentComplete: %S\n", url));
 
@@ -1012,7 +1012,7 @@ STDMETHODIMP WebBrowser::OnRegisterLogin(const wchar_t* nick , const wchar_t* pa
 	{
 	WWDEBUG_SAY(("WebBrowser: Register WWOnline login: '%S' - '%S'\n", nick, pass));
 
-	RefPtr<WWOnline::LoginInfo> login = WWOnline::LoginInfo::Create(nick, pass, false);
+	RefPtr<WWOnline::LoginInfo> login = WWOnline::LoginInfo::Create(reinterpret_cast<const unichar_t*>(nick), reinterpret_cast<const unichar_t*>(pass), false);
 
 	if (login.IsValid())
 		{
@@ -1104,8 +1104,8 @@ bool WebBrowser::LaunchExternal(const char* url)
 
 	memset(&mProcessInfo, 0, sizeof(mProcessInfo));
 
-	BOOL createSuccess = CreateProcessA(exeName, commandLine, NULL, NULL, false,
-			0, NULL, NULL, &startupInfo, &mProcessInfo);
+	bool createSuccess = CreateProcessA(exeName, commandLine, NULL, NULL, false,
+			0, NULL, NULL, &startupInfo, &mProcessInfo) != 0;
 
 	WWASSERT(createSuccess && "Failed to launch external WebBrowser.");
 
@@ -1114,7 +1114,7 @@ bool WebBrowser::LaunchExternal(const char* url)
 	  WaitForInputIdle(mProcessInfo.hProcess, 5000);
 		}
 
-	return (true == createSuccess);
+	return createSuccess;
 	}
 
 

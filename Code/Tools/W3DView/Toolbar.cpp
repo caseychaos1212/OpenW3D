@@ -96,7 +96,7 @@ CFancyToolbar::RegisterFancyToolbarClass (void)
     WNDCLASS classInfo = { 0 };
     if (::GetClassInfo (::AfxGetInstanceHandle (),
                         TOOLBAR_CLASS_NAME,
-                        &classInfo) != true)
+                        &classInfo) == 0)
     {
         classInfo.style = CS_PARENTDC;
         classInfo.lpfnWndProc = ::DefWindowProc;
@@ -426,7 +426,7 @@ CFancyToolbar::OnLButtonUp
 //  OnDraw
 //
 void
-CFancyToolbar::OnDraw (CDC* pDC)
+CFancyToolbar::OnDraw (CDC* /* pDC */)
 {
     return ;
 }

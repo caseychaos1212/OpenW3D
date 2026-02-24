@@ -258,8 +258,8 @@ EditDialogueDialogClass::OnDelete (void)
 void
 EditDialogueDialogClass::OnDblclkOptionList
 (
-	NMHDR *		pNMHDR,
-	LRESULT *	pResult
+	NMHDR *		/* pNMHDR */,
+	LRESULT *	/* pResult */
 )
 {
 	//
@@ -471,11 +471,10 @@ EditDialogueDialogClass::Update_Enabled_State (void)
 void
 EditDialogueDialogClass::OnDeltaposSelectedWeightSpin
 (
-	NMHDR *pNMHDR,
+	NMHDR * /* pNMHDR */,
 	LRESULT *pResult
 ) 
 {
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
 	(*pResult) = 0;
 
 	//Update_Current_Weight ();
@@ -538,9 +537,9 @@ EditDialogueDialogClass::Update_Current_Weight (void)
 void
 EditDialogueDialogClass::OnVScroll
 (
-	UINT			nSBCode,
-	UINT			nPos,
-	CScrollBar *pScrollBar
+	UINT			/* nSBCode */,
+	UINT			/* nPos */,
+	CScrollBar * /* pScrollBar */
 )
 {
 	Update_Current_Weight ();

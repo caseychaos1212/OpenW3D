@@ -84,11 +84,10 @@ END_MESSAGE_MAP()
 void
 ConversationPickerDialogClass::OnSelchangedConversationTree
 (
-	NMHDR *		pNMHDR,
+	NMHDR *		/* pNMHDR */,
 	LRESULT *	pResult
 )
 {
-	NM_TREEVIEW *pNMTreeView = (NM_TREEVIEW *)pNMHDR;
 	(*pResult) = 0;
 
 	Conversation = NULL;

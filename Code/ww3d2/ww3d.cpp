@@ -256,7 +256,7 @@ void WW3D::Set_NPatches_Level(unsigned level)
  * HISTORY:                                                                                    *
  *   3/24/98    GTH : Created.                                                                 *
  *=============================================================================================*/
-WW3DErrorType WW3D::Init(void *hwnd, char *defaultpal, bool lite)
+WW3DErrorType WW3D::Init(void *hwnd, char * /*defaultpal*/, bool lite)
 {
 	assert(IsInitted == false);
 	WWDEBUG_SAY(("WW3D::Init hwnd = %p\n",hwnd));
@@ -274,7 +274,7 @@ WW3DErrorType WW3D::Init(void *hwnd, char *defaultpal, bool lite)
 	WWDEBUG_SAY(("Allocate Debug Resources\n"));
 	Allocate_Debug_Resources();
 
- 	MMRESULT r=timeBeginPeriod(1);
+ 	[[maybe_unused]] MMRESULT r=timeBeginPeriod(1);
 	WWASSERT(r==TIMERR_NOERROR);
 
 	/*

@@ -227,7 +227,7 @@ CheckBoxCtrlClass::Update_Client_Rect (void)
 	//
 	//	Determine what one character spacing would be
 	//
-	Vector2 char_size = TextRenderer.Get_Text_Extents (L"W");
+	Vector2 char_size = TextRenderer.Get_Text_Extents (U_CHAR("W"));
 
 	//
 	//	Set the client area
@@ -317,7 +317,7 @@ void CheckBoxCtrlClass::Internal_Set_Check(bool onoff, bool notify)
 //
 ////////////////////////////////////////////////////////////////
 void
-CheckBoxCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
+CheckBoxCtrlClass::On_LButton_Down (const Vector2 &/* mouse_pos */)
 {
 	Internal_Set_Check (!IsChecked, true);
 	return ;
@@ -330,7 +330,7 @@ CheckBoxCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-CheckBoxCtrlClass::On_LButton_Up (const Vector2 &mouse_pos)
+CheckBoxCtrlClass::On_LButton_Up (const Vector2 &/* mouse_pos */)
 {
 	return ;
 }
@@ -372,7 +372,7 @@ CheckBoxCtrlClass::On_Kill_Focus (DialogControlClass *focus)
 //
 ////////////////////////////////////////////////////////////////
 bool
-CheckBoxCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
+CheckBoxCtrlClass::On_Key_Down (uint32 key_id, uint32 /* key_data */)
 {
 	bool handled = false;
 	bool is_dirty = true;

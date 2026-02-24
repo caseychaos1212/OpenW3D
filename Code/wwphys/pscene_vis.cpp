@@ -262,7 +262,7 @@ VisTableClass * PhysicsSceneClass::Get_Vis_Table_For_Rendering(const CameraClass
 		} else {
 
 			if ((LastValidVisId != vis_id) && VisSectorDisplayEnabled)  {
-				StaticPhysClass * tile = StaticCullingSystem->Find_Vis_Tile(vis_sample_point);
+				[[maybe_unused]] StaticPhysClass * tile = StaticCullingSystem->Find_Vis_Tile(vis_sample_point);
 				WWDEBUG_SAY (("Vis Sector: %s\n", tile->Peek_Model ()->Get_Name ()));
 			}
 
@@ -738,7 +738,7 @@ void PhysicsSceneClass::Vis_Render_And_Scan(VisRenderContextClass & context,VisS
 	*/
 	if (!vis_sample.Sample_Rejected()) {
 		context.VisRasterizer->Set_Render_Mode(IDBufferClass::NON_OCCLUDER_MODE);
-		StaticCullingSystem->Evaluate_Non_Occluder_Visibility(context,vis_sample);
+		StaticCullingSystem->Evaluate_Non_Occluder_Visibility(context);
 		DynamicObjVisSystem->Evaluate_Non_Occluder_Visibility(context);
 	}
 

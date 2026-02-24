@@ -571,8 +571,8 @@ SceneEditorClass::Clone_Objects (void)
 void
 SceneEditorClass::Add_Groups_To_List
 (
-	NodeClass &	node,
-	GROUP_LIST &group_list
+	NodeClass &	/* node */,
+	GROUP_LIST &/* group_list */
 )
 {	
 	/*group_list += node.Get_Groups ();
@@ -610,9 +610,9 @@ SceneEditorClass::Build_Group_List
 		// and add thier groups to this list
 		//
 		for (int index = 0; index < m_SelectionMgr->Get_Count (); index ++) {
-			NodeClass *node = m_SelectionMgr->Get_At (index);
-			if (node != NULL) {
-				Add_Groups_To_List (*node, group_list);
+			NodeClass *next_node = m_SelectionMgr->Get_At (index);
+			if (next_node != NULL) {
+				Add_Groups_To_List (*next_node, group_list);
 			}
 		}
 	}
@@ -629,8 +629,8 @@ SceneEditorClass::Build_Group_List
 void
 SceneEditorClass::Add_Nodes_To_List
 (
-	NodeClass &node,
-	NODE_LIST &node_list
+	NodeClass &/* node */,
+	NODE_LIST &/* node_list */
 )
 {
 	//
@@ -995,7 +995,6 @@ SceneEditorClass::Execute_Function_At_Point (CPoint point)
 	//
 	// Determine if the user clicked on a 'function'
 	//
-	NodeClass *node = NULL;
 	if (physobj != NULL) {
 		
 		HITTESTINFO *hit_info = (HITTESTINFO *)physobj->Peek_Model ()->Get_User_Data ();
@@ -1511,7 +1510,7 @@ SceneEditorClass::Reset_Global_Groups_List (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-SceneEditorClass::Add_Group_To_Toolbar (GroupMgrClass *group)
+SceneEditorClass::Add_Group_To_Toolbar ([[maybe_unused]] GroupMgrClass *group)
 {
 	ASSERT (group != NULL);
 			
@@ -1531,7 +1530,7 @@ SceneEditorClass::Add_Group_To_Toolbar (GroupMgrClass *group)
 //
 ////////////////////////////////////////////////////////////////
 void
-SceneEditorClass::Remove_Group_From_Toolbar (GroupMgrClass *group)
+SceneEditorClass::Remove_Group_From_Toolbar ([[maybe_unused]] GroupMgrClass *group)
 {
 	ASSERT (group != NULL);
 			
@@ -1651,7 +1650,7 @@ SceneEditorClass::Set_Background_Music (LPCTSTR filename)
 //
 ////////////////////////////////////////////////////////////////
 void
-SceneEditorClass::View_Aggregate_Children (bool view)
+SceneEditorClass::View_Aggregate_Children (bool /* view */)
 {
 	// Did the state change?
 	/*if (view != m_bAggregateChildrenVisible) {
@@ -2743,7 +2742,7 @@ void
 SceneEditorClass::Generate_Edge_Sampled_Vis
 (
 	float	granularity,
-	bool	ignore_bias,
+	bool	/* ignore_bias */,
 	bool  farm_mode,
 	int	farm_cpu_index,
 	int	farm_cpu_total
@@ -3145,7 +3144,7 @@ void
 SceneEditorClass::On_Vis_Occluders_Rendered
 (
 	VisRenderContextClass &	context,
-	VisSampleClass &			sample
+	VisSampleClass &			/* sample */
 )
 {
 	m_VisWindow.Update_Display (*context.VisRasterizer);

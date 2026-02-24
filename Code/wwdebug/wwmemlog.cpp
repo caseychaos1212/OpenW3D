@@ -494,7 +494,7 @@ int WWMemoryLogClass::Get_Peak_Allocated_Memory(int category)
 	return Get_Log()->Get_Peak_Allocated_Memory(category);
 }
 
-void WWMemoryLogClass::Push_Active_Category(int category)
+void WWMemoryLogClass::Push_Active_Category([[maybe_unused]] int category)
 {
 #if (DISABLE_MEMLOG == 0)
 	Get_Log()->Push_Active_Category(category);
@@ -516,12 +516,6 @@ int WWMemoryLogClass::Register_Memory_Allocated(int size)
 void WWMemoryLogClass::Register_Memory_Released(int category,int size)
 {
 	Get_Log()->Register_Memory_Released(category,size);
-}
-
-
-static void __cdecl _MemLogCleanup(void)
-{
-	delete _TheMemLog;
 }
 
 

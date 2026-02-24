@@ -399,16 +399,16 @@ PerformanceConfigDialogClass::Load_Values (void)
 	//
 	RegistryClass registry (KEY_NAME_SETTINGS);
 	INIClass ini(W3D_CONF_FILE);
-	int dynamic_lod;
-	int static_lod;
-	int dynamic_shadows;
-	int static_shadows;
-	int prelit_mode;
-	int texture_filter;
-	int shadow_mode;		
-	int texture_red;
-	int surface_effect;
-	int particle_detail;
+	int dynamic_lod = 3000;
+	int static_lod = 3000;
+	int dynamic_shadows = 1;
+	int static_shadows = 1;
+	int prelit_mode = WW3D::PRELIT_MODE_LIGHTMAP_MULTI_TEXTURE;
+	int texture_filter = TextureClass::TEXTURE_FILTER_BILINEAR;
+	int shadow_mode = PhysicsSceneClass::SHADOW_MODE_BLOBS_PLUS;		
+	int texture_red = 0;
+	int surface_effect = 1;
+	int particle_detail = 1;
 	
 	if(ini.Is_Present(W3D_SECTION_SYSTEM))
 	{
@@ -1205,7 +1205,7 @@ PerformanceConfigDialogClass::OnShowWindow(BOOL bShow, UINT nStatus)
 			}
 
 			// Try to set the previous selection
-			unsigned res=SendDlgItemMessage (IDC_LIGHTING_MODE_COMBO, CB_FINDSTRINGEXACT, -1, (LPARAM)cur_sel_string);
+			unsigned res=SendDlgItemMessage (IDC_LIGHTING_MODE_COMBO, CB_FINDSTRINGEXACT, WPARAM(-1), (LPARAM)cur_sel_string);
 			if (res==CB_ERR) {
 				if (sel==0) res=0;
 				else {
@@ -1239,7 +1239,7 @@ PerformanceConfigDialogClass::OnShowWindow(BOOL bShow, UINT nStatus)
 			}
 
 			// Try to set the previous selection
-			res=SendDlgItemMessage (IDC_TEXTURE_FILTER_COMBO, CB_FINDSTRINGEXACT, -1, (LPARAM)cur_sel_string);
+			res=SendDlgItemMessage (IDC_TEXTURE_FILTER_COMBO, CB_FINDSTRINGEXACT, WPARAM(-1), (LPARAM)cur_sel_string);
 			if (res==CB_ERR) {
 				if (sel==0) res=0;
 				else {

@@ -42,7 +42,7 @@
 #include <wwdebug/wwdebug.h>
 
 
-bool MPWolAddIgnoreEntry::DoDialog(const wchar_t* defaultUser)
+bool MPWolAddIgnoreEntry::DoDialog(const unichar_t* defaultUser)
 {
 	MPWolAddIgnoreEntry* dialog = new MPWolAddIgnoreEntry(defaultUser);
 
@@ -60,7 +60,7 @@ bool MPWolAddIgnoreEntry::DoDialog(const wchar_t* defaultUser)
 //	MPWolAddIgnoreEntryPopupClass
 //
 ////////////////////////////////////////////////////////////////
-MPWolAddIgnoreEntry::MPWolAddIgnoreEntry(const wchar_t* defaultUser) :
+MPWolAddIgnoreEntry::MPWolAddIgnoreEntry(const unichar_t* defaultUser) :
 		PopupDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_ADD_IGNORE_ENTRY)),
 		mDefaultUser(defaultUser)
 {
@@ -121,7 +121,7 @@ void MPWolAddIgnoreEntry::Add_Ignore_Entry (void)
 	WOLBuddyMgr* buddyMgr = WOLBuddyMgr::GetInstance(false);
 
 	if (buddyMgr) {
-		const wchar_t* name = Get_Dlg_Item_Text(IDC_IGNORE_USER_EDIT);
+		const unichar_t* name = Get_Dlg_Item_Text(IDC_IGNORE_USER_EDIT);
 		buddyMgr->AddIgnore(name);
 		buddyMgr->Release_Ref();
 	}
@@ -145,7 +145,7 @@ void MPWolAddIgnoreEntry::On_EditCtrl_Change(EditCtrlClass* edit, int id)
 }
 
 
-void MPWolAddIgnoreEntry::On_EditCtrl_Enter_Pressed(EditCtrlClass* edit, int id)
+void MPWolAddIgnoreEntry::On_EditCtrl_Enter_Pressed(EditCtrlClass* /* edit */, int id)
 {
 	if (IDC_IGNORE_USER_EDIT == id) {
 		Add_Ignore_Entry();

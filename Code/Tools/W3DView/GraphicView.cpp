@@ -132,9 +132,6 @@ END_MESSAGE_MAP()
 void
 CGraphicView::OnDraw (CDC* pDC)
 {
-	// Get the document to display
-    CW3DViewDoc* doc = (CW3DViewDoc *)GetDocument();
-
     // Are we in a valid state?
     if (!pDC->IsPrinting ())
     {
@@ -469,14 +466,14 @@ CGraphicView::RepaintView
 
 		// Perform the object rotation if necessary
 		if ((m_objectRotation != NoRotation) &&
-			(bUpdateAnimation == true))
+			(bUpdateAnimation != 0))
 		{
 			Rotate_Object ();
 		}
 
 		// Perform the light rotation if necessary
 		if ((m_LightRotation != NoRotation) &&
-			(bUpdateAnimation == true))
+			(bUpdateAnimation != 0))
 		{
 			Rotate_Light ();
 		}
@@ -578,30 +575,7 @@ CGraphicView::RepaintView
 void
 CGraphicView::UpdateDisplay (void)
 {
-	// Get the document to display
-    CW3DViewDoc* doc = (CW3DViewDoc *)GetDocument();
-
-    // Are we in a valid state?
-    /*if (m_bInitialized && doc->GetScene ())
-    {
-        RenderObjClass *pCRenderObj = doc->GetDisplayedObject ();
-        if (pCRenderObj)
-        {
-            Matrix3D transform = pCRenderObj->Get_Transform ();
-            transform.Rotate_X (0.05F);
-            transform.Rotate_Y (0.05F);
-            transform.Rotate_Z (0.05F);
-
-            pCRenderObj->Set_Transform (transform);
-        }
-
-		// Render the current view inside the frame
-        WW3D::Begin_Render (true, true, Vector3 (0.2,0.4,0.6));
-		WW3D::Render (doc->GetScene (), m_pCamera, false, false);
-		WW3D::End_Render ();
-    } */       
-
-    return ;
+	return ;
 }
 
 
@@ -661,7 +635,6 @@ CGraphicView::WindowProc
 	} else if (message == WM_KEYUP) {
 
 		if ((wParam == VK_CONTROL) && (m_bLightMeshInScene == true)) {
-			CW3DViewDoc* doc = (CW3DViewDoc *)GetDocument();
 			m_pLightMesh->Remove ();
 			m_bLightMeshInScene = false;			
 		}
@@ -680,11 +653,11 @@ CGraphicView::WindowProc
 void CALLBACK
 fnTimerCallback
 (
-	UINT uID,
-	UINT uMsg,
+	UINT /* uID */,
+	UINT /* uMsg */,
 	DWORD_PTR dwUser,
-	DWORD_PTR dw1,
-	DWORD_PTR dw2
+	DWORD_PTR /* dw1 */,
+	DWORD_PTR /* dw2 */
 )
 {
 	HWND hwnd = (HWND)dwUser;
@@ -756,9 +729,9 @@ CGraphicView::OnLButtonUp
     }
 
     // Mouse button is up
-    m_bMouseDown = false;    
+    m_bMouseDown = FALSE;    
 
-    if (m_bRMouseDown == true)
+    if (m_bRMouseDown == TRUE)
     {
         ::SetCursor (::LoadCursor (::AfxGetResourceHandle (), MAKEINTRESOURCE (IDC_CURSOR_ZOOM)));
 		  ((CW3DViewDoc *)GetDocument())->Set_Cursor ("zoom.tga");
@@ -776,7 +749,7 @@ CGraphicView::OnLButtonUp
 
 float minZoomAdjust = 0.0F;
 Vector3 sphereCenter;
-Quaternion rotation;
+Quaternion rotationGlobal;
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -791,7 +764,6 @@ CGraphicView::OnMouseMove
     CPoint point
 ) 
 {
-	int iDeltaX = m_lastPoint.x-point.x;
 	int iDeltaY = m_lastPoint.y-point.y;
 
 	// Get the document to display
@@ -828,7 +800,7 @@ CGraphicView::OnMouseMove
 
 		transform.Translate (cameraPan);
 
-		Matrix3 view = Build_Matrix3 (rotation);
+		Matrix3 view = Build_Matrix3 (rotationGlobal);
 		Vector3 move = view * cameraPan;
 		sphereCenter += move;
 
@@ -942,40 +914,40 @@ CGraphicView::OnMouseMove
 
 				// Rotate around the object (orbit) using a 0.00F - 1.00F percentage of
 				// the mouse coordinates
-				rotation = ::Trackball (lastPointX, lastPointY, pointX, pointY, 0.8F);
+				rotationGlobal = ::Trackball (lastPointX, lastPointY, pointX, pointY, 0.8F);
 
 				// Do we want to 'lock-out' all rotation except X?
 				if (m_allowedCameraRotation == OnlyRotateX)
 				{
-					Matrix3D tempMatrix = Build_Matrix3D (rotation);
+					Matrix3D tempMatrix = Build_Matrix3D (rotationGlobal);
 					Matrix3D tempMatrix2 (1);
 
 					tempMatrix2.Rotate_X (tempMatrix.Get_X_Rotation ());
 					tempMatrix2.Set_Translation (tempMatrix.Get_Translation ());
 
-					rotation = Build_Quaternion (tempMatrix2);
+					rotationGlobal = Build_Quaternion (tempMatrix2);
 				}
 				// Do we want to 'lock-out' all rotation except Y?
 				else if (m_allowedCameraRotation == OnlyRotateY)
 				{
-					Matrix3D tempMatrix = Build_Matrix3D (rotation);
+					Matrix3D tempMatrix = Build_Matrix3D (rotationGlobal);
 					Matrix3D tempMatrix2 (1);
 
 					tempMatrix2.Rotate_Y (tempMatrix.Get_Y_Rotation ());
 					tempMatrix2.Set_Translation (tempMatrix.Get_Translation ());
 
-					rotation = Build_Quaternion (tempMatrix2);
+					rotationGlobal = Build_Quaternion (tempMatrix2);
 				}
 				// Do we want to 'lock-out' all rotation except Z?
 				else if (m_allowedCameraRotation == OnlyRotateZ)
 				{
-					Matrix3D tempMatrix = Build_Matrix3D (rotation);
+					Matrix3D tempMatrix = Build_Matrix3D (rotationGlobal);
 					Matrix3D tempMatrix2 (1);
 
 					tempMatrix2.Rotate_Z (tempMatrix.Get_Z_Rotation ());
 					tempMatrix2.Set_Translation (tempMatrix.Get_Translation ());
 
-					rotation = Build_Quaternion (tempMatrix2);
+					rotationGlobal = Build_Quaternion (tempMatrix2);
 				}
 
 				// Get the transformation matrix for the camera and its inverse
@@ -987,7 +959,7 @@ CGraphicView::OnMouseMove
 
 				transform.Translate (to_object);
 
-				Matrix3D::Multiply (transform, Build_Matrix3D (rotation), &transform);
+				Matrix3D::Multiply (transform, Build_Matrix3D (rotationGlobal), &transform);
 
 				transform.Translate (-to_object);
 
@@ -1175,7 +1147,7 @@ CGraphicView::Reset_Camera_To_Display_Sphere (SphereClass &sphere)
 	sphereCenter	= sphere.Center;
 	m_ObjectCenter	= sphereCenter;
 	minZoomAdjust	= m_CameraDistance / 190.0F;
-	rotation			= Build_Quaternion (transform);
+	rotationGlobal			= Build_Quaternion (transform);
 
 	// Move the camera back to get a good view of the object
 	m_pCamera->Set_Transform (transform);

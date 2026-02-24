@@ -182,10 +182,10 @@ MenuEntryCtrlClass::On_Create (void)
 	//	Should we left justify?
 	//
 	if ((Style & 0xF00) == BS_LEFT) {
-		Rect.Right = Rect.Left + extents.X + TextRenderer.Get_Text_Extents (L"W").X;
+		Rect.Right = Rect.Left + extents.X + TextRenderer.Get_Text_Extents (U_CHAR("W")).X;
 	} else {	
 		Rect.Left	= int(Rect.Left + (Rect.Width () / 2) - (extents.X / 2));
-		Rect.Right	= Rect.Left + extents.X + TextRenderer.Get_Text_Extents (L"W").X;
+		Rect.Right	= Rect.Left + extents.X + TextRenderer.Get_Text_Extents (U_CHAR("W")).X;
 	}
 
 	return ;
@@ -678,7 +678,7 @@ MenuEntryCtrlClass::On_Kill_Focus (DialogControlClass *focus)
 //
 ////////////////////////////////////////////////////////////////
 bool
-MenuEntryCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
+MenuEntryCtrlClass::On_Key_Down (uint32 key_id, uint32 /* key_data */)
 {
 	bool handled = true;
 
@@ -731,7 +731,7 @@ MenuEntryCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
 //
 ////////////////////////////////////////////////////////////////
 bool
-MenuEntryCtrlClass::On_Key_Up (uint32 key_id)
+MenuEntryCtrlClass::On_Key_Up (uint32 /* key_id */)
 {	
 	return false;
 }

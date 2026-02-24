@@ -186,9 +186,9 @@ MPWolPageBuddyPopupClass::Send_Page(void)
 	if (message.Is_Empty() == false) {
 
 		//	Get the name of the user we'll be paging
-		const wchar_t* username = Get_Dlg_Item_Text(IDC_BUDDY_NAME_COMBO);
+		const unichar_t* username = Get_Dlg_Item_Text(IDC_BUDDY_NAME_COMBO);
 
-		if (wcslen(username) > 0) {
+		if (u_strlen(username) > 0) {
 
 			//	Send the page
 			if (mBuddyMgr) {
@@ -206,7 +206,7 @@ MPWolPageBuddyPopupClass::Send_Page(void)
 //	Set_Buddy_Name
 //
 ////////////////////////////////////////////////////////////////
-void MPWolPageBuddyPopupClass::Set_Buddy_Name(const wchar_t *user_name)
+void MPWolPageBuddyPopupClass::Set_Buddy_Name(const unichar_t *user_name)
 {
 	Set_Dlg_Item_Text(IDC_BUDDY_NAME_COMBO, user_name);
 }
@@ -231,7 +231,7 @@ void MPWolPageBuddyPopupClass::CheckIfCanSendPage(void)
 }
 
 
-void MPWolPageBuddyPopupClass::On_ComboBoxCtrl_Edit_Change(ComboBoxCtrlClass* combo, int id)
+void MPWolPageBuddyPopupClass::On_ComboBoxCtrl_Edit_Change(ComboBoxCtrlClass* /* combo */, int id)
 {
 	if (IDC_BUDDY_NAME_COMBO == id) { 
 		CheckIfCanSendPage();
@@ -239,7 +239,7 @@ void MPWolPageBuddyPopupClass::On_ComboBoxCtrl_Edit_Change(ComboBoxCtrlClass* co
 }
 
 
-void MPWolPageBuddyPopupClass::On_EditCtrl_Change(EditCtrlClass* edit, int id)
+void MPWolPageBuddyPopupClass::On_EditCtrl_Change(EditCtrlClass* /* edit */, int id)
 {
 	if (IDC_MESSAGE_EDIT == id) { 
 		CheckIfCanSendPage();
@@ -247,7 +247,7 @@ void MPWolPageBuddyPopupClass::On_EditCtrl_Change(EditCtrlClass* edit, int id)
 }
 
 
-void MPWolPageBuddyPopupClass::On_EditCtrl_Enter_Pressed(EditCtrlClass* edit, int id)
+void MPWolPageBuddyPopupClass::On_EditCtrl_Enter_Pressed(EditCtrlClass* /* edit */, int id)
 {
 	if (IDC_MESSAGE_EDIT == id && Is_Dlg_Item_Enabled(IDC_PAGE_BUTTON)) {
 		Send_Page();

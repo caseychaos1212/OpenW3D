@@ -69,7 +69,7 @@ MPWolBuddyListPopupClass::On_Init_Dialog (void)
 	//
 	ListCtrlClass *list_ctrl = (ListCtrlClass *)Get_Dlg_Item (IDC_BUDDY_LIST_CTRL);
 	if (list_ctrl != NULL) {
-		list_ctrl->Add_Column (L"", 1.0F, Vector3 (1, 1, 1));		
+		list_ctrl->Add_Column (U_CHAR(""), 1.0F, Vector3 (1, 1, 1));		
 
 		//
 		//	Loop over all the buddies
@@ -126,9 +126,9 @@ MPWolBuddyListPopupClass::On_Command (int ctrl_id, int message_id, unsigned int 
 void
 MPWolBuddyListPopupClass::On_ListCtrl_DblClk
 (
-	ListCtrlClass *list_ctrl,
-	int				ctrl_id,
-	int				item_index
+	ListCtrlClass * /* list_ctrl */,
+	int				/* ctrl_id */,
+	int				/* item_index */
 )
 {
 	On_Select ();

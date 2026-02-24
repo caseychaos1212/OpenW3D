@@ -108,7 +108,7 @@ MovieOptionsMenuClass::On_Init_Dialog (void)
 				//
 				//	Add an entry for this movie
 				//
-				const wchar_t *wide_desc = TRANSLATE_BY_DESC(string_id_des);
+				const unichar_t *wide_desc = TRANSLATE_BY_DESC(string_id_des);
 				int item_index = list_ctrl->Insert_Entry (0xFF, wide_desc);
 				if (item_index != -1) {
 					list_ctrl->Set_Entry_Data (item_index, 0, (uintptr_t)new StringClass (list[index]));
@@ -187,9 +187,9 @@ MovieOptionsMenuClass::On_ListCtrl_Delete_Entry
 void
 MovieOptionsMenuClass::On_ListCtrl_DblClk
 (
-	ListCtrlClass *list_ctrl,
-	int				ctrl_id,
-	int				item_index
+	ListCtrlClass * /* list_ctrl */,
+	int				/* ctrl_id */,
+	int				/* item_index */
 )
 {
 	if (IsPlaying) {

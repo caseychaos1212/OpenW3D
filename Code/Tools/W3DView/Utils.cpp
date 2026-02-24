@@ -498,7 +498,7 @@ Create_DIB_Section
 //  Make_Bitmap_From_Texture
 //
 HBITMAP
-Make_Bitmap_From_Texture (TextureClass &texture, int width, int height)
+Make_Bitmap_From_Texture ([[maybe_unused]] TextureClass &texture, [[maybe_unused]] int width, [[maybe_unused]] int height)
 {
 	HBITMAP hbitmap = NULL;
 #ifdef WW3D_DX8
@@ -816,7 +816,7 @@ Get_File_Time
 	if (hfile != INVALID_HANDLE_VALUE) {
 
 		// Get the mod times for this file
-		retval = (::GetFileTime (hfile, pcreation_time, paccess_time, pwrite_time) == true);
+		retval = (::GetFileTime (hfile, pcreation_time, paccess_time, pwrite_time) != 0);
 
 		// Close the file
 		SAFE_CLOSE (hfile);
@@ -831,10 +831,11 @@ Get_File_Time
 //  Load_RC_Texture
 //
 TextureClass *
-Load_RC_Texture (LPCTSTR resource_name)
+Load_RC_Texture ([[maybe_unused]] LPCTSTR resource_name)
 {
 	TextureClass *texture = NULL;
 
+#ifdef WW3D_DX8
 	//
 	//	Load the cursor file image from this binaries resources
 	//
@@ -845,7 +846,6 @@ Load_RC_Texture (LPCTSTR resource_name)
 	//
 	//	Create a texture from the raw image data
 	//
-#ifdef WW3D_DX8
 	srBinIMStream stream (res_data, data_size);
 	srSurfaceIOManager::SurfaceImporter *importer = srCore.getSurfaceIOManager()->getImporter (".tga");
 	if (importer != NULL) {
@@ -890,7 +890,7 @@ Find_Missing_Textures
 (
 	DynamicVectorClass<CString> &	list,
 	LPCTSTR								name,
-	int									frame_count
+	int									/* frame_count */
 )
 {
 	//
@@ -944,7 +944,7 @@ Copy_File
 
 	// Perform the copy operation!
 	if (allow_copy) {
-		retval = (::CopyFile (existing_filename, new_filename, false) == true);
+		retval = (::CopyFile (existing_filename, new_filename, false) != 0);
 	}
 
 	// Return the true/false result code

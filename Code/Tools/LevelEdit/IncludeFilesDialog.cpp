@@ -192,11 +192,10 @@ IncludeFilesDialogClass::OnOK (void)
 void
 IncludeFilesDialogClass::OnSelchangedIncludeTree
 (
-	NMHDR *pNMHDR,
+	NMHDR * /* pNMHDR */,
 	LRESULT *pResult
 )
 {
-	NM_TREEVIEW *pNMTreeView = (NM_TREEVIEW *)pNMHDR;
 	(*pResult) = 0;
 	
 	// Change the text in the edit control to reflect the new selection

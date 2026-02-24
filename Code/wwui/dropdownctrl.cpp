@@ -114,7 +114,7 @@ DropDownCtrlClass::Create_Text_Renderer (void)
 		//
 		//	Get the width and height of the current entry
 		//
-		const wchar_t *text		= EntryList[index].text;
+		const unichar_t *text		= EntryList[index].text;
 		Vector2 text_extent	= TextRenderer.Get_Text_Extents (text);
 
 		//
@@ -222,7 +222,7 @@ DropDownCtrlClass::Update_Client_Rect (void)
 	//
 	//	Determine what one character spacing would be
 	//
-	Vector2 char_size = TextRenderer.Get_Text_Extents (L"W");
+	Vector2 char_size = TextRenderer.Get_Text_Extents (U_CHAR("W"));
 
 	float border_width	= char_size.X + 2;
 	float border_height	= 2;
@@ -363,7 +363,7 @@ DropDownCtrlClass::On_Mouse_Move (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 bool
-DropDownCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
+DropDownCtrlClass::On_Key_Down (uint32 key_id, uint32 /* key_data */)
 {
 	bool handled = true;
 
@@ -414,7 +414,7 @@ DropDownCtrlClass::On_Create (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-DropDownCtrlClass::On_Kill_Focus (DialogControlClass *focus)
+DropDownCtrlClass::On_Kill_Focus (DialogControlClass * /* focus */)
 {
 	//
 	//	Noitify the combobox that we are done
@@ -433,7 +433,7 @@ DropDownCtrlClass::On_Kill_Focus (DialogControlClass *focus)
 //
 ////////////////////////////////////////////////////////////////
 int
-DropDownCtrlClass::Add_String (const wchar_t* string)
+DropDownCtrlClass::Add_String (const unichar_t* string)
 {
 	if (string == NULL) {
 		return -1;
@@ -482,7 +482,7 @@ DropDownCtrlClass::Delete_String (int index)
 //
 ////////////////////////////////////////////////////////////////
 int
-DropDownCtrlClass::Find_String (const wchar_t* string)
+DropDownCtrlClass::Find_String (const unichar_t* string)
 {
 	int retval = -1;
 
@@ -504,11 +504,11 @@ DropDownCtrlClass::Find_String (const wchar_t* string)
 }
 
 
-int DropDownCtrlClass::Find_Closest_String(const wchar_t* string)
+int DropDownCtrlClass::Find_Closest_String(const unichar_t* string)
 {
 	int retval = -1;
 
-	if (string && (wcslen(string) > 0)) {
+	if (string && (u_strlen(string) > 0)) {
 		for (int index = 0; index < EntryList.Count (); index ++) {
 			int relation = EntryList[index].text.Compare_No_Case(string);
 
@@ -681,10 +681,10 @@ DropDownCtrlClass::Get_String (int index, WideStringClass &string) const
 //	Get_String
 //
 ////////////////////////////////////////////////////////////////
-const wchar_t *
+const unichar_t *
 DropDownCtrlClass::Get_String (int index) const
 {
-	const wchar_t *retval = NULL;
+	const unichar_t *retval = NULL;
 
 	if (index >= 0 && index < EntryList.Count ()) {
 		

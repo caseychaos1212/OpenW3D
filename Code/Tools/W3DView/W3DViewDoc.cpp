@@ -104,7 +104,7 @@ CW3DViewDoc::CW3DViewDoc (void)
 		m_pCAnimCombo (NULL),
 		m_pCBackgroundBMP (NULL),		
       m_CurrentFrame (0),
-      m_bAnimBlend (true),
+      m_bAnimBlend (TRUE),
 		m_bAnimateCamera (false),
 		m_bAutoCameraReset (true),
 		m_bOneTimeReset (true),
@@ -118,8 +118,8 @@ CW3DViewDoc::CW3DViewDoc (void)
 		m_bCompress_channel_Q(false)
 {
 	// Read the camera animation settings from the registry
-	m_bAnimateCamera = ((BOOL)theApp.GetProfileInt ("Config", "AnimateCamera", 0)) == true;
-	m_bAutoCameraReset = ((BOOL)theApp.GetProfileInt ("Config", "ResetCamera", 1)) == true;
+	m_bAnimateCamera = ((BOOL)theApp.GetProfileInt ("Config", "AnimateCamera", 0)) != 0;
+	m_bAutoCameraReset = ((BOOL)theApp.GetProfileInt ("Config", "ResetCamera", 1)) != 0;
 	return ;
 }
 
@@ -726,24 +726,24 @@ CW3DViewDoc::DisplayObject
             // Reset the animation for this object
             pCModel->Set_Animation ();
 
-				RenderObjClass *m_pCRenderObj;
+				RenderObjClass *render_obj;
 
-            m_pCRenderObj = pCModel;
-            m_pCRenderObj->Add_Ref ();
-            m_pCRenderObj->Set_Transform (Matrix3D (1));
+            render_obj = pCModel;
+            render_obj->Add_Ref ();
+            render_obj->Set_Transform (Matrix3D (1));
 
             // Add this object to the scene
-				if (m_pCRenderObj->Class_ID () == RenderObjClass::CLASSID_BITMAP2D) {
-					m_pC2DScene->Add_Render_Object (m_pCRenderObj);
+				if (render_obj->Class_ID () == RenderObjClass::CLASSID_BITMAP2D) {
+					m_pC2DScene->Add_Render_Object (render_obj);
 				} else {
 					m_pCScene->Clear_Lineup();
-					m_pCScene->Add_Render_Object (m_pCRenderObj);
+					m_pCScene->Add_Render_Object (render_obj);
 				}
 
 				// Reset the current lod to be the lowest possible LOD...
 				if ((m_pCScene->Are_LODs_Switching ()) &&
-					 (m_pCRenderObj->Class_ID () == RenderObjClass::CLASSID_HLOD)) {
-					((HLodClass *)m_pCRenderObj)->Set_LOD_Level (0);
+					 (render_obj->Class_ID () == RenderObjClass::CLASSID_HLOD)) {
+					((HLodClass *)render_obj)->Set_LOD_Level (0);
 				}
 
             CGraphicView *pCGraphicView = GetGraphicView ();
@@ -754,7 +754,7 @@ CW3DViewDoc::DisplayObject
                 if ((use_global_reset_flag && m_bAutoCameraReset) ||
 					     ((use_global_reset_flag == false) && allow_reset) ||
 						  m_bOneTimeReset) {
-						pCGraphicView->Reset_Camera_To_Display_Object (*m_pCRenderObj);
+						pCGraphicView->Reset_Camera_To_Display_Object (*render_obj);
 						m_bOneTimeReset = false;
 					 }
             }
@@ -3032,8 +3032,8 @@ CW3DViewDoc::Save_Camera_Settings (void)
 void
 CW3DViewDoc::Load_Camera_Settings (void)
 {
-	m_ManualFOV				= (theApp.GetProfileInt ("Config", "UseManualFOV", 0) == true);
-	m_ManualClipPlanes	= (theApp.GetProfileInt ("Config", "UseManualClipPlanes", 0) == true);
+	m_ManualFOV				= (theApp.GetProfileInt ("Config", "UseManualFOV", 0) != 0);
+	m_ManualClipPlanes	= (theApp.GetProfileInt ("Config", "UseManualClipPlanes", 0) != 0);
 
 	CGraphicView *graphic_view	= GetGraphicView ();
 	if (graphic_view != NULL) {

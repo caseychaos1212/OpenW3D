@@ -294,7 +294,7 @@ bool
 FileMgrClass::Does_File_Exist
 (
 	LPCTSTR	filename,
-	bool		update_from_vss
+	[[maybe_unused]] bool		update_from_vss
 )
 {
 	// Assume it doesn't exist
@@ -615,7 +615,7 @@ FileMgrClass::Build_Texture_List
 	LPCTSTR start_path,
 	RenderObjClass *prender_obj,
 	DynamicVectorClass<CString> &texture_list,
-	bool brecurse
+	bool /* brecurse */
 )
 {
 	// Param valid?
@@ -780,7 +780,7 @@ FileMgrClass::Initialize_VSS
 																		  username ? username : "User",
 																		  password ? password : "");
 		
-		m_bReadOnlyVSS = (m_DatabaseInterface->Is_Read_Only () == true);
+		m_bReadOnlyVSS = (m_DatabaseInterface->Is_Read_Only ());
 
 		//
 		//	Is this a special user?  A special user is someone who doesn't
