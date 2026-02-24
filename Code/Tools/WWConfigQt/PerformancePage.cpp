@@ -18,8 +18,10 @@
 
 #include "../WWConfig/wwconfig_ids.h"
 #include "../../ww3d2/ww3d.h"
+#if defined(_WIN32)
 #include "../../ww3d2/dx8caps.h"
 #include "../../ww3d2/formconv.h"
+#endif
 #include "../../ww3d2/texture.h"
 
 namespace
@@ -71,6 +73,10 @@ RenderCapabilityInfo QueryRenderCapabilities(const VideoSettings &settings)
 {
     RenderCapabilityInfo caps;
 
+#if !defined(_WIN32)
+    (void)settings;
+    return caps;
+#else
     IDirect3D9 *d3d = Direct3DCreate9(D3D_SDK_VERSION);
     if (!d3d) {
         return caps;
@@ -104,6 +110,7 @@ RenderCapabilityInfo QueryRenderCapabilities(const VideoSettings &settings)
 
     d3d->Release();
     return caps;
+#endif
 }
 } // namespace
 

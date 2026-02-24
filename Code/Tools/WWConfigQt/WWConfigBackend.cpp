@@ -1,13 +1,18 @@
 #include "WWConfigBackend.h"
 
+#if defined(_WIN32)
 #include <d3d9.h>
+#endif
+
 #include <QObject>
 
 #include "../WWConfig/Locale_API.h"
 #include "../WWConfig/WWConfigSettings.h"
 #include "../WWConfig/wwconfig_ids.h"
+#if defined(_WIN32)
 #include "../../ww3d2/dx8caps.h"
 #include "../../ww3d2/ww3d.h"
+#endif
 
 WWConfigBackend::WWConfigBackend() = default;
 
@@ -107,6 +112,9 @@ bool WWConfigBackend::checkDriverWarning(DriverWarningInfo &info) const
     info.show = false;
     info.message.clear();
 
+#if !defined(_WIN32)
+    return false;
+#else
     if (WWConfig::IsDriverWarningDisabled()) {
         return false;
     }
@@ -171,6 +179,7 @@ bool WWConfigBackend::checkDriverWarning(DriverWarningInfo &info) const
                             versionText);
     info.show = true;
     return true;
+#endif
 }
 
 void WWConfigBackend::disableDriverWarning() const

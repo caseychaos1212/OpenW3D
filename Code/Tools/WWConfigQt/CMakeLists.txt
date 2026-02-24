@@ -33,15 +33,17 @@ target_link_libraries(wwconfig_qt
         w3d_qt_toolkit
         wwconfig_core
         wwcommon
+        wwaudio
+)
+
+if(WIN32)
+    target_link_libraries(wwconfig_qt PRIVATE
         wwdebug
         wwmath
         wwphys
         wwsaveload
         ww3d2
-        wwaudio
-)
-
-if(WIN32)
+    )
     target_link_libraries(wwconfig_qt PRIVATE winmm)
 endif()
 
