@@ -10,9 +10,14 @@ set(WWCONFIG_QT_SRC
     AudioPage.h
     WWConfigBackend.cpp
     WWConfigBackend.h
-    wwconfig_qt.rc
     resources.qrc
 )
+
+if(WIN32)
+    list(APPEND WWCONFIG_QT_SRC
+        wwconfig_qt.rc
+    )
+endif()
 
 add_executable(wwconfig_qt WIN32)
 
@@ -28,14 +33,19 @@ target_link_libraries(wwconfig_qt
         w3d_qt_toolkit
         wwconfig_core
         wwcommon
+        wwaudio
+)
+
+if(WIN32)
+    target_link_libraries(wwconfig_qt PRIVATE
         wwdebug
         wwmath
         wwphys
         wwsaveload
         ww3d2
-        wwaudio
-        winmm
-)
+    )
+    target_link_libraries(wwconfig_qt PRIVATE winmm)
+endif()
 
 if(WIN32)
     find_program(WINDEPLOYQT_EXECUTABLE
