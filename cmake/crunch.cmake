@@ -1,8 +1,22 @@
-FetchContent_Populate(
-    crunch
-    GIT_REPOSITORY https://github.com/BinomialLLC/crunch.git
-    GIT_TAG        36479bc697be19168daafbf15f47f3c60ccec004
-)
+set(W3D_CRUNCH_SOURCE_DIR "" CACHE PATH "Path to a local crunch checkout")
+if(W3D_CRUNCH_SOURCE_DIR)
+    set(FETCHCONTENT_SOURCE_DIR_CRUNCH "${W3D_CRUNCH_SOURCE_DIR}")
+endif()
+
+if(DEFINED FETCHCONTENT_SOURCE_DIR_CRUNCH AND NOT FETCHCONTENT_SOURCE_DIR_CRUNCH STREQUAL "")
+    set(crunch_SOURCE_DIR "${FETCHCONTENT_SOURCE_DIR_CRUNCH}")
+    if(NOT EXISTS "${crunch_SOURCE_DIR}/crnlib/crnlib.cpp")
+        message(FATAL_ERROR "FETCHCONTENT_SOURCE_DIR_CRUNCH points to '${crunch_SOURCE_DIR}', but crunch sources were not found there.")
+    endif()
+elseif(W3D_FETCHCONTENT_OFFLINE)
+    message(FATAL_ERROR "W3D_FETCHCONTENT_OFFLINE=ON requires a local crunch source for tools. Set W3D_CRUNCH_SOURCE_DIR or FETCHCONTENT_SOURCE_DIR_CRUNCH, or disable tools with W3D_TOOLS=OFF.")
+else()
+    FetchContent_Populate(
+        crunch
+        GIT_REPOSITORY https://github.com/BinomialLLC/crunch.git
+        GIT_TAG        36479bc697be19168daafbf15f47f3c60ccec004
+    )
+endif()
 
 set(CRNLIB_SOURCES
     ${crunch_SOURCE_DIR}/crnlib/crn_arealist.cpp

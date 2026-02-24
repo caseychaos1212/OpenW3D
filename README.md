@@ -20,8 +20,9 @@ In the near term, the project targets minimal gameplay-impacting changes while c
 - CMake 3.25 or newer.
 - Ninja.
 - A C++20-capable compiler.
-- Network access for CMake `FetchContent` dependencies used by this tree.
+- Network access for CMake `FetchContent` dependencies used by this tree (unless using offline mode below).
 - On Windows, Visual Studio with C++ tools installed.
+- For vcpkg-based presets, set `VCPKG_ROOT` and install bootstrap tools (`curl`, `zip`, `unzip`, `tar` on Linux).
 
 ### Current platform status
 - Windows: primary supported build path.
@@ -43,23 +44,34 @@ cmake --build --preset win --config Release
 
 ### 2) Linux (partial/in-progress)
 
-Linux support is currently best-effort and typically focuses on non-client targets.
+Linux support is currently best-effort and currently focuses on core non-DX/non-Qt targets.
 
 Configure:
 ```bash
-cmake --preset linux -DRENEGADE_CLIENT=OFF -DRENEGADE_FDS=OFF
+cmake --preset linux-core
 ```
 
 Build:
 ```bash
-cmake --build build/linux --config Release
+cmake --build --preset linux-core
 ```
 
+For offline Linux builds, add local dependency paths as needed (for example `-DW3D_FETCHCONTENT_OFFLINE=ON -DW3D_MILES_SOURCE_DIR=... -DW3D_GAMESPY_SOURCE_DIR=...`).
+
 ### 3) Useful CMake options
-- `-DRENEGADE_CLIENT=ON|OFF` to build or skip the game client target.
-- `-DRENEGADE_FDS=ON|OFF` to build or skip dedicated server target.
-- `-DRENEGADE_TOOLS=ON|OFF` to build or skip legacy tool targets.
+- `-DW3D_CLIENT=ON|OFF` to build or skip the game client target.
+- `-DW3D_FDS=ON|OFF` to build or skip dedicated server target.
+- `-DW3D_TOOLS=ON|OFF` to build or skip legacy tool targets.
 - `-DW3D_BUILD_OPTION_FFMPEG=ON|OFF` to toggle FFmpeg integration.
+- `-DW3D_FETCHCONTENT_OFFLINE=ON|OFF` to disable network downloads for `FetchContent`.
+- `-DW3D_MILES_SOURCE_DIR=/path/to/miles-sdk-stub` (or `FETCHCONTENT_SOURCE_DIR_MILES`) to use a local Miles stub checkout.
+- `-DW3D_GAMESPY_SOURCE_DIR=/path/to/GamespySDK` (or `FETCHCONTENT_SOURCE_DIR_GAMESPY`) to use a local GameSpy checkout.
+- `-DW3D_BINK_SOURCE_DIR=/path/to/bink-sdk-stub` (or `FETCHCONTENT_SOURCE_DIR_BINK`) to use a local Bink stub checkout.
+- `-DW3D_CRUNCH_SOURCE_DIR=/path/to/crunch` (or `FETCHCONTENT_SOURCE_DIR_CRUNCH`) to use a local Crunch checkout (required when tools are enabled in offline mode).
+
+### 4) Offline FetchContent mode
+
+When `-DW3D_FETCHCONTENT_OFFLINE=ON`, configure will fail early unless local source directories are provided for each required dependency (`Miles`, `GameSpy`, `Bink` when enabled on Windows, and `Crunch` when tools are enabled). This avoids slow retries and makes dependency requirements explicit for offline environments.
 
 ## License
 

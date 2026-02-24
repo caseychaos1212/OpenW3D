@@ -45,6 +45,9 @@ add_feature_info(FFMpegBuild W3D_BUILD_OPTION_FFMPEG "Build OpenW3D with FFMpeg"
 option(W3D_BUILD_QT_TOOLS "Build Qt-based GUI tools." ON)
 add_feature_info(QtTools W3D_BUILD_QT_TOOLS "Build Qt front-end tools (WWConfig, WDump, and W3DView on Windows)")
 
+option(W3D_FETCHCONTENT_OFFLINE "Disable network access for FetchContent dependencies." OFF)
+add_feature_info(OfflineFetchContent W3D_FETCHCONTENT_OFFLINE "Require local source dirs for FetchContent dependencies")
+
 if(NOT WIN32)
     add_compile_definitions(__cdecl=)
     add_compile_definitions(__stdcall=)
@@ -56,6 +59,10 @@ if(NOT WIN32)
 endif()
 
 include(FetchContent)
+if(W3D_FETCHCONTENT_OFFLINE)
+    set(FETCHCONTENT_FULLY_DISCONNECTED ON CACHE BOOL "Disable all FetchContent download/update steps" FORCE)
+    set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE BOOL "Disable FetchContent update checks" FORCE)
+endif()
 
 if(W3D_BUILD_OPTION_FFMPEG)
     include(ffmpeg)
