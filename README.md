@@ -8,11 +8,11 @@ Active development discussion happens on Discord: https://discord.gg/wSsghDAF4B
 
 Current goals are to modernize the codebase in a practical order while keeping momentum and maintaining compatibility where possible.
 
-- 64-bit Windows support as the immediate focus.
-- Cross-platform support after the 64-bit baseline is stable.
-- Engine improvements after the platform and build foundations are in place.
+- 64-bit support and stability.
+- Cross-platform support.
+- Engine improvements.
 
-In the near term, the project targets minimal gameplay-impacting changes while compatibility work is underway.
+In the near term, the project targets minimal gameplay-impacting changes while compatibility work is underway. Linux builds are also useful for sanitizer-driven debugging, which helps improve x64 stability across platforms.
 
 ## Build Instructions
 

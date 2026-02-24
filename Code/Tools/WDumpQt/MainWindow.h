@@ -59,8 +59,6 @@ private:
     void splitViews();
     void updateRecentFilesMenu();
     void addRecentFile(const QString &path);
-    QStringList recentFiles() const;
-    void setRecentFiles(const QStringList &files);
     void clearViews();
     QString windowTitleForPath(const QString &path) const;
     void rebuildTree();

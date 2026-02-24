@@ -92,6 +92,8 @@
 #include "SphereEditDialog.h"
 #include "SoundEditDialog.h"
 #include "TexturePathDialog.h"
+#include "RecentFiles.h"
+#include "ShortcutHelpers.h"
 
 namespace {
 constexpr int kRoleType = Qt::UserRole + 1;
@@ -374,19 +376,6 @@ void SetHighestLod(RenderObjClass *render_obj)
             hlod->Set_LOD_Level(max_level);
         }
     }
-}
-
-QAction *CreateWindowShortcutAction(QWidget *window, const QList<QKeySequence> &shortcuts)
-{
-    if (!window || shortcuts.isEmpty()) {
-        return nullptr;
-    }
-
-    auto *action = new QAction(window);
-    action->setShortcuts(shortcuts);
-    action->setShortcutContext(Qt::WindowShortcut);
-    window->addAction(action);
-    return action;
 }
 
 bool GetSelectedRenderObject(QTreeView *tree, QString &name, int &class_id)
@@ -1196,51 +1185,51 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     connect(_aboutAction, &QAction::triggered, this, &W3DViewMainWindow::showAbout);
 
     auto *make_aggregate_shortcut =
-        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_A)});
+        qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_A)});
     if (make_aggregate_shortcut != nullptr) {
         connect(make_aggregate_shortcut, &QAction::triggered, this, &W3DViewMainWindow::makeAggregate);
     }
     auto *advanced_animation_shortcut =
-        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_V)});
+        qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_V)});
     if (advanced_animation_shortcut != nullptr) {
         connect(advanced_animation_shortcut, &QAction::triggered,
                 this, &W3DViewMainWindow::openAdvancedAnimation);
     }
     auto *lod_record_shortcut =
-        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_Space)});
+        qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_Space)});
     if (lod_record_shortcut != nullptr) {
         connect(lod_record_shortcut, &QAction::triggered, this, &W3DViewMainWindow::recordLodScreenArea);
     }
     auto *lod_prev_shortcut =
-        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_BracketLeft)});
+        qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_BracketLeft)});
     if (lod_prev_shortcut != nullptr) {
         connect(lod_prev_shortcut, &QAction::triggered, this, &W3DViewMainWindow::selectPrevLod);
     }
     auto *lod_next_shortcut =
-        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_BracketRight)});
+        qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_BracketRight)});
     if (lod_next_shortcut != nullptr) {
         connect(lod_next_shortcut, &QAction::triggered, this, &W3DViewMainWindow::selectNextLod);
     }
     auto *object_rotate_y_back_shortcut =
-        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_Down)});
+        qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_Down)});
     if (object_rotate_y_back_shortcut != nullptr) {
         connect(object_rotate_y_back_shortcut, &QAction::triggered,
                 this, &W3DViewMainWindow::toggleObjectRotateYBack);
     }
     auto *object_rotate_z_back_shortcut =
-        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_Left)});
+        qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_Left)});
     if (object_rotate_z_back_shortcut != nullptr) {
         connect(object_rotate_z_back_shortcut, &QAction::triggered,
                 this, &W3DViewMainWindow::toggleObjectRotateZBack);
     }
     auto *light_rotate_y_back_shortcut =
-        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_Down)});
+        qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_Down)});
     if (light_rotate_y_back_shortcut != nullptr) {
         connect(light_rotate_y_back_shortcut, &QAction::triggered,
                 this, &W3DViewMainWindow::toggleLightRotateYBack);
     }
     auto *light_rotate_z_back_shortcut =
-        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_Left)});
+        qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::CTRL | Qt::Key_Left)});
     if (light_rotate_z_back_shortcut != nullptr) {
         connect(light_rotate_z_back_shortcut, &QAction::triggered,
                 this, &W3DViewMainWindow::toggleLightRotateZBack);
@@ -1248,7 +1237,7 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     for (int slot = 1; slot <= 9; ++slot) {
         const Qt::Key key = static_cast<Qt::Key>(Qt::Key_1 + (slot - 1));
         auto *settings_shortcut =
-            CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(key)});
+            qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(key)});
         if (settings_shortcut != nullptr) {
             connect(settings_shortcut, &QAction::triggered, this, [this, slot]() {
                 loadQuickSettings(slot);
@@ -1256,12 +1245,12 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
         }
     }
     auto *next_pane_shortcut =
-        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_F6)});
+        qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::Key_F6)});
     if (next_pane_shortcut != nullptr) {
         connect(next_pane_shortcut, &QAction::triggered, this, [this]() { cyclePaneFocus(false); });
     }
     auto *prev_pane_shortcut =
-        CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::SHIFT | Qt::Key_F6)});
+        qtcommon::CreateWindowShortcutAction(this, QList<QKeySequence>{QKeySequence(Qt::SHIFT | Qt::Key_F6)});
     if (prev_pane_shortcut != nullptr) {
         connect(prev_pane_shortcut, &QAction::triggered, this, [this]() { cyclePaneFocus(true); });
     }
@@ -1502,18 +1491,16 @@ void W3DViewMainWindow::openRecentFile()
     if (!info.exists() || !info.isFile()) {
         QMessageBox::warning(this, "W3DViewQt", QString("File not found:\n%1").arg(path));
         QSettings settings;
-        auto files = settings.value(QStringLiteral("recentFiles")).toStringList();
-        files.removeAll(path);
-        settings.setValue(QStringLiteral("recentFiles"), files);
+        const QStringList files = qtcommon::RemoveRecentFile(qtcommon::ReadRecentFiles(settings), path);
+        qtcommon::WriteRecentFiles(settings, files, QStringLiteral("recentFiles"), kMaxRecentFiles);
         updateRecentFilesMenu();
         return;
     }
 
     if (!loadAssetsFromFile(path)) {
         QSettings settings;
-        auto files = settings.value(QStringLiteral("recentFiles")).toStringList();
-        files.removeAll(path);
-        settings.setValue(QStringLiteral("recentFiles"), files);
+        const QStringList files = qtcommon::RemoveRecentFile(qtcommon::ReadRecentFiles(settings), path);
+        qtcommon::WriteRecentFiles(settings, files, QStringLiteral("recentFiles"), kMaxRecentFiles);
         updateRecentFilesMenu();
     }
 }
@@ -4517,7 +4504,7 @@ void W3DViewMainWindow::updateRecentFilesMenu()
 
     _recentFilesMenu->clear();
     QSettings settings;
-    const auto files = settings.value(QStringLiteral("recentFiles")).toStringList();
+    const auto files = qtcommon::ReadRecentFiles(settings, QStringLiteral("recentFiles"), kMaxRecentFiles);
     if (files.isEmpty()) {
         auto *empty_action = _recentFilesMenu->addAction("(No recent files)");
         empty_action->setEnabled(false);
@@ -4542,13 +4529,11 @@ void W3DViewMainWindow::addRecentFile(const QString &path)
     }
 
     QSettings settings;
-    auto files = settings.value(QStringLiteral("recentFiles")).toStringList();
-    files.removeAll(path);
-    files.prepend(path);
-    while (files.size() > kMaxRecentFiles) {
-        files.removeLast();
-    }
-    settings.setValue(QStringLiteral("recentFiles"), files);
+    const QStringList files = qtcommon::AddRecentFile(
+        qtcommon::ReadRecentFiles(settings),
+        path,
+        kMaxRecentFiles);
+    qtcommon::WriteRecentFiles(settings, files, QStringLiteral("recentFiles"), kMaxRecentFiles);
     updateRecentFilesMenu();
 }
 

@@ -17,6 +17,7 @@ target_include_directories(wdump_qt
 
 target_link_libraries(wdump_qt
     PRIVATE
+        qtcommon
         w3d_qt_toolkit
         wdump_core
         wwlib

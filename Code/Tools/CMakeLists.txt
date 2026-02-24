@@ -12,6 +12,7 @@ if(WIN32)
 endif()
 
 if(W3D_BUILD_QT_TOOLS)
+    add_subdirectory(QtCommon)
     add_subdirectory(WWConfigQt)
     add_subdirectory(WDumpQt)
     if(WIN32)

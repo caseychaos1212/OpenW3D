@@ -70,6 +70,7 @@ target_include_directories(w3dview_qt
 
 target_link_libraries(w3dview_qt
     PRIVATE
+        qtcommon
         w3d_qt_toolkit
         d3d9lib
         version

@@ -17,6 +17,7 @@
 */
 
 #include "MainWindow.h"
+#include "RecentFiles.h"
 
 #include <QAction>
 #include <QDragEnterEvent>
@@ -307,9 +308,9 @@ void MainWindow::openRecentFile()
 
     const QString path = action->data().toString();
     if (!loadFile(path)) {
-        auto files = recentFiles();
-        files.removeAll(path);
-        setRecentFiles(files);
+        QSettings settings;
+        const QStringList files = qtcommon::RemoveRecentFile(qtcommon::ReadRecentFiles(settings), path);
+        qtcommon::WriteRecentFiles(settings, files);
         updateRecentFilesMenu();
     }
 }
@@ -321,7 +322,8 @@ void MainWindow::updateRecentFilesMenu()
     }
 
     _recentMenu->clear();
-    const auto files = recentFiles();
+    QSettings settings;
+    const auto files = qtcommon::ReadRecentFiles(settings, QStringLiteral("recentFiles"), kMaxRecentFiles);
     if (files.isEmpty()) {
         auto *emptyAction = _recentMenu->addAction(tr("(No recent files)"));
         emptyAction->setEnabled(false);
@@ -344,26 +346,13 @@ void MainWindow::addRecentFile(const QString &path)
         return;
     }
 
-    auto files = recentFiles();
-    files.removeAll(path);
-    files.prepend(path);
-    while (files.size() > kMaxRecentFiles) {
-        files.removeLast();
-    }
-    setRecentFiles(files);
+    QSettings settings;
+    const QStringList files = qtcommon::AddRecentFile(
+        qtcommon::ReadRecentFiles(settings),
+        path,
+        kMaxRecentFiles);
+    qtcommon::WriteRecentFiles(settings, files, QStringLiteral("recentFiles"), kMaxRecentFiles);
     updateRecentFilesMenu();
-}
-
-QStringList MainWindow::recentFiles() const
-{
-    QSettings settings;
-    return settings.value(QStringLiteral("recentFiles")).toStringList();
-}
-
-void MainWindow::setRecentFiles(const QStringList &files)
-{
-    QSettings settings;
-    settings.setValue(QStringLiteral("recentFiles"), files);
 }
 
 void MainWindow::clearViews()

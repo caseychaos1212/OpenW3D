@@ -47,6 +47,7 @@ int LanguageFromString(const QString &value)
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    QCoreApplication::setOrganizationName(QStringLiteral("OpenW3D"));
     QCoreApplication::setApplicationName(QStringLiteral("WWConfigQt"));
     QCoreApplication::setApplicationVersion(QStringLiteral("0.1"));
 
