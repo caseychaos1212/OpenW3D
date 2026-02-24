@@ -13,6 +13,7 @@
 #include "hmorphanim.h"
 #include "hlod.h"
 #include "htree.h"
+#include "matrix3d.h"
 #include "part_emt.h"
 #include "part_ldr.h"
 #include "quat.h"
@@ -457,6 +458,46 @@ QString GetSelectedHierarchyName(QTreeView *tree)
     return QString();
 }
 
+QModelIndex FindRenderObjectIndex(QStandardItemModel *model, const QString &name, int class_id)
+{
+    if (!model || name.isEmpty() || model->rowCount() <= 0) {
+        return QModelIndex();
+    }
+
+    const QModelIndex start = model->index(0, 0);
+    const QModelIndexList matches = model->match(start,
+                                                 kRoleName,
+                                                 name,
+                                                 -1,
+                                                 Qt::MatchExactly | Qt::MatchRecursive);
+    for (const QModelIndex &match : matches) {
+        if (!match.isValid()) {
+            continue;
+        }
+        if (match.data(kRoleType).toInt() != static_cast<int>(AssetNodeType::RenderObject)) {
+            continue;
+        }
+        if (class_id >= 0 && match.data(kRoleClassId).toInt() != class_id) {
+            continue;
+        }
+        return match;
+    }
+
+    return QModelIndex();
+}
+
+void ExpandParentChain(QTreeView *tree, QModelIndex index)
+{
+    if (!tree) {
+        return;
+    }
+
+    while (index.isValid()) {
+        tree->expand(index);
+        index = index.parent();
+    }
+}
+
 QString ResolveGroupLabel(QStandardItemModel *model, const QModelIndex &index, bool is_group)
 {
     if (!model || !index.isValid()) {
@@ -849,6 +890,9 @@ W3DViewMainWindow::W3DViewMainWindow(QWidget *parent)
     auto *settings_menu = menuBar()->addMenu("&Settings");
     _texturePathsAction = settings_menu->addAction("&Texture Paths...");
     connect(_texturePathsAction, &QAction::triggered, this, &W3DViewMainWindow::openTexturePathsDialog);
+    _autoExpandTreeAction = settings_menu->addAction("&Auto Expand Asset Tree");
+    _autoExpandTreeAction->setCheckable(true);
+    connect(_autoExpandTreeAction, &QAction::toggled, this, &W3DViewMainWindow::toggleAutoExpandAssetTree);
 
     auto *view_menu = menuBar()->addMenu("&View");
     auto *toolbars_menu = view_menu->addMenu("&Toolbars");
@@ -1641,6 +1685,9 @@ void W3DViewMainWindow::onCurrentChanged(const QModelIndex &current, const QMode
         }
 
         auto *bitmap = new Bitmap2DObjClass(texture, 0.5f, 0.5f, true, false, false, true);
+        Matrix3D transform(1);
+        transform.Rotate_Y(static_cast<float>(kPi * 0.5));
+        bitmap->Set_Transform(transform);
         _viewport->setRenderObject(bitmap);
         bitmap->Release_Ref();
         statusBar()->showMessage(QString("Showing material: %1").arg(name));
@@ -1894,6 +1941,32 @@ void W3DViewMainWindow::toggleSorting(bool enabled)
 
     QSettings settings;
     settings.setValue("Config/EnableSorting", enabled);
+}
+
+void W3DViewMainWindow::toggleAutoExpandAssetTree(bool enabled)
+{
+    _autoExpandAssetTree = enabled;
+
+    QSettings settings;
+    settings.setValue("Config/AutoExpandAssetTree", enabled);
+
+    if (!_treeView || !_treeModel) {
+        return;
+    }
+
+    auto *root = _treeModel->invisibleRootItem();
+    if (!root) {
+        return;
+    }
+
+    const int count = root->rowCount();
+    for (int index = 0; index < count; ++index) {
+        auto *item = root->child(index);
+        if (!item) {
+            continue;
+        }
+        _treeView->setExpanded(item->index(), enabled);
+    }
 }
 
 void W3DViewMainWindow::toggleBackfaceCulling(bool inverted)
@@ -3129,6 +3202,11 @@ void W3DViewMainWindow::editEmitter()
         return;
     }
 
+    QString updated_name = name;
+    if (updated->Get_Name() && updated->Get_Name()[0]) {
+        updated_name = QString::fromLatin1(updated->Get_Name());
+    }
+
     if (updated->Get_Name() && updated->Get_Name()[0] && _viewport) {
         RenderObjClass *object = asset_manager->Create_Render_Obj(updated->Get_Name());
         if (object) {
@@ -3139,6 +3217,16 @@ void W3DViewMainWindow::editEmitter()
     }
 
     rebuildAssetTree();
+    if (_treeModel && _treeView) {
+        const QModelIndex index = FindRenderObjectIndex(_treeModel,
+                                                        updated_name,
+                                                        RenderObjClass::CLASSID_PARTICLEEMITTER);
+        if (index.isValid()) {
+            ExpandParentChain(_treeView, index.parent());
+            _treeView->setCurrentIndex(index);
+            _treeView->scrollTo(index);
+        }
+    }
     statusBar()->showMessage("Updated emitter.");
 }
 
@@ -4383,15 +4471,15 @@ void W3DViewMainWindow::rebuildAssetTree()
     SortAnimationChildren(hlod_group);
     SortAnimationChildren(aggregate_group);
 
-    _treeView->expand(materials_group->index());
-    _treeView->expand(mesh_group->index());
-    _treeView->expand(hierarchy_group->index());
-    _treeView->expand(hlod_group->index());
-    _treeView->expand(collection_group->index());
-    _treeView->expand(aggregate_group->index());
-    _treeView->expand(emitter_group->index());
-    _treeView->expand(primitives_group->index());
-    _treeView->expand(sound_group->index());
+    _treeView->setExpanded(materials_group->index(), _autoExpandAssetTree);
+    _treeView->setExpanded(mesh_group->index(), _autoExpandAssetTree);
+    _treeView->setExpanded(hierarchy_group->index(), _autoExpandAssetTree);
+    _treeView->setExpanded(hlod_group->index(), _autoExpandAssetTree);
+    _treeView->setExpanded(collection_group->index(), _autoExpandAssetTree);
+    _treeView->setExpanded(aggregate_group->index(), _autoExpandAssetTree);
+    _treeView->setExpanded(emitter_group->index(), _autoExpandAssetTree);
+    _treeView->setExpanded(primitives_group->index(), _autoExpandAssetTree);
+    _treeView->setExpanded(sound_group->index(), _autoExpandAssetTree);
 }
 
 void W3DViewMainWindow::addMaterialItems(QStandardItem *parent)
@@ -4627,6 +4715,7 @@ void W3DViewMainWindow::loadAppSettings()
     _sortingEnabled = settings.value("Config/EnableSorting", true).toBool();
     _animateCamera = settings.value("Config/AnimateCamera", false).toBool();
     _autoResetCamera = settings.value("Config/ResetCamera", true).toBool();
+    _autoExpandAssetTree = settings.value("Config/AutoExpandAssetTree", true).toBool();
     const bool invert_culling = settings.value("Config/InvertBackfaceCulling", false).toBool();
     const bool manual_fov = settings.value("Config/UseManualFOV", false).toBool();
     const bool manual_clip = settings.value("Config/UseManualClipPlanes", false).toBool();
@@ -4667,6 +4756,9 @@ void W3DViewMainWindow::loadAppSettings()
     }
     if (_mungeSortAction) {
         _mungeSortAction->setChecked(munge_sort);
+    }
+    if (_autoExpandTreeAction) {
+        _autoExpandTreeAction->setChecked(_autoExpandAssetTree);
     }
     if (gamma_enabled) {
         int gamma = settings.value("Config/Gamma", 10).toInt();

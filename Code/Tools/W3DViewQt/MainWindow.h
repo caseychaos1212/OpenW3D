@@ -78,6 +78,7 @@ private slots:
     void openGammaDialog();
     void toggleGammaCorrection(bool enabled);
     void toggleMungeSortOnLoad(bool enabled);
+    void toggleAutoExpandAssetTree(bool enabled);
     void openBackgroundObjectDialog();
     void captureScreenshot();
     void makeMovie();
@@ -191,6 +192,7 @@ private:
     QAction *_newAction = nullptr;
     QAction *_openAction = nullptr;
     QAction *_texturePathsAction = nullptr;
+    QAction *_autoExpandTreeAction = nullptr;
     QAction *_loadSettingsAction = nullptr;
     QAction *_saveSettingsAction = nullptr;
     QAction *_enableGammaAction = nullptr;
@@ -271,4 +273,5 @@ private:
     bool _sortingEnabled = true;
     bool _animateCamera = false;
     bool _autoResetCamera = true;
+    bool _autoExpandAssetTree = true;
 };
