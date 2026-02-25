@@ -51,6 +51,9 @@
 #include "assetpackagemgr.h"
 #include "editorbuild.h"
 
+#include <stdlib.h>
+#include <tchar.h>
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -172,6 +175,47 @@ CLevelEditApp::InitInstance (void)
 		install_path[::lstrlen(install_path)-1] = 0;
 	}
 
+	//
+	//  Use file-backed profile storage instead of the registry.
+	//  This keeps tool configuration portable and easy to edit in source-controlled setups.
+	//
+	CString profile_path;
+	LPCTSTR env_profile_path = _tgetenv (TEXT ("OPENW3D_LEVELEDIT_CONFIG_INI"));
+	if (env_profile_path == NULL || env_profile_path[0] == 0) {
+		env_profile_path = _tgetenv (TEXT ("LEVELEDIT_CONFIG_INI"));
+	}
+
+	if (env_profile_path != NULL && env_profile_path[0] != 0) {
+		profile_path = env_profile_path;
+	} else {
+		CString module_path = install_path;
+		int slash_pos = module_path.ReverseFind ('\\');
+		int alt_slash_pos = module_path.ReverseFind ('/');
+		if (alt_slash_pos > slash_pos) {
+			slash_pos = alt_slash_pos;
+		}
+
+		if (slash_pos >= 0) {
+			module_path = module_path.Left (slash_pos + 1);
+		} else {
+			module_path.Empty ();
+		}
+
+		profile_path = module_path + "LevelEdit.ini";
+	}
+
+	if (m_pszRegistryKey != NULL) {
+		::free ((void *)m_pszRegistryKey);
+		m_pszRegistryKey = NULL;
+	}
+
+	if (m_pszProfileName != NULL) {
+		::free ((void *)m_pszProfileName);
+		m_pszProfileName = NULL;
+	}
+
+	m_pszProfileName = _tcsdup ((LPCTSTR)profile_path);
+
 	_pThe3DAssetManager = new EditorAssetMgrClass;
 
 	//
@@ -201,11 +245,6 @@ CLevelEditApp::InitInstance (void)
 
 	RegisterColorPicker (::AfxGetInstanceHandle ());
 	RegisterColorBar (::AfxGetInstanceHandle ());
-
-	// Change the registry key under which our settings are stored.
-	// You should modify this string to be something appropriate
-	// such as the name of your company or organization.
-	SetRegistryKey(_T("Westwood Studios"));	
 
 	//
 	//	Handle the command line

@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-02-25",
+  "sources": {
+    "publicMenuResource": "Code/Tools/LevelEdit/LevelEdit.rc#IDR_MAINFRAME2",
+    "fullMenuResource": "Code/Tools/LevelEdit/LevelEdit.rc#IDR_MAINFRAME",
+    "acceleratorResource": "Code/Tools/LevelEdit/LevelEdit.rc#IDR_MAINFRAME2 ACCELERATORS"
+  },
+  "profiles": {
+    "public": {
+      "status": "in_progress",
+      "menuBaseline": "IDR_MAINFRAME2",
+      "coreImplemented": [
+        "ID_FILE_NEW",
+        "ID_FILE_OPEN",
+        "ID_FILE_SAVE",
+        "ID_FILE_SAVE_AS",
+        "ID_APP_EXIT",
+        "ID_EDIT_UNDO",
+        "ID_EDIT_CUT",
+        "ID_EDIT_COPY",
+        "ID_EDIT_PASTE"
+      ],
+      "runtimeRouted": [
+        "IDM_MODE_CAMERA",
+        "IDM_OBJECT_MANIPULATE",
+        "IDM_MODE_ORBIT",
+        "IDM_MODE_WALKTHROUGH",
+        "IDM_TOGGLE_WIREFRAME_MODE",
+        "IDM_VIEW_CHANGE_DEVICE",
+        "IDM_USE_VIS_CAMERA",
+        "IDM_BUILD_DYNA_CULLSYS",
+        "IDM_GENERATE_OBSTACLE_VOLUMES",
+        "IDM_IMPORT_PATHFIND",
+        "IDM_IMPORT_LIGHTS",
+        "IDM_EDIT_STRINGS_TABLE",
+        "IDM_EXPORT_PRESETS"
+      ],
+      "acceleratorOnlyRouted": [
+        "IDM_ROTATE_LEFT",
+        "IDM_ROTATE_RIGHT",
+        "IDM_VOL_DEC",
+        "IDM_VOL_INC",
+        "IDM_CAM_SPEED_INCREASE",
+        "IDM_CAM_SPEED_DECREASE",
+        "IDM_DELETE_SELECTION",
+        "IDM_ESCAPE",
+        "IDM_VIS_INVERT",
+        "IDM_VIS_DISABLE",
+        "IDM_TOGGLE_PERFORMANCE_SAMPLING",
+        "IDM_CAM_ELEVATE_DN",
+        "IDM_CAM_BKWD",
+        "IDM_CAM_LOOK_DN",
+        "IDM_CAM_TURN_LEFT",
+        "IDM_CAM_RESET",
+        "IDM_CAM_TURN_RIGHT",
+        "IDM_CAM_ELEVATE_UP",
+        "IDM_CAM_FWD",
+        "IDM_CAM_LOOK_UP",
+        "IDM_GEN_VIS",
+        "IDM_RESTRICT_X",
+        "IDM_RESTRICT_Y",
+        "IDM_RESTRICT_Z"
+      ]
+    },
+    "full": {
+      "status": "in_progress",
+      "menuDeltaFromPublic": [
+        {
+          "commandId": "IDM_LEVEL_EXPORT",
+          "menuPath": "File/Export",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_ALWAYS_EXPORT",
+          "menuPath": "File/Export Always",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_ALWAYS_LOCAL_EXPORT",
+          "menuPath": "File/Export Local Always",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_BATCH_EXPORT",
+          "menuPath": "File/Batch Export",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_EXPORT_LANGUAGE",
+          "menuPath": "File/Export Language Version",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_EXPORT_INSTALLER_LANGUAGE_VERSION",
+          "menuPath": "File/Export Installer Language Version",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_SPECIFY_ASSET_DATABASE",
+          "menuPath": "Edit/Select Asset Database",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_CHANGE_BASE",
+          "menuPath": "Edit/Change Asset Tree",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_CAMERA_PERSPECTIVE",
+          "menuPath": "Camera/Perspective",
+          "shortcuts": [],
+          "qtStatus": "toggle_routed"
+        },
+        {
+          "commandId": "IDM_CAMERA_ORTHOGRAPHIC",
+          "menuPath": "Camera/Orthographic",
+          "shortcuts": [],
+          "qtStatus": "toggle_routed"
+        },
+        {
+          "commandId": "IDM_IMPORT_STRING_IDS",
+          "menuPath": "Strings/Import IDs",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_EXPORT_STRING_IDS",
+          "menuPath": "Strings/Export IDs",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_IMMEDIATE_PRESET_CHECKIN",
+          "menuPath": "Presets/Immediate Check In",
+          "shortcuts": [],
+          "qtStatus": "toggle_routed"
+        },
+        {
+          "commandId": "IDM_CHECK_IN_PRESET_CHANGES",
+          "menuPath": "Presets/Check In",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_DEBUG_SCRIPTS_MODE",
+          "menuPath": "Debug/Debug Scripts Mode",
+          "shortcuts": [],
+          "qtStatus": "toggle_routed"
+        },
+        {
+          "commandId": "IDM_CREATE_PROXIES",
+          "menuPath": "Debug/Create Proxy Objects",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_CHECK_MEMLOG",
+          "menuPath": "Debug/View Memory Log",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_EXTRACT_RC_STRINGS",
+          "menuPath": "Debug/Extract RC Strings",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_EXTRACT_INSTALLER_RC_STRINGS",
+          "menuPath": "Debug/Extract Installer RC Strings",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        },
+        {
+          "commandId": "IDM_IMPORT_SOUNDS",
+          "menuPath": "Debug/Generic Debug Fn 1",
+          "shortcuts": [],
+          "qtStatus": "runtime_routed"
+        }
+      ]
+    }
+  },
+  "notes": [
+    "This manifest tracks current command routing parity status.",
+    "Runtime-routed means the command traverses command plumbing into RuntimeSession, but behavior parity may still be incomplete.",
+    "See LevelEditQt-Parity-Exceptions.md for active gaps, intentional divergences, and exit criteria."
+  ]
+}

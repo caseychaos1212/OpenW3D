@@ -54,6 +54,7 @@
 #include "node.h"
 #include "ramfile.h"
 #include "editorbuild.h"
+#include "DdbJsonMirror.h"
 
 
 #ifdef _DEBUG
@@ -1390,6 +1391,22 @@ PresetsFormClass::Save_Presets
 		//	Now write the presets and definitions out to this file
 		//
 		Save_Presets (file, class_id, class_id_matters, temps_only);
+
+#ifdef W3D_LEVELEDIT_DDB_JSON_MIRROR
+		//
+		//	Emit a deterministic sidecar JSON mirror for source-control review.
+		//
+		CString json_path = CString(path) + ".json";
+		StringClass mirror_error;
+		if (!WriteDdbJsonMirror(path, json_path, &mirror_error)) {
+			CString message;
+			message.Format("Failed to write DDB JSON mirror.\nDDB:%s\nJSON:%s\nError:%s",
+							  path,
+							  (LPCTSTR)json_path,
+							  (const char *)mirror_error);
+			::Output_Message(message);
+		}
+#endif // W3D_LEVELEDIT_DDB_JSON_MIRROR
 			
 	} else {
 		

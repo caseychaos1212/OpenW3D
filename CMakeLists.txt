@@ -45,8 +45,41 @@ add_feature_info(FFMpegBuild W3D_BUILD_OPTION_FFMPEG "Build OpenW3D with FFMpeg"
 option(W3D_BUILD_QT_TOOLS "Build Qt-based GUI tools." ON)
 add_feature_info(QtTools W3D_BUILD_QT_TOOLS "Build Qt front-end tools (WWConfig, WDump, and W3DView on Windows)")
 
+option(W3D_BUILD_LEVELEDIT_QT "Build Qt-based LevelEdit prototype tool." OFF)
+add_feature_info(LevelEditQt W3D_BUILD_LEVELEDIT_QT "Build Qt front-end for LevelEdit on Windows")
+
+set(W3D_LEVELEDIT_QT_PROFILE "public" CACHE STRING "LevelEditQt feature profile (public|full).")
+set_property(CACHE W3D_LEVELEDIT_QT_PROFILE PROPERTY STRINGS public full)
+set(W3D_LEVELEDIT_QT_PROFILE_FULL OFF)
+
+set(W3D_LEVELEDIT_PROFILE "public" CACHE STRING "Legacy LevelEdit profile (public|full).")
+set_property(CACHE W3D_LEVELEDIT_PROFILE PROPERTY STRINGS public full)
+set(W3D_LEVELEDIT_PROFILE_FULL OFF)
+
+option(W3D_LEVELEDIT_GIT_SCM "Enable Git-backed LevelEdit source-control integration." OFF)
+add_feature_info(LevelEditGitScm W3D_LEVELEDIT_GIT_SCM "Enable Git-backed LevelEdit SCM abstractions")
+
+option(W3D_LEVELEDIT_DDB_JSON_MIRROR "Enable deterministic .ddb.json sidecar generation." OFF)
+add_feature_info(LevelEditDdbJsonMirror W3D_LEVELEDIT_DDB_JSON_MIRROR "Enable .ddb sidecar JSON output")
+
 option(W3D_FETCHCONTENT_OFFLINE "Disable network access for FetchContent dependencies." OFF)
 add_feature_info(OfflineFetchContent W3D_FETCHCONTENT_OFFLINE "Require local source dirs for FetchContent dependencies")
+
+if(NOT W3D_LEVELEDIT_QT_PROFILE STREQUAL "public" AND NOT W3D_LEVELEDIT_QT_PROFILE STREQUAL "full")
+    message(FATAL_ERROR "W3D_LEVELEDIT_QT_PROFILE must be 'public' or 'full' (got '${W3D_LEVELEDIT_QT_PROFILE}').")
+endif()
+if(W3D_LEVELEDIT_QT_PROFILE STREQUAL "full")
+    set(W3D_LEVELEDIT_QT_PROFILE_FULL ON)
+endif()
+add_feature_info(LevelEditQtProfileFull W3D_LEVELEDIT_QT_PROFILE_FULL "Build LevelEditQt with full profile menu surface")
+
+if(NOT W3D_LEVELEDIT_PROFILE STREQUAL "public" AND NOT W3D_LEVELEDIT_PROFILE STREQUAL "full")
+    message(FATAL_ERROR "W3D_LEVELEDIT_PROFILE must be 'public' or 'full' (got '${W3D_LEVELEDIT_PROFILE}').")
+endif()
+if(W3D_LEVELEDIT_PROFILE STREQUAL "full")
+    set(W3D_LEVELEDIT_PROFILE_FULL ON)
+endif()
+add_feature_info(LevelEditProfileFull W3D_LEVELEDIT_PROFILE_FULL "Build legacy LevelEdit with full profile behavior")
 
 if(NOT WIN32)
     add_compile_definitions(__cdecl=)

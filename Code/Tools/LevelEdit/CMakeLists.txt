@@ -95,6 +95,8 @@ set(LEVELEDIT_SRC
     MemLogDialog.cpp
     MissingTranslationReportDialog.cpp
     mixfiledatabase.cpp
+    GitAssetDatabase.cpp
+    DdbJsonMirror.cpp
     ModelUtils.cpp
     MouseMgr.cpp
     Mover.cpp
@@ -307,6 +309,8 @@ set(LEVELEDIT_SRC
     MemLogDialog.h
     MissingTranslationReportDialog.h
     mixfiledatabase.h
+    GitAssetDatabase.h
+    DdbJsonMirror.h
     ModelUtils.h
     MouseMgr.h
     Mover.h
@@ -431,6 +435,18 @@ target_compile_definitions(leveledit PRIVATE
     _AFXDLL
     PARAM_EDITING_ON
 )
+
+if(W3D_LEVELEDIT_PROFILE STREQUAL "full")
+    target_compile_definitions(leveledit PRIVATE W3D_FORCE_FULL_EDITOR_VER)
+endif()
+
+if(W3D_LEVELEDIT_GIT_SCM)
+    target_compile_definitions(leveledit PRIVATE W3D_LEVELEDIT_GIT_SCM)
+endif()
+
+if(W3D_LEVELEDIT_DDB_JSON_MIRROR)
+    target_compile_definitions(leveledit PRIVATE W3D_LEVELEDIT_DDB_JSON_MIRROR)
+endif()
 
 target_include_directories(leveledit PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}

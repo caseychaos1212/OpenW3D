@@ -40,8 +40,98 @@
 #include "Utils.h"
 #include "mixfile.h"
 #include "rawfile.h"
+#include "regkeys.h"
 #include "shlwapi.h"
 #include <algorithm>
+#include <tchar.h>
+
+namespace
+{
+CString Normalize_Path (LPCTSTR path)
+{
+	if (path == NULL) {
+		return CString ("");
+	}
+
+	CString normalized = path;
+	normalized.TrimLeft ();
+	normalized.TrimRight ();
+
+	if (normalized.GetLength () >= 2 &&
+		normalized[0] == '\"' &&
+		normalized[normalized.GetLength () - 1] == '\"')
+	{
+		normalized = normalized.Mid (1, normalized.GetLength () - 2);
+	}
+
+	return normalized;
+}
+
+bool Has_Always_Mix_Files (LPCTSTR data_path)
+{
+	CString always_dbs_path = ::Make_Path (data_path, "Always.dbs");
+	CString always_dat_path = ::Make_Path (data_path, "Always.dat");
+	return (::PathFileExists (always_dbs_path) || ::PathFileExists (always_dat_path));
+}
+
+bool Resolve_Data_Path_From_Hint (LPCTSTR path_hint, CString &data_path)
+{
+	data_path.Empty ();
+
+	CString normalized_path = Normalize_Path (path_hint);
+	if (normalized_path.IsEmpty ()) {
+		return false;
+	}
+
+	CString candidate_root = normalized_path;
+	if (::PathFileExists (normalized_path) && !::PathIsDirectory (normalized_path)) {
+		candidate_root = ::Strip_Filename_From_Path (normalized_path);
+	}
+
+	CString candidate_data_path = candidate_root;
+	CString leaf_name = ::PathFindFileName (candidate_root);
+	leaf_name.MakeLower ();
+
+	if (leaf_name != "data") {
+		candidate_data_path = ::Make_Path (candidate_root, "DATA");
+	}
+
+	if (Has_Always_Mix_Files (candidate_data_path)) {
+		data_path = candidate_data_path;
+		return true;
+	}
+
+	if (Has_Always_Mix_Files (candidate_root)) {
+		data_path = candidate_root;
+		return true;
+	}
+
+	return false;
+}
+
+bool Resolve_Data_Path_From_Profile (CString &data_path)
+{
+	data_path.Empty ();
+
+	CWinApp *app = ::AfxGetApp ();
+	if (app == NULL) {
+		return false;
+	}
+
+	CString profile_path = app->GetProfileString (CONFIG_KEY, RENEGADE_INSTALL_PATH_VALUE, "");
+	if (Resolve_Data_Path_From_Hint (profile_path, data_path)) {
+		return true;
+	}
+
+	// Backwards-compatible fallback: users often point Asset Tree at DATA.
+	profile_path = app->GetProfileString (CONFIG_KEY, ASSET_DIR_VALUE, "");
+	if (Resolve_Data_Path_From_Hint (profile_path, data_path)) {
+		return true;
+	}
+
+	return false;
+}
+}
 
 
 //////////////////////////////////////////////////////////////////////
@@ -57,29 +147,39 @@ MixFileDatabaseClass *MixFileDatabaseClass::_TheInstance = NULL;
 //////////////////////////////////////////////////////////////////////
 MixFileDatabaseClass::MixFileDatabaseClass (void)
 {
-	//
-	//	Open Renegade's registry
-	//
-	const char * const RENEGADE_REG_KEY	= "Software\\Westwood\\Renegade";
-	RegistryClass registry (RENEGADE_REG_KEY);
-	if (registry.Is_Valid ()) {
+	CString resolved_mix_path;
 
+	//
+	// First, allow explicit override via environment variable.
+	//
+	LPCTSTR env_path = _tgetenv (TEXT ("OPENW3D_RENEGADE_INSTALL_PATH"));
+	if (env_path == NULL || env_path[0] == 0) {
+		env_path = _tgetenv (TEXT ("RENEGADE_INSTALL_PATH"));
+	}
+	if (!Resolve_Data_Path_From_Hint (env_path, resolved_mix_path)) {
+		
 		//
-		//	Read the installation path from the registry
+		// Next, attempt file-backed LevelEdit profile settings.
 		//
-		StringClass install_path;
-		const char * const RENEGADE_INSTALL_VALUE	= "InstallPath";
-		registry.Get_String (RENEGADE_INSTALL_VALUE, install_path);
-
-		if (install_path.Get_Length () > 0) {			
+		if (!Resolve_Data_Path_From_Profile (resolved_mix_path)) {
 
 			//
-			//	The mix files are contained in the data sub-directory
+			// Backwards-compat fallback: open Renegade's registry key.
 			//
-			install_path	= ::Strip_Filename_From_Path (install_path);
-			MixFilePath		= ::Make_Path (install_path, "DATA");
+			const char * const RENEGADE_REG_KEY	= "Software\\Westwood\\Renegade";
+			RegistryClass registry (RENEGADE_REG_KEY);
+			if (registry.Is_Valid ()) {
+
+				StringClass install_path;
+				const char * const RENEGADE_INSTALL_VALUE	= "InstallPath";
+				registry.Get_String (RENEGADE_INSTALL_VALUE, install_path);
+
+				Resolve_Data_Path_From_Hint (install_path, resolved_mix_path);
+			}
 		}
 	}
+
+	MixFilePath = resolved_mix_path;
 
 	_TheInstance = this;
 	return ;

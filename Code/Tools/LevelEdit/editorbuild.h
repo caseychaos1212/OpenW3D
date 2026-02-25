@@ -53,7 +53,11 @@
 // built with the public "mod" functionality or the in-house tool
 // functionality.
 //
+// The default profile is public unless CMake enables
+// `W3D_FORCE_FULL_EDITOR_VER` for full-tool behavior.
+#if !defined(W3D_FORCE_FULL_EDITOR_VER)
 #define PUBLIC_EDITOR_VER
+#endif
 
 
 

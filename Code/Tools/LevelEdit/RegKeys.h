@@ -61,5 +61,6 @@ const TCHAR * const	NODE_ID_START_VALUE			= TEXT ("NodeIDStart");
 const TCHAR * const	IMMEDIATE_CHECKIN_VALUE		= TEXT ("Immed Preset Checkin");
 const TCHAR * const	TEXTURE_COMPRESSION_VALUE	= TEXT ("Texture Compression");
 const TCHAR * const	CURRENT_PACKAGE_NAME			= TEXT ("Asset Package");
+const TCHAR * const	RENEGADE_INSTALL_PATH_VALUE	= TEXT ("Renegade Install Path");
 
 #endif //__REGKEYS_H

@@ -172,6 +172,19 @@ CLevelEditDoc::Initialize_VSS (void)
 	retval = true;
 #else
 
+#ifdef W3D_LEVELEDIT_GIT_SCM
+	CString repo_root = theApp.GetProfileString (CONFIG_KEY, ASSET_DIR_VALUE, "");
+	retval = m_pFileMgr->Initialize_VSS (repo_root);
+
+	if (m_pFileMgr->Is_VSS_Read_Only ()) {
+		::MessageBox (NULL,
+						  "Git source-control integration is running in read-only mode.\nInstall/configure git-lfs locks for editable mode.",
+						  "Git Integration",
+						  MB_ICONEXCLAMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+	}
+
+#else
+
 	// Get the default VSS database to open
 	CString database_path = theApp.GetProfileString (CONFIG_KEY,
 																	 VSSDB_VALUE,
@@ -226,6 +239,8 @@ CLevelEditDoc::Initialize_VSS (void)
 		theApp.WriteProfileString (CONFIG_KEY, VSSDB_VALUE, database_path);	
 		retval = true;
 	}		
+
+#endif // W3D_LEVELEDIT_GIT_SCM
 
 #endif //PUBLIC_EDITOR_VER
 	

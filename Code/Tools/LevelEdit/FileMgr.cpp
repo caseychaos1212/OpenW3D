@@ -62,7 +62,9 @@
 #include "mixfiledatabase.h"
 
 #ifndef PUBLIC_EDITOR_VER
-#include "vssclass.h"
+#ifdef W3D_LEVELEDIT_GIT_SCM
+#include "GitAssetDatabase.h"
+#endif
 #endif
 
 
@@ -108,7 +110,11 @@ FileMgrClass::FileMgrClass (void)
 	//
 	//	Allocate the database interface layer we'll need to access assets
 	//
-	m_DatabaseInterface = new VSSClass;
+	#ifdef W3D_LEVELEDIT_GIT_SCM
+	m_DatabaseInterface = new GitAssetDatabaseClass;
+	#else
+	m_DatabaseInterface = new MixFileDatabaseClass;
+	#endif
 
 	//
 	// Read the asset directory from the registry
@@ -786,7 +792,7 @@ FileMgrClass::Initialize_VSS
 		//	Is this a special user?  A special user is someone who doesn't
 		// have full write access to the database.
 		//
-		if (::lstrcmpi (username, SPECIAL_USER_NAME) == 0) {
+		if (username != NULL && ::lstrcmpi (username, SPECIAL_USER_NAME) == 0) {
 			m_IsSpecialUser = true;
 		}
 	}
