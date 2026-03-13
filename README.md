@@ -63,15 +63,41 @@ For offline Linux builds, add local dependency paths as needed (for example `-DW
 - `-DW3D_FDS=ON|OFF` to build or skip dedicated server target.
 - `-DW3D_TOOLS=ON|OFF` to build or skip legacy tool targets.
 - `-DW3D_BUILD_OPTION_FFMPEG=ON|OFF` to toggle FFmpeg integration.
+- `-DW3D_BUILD_LEVELEDIT_QT=ON|OFF` to build the experimental Qt LevelEdit target on Windows when Qt tools are enabled.
+- `-DW3D_LEVELEDIT_QT_PROFILE=public|full` to select Qt LevelEdit profile surface (`public` default).
+- `-DW3D_LEVELEDIT_PROFILE=public|full` to select legacy LevelEdit profile behavior (`public` default).
+- `-DW3D_LEVELEDIT_GIT_SCM=ON|OFF` to enable Git-backed source-control integration scaffolding for LevelEdit full profile.
+- `-DW3D_LEVELEDIT_DDB_JSON_MIRROR=ON|OFF` to emit deterministic `.ddb.json` sidecars when preset DB files are saved.
 - `-DW3D_FETCHCONTENT_OFFLINE=ON|OFF` to disable network downloads for `FetchContent`.
 - `-DW3D_MILES_SOURCE_DIR=/path/to/miles-sdk-stub` (or `FETCHCONTENT_SOURCE_DIR_MILES`) to use a local Miles stub checkout.
 - `-DW3D_GAMESPY_SOURCE_DIR=/path/to/GamespySDK` (or `FETCHCONTENT_SOURCE_DIR_GAMESPY`) to use a local GameSpy checkout.
 - `-DW3D_BINK_SOURCE_DIR=/path/to/bink-sdk-stub` (or `FETCHCONTENT_SOURCE_DIR_BINK`) to use a local Bink stub checkout.
 - `-DW3D_CRUNCH_SOURCE_DIR=/path/to/crunch` (or `FETCHCONTENT_SOURCE_DIR_CRUNCH`) to use a local Crunch checkout (required when tools are enabled in offline mode).
 
-### 4) Offline FetchContent mode
+### 4) LevelEdit settings file (registry-free)
+
+`leveledit` and `leveledit_qt` use an INI settings file instead of registry-backed profiles.
+
+- Default path: next to `leveledit.exe`, as `LevelEdit.ini`.
+- Optional override: set `OPENW3D_LEVELEDIT_CONFIG_INI` (or `LEVELEDIT_CONFIG_INI`) to a full file path.
+- Asset tree location is stored under section/key: `[Config]` / `Asset Tree`.
+- Renegade source-data lookup for `Always.dbs`/`Always.dat` can be set without registry:
+  - Environment override: `OPENW3D_RENEGADE_INSTALL_PATH` (fallback `RENEGADE_INSTALL_PATH`).
+  - INI key override: `[Config]` / `Renegade Install Path`.
+  - Accepted values: game install folder, `Data` folder, or full path to `Renegade.exe`.
+- Final fallback for legacy compatibility is still Renegade registry key `HKCU\Software\Westwood\Renegade\InstallPath`.
+
+### 5) Offline FetchContent mode
 
 When `-DW3D_FETCHCONTENT_OFFLINE=ON`, configure will fail early unless local source directories are provided for each required dependency (`Miles`, `GameSpy`, `Bink` when enabled on Windows, and `Crunch` when tools are enabled). This avoids slow retries and makes dependency requirements explicit for offline environments.
+
+### 6) LevelEdit DDB mirror verification
+
+When tools are enabled, `leveledit_dbmirror` is built and can validate expected JSON sidecar structure for preset DB mirrors:
+
+```bash
+leveledit_dbmirror verify --ddb <path-to-ddb> --json <path-to-ddb.json>
+```
 
 ## License
 

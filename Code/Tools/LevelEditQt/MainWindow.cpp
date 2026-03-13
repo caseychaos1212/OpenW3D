@@ -14,17 +14,29 @@
 #include "RecentFiles.h"
 #include "ShortcutHelpers.h"
 
+#include <QAbstractItemView>
 #include <QAction>
+#include <QDialog>
+#include <QDialogButtonBox>
 #include <QDir>
 #include <QDockWidget>
 #include <QFileDialog>
+#include <QFile>
 #include <QFileInfo>
+#include <QHeaderView>
 #include <QKeySequence>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QStatusBar>
 #include <QTabWidget>
+#include <QTextEdit>
+#include <QTreeWidget>
+#include <QTextStream>
+#include <QVBoxLayout>
+#include <algorithm>
+#include <functional>
+#include <unordered_set>
 
 namespace leveledit_qt {
 
@@ -33,6 +45,69 @@ namespace {
 QString CommandLabel(CommandId id)
 {
     return QStringLiteral("0x%1").arg(LegacyCommandValue(id), 0, 16);
+}
+
+QString ReadRawConfigValue(const QString &key)
+{
+    QFile file(LevelEditSettingsPath());
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QString();
+    }
+
+    QTextStream stream(&file);
+    bool in_config_section = false;
+    while (!stream.atEnd()) {
+        QString line = stream.readLine().trimmed();
+        if (line.isEmpty() || line.startsWith(QLatin1Char(';')) || line.startsWith(QLatin1Char('#'))) {
+            continue;
+        }
+
+        if (line.startsWith(QLatin1Char('[')) && line.endsWith(QLatin1Char(']'))) {
+            const QString section_name = line.mid(1, line.size() - 2).trimmed();
+            in_config_section = (section_name.compare(QStringLiteral("Config"), Qt::CaseInsensitive) == 0);
+            continue;
+        }
+
+        if (!in_config_section) {
+            continue;
+        }
+
+        const int equals_pos = line.indexOf(QLatin1Char('='));
+        if (equals_pos <= 0) {
+            continue;
+        }
+
+        const QString parsed_key = line.left(equals_pos).trimmed();
+        if (parsed_key.compare(key, Qt::CaseInsensitive) != 0) {
+            continue;
+        }
+
+        return line.mid(equals_pos + 1).trimmed();
+    }
+
+    return QString();
+}
+
+QString ResolveAssetHint(const SettingsBridge &settings)
+{
+    const QString raw_asset_tree = ReadRawConfigValue(QStringLiteral("Asset Tree"));
+    if (!raw_asset_tree.isEmpty()) {
+        return raw_asset_tree;
+    }
+
+    const std::string asset_tree =
+        settings.readString("Config", "Asset Tree", "");
+    if (!asset_tree.empty()) {
+        return QString::fromStdString(asset_tree);
+    }
+
+    const QString raw_install_path = ReadRawConfigValue(QStringLiteral("Renegade Install Path"));
+    if (!raw_install_path.isEmpty()) {
+        return raw_install_path;
+    }
+
+    return QString::fromStdString(
+        settings.readString("Config", "Renegade Install Path", ""));
 }
 
 } // namespace
@@ -134,6 +209,11 @@ bool MainWindow::initializeRuntime()
 {
     DeviceSelectionDialog dialog(this);
     if (dialog.exec() != QDialog::Accepted) {
+        if (_presetsPanel) {
+            _presetsPanel->setPresets({},
+                                      QString(),
+                                      QStringLiteral("Runtime initialization was canceled."));
+        }
         return false;
     }
 
@@ -143,9 +223,15 @@ bool MainWindow::initializeRuntime()
     options.bits_per_pixel = dialog.bitsPerPixel();
     options.windowed = dialog.isWindowed();
     options.profile = _profile;
+    options.asset_tree_path = ResolveAssetHint(_settings).toStdString();
 
     std::string error;
     if (!_runtime.initialize(options, error)) {
+        if (_presetsPanel) {
+            _presetsPanel->setPresets({},
+                                      QString(),
+                                      QString::fromStdString(error));
+        }
         QMessageBox::critical(this,
                               QStringLiteral("Runtime Init Failed"),
                               QString::fromStdString(error));
@@ -166,6 +252,8 @@ bool MainWindow::initializeRuntime()
             _outputDock->appendLine(QStringLiteral("[Runtime] DDB JSON mirror: enabled"));
         }
     }
+
+    refreshPresetCatalog();
     return true;
 }
 
@@ -194,7 +282,20 @@ void MainWindow::createDockSurfaces()
     auto *panelTabs = new QTabWidget(this);
     panelTabs->setTabPosition(QTabWidget::North);
     panelTabs->setDocumentMode(true);
-    panelTabs->addTab(new PresetsPanel(panelTabs), QStringLiteral("Presets"));
+    _presetsPanel = new PresetsPanel(panelTabs);
+    connect(_presetsPanel,
+            &PresetsPanel::presetActivated,
+            this,
+            [this](quint32 id, const QString &name, quint32 class_id, quint32 parent_id, bool temporary) {
+                openPresetDetails(id, name, class_id, parent_id, temporary);
+            });
+    connect(_presetsPanel,
+            &PresetsPanel::presetOpenRequested,
+            this,
+            [this](quint32 id, const QString &name, quint32 class_id, quint32 parent_id, bool temporary) {
+                openPresetInspector(id, name, class_id, parent_id, temporary);
+            });
+    panelTabs->addTab(_presetsPanel, QStringLiteral("Presets"));
     panelTabs->addTab(new InstancesPanel(panelTabs), QStringLiteral("Instances"));
     panelTabs->addTab(new ConversationsPanel(panelTabs), QStringLiteral("Conversations"));
     panelTabs->addTab(new OverlapPanel(panelTabs), QStringLiteral("Overlap"));
@@ -215,6 +316,20 @@ void MainWindow::createDockSurfaces()
     auto *cameraDock = new CameraSettingsDock(this);
     addDockWidget(Qt::RightDockWidgetArea, cameraDock);
     tabifyDockWidget(ambientDock, cameraDock);
+
+    auto *presetDefinitionDock = new QDockWidget(QStringLiteral("Preset Definition"), this);
+    presetDefinitionDock->setObjectName(QStringLiteral("PresetDefinitionDock"));
+    presetDefinitionDock->setAllowedAreas(Qt::LeftDockWidgetArea |
+                                          Qt::RightDockWidgetArea |
+                                          Qt::BottomDockWidgetArea);
+    _presetDefinitionView = new QTextEdit(presetDefinitionDock);
+    _presetDefinitionView->setReadOnly(true);
+    _presetDefinitionView->setLineWrapMode(QTextEdit::NoWrap);
+    _presetDefinitionView->setPlainText(
+        QStringLiteral("Select a preset to view definition metadata."));
+    presetDefinitionDock->setWidget(_presetDefinitionView);
+    addDockWidget(Qt::RightDockWidgetArea, presetDefinitionDock);
+    tabifyDockWidget(cameraDock, presetDefinitionDock);
 }
 
 void MainWindow::createFileMenu()
@@ -822,6 +937,492 @@ void MainWindow::saveLevelToPath(const QString &path)
         _outputDock->appendLine(statusBar()->currentMessage());
     }
     refreshActionStates();
+}
+
+void MainWindow::openPresetDetails(quint32 id,
+                                   const QString &name,
+                                   quint32 class_id,
+                                   quint32 parent_id,
+                                   bool temporary)
+{
+    if (_presetDefinitionView == nullptr) {
+        return;
+    }
+
+    if (id == 0) {
+        _presetDefinitionView->setPlainText(
+            QStringLiteral("Select a preset row to view definition metadata."));
+        return;
+    }
+
+    QString display_name = name.trimmed();
+    if (display_name.isEmpty()) {
+        display_name = QStringLiteral("<unnamed>");
+    }
+
+    const auto direct_child_it = _directChildCountById.find(static_cast<std::uint32_t>(id));
+    const std::uint32_t direct_children =
+        (direct_child_it != _directChildCountById.end()) ? direct_child_it->second : 0U;
+
+    QStringList inheritance_rows;
+    std::unordered_set<std::uint32_t> guard;
+    std::uint32_t walk_parent_id = static_cast<std::uint32_t>(parent_id);
+    while (walk_parent_id != 0 && guard.insert(walk_parent_id).second) {
+        const auto it = _presetById.find(walk_parent_id);
+        if (it == _presetById.end()) {
+            inheritance_rows.push_back(QStringLiteral("%1 [missing]").arg(walk_parent_id));
+            break;
+        }
+
+        QString parent_name = QString::fromStdString(it->second.name).trimmed();
+        if (parent_name.isEmpty()) {
+            parent_name = QStringLiteral("<unnamed>");
+        }
+
+        inheritance_rows.push_back(QStringLiteral("%1 (id=%2)").arg(parent_name).arg(walk_parent_id));
+        walk_parent_id = it->second.parent_id;
+    }
+
+    if (!inheritance_rows.isEmpty()) {
+        std::reverse(inheritance_rows.begin(), inheritance_rows.end());
+    }
+
+    const QString details = QStringLiteral(
+                                "Name: %1\n"
+                                "Definition ID: %2 (0x%3)\n"
+                                "Class ID: %4 (0x%5)\n"
+                                "Parent ID: %6 (0x%7)\n"
+                                "Temporary: %8\n"
+                                "Direct children: %9\n\n"
+                                "Inheritance chain:\n%10\n\n"
+                                "Double-click a preset row or press Mod... to open full read-only"
+                                " serialized definition data.\n\n"
+                                "Note: full definition property editing is not wired yet.\n"
+                                "This view currently shows definition identity/inheritance metadata.")
+                                .arg(display_name)
+                                .arg(id)
+                                .arg(QString::number(static_cast<qulonglong>(id), 16).toUpper())
+                                .arg(class_id)
+                                .arg(QString::number(static_cast<qulonglong>(class_id), 16).toUpper())
+                                .arg(parent_id)
+                                .arg(QString::number(static_cast<qulonglong>(parent_id), 16).toUpper())
+                                .arg(temporary ? QStringLiteral("Yes") : QStringLiteral("No"))
+                                .arg(direct_children)
+                                .arg(inheritance_rows.isEmpty()
+                                         ? QStringLiteral("  <root preset>")
+                                         : QStringLiteral("  - %1").arg(inheritance_rows.join(QStringLiteral("\n  - "))));
+
+    _presetDefinitionView->setPlainText(details);
+    statusBar()->showMessage(
+        QStringLiteral("Preset selected: %1 (%2)").arg(display_name).arg(id), 3000);
+}
+
+void MainWindow::openPresetInspector(quint32 id,
+                                     const QString &name,
+                                     quint32 class_id,
+                                     quint32 parent_id,
+                                     bool temporary)
+{
+    if (id == 0) {
+        return;
+    }
+
+    openPresetDetails(id, name, class_id, parent_id, temporary);
+
+    PresetDefinitionDetails details;
+    std::vector<std::string> searched_paths;
+    std::string error;
+    if (!_runtime.readPresetDefinitionDetails(id, details, error, &searched_paths)) {
+        QStringList message_lines;
+        message_lines << QString::fromStdString(error);
+        if (!searched_paths.empty()) {
+            message_lines << QString();
+            message_lines << QStringLiteral("Searched paths:");
+            for (const std::string &path : searched_paths) {
+                message_lines << QStringLiteral("  %1")
+                                     .arg(QDir::toNativeSeparators(QString::fromStdString(path)));
+            }
+        }
+
+        QMessageBox::warning(this,
+                             QStringLiteral("Preset Definition"),
+                             message_lines.join(QStringLiteral("\n")));
+        return;
+    }
+
+    QString display_name = name.trimmed();
+    if (display_name.isEmpty() && !details.name.empty()) {
+        display_name = QString::fromStdString(details.name).trimmed();
+    }
+    if (display_name.isEmpty()) {
+        display_name = QStringLiteral("<unnamed>");
+    }
+
+    QDialog dialog(this);
+    dialog.setWindowTitle(QStringLiteral("Edit Object (Read Only): %1").arg(display_name));
+    dialog.resize(980, 680);
+
+    auto *layout = new QVBoxLayout(&dialog);
+    auto *tabs = new QTabWidget(&dialog);
+
+    auto format_hex_u32 = [](std::uint32_t value) {
+        return QStringLiteral("0x%1")
+            .arg(static_cast<qulonglong>(value), 8, 16, QLatin1Char('0'))
+            .toUpper();
+    };
+
+    auto chunk_label_for = [&](const PresetDefinitionField &field) {
+        const QString chunk_hex = format_hex_u32(field.chunk_id);
+        if (!field.chunk_name.empty()) {
+            return QStringLiteral("%1 (%2)")
+                .arg(QString::fromStdString(field.chunk_name), chunk_hex);
+        }
+
+        return chunk_hex;
+    };
+
+    auto field_label_for = [&](const PresetDefinitionField &field) {
+        const QString micro_hex = format_hex_u32(field.micro_id);
+        if (!field.field_name.empty()) {
+            return QStringLiteral("%1 (%2)")
+                .arg(QString::fromStdString(field.field_name), micro_hex);
+        }
+
+        return micro_hex;
+    };
+
+    auto field_token_string = [](const PresetDefinitionField &field) {
+        return QStringLiteral("%1 %2 %3")
+            .arg(QString::fromStdString(field.field_name),
+                 QString::fromStdString(field.chunk_name),
+                 QString::fromStdString(field.decoded_value))
+            .toLower();
+    };
+
+    auto field_matches_any = [&](const PresetDefinitionField &field,
+                                 std::initializer_list<const char *> keywords) {
+        const QString tokens = field_token_string(field);
+        for (const char *keyword : keywords) {
+            if (tokens.contains(QString::fromLatin1(keyword))) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    qlonglong named_field_count = 0;
+    for (const PresetDefinitionField &field : details.fields) {
+        if (!field.field_name.empty()) {
+            ++named_field_count;
+        }
+    }
+
+    auto *general_view = new QTextEdit(tabs);
+    general_view->setReadOnly(true);
+    general_view->setLineWrapMode(QTextEdit::NoWrap);
+
+    QString general_text = QStringLiteral(
+                               "Name: %1\n"
+                               "Definition ID: %2 (%3)\n"
+                               "Class ID: %4 (%5)\n"
+                               "Parent ID: %6 (%7)\n"
+                               "Temporary: %8\n"
+                               "Serialized fields captured: %9\n"
+                               "Source-labeled fields: %10\n"
+                               "Definition chunk: %11\n"
+                               "Definition source: %12\n")
+                               .arg(display_name)
+                               .arg(id)
+                               .arg(format_hex_u32(id))
+                               .arg(class_id)
+                               .arg(format_hex_u32(class_id))
+                               .arg(parent_id)
+                               .arg(format_hex_u32(parent_id))
+                               .arg(temporary ? QStringLiteral("Yes") : QStringLiteral("No"))
+                               .arg(static_cast<qlonglong>(details.fields.size()))
+                               .arg(named_field_count)
+                               .arg(format_hex_u32(details.definition_chunk_id))
+                               .arg(QDir::toNativeSeparators(QString::fromStdString(details.source_path)));
+
+    if (!details.annotation_class_name.empty()) {
+        general_text += QStringLiteral("Parser class: %1\n")
+                            .arg(QString::fromStdString(details.annotation_class_name));
+    }
+    if (!details.annotation_source_file.empty()) {
+        general_text += QStringLiteral("Parser source: %1\n")
+                            .arg(QDir::toNativeSeparators(
+                                QString::fromStdString(details.annotation_source_file)));
+    }
+    if (details.annotation_field_count > 0) {
+        general_text += QStringLiteral("Known field mappings in parser source: %1\n")
+                            .arg(details.annotation_field_count);
+    }
+    if (_presetDefinitionView != nullptr) {
+        general_text += QStringLiteral("\nPreset selection context:\n%1")
+                            .arg(_presetDefinitionView->toPlainText());
+    }
+
+    general_view->setPlainText(general_text);
+    tabs->addTab(general_view, QStringLiteral("General"));
+
+    auto create_decoded_tree =
+        [&](const QString &empty_text,
+            const std::function<bool(const PresetDefinitionField &)> &predicate,
+            qlonglong *row_count) -> QTreeWidget * {
+            auto *tree = new QTreeWidget(tabs);
+            tree->setColumnCount(4);
+            tree->setHeaderLabels({
+                QStringLiteral("Field"),
+                QStringLiteral("Value"),
+                QStringLiteral("Chunk"),
+                QStringLiteral("Raw Hex"),
+            });
+            tree->setRootIsDecorated(false);
+            tree->setAlternatingRowColors(true);
+            tree->setSelectionBehavior(QAbstractItemView::SelectRows);
+            tree->setSelectionMode(QAbstractItemView::SingleSelection);
+            tree->setEditTriggers(QAbstractItemView::NoEditTriggers);
+            tree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+            tree->header()->setSectionResizeMode(1, QHeaderView::Stretch);
+            tree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+            tree->header()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+
+            qlonglong count = 0;
+            for (const PresetDefinitionField &field : details.fields) {
+                if (!predicate(field)) {
+                    continue;
+                }
+
+                ++count;
+                auto *item = new QTreeWidgetItem(tree);
+                item->setText(0, field_label_for(field));
+                item->setText(1, QString::fromStdString(field.decoded_value));
+                item->setText(2, chunk_label_for(field));
+                item->setText(3, QString::fromStdString(field.raw_hex));
+            }
+
+            if (count == 0) {
+                auto *item = new QTreeWidgetItem(tree);
+                item->setText(0, empty_text);
+            }
+
+            if (row_count != nullptr) {
+                *row_count = count;
+            }
+            return tree;
+        };
+
+    auto *physics_tree = create_decoded_tree(
+        QStringLiteral("<no physics-model fields decoded>"),
+        [&](const PresetDefinitionField &field) {
+            return field_matches_any(field,
+                                     {"phys",
+                                      "physics",
+                                      "model",
+                                      "mass",
+                                      "elastic",
+                                      "spring",
+                                      "damping",
+                                      "collision",
+                                      "aerodynamic",
+                                      "turnradius",
+                                      "turret",
+                                      "barrel",
+                                      "type",
+                                      "seat"});
+        },
+        nullptr);
+    tabs->addTab(physics_tree, QStringLiteral("Physics Model"));
+
+    auto *settings_tree = create_decoded_tree(
+        QStringLiteral("<no serialized settings fields decoded>"),
+        [](const PresetDefinitionField &) { return true; },
+        nullptr);
+    tabs->addTab(settings_tree, QStringLiteral("Settings"));
+
+    auto *dependencies_tree = create_decoded_tree(
+        QStringLiteral("<no file dependencies decoded>"),
+        [&](const PresetDefinitionField &field) {
+            return field_matches_any(field, {"dependency",
+                                             "filename",
+                                             "filepath",
+                                             "modelname",
+                                             ".w3d",
+                                             ".tga",
+                                             ".wav",
+                                             ".mp3"});
+        },
+        nullptr);
+    tabs->addTab(dependencies_tree, QStringLiteral("Dependencies"));
+
+    auto *scripts_tree = create_decoded_tree(
+        QStringLiteral("<no script assignment fields decoded>"),
+        [&](const PresetDefinitionField &field) {
+            return field_matches_any(field, {"script", "scripts"});
+        },
+        nullptr);
+    tabs->addTab(scripts_tree, QStringLiteral("Scripts"));
+
+    auto *transitions_tree = create_decoded_tree(
+        QStringLiteral("<no transition fields decoded>"),
+        [&](const PresetDefinitionField &field) {
+            return field_matches_any(field,
+                                     {"transition",
+                                      "vehicle_enter",
+                                      "vehicle_exit",
+                                      "enter",
+                                      "exit",
+                                      "anim"});
+        },
+        nullptr);
+    tabs->addTab(transitions_tree, QStringLiteral("Transitions"));
+
+    auto *raw_tree = new QTreeWidget(tabs);
+    raw_tree->setColumnCount(6);
+    raw_tree->setHeaderLabels({
+        QStringLiteral("Chunk Path"),
+        QStringLiteral("Chunk"),
+        QStringLiteral("Field"),
+        QStringLiteral("Size"),
+        QStringLiteral("Decoded"),
+        QStringLiteral("Raw Hex"),
+    });
+    raw_tree->setRootIsDecorated(false);
+    raw_tree->setAlternatingRowColors(true);
+    raw_tree->setSelectionBehavior(QAbstractItemView::SelectRows);
+    raw_tree->setSelectionMode(QAbstractItemView::SingleSelection);
+    raw_tree->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    raw_tree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    raw_tree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    raw_tree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    raw_tree->header()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    raw_tree->header()->setSectionResizeMode(4, QHeaderView::Stretch);
+    raw_tree->header()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
+
+    for (const PresetDefinitionField &field : details.fields) {
+        auto *item = new QTreeWidgetItem(raw_tree);
+        item->setText(0, QString::fromStdString(field.chunk_path));
+        item->setText(1, chunk_label_for(field));
+        item->setText(2, field_label_for(field));
+        item->setText(3, QString::number(field.byte_length));
+        item->setText(4, QString::fromStdString(field.decoded_value));
+        item->setText(5, QString::fromStdString(field.raw_hex));
+        item->setTextAlignment(3, Qt::AlignRight | Qt::AlignVCenter);
+    }
+
+    if (details.fields.empty()) {
+        auto *item = new QTreeWidgetItem(raw_tree);
+        item->setText(0, QStringLiteral("<no serialized field data captured>"));
+    }
+
+    tabs->addTab(raw_tree, QStringLiteral("Raw Data"));
+
+    layout->addWidget(tabs, 1);
+
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    layout->addWidget(buttons);
+
+    dialog.exec();
+}
+
+void MainWindow::rebuildPresetIndex(const std::vector<PresetRecord> &records)
+{
+    _presetById.clear();
+    _directChildCountById.clear();
+
+    _presetById.reserve(records.size());
+    _directChildCountById.reserve(records.size());
+
+    for (const PresetRecord &record : records) {
+        if (record.id == 0) {
+            continue;
+        }
+
+        auto insert_result = _presetById.emplace(record.id, record);
+        if (!insert_result.second) {
+            PresetRecord &existing = insert_result.first->second;
+            if (existing.name.empty() && !record.name.empty()) {
+                existing.name = record.name;
+            }
+            if (existing.class_id == 0 && record.class_id != 0) {
+                existing.class_id = record.class_id;
+            }
+            if (existing.parent_id == 0 && record.parent_id != 0) {
+                existing.parent_id = record.parent_id;
+            }
+            existing.temporary = existing.temporary || record.temporary;
+        }
+
+        if (record.parent_id != 0) {
+            ++_directChildCountById[record.parent_id];
+        }
+    }
+}
+
+void MainWindow::refreshPresetCatalog()
+{
+    if (_presetsPanel == nullptr) {
+        return;
+    }
+
+    std::vector<PresetRecord> records;
+    std::vector<std::string> searched_paths;
+    std::string source;
+    std::string error;
+    if (!_runtime.readPresetCatalog(records, source, error, &searched_paths)) {
+        _presetById.clear();
+        _directChildCountById.clear();
+        _presetsPanel->setPresets({},
+                                  QString::fromStdString(source),
+                                  QString::fromStdString(error));
+        if (_presetDefinitionView) {
+            _presetDefinitionView->setPlainText(
+                QStringLiteral("Preset catalog is unavailable.\n\n%1")
+                    .arg(QString::fromStdString(error)));
+        }
+        if (_outputDock) {
+            const QString asset_hint = ResolveAssetHint(_settings);
+            _outputDock->appendLine(
+                QStringLiteral("[Presets] Asset hint: %1")
+                    .arg(QDir::toNativeSeparators(asset_hint)));
+
+            if (searched_paths.empty()) {
+                _outputDock->appendLine(QStringLiteral("[Presets] Candidate search list is empty."));
+            } else {
+                _outputDock->appendLine(QStringLiteral("[Presets] Candidate paths:"));
+                for (const std::string &path : searched_paths) {
+                    _outputDock->appendLine(QStringLiteral("[Presets]   %1")
+                                                .arg(QDir::toNativeSeparators(
+                                                    QString::fromStdString(path))));
+                }
+            }
+
+            if (!error.empty()) {
+                _outputDock->appendLine(
+                    QStringLiteral("[Presets] %1").arg(QString::fromStdString(error)));
+            }
+        }
+        return;
+    }
+
+    const QString source_text = QString::fromStdString(source);
+    rebuildPresetIndex(records);
+    _presetsPanel->setPresets(records, source_text);
+    if (_presetDefinitionView) {
+        _presetDefinitionView->setPlainText(
+            QStringLiteral("Select a preset to view definition metadata.\n\n"
+                           "Loaded %1 presets from:\n%2")
+                .arg(static_cast<qlonglong>(records.size()))
+                .arg(QDir::toNativeSeparators(source_text)));
+    }
+    if (_outputDock) {
+        _outputDock->appendLine(
+            QStringLiteral("[Presets] Loaded %1 entries from %2")
+                .arg(static_cast<qlonglong>(records.size()))
+                .arg(QDir::toNativeSeparators(source_text)));
+    }
 }
 
 } // namespace leveledit_qt

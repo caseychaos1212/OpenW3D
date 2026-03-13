@@ -55,6 +55,7 @@ target_link_libraries(leveledit_qt
         w3d_qt_toolkit
         wwcommon
         wwlib
+        wwsaveload
 )
 
 if(WIN32)

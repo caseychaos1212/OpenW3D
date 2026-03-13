@@ -2,7 +2,9 @@
 
 #include "FeatureProfile.h"
 
+#include <cstdint>
 #include <string>
+#include <vector>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -24,6 +26,39 @@ struct RuntimeInitOptions {
     int bits_per_pixel = 32;
     bool windowed = true;
     LevelEditQtProfile profile = LevelEditQtProfile::Public;
+    std::string asset_tree_path;
+};
+
+struct PresetRecord {
+    std::uint32_t id = 0;
+    std::uint32_t definition_id = 0;
+    std::uint32_t class_id = 0;
+    std::uint32_t parent_id = 0;
+    bool temporary = false;
+    std::string name;
+};
+
+struct PresetDefinitionField {
+    std::uint32_t chunk_id = 0;
+    std::uint32_t micro_id = 0;
+    std::uint32_t byte_length = 0;
+    std::string chunk_path;
+    std::string chunk_name;
+    std::string field_name;
+    std::string decoded_value;
+    std::string raw_hex;
+};
+
+struct PresetDefinitionDetails {
+    std::uint32_t definition_id = 0;
+    std::uint32_t class_id = 0;
+    std::uint32_t definition_chunk_id = 0;
+    std::string name;
+    std::string source_path;
+    std::string annotation_source_file;
+    std::string annotation_class_name;
+    std::uint32_t annotation_field_count = 0;
+    std::vector<PresetDefinitionField> fields;
 };
 
 class RuntimeSession
@@ -35,6 +70,14 @@ public:
     bool openLevel(const std::string &path, std::string &error);
     bool saveLevel(const std::string &path, std::string &error);
     bool executeLegacyCommand(int legacy_command_id, std::string &error);
+    bool readPresetCatalog(std::vector<PresetRecord> &records,
+                           std::string &source,
+                           std::string &error,
+                           std::vector<std::string> *searched_paths = nullptr) const;
+    bool readPresetDefinitionDetails(std::uint32_t definition_id,
+                                     PresetDefinitionDetails &details,
+                                     std::string &error,
+                                     std::vector<std::string> *searched_paths = nullptr) const;
 
     bool isInitialized() const { return _initialized; }
     const std::string &currentLevelPath() const { return _currentLevelPath; }
