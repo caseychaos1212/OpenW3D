@@ -29,11 +29,11 @@
 #include <system_error>
 #include <vector>
 
-#ifdef _WIN32
+#if defined(OPENW3D_WIN32)
 #include <windows.h>
 #include <shlobj.h>
-#else
-#include <unistd.h>
+#elif defined(OPENW3D_SDL3)
+#include <SDL3/SDL_filesystem.h>
 #endif
 
 namespace
@@ -87,24 +87,7 @@ namespace
 	{
 		std::error_code error;
 		std::filesystem::path current_dir = std::filesystem::current_path(error);
-		if (!error) {
-			return current_dir;
-		}
-
-#ifdef _WIN32
-		char path[MAX_PATH] = { 0 };
-		DWORD length = GetCurrentDirectoryA(ARRAY_SIZE(path), path);
-		if (length > 0 && length < ARRAY_SIZE(path)) {
-			return std::filesystem::path(path);
-		}
-#else
-		char path[4096] = { 0 };
-		if (getcwd(path, sizeof(path)) != NULL) {
-			return std::filesystem::path(path);
-		}
-#endif
-
-		return std::filesystem::path();
+		return error ? std::filesystem::path() : current_dir;
 	}
 
 	std::filesystem::path Make_Absolute_Path(const char *path)
@@ -123,32 +106,30 @@ namespace
 
 	std::filesystem::path Get_Executable_Directory()
 	{
-#ifdef _WIN32
+#if defined(OPENW3D_WIN32)
 		char path[32768] = { 0 };
 		DWORD length = GetModuleFileNameA(NULL, path, ARRAY_SIZE(path));
 		if (length > 0 && length < ARRAY_SIZE(path)) {
 			return std::filesystem::path(path).parent_path();
 		}
-#else
-		char path[4096] = { 0 };
-		const ssize_t length = readlink("/proc/self/exe", path, sizeof(path) - 1);
-		if (length > 0) {
-			path[length] = '\0';
-			return std::filesystem::path(path).parent_path();
+#elif defined(OPENW3D_SDL3)
+		const char *base_path = SDL_GetBasePath();
+		if (base_path != NULL && base_path[0] != '\0') {
+			return std::filesystem::path(base_path);
 		}
 #endif
 
 		return Get_Current_Directory();
 	}
 
-	std::filesystem::path Get_Windows_AppData_Directory()
+	std::filesystem::path Get_User_Config_Directory()
 	{
+#if defined(OPENW3D_WIN32)
 		const char *appdata = std::getenv("APPDATA");
 		if (appdata != NULL && appdata[0] != '\0') {
-			return Make_Absolute_Path(appdata);
+			return Make_Absolute_Path(appdata) / "OpenW3D";
 		}
 
-#ifdef _WIN32
 		std::filesystem::path appdata_path;
 		HMODULE shfolder = LoadLibraryA("shfolder.dll");
 		if (shfolder != NULL) {
@@ -164,10 +145,18 @@ namespace
 			FreeLibrary(shfolder);
 		}
 
-		return appdata_path;
-#else
-		return std::filesystem::path();
+		return appdata_path.empty() ? std::filesystem::path() : appdata_path / "OpenW3D";
+#elif defined(OPENW3D_SDL3)
+		char *pref_path = SDL_GetPrefPath("OpenW3D", "OpenW3D");
+		if (pref_path != NULL && pref_path[0] != '\0') {
+			const std::filesystem::path config_path(pref_path);
+			SDL_free(pref_path);
+			return config_path;
+		}
+		SDL_free(pref_path);
 #endif
+
+		return std::filesystem::path();
 	}
 
 	std::filesystem::path Get_Default_Config_File_Path()
@@ -187,20 +176,10 @@ namespace
 			return portable_config;
 		}
 
-#ifdef _WIN32
-		std::filesystem::path config_dir = Get_Windows_AppData_Directory();
+#if defined(OPENW3D_WIN32) || defined(OPENW3D_SDL3)
+		std::filesystem::path config_dir = Get_User_Config_Directory();
 		if (!config_dir.empty()) {
-			return config_dir / "OpenW3D" / W3D_CONF_FILENAME;
-		}
-#else
-		const char *xdg_config_home = std::getenv("XDG_CONFIG_HOME");
-		if (xdg_config_home != NULL && xdg_config_home[0] != '\0') {
-			return Make_Absolute_Path(xdg_config_home) / "OpenW3D" / W3D_CONF_FILENAME;
-		}
-
-		const char *home = std::getenv("HOME");
-		if (home != NULL && home[0] != '\0') {
-			return Make_Absolute_Path(home) / ".config" / "OpenW3D" / W3D_CONF_FILENAME;
+			return config_dir / W3D_CONF_FILENAME;
 		}
 #endif
 
