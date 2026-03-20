@@ -657,6 +657,6 @@ DlgConfigPerformanceTabClass::On_Apply (void)
 	}
 	WW3D::Set_Texture_Reduction (std::max (2 - texture_red, 0));
 	SurfaceEffectsManager::Set_Mode ((SurfaceEffectsManager::MODE)surface_effect);
-	ini.Save(W3D_CONF_FILE);
+	OpenW3D::Save_Config(ini);
 	return true;
 }

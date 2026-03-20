@@ -246,7 +246,13 @@ static bool Graphics_Settings_Trouble_Shooting()
 		const char * args[] = {
 			"wwconfig.exe",
 			nullptr,
+			nullptr,
+			nullptr,
 		};
+		if (OpenW3D::Has_Config_File_Path_Override()) {
+			args[1] = "--ini";
+			args[2] = OpenW3D::Get_Config_File_Path();
+		}
 		Process *process = ProcessManager::Create_Process(args);
 		if (!process) {
 			return 1;
@@ -359,7 +365,7 @@ static bool Video_Card_Driver_Check()
 	case DX8Caps::DRIVER_STATUS_OK:
 	case DX8Caps::DRIVER_STATUS_UNKNOWN:
 		ini.Put_Int(W3D_SECTION_RENDER, "DriverVersionCheckDisabled", 87);
-		ini.Save(W3D_CONF_FILE);
+		OpenW3D::Save_Config(ini);
 		return true;
 	case DX8Caps::DRIVER_STATUS_BAD:
 		break;
@@ -369,7 +375,13 @@ static bool Video_Card_Driver_Check()
 		"wwconfig.exe",
 		"-driverversion",
 		nullptr,
+		nullptr,
+		nullptr,
 	};
+	if (OpenW3D::Has_Config_File_Path_Override()) {
+		options[2] = "--ini";
+		options[3] = OpenW3D::Get_Config_File_Path();
+	}
 	Process *process = ProcessManager::Create_Process(options);
 	if (!process) {
 		return true;

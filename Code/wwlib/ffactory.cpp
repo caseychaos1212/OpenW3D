@@ -222,6 +222,9 @@ Is_Full_Path (const char *path)
 
 		// Check for network path
 		retval |= bool((path[0] == '\\') && (path[1] == '\\'));
+
+		// Check for POSIX-style absolute paths.
+		retval |= bool(path[0] == '/');
 	}
 
 	return retval;
@@ -306,5 +309,4 @@ void SimpleFileFactoryClass::Return_File( FileClass *file )
 {
 	delete file;
 }
-
 

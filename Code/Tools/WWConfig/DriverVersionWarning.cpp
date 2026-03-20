@@ -306,7 +306,7 @@ void DriverVersionWarning::OnDisableDriverVersionDialogCheckbox()
 	INIClass ini(W3D_CONF_FILE);
 
 	ini.Put_Int(W3D_SECTION_RENDER, "DriverVersionCheckDisabled", is_disabled ? 87 : 0);
-	ini.Save(W3D_CONF_FILE);
+	OpenW3D::Save_Config(ini);
 
 }
 
