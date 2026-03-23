@@ -38,6 +38,9 @@
 
 namespace
 {
+	constexpr char kConfigOrganization[] = "W3DHub";
+	constexpr char kConfigApplication[] = "OpenW3D";
+
 	std::string g_config_file_path;
 	bool g_config_file_path_initialized = false;
 	bool g_config_file_path_override = false;
@@ -124,10 +127,10 @@ namespace
 
 	std::filesystem::path Get_User_Config_Directory()
 	{
-#if defined(OPENW3D_WIN32)
+	#if defined(OPENW3D_WIN32)
 		const char *appdata = std::getenv("APPDATA");
 		if (appdata != NULL && appdata[0] != '\0') {
-			return Make_Absolute_Path(appdata) / "OpenW3D";
+			return Make_Absolute_Path(appdata) / kConfigOrganization / kConfigApplication;
 		}
 
 		std::filesystem::path appdata_path;
@@ -145,9 +148,9 @@ namespace
 			FreeLibrary(shfolder);
 		}
 
-		return appdata_path.empty() ? std::filesystem::path() : appdata_path / "OpenW3D";
-#elif defined(OPENW3D_SDL3)
-		char *pref_path = SDL_GetPrefPath("OpenW3D", "OpenW3D");
+		return appdata_path.empty() ? std::filesystem::path() : appdata_path / kConfigOrganization / kConfigApplication;
+	#elif defined(OPENW3D_SDL3)
+		char *pref_path = SDL_GetPrefPath(kConfigOrganization, kConfigApplication);
 		if (pref_path != NULL && pref_path[0] != '\0') {
 			const std::filesystem::path config_path(pref_path);
 			SDL_free(pref_path);
