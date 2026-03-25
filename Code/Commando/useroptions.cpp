@@ -47,6 +47,7 @@
 #include "GameSpy_QnR.h"
 #include "gamespyadmin.h"
 #include "specialbuilds.h"
+#include "openw3d.h"
 #include "useroptions.h"
 
 extern char DefaultRegistryModifier[1024];
@@ -89,6 +90,13 @@ cUserOptions::ParseResult cUserOptions::Parse_Command_Line(int argc, char *argv[
 {
 	ParseResult retcode = ParseResult::SUCCESS;
 
+	if (!OpenW3D::Set_Config_File_Path_From_Command_Line(argc, argv)) {
+		return ParseResult::FAILURE;
+	}
+
+	// Resolve the config file path before later arguments can change the working directory.
+	OpenW3D::Get_Config_File_Path();
+
 	//
 	// Loop through all the command line arguments.
 	//
@@ -104,6 +112,15 @@ cUserOptions::ParseResult cUserOptions::Parse_Command_Line(int argc, char *argv[
 				break;
 			}
 			Set_GameDir(argval);
+			continue;
+		}
+
+		if (strcmp(cmd, "--ini") == 0) {
+			i++;
+			if (i >= argc) {
+				retcode = FAILURE;
+				break;
+			}
 			continue;
 		}
 
@@ -291,6 +308,7 @@ void cUserOptions::Print_Command_Line_Help(bool error)
 
 	fprintf(file, "usage: %s [--ip IP] [--multi] [--regmod MOD] [--slave] [--startserver INI]\n", path);
 	fprintf(file, "    [--gamedir PATH]\n");
+	fprintf(file, "    [--ini PATH]\n");
 	fprintf(file, "    [--gamespyserver ADDRESS] [--nodx]\n");
 #ifndef BETACLIENT
 	fprintf(file, "    [--gamespy-connect IP[:PORT]]\n");

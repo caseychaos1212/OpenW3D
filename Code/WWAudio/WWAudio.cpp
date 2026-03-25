@@ -1536,7 +1536,7 @@ WWAudioClass::Save_To_Registry
 	ini.Put_Float (W3D_SECTION_SOUND, VALUE_INI_DIALOG_VOL,			dialog_volume);
 	ini.Put_Float (W3D_SECTION_SOUND, VALUE_INI_CINEMATIC_VOL,		cinematic_volume);
 	ini.Put_Int (W3D_SECTION_SOUND, VALUE_INI_SPEAKER_TYPE,		speaker_type);
-	retval = ini.Save(W3D_CONF_FILE) != 0;
+	retval = OpenW3D::Save_Config(ini);
 
 	return retval;
 }

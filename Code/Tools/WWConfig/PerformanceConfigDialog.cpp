@@ -748,7 +748,7 @@ PerformanceConfigDialogClass::Apply_Changes (void)
 	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_TEXTURE_RES, std::max (2 - texture_red, 0));
 	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_SURFACE_EFFECT, surface_effect);
 	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_PARTICLE_DETAIL, particle_detail);
-	ini.Save(W3D_CONF_FILE);
+	OpenW3D::Save_Config(ini);
 
 	return ;
 }
@@ -1134,7 +1134,7 @@ void AutoConfigSettings()
 	}
 
 	d3d->Release();
-	ini.Save(W3D_CONF_FILE);
+	OpenW3D::Save_Config(ini);
 }
 
 
@@ -1257,4 +1257,3 @@ PerformanceConfigDialogClass::OnShowWindow(BOOL bShow, UINT nStatus)
 
 	return ;
 }
-

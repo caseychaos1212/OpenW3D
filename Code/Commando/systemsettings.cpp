@@ -78,7 +78,7 @@ void	SystemSettings::Registry_Save( const char * /* sub_key */ )
 	for ( int index = 0; index < SettingList.Count(); index++ ) {
 		SettingList[ index ]->INI_Save( ini );
 	}
-	ini.Save(W3D_CONF_FILE);
+	OpenW3D::Save_Config(ini);
 }
 
 void	SystemSettings::Registry_Load( const char * /* sub_key */ )

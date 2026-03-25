@@ -29,6 +29,7 @@ set(WWLIB_SRC
     multilist.cpp
     mutex.cpp
     nstrdup.cpp
+    openw3d.cpp
     pipe.cpp
     pk.cpp
     ramfile.cpp

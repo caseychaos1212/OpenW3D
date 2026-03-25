@@ -1087,7 +1087,7 @@ bool DX8Wrapper::Registry_Save_Render_Device( const char */*sub_key*/, int devic
 	ini.Put_Bool(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_WINDOWED, windowed != 0);
 	ini.Put_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_TEXTURE_DEPTH, texture_depth);
 
-	return ini.Save(W3D_CONF_FILE) != 0;
+	return OpenW3D::Save_Config(ini);
 }
 
 bool DX8Wrapper::Registry_Load_Render_Device( const char * sub_key, bool resize_window )
