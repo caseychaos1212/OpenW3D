@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QByteArray>
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QDebug>
@@ -11,6 +12,7 @@
 #include "MainWindow.h"
 #include "WWConfigBackend.h"
 #include "../WWConfig/wwconfig_ids.h"
+#include "../../wwlib/openw3d.h"
 
 namespace
 {
@@ -55,6 +57,12 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
 
+    QCommandLineOption iniOption(
+        QStringLiteral("ini"),
+        QObject::tr("Use the specified OpenW3D configuration file."),
+        QObject::tr("path"));
+    parser.addOption(iniOption);
+
     QCommandLineOption languageOption(
         {QStringLiteral("l"), QStringLiteral("language")},
         QObject::tr("Override the UI language (english, french, german, japanese, korean, chinese)."),
@@ -62,6 +70,12 @@ int main(int argc, char *argv[])
     parser.addOption(languageOption);
 
     parser.process(app);
+
+    if (parser.isSet(iniOption)) {
+        const QString iniPath = QFileInfo(parser.value(iniOption)).absoluteFilePath();
+        const QByteArray iniPathBytes = iniPath.toLocal8Bit();
+        OpenW3D::Set_Config_File_Path_Override(iniPathBytes.constData());
+    }
 
     app.setWindowIcon(QIcon(QStringLiteral(":/wwconfig/wwconfig.ico")));
 

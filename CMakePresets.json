@@ -49,9 +49,9 @@
             "inherits": "windows-qt",
             "displayName": "Windows + Qt (Tools only)",
             "cacheVariables": {
-                "RENEGADE_CLIENT": "OFF",
-                "RENEGADE_FDS": "OFF",
-                "RENEGADE_TOOLS": "ON"
+                "W3D_CLIENT": "OFF",
+                "W3D_FDS": "OFF",
+                "W3D_TOOLS": "ON"
             }
         },
         {
