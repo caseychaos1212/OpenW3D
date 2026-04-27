@@ -2,7 +2,6 @@
 
 #include <QMainWindow>
 
-class QLabel;
 class QTabWidget;
 class WWConfigBackend;
 class PerformancePage;
@@ -22,7 +21,6 @@ private:
     void refreshTabs();
 
     WWConfigBackend &m_backend;
-    QLabel *m_statusLabel = nullptr;
     QTabWidget *m_tabWidget = nullptr;
     PerformancePage *m_performancePage = nullptr;
     VideoPage *m_videoPage = nullptr;

@@ -63,11 +63,6 @@ void MainWindow::setupUi()
         updateStatusText();
     });
 
-    m_statusLabel = new QLabel(tr("Loading locale data..."), central);
-    m_statusLabel->setWordWrap(true);
-    m_statusLabel->setStyleSheet(QStringLiteral("color: palette(mid);"));
-    layout->addWidget(m_statusLabel);
-
     auto *buttonRow = new QHBoxLayout();
     buttonRow->addStretch();
     auto *okButton = new QPushButton(tr("OK"), central);
@@ -92,18 +87,6 @@ void MainWindow::updateStatusText()
     if (!localizedTitle.isEmpty()) {
         setWindowTitle(localizedTitle);
     }
-
-    const QString state = m_backend.isLocaleReady()
-                              ? tr("Locale bank loaded.")
-                              : tr("Locale bank unavailable, using fallback strings.");
-
-    const RenderSettings settings = m_backend.loadRenderSettings();
-    const QString renderSummary = tr("LOD %1  Filter %2  Shadows %3")
-                                      .arg(settings.dynamicLOD)
-                                      .arg(settings.textureFilter)
-                                      .arg(settings.shadowMode);
-
-    m_statusLabel->setText(tr("%1 · %2").arg(state, renderSummary));
 
     refreshTabs();
 }
