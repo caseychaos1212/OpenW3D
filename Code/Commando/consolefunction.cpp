@@ -1135,7 +1135,7 @@ public:
 		ini.Put_Int(W3D_SECTION_SYSTEM, "Brightness", 0);
 		ini.Put_Int(W3D_SECTION_SYSTEM, "Contrast", 1);
 
-		ini.Save(W3D_CONF_FILE);
+		OpenW3D::Save_Config(ini);
 	}
 };
 
@@ -5485,4 +5485,3 @@ void	ConsoleFunctionManager::Print( const char *format, ... )
 	ConsoleBox.Print(string.Peek_Buffer());
 	va_end (arg_list);
 }
-

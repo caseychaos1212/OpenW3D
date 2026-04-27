@@ -17,8 +17,24 @@
 */
 #pragma once
 
+class INIClass;
+class StringClass;
+
+namespace OpenW3D
+{
+	void Set_Config_File_Path_Override(const char *path);
+	bool Set_Config_File_Path_From_Command_Line(int argc, char *argv[]);
+	bool Set_Config_File_Path_From_Command_Line(const char *command_line);
+	const char *Get_Config_File_Path();
+	bool Has_Config_File_Path_Override();
+	bool Command_Line_Has_Arg(const char *command_line, const char *arg);
+	void Append_Config_File_Arg(StringClass &command_line);
+	bool Save_Config(const INIClass &ini);
+}
+
 // Some defines for moving game config to ini files rather than registry.
-#define W3D_CONF_FILE "openw3d.conf"
+#define W3D_CONF_FILENAME "openw3d.conf"
+#define W3D_CONF_FILE OpenW3D::Get_Config_File_Path()
 #define W3D_SECTION_RENDER "RenderDevice"
 #define W3D_SECTION_SOUND "Sound"
 #define W3D_SECTION_SYSTEM "System"
