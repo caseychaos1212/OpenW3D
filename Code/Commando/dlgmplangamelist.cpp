@@ -56,8 +56,10 @@
 #include "registry.h"
 #include "_globals.h"
 #include "dlgmplanhostoptions.h"
+#include "gdcoopmission.h"
 
 bool MPLanGameListMenuClass::UpdateNickname = false;
+bool MPLanGameListMenuClass::IsCoopList = false;
 
 ////////////////////////////////////////////////////////////////
 //	Local constants
@@ -232,7 +234,11 @@ MPLanGameListMenuClass::On_Command (int ctrl_id, int message_id, unsigned int pa
 				delete PTheGameData;
 				PTheGameData = NULL;
 			}
-			PTheGameData = cGameData::Create_Game_Of_Type (cGameData::GAME_TYPE_CNC);
+			cGameData::GameTypeEnum game_type = IsCoopList ? cGameData::GAME_TYPE_COOP_MISSION : cGameData::GAME_TYPE_CNC;
+			if (IsCoopList && !GameInitMgrClass::Is_Coop_LAN_Initialized()) {
+				GameInitMgrClass::Initialize_Coop_LAN();
+			}
+			PTheGameData = cGameData::Create_Game_Of_Type (game_type);
 			WWASSERT(PTheGameData != NULL);
 
 			// LAN games are NEVER quickmatch
@@ -346,6 +352,11 @@ MPLanGameListMenuClass::Update_Game_List (void)
 		//
 		cGameChannel *channel = objnode->Data ();
 		WWASSERT (channel != NULL);
+
+		bool is_coop_game = channel->Get_Game_Data()->Is_Coop_Mission();
+		if (is_coop_game != IsCoopList) {
+			continue;
+		}
 
 		//
 		//	Insert the entry
@@ -631,6 +642,33 @@ void MPLanGameListMenuClass::On_EditCtrl_Change(EditCtrlClass* edit, int id)
 void
 MPLanGameListMenuClass::Display (void)
 {
+	IsCoopList = false;
+
+	//
+	//	Create the dialog if necessary, otherwise simply bring it to the front
+	//
+	if (_TheInstance == NULL) {
+		START_DIALOG (MPLanGameListMenuClass);
+	} else {
+		if (_TheInstance->Is_Active_Menu () == false) {
+			DialogMgrClass::Rollback (_TheInstance);
+		}
+	}
+
+	return ;
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//	Display_Coop
+//
+////////////////////////////////////////////////////////////////
+void
+MPLanGameListMenuClass::Display_Coop (void)
+{
+	IsCoopList = true;
+
 	//
 	//	Create the dialog if necessary, otherwise simply bring it to the front
 	//

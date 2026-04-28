@@ -79,11 +79,13 @@ public:
 	//		SP		= Single Player
 	//
 	static void		Initialize_LAN (void);
+	static void		Initialize_Coop_LAN (void);
 	static void		Initialize_WOL (void);
 	static void		Initialize_SP (void);
 	static void		Initialize_Skirmish (void);
 
 	static bool		Is_LAN_Initialized (void)			{ return Mode == MODE_LAN; }
+	static bool		Is_Coop_LAN_Initialized (void)	{ return Mode == MODE_COOP_LAN; }
 	static bool		Is_WOL_Initialized (void)			{ return Mode == MODE_WOL; }
 	static bool		Is_SP_Initialized (void)			{ return Mode == MODE_SP; }
 	static bool		Is_Skirmish_Initialized (void)	{ return Mode == MODE_SKIRMISH; }
@@ -95,6 +97,7 @@ public:
 	static void		Shutdown_Skirmish (void);
 
 	static void		End_Client_Server (void);
+	static void		Set_Is_Coop_Level_Transition (bool onoff)	{ IsCoopLevelTransition = onoff; }
 
 	//
 	//	Thinking support (for safely triggering game ends)
@@ -119,6 +122,7 @@ private:
 		MODE_SP,
 		MODE_SKIRMISH,
 		MODE_LAN,
+		MODE_COOP_LAN,
 		MODE_WOL
 	};
 
@@ -133,6 +137,7 @@ private:
 	////////////////////////////////////////////////////////////////
 	static bool		IsClientRequired;
 	static bool		IsServerRequired;
+	static bool		IsCoopLevelTransition;
 	static bool		RestoreSFX;
 	static bool		RestoreMusic;
 	static int		Mode;

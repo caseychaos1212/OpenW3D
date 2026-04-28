@@ -580,7 +580,7 @@ DECLARE_SCRIPT (MX0_Engineer1, "Damage_multiplier:float")
 		last_health = Commands->Get_Health (obj);
 		current_health = Commands->Get_Health (obj);
 
-		if (damager == STAR && !doing_anim)
+		if (Commands->Is_A_Star(damager) && !doing_anim)
 		{
 			static constexpr const char* convs[4] =
 				{
@@ -854,7 +854,7 @@ DECLARE_SCRIPT (MX0_Engineer2, "Damage_multiplier:float")
 		last_health = Commands->Get_Health (obj);
 		current_health = Commands->Get_Health (obj);
 
-		if (damager == STAR && !doing_anim)
+		if (Commands->Is_A_Star(damager) && !doing_anim)
 		{
 			static constexpr const char* convs[4] =
 				{
@@ -1247,7 +1247,7 @@ DECLARE_SCRIPT (MX0_SniperAction, "FaceObj:int")
 	{
 		Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", NULL);
 
-		if ( damager == STAR )
+		if ( Commands->Is_A_Star(damager) )
 		{
 			Commands->Apply_Damage( obj, 10000.0f, "Blamokiller", STAR );
 
@@ -1295,7 +1295,7 @@ DECLARE_SCRIPT (MX0_KillNotify, "")
 
 	void Damaged (GameObject * /* obj */, GameObject *damager, float /* amount */) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			hit = true;
 		}
@@ -1359,7 +1359,7 @@ DECLARE_SCRIPT (MX0_KillNotify, "")
 
 	void Killed (GameObject *obj, GameObject *killer) override
 	{
-		if (killer == STAR)
+		if (Commands->Is_A_Star(killer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (1200001), SNIPER1KILLED, 0, 0.0f );
 		}

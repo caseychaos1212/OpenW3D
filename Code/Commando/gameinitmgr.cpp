@@ -58,6 +58,7 @@
 #include "pscene.h"
 #include "dx8renderer.h"
 #include "gdsingleplayer.h"
+#include "gdcoopmission.h"
 #include "gdskirmish.h"
 #include "playertype.h"
 #include "gameobjmanager.h"
@@ -80,10 +81,12 @@
 #include "ConsoleMode.h"
 #include "specialbuilds.h"
 #include "modpackagemgr.h"
+#include "teammanager.h"
 
 #include "translatedb.h"
 #include "damage.h"
 #include "ccamera.h"
+#include "coopdebuglog.h"
 #include "bones.h"
 #include "surfaceeffects.h"
 #include "ffactory.h"
@@ -109,6 +112,7 @@ bool		GameInitMgrClass::RestoreSFX			= false;
 bool		GameInitMgrClass::RestoreMusic		= false;
 bool		GameInitMgrClass::NeedsGameExit		= false;
 bool		GameInitMgrClass::NeedsGameExitAll	= false;
+bool		GameInitMgrClass::IsCoopLevelTransition = false;
 int		GameInitMgrClass::Mode					= MODE_UNKNOWN;
 int		GameInitMgrClass::WOLReturnDialog	= RenegadeDialogMgrClass::LOC_INTERNET_MAIN;
 
@@ -133,6 +137,8 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned int
 
 	WWASSERT(map_name != NULL);
    WWDEBUG_SAY (("GameInitMgrClass::Start_Game(%s)\n", map_name));
+	CoopDebugLog::Log("GameInitMgrClass::Start_Game begin map=%s mode=%d teamChoice=%d client_required=%d server_required=%d game_type=%d",
+		map_name, Mode, teamChoice, IsClientRequired, IsServerRequired, cGameType::Get_Game_Type());
 
 	// NOTE: Multi-play does not need this fix because it does not sound page swap.
 	if (IS_SOLOPLAY) {
@@ -173,11 +179,13 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned int
 	//	Determine if there is a mod specified... if so, load the mod package
 	//
 	ModPackageMgrClass::Load_Current_Mod ();
+	CoopDebugLog::Log("GameInitMgrClass::Start_Game loaded mod package map=%s", map_name);
 
 	//
 	// Reload the sub-systems that may be affected by a mod
 	//
 	_reload_game_configuration_files();
+	CoopDebugLog::Log("GameInitMgrClass::Start_Game reloaded configuration map=%s", map_name);
 
 	//
 	//	Check to ensure the game is configured correctly
@@ -206,6 +214,7 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned int
 	// on which mode we are in.
 	//
 	Start_Client_Server ();
+	CoopDebugLog::Log("GameInitMgrClass::Start_Game Start_Client_Server done map=%s", map_name);
 
 	//
 	//	Deactivate the menu system
@@ -219,19 +228,23 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned int
 	INIT_STATUS ("Activate combat");
    GameModeManager::Find ("Combat")->Activate ();
 	INIT_STATUS ("");
+	CoopDebugLog::Log("GameInitMgrClass::Start_Game combat activated map=%s", map_name);
 
 	//
 	//	Load the level
 	//
 	CombatGameModeClass *game_mode = static_cast<CombatGameModeClass*>(GameModeManager::Find ("Combat"));
+	CoopDebugLog::Log("GameInitMgrClass::Start_Game Load_Level start map=%s", map_name);
 	game_mode->Load_Level ();
+	CoopDebugLog::Log("GameInitMgrClass::Start_Game Load_Level done map=%s", map_name);
 
    //
 	//	Let the LAN or WOL interface know we are starting a game
 	//
-	if (Mode == MODE_LAN) {
+	if (Mode == MODE_LAN || Mode == MODE_COOP_LAN) {
 		INIT_STATUS ("Go to location");
 		PLC->Go_To_Location (LANLOC_INGAME);
+		CoopDebugLog::Log("GameInitMgrClass::Start_Game LAN location set map=%s", map_name);
 	} else if (Mode == MODE_WOL) {
 		INIT_STATUS ("Go to game channel");
 	}
@@ -277,9 +290,12 @@ GameInitMgrClass::End_Game (void)
 	unsigned int time;
 
 	WWDEBUG_SAY (("GameInitMgrClass::End_Game\n"));
+	CoopDebugLog::Log("GameInitMgrClass::End_Game begin mode=%d game_type=%d in_progress=%d",
+		Mode, cGameType::Get_Game_Type(), Is_Game_In_Progress());
 
 	// Do nothing if the game is not in progress.
 	if ( !IS_MISSION && (!Is_Game_In_Progress())) {
+		CoopDebugLog::Log("GameInitMgrClass::End_Game ignored because game is not in progress");
 		return;
 	}
 
@@ -304,7 +320,7 @@ GameInitMgrClass::End_Game (void)
 	}
 
 #ifndef MULTIPLAYERDEMO
-	if ( IS_MISSION && COMBAT_STAR ) {
+	if ( IS_MISSION && PTheGameData != NULL && The_Game()->Remember_Inventory() && COMBAT_STAR ) {
 		cGod::Store_Inventory( COMBAT_STAR );
 	}
 #endif // !MULTIPLAYERDEMO
@@ -367,11 +383,13 @@ GameInitMgrClass::End_Game (void)
 	//	Shutdown the combat system
 	//
 	GameModeManager::Find ("Combat")->Deactivate ();
+	CoopDebugLog::Log("GameInitMgrClass::End_Game combat deactivated");
 
 	//
 	//	Let the game mode manager think to cleanup all pending states
 	//
 	GameModeManager::Think ();
+	CoopDebugLog::Log("GameInitMgrClass::End_Game GameModeManager cleanup think done");
 
  	//
 	//	Shutdown the menu system as necessary
@@ -389,7 +407,9 @@ GameInitMgrClass::End_Game (void)
 		wolGame->Leave_Game();
 	}
 
-	if (cNetwork::I_Am_Server()) {
+	bool preserve_network = IsCoopLevelTransition && IS_COOP_MISSION;
+
+	if (cNetwork::I_Am_Server() && !preserve_network) {
 
 		bool is_quick_full_exit_requested = false;
 #ifdef WWDEBUG
@@ -402,8 +422,13 @@ GameInitMgrClass::End_Game (void)
 	}
 
 	cNetwork::Flush();
+	CoopDebugLog::Log("GameInitMgrClass::End_Game cNetwork::Flush done preserve_network=%d", preserve_network);
 
-	End_Client_Server();
+	if (!preserve_network) {
+		CoopDebugLog::Log("GameInitMgrClass::End_Game End_Client_Server start");
+		End_Client_Server();
+		CoopDebugLog::Log("GameInitMgrClass::End_Game End_Client_Server done");
+	}
 
 	//
 	//	Remove all players
@@ -416,7 +441,11 @@ GameInitMgrClass::End_Game (void)
 	// Destroy all netobjects !
 	//
 	NetworkObjectMgrClass::Set_All_Delete_Pending();
+	CoopDebugLog::Log("GameInitMgrClass::End_Game Set_All_Delete_Pending done pending=%d",
+		NetworkObjectMgrClass::Get_Pending_Object_Count());
 	NetworkObjectMgrClass::Delete_Pending();
+	CoopDebugLog::Log("GameInitMgrClass::End_Game Delete_Pending done objects=%d",
+		NetworkObjectMgrClass::Get_Object_Count());
 
 	cGod::Reset();
 
@@ -424,6 +453,7 @@ GameInitMgrClass::End_Game (void)
 	//	Unload whatever mod is currently loaded (if necessary)...
 	//
 	ModPackageMgrClass::Unload_Current_Mod ();
+	CoopDebugLog::Log("GameInitMgrClass::End_Game done");
 	return ;
 }
 
@@ -480,6 +510,7 @@ GameInitMgrClass::Display_End_Game_Menu (void)
 		//	Display the LAN main menu
 		//
 		case MODE_LAN:
+		case MODE_COOP_LAN:
 			//GAMESPY
 			if (cGameSpyAdmin::Is_Gamespy_Game()) {
 				RenegadeDialogMgrClass::Goto_Location (RenegadeDialogMgrClass::LOC_GAMESPY_MAIN);
@@ -590,6 +621,13 @@ GameInitMgrClass::Start_Client_Server (void)
 				WWAudioClass::Get_Instance ()->Allow_Music (false);
 				RestoreMusic = true;
 			}
+		}
+	}
+	if (IsServerRequired && cNetwork::I_Am_Server () &&
+		 cTeamManager::Get_Team_Object_List()->Head() == NULL) {
+		for (int team_num = 0; team_num < MAX_TEAMS; team_num++) {
+			cTeam * p_team = new cTeam;
+			p_team->Init(team_num);
 		}
 	}
 
@@ -838,6 +876,40 @@ GameInitMgrClass::Initialize_LAN (void)
 
 ////////////////////////////////////////////////////////////////
 //
+//	Initialize_Coop_LAN
+//
+////////////////////////////////////////////////////////////////
+void
+GameInitMgrClass::Initialize_Coop_LAN (void)
+{
+	WWDEBUG_SAY (("GameInitMgrClass::Initialize_Coop_LAN\n"));
+	CoopDebugLog::Reset();
+	CoopDebugLog::Log("GameInitMgrClass::Initialize_Coop_LAN begin mode=%d", Mode);
+
+	if (Mode != MODE_UNKNOWN) {
+		CoopDebugLog::Log("GameInitMgrClass::Initialize_Coop_LAN shutting down existing mode=%d", Mode);
+		Shutdown ();
+	}
+
+	cGameType::Set_Game_Type(GAMETYPE_COOP_MISSION);
+	CoopDebugLog::Log("GameInitMgrClass::Initialize_Coop_LAN game type set to coop mission");
+
+	//
+	// Activate LAN interface. Co-op uses real LAN sockets, not single-player queues.
+	//
+	GameModeManager::Find ("LAN")->Activate ();
+
+	IsClientRequired	= false;
+	IsServerRequired	= false;
+	Mode					= MODE_COOP_LAN;
+	CoopDebugLog::Log("GameInitMgrClass::Initialize_Coop_LAN done mode=%d", Mode);
+
+	return ;
+}
+
+
+////////////////////////////////////////////////////////////////
+//
 //	Shutdown_LAN
 //
 ////////////////////////////////////////////////////////////////
@@ -941,6 +1013,7 @@ GameInitMgrClass::Shutdown (void)
 			break;
 
 		case MODE_LAN:
+		case MODE_COOP_LAN:
 			Shutdown_LAN ();
 			break;
 
@@ -994,12 +1067,14 @@ GameInitMgrClass::Think (void)
 	//	Safely exit the game and return to the menu (as necessary)
 	//
 	if (NeedsGameExit) {
+		CoopDebugLog::Log("GameInitMgrClass::Think handling NeedsGameExit");
 		GameInitMgrClass::End_Game ();
 		GameInitMgrClass::Display_End_Game_Menu ();
 		NeedsGameExit = false;
 	}
 
 	if (NeedsGameExitAll) {
+		CoopDebugLog::Log("GameInitMgrClass::Think handling NeedsGameExitAll");
 		GameInitMgrClass::End_Game ();
 		extern void Stop_Main_Loop (int exitCode);
 		Stop_Main_Loop (EXIT_SUCCESS);
@@ -1052,10 +1127,3 @@ void _reload_game_configuration_files(void)
 	ScriptManager::Shutdown();
 	ScriptManager::Init();
 }
-
-
-
-
-
-
-

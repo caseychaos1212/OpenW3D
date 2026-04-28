@@ -37,6 +37,7 @@
 #include "powerup.h"
 #include "debug.h"
 #include "combat.h"
+#include "coopinventory.h"
 #include "phys.h"
 #include "persistfactory.h"
 #include "combatchunkid.h"
@@ -255,6 +256,93 @@ const PersistFactoryClass & PowerUpGameObjDef::Get_Factory (void) const
 	return _PowerUpGameObjDefPersistFactory;
 }
 
+bool PowerUpGameObjDef::Has_Coop_Shared_Grant(void) const
+{
+	return GrantShieldType != 0 ||
+		GrantShieldStrengthMax != 0 ||
+		GrantHealthMax != 0 ||
+		GrantWeaponID != 0 ||
+		GrantWeaponClips ||
+		GrantKey != 0;
+}
+
+bool PowerUpGameObjDef::Grant_Coop_Shared(SmartGameObj *obj, bool hud_display) const
+{
+	bool granted = false;
+
+	WWASSERT(CombatManager::I_Am_Server());
+	WWASSERT(obj != NULL);
+
+	DefenseObjectClass *defense = obj->Get_Defense_Object();
+
+	if (GrantShieldType != 0 && GrantShieldType > (int)defense->Get_Shield_Type()) {
+		defense->Set_Shield_Type(GrantShieldType);
+		granted = true;
+	}
+
+	if (GrantShieldStrengthMax != 0) {
+		float add = GrantShieldStrengthMax * (float)obj->Get_Definition().Get_DefenseObjectDef().ShieldStrengthMax;
+
+		switch (CombatManager::Get_Difficulty_Level()) {
+			case 0:	add *= 2.0f;	break;
+			case 2:	add *= 0.75f;	break;
+		};
+
+		add = (int)(add + 0.95f);
+		defense->Set_Shield_Strength_Max(defense->Get_Shield_Strength_Max() + add);
+		granted = true;
+
+		if (hud_display && obj == COMBAT_STAR) {
+			HUDClass::Add_Shield_Upgrade_Grant(add);
+		}
+	}
+
+	if (GrantHealthMax != 0) {
+		float add = GrantHealthMax * (float)obj->Get_Definition().Get_DefenseObjectDef().HealthMax;
+
+		switch (CombatManager::Get_Difficulty_Level()) {
+			case 0:	add *= 2.0f;	break;
+			case 2:	add *= 0.75f;	break;
+		};
+
+		add = (int)(add + 0.95f);
+		defense->Set_Health_Max(defense->Get_Health_Max() + add);
+		granted = true;
+
+		if (hud_display && obj == COMBAT_STAR) {
+			HUDClass::Add_Health_Upgrade_Grant(add);
+		}
+	}
+
+	if (GrantWeaponID != 0) {
+		if ((GrantWeapon && !obj->Get_Weapon_Bag()->Is_Weapon_Owned(GrantWeaponID)) ||
+			 !obj->Get_Weapon_Bag()->Is_Ammo_Full(GrantWeaponID)) {
+			obj->Get_Weapon_Bag()->Add_Weapon(GrantWeaponID, GrantWeaponRounds, GrantWeapon);
+			granted = true;
+		}
+	} else if (GrantWeaponClips) {
+		WeaponBagClass *weapon_bag = obj->Get_Weapon_Bag();
+		for (int weapon_index = 0; weapon_index < weapon_bag->Get_Count(); weapon_index++) {
+			WeaponClass *weapon = weapon_bag->Peek_Weapon(weapon_index);
+			if (weapon != NULL && weapon->Get_Definition()->CanReceiveGenericCnCAmmo) {
+				int clip_rounds = weapon->Get_Definition()->ClipSize;
+				weapon_bag->Add_Weapon(weapon->Get_Definition(), clip_rounds * GrantWeaponRounds, false);
+				granted = true;
+			}
+		}
+	}
+
+	if (GrantKey != 0) {
+		SoldierGameObj *soldier = obj->As_SoldierGameObj();
+		if (soldier != NULL && soldier->Is_Human_Controlled() && !soldier->Has_Key(GrantKey)) {
+			soldier->Give_Key(GrantKey);
+			granted = true;
+		}
+	}
+
+	return granted;
+}
+
 bool	PowerUpGameObjDef::Grant( SmartGameObj * obj, PowerUpGameObj * p_powerup, bool hud_display ) const
 {
 	int no_grant_message = 0;
@@ -412,6 +500,7 @@ bool	PowerUpGameObjDef::Grant( SmartGameObj * obj, PowerUpGameObj * p_powerup, b
 				//
 				int clip_rounds = weapon->Get_Definition()->ClipSize;
 				weapon->Add_Rounds( clip_rounds * GrantWeaponRounds );
+				granted = true;
 			}
 		}
 	}
@@ -468,6 +557,10 @@ bool	PowerUpGameObjDef::Grant( SmartGameObj * obj, PowerUpGameObj * p_powerup, b
 	if ( !granted && ( COMBAT_STAR == obj ) && no_grant_message != 0 ) {
 		HUDInfo::Set_HUD_Help_Text( TRANSLATE( no_grant_message ), Vector3( 0,1,0 ) );
 
+	}
+
+	if (granted) {
+		CoopInventoryManager::Record_And_Share_PowerUp(obj, *this);
 	}
 
 	return granted;
@@ -746,6 +839,7 @@ void	PowerUpGameObj::Grant( SmartGameObj * obj )
 	if ( WeaponBag != NULL ) {
 		WWASSERT( obj->Get_Weapon_Bag() );
 		if ( obj->Get_Weapon_Bag()->Move_Contents( WeaponBag ) ) {
+			CoopInventoryManager::Record_And_Share_Weapon_Bag(obj, WeaponBag);
 			Set_State( PowerUpGameObj::STATE_GRANTING );
 		}
 	}

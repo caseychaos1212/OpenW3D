@@ -1005,7 +1005,7 @@ DECLARE_SCRIPT (test_Ssm_Trigger, "")
 {
 	void Damaged( GameObject * obj, GameObject * damager, float /*amount*/ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			Commands->Send_Custom_Event (obj, obj, M00_LAUNCH_SSM, 0, 0.0f);
 		}

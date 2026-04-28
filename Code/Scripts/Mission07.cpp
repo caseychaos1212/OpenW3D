@@ -1577,7 +1577,7 @@ DECLARE_SCRIPT(M07_In_Nuke_Blast, "")
 		}
 		// Send to enterer to let script know in blast zone
 		Commands->Send_Custom_Event (obj, enterer, M07_NUKE_BLAST, 1, 0.0f);
-		if(!star_in_blast && enterer == STAR)
+		if(!star_in_blast && Commands->Is_A_Star(enterer))
 		{
 			star_in_blast = true;
 
@@ -1638,7 +1638,7 @@ DECLARE_SCRIPT(M07_Out_Nuke_Blast, "")
 		}
 		// Send to enterer to let script know out blast zone
 		Commands->Send_Custom_Event (obj, enterer, M07_NUKE_BLAST, 0, 0.0f);
-		if(star_in_blast && enterer == STAR)
+		if(star_in_blast && Commands->Is_A_Star(enterer))
 		{
 			star_in_blast = false;
 

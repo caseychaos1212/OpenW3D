@@ -49,6 +49,13 @@ public:
 	static bool					Get_Is_Under_Gamespy_Menuing(void)						{return IsUnderGamespyMenuing;}
 	static void					Set_Is_Launch_From_Gamespy_Requested(bool flag)		{IsLaunchFromGamespyRequested = flag;}
 	static bool					Get_Is_Launch_From_Gamespy_Requested(void)			{return IsLaunchFromGamespyRequested;}
+	static void					Set_Is_Coop_Direct_Connect(bool flag)					{IsCoopDirectConnect = flag;}
+	static void					Set_Is_Coop_Direct_Host_Requested(bool flag)			{IsCoopDirectHostRequested = flag;}
+	static bool					Get_Is_Coop_Direct_Host_Requested(void)				{return IsCoopDirectHostRequested;}
+	static void					Set_Coop_Direct_Host_Mission(const char *mission_name);
+	static void					Set_Coop_Direct_Host_Port(USHORT port)				{CoopDirectHostPort = port;}
+	static bool					Is_Direct_Internet_Game(void)							{return IsCoopDirectConnect || IsCoopDirectHostActive;}
+	static bool					Needs_Think(void)											{return Is_Gamespy_Game() || IsCoopDirectHostRequested;}
 	static void					Set_Is_Launched_From_Gamespy(bool flag)				{IsLaunchedFromGamespy = flag;}
 	static bool					Get_Is_Launched_From_Gamespy(void)						{return IsLaunchedFromGamespy;}
 	static void					Set_Is_Server_Gamespy_Listed(bool flag)				{IsServerGamespyListed = flag;}
@@ -64,14 +71,20 @@ private:
 	void						HandleNotification(DlgWOLWaitEvent& event) override;
 	static void					Join_Server(void);
 	static void					Connect_To_Game_Server(void);
+	static void					Host_Coop_Direct_Game(void);
 
 	static bool					DetectingBandwidth;
 	static bool					IsUnderGamespyMenuing;
 	static bool					IsLaunchFromGamespyRequested;
 	static bool					IsLaunchedFromGamespy;
 	static bool					IsServerGamespyListed;
+	static bool					IsCoopDirectConnect;
+	static bool					IsCoopDirectHostRequested;
+	static bool					IsCoopDirectHostActive;
 	static ULONG				GameHostIp;
 	static USHORT				GameHostPort;
+	static char					CoopDirectHostMission[256];
+	static USHORT				CoopDirectHostPort;
 	static WideStringClass	PasswordAttempt;
 };
 

@@ -41,7 +41,9 @@
 #include "gamemode.h"
 #include "registry.h"
 #include "gamechanlist.h"
+#include "gamedata.h"
 #include "playermanager.h"
+#include "playertype.h"
 #include "gametype.h"
 #include "translatedb.h"
 #include "string_ids.h"
@@ -170,7 +172,12 @@ void cLanChat::Init_Lan_Protocol_And_Socket(void)
 //-----------------------------------------------------------------------------
 void cLanChat::Accept_Actions(void)
 {
-	DlgMPConnect::DoDialog(cNetInterface::Get_Side_Preference(), 0);
+	int team_choice = cNetInterface::Get_Side_Preference();
+	if (The_Game() != NULL && The_Game()->Is_Coop_Mission()) {
+		team_choice = PLAYERTYPE_GDI;
+	}
+
+	DlgMPConnect::DoDialog(team_choice, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -383,4 +390,3 @@ void cLanChat::Think(void)
 		::strcpy(name, cNetInterface::Get_Nickname());
 	}
 	*/
-

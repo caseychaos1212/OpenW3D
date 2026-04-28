@@ -1255,7 +1255,7 @@ DECLARE_SCRIPT(Sakura_Killed, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /*amount*/ ) override
 	{
-		if (damager != STAR)
+		if (!Commands->Is_A_Star(damager))
 		{
 			if (Commands->Get_Health (obj) < 5)
 			{
@@ -5915,7 +5915,7 @@ DECLARE_SCRIPT (M03_Zone_Enabled_Spawner, "Spawner_num:int, Control_num:int")
 		int control = Get_Int_Parameter("Control_num");
 		GameObject * officer = Commands->Find_Object (control);
 
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if ((officer) || (Get_Int_Parameter("Control_num") == 0))
 			{
@@ -5929,7 +5929,7 @@ DECLARE_SCRIPT (M03_Killed_Disabled_Spawner, "Spawner_num:int")
 {
 	void Killed(GameObject * /*obj*/, GameObject * killer) override
 	{
-		if (killer == STAR)
+		if (Commands->Is_A_Star(killer))
 		{
 			Commands->Enable_Spawner(Get_Int_Parameter("Spawner_num"), false);
 		}
@@ -6376,7 +6376,7 @@ DECLARE_SCRIPT(M03_Holograph_EntryZone_JDG, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && entered == false)
+		if (Commands->Is_A_Star(enterer) && entered == false)
 		{
 			entered = true;
 			float delayTimer = Commands->Get_Random ( 0.25f, 1.0f );
@@ -6862,7 +6862,7 @@ DECLARE_SCRIPT (M10_Elevator_All_Zone, "Controller_num:int")
 
 	void Entered (GameObject * obj, GameObject * enterer) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			star_in_zone = true;
 			Commands->Send_Custom_Event(obj, Commands->Find_Object(Get_Int_Parameter("Controller_num")), ACTIVATE, 0, 0.0f);

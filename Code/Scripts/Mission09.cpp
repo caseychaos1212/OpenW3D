@@ -549,7 +549,7 @@ DECLARE_SCRIPT (M09_Evac_Point_Objective, "")
 	{
 		GameObject * mobius = Commands->Find_Object (2000010);
 
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			star_in_zone = true;
 
@@ -1204,7 +1204,7 @@ DECLARE_SCRIPT (M09_Mobius_Follow, "")  //Mobius (Pre-Suit): 2000010
 
 	/*void Poked(GameObject * obj, GameObject * poker)
 	{
-		if (poker == STAR)
+		if (Commands->Is_A_Star(poker))
 		{
 			if (stationary == false)
 			{
@@ -1547,7 +1547,7 @@ DECLARE_SCRIPT (M09_Mutant_Damage_Mod_10, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager != STAR)
+		if (!Commands->Is_A_Star(damager))
 		{
 			current_health = Commands->Get_Health (obj);
 			float damage = ((last_health - current_health) + damage_tally);
@@ -1581,7 +1581,7 @@ DECLARE_SCRIPT (M09_Mutant_Damage_Mod_50, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager != STAR)
+		if (!Commands->Is_A_Star(damager))
 		{
 			current_health = Commands->Get_Health (obj);
 			float damage = ((last_health - current_health) + damage_tally);
@@ -1615,7 +1615,7 @@ DECLARE_SCRIPT (M09_Nod_Damage_Mod_10, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager != STAR)
+		if (!Commands->Is_A_Star(damager))
 		{
 			current_health = Commands->Get_Health (obj);
 			float damage = ((last_health - current_health) + damage_tally);
@@ -2886,7 +2886,7 @@ DECLARE_SCRIPT (M09_Key_Grant, "")
 {
 	void Poked(GameObject * /* obj */, GameObject * poker) override
 	{
-		if (poker == STAR)
+		if (Commands->Is_A_Star(poker))
 		{
 
 			GameObject *key1 = Commands->Create_Object ( "Level_01_Keycard", Vector3 (-97.303f, 520.441f, -153.080f) );
@@ -3259,7 +3259,7 @@ DECLARE_SCRIPT (M09_Elevator_Movement_Zone, "Direction:int, Anim_num:int, Elev_o
 			"lab_spn_door08.lab_spn_door08",
 		};
 
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (Get_Int_Parameter("Direction") == 0)
 			{
@@ -3298,7 +3298,7 @@ DECLARE_SCRIPT (M09_Elevator_All_Zone, "Controller_num:int")
 
 	void Entered (GameObject * obj, GameObject * enterer) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			star_in_zone = true;
 			Commands->Send_Custom_Event(obj, Commands->Find_Object(Get_Int_Parameter("Controller_num")), SET_STAR, ENTER, 0.0f);
@@ -3715,12 +3715,12 @@ DECLARE_SCRIPT (M09_Damage_Modifier, "Damage_multiplier:float")
 	{
 		float damage;
 
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			last_health = Commands->Get_Health (obj);
 		}
 
-		if (damager != STAR)
+		if (!Commands->Is_A_Star(damager))
 		{
 			current_health = Commands->Get_Health (obj);
 			if (current_health == 0)
@@ -4087,12 +4087,12 @@ DECLARE_SCRIPT(M09_Innate_Disable, "")
 	{
 		GameObject * mobius = Commands->Find_Object (2000010);
 
-		if (damager == STAR  || damager == mobius)
+		if (Commands->Is_A_Star(damager)  || damager == mobius)
 		{
 			last_health = Commands->Get_Health (obj);
 		}
 
-		if (damager != STAR && damager != mobius)
+		if (!Commands->Is_A_Star(damager) && damager != mobius)
 		{
 			current_health = Commands->Get_Health (obj);
 			float damage = ((last_health - current_health) + damage_tally);

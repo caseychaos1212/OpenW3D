@@ -35,6 +35,7 @@
 #include "bandwidth.h"
 #include "bandwidthcheck.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "trim.h"
 #include "singletoninstancekeeper.h"
@@ -46,6 +47,7 @@
 #include "ConsoleMode.h"
 #include "GameSpy_QnR.h"
 #include "gamespyadmin.h"
+#include "netinterface.h"
 #include "specialbuilds.h"
 #include "openw3d.h"
 #include "useroptions.h"
@@ -237,21 +239,108 @@ cUserOptions::ParseResult cUserOptions::Parse_Command_Line(int argc, char *argv[
                 if (end_port != nullptr && *end_port != '\0') {
                     return FAILURE;
                 }
-                if (arg_port != 0 || arg_port > 0) {
-                    port = arg_port;
+                if (arg_port > 0 && arg_port <= 65535) {
+                    port = (USHORT)arg_port;
                 }
                 saddr = saddr_mem = new char[tport - argval + 1];
                 memcpy(saddr_mem, argval, tport - argval);
                 saddr_mem[tport - argval] = '\0';
 			}
 
-			addr = ::inet_addr(argval);
+			addr = ::inet_addr(saddr);
 
             delete[] saddr_mem;
 
 			cGameSpyAdmin::Set_Game_Host_Ip(addr);
 			cGameSpyAdmin::Set_Game_Host_Port(port);
+			cGameSpyAdmin::Set_Is_Coop_Direct_Connect(false);
 			cGameSpyAdmin::Set_Is_Launch_From_Gamespy_Requested(true);
+			continue;
+		}
+
+		if (strcmp(cmd, "--coop-connect") == 0) {
+			const char *argval = argv[i + 1];
+			i++;
+			if (i >= argc) {
+				retcode = FAILURE;
+				break;
+			}
+			USHORT port = 4848;
+			DWORD addr = 0;
+
+            char *saddr_mem = nullptr;
+            const char *saddr = argval;
+            const char *tport = strchr(argval, ':');
+			if (tport) {
+                char *end_port = nullptr;
+                int arg_port = strtol(tport + 1, &end_port, 10);
+                if (end_port != nullptr && *end_port != '\0') {
+                    return FAILURE;
+                }
+                if (arg_port > 0 && arg_port <= 65535) {
+                    port = (USHORT)arg_port;
+                }
+                saddr = saddr_mem = new char[tport - argval + 1];
+                memcpy(saddr_mem, argval, tport - argval);
+                saddr_mem[tport - argval] = '\0';
+			}
+
+			addr = ::inet_addr(saddr);
+
+            delete[] saddr_mem;
+
+			cGameSpyAdmin::Set_Game_Host_Ip(addr);
+			cGameSpyAdmin::Set_Game_Host_Port(port);
+			cGameSpyAdmin::Set_Is_Coop_Direct_Connect(true);
+			cGameSpyAdmin::Set_Is_Launch_From_Gamespy_Requested(true);
+			continue;
+		}
+
+		if (strcmp(cmd, "--coop-host") == 0) {
+			const char *mission_name = "";
+			if (i + 1 < argc && strncmp(argv[i + 1], "--", 2) != 0) {
+				mission_name = argv[i + 1];
+				i++;
+			}
+
+			cGameSpyAdmin::Set_Coop_Direct_Host_Mission(mission_name);
+			cGameSpyAdmin::Set_Is_Coop_Direct_Connect(false);
+			cGameSpyAdmin::Set_Is_Coop_Direct_Host_Requested(true);
+			continue;
+		}
+
+		if (strcmp(cmd, "--coop-port") == 0) {
+			const char *argval = argv[i + 1];
+			i++;
+			if (i >= argc) {
+				retcode = FAILURE;
+				break;
+			}
+
+			char *end_port = nullptr;
+			int arg_port = strtol(argval, &end_port, 10);
+			if (end_port != nullptr && *end_port != '\0') {
+				return FAILURE;
+			}
+			if (arg_port <= 0 || arg_port > 65535) {
+				return FAILURE;
+			}
+
+			cGameSpyAdmin::Set_Coop_Direct_Host_Port((USHORT)arg_port);
+			continue;
+		}
+
+		if (strcmp(cmd, "--netplayername") == 0) {
+			const char *argval = argv[i + 1];
+			i++;
+			if (i >= argc) {
+				retcode = FAILURE;
+				break;
+			}
+
+			WideStringClass nickname;
+			nickname.Convert_From(argval);
+			cNetInterface::Set_Nickname(nickname);
 			continue;
 		}
 
@@ -279,6 +368,7 @@ cUserOptions::ParseResult cUserOptions::Parse_Command_Line(int argc, char *argv[
 			WideStringClass wide_password;
 			wide_password.Convert_From(argval);
 			cGameSpyAdmin::Set_Password_Attempt(wide_password);
+			continue;
 		}
 #endif // !BETACLIENT
 
@@ -312,6 +402,9 @@ void cUserOptions::Print_Command_Line_Help(bool error)
 	fprintf(file, "    [--gamespyserver ADDRESS] [--nodx]\n");
 #ifndef BETACLIENT
 	fprintf(file, "    [--gamespy-connect IP[:PORT]]\n");
+	fprintf(file, "    [--coop-connect IP[:PORT]]\n");
+	fprintf(file, "    [--coop-host [MISSION.mix]] [--coop-port PORT]\n");
+	fprintf(file, "    [--netplayername NAME]\n");
 	fprintf(file, "    [--gamespy-netplayername NAME]\n");
 	fprintf(file, "    [--gamespy-password PASSWORD]\n");
 #endif

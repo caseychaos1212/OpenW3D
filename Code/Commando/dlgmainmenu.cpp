@@ -60,6 +60,7 @@
 #include "registry.h"
 #include "_globals.h"
 #include "dialogtests.h"
+#include "dlgmplangamelist.h"
 #include "DlgWOLWait.h"
 #include "nicenum.h"
 #include "DlgMessageBox.h"
@@ -194,7 +195,9 @@ MainMenuDialogClass::On_Init_Dialog (void)
 
 #if defined(BETACLIENT) || defined(FREEDEDICATEDSERVER) || defined(MULTIPLAYERDEMO)
 	Get_Dlg_Item(IDC_MENU_START_SP_GAME_BUTTON)->Enable(false);
-	Get_Dlg_Item(IDC_MENU_START_PRACTICE_GAME_BUTTON)->Enable(false);
+	if (Get_Dlg_Item(IDC_MENU_START_PRACTICE_GAME_BUTTON) != NULL) {
+		Get_Dlg_Item(IDC_MENU_START_PRACTICE_GAME_BUTTON)->Enable(false);
+	}
 #endif
 
 #ifndef BETACLIENT
@@ -414,6 +417,24 @@ MainMenuDialogClass::On_Command (int ctrl_id, int message_id, unsigned int param
 					TRANSLATE(IDS_MP_NO_LAN_IP_ADDRESSES_FOUND));
 				allow_default = false;
 			}
+			break;
+
+		case IDC_MENU_MP_COOP_BUTTON:
+
+			//
+			// Clear any gamespyadmin flags
+			//
+			cGameSpyAdmin::Reset();
+
+			if (cNicEnum::Get_Num_Nics() > 0) {
+				GameInitMgrClass::Initialize_Coop_LAN ();
+				MPLanGameListMenuClass::Display_Coop ();
+			} else {
+				DlgMsgBox::DoDialog(
+					TRANSLATE(IDS_MP_UNABLE_INITIALIZE_LAN),
+					TRANSLATE(IDS_MP_NO_LAN_IP_ADDRESSES_FOUND));
+			}
+			allow_default = false;
 			break;
 
 		case IDC_MENU_MP_INTERNET_GAME_BUTTON:

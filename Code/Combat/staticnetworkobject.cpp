@@ -41,6 +41,7 @@
 #include "elevator.h"
 #include "bitpackids.h"
 #include "combat.h"
+#include "coopdebuglog.h"
 #include "damageablestaticphys.h"
 #include "explosion.h"
 #include "vistable.h"
@@ -322,6 +323,8 @@ StaticNetworkObjectClass::Import_Rare (BitStreamClass &packet)
 	packet.Get (LoopEnd);
 	packet.Get (CurrFrame);
 	packet.Get (TargetFrame);
+	CoopDebugLog::Log("StaticNetworkObjectClass::Import_Rare net_id=%d anim_mode=%d loop=(%d,%d) curr=%d target=%d phys=%p",
+		Get_Network_ID(), AnimationMode, LoopStart, LoopEnd, CurrFrame, TargetFrame, PhysObj);
 
 	if (PhysObj != NULL) {
 		AnimCollisionManagerClass &anim_mgr = PhysObj->Get_Animation_Manager ();
@@ -454,6 +457,7 @@ DoorNetworkObjectClass::Import_Rare (BitStreamClass &packet)
 	//	Read the new state
 	//
 	packet.Get (DoorState, BITPACK_DOOR_STATE);
+	CoopDebugLog::Log("DoorNetworkObjectClass::Import_Rare net_id=%d state=%d phys=%p", Get_Network_ID(), DoorState, PhysObj);
 
 	//
 	//	Get a pointer to the door
@@ -648,6 +652,8 @@ ElevatorNetworkObjectClass::Import_Rare (BitStreamClass &packet)
 	packet.Get (State);
 	packet.Get (DoorStateTop);
 	packet.Get (DoorStateBottom);
+	CoopDebugLog::Log("ElevatorNetworkObjectClass::Import_Rare net_id=%d state=%d top=%d bottom=%d phys=%p",
+		Get_Network_ID(), State, DoorStateTop, DoorStateBottom, PhysObj);
 
 	//
 	//	Get a pointer to the elevator

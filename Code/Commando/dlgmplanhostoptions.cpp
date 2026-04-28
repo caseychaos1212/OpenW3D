@@ -44,6 +44,7 @@
 #include "gameinitmgr.h"
 #include "renegadedialogmgr.h"
 #include "gdcnc.h"
+#include "gdcoopmission.h"
 #include "devoptions.h"
 #include "translatedb.h"
 #include "string_ids.h"
@@ -54,6 +55,7 @@
 #include "wolgmode.h"
 #include "campaign.h"
 #include "mpsettingsmgr.h"
+#include "playertype.h"
 #include "specialbuilds.h"
 #include "dlgmpslaveservers.h"
 #include "wolgmode.h"
@@ -103,8 +105,12 @@ MPLanHostOptionsMenuClass::On_Init_Dialog (void)
 #endif // BETACLIENT
 
 	WWASSERT(PTheGameData != NULL);
-	WWASSERT(The_Game ()->Is_Cnc());
-	Set_Dlg_Item_Text(IDC_GAME_TYPE_TITLE, TRANSLATE(IDS_MP_GAME_CNC));
+	WWASSERT(The_Game ()->Is_Cnc() || The_Game ()->Is_Coop_Mission());
+	if (The_Game ()->Is_Coop_Mission()) {
+		Set_Dlg_Item_Text(IDC_GAME_TYPE_TITLE, U_CHAR("Co-op Campaign"));
+	} else {
+		Set_Dlg_Item_Text(IDC_GAME_TYPE_TITLE, TRANSLATE(IDS_MP_GAME_CNC));
+	}
 
 	TabCtrlClass *tab_ctrl = (TabCtrlClass *)Get_Dlg_Item (IDC_TABCTRL);
 	if (tab_ctrl != NULL) {
@@ -119,10 +125,14 @@ MPLanHostOptionsMenuClass::On_Init_Dialog (void)
 		//
 		if (The_Game ()->As_Cnc () != NULL) {
 			TABCTRL_ADD_TAB (tab_ctrl, MPLanHostCnCOptionsTabClass);
+		} else if (The_Game ()->Is_Coop_Mission()) {
+			TABCTRL_ADD_TAB (tab_ctrl, MPLanHostCoopOptionsTabClass);
 		}
 
-		TABCTRL_ADD_TAB (tab_ctrl, MPLanHostAdvancedOptionsTabClass);
-		TABCTRL_ADD_TAB (tab_ctrl, MPLanHostVictoryOptionsTabClass);
+		if (!The_Game ()->Is_Coop_Mission()) {
+			TABCTRL_ADD_TAB (tab_ctrl, MPLanHostAdvancedOptionsTabClass);
+			TABCTRL_ADD_TAB (tab_ctrl, MPLanHostVictoryOptionsTabClass);
+		}
 
 		//
 		//	Keep a pointer around to the map cycle tab so we can
@@ -290,10 +300,17 @@ void MPLanHostOptionsMenuClass::ReceiveSignal(WolGameModeClass& gameMode)
 
 void MPLanHostOptionsMenuClass::Start_Game(cGameData* theGame)
 {
-	CampaignManager::Select_Backdrop_Number_By_MP_Type( theGame->Get_Game_Type() );
-
 	GameInitMgrClass::Set_Is_Client_Required(theGame->IsDedicated.Is_False());
 	GameInitMgrClass::Set_Is_Server_Required(true);
+
+	if (theGame->Is_Coop_Mission()) {
+		cGameDataCoopMission *coop_game = theGame->As_Coop_Mission();
+		WWASSERT(coop_game != NULL);
+		CampaignManager::Start_Coop_Campaign(theGame->Get_Map_Name(), coop_game->Get_Difficulty_Level());
+		return;
+	}
+
+	CampaignManager::Select_Backdrop_Number_By_MP_Type( theGame->Get_Game_Type() );
 
 	int side = cNetInterface::Get_Side_Preference();
 	GameInitMgrClass::Start_Game(theGame->Get_Map_Name(), side, mClanID);
@@ -376,6 +393,10 @@ MPLanHostBasicOptionsTabClass::On_Init_Dialog (void)
 	} else {
 		Set_Dlg_Item_Int (IDC_NUM_PLAYERS_EDIT, std::min(The_Game ()->Get_Max_Players (), NetworkObjectClass::MAX_CLIENT_COUNT-1));
 	}
+	if (The_Game ()->Is_Coop_Mission()) {
+		Set_Dlg_Item_Int (IDC_NUM_PLAYERS_EDIT, 2);
+		Enable_Dlg_Item (IDC_NUM_PLAYERS_EDIT, false);
+	}
 
 	//
 	//	Configure the IP NIC Enumeration combobox
@@ -419,6 +440,9 @@ MPLanHostBasicOptionsTabClass::On_Init_Dialog (void)
 	}
 
 	int sidePref = cNetInterface::Get_Side_Preference();
+	if (The_Game ()->Is_Coop_Mission()) {
+		sidePref = PLAYERTYPE_GDI;
+	}
 
 	if (wolGame) {
 		RefPtr<WWOnline::Session> wolSession = WWOnline::Session::GetInstance(false);
@@ -437,6 +461,9 @@ MPLanHostBasicOptionsTabClass::On_Init_Dialog (void)
 	}
 
 	InitSideChoiceCombo(sidePref);
+	if (The_Game ()->Is_Coop_Mission()) {
+		Enable_Dlg_Item (IDC_CHOOSESIDE_COMBO, false);
+	}
 
 	ChildDialogClass::On_Init_Dialog ();
 	return ;
@@ -512,7 +539,11 @@ MPLanHostBasicOptionsTabClass::On_Apply (void)
 	The_Game ()->Set_Game_Title (Get_Dlg_Item_Text (IDC_GAME_NAME_EDIT));
 	The_Game ()->Set_Password (password);
 	// Has to be -1 since we use the last client as a reference for refreshing dirty bits.
-	The_Game ()->Set_Max_Players (std::min(Get_Dlg_Item_Int (IDC_NUM_PLAYERS_EDIT), NetworkObjectClass::MAX_CLIENT_COUNT - 1));
+	if (The_Game ()->Is_Coop_Mission()) {
+		The_Game ()->Set_Max_Players (2);
+	} else {
+		The_Game ()->Set_Max_Players (std::min(Get_Dlg_Item_Int (IDC_NUM_PLAYERS_EDIT), NetworkObjectClass::MAX_CLIENT_COUNT - 1));
+	}
 
 	// Quickmatch games can not have passwords
 	if (The_Game()->IsPassworded.Is_True()) {
@@ -565,6 +596,9 @@ MPLanHostBasicOptionsTabClass::On_Apply (void)
 	if (combo) {
 		int curSel = combo->Get_Curr_Sel();
 		int side = combo->Get_Item_Data(curSel);
+		if (The_Game ()->Is_Coop_Mission()) {
+			side = PLAYERTYPE_GDI;
+		}
 		cNetInterface::Set_Side_Preference(side);
 	}
 
@@ -1068,6 +1102,12 @@ MPLanHostMapCycleOptionsTabClass::On_Init_Dialog (void)
 	((EditCtrlClass *)Get_Dlg_Item (IDC_MAP_TIME_LIMIT_EDIT))->Set_Text_Limit (3);
 	Set_Dlg_Item_Int (IDC_MAP_TIME_LIMIT_EDIT, The_Game ()->Get_Time_Limit_Minutes ());
 	Check_Dlg_Button (IDC_LOOP_MAPS_CHECK,	The_Game ()->Do_Maps_Loop ());
+	if (The_Game ()->Is_Coop_Mission()) {
+		Set_Dlg_Item_Int (IDC_MAP_TIME_LIMIT_EDIT, 0);
+		Enable_Dlg_Item (IDC_MAP_TIME_LIMIT_EDIT, false);
+		Enable_Dlg_Item (IDC_LOOP_MAPS_CHECK, false);
+		Enable_Dlg_Item (IDC_MOD_PACKAGE_COMBO, false);
+	}
 
 	ChildDialogClass::On_Init_Dialog ();
 	return ;
@@ -1139,8 +1179,13 @@ MPLanHostMapCycleOptionsTabClass::On_Apply (void)
 	//	Save the map time limit
 	//
 	WWASSERT(PTheGameData != NULL);
-	The_Game ()->Set_Time_Limit_Minutes (Get_Dlg_Item_Int (IDC_MAP_TIME_LIMIT_EDIT));
-	The_Game ()->Set_Do_Maps_Loop (Is_Dlg_Button_Checked (IDC_LOOP_MAPS_CHECK));
+	if (The_Game ()->Is_Coop_Mission()) {
+		The_Game ()->Set_Time_Limit_Minutes (0);
+		The_Game ()->Set_Do_Maps_Loop (false);
+	} else {
+		The_Game ()->Set_Time_Limit_Minutes (Get_Dlg_Item_Int (IDC_MAP_TIME_LIMIT_EDIT));
+		The_Game ()->Set_Do_Maps_Loop (Is_Dlg_Button_Checked (IDC_LOOP_MAPS_CHECK));
+	}
 	return true;
 }
 
@@ -1553,6 +1598,8 @@ MPLanHostMapCycleOptionsTabClass::Build_Map_List (void)
 	WWASSERT(The_Game() != NULL);
 	if (The_Game()->Is_Cnc()) {
 		file_filter.Format("data/c&c_*.mix");
+	} else if (The_Game()->Is_Coop_Mission()) {
+		file_filter.Format("data/m*.mix");
 	} else {
 		file_filter.Format("data/mp_*.mix");
 	}
@@ -1722,6 +1769,83 @@ MPLanHostVictoryOptionsTabClass::On_Command (int ctrl_id, int message_id, unsign
 
 	ChildDialogClass::On_Command (ctrl_id, message_id, param);
 	return ;
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//	MPLanHostCoopOptionsTabClass
+//
+////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////
+//
+//	On_Init_Dialog
+//
+////////////////////////////////////////////////////////////////
+void
+MPLanHostCoopOptionsTabClass::On_Init_Dialog (void)
+{
+	WWASSERT(PTheGameData != NULL);
+	cGameDataCoopMission *game_data = The_Game ()->As_Coop_Mission ();
+	WWASSERT (game_data != NULL);
+
+	Set_Dlg_Item_Text (IDC_STARTING_CREDITS_STATIC, U_CHAR("Difficulty (0-2)"));
+
+	EditCtrlClass * edit = (EditCtrlClass *)Get_Dlg_Item(IDC_STARTING_CREDITS_EDIT);
+	if (edit != NULL) {
+		edit->Set_Text_Limit(1);
+	}
+	Set_Dlg_Item_Int (IDC_STARTING_CREDITS_EDIT,	game_data->Get_Difficulty_Level ());
+
+	Check_Dlg_Button (IDC_ALLIED_FIRE_CHECK, The_Game ()->IsFriendlyFirePermitted.Is_True ());
+	Enable_Dlg_Item (IDC_ALLIED_FIRE_CHECK, true);
+
+	Check_Dlg_Button (IDC_CAN_REPAIR_BUILDINGS_CHECK, false);
+	Check_Dlg_Button (IDC_DRIVER_IS_ALWAYS_GUNNER_CHECK, false);
+	Check_Dlg_Button (IDC_SPAWN_WEAPONS_CHECK, false);
+	Enable_Dlg_Item (IDC_CAN_REPAIR_BUILDINGS_CHECK, false);
+	Enable_Dlg_Item (IDC_DRIVER_IS_ALWAYS_GUNNER_CHECK, false);
+	Enable_Dlg_Item (IDC_SPAWN_WEAPONS_CHECK, false);
+
+	ComboBoxCtrlClass *radar_combobox = (ComboBoxCtrlClass *)Get_Dlg_Item (IDC_RADAR_MODE_COMBO);
+	if (radar_combobox != NULL) {
+		radar_combobox->Add_String (TRANSLATION(IDS_MP_RADAR_MODE_NOBODY));
+		radar_combobox->Add_String (TRANSLATION(IDS_MP_RADAR_MODE_TEAMMATES));
+		radar_combobox->Add_String (TRANSLATION(IDS_MP_RADAR_MODE_ALL));
+		radar_combobox->Set_Curr_Sel (The_Game ()->Get_Radar_Mode ());
+	}
+
+	ChildDialogClass::On_Init_Dialog ();
+	return ;
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//	On_Apply
+//
+////////////////////////////////////////////////////////////////
+bool
+MPLanHostCoopOptionsTabClass::On_Apply (void)
+{
+	WWASSERT(PTheGameData != NULL);
+	cGameDataCoopMission *game_data = The_Game ()->As_Coop_Mission ();
+	WWASSERT (game_data != NULL);
+
+	game_data->Set_Difficulty_Level (Get_Dlg_Item_Int (IDC_STARTING_CREDITS_EDIT));
+	The_Game ()->IsFriendlyFirePermitted.Set (Is_Dlg_Button_Checked (IDC_ALLIED_FIRE_CHECK));
+	The_Game ()->CanRepairBuildings.Set (false);
+	The_Game ()->DriverIsAlwaysGunner.Set (false);
+	The_Game ()->SpawnWeapons.Set (true);
+	The_Game ()->Set_Max_Players (2);
+
+	ComboBoxCtrlClass *radar_combobox = (ComboBoxCtrlClass *)Get_Dlg_Item (IDC_RADAR_MODE_COMBO);
+	if (radar_combobox != NULL) {
+		The_Game ()->Set_Radar_Mode ((RadarModeEnum)radar_combobox->Get_Curr_Sel ());
+	}
+
+	return true;
 }
 
 

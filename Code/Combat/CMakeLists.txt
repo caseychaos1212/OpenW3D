@@ -30,6 +30,8 @@ set(COMBAT_SRC
     combatsaveload.cpp
     combatsound.cpp
     comcentergameobj.cpp
+    coopdebuglog.cpp
+    coopinventory.cpp
     control.cpp
     conversation.cpp
     conversationmgr.cpp
@@ -157,6 +159,8 @@ set(COMBAT_SRC
     combatsaveload.h
     combatsound.h
     comcentergameobj.h
+    coopdebuglog.h
+    coopinventory.h
     control.h
     conversation.h
     conversationmgr.h

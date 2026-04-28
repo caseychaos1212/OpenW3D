@@ -65,6 +65,7 @@ class Font3DInstanceClass;
 //class cGameDataDeathMatch;
 //class cGameDataTeamDeathMatch;
 class cGameDataSinglePlayer;
+class cGameDataCoopMission;
 class cGameDataSkirmish;
 class cGameDataCnc;
 class WOLGameInfo;
@@ -82,6 +83,7 @@ class	cGameData :
 			GAME_TYPE_SINGLE_PLAYER = 0,
 			GAME_TYPE_SKIRMISH,
 			GAME_TYPE_CNC,
+			GAME_TYPE_COOP_MISSION,
 		};
 
 		enum WinTypeEnum {
@@ -203,10 +205,12 @@ class	cGameData :
 		// Ideally, none of these would exist, so comment out any unused ones...
 		//
 		virtual bool	Is_Single_Player(void)			const	{return false;}
+		virtual bool	Is_Coop_Mission(void)			const	{return false;}
 		virtual bool	Is_Skirmish(void)					const	{return false;}
 		virtual bool	Is_Cnc(void)						const	{return false;}
 
 		virtual cGameDataSinglePlayer *		As_Single_Player(void)		{return NULL;}
+		virtual cGameDataCoopMission *		As_Coop_Mission(void)		{return NULL;}
 		virtual cGameDataSkirmish *			As_Skirmish(void)				{return NULL;}
 		virtual cGameDataCnc *					As_Cnc(void)					{return NULL;}
 
@@ -396,6 +400,7 @@ extern cGameData *						PTheGameData;
 extern cGameData *						The_Game(void);
 
 extern cGameDataSinglePlayer *		The_Single_Player_Game(void);
+extern cGameDataCoopMission *		The_Coop_Mission_Game(void);
 extern cGameDataSkirmish *				The_Skirmish_Game(void);
 extern cGameDataCnc *					The_Cnc_Game(void);
 

@@ -168,6 +168,8 @@ set(COMMANDO_SRC
     gamedata.h
     gdcnc.cpp
     gdcnc.h
+    gdcoopmission.cpp
+    gdcoopmission.h
     gdsingleplayer.cpp
     gdsingleplayer.h
     gdskirmish.cpp
@@ -346,6 +348,8 @@ set(COMMANDO_SRC
     clientbboevent.h
     clientgoodbyeevent.cpp
     clientgoodbyeevent.h
+    coopleveltransitionevent.cpp
+    coopleveltransitionevent.h
     consolecommandevent.cpp
     consolecommandevent.h
     csconsolecommandevent.cpp

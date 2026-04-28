@@ -1170,7 +1170,7 @@ DECLARE_SCRIPT(M04_MissileRoom_EnterZone_Left_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR  )
+		if ( Commands->Is_A_Star(enterer)  )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_CARGOHOLD_CONTROLLER_JDG), 0, 600, 0 );//have leftside guard come in
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_CARGOHOLD_CONTROLLER_JDG), 0, 200, 0 );//put missile room guys to 50% priority
@@ -1194,7 +1194,7 @@ DECLARE_SCRIPT(M04_MissileRoom_EnterZone_Right_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR  )
+		if ( Commands->Is_A_Star(enterer)  )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_CARGOHOLD_CONTROLLER_JDG), 0, 500, 0 );//have rightside guard come in
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_CARGOHOLD_CONTROLLER_JDG), 0, 200, 0 );//put missile room guys to 50% priority
@@ -2158,7 +2158,7 @@ DECLARE_SCRIPT(M04_EngineRoom_EnterZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR  )
+		if ( Commands->Is_A_Star(enterer)  )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_OBJECTIVE_CONTROLLER_JDG), 0, 430, 0 );//tell objective controller to announce objective
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_CARGOHOLD_CONTROLLER_JDG), 0, 700, 0 );//tell cargo/missile contoller to turn off spawners
@@ -2759,7 +2759,7 @@ DECLARE_SCRIPT(M04_EngineRoom_PrisonLift_EnterZone_JDG, "")
 {
 	void Entered( GameObject * /* obj */, GameObject * enterer ) override
 	{
-		if ( enterer == STAR  )
+		if ( Commands->Is_A_Star(enterer)  )
 		{
 			Vector3 spawnSpot (-0.512f, -95.434f, 0);
 			GameObject * liftEngineer = Commands->Create_Object ( "Nod_Engineer_0", spawnSpot );
@@ -2801,7 +2801,7 @@ DECLARE_SCRIPT(M04_EngineRoom_Start_Guard_Conversation_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR )
+		if ( Commands->Is_A_Star(enterer) )
 		{
 			GameObject * prisonGuard01 = Commands->Find_Object ( M04_ENGINEROOM_PRISONGUARD_01_JDG );
 			GameObject * prisonGuard02 = Commands->Find_Object ( M04_ENGINEROOM_PRISONGUARD_02_JDG );
@@ -2853,7 +2853,7 @@ DECLARE_SCRIPT(M04_EngineRoom_Prison_Guard_01_JDG, "")//M04_ENGINEROOM_PRISONGUA
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (obj && damager == STAR)
+		if (obj && Commands->Is_A_Star(damager))
 		{
 			Commands->Set_Innate_Is_Stationary ( obj, false );
 
@@ -2985,7 +2985,7 @@ DECLARE_SCRIPT(M04_EngineRoom_Prison_Guard_02_JDG, "")//M04_ENGINEROOM_PRISONGUA
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (obj && damager == STAR)
+		if (obj && Commands->Is_A_Star(damager))
 		{
 			Commands->Set_Innate_Is_Stationary ( obj, false );
 			GameObject* guard01 = Commands->Find_Object ( M04_ENGINEROOM_PRISONGUARD_01_JDG );
@@ -3052,7 +3052,7 @@ DECLARE_SCRIPT(M04_EngineRoom_TalkToPrisoners_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR )
+		if ( Commands->Is_A_Star(enterer) )
 		{
 			bool playerHasLev01Card = Commands->Has_Key( STAR, 1 );
 
@@ -3113,7 +3113,7 @@ DECLARE_SCRIPT(M04_EngineRoom_Prisoner_01_JDG, "")//this guys ID number is M04_P
 	{
 		if (obj)
 		{
-			if (damager == STAR )
+			if (Commands->Is_A_Star(damager) )
 			{
 				int myMaxHealth = Commands->Get_Max_Health ( obj );
 				Commands->Set_Health ( obj, myMaxHealth );
@@ -3280,7 +3280,7 @@ DECLARE_SCRIPT(M04_EngineRoom_Prisoner_02_JDG, "")//this guys ID number is M04_P
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (obj && damager == STAR)
+		if (obj && Commands->Is_A_Star(damager))
 		{
 			int myMaxHealth = Commands->Get_Max_Health ( obj );
 			Commands->Set_Health ( obj, myMaxHealth );
@@ -3311,7 +3311,7 @@ DECLARE_SCRIPT(M04_EngineRoom_Prisoner_02_JDG, "")//this guys ID number is M04_P
 
 	void Damaged( GameObject * obj, GameObject * damager, float amount ) override
 	{
-		if (obj && damager == STAR)
+		if (obj && Commands->Is_A_Star(damager))
 		{
 			int myMaxHealth = Commands->Get_Max_Health ( obj );
 			Commands->Set_Health ( obj, myMaxHealth );
@@ -3388,7 +3388,7 @@ DECLARE_SCRIPT(M04_EngineRoom_Prisoner_03_JDG, "")//this guys ID number is M04_P
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
 		ActionParamsStruct params;
-		if (obj && damager == STAR)
+		if (obj && Commands->Is_A_Star(damager))
 		{
 			int myMaxHealth = Commands->Get_Max_Health ( obj );
 			Commands->Set_Health ( obj, myMaxHealth );
@@ -3492,7 +3492,7 @@ DECLARE_SCRIPT(M04_Prison_CellDoor_Zone_JDG, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR )
+		if ( Commands->Is_A_Star(enterer) )
 		{
 			bool playerHasPrisonKey = Commands->Has_Key( STAR, 1 );
 
@@ -3547,7 +3547,7 @@ DECLARE_SCRIPT(M04_AftDeck_InnerSanctum_Entry_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR)
+		if ( Commands->Is_A_Star(enterer))
 		{
 			Commands->Create_Sound ( "00-n060e", Commands->Get_Position ( obj ), obj );//updating radar flags
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_AFT_DECK_CONTROLLER_JDG), 0, 4000, 0 );//tell aft deck controller that player is moving forward
@@ -3565,7 +3565,7 @@ DECLARE_SCRIPT(M04_AftDeck_InnerSanctum_02_Entry_Zone_JDG, "")//player is almost
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR)
+		if ( Commands->Is_A_Star(enterer))
 		{
 			Commands->Create_Sound ( "00-n060e", Commands->Get_Position ( obj ), obj );//updating radar flags
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_AFT_DECK_CONTROLLER_JDG), 0, 5000, 0 );//tell aft deck controller that player is moving forward
@@ -3986,7 +3986,7 @@ DECLARE_SCRIPT(M04_SecondaryBridge_Enter_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR )
+		if ( Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_SHIPS_FIRST_MATE_JDG), 0, 100, 0 );//tell first mate to start hearing stuff
 			//Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_OBJECTIVE_CONTROLLER_JDG), 0, 1000, 0 );//tell objective controller to play battle music
@@ -4011,7 +4011,7 @@ DECLARE_SCRIPT(M04_Player_Is_Leaving_Aft_Deck_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_AFT_DECK_CONTROLLER_JDG), 0, 6000, 0 );//tell aft deck controller to clean up any remaining soldiers
 
@@ -4515,7 +4515,7 @@ DECLARE_SCRIPT(M04_AftDeck_02_Entry_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR)
+		if ( Commands->Is_A_Star(enterer))
 		{
 			Commands->Create_Sound ( "00-n060e", Commands->Get_Position ( obj ), obj );//updating radar flags
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_AFT_DECK_CONTROLLER_JDG), 0, 100, 0 );//tell aft deck controller to start scenario
@@ -4565,7 +4565,7 @@ DECLARE_SCRIPT(M04_Apache_Enter_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR )
+		if ( Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_APACHE_CONTROLLER_JDG), 0, 100, 0 );//tell apache controller to place actors
 
@@ -4792,7 +4792,7 @@ DECLARE_SCRIPT(M04_ForeDeck_RocketGuy_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (obj && damager == STAR)
+		if (obj && Commands->Is_A_Star(damager))
 		{
 			Commands->Set_Innate_Is_Stationary ( obj, false );
 		}
@@ -4803,7 +4803,7 @@ DECLARE_SCRIPT(M04_ForeDeck_Initial_Enter_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR )
+		if ( Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_FORE_DECK_CONTROLLER_JDG), 0, 100, 0 );//tell ForeDeck controller that player(s) is approaching
 
@@ -4826,7 +4826,7 @@ DECLARE_SCRIPT(M04_MedLab_Enter_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR )
+		if ( Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_PRISON_WARDEN_JDG), 0, 100, 0 );//tell prison warden to start acting
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_MEDLAB_TECHNICIAN_JDG), 0, 100, 0 );//tell medlab tech to start acting
@@ -5277,7 +5277,7 @@ DECLARE_SCRIPT(M04_Captains_Bridge_Enter_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR)
+		if ( Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_FORE_DECK_CONTROLLER_JDG), 0, 700, 0 );//tell foredeck controller that player is approaching main bridge
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_SHIPS_CAPTAIN_JDG), 0, 100, 0 );//this tells captain to turn on hearing
@@ -5297,7 +5297,7 @@ DECLARE_SCRIPT(M04_BH_MessHall_Trigger_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR)
+		if ( Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_FORE_DECK_CONTROLLER_JDG), 0, 650, 0 );//tell foredeck controller that player is entering BH messhall
 			Commands->Create_Sound ( "00-c164e", Commands->Get_Position ( obj ), obj );//proceed with caution
@@ -5333,7 +5333,7 @@ DECLARE_SCRIPT(M04_BH_MessHall_Guy_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			if (obj)
 			{
@@ -5416,7 +5416,7 @@ DECLARE_SCRIPT(M04_ForeDeck_ClosetSurprise_Trigger_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_FORE_DECK_CONTROLLER_JDG), 0, 505, 0 );//tell foredeck controller that player is leaving mess hall
 
@@ -5442,7 +5442,7 @@ DECLARE_SCRIPT(M04_GruntMessHall_Exit_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR)
+		if ( Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_FORE_DECK_CONTROLLER_JDG), 0, 500, 0 );//tell foredeck controller that player is leaving mess hall
 
@@ -5459,7 +5459,7 @@ DECLARE_SCRIPT(M04_GruntMessHall_Entry_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR)
+		if ( Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_FORE_DECK_CONTROLLER_JDG), 0, 300, 0 );//tell foredeck controller that player is entering mess hall
 
@@ -5506,7 +5506,7 @@ DECLARE_SCRIPT(M04_Firefight_Start_Battle_Music_JDG, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR && playerHasLevel3Keycard == true)
+		if ( Commands->Is_A_Star(enterer) && playerHasLevel3Keycard == true)
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_END_FIREFIGHT_CONTROLLER_JDG), 0, 100, 0 );
 		}
@@ -5876,7 +5876,7 @@ DECLARE_SCRIPT(M04_EnterCargoBay_BottomRight_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR  )
+		if ( Commands->Is_A_Star(enterer)  )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_CARGOHOLD_CONTROLLER_JDG), 0, 100, 0 );
 
@@ -5901,7 +5901,7 @@ DECLARE_SCRIPT(M04_EnterCargoBay_TopLeft_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR  )
+		if ( Commands->Is_A_Star(enterer)  )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_CARGOHOLD_CONTROLLER_JDG), 0, 100, 0 );
 
@@ -6234,7 +6234,7 @@ DECLARE_SCRIPT(M04_Catwalk_Enter_Zone_01_JDG, "")//this guy comes out level 2 do
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * sniperTarget01 = Commands->Create_Object ( "Nod_MiniGunner_1Off", Vector3(-14.594f, 27.717f, -9));
 			Commands->Attach_Script(sniperTarget01, "M04_Doorway_Enterer_JDG", "-9.3 8.9 -9");
@@ -6248,7 +6248,7 @@ DECLARE_SCRIPT(M04_Catwalk_Enter_Zone_02_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * sniperTarget01 = Commands->Create_Object ( "Nod_MiniGunner_1Off", Vector3(12.913f, -27.628f, -9));
 			Commands->Attach_Script(sniperTarget01, "M04_Doorway_Enterer_JDG", "10.868 -6.359 -9");
@@ -6600,7 +6600,7 @@ DECLARE_SCRIPT(M04_Hunter_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float amount ) override
 	{
-		if (obj && damager == STAR)
+		if (obj && Commands->Is_A_Star(damager))
 		{
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
 		}
@@ -6668,7 +6668,7 @@ DECLARE_SCRIPT(M04_Prison_Keycard_CheckZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * prisonGuard01 = Commands->Find_Object (M04_ENGINEROOM_PRISONGUARD_01_JDG);
 			GameObject * prisonGuard02 = Commands->Find_Object (M04_ENGINEROOM_PRISONGUARD_02_JDG);
@@ -6709,12 +6709,12 @@ DECLARE_SCRIPT(M04_TiberiumHold_EntryZone_and_Controller_JDG, "")//this guys ID 
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR  && (ok_to_clean_up == true))
+		if ( Commands->Is_A_Star(enterer)  && (ok_to_clean_up == true))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_AFT_DECK_CONTROLLER_JDG), 0, 6000, 0 );//tell aft deck controller to clean up any remaining soldiers
 		}
 
-		if ( enterer == STAR  && (entered == false))
+		if ( Commands->Is_A_Star(enterer)  && (entered == false))
 		{
 			entered = true;
 
@@ -7696,7 +7696,7 @@ DECLARE_SCRIPT(M04_Prison_Warden_JDG, "")//this guys ID is M04_PRISON_WARDEN_JDG
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			Commands->Set_Innate_Is_Stationary ( obj, false );
 		}
@@ -7787,7 +7787,7 @@ DECLARE_SCRIPT(M04_MedLab_Tech_JDG, "")//this guys ID is M04_MEDLAB_TECHNICIAN_J
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			if (obj)
 			{
@@ -7835,7 +7835,7 @@ DECLARE_SCRIPT(M04_MissileRoom_ObjectiveZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR )
+		if ( Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_OBJECTIVE_CONTROLLER_JDG), 0, 440, 0 );//tell objective controller to announce missile objective
 
@@ -7860,7 +7860,7 @@ DECLARE_SCRIPT(M04_Announce_Keycard_02_Objective_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR )
+		if ( Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M04_OBJECTIVE_CONTROLLER_JDG), 0, 410, 5 );
 
@@ -8419,7 +8419,7 @@ DECLARE_SCRIPT(M04_ApacheRoom_Second_EntryZone_TopFloor_JDG, "")//105011 105012
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (commandClearance == true)
 			{
@@ -8505,7 +8505,7 @@ DECLARE_SCRIPT(M04_ApacheRoom_Second_EntryZone_MiddleFloor_JDG, "")//105081 1050
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (commandClearance == true)
 			{
@@ -8591,7 +8591,7 @@ DECLARE_SCRIPT(M04_ApacheRoom_Second_EntryZone_BottomFloor_JDG, "")//105083 1050
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (commandClearance == true)
 			{
@@ -8670,7 +8670,7 @@ DECLARE_SCRIPT(M04_Apache_GoBackToHangar_EntryZone_JDG, "")//105085
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * apache = Commands->Find_Object ( apache_id );
 			if (apache != NULL)
@@ -9024,7 +9024,7 @@ DECLARE_SCRIPT(M04_Firefight_Prisoner, "")
 			}
 		}
 
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			Commands->Set_Health ( obj, last_health );
 		}
@@ -9468,7 +9468,7 @@ DECLARE_SCRIPT(M04_Firefight_RallyZone, "")//this guys ID number is 101194
 		GameObject *prisoner02 = Commands->Find_Object ( prisoner02_ID );
 		GameObject *prisoner03 = Commands->Find_Object ( prisoner03_ID );
 
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			//if (ok_to_end == true)
 			//{
@@ -10089,7 +10089,7 @@ DECLARE_SCRIPT(M04_Start_TorpedoObjective_Zone_JDG, "")//105238 105239
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if ( enterer == STAR && conversationPlaying == false)//M04_Add_Torpedo_Objective_Conversation
+		if ( Commands->Is_A_Star(enterer) && conversationPlaying == false)//M04_Add_Torpedo_Objective_Conversation
 		{
 			conversationPlaying = true;
 			missionIntroConv = Commands->Create_Conversation( "M04_Add_Torpedo_Objective_Conversation", 100, 1000, false);
@@ -10137,7 +10137,7 @@ DECLARE_SCRIPT(M04_TorpedoRoom_EnterZone_JDG, "")// 105240
 {
 	void Entered( GameObject * /* obj */, GameObject * enterer ) override
 	{
-		if ( enterer == STAR )
+		if ( Commands->Is_A_Star(enterer) )
 		{
 			int missionIntroConv = Commands->Create_Conversation( "M04_Poke_The_Torpedos_Conversation", 100, 1000, false);
 			Commands->Join_Conversation( NULL, missionIntroConv, false, false, true );
@@ -10168,7 +10168,7 @@ DECLARE_SCRIPT(M04_BigSam_EntryZone_JDG, "")//104942
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (missilesSabotaged == true)
 			{
@@ -10266,7 +10266,7 @@ DECLARE_SCRIPT(M04_PlaySound_OnZoneEntry_OneTime_JDG, "SoundName:string")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			const char * sound_name = Get_Parameter("SoundName");
 

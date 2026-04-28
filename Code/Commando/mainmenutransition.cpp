@@ -213,7 +213,7 @@ MainMenuTransitionClass::Update_Controls (void)
 		//C_MENU_START_SKIRMISH_GAME_BUTTON,
 		IDC_MENU_MP_INTERNET_GAME_BUTTON,
 		IDC_MENU_MP_LAN_GAME_BUTTON,
-		IDC_MENU_START_PRACTICE_GAME_BUTTON,
+		IDC_MENU_MP_COOP_BUTTON,
 		IDC_MENU_OPTIONS_BUTTON,
 		IDC_MENU_QUIT_BUTTON
 	};
@@ -289,4 +289,3 @@ MainMenuTransitionClass::Is_Valid (void) const
 
 	return retval;
 }
-

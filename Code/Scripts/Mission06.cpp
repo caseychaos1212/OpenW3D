@@ -1352,7 +1352,7 @@ DECLARE_SCRIPT(M06_Escort_Tank, "")
 	{
 		ActionParamsStruct params;
 
-		if(damager == STAR)
+		if(Commands->Is_A_Star(damager))
 		{
 			if(!attacking)
 			{

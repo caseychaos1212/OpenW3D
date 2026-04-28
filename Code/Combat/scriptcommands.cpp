@@ -37,6 +37,7 @@
 #include "scriptcommands.h"
 #include "debug.h"
 #include "combat.h"
+#include "coopinventory.h"
 #include "smartgameobj.h"
 #include "damage.h"
 #include "gameobjmanager.h"
@@ -2378,6 +2379,7 @@ void	Grant_Key( GameObject* object, int key, bool grant = true )
 		} else {
 			soldier->Remove_Key( key );
 		}
+		CoopInventoryManager::Record_And_Share_Key(soldier, key, grant);
 	}
 }
 

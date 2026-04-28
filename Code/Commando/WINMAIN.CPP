@@ -81,6 +81,7 @@
 #include "datasafe.h"
 
 #include "combatgmode.h"
+#include "coopdebuglog.h"
 #include "registry.h"
 #include "init.h"
 #include "_globals.h"
@@ -104,6 +105,10 @@
 #include "singletoninstancekeeper.h"
 #include "packetmgr.h"
 #include "ProcessManager.h"
+#include <exception>
+#include <signal.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 //----------------------------------------------------------------------------
 //	Globals
@@ -130,9 +135,57 @@ bool Set_Working_Directory(void);
 #if 1 //ndef _MSC_VER
 int Top_Level_Exception_Filter(EXCEPTION_POINTERS *e_info)
 {
+	CoopDebugLog::Log("Top_Level_Exception_Filter code=0x%08X address=%p",
+		(unsigned int)e_info->ExceptionRecord->ExceptionCode,
+		e_info->ExceptionRecord->ExceptionAddress);
 	return(Exception_Handler(e_info->ExceptionRecord->ExceptionCode, e_info));
 }
 #endif //_MSC_VER
+
+static void Coop_Terminate_Handler(void)
+{
+	CoopDebugLog::Log("std::terminate invoked");
+	abort();
+}
+
+static void Coop_Signal_Handler(int signal_id)
+{
+	CoopDebugLog::Log("process signal received signal=%d", signal_id);
+	signal(signal_id, SIG_DFL);
+	raise(signal_id);
+}
+
+static void Coop_Purecall_Handler(void)
+{
+	CoopDebugLog::Log("pure virtual function call handler invoked");
+	abort();
+}
+
+static void Coop_Invalid_Parameter_Handler(
+	const wchar_t * expression,
+	const wchar_t * function,
+	const wchar_t * file,
+	unsigned int line,
+	uintptr_t reserved)
+{
+	expression = expression;
+	function = function;
+	file = file;
+	line = line;
+	reserved = reserved;
+	CoopDebugLog::Log("invalid parameter handler invoked");
+}
+
+static void Install_Coop_Process_Exit_Logging(void)
+{
+	std::set_terminate(Coop_Terminate_Handler);
+	signal(SIGABRT, Coop_Signal_Handler);
+	signal(SIGSEGV, Coop_Signal_Handler);
+	signal(SIGILL, Coop_Signal_Handler);
+	signal(SIGFPE, Coop_Signal_Handler);
+	_set_purecall_handler(Coop_Purecall_Handler);
+	_set_invalid_parameter_handler(Coop_Invalid_Parameter_Handler);
+}
 
 
 /***********************************************************************************************
@@ -418,6 +471,8 @@ int Start_Application(void)
 			::Show_Message_Box(MESSAGEBOX_BUTTONS_OK | MESSAGEBOX_SEVERITY_ERROR, "Set working folder and try again...", "Invalid working folder");
 			return 0;
 		}
+		Install_Coop_Process_Exit_Logging();
+		CoopDebugLog::Log("Start_Application working directory set");
 
 		//
 		// TEMP Dev code - check the working folder is correct!
@@ -446,6 +501,7 @@ int Start_Application(void)
 		//Debug_Say(("Started logging at time %s", cMiscUtil::Get_Text_Time()));
 
 		if (!Create_Main_Window()) return 0;
+		CoopDebugLog::Log("Start_Application main window created");
 
 		Register_Thread_ID(ThreadClass::Get_Current_Thread_ID(), "Main Thread", true);
 	}
@@ -473,7 +529,9 @@ int Start_Application(void)
 		SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER) &Top_Level_Exception_Filter);
 #endif
 			WWDEBUG_SAY(("Game_Main_Loop\n"));
+			CoopDebugLog::Log("Start_Application Game_Main_Loop call start");
 			exitCode = Game_Main_Loop();
+			CoopDebugLog::Log("Start_Application Game_Main_Loop returned exitCode=%d", exitCode);
 
 #if 0 //def _MSC_VER
 		} __except(Exception_Handler(GetExceptionCode(), GetExceptionInformation())) {};
@@ -489,6 +547,7 @@ int Start_Application(void)
 #endif //WWDEBUG
 
 	Unregister_Thread_ID(ThreadClass::Get_Current_Thread_ID(), "Main Thread");
+	CoopDebugLog::Log("Start_Application returning exitCode=%d", exitCode);
 
    //Debug_Say(("Finished logging at time %s", cMiscUtil::Get_Text_Time()));
 
@@ -587,8 +646,14 @@ LRESULT CALLBACK Main_Window_Proc( HWND hwnd, UINT message, WPARAM wParam, LPARA
 		/*
 		** Main window destruction
 		*/
+		case WM_CLOSE:
+			CoopDebugLog::Log("Main_Window_Proc WM_CLOSE");
+			break;
+
 		case WM_DESTROY:
+			CoopDebugLog::Log("Main_Window_Proc WM_DESTROY");
 			ReleaseCapture ();
+			CoopDebugLog::Log("Main_Window_Proc PostQuitMessage");
 			PostQuitMessage (0);
 			break;
 
@@ -596,6 +661,7 @@ LRESULT CALLBACK Main_Window_Proc( HWND hwnd, UINT message, WPARAM wParam, LPARA
 			switch (wParam) {
 
 				case SC_CLOSE:
+					CoopDebugLog::Log("Main_Window_Proc WM_SYSCOMMAND SC_CLOSE ignored");
 					/*
 					** Windows sent us a close message. Probably in response to Alt-F4. Ignore it by
 					** pretending to handle the message and returning true;

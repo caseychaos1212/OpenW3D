@@ -72,6 +72,7 @@
 #include "realcrc.h"
 #include "useroptions.h"
 #include "gdsingleplayer.h"
+#include "gdcoopmission.h"
 #include "gdcnc.h"
 #include "wolgmode.h"
 #include "font3d.h"
@@ -1714,24 +1715,19 @@ bool cGameData::Is_Clan_Game_Open(void) const
 }
 
 //-----------------------------------------------------------------------------
-cGameData * cGameData::Create_Game_Of_Type([[maybe_unused]] GameTypeEnum game_type)
+cGameData * cGameData::Create_Game_Of_Type(GameTypeEnum game_type)
 {
-	/*
 	cGameData * p_game_data = NULL;
 
 	switch (game_type) {
 		//case GAME_TYPE_DEATHMATCH:			p_game_data = new cGameDataDeathMatch;			break;
 		//case GAME_TYPE_TEAM_DEATHMATCH:	p_game_data = new cGameDataTeamDeathMatch;	break;
+		case GAME_TYPE_COOP_MISSION:		p_game_data = new cGameDataCoopMission;		break;
 		case GAME_TYPE_CNC:					p_game_data = new cGameDataCnc;					break;
 		default:									DIE;														break;
 	}
 
 	return p_game_data;
-	*/
-
-	WWASSERT(game_type == GAME_TYPE_CNC);
-
-	return new cGameDataCnc;
 }
 
 /*
@@ -2446,6 +2442,7 @@ void cGameData::Get_Description(WideStringClass & description)
 cGameData *						The_Game(void)							{return PTheGameData;}
 
 cGameDataSinglePlayer *		The_Single_Player_Game(void)		{WWASSERT(The_Game()->As_Single_Player() != NULL);		return The_Game()->As_Single_Player();}
+cGameDataCoopMission *		The_Coop_Mission_Game(void)		{WWASSERT(The_Game()->As_Coop_Mission() != NULL);	return The_Game()->As_Coop_Mission();}
 cGameDataSkirmish *			The_Skirmish_Game(void)				{WWASSERT(The_Game()->As_Skirmish() != NULL);			return The_Game()->As_Skirmish();}
 cGameDataCnc *					The_Cnc_Game(void)					{WWASSERT(The_Game()->As_Cnc() != NULL);					return The_Game()->As_Cnc();}
 

@@ -38,6 +38,7 @@
 #include "level.h"
 #include "input.h"
 #include "cnetwork.h"
+#include "coopdebuglog.h"
 #include "AudibleSound.h"
 #include "debug.h"
 #include "registry.h"
@@ -1039,7 +1040,7 @@ void CombatGameModeClass::Post_Load_Dynamic_Object_Filtering(void)
 			}
 
 			if (!p_smart_obj->Is_Delete_Pending() && !p_smart_obj->Has_Player() &&
-				!IS_SOLOPLAY) {
+				!IS_SOLOPLAY && !IS_MISSION) {
 				Debug_Say(("* Removing loaded soldier grunt in non-mission game (id = %d).\n",
 					p_smart_obj->Get_ID()));
 	         p_smart_obj->Set_Delete_Pending();
@@ -1239,21 +1240,41 @@ void CombatGameModeClass::Save_Registry_Keys(void)
 void 	CombatGameModeClass::Think()
 {
 	WWPROFILE( "Combat Think" );
+	static int coop_combat_think_log_budget = 1200;
+	const bool log_coop_think = IS_COOP_MISSION && cNetwork::I_Am_Client() && coop_combat_think_log_budget-- > 0;
 
 	if ( !Is_Active() ) {
 		return;
 	}
 
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think begin");
+	}
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think Combat_Keyboard start");
+	}
 	Combat_Keyboard();
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think Combat_Keyboard done active=%d", Is_Active());
+	}
 
 	//
 	// Test again to see if we are active, because quick exit may inactivate us.
 	//
 	if ( !Is_Active() ) {
+		if (log_coop_think) {
+			CoopDebugLog::Log("CombatGameModeClass::Think stopped after Combat_Keyboard because mode inactive");
+		}
 		return;
 	}
 
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think Generate_Control start");
+	}
 	CombatManager::Generate_Control();
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think Generate_Control done");
+	}
 
 	//
 	// Network Update needs to be between input and think
@@ -1262,26 +1283,47 @@ void 	CombatGameModeClass::Think()
 	float time_1;
 	{
 	WWMeasureItClass net_upd_time_s(&time_1);
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think cNetwork::Update start");
+	}
 	cNetwork::Update();
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think cNetwork::Update done");
+	}
 	}
 
 	float time_2;
 	{
 	WWMeasureItClass combat_think_time_s(&time_2);
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think CombatManager::Think start");
+	}
 	CombatManager::Think();
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think CombatManager::Think done");
+	}
 	}
 
 	if (cNetwork::I_Am_Server())
 	{
+		if (log_coop_think) {
+			CoopDebugLog::Log("CombatGameModeClass::Think server sbbo start");
+		}
 		WWPROFILE( "cSbboManager stuff" );
 		cSbboManager::Increment_Accum_Time_S_Net_Update(time_1);
 		cSbboManager::Increment_Accum_Time_S_Combat_Think(time_2);
 		cSbboManager::Think();
+		if (log_coop_think) {
+			CoopDebugLog::Log("CombatGameModeClass::Think server sbbo done");
+		}
 	}
 
 	DEMO_SECURITY_CHECK;
 
 	if ( COMBAT_STAR ) {
+		if (log_coop_think) {
+			CoopDebugLog::Log("CombatGameModeClass::Think COMBAT_STAR console update start star=%p", COMBAT_STAR);
+		}
 		WWPROFILE( "Stuff 1" );
 		Vector3 pos;
 		COMBAT_STAR->Get_Position( &pos );
@@ -1293,17 +1335,40 @@ void 	CombatGameModeClass::Think()
 			ConsoleFunctionManager::Parse_Input( "God" );
 		}
 
+		if (log_coop_think) {
+			CoopDebugLog::Log("CombatGameModeClass::Think COMBAT_STAR console update done");
+		}
 	}
 
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think MultiHUDClass::Think start");
+	}
 	MultiHUDClass::Think();
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think MultiHUDClass::Think done");
+	}
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think cPlayerManager::Think start");
+	}
 	cPlayerManager::Think();
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think cPlayerManager::Think done");
+	}
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think cTeamManager::Think start");
+	}
 	cTeamManager::Think();
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think cTeamManager::Think done");
+	}
 
 	if ( PendingCampaignContinue ) {
+		CoopDebugLog::Log("CombatGameModeClass::Think PendingCampaignContinue handling start");
 		WWPROFILE( "Stuff 2" );
 		PendingCampaignContinue	= false;
 		Debug_Say(( "Handle Pending Campaign Continue\n" ));
 		CampaignManager::Continue();
+		CoopDebugLog::Log("CombatGameModeClass::Think PendingCampaignContinue handling done");
 	}
 
 
@@ -1324,6 +1389,7 @@ void 	CombatGameModeClass::Think()
 
 
 	if (g_b_core_restart)	{
+		CoopDebugLog::Log("CombatGameModeClass::Think g_b_core_restart start");
 		WWPROFILE( "g_b_core_restart" );
 
 		g_b_core_restart = false;
@@ -1353,6 +1419,7 @@ void 	CombatGameModeClass::Think()
 		}
 
 		cNetwork::Enable_Waiting_Players();
+		CoopDebugLog::Log("CombatGameModeClass::Think g_b_core_restart done");
 
 /*
 #if(0)
@@ -1368,6 +1435,7 @@ void 	CombatGameModeClass::Think()
 
 	// Autosave, after one run throught main loop
 	if ( CombatManager::Is_Autosave_Requested() ) {
+		CoopDebugLog::Log("CombatGameModeClass::Think autosave start");
 		WWPROFILE( "Autosaving" );
 		Debug_Say(( "Autosaving\n" ));
 		int time=TIMEGETTIME();
@@ -1376,11 +1444,13 @@ void 	CombatGameModeClass::Think()
 		SaveGameManager::Save_Game( "save\\autosave.sav", &_CommandoSaveLoad, NULL );
 		time=TIMEGETTIME()-time;
 		Debug_Say(( "Autosaving Complete, took %d.%2.2d seconds\n",time/1000,(time/10)%100 ));
+		CoopDebugLog::Log("CombatGameModeClass::Think autosave done");
 	}
 
 	//TSS090401
 	if (g_client_quit)
 	{
+		CoopDebugLog::Log("CombatGameModeClass::Think g_client_quit start");
 		WWPROFILE( "g_client_quit" );
 
 		//
@@ -1406,6 +1476,10 @@ void 	CombatGameModeClass::Think()
 		{
 			GameInitMgrClass::Display_End_Game_Menu();
 		}
+		CoopDebugLog::Log("CombatGameModeClass::Think g_client_quit done");
+	}
+	if (log_coop_think) {
+		CoopDebugLog::Log("CombatGameModeClass::Think done");
 	}
 }
 

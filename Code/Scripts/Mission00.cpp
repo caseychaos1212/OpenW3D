@@ -3797,7 +3797,7 @@ DECLARE_SCRIPT (MTU_Nod_Soldier, "Soldier_ID:int")
 	void Damaged (GameObject * obj, GameObject * damager, float /*amount*/) override
 	{
 		int soldier_id = Get_Int_Parameter ("Soldier_ID");
-		if ((damager != STAR) && (soldier_id == 2))
+		if ((!Commands->Is_A_Star(damager)) && (soldier_id == 2))
 		{
 			Commands->Set_Health (obj, 10.0f);
 		}

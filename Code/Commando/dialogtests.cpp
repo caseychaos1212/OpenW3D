@@ -809,6 +809,51 @@ StartSPGameDialogClass::StartSPGameDialogClass (void)	:
 	return ;
 }
 
+//-----------------------------------------------------------------------------
+static StringClass Choose_Skirmish_Map(void)
+{
+	DynamicVectorClass<StringClass>	map_list;
+	WIN32_FIND_DATAA find_info	= { 0 };
+	BOOL keep_going				= true;
+	HANDLE file_find				= NULL;
+	StringClass file_filter;
+
+	file_filter.Format("data/skirmish*.mix");
+	for (file_find = ::FindFirstFileA (file_filter, &find_info);
+		 (file_find != INVALID_HANDLE_VALUE) && keep_going;
+		  keep_going = ::FindNextFileA (file_find, &find_info))
+	{
+		map_list.Add (find_info.cFileName);
+	}
+
+	if (file_find != INVALID_HANDLE_VALUE) {
+		::FindClose (file_find);
+	}
+
+	if (map_list.Count() == 0) {
+		file_filter.Format("data/c&c_*.mix");
+		keep_going = true;
+		for (file_find = ::FindFirstFileA (file_filter, &find_info);
+			 (file_find != INVALID_HANDLE_VALUE) && keep_going;
+			  keep_going = ::FindNextFileA (file_find, &find_info))
+		{
+			map_list.Add (find_info.cFileName);
+		}
+
+		if (file_find != INVALID_HANDLE_VALUE) {
+			::FindClose (file_find);
+		}
+	}
+
+	StringClass mapname;
+	if (map_list.Count() > 0) {
+		int choice = rand() % map_list.Count();
+		mapname = map_list[choice];
+	}
+
+	return mapname;
+}
+
 
 
 ////////////////////////////////////////////////////////////////
@@ -1058,6 +1103,19 @@ StartSPGameDialogClass::On_Command (int ctrl_id, int message_id, unsigned int pa
 		CampaignManager::Select_Backdrop_Number( TUTORIAL_LOAD_MENU_NUMBER );
 		GameInitMgrClass::Initialize_SP ();
 		GameInitMgrClass::Start_Game (TUTORIAL_MAP_NAME, -1, 0);
+	} else if (ctrl_id == IDC_MENU_START_PRACTICE_GAME_BUTTON) {
+		StringClass mapname = Choose_Skirmish_Map();
+
+		if (!mapname.Is_Empty()) {
+			const int SKIRMISH_LOAD_MENU_NUMBER	= 96;
+			CampaignManager::Select_Backdrop_Number(SKIRMISH_LOAD_MENU_NUMBER);
+			GameInitMgrClass::Initialize_Skirmish();
+
+			WWASSERT(The_Game() != NULL);
+			The_Game()->Set_Map_Cycle(0, mapname);
+
+			GameInitMgrClass::Start_Game(mapname, -1, 0);
+		}
 	} else {
 		CampaignManager::Select_Backdrop_Number( 0 );	// Use default load number
 	}

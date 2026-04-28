@@ -2947,7 +2947,7 @@ DECLARE_SCRIPT(M01_Entering_Church_Area_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_APPROACHING_CHURCH_JDG, 0 );
 
@@ -2973,7 +2973,7 @@ DECLARE_SCRIPT(M01_Hand_Of_Nod_Interior_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_INSIDE_HON_JDG, 0 );
 		}
@@ -2984,7 +2984,7 @@ DECLARE_SCRIPT(M01_Hand_Of_Nod_Exterior_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_OUTSIDE_HON_JDG, 0 );
 		}
@@ -2995,7 +2995,7 @@ DECLARE_SCRIPT(M01_Comm_Center_Interior_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_INSIDE_COMM_CENTER_JDG, 0 );
 		}
@@ -3006,7 +3006,7 @@ DECLARE_SCRIPT(M01_Comm_Center_Exterior_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_OUTSIDE_COMM_CENTER_JDG, 0 );
 		}
@@ -3017,7 +3017,7 @@ DECLARE_SCRIPT(M01_Tunnel_Interior_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_INSIDE_TUNNEL_JDG, 0 );
 		}
@@ -3028,7 +3028,7 @@ DECLARE_SCRIPT(M01_Tunnel_Exterior_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_OUTSIDE_TUNNEL_JDG, 0 );
 		}
@@ -3039,7 +3039,7 @@ DECLARE_SCRIPT(M01_Waterfall_Interior_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_INSIDE_WATERFALL_JDG, 0 );
 		}
@@ -3050,7 +3050,7 @@ DECLARE_SCRIPT(M01_Waterfall_Exterior_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_OUTSIDE_WATERFALL_JDG, 0 );
 		}
@@ -3073,7 +3073,7 @@ DECLARE_SCRIPT(M01_Player_is_Leaving_GDI_Base_Zone, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			if (firstEntry == true)
 			{
@@ -3095,7 +3095,7 @@ DECLARE_SCRIPT(M01_Player_is_Entering_GDI_Base_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_APPROACHING_GDI_BASE_AREA_JDG, 0 );
 		}
@@ -3106,7 +3106,7 @@ DECLARE_SCRIPT(M01_Lose_Any_Church_Escorts_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_LEAVING_CHURCH_01_JDG, 0 );
 		}
@@ -3117,7 +3117,7 @@ DECLARE_SCRIPT(M01_Lose_Any_Church_Escorts_Zone_02, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_LEAVING_CHURCH_02_JDG, 0 );
 		}
@@ -3128,7 +3128,7 @@ DECLARE_SCRIPT(M01_Lose_Any_HON_Escorts_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_LEAVING_HON_01_JDG, 0 );
 		}
@@ -3139,7 +3139,7 @@ DECLARE_SCRIPT(M01_Lose_Any_HON_Escorts_Zone_02, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_LEAVING_HON_02_JDG, 0 );
 		}
@@ -3150,7 +3150,7 @@ DECLARE_SCRIPT(M01_Announce_Prisoner_Objective_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_ANNOUNCE_PRISONER_OBJECTIVE_JDG, 0 );
 			Commands->Destroy_Object ( obj );//this is a one-time only zone--clean it up
@@ -3162,7 +3162,7 @@ DECLARE_SCRIPT(M01_Scramble_Radar_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_SCRAMBLE_THE_RADAR_JDG, 0 );
 		}
@@ -3173,7 +3173,7 @@ DECLARE_SCRIPT(M01_UnScramble_Radar_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_UNSCRAMBLE_THE_RADAR_JDG, 0 );
 		}
@@ -3269,7 +3269,7 @@ DECLARE_SCRIPT(M01_CommCenter_Evacuator_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -3300,7 +3300,7 @@ DECLARE_SCRIPT(M01_HON_FrontDoor_Evacuator_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -3375,7 +3375,7 @@ DECLARE_SCRIPT(M01_HON_BackDoor_Evacuator_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -3403,7 +3403,7 @@ DECLARE_SCRIPT(M01_HON_Dorm_Crapper_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -3477,7 +3477,7 @@ DECLARE_SCRIPT(M01_HON_Dorm_Crapper_JDG, "")
 
 		if (action_id == M01_GOING_TO_EVAC_SPOT_JDG && complete_reason == ACTION_COMPLETE_NORMAL)
 		{
-			GameObject * star = Commands->Get_A_Star (Vector3(0.0f,0.0f,0.0f));
+			GameObject * star = Commands->Get_A_Star(Commands->Get_Position(obj));
 			if ( star != NULL )
 			{
 				int players_ID_number = Commands->Get_ID ( star );
@@ -3506,7 +3506,7 @@ DECLARE_SCRIPT(M01_HON_Dorm_FlameGuy_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -3595,7 +3595,7 @@ DECLARE_SCRIPT(M01_HON_Dorm_ChemGuy_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -3684,7 +3684,7 @@ DECLARE_SCRIPT(M01_HON_Dorm_RocketGuy_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -3771,7 +3771,7 @@ DECLARE_SCRIPT(M01_HON_Dorm_MiniGunner_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -3867,7 +3867,7 @@ DECLARE_SCRIPT(M01_HON_Cafeteria_Eating_Guy_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -3953,7 +3953,7 @@ DECLARE_SCRIPT(M01_HON_Cafeteria_Walking_Guy_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -4080,7 +4080,7 @@ DECLARE_SCRIPT(M01_Hand_Of_Nod_Grunt_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_IN_HON_GRUNT_LEVEL_JDG, 0 );
 		}
@@ -4091,7 +4091,7 @@ DECLARE_SCRIPT(M01_Hand_Of_Nod_Dojo_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_IN_HON_DOJO_JDG, 0 );
 		}
@@ -4107,7 +4107,7 @@ DECLARE_SCRIPT(M01_Church_LoveShack_MiniGunner_JDG, "")//M01_CHURCH_LOVESHACK_MI
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			if (obj)
 			{
@@ -4179,7 +4179,7 @@ DECLARE_SCRIPT(M01_Church_Exterior_MiniGunner_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			if (obj)
 			{
@@ -4388,7 +4388,7 @@ DECLARE_SCRIPT(M01_Announce_Hand_of_Nod_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			GameObject *controller = Commands->Create_Object("Invisible_Object", Vector3(0,0,0));
 			Commands->Attach_Script(controller, "Test_Cinematic", "X1A_Apache_Orca_Chase_01.txt");
@@ -4410,7 +4410,7 @@ DECLARE_SCRIPT(M01_Announce_Barn_Objective_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			//Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_START_BARN_OBJECTIVE_JDG, 0 );
 			Commands->Destroy_Object ( obj);//this is a 1-time only zone--cleaning up
@@ -4491,7 +4491,7 @@ DECLARE_SCRIPT(M01_Player_Is_Crossing_Bridge_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_CROSSING_THE_BRIDGE_JDG, 0 );
 
@@ -4528,7 +4528,7 @@ DECLARE_SCRIPT(M01_Player_Is_Crossing_Bridge_Via_Cave_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_CROSSING_THE_BRIDGE_VIA_CAVE_JDG, 0 );
 
@@ -4564,7 +4564,7 @@ DECLARE_SCRIPT(M01_Player_Is_Crossing_Bridge_Via_Church_Zone, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_CROSSING_THE_BRIDGE_JDG, 0 );
 
@@ -4658,7 +4658,7 @@ DECLARE_SCRIPT(M01_Flamethrower_Point_Guard_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			if (obj)
 			{
@@ -4739,7 +4739,7 @@ DECLARE_SCRIPT(M01_HON_Easy_Spawned_Guy_01_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			if (obj)
 			{
@@ -4855,7 +4855,7 @@ DECLARE_SCRIPT(M01_HON_Easy_Spawned_Guy_02_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -4970,7 +4970,7 @@ DECLARE_SCRIPT(M01_HON_Easy_Spawned_Guy_03_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR )
+		if (Commands->Is_A_Star(damager) )
 		{
 			if (obj)
 			{
@@ -5070,7 +5070,7 @@ DECLARE_SCRIPT(M01_Whack_A_Mole_Enter_Zone_JDG, "")//this guys ID is 101209
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_SPAWN_WHACK_A_MOLE_GUY_JDG, 0 );
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( 101207 ), 0, M01_SPAWN_WHACK_A_MOLE_GUY_JDG, 0 );
@@ -5102,7 +5102,7 @@ DECLARE_SCRIPT(M01_Whack_A_Mole_Exit_Zone_JDG, "")//this guys ID is 101207
 	}
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && okayToAct == true)
+		if (Commands->Is_A_Star(enterer) && okayToAct == true)
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_CHANGE_WHACK_A_MOLE_GUY_JDG, 0 );
 			Commands->Destroy_Object ( obj );
@@ -5256,7 +5256,7 @@ DECLARE_SCRIPT(M01_Whack_A_Mole_Minigunner_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR && invincible == true)
+		if (Commands->Is_A_Star(damager) && invincible == true)
 		{
 			if (obj)
 			{
@@ -5282,7 +5282,7 @@ DECLARE_SCRIPT(M01_Left_Interrogation_Room_Enter_Zone_JDG, "")//this guys ID is 
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			if (Commands->Find_Object ( M01_HON_INTERROGATION_ROOM_GUY_ID ))
 			{
@@ -5306,7 +5306,7 @@ DECLARE_SCRIPT(M01_Right_Interrogation_Room_Enter_Zone_JDG, "")//this guys ID is
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			if (Commands->Find_Object ( M01_HON_INTERROGATION_ROOM_GUY_ID ))
 			{
@@ -5536,7 +5536,7 @@ DECLARE_SCRIPT(M01_Billys_Conversation_Zone_JDG, "")//this guys ID is 101661
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			playerEntered = true;
 			Commands->Send_Custom_Event( obj, obj, 0, M01_CUE_BILLYS_CONVERSATION_JDG, 0 );
@@ -5604,7 +5604,7 @@ DECLARE_SCRIPT(M01_Player_Is_Entering_Tailgun_Alley_JDG, "")//this guys ID is 10
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			int tankWarning = Commands->Create_Conversation( "M01_Announce_LightTank_Conversation", 100, 1000, false);
 			Commands->Join_Conversation( NULL, tankWarning, false, false, true );
@@ -5658,7 +5658,7 @@ DECLARE_SCRIPT(M01_Player_Is_Entering_Tailgun_Alley_Backway_JDG, "")//this guys 
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if ( Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ))
 			{
@@ -5866,7 +5866,7 @@ DECLARE_SCRIPT(M01_Tailgun_02_SpawnApache_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			GameObject *controller = Commands->Create_Object("Invisible_Object", Vector3(0,0,0));
 			Commands->Attach_Script(controller, "Test_Cinematic", "X1A_Tailgun_Apache_02.txt");
@@ -5911,7 +5911,7 @@ DECLARE_SCRIPT(M01_Comm_Base_Commander_JDG, "")//this guys ID is M01_COMMCENTER_
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR && enemyEngaged == false)
+		if (Commands->Is_A_Star(damager) && enemyEngaged == false)
 		{
 			enemyEngaged = true;
 			Commands->Innate_Enable(obj);
@@ -5937,7 +5937,7 @@ DECLARE_SCRIPT(M01_Comm_Base_Commander_JDG, "")//this guys ID is M01_COMMCENTER_
 
 	void Killed( GameObject * obj, GameObject * killer ) override
 	{
-		if (killer == STAR)
+		if (Commands->Is_A_Star(killer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_CUE_KANE_AND_HAVOC_CONVERSATION_JDG, 0 );
 
@@ -6194,7 +6194,7 @@ DECLARE_SCRIPT(M01_Comm_Base_Commander_Conv_Start_Zone_JDG, "")//this guys ID is
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_CUE_KANE_AND_NUMBER2_CONVERSATION_JDG, 0 );
 			GameObject * zone01 = Commands->Find_Object ( 101947 );
@@ -6216,7 +6216,7 @@ DECLARE_SCRIPT(M01_Comm_Kane_n_Havoc_Conv_Start_Zone_JDG, "")//this guys ID is 1
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_CUE_KANE_AND_HAVOC_CONVERSATION_JDG, 0 );
 			Commands->Destroy_Object ( obj );//this is one-time only zone--cleaning up
@@ -6848,7 +6848,7 @@ DECLARE_SCRIPT(M01_Turn_on_the_Hand_of_Nod_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			if ( Commands->Find_Object ( M01_CHURCHAREA_SPAWNER_CONTROLLER_JDG ))
 			{
@@ -6892,7 +6892,7 @@ DECLARE_SCRIPT(M01_Turn_on_the_Hand_of_Nod_Zone_JDG, "")
 	{
 		if (obj)
 		{
-			if (damager == STAR && deadYet == false && firstTimeDamaged == true)
+			if (Commands->Is_A_Star(damager) && deadYet == false && firstTimeDamaged == true)
 			{
 				Vector3 myPosition = Commands->Get_Position ( obj );
 				Vector3 playerPosition = Commands->Get_Position ( STAR );
@@ -7011,7 +7011,7 @@ DECLARE_SCRIPT(M01_TailgunRun_NOD_Commander_JDG, "")//this guys ID is M01_TAILGU
 	{
 		if (obj)
 		{
-			if (damager == STAR && deadYet == false && firstTimeDamaged == true)
+			if (Commands->Is_A_Star(damager) && deadYet == false && firstTimeDamaged == true)
 			{
 				Vector3 myPosition = Commands->Get_Position ( obj );
 				Vector3 playerPosition = Commands->Get_Position ( STAR );
@@ -7173,7 +7173,7 @@ DECLARE_SCRIPT(M01_ChurchArea_NOD_Commander_JDG, "")//M01_CHURCHAREA_NOD_COMMAND
 	{
 		if (obj)
 		{
-			if (damager == STAR && deadYet == false && firstTimeDamaged == true && playerSeen == false)
+			if (Commands->Is_A_Star(damager) && deadYet == false && firstTimeDamaged == true && playerSeen == false)
 			{
 				Vector3 myPosition = Commands->Get_Position ( obj );
 				Vector3 playerPosition = Commands->Get_Position ( STAR );
@@ -7438,7 +7438,7 @@ DECLARE_SCRIPT(M01_Nod_GuardTower_01_Enter_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * sniperTarget01 = Commands->Create_Object ( "Nod_MiniGunner_0", Vector3(-148.379f, 342.954f, 9.656f));
 			Commands->Attach_Script(sniperTarget01, "M01_GuardTower_Sniper_Target_JDG", "-157.390 363.504 10.695, 148.379 342.954 9.656");
@@ -7458,7 +7458,7 @@ DECLARE_SCRIPT(M01_Nod_GuardTower_02_Enter_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * sniperTarget01 = Commands->Create_Object ( "Nod_MiniGunner_0", Vector3(-153.944f, 602.434f, 4.226f));
 			Commands->Attach_Script(sniperTarget01, "M01_GuardTower_Sniper_Target_JDG", "-141.665 573.039 4.409, -153.944 602.434 4.226");
@@ -7478,7 +7478,7 @@ DECLARE_SCRIPT(M01_Nod_GuardTower_03_Enter_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * sniperTarget01 = Commands->Create_Object ( "Nod_MiniGunner_0", Vector3(-254.164f, 564.968f, 30.630f));
 			Commands->Attach_Script(sniperTarget01, "M01_GuardTower_Sniper_Target_JDG", "-221.487 556.431 25.927, -254.164 564.968 30.630");
@@ -7670,7 +7670,7 @@ DECLARE_SCRIPT(M01_HarvesterScript_New_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (obj && damager == STAR)
+		if (obj && Commands->Is_A_Star(damager))
 		{
 			if (damagedYet == false)
 			{
@@ -7833,7 +7833,7 @@ DECLARE_SCRIPT(M01_Barn_Babushkas_Conversation_Zone_JDG, "")//this guys ID is 10
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			playerEntered = true;
 			Commands->Send_Custom_Event( obj, obj, 0, M01_CUE_BABUSHKA_CONVERSATION_JDG, 0 );
@@ -7852,7 +7852,7 @@ DECLARE_SCRIPT(M01_Barn_Point_Guard_01_JDG, "")//this guys ID is 101439
 	{
 		if (obj)
 		{
-			if (damager == STAR)
+			if (Commands->Is_A_Star(damager))
 			{
 				Commands->Set_Innate_Is_Stationary ( obj, false );
 				Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_IS_ATTACKING_ME_JDG, 0 );
@@ -7908,7 +7908,7 @@ DECLARE_SCRIPT(M01_Barn_Point_Guard_02_JDG, "")//this guys ID is 101658
 	{
 		if (obj)
 		{
-			if (damager == STAR)
+			if (Commands->Is_A_Star(damager))
 			{
 				if (obj && retreating == false)
 				{
@@ -9114,7 +9114,7 @@ DECLARE_SCRIPT(M01_Priest_Conversation_Zone_JDG, "")//this guys ID is 103395  M0
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			if (okay_to_play_conversation == true)
 			{
@@ -9151,7 +9151,7 @@ DECLARE_SCRIPT(M01_Loveshack_Nun_Conversation_Zone_JDG, "")//this guys ID is 101
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			if (okay_to_play_conversation == true)
 			{
@@ -9186,7 +9186,7 @@ DECLARE_SCRIPT(M01_Interior_Nun_Conversation_Zone_JDG, "")//this guys ID is #101
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			if (okay_to_play_conversation == true)
 			{
@@ -9207,7 +9207,7 @@ DECLARE_SCRIPT(M01_Church_Guard_MiniGunner_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			if (obj)
 			{
@@ -9248,7 +9248,7 @@ DECLARE_SCRIPT(M01_Church_Loveshack_InterrogationConv_Zone_JDG, "")//103392
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && conversation_triggered == false)
+		if (Commands->Is_A_Star(enterer) && conversation_triggered == false)
 		{
 			conversation_triggered = true;
 			GameObject * loveshackNun = Commands->Find_Object ( M01_CHURCH_LOVESHACK_NUN_ID );
@@ -9367,7 +9367,7 @@ DECLARE_SCRIPT(M01_CHURCH_Chinook_Spawned_Soldier01_GDI, "")
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR)
+		if (Commands->Is_A_Star(poker))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_GDI_GUY_HAS_BEEN_POKED_JDG, 0 );
 		}
@@ -9653,7 +9653,7 @@ DECLARE_SCRIPT(M01_CHURCH_Chinook_Spawned_Soldier02_GDI, "")
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR)
+		if (Commands->Is_A_Star(poker))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_GDI_GUY_HAS_BEEN_POKED_JDG, 0 );
 		}
@@ -9920,7 +9920,7 @@ DECLARE_SCRIPT(M01_COMM_Chinook_Spawned_Soldier_GDI, "")
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR)
+		if (Commands->Is_A_Star(poker))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_GDI_GUY_HAS_BEEN_POKED_JDG, 0 );
 		}
@@ -10202,7 +10202,7 @@ DECLARE_SCRIPT(M01_MovieProjector_JDG, "")//103942
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR && destroyed == false)
+		if (Commands->Is_A_Star(damager) && destroyed == false)
 		{
 			destroyed = true;
 			Commands->Set_Animation ( obj, "DSP_PROJECTOR.DSP_PROJECTOR", false, NULL, 0, 9, false );
@@ -10760,7 +10760,7 @@ DECLARE_SCRIPT(M01_HON_Paintball_Team_01_JDG, "")//this is the grunt team
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			starEncountered = true;
 
@@ -10907,7 +10907,7 @@ DECLARE_SCRIPT(M01_HON_Paintball_Team_02_JDG, "")//this is the officer team
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			starEncountered = true;
 
@@ -11048,7 +11048,7 @@ DECLARE_SCRIPT(M01_HON_Dojo_Trainer_JDG, "")//this guys ID is M01_HON_DOJO_SENSE
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR && first_time == true)
+		if (Commands->Is_A_Star(damager) && first_time == true)
 		{
 			first_time = false;
 
@@ -11452,7 +11452,7 @@ DECLARE_SCRIPT(M01_Comm_Mainframe_PogZone_01_JDG, "")//108024
 {//target location ()
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Vector3 radarMarker (-293.163f, 499.787f, 19.959f);
 			Commands->Set_Objective_HUD_Info_Position( M01_UNLOCK_GATE_OBJECTIVE_JDG, 93, "POG_M01_1_02.tga", IDS_POG_ACCESS, radarMarker );
@@ -11466,7 +11466,7 @@ DECLARE_SCRIPT(M01_Comm_Mainframe_PogZone_02_JDG, "")//108026
 {//target location ()
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Vector3 radarMarker (-292.135f, 522.740f, 16.448f);
 			Commands->Set_Objective_HUD_Info_Position( M01_UNLOCK_GATE_OBJECTIVE_JDG, 93, "POG_M01_1_02.tga", IDS_POG_ACCESS, radarMarker );
@@ -11480,7 +11480,7 @@ DECLARE_SCRIPT(M01_Comm_Mainframe_PogZone_03_JDG, "")//108028
 {//target location ()
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Vector3 radarMarker (-314.578f, 517.124f, 16.447f);
 			Commands->Set_Objective_HUD_Info_Position( M01_UNLOCK_GATE_OBJECTIVE_JDG, 93, "POG_M01_1_02.tga", IDS_POG_ACCESS, radarMarker );
@@ -11511,7 +11511,7 @@ DECLARE_SCRIPT(M01_Comm_Center_Player_Terminal_Zone, "")//107809
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR && poked == false)
+		if (Commands->Is_A_Star(poker) && poked == false)
 		{
 			if (commCenterDead == false)
 			{
@@ -12119,7 +12119,7 @@ DECLARE_SCRIPT(M01_Church_Priest_JDG, "")
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR)
+		if (Commands->Is_A_Star(poker))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_CUE_PRIEST_CONVERSATION_JDG, 0 );
 		}
@@ -12436,7 +12436,7 @@ DECLARE_SCRIPT(M01_Church_Interior_Nun_JDG, "")
 	{
 		ActionParamsStruct params;
 
-		if (poker == STAR)
+		if (Commands->Is_A_Star(poker))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_CUE_INTERIOR_NUN_CONVERSATION_JDG, 0 );
 		}
@@ -12561,7 +12561,7 @@ DECLARE_SCRIPT(M01_Church_LoveShack_Nun_JDG, "")
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR)
+		if (Commands->Is_A_Star(poker))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_CUE_LOVESHACK_NUN_CONVERSATION_JDG, 0 );
 		}
@@ -13440,7 +13440,7 @@ DECLARE_SCRIPT(M01_TriggerZone_GDIBase_BaseCommander_JDG, "")//106267 and 106268
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * gdiBaseCommander = Commands->Find_Object ( 106050 );
 
@@ -13664,7 +13664,7 @@ DECLARE_SCRIPT(M01_TibCave_StartZone_JDG, "")//108922
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * visceroid01 = Commands->Find_Object ( 106908 );
 			GameObject * visceroid02 = Commands->Find_Object ( 106909 );
@@ -13871,7 +13871,7 @@ DECLARE_SCRIPT(M01_Tiberium_Cave_Spawn_Helicopter_Zone_JDG, "")//M01_TIB_TUNNEL_
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_SPAWN_TIB_CAVE_HELICOPTER_JDG, 0 );
 
@@ -13935,7 +13935,7 @@ DECLARE_SCRIPT(M01_Detention_GuardTower_Enter_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * detentionCiv01 = Commands->Find_Object ( M01_DETENTION_CIVILIAN_01_JDG );
 			if (detentionCiv01 != NULL)
@@ -14661,7 +14661,7 @@ DECLARE_SCRIPT(M01_BarnArea_NOD_Commander_Trigger_Zone_JDG, "")//M01_BARNAREA_NO
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR )
+		if (Commands->Is_A_Star(enterer) )
 		{
 			GameObject * firstFieldCommander = Commands->Find_Object (M01_BARNAREA_NOD_COMMANDER_JDG);
 			if (firstFieldCommander != NULL)
@@ -14718,7 +14718,7 @@ DECLARE_SCRIPT(M01_GDI_GuardTower_NOD_Commander_JDG, "")//M01_BARNAREA_NOD_COMMA
 	{
 		if (obj)
 		{
-			if (damager == STAR && deadYet == false && firstTimeDamaged == true)
+			if (Commands->Is_A_Star(damager) && deadYet == false && firstTimeDamaged == true)
 			{
 				Vector3 myPosition = Commands->Get_Position ( obj );
 				Vector3 playerPosition = Commands->Get_Position ( STAR );
@@ -15311,7 +15311,7 @@ DECLARE_SCRIPT(M01_PlayerEntering_BarnArea_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject *gunboatController = Commands->Find_Object ( M01_TURRETBEACH_CONTROLLER_ID );
 			if (gunboatController != NULL)
@@ -15332,7 +15332,7 @@ DECLARE_SCRIPT(M01_PlayerLeaving_BarnArea_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject *gunboatController = Commands->Find_Object ( M01_TURRETBEACH_CONTROLLER_ID );
 			if (gunboatController != NULL)
@@ -15356,7 +15356,7 @@ DECLARE_SCRIPT(M01_Barn_EntryZone_JDG, "")//113734
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)//
+		if (Commands->Is_A_Star(enterer))//
 		{
 			GameObject * missionController = Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG );
 			if (missionController != NULL)
@@ -15386,7 +15386,7 @@ DECLARE_SCRIPT(M01_GDI_BaseCommander_Backside_EntryZone_JDG, "")//113733
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && entered == false)
+		if (Commands->Is_A_Star(enterer) && entered == false)
 		{
 			entered = true;
 			GameObject * gdiBaseLeaderGuy = Commands->Find_Object ( 104685 );//
@@ -15601,7 +15601,7 @@ DECLARE_SCRIPT(M01_HON_RedKey_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			bool playerHasRedKey = Commands->Has_Key( STAR, 3 );
 			if (playerHasRedKey == false)
@@ -15633,7 +15633,7 @@ DECLARE_SCRIPT(M01_Comm_Center_Pen_Gate, "")
 
 	void Poked( GameObject * obj, GameObject * poker ) override //
 	{
-		if (poker == STAR && samDead == true)
+		if (Commands->Is_A_Star(poker) && samDead == true)
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG ), 0, M01_PLAYER_HAS_POKED_PEN_GATE_JDG, 0 );
 		}
@@ -15709,7 +15709,7 @@ DECLARE_SCRIPT(M01_Commander_Shack_Zone_JDG, "")//115985
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			playerinZone = true;
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
@@ -15831,7 +15831,7 @@ DECLARE_SCRIPT(M01_TurretBeach_Engineer_JDG, "")//this guys ID is M01_TURRETBEAC
 			Commands->Set_Health ( obj, last_health );
 		}
 
-		else if (damager == STAR)
+		else if (Commands->Is_A_Star(damager))
 		{
 			if (obj)
 			{
@@ -16117,7 +16117,7 @@ DECLARE_SCRIPT(M01_TurretBeach_Chinook_Spawned_Soldier_NOD, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			Commands->Innate_Enable(obj);
 		}
@@ -17266,7 +17266,7 @@ DECLARE_SCRIPT(M01_RealLightTank_TriggerZone_JDG, "")
 	{
 		if (entered == false)
 		{
-			if (enterer == STAR)
+			if (Commands->Is_A_Star(enterer))
 			{
 				entered = true;
 				GameObject * lightTank = Commands->Find_Object ( 120022 );//00-N036E
@@ -17314,7 +17314,7 @@ DECLARE_SCRIPT(M01_Announce_First_ObjectiveZone_JDG, "")//116380
 
 	void Entered( GameObject * obj, GameObject * enterer ) override //M01_Press_F1_Conversation
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * pogController = Commands->Find_Object ( M01_MISSION_POG_CONTROLLER_JDG );
 			if (pogController != NULL)
@@ -17393,7 +17393,7 @@ DECLARE_SCRIPT(M01_SniperRifle_02_AirdropZone_JDG, "")//in guard tower 01
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Create_Sound ( "M01EVAG_DSGN0268I1EVAG_SND", Vector3 (0,0,0), obj );//enemy aircraft detected
 			GameObject * chinook_obj3 = Commands->Create_Object ( "Invisible_Object", Vector3(-12.031f, -42.150f, -1.252f));
@@ -17424,7 +17424,7 @@ DECLARE_SCRIPT(M01_Use_Ladder_Zone_JDG, "")
 {
 	void Entered( GameObject * /* obj */, GameObject * enterer ) override //M01_Press_F1_Conversation
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			int pressF1Conv = Commands->Create_Conversation( "M01_Press_E_For_Ladders_Conversation", 100, 1000, true);
 			Commands->Join_Conversation( NULL, pressF1Conv, false, false, true );
@@ -17439,7 +17439,7 @@ DECLARE_SCRIPT(M01_AccessDenied_Zone_JDG, "")
 {
 	void Entered( GameObject * /* obj */, GameObject * enterer ) override //M01_Press_F1_Conversation
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			int pressF1Conv = Commands->Create_Conversation( "M01_Lockdown_Conversation", 100, 1000, true);
 			Commands->Join_Conversation( NULL, pressF1Conv, false, false, true );
@@ -17463,7 +17463,7 @@ DECLARE_SCRIPT(M01_QuickSave_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Set_HUD_Help_Text ( IDS_M01DSGN_DSGN0525I1DSGN_TXT, TEXT_COLOR_OBJECTIVE_PRIMARY );
 			Commands->Destroy_Object ( obj );
@@ -17965,7 +17965,7 @@ DECLARE_SCRIPT(M01_ConDropZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject *controller1 = Commands->Create_Object("Invisible_Object", Vector3(54.835f, -3.011f, 13.105f));
 			Commands->Set_Facing ( controller1, 45 );
@@ -18044,7 +18044,7 @@ DECLARE_SCRIPT(M01_Base_StartZone_JDG, "")//119628
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * minigunner = Commands->Find_Object ( 116382 );
 			GameObject * grenadier = Commands->Find_Object ( 116383 );
@@ -18078,7 +18078,7 @@ DECLARE_SCRIPT(M01_C4_Tutorial_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * c4TextController = Commands->Find_Object ( 117188 );
 			if (c4TextController != NULL)
@@ -18097,7 +18097,7 @@ DECLARE_SCRIPT(M01_Mainframe_Tutorial_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Set_HUD_Help_Text ( IDS_M01DSGN_DSGN0527I1DSGN_TXT, TEXT_COLOR_OBJECTIVE_PRIMARY );
 
@@ -18122,7 +18122,7 @@ DECLARE_SCRIPT(M01_GateSwitch_Tutorial_Zone_JDG, "")//120844
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && command_clearance == true)
+		if (Commands->Is_A_Star(enterer) && command_clearance == true)
 		{
 			Commands->Set_HUD_Help_Text ( IDS_M01DSGN_DSGN0528I1DSGN_TXT, TEXT_COLOR_OBJECTIVE_PRIMARY );
 
@@ -18159,7 +18159,7 @@ DECLARE_SCRIPT(M01_BarnArea_NOD_Commander_Trigger_Zone02_JDG, "")//103343
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && entered == false)
+		if (Commands->Is_A_Star(enterer) && entered == false)
 		{
 			entered = true;
 			GameObject * firstFieldCommander = Commands->Find_Object (M01_BARNAREA_NOD_COMMANDER_JDG);
@@ -19204,7 +19204,7 @@ DECLARE_SCRIPT(M01_MediumTank_ReminderZone_JDG, "")//122848
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (commandClearance == true)
 			{
@@ -19681,7 +19681,7 @@ DECLARE_SCRIPT(M01_GDI_BeachGuy01_JDG, "")
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
 		float currentHealth = Commands->Get_Health ( obj );
-		if (currentHealth <= 10 && damager == STAR)
+		if (currentHealth <= 10 && Commands->Is_A_Star(damager))
 		{
 			Commands->Set_Health ( obj, 10 );
 		}
@@ -19705,7 +19705,7 @@ DECLARE_SCRIPT(M01_Announce_TankAirstrikeZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * missionController = Commands->Find_Object ( M01_MISSION_CONTROLLER_JDG );
 			if (missionController != NULL)
@@ -19733,7 +19733,7 @@ DECLARE_SCRIPT(M01_GDI_GuardTower_02_Enter_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * sniperTarget01 = Commands->Create_Object ( "Nod_MiniGunner_0", Vector3());
 			Commands->Attach_Script(sniperTarget01, "M01_GuardTower_Sniper_Target_JDG", "-90.385 124.308 1.610, -79.477 139.201 0.947");
@@ -19913,7 +19913,7 @@ DECLARE_SCRIPT(M01_GuardTower02_Sniper_TowerZone_JDG, "")//123645
 
 	void Entered( GameObject * /* obj */, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			player_in_zone = true;
 		}
@@ -20117,7 +20117,7 @@ DECLARE_SCRIPT(M01_TurnOff_TankReminder_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * tankReminderZone = Commands->Find_Object ( 122848 );
 			if (tankReminderZone != NULL)
@@ -20133,7 +20133,7 @@ DECLARE_SCRIPT(M01_HON_Escorts_Warroom_MCT_ZoneController_JDG, "")//103378
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * mctCommander = Commands->Find_Object ( 103373 );
 			GameObject * mctProtector01 = Commands->Find_Object ( 103374 );
@@ -20621,7 +20621,7 @@ DECLARE_SCRIPT(M01_GiveMCTSpeech_Zone_JDG, "")//124260
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			player_in_warroom = true;
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
@@ -20642,7 +20642,7 @@ DECLARE_SCRIPT(M01_Havoc_In_WarroomZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * HON_MonitorZone = Commands->Find_Object ( 124044 );
 			if (HON_MonitorZone != NULL)
@@ -20657,7 +20657,7 @@ DECLARE_SCRIPT(M01_Havoc_Out_WarroomZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * HON_MonitorZone = Commands->Find_Object ( 124044 );
 			if (HON_MonitorZone != NULL)
@@ -21530,7 +21530,7 @@ DECLARE_SCRIPT(M01_BackPath_EntranceZone_JDG, "")//121433
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
@@ -22010,5 +22010,3 @@ DECLARE_SCRIPT(M01_Base_GDI_Minigunner_JDG, "")//116382
 		}
 	}
 };
-
-

@@ -82,6 +82,7 @@ public:
 	//	Singleton access
 	//
 	static void								Display (void);
+	static void								Display_Coop (void);
 	static MPLanGameListMenuClass *	Get_Instance (void)	{ return _TheInstance; }
 
 protected:
@@ -106,6 +107,7 @@ protected:
 	////////////////////////////////////////////////////////////////
 	int										UpdateTimer;
 	static bool								UpdateNickname;
+	static bool								IsCoopList;
 
 	static MPLanGameListMenuClass *	_TheInstance;
 
@@ -113,4 +115,3 @@ protected:
 
 
 #endif //__DLG_MP_LAN_GAME_LIST_H
-

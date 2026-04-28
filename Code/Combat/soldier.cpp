@@ -4181,7 +4181,16 @@ bool	SoldierGameObj::Use_Ladder_View( void )
 //------------------------------------------------------------------------------------
 void SoldierGameObj::Set_Model(const char *model_name)
 {
-	Peek_Physical_Object()->Set_Model_By_Name(model_name);
+	if (model_name == NULL || model_name[0] == 0) {
+		return;
+	}
+
+	StringClass render_model_name(model_name, true);
+	if (!render_model_name.Is_Empty() && ::strchr(render_model_name, '.') != NULL) {
+		Get_Render_Obj_Name_From_Filename(render_model_name, model_name);
+	}
+
+	Peek_Physical_Object()->Set_Model_By_Name(render_model_name);
 	HumanState.Set_Anim_Control( (HumanAnimControlClass *)Get_Anim_Control() );  // Must set the anim control after the phys object
 }
 
@@ -5310,5 +5319,3 @@ void	SoldierGameObj::Update_Locked_Facing( void )
 		CombatManager::Soldier_Dies(this);
 	}
 	*/
-
-

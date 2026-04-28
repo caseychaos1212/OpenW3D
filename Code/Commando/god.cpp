@@ -29,8 +29,14 @@
 #include "playermanager.h"
 #include "gameobjmanager.h"
 #include "spawn.h"
+#include "gdcoopmission.h"
+#include "coopdebuglog.h"
+#include "coopinventory.h"
 #include "playertype.h"
 #include "objlibrary.h"
+#include "definitionmgr.h"
+#include "combatchunkid.h"
+#include "phys.h"
 #include "soldierobserver.h"
 #include "gametype.h"
 #include "dialogtests.h"
@@ -59,10 +65,76 @@ typedef enum {
 	GOD_STATE_SINGLE_RUNNING,
 	GOD_STATE_SINGLE_DEAD,
 
+	GOD_STATE_COOP_INIT,
+	GOD_STATE_COOP_RUNNING,
+
 } GodState;
 
 int		cGod::State		= GOD_STATE_UNINITIALIZED;
 InventoryClass	cGod::LevelStartInventory;
+
+//-----------------------------------------------------------------------------
+static cPlayer * Get_First_Active_In_Game_Player(void)
+{
+	for (
+		SLNode<cPlayer> * objnode = cPlayerManager::Get_Player_Object_List()->Head();
+		objnode;
+		objnode = objnode->Next()) {
+
+		cPlayer * p_player = objnode->Data();
+		if (p_player != NULL &&
+			 p_player->Get_Is_Active().Is_True() &&
+			 p_player->Get_Is_In_Game().Is_True()) {
+			return p_player;
+		}
+	}
+
+	return NULL;
+}
+
+//-----------------------------------------------------------------------------
+static bool Is_Coop_Secondary_Player(int client_id)
+{
+	if (!IS_COOP_MISSION) {
+		return false;
+	}
+
+	cPlayer * first_player = Get_First_Active_In_Game_Player();
+	return first_player != NULL && first_player->Get_Id() != client_id;
+}
+
+//-----------------------------------------------------------------------------
+static bool Get_Preset_Model_Name(const StringClass & preset_name, StringClass & model_name)
+{
+	DefinitionClass * object_base_def = DefinitionMgrClass::Find_Typed_Definition(preset_name, CLASSID_GAME_OBJECTS);
+	PhysicalGameObjDef * object_def = (PhysicalGameObjDef *)object_base_def;
+	if (object_def == NULL) {
+		return false;
+	}
+
+	DefinitionClass * phys_base_def = DefinitionMgrClass::Find_Definition(object_def->Get_Phys_Def_ID());
+	PhysDefClass * phys_def = (PhysDefClass *)phys_base_def;
+	if (phys_def == NULL || phys_def->Get_Model_Name().Is_Empty()) {
+		return false;
+	}
+
+	model_name = phys_def->Get_Model_Name();
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+static void Attach_Mission_Start_Script(SoldierGameObj * soldier)
+{
+	WWASSERT(soldier != NULL);
+
+	const char * script_name = CombatManager::Get_Start_Script();
+	if (script_name != NULL && script_name[0] != 0) {
+		ScriptClass* script = ScriptManager::Create_Script( script_name );
+		if (script) {
+			soldier->Add_Observer( script );
+		}
+	}
+}
 
 //-----------------------------------------------------------------------------
 enum	{
@@ -123,7 +195,12 @@ void cGod::Think(void)
 
 	if ( State == GOD_STATE_UNINITIALIZED ) {
 		//XXX
-		State = ( IS_MISSION ) ? GOD_STATE_SINGLE_INIT : GOD_STATE_MULTIPLAYER;
+		if (IS_COOP_MISSION) {
+			CoopDebugLog::Log("cGod::Think transition UNINITIALIZED -> COOP_INIT");
+			State = GOD_STATE_COOP_INIT;
+		} else {
+			State = ( IS_MISSION ) ? GOD_STATE_SINGLE_INIT : GOD_STATE_MULTIPLAYER;
+		}
 	}
 
 	if ( State == GOD_STATE_SINGLE_INIT ) {
@@ -132,13 +209,29 @@ void cGod::Think(void)
 		// Create a Commando for the Player
 		SoldierGameObj * soldier = Create_Commando( cPlayerManager::Get_Player_Object_List()->Head()->Data() );
 
-		const char * script_name = CombatManager::Get_Start_Script();
-		ScriptClass* script = ScriptManager::Create_Script( script_name );
-		if (script) {
-			soldier->Add_Observer( script );
-		}
+		Attach_Mission_Start_Script(soldier);
 
 		State = GOD_STATE_SINGLE_RUNNING;
+	}
+
+	if ( State == GOD_STATE_COOP_INIT ) {
+
+		cPlayer * first_player = Get_First_Active_In_Game_Player();
+		if (first_player == NULL) {
+			CoopDebugLog::Log("cGod::Think COOP_INIT waiting for first active in-game player");
+			return;
+		}
+
+		CoopDebugLog::Log("cGod::Think COOP_INIT spawning first player id=%d", first_player->Get_Id());
+		CoopInventoryManager::Reset();
+
+		SoldierGameObj * soldier = Create_Commando(first_player);
+		CoopDebugLog::Log("cGod::Think COOP_INIT first player soldier=%p net_id=%d",
+			soldier, soldier != NULL ? soldier->Get_Network_ID() : 0);
+		Attach_Mission_Start_Script(soldier);
+
+		CoopDebugLog::Log("cGod::Think transition COOP_INIT -> COOP_RUNNING");
+		State = GOD_STATE_COOP_RUNNING;
 	}
 
 	// This code may need to get cleaned up
@@ -165,7 +258,7 @@ void cGod::Think(void)
    // Take a look through the player list and create commando bodies
 	// for anyone who merits one
    //
-	if ( State == GOD_STATE_MULTIPLAYER ) {
+	if ( State == GOD_STATE_MULTIPLAYER || State == GOD_STATE_COOP_RUNNING ) {
 		for (
 			SLNode<cPlayer> * objnode = cPlayerManager::Get_Player_Object_List()->Head();
 			objnode;
@@ -188,6 +281,9 @@ void cGod::Think(void)
 				//
 				// A disembodied player... give him a body
 				//
+				if (State == GOD_STATE_COOP_RUNNING) {
+					CoopDebugLog::Log("cGod::Think COOP_RUNNING spawning missing body for player id=%d", p_player->Get_Id());
+				}
 				Create_Commando(p_player);
 			}
 		}
@@ -240,6 +336,10 @@ cPlayer * cGod::Create_Player(int client_id, const WideStringClass & name,
 	p_player->Reset_Join_Time();
 	p_player->Invulnerable.Set(is_invulnerable);
 	p_player->Set_Is_Active(true);
+	if (IS_COOP_MISSION) {
+		CoopDebugLog::Log("cGod::Create_Player id=%d new=%d team_choice=%d player_type=%d invulnerable=%d",
+			client_id, is_new, team_choice, p_player->Get_Player_Type(), is_invulnerable);
+	}
 
 	//
 	// Tell everyone about this guy
@@ -286,9 +386,14 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type/*, int mod
 	WWASSERT(player_type >= PLAYERTYPE_NEUTRAL && player_type <= PLAYERTYPE_LAST);
 
 	WWASSERT(PTheGameData != NULL);
+	if (IS_COOP_MISSION) {
+		CoopDebugLog::Log("cGod::Create_Commando begin client_id=%d player_type=%d", client_id, player_type);
+	}
 
 	StringClass preset_name;
 	preset_name.Format("Commando");
+	StringClass primary_mission_preset;
+	StringClass player2_model_preset;
 
 	if (IS_MISSION) {
 
@@ -303,6 +408,19 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type/*, int mod
 			}
 		}
 #endif // !MULTIPLAYERDEMO
+		primary_mission_preset = preset_name;
+
+		if (IS_COOP_MISSION && player_type == PLAYERTYPE_GDI && Is_Coop_Secondary_Player(client_id)) {
+			cGameDataCoopMission * coop_game = The_Game()->As_Coop_Mission();
+			WWASSERT(coop_game != NULL);
+
+			const StringClass & player2_preset = coop_game->Get_Player2_Preset();
+			if (!player2_preset.Is_Empty()) {
+				player2_model_preset = player2_preset;
+			} else {
+				Debug_Say(("Co-op player 2 preset is not configured; falling back to %s\n", primary_mission_preset.Peek_Buffer()));
+			}
+		}
 
 	} else if (The_Game()->Is_Cnc() || The_Game()->Is_Skirmish()) {
 		if (player_type == PLAYERTYPE_NOD) {
@@ -315,12 +433,29 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type/*, int mod
 	WWASSERT(!preset_name.Is_Empty());
 	PhysicalGameObj * p_phys_obj = ObjectLibraryManager::Create_Object(preset_name);
 	WWASSERT(p_phys_obj != NULL);
+	if (IS_COOP_MISSION) {
+		CoopDebugLog::Log("cGod::Create_Commando object created client_id=%d preset=%s object=%p net_id=%d",
+			client_id, preset_name.Peek_Buffer(), p_phys_obj, p_phys_obj != NULL ? p_phys_obj->Get_Network_ID() : 0);
+	}
 
 	SoldierGameObj * p_soldier = p_phys_obj->As_SoldierGameObj();
 	WWASSERT(p_soldier != NULL);
 	WWASSERT(p_soldier->Peek_Physical_Object() != NULL);
 
-	if (IS_SOLOPLAY) {
+	if (!player2_model_preset.Is_Empty()) {
+		StringClass player2_model_name;
+		if (Get_Preset_Model_Name(player2_model_preset, player2_model_name)) {
+			CoopDebugLog::Log("cGod::Create_Commando player2 model override client_id=%d preset=%s model=%s",
+				client_id, player2_model_preset.Peek_Buffer(), player2_model_name.Peek_Buffer());
+			p_soldier->Set_Model(player2_model_name);
+			p_soldier->Set_Object_Dirty_Bit(NetworkObjectClass::BIT_RARE, true);
+		} else {
+			Debug_Say(("Co-op player 2 preset %s is invalid; using %s model\n",
+				player2_model_preset.Peek_Buffer(), primary_mission_preset.Peek_Buffer()));
+		}
+	}
+
+	if (IS_SOLOPLAY || IS_COOP_MISSION) {
 		// Setup initial health depending on difficulty level
 		float max = 100.0f;
 		switch ( CombatManager::Get_Difficulty_Level() ) {
@@ -337,10 +472,21 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type/*, int mod
 	Matrix3D transform;
 	if (IS_MISSION && player_type == PLAYERTYPE_GDI) {
 		transform = SpawnManager::Get_Primary_Spawn_Location();
+		if (IS_COOP_MISSION && Is_Coop_Secondary_Player(client_id)) {
+			Vector3 position = transform.Get_Translation();
+			position += transform.Get_Y_Vector() * 1.5F;
+			position.Z += 0.25F;
+			transform.Set_Translation(position);
+		}
 	} else {
 		transform = SpawnManager::Get_Multiplayer_Spawn_Location(player_type,p_soldier);
 	}
 	p_soldier->Set_Transform(transform);
+	if (IS_COOP_MISSION) {
+		Vector3 position = transform.Get_Translation();
+		CoopDebugLog::Log("cGod::Create_Commando transform client_id=%d pos=(%.2f, %.2f, %.2f)",
+			client_id, position.X, position.Y, position.Z);
+	}
 
 	p_soldier->Set_Control_Owner(client_id);
 	cPlayer * player = cPlayerManager::Find_Player( client_id );
@@ -372,8 +518,17 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type/*, int mod
 	// Added this 090401
 	//
 	p_soldier->Start_Observers();
+	CoopInventoryManager::Apply_To_Player(p_soldier);
+	if (IS_COOP_MISSION) {
+		CoopDebugLog::Log("cGod::Create_Commando observers/inventory started client_id=%d soldier=%p net_id=%d",
+			client_id, p_soldier, p_soldier->Get_Network_ID());
+	}
 
 	The_Game()->Soldier_Added(p_soldier);
+	if (IS_COOP_MISSION) {
+		CoopDebugLog::Log("cGod::Create_Commando done client_id=%d soldier=%p net_id=%d",
+			client_id, p_soldier, p_soldier->Get_Network_ID());
+	}
 
 	if (cNetwork::I_Am_Client() && client_id == cNetwork::Get_My_Id()) {
 		ActionParamsStruct parameters;
@@ -467,6 +622,7 @@ InventoryClass	_DeathInventory;
 void cGod::Reset( void )
 {
 	State = GOD_STATE_UNINITIALIZED;
+	CoopInventoryManager::Reset();
 }
 
 void cGod::Exit( void )
@@ -487,7 +643,7 @@ void cGod::Star_Killed( void )
 		DeathOptionsPopupClass * popup = new DeathOptionsPopupClass;
 		popup->Start_Dialog();
 		popup->Release_Ref();
-	} else if ( State == GOD_STATE_MULTIPLAYER ) {
+	} else if ( State == GOD_STATE_MULTIPLAYER || State == GOD_STATE_COOP_RUNNING ) {
 
 		if (GameModeManager::Find ("Combat")->Is_Active ()) {
 			if (GameModeManager::Find ("Menu")->Is_Active ()) {
@@ -582,5 +738,3 @@ void cGod::Reset_Inventory( void )
 {
 	LevelStartInventory.Reset();
 }
-
-

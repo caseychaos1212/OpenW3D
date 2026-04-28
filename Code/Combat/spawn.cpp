@@ -1011,11 +1011,12 @@ void	SpawnManager::Update( void )
 			// Let each Spawner Check for Auto Spwan
 			for ( int i = 0; i < SpawnerList.Count(); i++ ) {
 				//
-				// Soldiers are only spawned in missions (SP, coop)
+				// Soldier startup spawners are mission/skirmish-only. Co-op is
+				// networked, but it still needs campaign startup actors.
 				//
 				if (!SpawnerList[i]->Get_Definition().IsSoldierStartup ||
-					//CombatManager::Is_Mission()) {
-					IS_SOLOPLAY) {
+					IS_SOLOPLAY ||
+					IS_COOP_MISSION) {
 					SpawnerList[i]->Check_Auto_Spawn( AutoSpawnTimer );
 				}
 			}
@@ -1084,7 +1085,6 @@ SpawnManager::~SpawnManager(void)
 {
 	Remove_All_Spawners();
 }
-
 
 
 

@@ -35,9 +35,11 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "campaign.h"
+#include "coopleveltransitionevent.h"
 #include "debug.h"
 #include "gamemode.h"
 #include "gamedata.h"
+#include "gametype.h"
 #include "singlepl.h"
 #include "gdsingleplayer.h"
 #include "cnetwork.h"
@@ -55,6 +57,7 @@
 #include "dlgloadspgame.h"
 #include "ccamera.h"
 #include <cstdio>
+#include <cstring>
 
 /*
 **
@@ -79,6 +82,67 @@ struct BackdropDescriptionStruct {
 };
 
 DynamicVectorClass<BackdropDescriptionStruct>	BackdropDescriptions;
+
+static bool Campaign_String_Match(const char *description, const char *prefix)
+{
+	return description != NULL && ::strncmp(description, prefix, ::strlen(prefix)) == 0;
+}
+
+static const char * Campaign_Get_Level_Name(int state)
+{
+	if (state < 0 || state >= CampaignFlowDescriptions.Count()) {
+		return NULL;
+	}
+
+	const char *description = CampaignFlowDescriptions[state];
+	if (!Campaign_String_Match(description, "Level ")) {
+		return NULL;
+	}
+
+	return description + ::strlen("Level ");
+}
+
+static int Campaign_Find_Level_State(const char *mission_name)
+{
+	if (mission_name == NULL || mission_name[0] == 0) {
+		return NOT_IN_CAMPAIGN_STATE;
+	}
+
+	int mission_number = cGameData::Get_Mission_Number_From_Map_Name(mission_name);
+	for (int index = 0; index < CampaignFlowDescriptions.Count(); index++) {
+		const char *level_name = Campaign_Get_Level_Name(index);
+		if (level_name == NULL) {
+			continue;
+		}
+
+		if (::stricmp(level_name, mission_name) == 0 ||
+			 cGameData::Get_Mission_Number_From_Map_Name(level_name) == mission_number) {
+			return index;
+		}
+	}
+
+	return NOT_IN_CAMPAIGN_STATE;
+}
+
+static int Campaign_Find_Next_Level_State(int state)
+{
+	for (int index = state + 1; index < CampaignFlowDescriptions.Count(); index++) {
+		if (Campaign_Get_Level_Name(index) != NULL) {
+			return index;
+		}
+	}
+
+	return NOT_IN_CAMPAIGN_STATE;
+}
+
+static void Campaign_Set_Difficulty(int difficulty)
+{
+	CombatManager::Set_Difficulty_Level(difficulty);
+
+	StringClass diff_string;
+	diff_string.Format("difficulty %d", difficulty);
+	ConsoleFunctionManager::Parse_Input(diff_string);
+}
 
 /*
 **
@@ -200,15 +264,29 @@ void	CampaignManager::Start_Campaign( int difficulty )
 	BackdropIndex = 0;
 
 	// Why was this commented out???
-	CombatManager::Set_Difficulty_Level( difficulty );
-
-	StringClass diff_string;
-	diff_string.Format( "difficulty %d", difficulty );
-	ConsoleFunctionManager::Parse_Input( diff_string );
+	Campaign_Set_Difficulty(difficulty);
 
 	cGod::Reset_Inventory();
 
 	Continue();
+}
+
+/*
+**
+*/
+void	CampaignManager::Start_Coop_Campaign( const char * mission_name, int difficulty )
+{
+	Debug_Say(( "CampaignManager::Start_Coop_Campaign( %s, %d )\n", mission_name, difficulty ));
+
+	State = Campaign_Find_Level_State(mission_name);
+	BackdropIndex = 0;
+
+	Campaign_Set_Difficulty(difficulty);
+	cGod::Reset_Inventory();
+
+	int mission = cGameData::Get_Mission_Number_From_Map_Name(mission_name);
+	Select_Backdrop_Number(mission);
+	GameInitMgrClass::Start_Game(mission_name, PLAYERTYPE_GDI, 0);
 }
 
 /*
@@ -235,6 +313,46 @@ void	CampaignManager::Continue( bool /* success */ )
 		if ( ss != NULL ) {
 			ss->Activate();
 		}
+		return;
+	}
+
+	if (IS_COOP_MISSION) {
+		if (!cNetwork::I_Am_Server()) {
+			return;
+		}
+
+		int next_state = Campaign_Find_Next_Level_State(State);
+		if (State == NOT_IN_CAMPAIGN_STATE ||
+			 State == REPLAY_SCORE ||
+			 next_state == NOT_IN_CAMPAIGN_STATE) {
+			State = NOT_IN_CAMPAIGN_STATE;
+			GameModeManager::Find ("Movie")->Deactivate();
+			GameModeManager::Find ("ScoreScreen")->Deactivate();
+			GameModeManager::Find ("Combat")->Suspend();
+			GameInitMgrClass::End_Game();
+			GameInitMgrClass::Display_End_Game_Menu();
+			return;
+		}
+
+		State = next_state;
+		const char *mission_name = Campaign_Get_Level_Name(State);
+		WWASSERT(mission_name != NULL);
+
+		cCoopLevelTransitionEvent *transition_event = new cCoopLevelTransitionEvent;
+		transition_event->Init(mission_name, CombatManager::Get_Difficulty_Level());
+		cNetwork::Flush();
+
+		GameModeManager::Find ("Combat")->Suspend();
+		GameModeManager::Find ("Movie")->Deactivate();
+	    GameModeManager::Find ("ScoreScreen")->Deactivate ();
+
+		GameInitMgrClass::Set_Is_Coop_Level_Transition(true);
+		GameInitMgrClass::End_Game();
+		GameInitMgrClass::Set_Is_Coop_Level_Transition(false);
+
+		int mission = cGameData::Get_Mission_Number_From_Map_Name(mission_name);
+		Select_Backdrop_Number(mission);
+		GameInitMgrClass::Start_Game(mission_name, PLAYERTYPE_GDI, 0);
 		return;
 	}
 
@@ -426,6 +544,13 @@ void	CampaignManager::Select_Backdrop_Number_By_MP_Type( [[maybe_unused]] int ty
 	}
 	Select_Backdrop_Number( load_menu_number );
 	*/
+
+	if (type == cGameData::GAME_TYPE_COOP_MISSION) {
+		WWASSERT(The_Game() != NULL);
+		int mission = cGameData::Get_Mission_Number_From_Map_Name(The_Game()->Get_Map_Name());
+		Select_Backdrop_Number(mission);
+		return;
+	}
 
 	WWASSERT(type == cGameData::GAME_TYPE_CNC);
 

@@ -41,6 +41,7 @@
 #include "explosion.h"
 #include "assets.h"
 #include "combatsound.h"
+#include "coopdebuglog.h"
 #include "matrix3d.h"
 #include "phys.h"
 #include "smartgameobj.h"
@@ -1093,11 +1094,12 @@ void	PhysicalGameObj::Export_Rare( BitStreamClass &packet )
 	//
 
 	WWASSERT(Peek_Physical_Object() != NULL);
-	WWASSERT(Peek_Physical_Object()->Peek_Model() != NULL);
-	//WWASSERT(Peek_Physical_Object()->Peek_Model()->Get_Name());
 
-	const char *model_name = Peek_Physical_Object()->Peek_Model()->Get_Name();
-	WWASSERT(model_name != NULL);
+	const char *model_name = "NULL";
+	RenderObjClass *render_model = Peek_Physical_Object()->Peek_Model();
+	if (render_model != NULL && render_model->Get_Name() != NULL) {
+		model_name = render_model->Get_Name();
+	}
 	WWASSERT(::strlen(model_name) < 256);
 	packet.Add_Terminated_String( model_name, true );
 
@@ -1162,6 +1164,19 @@ void	PhysicalGameObj::Export_Rare( BitStreamClass &packet )
 
 void	PhysicalGameObj::Import_Rare( BitStreamClass &packet )
 {
+	static int import_rare_log_count = 0;
+	const bool log_this_import = import_rare_log_count < 5000;
+	import_rare_log_count++;
+
+	const char *definition_name = Get_Definition().Get_Name();
+	if (definition_name == NULL) {
+		definition_name = "<null>";
+	}
+
+	if (log_this_import) {
+		CoopDebugLog::Log("PhysicalGameObj::Import_Rare begin net_id=%d def=%s", Get_Network_ID(), definition_name);
+	}
+
 	DamageableGameObj::Import_Rare( packet );
 
 	//
@@ -1169,13 +1184,31 @@ void	PhysicalGameObj::Import_Rare( BitStreamClass &packet )
 	//
 	StringClass model_name;
 	packet.Get_Terminated_String( model_name.Get_Buffer( 256 ), 256, true );
+	if (log_this_import) {
+		CoopDebugLog::Log("PhysicalGameObj::Import_Rare model net_id=%d def=%s requested=%s",
+			Get_Network_ID(), definition_name, model_name.Peek_Buffer());
+	}
 
 	//
 	//	Set the new model (if necessary)
 	//
-	const char *old_model_name = Peek_Physical_Object()->Peek_Model()->Get_Name();
-	if ( model_name.Compare_No_Case (old_model_name) != 0 ) {
+	RenderObjClass *old_model = Peek_Physical_Object()->Peek_Model();
+	const char *old_model_name = "";
+	if (old_model != NULL && old_model->Get_Name() != NULL) {
+		old_model_name = old_model->Get_Name();
+	}
+	if ( !model_name.Is_Empty() && (old_model == NULL || model_name.Compare_No_Case (old_model_name) != 0) ) {
+		if (log_this_import) {
+			CoopDebugLog::Log("PhysicalGameObj::Import_Rare Set_Model_By_Name start net_id=%d def=%s old=%s new=%s",
+				Get_Network_ID(), definition_name, old_model_name, model_name.Peek_Buffer());
+		}
 		Peek_Physical_Object()->Set_Model_By_Name( model_name );
+		if (log_this_import) {
+			RenderObjClass *new_model = Peek_Physical_Object()->Peek_Model();
+			const char *new_model_name = new_model != NULL && new_model->Get_Name() != NULL ? new_model->Get_Name() : "<null>";
+			CoopDebugLog::Log("PhysicalGameObj::Import_Rare Set_Model_By_Name done net_id=%d def=%s current=%s",
+				Get_Network_ID(), definition_name, new_model_name);
+		}
 	}
 
 	//
@@ -1189,14 +1222,35 @@ void	PhysicalGameObj::Import_Rare( BitStreamClass &packet )
 	packet.Get( curr_frame );
 	packet.Get( target_frame );
 	packet.Get( anim_mode );
+	if (log_this_import) {
+		CoopDebugLog::Log("PhysicalGameObj::Import_Rare animation net_id=%d def=%s anim=%s curr=%d target=%d mode=%d anim_control=%p",
+			Get_Network_ID(), definition_name, animation_name.Peek_Buffer(), curr_frame, target_frame, anim_mode, AnimControl);
+	}
 
 	//
 	//	Pass the animation information onto the controller
 	//
-	if (AnimControl != NULL) {
+	RenderObjClass *current_model = Peek_Model();
+	if (AnimControl == NULL && !animation_name.Is_Empty() && current_model != NULL) {
+		if (log_this_import) {
+			CoopDebugLog::Log("PhysicalGameObj::Import_Rare create SimpleAnimControl net_id=%d def=%s", Get_Network_ID(), definition_name);
+		}
+		Set_Anim_Control(new SimpleAnimControlClass);
+	}
+
+	if (AnimControl != NULL && current_model != NULL) {
+		if (log_this_import) {
+			const char *current_model_name = current_model->Get_Name() != NULL ? current_model->Get_Name() : "<null>";
+			CoopDebugLog::Log("PhysicalGameObj::Import_Rare apply animation start net_id=%d def=%s model=%s anim=%s",
+				Get_Network_ID(), definition_name, current_model_name, animation_name.Peek_Buffer());
+		}
+		AnimControl->Set_Model(current_model);
 		AnimControl->Set_Animation( animation_name, 0, curr_frame );
 		AnimControl->Set_Target_Frame( target_frame );
 		AnimControl->Set_Mode( (AnimMode)anim_mode );
+		if (log_this_import) {
+			CoopDebugLog::Log("PhysicalGameObj::Import_Rare apply animation done net_id=%d def=%s", Get_Network_ID(), definition_name);
+		}
 	}
 
 	//
@@ -1205,6 +1259,10 @@ void	PhysicalGameObj::Import_Rare( BitStreamClass &packet )
 	int host_model_id = 0;
 	packet.Get( host_model_id );
 	packet.Get( HostGameObjBone );
+	if (log_this_import) {
+		CoopDebugLog::Log("PhysicalGameObj::Import_Rare host net_id=%d def=%s host_id=%d host_bone=%d",
+			Get_Network_ID(), definition_name, host_model_id, HostGameObjBone);
+	}
 
 	//
 	//	Change the host object
@@ -1228,6 +1286,10 @@ void	PhysicalGameObj::Import_Rare( BitStreamClass &packet )
 	Set_Player_Type( player_type );
 
 	HUDPokableIndicatorEnabled = packet.Get( HUDPokableIndicatorEnabled );
+	if (log_this_import) {
+		CoopDebugLog::Log("PhysicalGameObj::Import_Rare player/hud net_id=%d def=%s player_type=%d hud_pokable=%d",
+			Get_Network_ID(), definition_name, player_type, HUDPokableIndicatorEnabled);
+	}
 
 
 	if ( As_VehicleGameObj() != NULL ) {
@@ -1236,6 +1298,10 @@ void	PhysicalGameObj::Import_Rare( BitStreamClass &packet )
 		if ( Peek_Model() ) {
 			Peek_Model()->Set_Hidden( hidden );
 		}
+	}
+
+	if (log_this_import) {
+		CoopDebugLog::Log("PhysicalGameObj::Import_Rare done net_id=%d def=%s", Get_Network_ID(), definition_name);
 	}
 
 	return ;
@@ -1415,4 +1481,3 @@ void PhysicalGameObj::Object_Shattered_Something
 														false		// no emitter
 														);
 }
-

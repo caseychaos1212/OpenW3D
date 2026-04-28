@@ -6833,7 +6833,7 @@ DECLARE_SCRIPT (M08_Elevator_Movement_Zone, "Direction:int, Anim_num:int, Elev_o
 
 		};
 
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Attach_Script(STAR, "M00_No_Falling_Damage_DME", "");
 			GameObject * blocker = Commands->Create_Object ("M08_Rubble_Stub", Vector3 (-100.952F, 483.541F, -155.645F));

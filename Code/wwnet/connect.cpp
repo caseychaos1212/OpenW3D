@@ -49,7 +49,9 @@
 #endif
 #include "packetmgr.h"
 #include "BWBalance.h"
+#include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 #include <algorithm>
 #include "socket_wrapper.h"
 #include <cstdio>
@@ -128,6 +130,41 @@ char* Addr_As_String(sockaddr_in* addr)
 	return const_cast<char*>(Addr_As_String(static_cast<const sockaddr_in*>(addr)));
 }
 //#endif //WWDEBUG
+
+static void Log_Connection_Request(const char *format, ...)
+{
+	char buffer[2048];
+
+	va_list args;
+	va_start(args, format);
+	vsnprintf(buffer, sizeof(buffer), format, args);
+	va_end(args);
+
+	buffer[sizeof(buffer) - 1] = 0;
+
+	FILE *file = fopen("coop_connect_refusals.log", "a");
+	if (file != NULL) {
+		fputs(buffer, file);
+		fclose(file);
+	}
+
+	const char *temp_path = getenv("TEMP");
+	if (temp_path == NULL || temp_path[0] == 0) {
+		temp_path = getenv("TMP");
+	}
+
+	if (temp_path != NULL && temp_path[0] != 0) {
+		char log_path[512];
+		snprintf(log_path, sizeof(log_path), "%s\\openw3d_coop_connect_refusals.log", temp_path);
+		log_path[sizeof(log_path) - 1] = 0;
+
+		file = fopen(log_path, "a");
+		if (file != NULL) {
+			fputs(buffer, file);
+			fclose(file);
+		}
+	}
+}
 
 
 //------------------------------------------------------------------------------------
@@ -1052,6 +1089,7 @@ void cConnection::Process_Connection_Request(cPacket & packet)
 
    WWASSERT(InitDone);
    WWASSERT(IsServer);
+	Log_Connection_Request("Low-level connect request received from %s\n", Addr_As_String(p_address));
 
    int new_rhost_id = ID_UNKNOWN;
 
@@ -1066,6 +1104,8 @@ void cConnection::Process_Connection_Request(cPacket & packet)
             //
             // He already has an id. This must be a resend or duplicate.
             //
+				Log_Connection_Request("Low-level connect request from %s ignored: existing remote host already owns that address\n",
+					Addr_As_String(p_address));
             return;
          }
 		} else if (new_rhost_id == ID_UNKNOWN) {
@@ -1076,6 +1116,8 @@ void cConnection::Process_Connection_Request(cPacket & packet)
 	if (new_rhost_id == ID_UNKNOWN) {
 
       WWDEBUG_SAY(("  Warning: server cannot accept this client; no free slots\n"));
+		Log_Connection_Request("Low-level connect request from %s refused before app checks: no free remote host slots\n",
+			Addr_As_String(p_address));
 		Send_Refusal_Sc(p_address, REFUSAL_GAME_FULL);
 
 	} else {
@@ -1084,6 +1126,8 @@ void cConnection::Process_Connection_Request(cPacket & packet)
 		REFUSAL_CODE refusal = ApplicationAcceptanceHandler(packet);
 
 		if (refusal != REFUSAL_CLIENT_ACCEPTED) {
+			Log_Connection_Request("Low-level connect request from %s refused by app handler: code=%d\n",
+				Addr_As_String(p_address), (int)refusal);
 			packet.Flush();
 			Send_Refusal_Sc(p_address, refusal);
 			return;
@@ -1094,6 +1138,9 @@ void cConnection::Process_Connection_Request(cPacket & packet)
 		//
 		int bbo = packet.Get(bbo);
 		WWDEBUG_SAY(("New clients BBO is %d\n", bbo));
+		Log_Connection_Request("Low-level connect request from %s accepted into slot %d with bbo=%d\n",
+			Addr_As_String(p_address), new_rhost_id, bbo);
+		packet.Flush();
 
       WWASSERT(PRHost[new_rhost_id] == NULL);
 	   PRHost[new_rhost_id] = new cRemoteHost();

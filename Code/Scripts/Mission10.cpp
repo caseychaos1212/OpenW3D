@@ -4235,7 +4235,7 @@ DECLARE_SCRIPT(M10_Con_Yard_Repair, "RepairSpeed=1:float")
 		}
 		else
 		{
-			if (damager == STAR)
+			if (Commands->Is_A_Star(damager))
 			{
 				Commands->Send_Custom_Event(obj, Commands->Find_Object (1206469), DAMAGED, 0, 0.0f);
 			}
@@ -4378,7 +4378,7 @@ DECLARE_SCRIPT (M10_HON_KillPrevention, "")
 {
 	void Killed(GameObject * obj, GameObject * killer) override
 	{
-		if (killer != STAR)
+		if (!Commands->Is_A_Star(killer))
 		{
 			Commands->Set_Health (obj, 1.0f);
 		}
@@ -4556,12 +4556,12 @@ DECLARE_SCRIPT (M10_NBase_Damage_Modifier, "Damage_multiplier:float")
 		{
 			float damage;
 
-			if (damager == STAR)
+			if (Commands->Is_A_Star(damager))
 			{
 				last_health = Commands->Get_Health (obj);
 			}
 
-			if (damager != STAR)
+			if (!Commands->Is_A_Star(damager))
 			{
 				current_health = Commands->Get_Health (obj);
 				if (current_health == 0)
@@ -4612,7 +4612,7 @@ DECLARE_SCRIPT(M10_Holograph_EntryZone_DME, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && entered == false)
+		if (Commands->Is_A_Star(enterer) && entered == false)
 		{
 			entered = true;
 			float delayTimer = Commands->Get_Random ( 0.25f, 1.0f );
@@ -4662,7 +4662,7 @@ DECLARE_SCRIPT(M10_Holograph_EntryZone2_DME, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && entered == false)
+		if (Commands->Is_A_Star(enterer) && entered == false)
 		{
 			entered = true;
 			Commands->Send_Custom_Event( obj, obj, 0, 8500, 0 );

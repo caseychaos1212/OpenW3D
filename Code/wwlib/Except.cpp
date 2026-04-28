@@ -145,6 +145,34 @@ int ExceptionRecursions = -1;
 */
 DynamicVectorClass<ThreadInfoType*> ThreadList;
 
+static void Write_Exception_Text_File(const char *filename)
+{
+	HANDLE debug_file = CreateFileA(filename, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (debug_file != INVALID_HANDLE_VALUE) {
+		const size_t text_length = ::strlen(ExceptionText);
+		const DWORD write_length = text_length > std::numeric_limits<DWORD>::max()
+			? std::numeric_limits<DWORD>::max()
+			: static_cast<DWORD>(text_length);
+		DWORD actual = 0;
+		WriteFile(debug_file, ExceptionText, write_length, &actual, NULL);
+		CloseHandle(debug_file);
+	}
+}
+
+static void Write_Temp_Exception_Text_File(void)
+{
+	char temp_path[MAX_PATH];
+	DWORD length = GetTempPathA(sizeof(temp_path), temp_path);
+	if (length == 0 || length >= sizeof(temp_path)) {
+		return;
+	}
+
+	char filename[MAX_PATH];
+	snprintf(filename, sizeof(filename), "%sopenw3d_except.txt", temp_path);
+	filename[sizeof(filename) - 1] = 0;
+	Write_Exception_Text_File(filename);
+}
+
 /*
 ** Definitions to allow run-time linking to the Imagehlp.dll functions.
 **
@@ -897,14 +925,8 @@ int Exception_Handler(int exception_code, EXCEPTION_POINTERS *e_info)
 		/*
 		** Log the machine state to disk
 		*/
-		HANDLE debug_file;
-		DWORD	actual;
-		debug_file = CreateFileA("_except.txt", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (debug_file != INVALID_HANDLE_VALUE){
-		const size_t text_length = ::strlen(ExceptionText);
-		WWASSERT(text_length <= std::numeric_limits<DWORD>::max());
-		WriteFile(debug_file, ExceptionText, static_cast<DWORD>(text_length), &actual, NULL);
-			CloseHandle (debug_file);
+		Write_Exception_Text_File("_except.txt");
+		Write_Temp_Exception_Text_File();
 
 #if (0)
 #ifdef _DEBUG_PRINT
@@ -927,7 +949,6 @@ int Exception_Handler(int exception_code, EXCEPTION_POINTERS *e_info)
 #endif	//_DEBUG_PRINT
 #endif	//(0)
 
-		}
 	}
 
 	/*
@@ -1326,7 +1347,6 @@ bool Is_Trying_To_Exit(void)
 
 
 #endif	//_MSC_VER
-
 
 
 

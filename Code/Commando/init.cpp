@@ -1050,7 +1050,7 @@ bool Game_Init(void)
 	//
 	if (AutoRestart.Get_Restart_Flag()) {
 		AutoRestart.Restart_Game();
-	} else if (cGameSpyAdmin::Is_Gamespy_Game()) {
+	} else if (cGameSpyAdmin::Needs_Think()) {
 		if (!ConsoleBox.Is_Exclusive()) {
 			RenegadeDialogMgrClass::Goto_Location (RenegadeDialogMgrClass::LOC_SPLASH_IN);
 		}

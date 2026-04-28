@@ -1428,7 +1428,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 				{
 					if (my_register_id < MX0_A02_ACTOR_NOD_START)
 					{
-						if (damager != STAR)
+						if (!Commands->Is_A_Star(damager))
 						{
 							int	my_type = Commands->Get_Player_Type (obj);
 							int their_type = Commands->Get_Player_Type (damager);
@@ -1508,7 +1508,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 			GameObject * controller = Commands->Find_Object (MX0_A02_CONTROLLER_ID);
 			if (controller)
 			{
-				if (killer == STAR)
+				if (Commands->Is_A_Star(killer))
 				{
 					Commands->Send_Custom_Event (obj, controller, MX0_A02_CUSTOM_TYPE_PLAYER_KILLED_NOD, MX0_A02_CUSTOM_PARAM_DEFAULT, 0.0f);
 				}
@@ -3086,7 +3086,7 @@ DECLARE_SCRIPT (MX0_A02_DEFAULT_OFF, "")
 
 	void Damaged (GameObject * obj, GameObject * damager, float /*amount*/) override
 	{
-		if (damager != STAR)
+		if (!Commands->Is_A_Star(damager))
 		{
 			Commands->Apply_Damage (obj, 10000.0f, "Blamokiller", obj);
 		}

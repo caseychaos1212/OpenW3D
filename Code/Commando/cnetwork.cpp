@@ -38,6 +38,8 @@
 
 #include <shellapi.h>
 #include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
 #include <limits>
 
 #include "specialbuilds.h"
@@ -67,6 +69,7 @@
 #include "serverfps.h"
 #include "sbbomanager.h"
 #include "clientgoodbyeevent.h"
+#include "coopdebuglog.h"
 //#include "helptext.h"
 #include	"natter.h"
 #include	"vistable.h"
@@ -127,6 +130,92 @@ VisTableClass *								cNetwork::VisTable							= NULL;
 bool												cNetwork::LastServerConnectionStateBad = false;
 bool												cNetwork::SensibleUpdates					= true;
 
+static const int CONNECT_VERSION_DIAGNOSTICS_MAGIC = 0x43564431; // CVD1
+
+struct ConnectVersionDiagnostics
+{
+	bool HasBbo = false;
+	bool HasDiagnostics = false;
+	bool HasUnexpectedMagic = false;
+	int Bbo = 0;
+	int UnexpectedMagic = 0;
+	int ExeCRC = 0;
+	int StringsCRC = 0;
+	int DataCRC = 0;
+	int BuildNumber = 0;
+	int StringsVersion = 0;
+};
+
+static const char * Match_Text(int left, int right)
+{
+	return left == right ? "match" : "DIFF";
+}
+
+static void Log_Connection_Message(const char *format, ...)
+{
+	char buffer[2048];
+
+	va_list args;
+	va_start(args, format);
+	vsnprintf(buffer, sizeof(buffer), format, args);
+	va_end(args);
+
+	buffer[sizeof(buffer) - 1] = 0;
+
+	ConsoleBox.Print("%s", buffer);
+
+	FILE *file = fopen("coop_connect_refusals.log", "a");
+	if (file != NULL) {
+		fputs(buffer, file);
+		fclose(file);
+	}
+
+	const char *temp_path = getenv("TEMP");
+	if (temp_path == NULL || temp_path[0] == 0) {
+		temp_path = getenv("TMP");
+	}
+
+	if (temp_path != NULL && temp_path[0] != 0) {
+		char log_path[MAX_PATH];
+		snprintf(log_path, sizeof(log_path), "%s\\openw3d_coop_connect_refusals.log", temp_path);
+		log_path[sizeof(log_path) - 1] = 0;
+
+		file = fopen(log_path, "a");
+		if (file != NULL) {
+			fputs(buffer, file);
+			fclose(file);
+		}
+	}
+}
+
+static void Read_Client_Version_Diagnostics(cPacket &packet, ConnectVersionDiagnostics &diagnostics)
+{
+	if (packet.Is_Flushed()) {
+		return;
+	}
+
+	diagnostics.Bbo = packet.Get(diagnostics.Bbo);
+	diagnostics.HasBbo = true;
+
+	if (packet.Is_Flushed()) {
+		return;
+	}
+
+	int magic = packet.Get(magic);
+	if (magic != CONNECT_VERSION_DIAGNOSTICS_MAGIC) {
+		diagnostics.HasUnexpectedMagic = true;
+		diagnostics.UnexpectedMagic = magic;
+		return;
+	}
+
+	diagnostics.HasDiagnostics = true;
+	diagnostics.ExeCRC = packet.Get(diagnostics.ExeCRC);
+	diagnostics.StringsCRC = packet.Get(diagnostics.StringsCRC);
+	diagnostics.DataCRC = packet.Get(diagnostics.DataCRC);
+	diagnostics.BuildNumber = packet.Get(diagnostics.BuildNumber);
+	diagnostics.StringsVersion = packet.Get(diagnostics.StringsVersion);
+}
+
 //-----------------------------------------------------------------------------
 void cNetwork::Init_Client([[maybe_unused]] unsigned short my_port)
 {
@@ -174,7 +263,7 @@ void cNetwork::Init_Client([[maybe_unused]] unsigned short my_port)
 	unsigned int bbo = 0;
 	//if (IS_SOLOPLAY || GameModeManager::Find("LAN")->Is_Active()) {
 	if (IS_SOLOPLAY ||
-		 (GameModeManager::Find("LAN")->Is_Active() && !cGameSpyAdmin::Is_Gamespy_Game())) {
+		 (GameModeManager::Find("LAN")->Is_Active() && !cGameSpyAdmin::Is_Gamespy_Game() && !cGameSpyAdmin::Is_Direct_Internet_Game())) {
 
 		bbo = cBandwidth::Get_Bandwidth_Bps_From_Type(BANDWIDTH_LANT1);
 
@@ -212,9 +301,15 @@ void cNetwork::Init_Client([[maybe_unused]] unsigned short my_port)
 
 	cPacket packet;
    packet.Add_Wide_Terminated_String(cNetInterface::Get_Nickname());
-   packet.Add_Wide_Terminated_String(The_Game()->Get_Password(), true);
+	packet.Add_Wide_Terminated_String(The_Game()->Get_Password(), true);
 	packet.Add(ExeKey);
 	packet.Add(bbo); // note, this field is consumed by wwnet
+	packet.Add(CONNECT_VERSION_DIAGNOSTICS_MAGIC);
+	packet.Add(ExeCRC);
+	packet.Add(StringsCRC);
+	packet.Add(Get_Data_Files_CRC());
+	packet.Add((int)BuildInfoClass::Get_Build_Number());
+	packet.Add((int)TranslateDBClass::Get_Version_Number());
 
    PClientConnection->Connect_Cs(packet);
 	packet.Flush();
@@ -246,6 +341,8 @@ void cNetwork::Cleanup_Client(void)
 #ifndef FREEDEDICATEDSERVER
 
    WWDEBUG_SAY(("cNetwork::Cleanup_Client\n"));
+	CoopDebugLog::Log("cNetwork::Cleanup_Client begin is_client=%d established=%d",
+		I_Am_Client(), I_Am_Client() && PClientConnection != NULL ? PClientConnection->Is_Established() : 0);
 
    if (I_Am_Client()) {
 
@@ -270,6 +367,7 @@ void cNetwork::Cleanup_Client(void)
 
 	delete PClientFps;
 	PClientFps = NULL;
+	CoopDebugLog::Log("cNetwork::Cleanup_Client done");
 
 #endif // !FREEDEDICATEDSERVER
 }
@@ -659,7 +757,7 @@ void cNetwork::Init_Server(void)
 
 	//if (IS_SOLOPLAY || GameModeManager::Find("LAN")->Is_Active()) {
 	if (IS_SOLOPLAY ||
-		 (GameModeManager::Find("LAN")->Is_Active() && !cGameSpyAdmin::Is_Gamespy_Game())) {
+		 (GameModeManager::Find("LAN")->Is_Active() && !cGameSpyAdmin::Is_Gamespy_Game() && !cGameSpyAdmin::Is_Direct_Internet_Game())) {
 
 		ULONG bbo = cBandwidth::Get_Bandwidth_Bps_From_Type(BANDWIDTH_LANT1);
 		WWASSERT(bbo > 0);
@@ -822,6 +920,7 @@ void cNetwork::Connection_Status_Change_Feedback(void)
 
 	unsigned int time = TIMEGETTIME();
 	const unichar_t *string = NULL;
+	CoopDebugLog::Log("cNetwork::Connection_Status_Change_Feedback bad=%d", LastServerConnectionStateBad);
 	if (LastServerConnectionStateBad) {
 		if (_last_print_bad && time - _last_print < 4000) {
 			return;
@@ -869,8 +968,14 @@ void cNetwork::Update(void)
 	WWMEMLOG(MEM_GAMEDATA);
 
 	bool flush_packets = false;
+	static int coop_network_update_log_budget = 1200;
+	const bool log_coop_network = IS_COOP_MISSION && I_Am_Client() && coop_network_update_log_budget-- > 0;
 
 	ThinkCount++;
+	if (log_coop_network) {
+		CoopDebugLog::Log("cNetwork::Update begin think=%d is_server=%d is_client=%d loading=%d",
+			ThinkCount, I_Am_Server(), I_Am_Client(), g_is_loading);
+	}
 
 	//
 	// Coding bugs may result in this function being called recursively.
@@ -899,7 +1004,13 @@ void cNetwork::Update(void)
 	if (I_Am_Server()) {
 		if (I_Am_Client()) {
 			WWPROFILE( "Client Send" );
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update listen-server Client Service_Send start");
+			}
 			PClientConnection->Service_Send();
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update listen-server Client Service_Send done");
+			}
 
 			if (PClientConnection->Is_Bad_Connection() != LastServerConnectionStateBad) {
 				LastServerConnectionStateBad = PClientConnection->Is_Bad_Connection();
@@ -913,45 +1024,87 @@ void cNetwork::Update(void)
 //		}
 
 		WWPROFILE( "Server Read" );
+		if (log_coop_network) {
+			CoopDebugLog::Log("cNetwork::Update server Service_Read start");
+		}
 		PServerConnection->Service_Read();
+		if (log_coop_network) {
+			CoopDebugLog::Log("cNetwork::Update server Service_Read done");
+		}
 
 		if (!g_is_loading) {
 			WWPROFILE( "Shared CS Think" );
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update shared CS think start");
+			}
 			Shared_Client_And_Server_Think();
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update shared CS think done");
+			}
 		}
 
 		if (I_Am_Client() && !g_is_loading) {
 			WWPROFILE( "Client_Think" );
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update listen-server Client_Think start");
+			}
 			if (Client_Think()) {
 				flush_packets = true;
+			}
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update listen-server Client_Think done flush=%d", flush_packets);
 			}
 		}
 
 		if (!g_is_loading) {
 			WWPROFILE( "Server_Think" );
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update Server_Think start");
+			}
 			if (Server_Think()) {
 				flush_packets = true;
 			} else {
 				// Server only sends packets in response to server think, not client think.
 				flush_packets = false;
 			}
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update Server_Think done flush=%d", flush_packets);
+			}
 		}
 
 		{
 		WWPROFILE( "Server Send" );
+		if (log_coop_network) {
+			CoopDebugLog::Log("cNetwork::Update server Service_Send start");
+		}
 		PServerConnection->Service_Send();
+		if (log_coop_network) {
+			CoopDebugLog::Log("cNetwork::Update server Service_Send done");
+		}
 		}
 
 		if (I_Am_Client()) {
 			WWPROFILE( "Client Read" );
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update listen-server Client Service_Read start");
+			}
 			PClientConnection->Service_Read();
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update listen-server Client Service_Read done");
+			}
 		}
 
 	} else if (I_Am_Client()) {
 
 		{
 		WWPROFILE( "Client Read" );
+		if (log_coop_network) {
+			CoopDebugLog::Log("cNetwork::Update client Service_Read start");
+		}
 		PClientConnection->Service_Read();
+		if (log_coop_network) {
+			CoopDebugLog::Log("cNetwork::Update client Service_Read done bad=%d", PClientConnection->Is_Bad_Connection());
+		}
 		}
 
 		if (PClientConnection->Is_Bad_Connection() != LastServerConnectionStateBad) {
@@ -961,34 +1114,69 @@ void cNetwork::Update(void)
 
 		if (!g_is_loading) {
 			WWPROFILE( "Shared CS Think" );
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update client shared CS think start");
+			}
 			Shared_Client_And_Server_Think();
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update client shared CS think done");
+			}
 		}
 
 		if (!g_is_loading) {
 			WWPROFILE( "Client_Think" );
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update Client_Think start");
+			}
 			if (Client_Think()) {
 				flush_packets = true;
+			}
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update Client_Think done flush=%d", flush_packets);
 			}
 		}
 
 		{
 		WWPROFILE( "Client Send" );
 		if (PClientConnection != NULL) {
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update client Service_Send start");
+			}
 			PClientConnection->Service_Send();
+			if (log_coop_network) {
+				CoopDebugLog::Log("cNetwork::Update client Service_Send done");
+			}
 		}
 		}
 	}
 
 	DEMO_SECURITY_CHECK;
 
+	if (log_coop_network) {
+		CoopDebugLog::Log("cNetwork::Update Delete_Pending start pending=%d objects=%d",
+			NetworkObjectMgrClass::Get_Pending_Object_Count(), NetworkObjectMgrClass::Get_Object_Count());
+	}
 	NetworkObjectMgrClass::Delete_Pending();
+	if (log_coop_network) {
+		CoopDebugLog::Log("cNetwork::Update Delete_Pending done pending=%d objects=%d",
+			NetworkObjectMgrClass::Get_Pending_Object_Count(), NetworkObjectMgrClass::Get_Object_Count());
+	}
 
 	if (flush_packets) {
+		if (log_coop_network) {
+			CoopDebugLog::Log("cNetwork::Update PacketManager.Flush start");
+		}
 		PacketManager.Flush(true);
+		if (log_coop_network) {
+			CoopDebugLog::Log("cNetwork::Update PacketManager.Flush done");
+		}
 	}
 
 	recursion_level--;
 	WWASSERT(recursion_level == 0);
+	if (log_coop_network) {
+		CoopDebugLog::Log("cNetwork::Update done think=%d", ThinkCount);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1425,8 +1613,12 @@ REFUSAL_CODE cNetwork::Application_Acceptance_Handler(cPacket & packet)
 	//packet.Get_Wide_Terminated_String(player_name.Get_Buffer(256), 256);
 	packet.Get_Wide_Terminated_String(player_name.Get_Buffer(256), 256, true);
 	if (player_name.Get_Length() == 0) {
+		Log_Connection_Message("Connection refused: malformed connect packet has an empty player name; reporting version mismatch\n");
       return REFUSAL_VERSION_MISMATCH;
 	}
+
+	StringClass player_name_string;
+	player_name.Convert_To(player_name_string);
 
 	// Get the clients password
 	WideStringClass password(0, true);
@@ -1438,16 +1630,52 @@ REFUSAL_CODE cNetwork::Application_Acceptance_Handler(cPacket & packet)
 	// Make sure the clients password matches the games password.
 	WWASSERT(PTheGameData != NULL);
 	if (The_Game()->IsPassworded.Is_True() && password.Compare(The_Game()->Get_Password()) != 0) {
+		Log_Connection_Message("Connection refused for %s: bad password\n", player_name_string.Peek_Buffer());
 		return REFUSAL_BAD_PASSWORD;
 	}
 
 	// Make sure the exe versions match
 	if (client_exe_key != cNetwork::Get_Exe_Key()) {
+		ConnectVersionDiagnostics diagnostics;
+		Read_Client_Version_Diagnostics(packet, diagnostics);
+
+		const int server_data_crc = Get_Data_Files_CRC();
+		const int server_build_number = (int)BuildInfoClass::Get_Build_Number();
+		const int server_strings_version = (int)TranslateDBClass::Get_Version_Number();
+
+		Log_Connection_Message("Connection refused for %s: version mismatch\n", player_name_string.Peek_Buffer());
+		Log_Connection_Message("  version key: client=%08X server=%08X\n",
+			(unsigned int)client_exe_key, (unsigned int)cNetwork::Get_Exe_Key());
+
+		if (diagnostics.HasBbo) {
+			Log_Connection_Message("  client bandwidth budget: %d bps\n", diagnostics.Bbo);
+		}
+
+		if (diagnostics.HasDiagnostics) {
+			Log_Connection_Message("  build number: client=%d server=%d [%s]\n",
+				diagnostics.BuildNumber, server_build_number, Match_Text(diagnostics.BuildNumber, server_build_number));
+			Log_Connection_Message("  strings version: client=%d server=%d [%s]\n",
+				diagnostics.StringsVersion, server_strings_version, Match_Text(diagnostics.StringsVersion, server_strings_version));
+			Log_Connection_Message("  exe/build crc: client=%08X server=%08X [%s]\n",
+				(unsigned int)diagnostics.ExeCRC, (unsigned int)cNetwork::Get_Exe_CRC(), Match_Text(diagnostics.ExeCRC, cNetwork::Get_Exe_CRC()));
+			Log_Connection_Message("  strings crc: client=%08X server=%08X [%s]\n",
+				(unsigned int)diagnostics.StringsCRC, (unsigned int)cNetwork::Get_Strings_CRC(), Match_Text(diagnostics.StringsCRC, cNetwork::Get_Strings_CRC()));
+			Log_Connection_Message("  core data crc: client=%08X server=%08X [%s]\n",
+				(unsigned int)diagnostics.DataCRC, (unsigned int)server_data_crc, Match_Text(diagnostics.DataCRC, server_data_crc));
+		} else if (diagnostics.HasUnexpectedMagic) {
+			Log_Connection_Message("  client did not send recognized version diagnostics; next field was %08X\n",
+				(unsigned int)diagnostics.UnexpectedMagic);
+		} else {
+			Log_Connection_Message("  client did not send version diagnostics; rebuild and resend the latest client binary\n");
+		}
+
       return REFUSAL_VERSION_MISMATCH;
    }
 
 	// Make sure we haven't exceeded our max player limit
 	if (cPlayerManager::Count() >= The_Game()->Get_Max_Players()) {
+		Log_Connection_Message("Connection refused for %s: game full (%d/%d players)\n",
+			player_name_string.Peek_Buffer(), cPlayerManager::Count(), The_Game()->Get_Max_Players());
       return REFUSAL_GAME_FULL;
 	}
 
@@ -1459,8 +1687,12 @@ REFUSAL_CODE cNetwork::Application_Acceptance_Handler(cPacket & packet)
 	//if (cPlayerManager::Find_Player(player_name)) {
 	if (!cGameSpyAdmin::Is_Gamespy_Game() &&
 	    cPlayerManager::Find_Player(player_name)) {
+		Log_Connection_Message("Connection refused for %s: duplicate player name\n", player_name_string.Peek_Buffer());
 		return REFUSAL_PLAYER_EXISTS;
 	}
+
+	Log_Connection_Message("Connection accepted for %s: version key=%08X\n",
+		player_name_string.Peek_Buffer(), (unsigned int)cNetwork::Get_Exe_Key());
 
 #endif // not BETACLIENT
 

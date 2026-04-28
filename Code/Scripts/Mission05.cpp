@@ -480,7 +480,7 @@ DECLARE_SCRIPT(M05_Activate_Objective_502, "")
 			const char *conv_name = ("M05_CON004");
 			int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
 			Commands->Join_Conversation(NULL, conv_id, false, true, true);
-			Commands->Join_Conversation(Commands->Get_A_Star(Vector3(0.0f,0.0f,0.0f)), conv_id, false, true, true);
+			Commands->Join_Conversation(enterer, conv_id, false, true, true);
 			Commands->Start_Conversation (conv_id, 300502);
 			Commands->Monitor_Conversation (obj, conv_id);
 
@@ -799,7 +799,7 @@ DECLARE_SCRIPT(M05_Activate_Objective_510, "")
 			const char *conv_name = ("M05_CON008");
 			int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
 			Commands->Join_Conversation(NULL, conv_id, false, true, true);
-			Commands->Join_Conversation(Commands->Get_A_Star(Vector3(0.0f,0.0f,0.0f)), conv_id, false, true, true);
+			Commands->Join_Conversation(enterer, conv_id, false, true, true);
 			Commands->Start_Conversation (conv_id, 300510);
 			Commands->Monitor_Conversation (obj, conv_id);
 
@@ -876,7 +876,7 @@ DECLARE_SCRIPT(M05_DEAD6_Engineer, "") // first hotwire
 					const char *conv_name = ("M05_CON009");
 					int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
 					Commands->Join_Conversation(obj, conv_id, false, true, true);
-					Commands->Join_Conversation(Commands->Get_A_Star(Vector3(0.0f,0.0f,0.0f)), conv_id, false, true, true);
+					Commands->Join_Conversation(poker, conv_id, false, true, true);
 					Commands->Start_Conversation (conv_id, 300551);
 					Commands->Monitor_Conversation (obj, conv_id);
 
@@ -5603,7 +5603,7 @@ DECLARE_SCRIPT (M05_Apc_Drop_Zone_DME, "")
 {
 	void Entered(GameObject * /* obj */, GameObject * enterer) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject *apc1 = Commands->Find_Object (100256);
 			Commands->Send_Custom_Event ( STAR, apc1, 100, 100, 0.0f );
@@ -7486,7 +7486,7 @@ DECLARE_SCRIPT(M05_APC_Deploy, "Preset:string, Soldier_Qty=0:int, Fire_Gun=1:int
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if((damager == STAR) && (!attacking))
+		if((Commands->Is_A_Star(damager)) && (!attacking))
 		{
 			attacking = true;
 			Deploy_Soldiers(obj);

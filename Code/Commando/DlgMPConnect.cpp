@@ -39,6 +39,8 @@
 #include "gamedata.h"
 #include "gameinitmgr.h"
 #include "campaign.h"
+#include "gdcoopmission.h"
+#include "coopdebuglog.h"
 #include "cnetwork.h"
 #include <wwdebug/wwdebug.h>
 #include "dlgmainmenu.h"
@@ -146,6 +148,9 @@ DlgMPConnect::~DlgMPConnect()
 
 void DlgMPConnect::Connected(cGameData* theGame)
 	{
+	CoopDebugLog::Log("DlgMPConnect::Connected game=%p type=%d map=%s",
+		theGame, theGame != NULL ? theGame->Get_Game_Type() : -1,
+		theGame != NULL ? theGame->Get_Map_Name().Peek_Buffer() : "<null>");
 	mTheGame = theGame;
 	}
 
@@ -168,6 +173,7 @@ void DlgMPConnect::Connected(cGameData* theGame)
 
 void DlgMPConnect::Failed_To_Connect(void)
 	{
+	CoopDebugLog::Log("DlgMPConnect::Failed_To_Connect");
 	mFailed = true;
 	}
 
@@ -234,6 +240,8 @@ void DlgMPConnect::On_Periodic(void)
 
 	if (mTheGame != NULL)
 		{
+		CoopDebugLog::Log("DlgMPConnect::On_Periodic has game type=%d map=%s",
+			mTheGame->Get_Game_Type(), mTheGame->Get_Map_Name().Peek_Buffer());
 		// Add a reference to keep us alive while we process the game start
 		Add_Ref();
 
@@ -252,10 +260,21 @@ void DlgMPConnect::On_Periodic(void)
 			// Start the game!
 			GameInitMgrClass::Set_Is_Client_Required(true);
 			GameInitMgrClass::Set_Is_Server_Required(false);
-			GameInitMgrClass::Start_Game(mTheGame->Get_Map_Name(), mTeamChoice, mClanID);
+			if (mTheGame->Is_Coop_Mission()) {
+				cGameDataCoopMission *coop_game = mTheGame->As_Coop_Mission();
+				WWASSERT(coop_game != NULL);
+				CoopDebugLog::Log("DlgMPConnect::On_Periodic Start_Coop_Campaign map=%s difficulty=%d",
+					mTheGame->Get_Map_Name().Peek_Buffer(), coop_game->Get_Difficulty_Level());
+				CampaignManager::Start_Coop_Campaign(mTheGame->Get_Map_Name(), coop_game->Get_Difficulty_Level());
+			} else {
+				CoopDebugLog::Log("DlgMPConnect::On_Periodic Start_Game map=%s team=%d",
+					mTheGame->Get_Map_Name().Peek_Buffer(), mTeamChoice);
+				GameInitMgrClass::Start_Game(mTheGame->Get_Map_Name(), mTeamChoice, mClanID);
+			}
 			}
 		else
 			{
+			CoopDebugLog::Log("DlgMPConnect::On_Periodic invalid settings");
 			WWDEBUG_SAY(("ERROR: %s\n", (const unichar_t*)outMsg));
 			}
 
@@ -266,6 +285,7 @@ void DlgMPConnect::On_Periodic(void)
 		{
 		if (mFailed)
 			{
+			CoopDebugLog::Log("DlgMPConnect::On_Periodic handling failed connect");
 
 			Add_Ref();
 

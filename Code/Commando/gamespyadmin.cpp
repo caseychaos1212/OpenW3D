@@ -29,9 +29,13 @@
 #include "widestring.h"
 #include "gameinitmgr.h"
 #include "gamedata.h"
+#include "gdcoopmission.h"
+#include "coopdebuglog.h"
+#include "campaign.h"
 #include "cnetwork.h"
 #include "DlgMPConnect.h"
 #include "GameSpy_QnR.h"
+#include "netutil.h"
 #include <gamespy/ghttp/ghttp.h>
 #include "useroptions.h"
 #include "renegadedialogmgr.h"
@@ -41,6 +45,7 @@
 #include "bandwidthcheck.h"
 #include "gamespyauthmgr.h"
 #include "specialbuilds.h"
+#include <cstring>
 
 //
 // Class statics
@@ -51,8 +56,13 @@ bool					cGameSpyAdmin::IsUnderGamespyMenuing			= false;
 bool					cGameSpyAdmin::IsLaunchFromGamespyRequested	= false;
 bool					cGameSpyAdmin::IsLaunchedFromGamespy			= false;
 bool					cGameSpyAdmin::IsServerGamespyListed			= false;
+bool					cGameSpyAdmin::IsCoopDirectConnect			= false;
+bool					cGameSpyAdmin::IsCoopDirectHostRequested	= false;
+bool					cGameSpyAdmin::IsCoopDirectHostActive		= false;
 ULONG					cGameSpyAdmin::GameHostIp							= 0;
 USHORT				cGameSpyAdmin::GameHostPort						= 0;
+char					cGameSpyAdmin::CoopDirectHostMission[256]	= { 0 };
+USHORT				cGameSpyAdmin::CoopDirectHostPort				= 0;
 WideStringClass	cGameSpyAdmin::PasswordAttempt;
 
 // It's 2:00am....see DoDialog below..
@@ -65,7 +75,13 @@ cGameSpyAdmin::Think
 	void
 )
 {
-	WWASSERT(Is_Gamespy_Game());
+	WWASSERT(Needs_Think());
+
+	if (IsCoopDirectHostRequested && SplashIntroMenuDialogClass::Is_Complete()) {
+		IsCoopDirectHostRequested = false;
+		IsCoopDirectHostActive = true;
+		Host_Coop_Direct_Game();
+	}
 
 	if (IsLaunchFromGamespyRequested && SplashIntroMenuDialogClass::Is_Complete ())
 	{
@@ -89,7 +105,7 @@ cGameSpyAdmin::Think
 
 
 #ifndef MULTIPLAYERDEMO
-	if (cNetwork::I_Am_Server())
+	if (cNetwork::I_Am_Server() && IsServerGamespyListed)
 	{
 		cGameSpyAuthMgr::Think();
 	}
@@ -172,8 +188,13 @@ cGameSpyAdmin::Reset
 	IsLaunchFromGamespyRequested	= false;
 	IsLaunchedFromGamespy			= false;
 	IsServerGamespyListed			= false;
+	IsCoopDirectConnect				= false;
+	IsCoopDirectHostRequested		= false;
+	IsCoopDirectHostActive			= false;
 	GameHostIp							= 0;
 	GameHostPort						= 0;
+	CoopDirectHostMission[0]		= 0;
+	CoopDirectHostPort				= 0;
 	GameSpyQnR.Shutdown();
 }
 
@@ -187,20 +208,95 @@ cGameSpyAdmin::Connect_To_Game_Server
 	WWASSERT(GameHostIp > 0);
 	WWASSERT(GameHostPort > 0);
 
-	GameInitMgrClass::Initialize_LAN();
+	if (IsCoopDirectConnect) {
+		CoopDebugLog::Reset();
+		CoopDebugLog::Log("cGameSpyAdmin::Connect_To_Game_Server coop direct connect ip=%u port=%u", GameHostIp, GameHostPort);
+		GameInitMgrClass::Initialize_Coop_LAN();
+	} else {
+		GameInitMgrClass::Initialize_LAN();
+	}
 
 	WWASSERT(PTheGameData == NULL);
-	PTheGameData = cGameData::Create_Game_Of_Type(cGameData::GAME_TYPE_CNC);
+	PTheGameData = cGameData::Create_Game_Of_Type(
+		IsCoopDirectConnect ? cGameData::GAME_TYPE_COOP_MISSION : cGameData::GAME_TYPE_CNC);
 	WWASSERT(PTheGameData != NULL);
 	PTheGameData->Set_Ip_Address(GameHostIp);
 	PTheGameData->Set_Port(GameHostPort);
+	if (IsCoopDirectConnect) {
+		CoopDebugLog::Log("cGameSpyAdmin::Connect_To_Game_Server game data ready ip=%u port=%u max_players=%d",
+			GameHostIp, GameHostPort, PTheGameData->Get_Max_Players());
+	}
 
 	cNetwork::Init_Client();
+	if (IsCoopDirectConnect) {
+		CoopDebugLog::Log("cGameSpyAdmin::Connect_To_Game_Server cNetwork::Init_Client done");
+	}
 
 	//
 	//	Display the "connecting" dialog
 	//
 	DlgMPConnect::DoDialog(-1, 0);
+}
+
+//----------------------------------------------------------------------------------
+void
+cGameSpyAdmin::Host_Coop_Direct_Game
+(
+	void
+)
+{
+	CoopDebugLog::Reset();
+	CoopDebugLog::Log("cGameSpyAdmin::Host_Coop_Direct_Game begin mission=%s port=%u",
+		CoopDirectHostMission[0] != 0 ? CoopDirectHostMission : "<default>", CoopDirectHostPort);
+	GameInitMgrClass::Initialize_Coop_LAN();
+
+	if (PTheGameData != NULL) {
+		delete PTheGameData;
+		PTheGameData = NULL;
+	}
+
+	PTheGameData = cGameData::Create_Game_Of_Type(cGameData::GAME_TYPE_COOP_MISSION);
+	WWASSERT(PTheGameData != NULL);
+	PTheGameData->Load_From_Server_Config();
+
+	if (CoopDirectHostMission[0] != 0) {
+		PTheGameData->Set_Map_Name(CoopDirectHostMission);
+		PTheGameData->Set_Map_Cycle(0, CoopDirectHostMission);
+	}
+
+	if (CoopDirectHostPort >= MIN_SERVER_PORT && CoopDirectHostPort <= MAX_SERVER_PORT) {
+		PTheGameData->Set_Port(CoopDirectHostPort);
+	}
+
+	PTheGameData->Set_Max_Players(2);
+	PTheGameData->Set_QuickMatch_Server(false);
+
+	GameInitMgrClass::Set_Is_Client_Required(PTheGameData->IsDedicated.Is_False());
+	GameInitMgrClass::Set_Is_Server_Required(true);
+	CoopDebugLog::Log("cGameSpyAdmin::Host_Coop_Direct_Game game data ready map=%s port=%d max_players=%d client_required=%d",
+		PTheGameData->Get_Map_Name(), PTheGameData->Get_Port(), PTheGameData->Get_Max_Players(), PTheGameData->IsDedicated.Is_False());
+
+	cGameDataCoopMission *coop_game = PTheGameData->As_Coop_Mission();
+	WWASSERT(coop_game != NULL);
+	CoopDebugLog::Log("cGameSpyAdmin::Host_Coop_Direct_Game Start_Coop_Campaign map=%s difficulty=%d",
+		PTheGameData->Get_Map_Name(), coop_game->Get_Difficulty_Level());
+	CampaignManager::Start_Coop_Campaign(PTheGameData->Get_Map_Name(), coop_game->Get_Difficulty_Level());
+}
+
+//----------------------------------------------------------------------------------
+void
+cGameSpyAdmin::Set_Coop_Direct_Host_Mission
+(
+	const char *mission_name
+)
+{
+	if (mission_name == NULL) {
+		CoopDirectHostMission[0] = 0;
+		return;
+	}
+
+	::strncpy(CoopDirectHostMission, mission_name, sizeof(CoopDirectHostMission) - 1);
+	CoopDirectHostMission[sizeof(CoopDirectHostMission) - 1] = 0;
 }
 
 //----------------------------------------------------------------------------------
@@ -257,6 +353,3 @@ cGameSpyAdmin::Is_Nickname_Collision
 
 	return collides;
 }
-
-
-

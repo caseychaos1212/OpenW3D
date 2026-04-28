@@ -624,7 +624,7 @@ DECLARE_SCRIPT(M00_ChainRxn_Barrel_JDG, "Controller_ID :int")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /*amount*/ ) override
 	{
-		if (obj && deadYet == false && damager == STAR)
+		if (obj && deadYet == false && Commands->Is_A_Star(damager))
 		{
 			Commands->Set_Health ( obj, 0.25f );
 
@@ -1873,12 +1873,12 @@ DECLARE_SCRIPT (M00_Damage_Modifier_DME, "Damage_multiplier:float, Star_Modifier
 		{
 			float damage;
 
-			if ((!star_modifier && damager == STAR && star_killable) || (!notStar_modifier && damager != STAR && notStar_killable))
+			if ((!star_modifier && Commands->Is_A_Star(damager) && star_killable) || (!notStar_modifier && !Commands->Is_A_Star(damager) && notStar_killable))
 			{
 				last_health = Commands->Get_Health (obj);
 			}
 
-			if ((star_modifier && damager == STAR && star_killable) || (notStar_modifier && damager != STAR && notStar_killable))
+			if ((star_modifier && Commands->Is_A_Star(damager) && star_killable) || (notStar_modifier && !Commands->Is_A_Star(damager) && notStar_killable))
 			{
 				current_health = Commands->Get_Health (obj);
 				if (current_health == 0)
@@ -1898,7 +1898,7 @@ DECLARE_SCRIPT (M00_Damage_Modifier_DME, "Damage_multiplier:float, Star_Modifier
 				current_health = Commands->Get_Health (obj);
 			}
 
-			if ((star_modifier && damager == STAR && !star_killable) || (notStar_modifier && damager != STAR && !notStar_killable))
+			if ((star_modifier && Commands->Is_A_Star(damager) && !star_killable) || (notStar_modifier && !Commands->Is_A_Star(damager) && !notStar_killable))
 			{
 				current_health = Commands->Get_Health (obj);
 				if (current_health == 0)

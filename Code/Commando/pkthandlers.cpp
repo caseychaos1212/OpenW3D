@@ -42,6 +42,7 @@
 #include "networkobjectfactorymgr.h"
 #include "playermanager.h"
 #include "apppacketstats.h"
+#include "coopdebuglog.h"
 #include "specialbuilds.h"
 
 
@@ -261,6 +262,8 @@ void cNetwork::Client_Packet_Handler([[maybe_unused]] cPacket & packet)
 
 	// TSS - hack
 	if (g_is_loading) {
+		CoopDebugLog::Log("Client_Packet_Handler: flushing packet during loading packet_id=%d sender=%d",
+			packet.Get_Id(), packet.Get_Sender_Id());
 		Debug_Say(("Client flushing packet during loading\n"));
 		packet.Flush();
 		return;
@@ -279,6 +282,14 @@ void cNetwork::Client_Packet_Handler([[maybe_unused]] cPacket & packet)
 	bool is_delete_pending	= packet.Get (is_delete_pending);
 	//BYTE app_packet_type		= packet.Get (app_packet_type);
 
+	static int client_packet_log_count = 0;
+	const bool log_this_packet = client_packet_log_count < 10000;
+	client_packet_log_count++;
+	if (log_this_packet) {
+		CoopDebugLog::Log("Client_Packet_Handler begin packet_id=%d sender=%d net_id=%d dirty=0x%02X delete=%d",
+			packet.Get_Id(), packet.Get_Sender_Id(), network_obj_id, dirty_bits, is_delete_pending);
+	}
+
 	//
 	//	Lookup the object this data belongs to
 	//
@@ -292,6 +303,8 @@ void cNetwork::Client_Packet_Handler([[maybe_unused]] cPacket & packet)
 		//WWASSERT (object == NULL);
 		if (object != NULL)
 		{
+			CoopDebugLog::Log("Client_Packet_Handler duplicate creation net_id=%d dirty=0x%02X existing_app=%s delete_pending=%d",
+				network_obj_id, dirty_bits, cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()), object->Is_Delete_Pending());
 			WWDEBUG_SAY(("cNetwork::Client_Packet_Handler: received BIT_CREATION for existing object of type %s\n",
 				cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type())));
 			DIE;
@@ -301,10 +314,22 @@ void cNetwork::Client_Packet_Handler([[maybe_unused]] cPacket & packet)
 		//	Create the network object
 		//
 		int net_classid = packet.Get (net_classid);
+		if (log_this_packet) {
+			CoopDebugLog::Log("Client_Packet_Handler create start net_id=%d net_classid=%d dirty=0x%02X",
+				network_obj_id, net_classid, dirty_bits);
+		}
 		if (object == NULL) {
 			object = Create_Network_Object (packet, net_classid, network_obj_id);
 		}
+		if (log_this_packet) {
+			CoopDebugLog::Log("Client_Packet_Handler import creation start net_id=%d object=%p app=%s",
+				network_obj_id, object, object != NULL ? cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()) : "<null>");
+		}
 		object->Import_Creation (packet);
+		if (log_this_packet) {
+			CoopDebugLog::Log("Client_Packet_Handler import creation done net_id=%d object=%p app=%s",
+				network_obj_id, object, object != NULL ? cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()) : "<null>");
+		}
 
 		//
 		//	HACK - HACK
@@ -333,6 +358,10 @@ void cNetwork::Client_Packet_Handler([[maybe_unused]] cPacket & packet)
 		//	Do we need to delete this object?
 		//
 		if (is_delete_pending && object != NULL) {
+			if (log_this_packet) {
+				CoopDebugLog::Log("Client_Packet_Handler delete pending net_id=%d app=%s",
+					network_obj_id, cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()));
+			}
 			object->Set_Delete_Pending ();
 		}
 
@@ -340,26 +369,54 @@ void cNetwork::Client_Packet_Handler([[maybe_unused]] cPacket & packet)
 		//	Do we need to modify this object?
 		//
 		if ((dirty_bits & NetworkObjectClass::BIT_RARE) == NetworkObjectClass::BIT_RARE) {
+			if (log_this_packet) {
+				CoopDebugLog::Log("Client_Packet_Handler import rare start net_id=%d app=%s",
+					network_obj_id, cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()));
+			}
 			object->Import_Rare (packet);
+			if (log_this_packet) {
+				CoopDebugLog::Log("Client_Packet_Handler import rare done net_id=%d app=%s",
+					network_obj_id, cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()));
+			}
 		}
 
 		//
 		//	Do we need to modify this object?
 		//
 		if ((dirty_bits & NetworkObjectClass::BIT_OCCASIONAL) == NetworkObjectClass::BIT_OCCASIONAL) {
+			if (log_this_packet) {
+				CoopDebugLog::Log("Client_Packet_Handler import occasional start net_id=%d app=%s",
+					network_obj_id, cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()));
+			}
 			object->Import_Occasional (packet);
+			if (log_this_packet) {
+				CoopDebugLog::Log("Client_Packet_Handler import occasional done net_id=%d app=%s",
+					network_obj_id, cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()));
+			}
 		}
 
 		//
 		//	Do we need to update this object?
 		//
 		if ((dirty_bits & NetworkObjectClass::BIT_FREQUENT) == NetworkObjectClass::BIT_FREQUENT) {
+			if (log_this_packet) {
+				CoopDebugLog::Log("Client_Packet_Handler import frequent start net_id=%d app=%s",
+					network_obj_id, cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()));
+			}
 			object->Import_Frequent (packet);
+			if (log_this_packet) {
+				CoopDebugLog::Log("Client_Packet_Handler import frequent done net_id=%d app=%s",
+					network_obj_id, cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()));
+			}
 			//object->Increment_Import_State_Count ();
 		}
 
 		object->Increment_Import_State_Count();
 		object->Set_Last_Clientside_Update_Time(TIMEGETTIME());
+		if (log_this_packet) {
+			CoopDebugLog::Log("Client_Packet_Handler done net_id=%d app=%s",
+				network_obj_id, cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()));
+		}
 
 		/*moving up
 		//
@@ -376,6 +433,10 @@ void cNetwork::Client_Packet_Handler([[maybe_unused]] cPacket & packet)
 		}
 		*/
 	} else {
+		if (log_this_packet) {
+			CoopDebugLog::Log("Client_Packet_Handler missing object net_id=%d dirty=0x%02X delete=%d; flushing",
+				network_obj_id, dirty_bits, is_delete_pending);
+		}
 		packet.Flush();
 		//Debug_Network_Basic(("Client %d received update for non-existent object %d.\n",
 		//	Get_My_Id(), network_obj_id));
@@ -387,6 +448,8 @@ void cNetwork::Client_Packet_Handler([[maybe_unused]] cPacket & packet)
 	//WWASSERT(packet.Is_Flushed());
 	if (!packet.Is_Flushed())
 	{
+		CoopDebugLog::Log("Client_Packet_Handler packet not flushed net_id=%d object=%p app=%s",
+			network_obj_id, object, object != NULL ? cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type()) : "<null>");
 		WWDEBUG_SAY(("cNetwork::Client_Packet_Handler: packet not flushed for object of type %s\n",
 			cAppPacketStats::Interpret_Type(object->Get_App_Packet_Type())));
 		//DIE;

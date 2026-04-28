@@ -771,7 +771,7 @@ DECLARE_SCRIPT(M11_Turn_Off_FirstFloor_Stuff_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M11_FIRSTFLOOR_STUFF_CONTROLLER_JDG), 0, M01_GOTO_IDLE_JDG, 0 );
 		}
@@ -782,7 +782,7 @@ DECLARE_SCRIPT(M11_Turn_On_FirstFloor_Stuff_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M11_FIRSTFLOOR_STUFF_CONTROLLER_JDG), 0, M01_START_ACTING_JDG, 0 );
 		}
@@ -1256,7 +1256,7 @@ DECLARE_SCRIPT(M11_Floor01_StealthSoldier01_JDG, "")
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR && attackingPlayer == false)
+		if (Commands->Is_A_Star(poker) && attackingPlayer == false)
 		{
 			attackingPlayer = true;
 			Commands->Action_Reset ( obj, 100 );
@@ -1271,7 +1271,7 @@ DECLARE_SCRIPT(M11_Floor01_StealthSoldier01_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR && attackingPlayer == false)
+		if (Commands->Is_A_Star(damager) && attackingPlayer == false)
 		{
 			attackingPlayer = true;
 			Commands->Action_Reset ( obj, 100 );
@@ -1363,7 +1363,7 @@ DECLARE_SCRIPT(M11_Floor01_StealthSoldier02_JDG, "")
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR)
+		if (Commands->Is_A_Star(poker))
 		{
 			Commands->Action_Reset ( obj, 100 );
 			ActionParamsStruct params;
@@ -1377,7 +1377,7 @@ DECLARE_SCRIPT(M11_Floor01_StealthSoldier02_JDG, "")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		if (damager == STAR)
+		if (Commands->Is_A_Star(damager))
 		{
 			Commands->Action_Reset ( obj, 100 );
 			ActionParamsStruct params;
@@ -1587,7 +1587,7 @@ DECLARE_SCRIPT(M11_NetRunnerRoom_EntryZone_JDG, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && entered == false)
+		if (Commands->Is_A_Star(enterer) && entered == false)
 		{
 			entered = true;
 			GameObject * exitZone = Commands->Find_Object ( 100228 );
@@ -1625,7 +1625,7 @@ DECLARE_SCRIPT(M11_NetRunnerRoom_ExitZone_JDG, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && okay_to_trigger == true)
+		if (Commands->Is_A_Star(enterer) && okay_to_trigger == true)
 		{
 			GameObject * stealthSoldier01 = Commands->Find_Object ( 100225 );
 			GameObject * stealthSoldier02 = Commands->Find_Object ( 100227 );
@@ -1652,7 +1652,7 @@ DECLARE_SCRIPT(M11_MuseumLevel_EntryZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * museumGuard01 = Commands->Find_Object ( M11_MUSEUM_GUARD_01_JDG );
 			GameObject * museumGuard02 = Commands->Find_Object ( M11_MUSEUM_GUARD_02_JDG );
@@ -1811,7 +1811,7 @@ DECLARE_SCRIPT(M11_MuseumLevel_Disable_Spawners_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * museumGuard01 = Commands->Find_Object ( M11_MUSEUM_GUARD_01_JDG );
 			GameObject * museumGuard02 = Commands->Find_Object ( M11_MUSEUM_GUARD_02_JDG );
@@ -1870,7 +1870,7 @@ DECLARE_SCRIPT(M11_WetBar_NeighborRoom_EntryZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * controller = Commands->Find_Object ( M11_WETBAR_SPAWNER_CONTROLLER_JDG );
 			if (controller != NULL)
@@ -2037,7 +2037,7 @@ DECLARE_SCRIPT(M11_GreenRoom_EntryZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * surpriseGuy01 = Commands->Create_Object ( "Nod_RocketSoldier_2SF_Chaingun", Vector3 (-10.408f, 32.538f, -29.855f) );
 			Commands->Attach_Script(surpriseGuy01, "M11_GreenRoom_SurpriseGuy_JDG", "");
@@ -2071,7 +2071,7 @@ DECLARE_SCRIPT(M11_WarRoom_EntryZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * engineer = Commands->Find_Object ( M11_WARROOM_ENGINEER_JDG );
 
@@ -2333,7 +2333,7 @@ DECLARE_SCRIPT(M11_WarRoom_ExitZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object ( M11_WARROOM_SECURITY_CONTROLLER_JDG ), 0, M01_MODIFY_YOUR_ACTION_04_JDG, 0 );
 
@@ -2509,7 +2509,7 @@ DECLARE_SCRIPT(M11_Barracks_LivingQuarters_T20_EntryZone_JDG, "")//100414 entry 
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (firstEntry == true)
 			{
@@ -2572,7 +2572,7 @@ DECLARE_SCRIPT(M11_Barracks_LivingQuarters_T19_EntryZone_JDG, "")//100404 entry 
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (firstEntry == true)
 			{
@@ -2775,7 +2775,7 @@ DECLARE_SCRIPT(M11_Barracks_LivingQuarters_T18_EntryZone_JDG, "")//100401 this i
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (firstEntry == true)
 			{
@@ -2897,7 +2897,7 @@ DECLARE_SCRIPT(M11_Barracks_LivingQuarters_T14_EntryZone_JDG, "")//100399 this i
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (firstEntry == true)
 			{
@@ -2974,7 +2974,7 @@ DECLARE_SCRIPT(M11_Barracks_LivingQuarters_T17_EntryZone_JDG, "")//100393 this i
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (firstEntry == true)
 			{
@@ -3032,7 +3032,7 @@ DECLARE_SCRIPT(M11_Barracks_LivingQuarters_T15_EntryZone_JDG, "")//this is a bed
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (firstEntry == true)
 			{
@@ -3165,7 +3165,7 @@ DECLARE_SCRIPT(M11_Barracks_LivingQuarters_T13_EntryZone_JDG, "")//this is entry
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (firstEntry == true)
 			{
@@ -3295,7 +3295,7 @@ DECLARE_SCRIPT(M11_Barracks_LivingQuarters_T16_EntryZone_JDG, "")//100385 this i
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (firstEntry == true)
 			{
@@ -3332,7 +3332,7 @@ DECLARE_SCRIPT(M11_Laboratory_EntryZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * mutant01 = Commands->Find_Object ( 100450 );
 			GameObject * mutant02 = Commands->Find_Object ( 100451 );
@@ -3434,7 +3434,7 @@ DECLARE_SCRIPT(M11_Turn_On_Mutant_Crypt_Spawners_Zone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * mutantController = Commands->Find_Object ( M11_MUTANT_CRYPT_SPAWNER_CONTROLLER_JDG );
 			if (mutantController != NULL)
@@ -4634,7 +4634,7 @@ DECLARE_SCRIPT(M11_PowerCore_Powerup_Zone_JDG, "")//
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && spawnClearance == true)
+		if (Commands->Is_A_Star(enterer) && spawnClearance == true)
 		{
 			spawnClearance = false;
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 15 );
@@ -4687,7 +4687,7 @@ DECLARE_SCRIPT(M11_PowerCore_EntryZone_JDG, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			//deleting the two "There's Sydney!" zones once entered into powercore
 			GameObject * zone01 = Commands->Find_Object ( 101327 );
@@ -4799,7 +4799,7 @@ DECLARE_SCRIPT(M11_End_First_Objective_Zone_JDG, "")//player has reached museum 
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M11_MISSION_CONTROLLER_JDG), 0, M11_END_FIRST_OBJECTIVE_JDG, 0 );//
 
@@ -4832,7 +4832,7 @@ DECLARE_SCRIPT(M11_Start_Third_Objective_Zone_JDG, "")//player's third objective
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && entered == false)
+		if (Commands->Is_A_Star(enterer) && entered == false)
 		{
 			entered = true;
 			addThirdObjectiveConv = Commands->Create_Conversation( "M11_Add_Third_Objective_Conversation", 100, 1000, false);
@@ -4863,7 +4863,7 @@ DECLARE_SCRIPT(M11_Start_Fifth_Objective_Zone_JDG, "")//player's fifth objective
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (M11_MISSION_CONTROLLER_JDG), 0, M11_ADD_FIFTH_OBJECTIVE_JDG, 0 );
 
@@ -5021,7 +5021,7 @@ DECLARE_SCRIPT(M11_KanesRoom_SecurityZone_JDG, "")//this guys ID is M11_KANESROO
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && entered == false)
+		if (Commands->Is_A_Star(enterer) && entered == false)
 		{
 			entered = true;
 			Commands->Send_Custom_Event( obj, obj, 0, M01_START_ACTING_JDG, 0 );
@@ -5124,7 +5124,7 @@ DECLARE_SCRIPT(M11_Lab_Cryochamber_Switch01_JDG, "")
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if ( poker == STAR && poked == false)
+		if ( Commands->Is_A_Star(poker) && poked == false)
 		{
 			Commands->Enable_HUD_Pokable_Indicator ( obj, false );
 			poked = true;
@@ -5159,7 +5159,7 @@ DECLARE_SCRIPT(M11_Laboratory_Scientist_JDG, "")
 	{
 		if (obj)
 		{
-			if (damager == STAR)
+			if (Commands->Is_A_Star(damager))
 			{
 				Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
 			}
@@ -5262,7 +5262,7 @@ DECLARE_SCRIPT(M11_Seths_Room_Conversation_Zone_JDG, "")//101103
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			int sethConv = Commands->Create_Conversation( "M11_Kane_Regarding_Seth_Conversation", 100, 1000, false);
 			Commands->Join_Conversation( NULL, sethConv, false, false, true );
@@ -5456,7 +5456,7 @@ DECLARE_SCRIPT(M11_Theres_Sydney_Zone_JDG, "")//101327 and 101328
 {
 	void Entered( GameObject * /* obj */, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			int theresSydneyConversation = Commands->Create_Conversation( "M11_Theres_Sydney_Conversation", 100, 1000, false);
 			Commands->Join_Conversation( STAR, theresSydneyConversation, false, false, false );
@@ -5495,7 +5495,7 @@ DECLARE_SCRIPT(M11_End_Third_Objective_Zone_JDG, "")//this guys ID is 100012--us
 
 	void Entered( GameObject * obj, GameObject * enterer ) override //
 	{
-		if (enterer == STAR && entered == false)
+		if (Commands->Is_A_Star(enterer) && entered == false)
 		{
 			entered = true;
 
@@ -5835,7 +5835,7 @@ DECLARE_SCRIPT(M11_SecondHolograph_EntryZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * hologramController = Commands->Find_Object ( 101251 );
 			if (hologramController != NULL)
@@ -5928,7 +5928,7 @@ DECLARE_SCRIPT(M11_KaneRoom_KaneEncounter_Zone_JDG, "")//
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * holograph = Commands->Find_Object ( 101226 );
 			if (holograph != NULL)
@@ -6126,7 +6126,7 @@ DECLARE_SCRIPT(M11_AblesTomb_TalkZone_JDG, "")//M11_Ables_Tomb_Conversation
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			int able_conv = Commands->Create_Conversation( "M11_Ables_Tomb_Conversation", 100, 2000, false);
 			Commands->Join_Conversation( NULL, able_conv, false, false, false );
@@ -6499,7 +6499,7 @@ DECLARE_SCRIPT(M11_Okay_ToPlay_MidtroZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * midtro01Controller = Commands->Find_Object ( 101449 );
 			if (midtro01Controller != NULL)
@@ -6531,7 +6531,7 @@ DECLARE_SCRIPT(M11_Start_FirstMidtro_Zone_JDG, "")//101449
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			if (entered == false && command_clearance == true)
 			{
@@ -6689,7 +6689,7 @@ DECLARE_SCRIPT(M11_PowerCore_TriggerPetrova_EnterZone_JDG, "")
 {
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR)
+		if (Commands->Is_A_Star(enterer))
 		{
 			GameObject * petrova = Commands->Find_Object (M11_MUTANT_PETROVA_JDG);
 
@@ -7610,7 +7610,7 @@ DECLARE_SCRIPT(M11_Lab_Cryochamber_Switch02_JDG, "")
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if ( poker == STAR && poked == false)
+		if ( Commands->Is_A_Star(poker) && poked == false)
 		{
 			Commands->Enable_HUD_Pokable_Indicator ( obj, false );
 			poked = true;
@@ -8672,7 +8672,7 @@ DECLARE_SCRIPT(M11_Silo_ElevatorZone01_JDG, "")//100699
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
 		}
 
-		else if (enterer == STAR)
+		else if (Commands->Is_A_Star(enterer))
 		{
 			havocIsInTheZone = true;
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
@@ -8746,7 +8746,7 @@ DECLARE_SCRIPT(M11_Silo_ElevatorZone02_JDG, "")//100700
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
 		}
 
-		else if (enterer == STAR)
+		else if (Commands->Is_A_Star(enterer))
 		{
 			havocIsInTheZone = true;
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
@@ -8820,7 +8820,7 @@ DECLARE_SCRIPT(M11_Silo_ElevatorZone03_JDG, "")//100701
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
 		}
 
-		else if (enterer == STAR)
+		else if (Commands->Is_A_Star(enterer))
 		{
 			havocIsInTheZone = true;
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
@@ -8894,7 +8894,7 @@ DECLARE_SCRIPT(M11_Silo_ElevatorZone04_JDG, "")//100702
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
 		}
 
-		else if (enterer == STAR)
+		else if (Commands->Is_A_Star(enterer))
 		{
 			havocIsInTheZone = true;
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
@@ -8966,7 +8966,7 @@ DECLARE_SCRIPT(M11_Sydney_Rally_Zone_01_JDG, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && sydneyInPosition == true)
+		if (Commands->Is_A_Star(enterer) && sydneyInPosition == true)
 		{
 			GameObject * sydney = Commands->Find_Object ( M11_REAL_SYDNEY_MOBIUS_JDG );
 			if (sydney != NULL )
@@ -9003,7 +9003,7 @@ DECLARE_SCRIPT(M11_Sydney_Rally_Zone_02_JDG, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && sydneyInPosition == true)
+		if (Commands->Is_A_Star(enterer) && sydneyInPosition == true)
 		{
 			GameObject * sydney = Commands->Find_Object ( M11_REAL_SYDNEY_MOBIUS_JDG );
 			if (sydney != NULL )
@@ -9040,7 +9040,7 @@ DECLARE_SCRIPT(M11_Sydney_Rally_Zone_03_JDG, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && sydneyInPosition == true)
+		if (Commands->Is_A_Star(enterer) && sydneyInPosition == true)
 		{
 			GameObject * sydney = Commands->Find_Object ( M11_REAL_SYDNEY_MOBIUS_JDG );
 			if (sydney != NULL )
@@ -9087,7 +9087,7 @@ DECLARE_SCRIPT(M11_Sydney_Rally_Zone_03b_JDG, "")
 
 	void Entered( GameObject * obj, GameObject * enterer ) override
 	{
-		if (enterer == STAR && sydneyInPosition == true)
+		if (Commands->Is_A_Star(enterer) && sydneyInPosition == true)
 		{
 			GameObject * sydney = Commands->Find_Object ( M11_REAL_SYDNEY_MOBIUS_JDG );
 			if (sydney != NULL )
@@ -10288,7 +10288,7 @@ DECLARE_SCRIPT(M11_Silo_ElevatorZone01_Top_JDG, "")//100705
 
 		}
 
-		else if (enterer == STAR)
+		else if (Commands->Is_A_Star(enterer))
 		{
 			havoc_in_zone = true;
 			Commands->Send_Custom_Event( obj, obj, 0, M01_MODIFY_YOUR_ACTION_JDG, 0 );
@@ -10380,7 +10380,7 @@ DECLARE_SCRIPT(M11_ForthFloor_Elevator_Switch_Script_JDG, "")//101689 101651 101
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR && sydney_in_motion == false)
+		if (Commands->Is_A_Star(poker) && sydney_in_motion == false)
 		{
 			GameObject * elevatorController = Commands->Find_Object ( M11_MISSILE_LIFT_CONTROLLER_JDG );
 			if (elevatorController != NULL)
@@ -10446,7 +10446,7 @@ DECLARE_SCRIPT(M11_ThirdFloor_Elevator_Switch_Script_JDG, "")//101692 101693 101
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR && sydney_in_motion == false)
+		if (Commands->Is_A_Star(poker) && sydney_in_motion == false)
 		{
 			GameObject * elevatorController = Commands->Find_Object ( M11_MISSILE_LIFT_CONTROLLER_JDG );
 			if (elevatorController != NULL)
@@ -10513,7 +10513,7 @@ DECLARE_SCRIPT(M11_SecondFloor_Elevator_Switch_Script_JDG, "")//101717 101718 10
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR && sydney_in_motion == false)
+		if (Commands->Is_A_Star(poker) && sydney_in_motion == false)
 		{
 			GameObject * elevatorController = Commands->Find_Object ( M11_MISSILE_LIFT_CONTROLLER_JDG );
 			if (elevatorController != NULL)
@@ -10579,7 +10579,7 @@ DECLARE_SCRIPT(M11_FirstFloor_Elevator_Switch_Script_JDG, "")//101721 101722 101
 
 	void Poked( GameObject * obj, GameObject * poker ) override
 	{
-		if (poker == STAR && sydney_in_motion == false)
+		if (Commands->Is_A_Star(poker) && sydney_in_motion == false)
 		{
 			GameObject * elevatorController = Commands->Find_Object ( M11_MISSILE_LIFT_CONTROLLER_JDG );
 			if (elevatorController != NULL)

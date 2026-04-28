@@ -3911,7 +3911,7 @@ DECLARE_SCRIPT(M02_Obelisk, "")
 
 				// Announce the returned health as an engineer repairing internally.
 
-				if ((!info_given) && (damager == STAR))
+				if ((!info_given) && (Commands->Is_A_Star(damager)))
 				{
 					info_given = true;
 					Commands->Stop_All_Conversations ();
@@ -3985,7 +3985,7 @@ DECLARE_SCRIPT (M02_Power_Plant, "")
 
 			// Announce the returned health as an engineer repairing internally.
 
-			if ((!info_given) && (damager == STAR))
+			if ((!info_given) && (Commands->Is_A_Star(damager)))
 			{
 				info_given = true;
 				Commands->Stop_All_Conversations ();
@@ -5039,7 +5039,7 @@ DECLARE_SCRIPT (M02_Destroy_Vehicle, "")
 
 	void Damaged (GameObject* obj, GameObject* damager, float /*amount*/) override
 	{
-		if (damager != STAR)
+		if (!Commands->Is_A_Star(damager))
 		{
 			Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", NULL);
 		}
