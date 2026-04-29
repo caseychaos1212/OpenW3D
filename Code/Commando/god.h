@@ -70,8 +70,8 @@ class cGod
 		static	void				Reset_Inventory( void );
 
 	private:
-		static SoldierGameObj * Create_Commando(int client_id, int player_type);
-		static SoldierGameObj * Create_Commando(cPlayer * p_player);
+		static SoldierGameObj * Create_Commando(int client_id, int player_type, bool prefer_ally_spawn = false);
+		static SoldierGameObj * Create_Commando(cPlayer * p_player, bool prefer_ally_spawn = false);
 
 		static	int				State;
 
@@ -80,4 +80,3 @@ class cGod
 
 //-----------------------------------------------------------------------------
 #endif // GOD_H
-

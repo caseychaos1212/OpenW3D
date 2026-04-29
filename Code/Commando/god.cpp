@@ -28,6 +28,7 @@
 #include "cnetwork.h"
 #include "playermanager.h"
 #include "gameobjmanager.h"
+#include "basegameobj.h"
 #include "spawn.h"
 #include "gdcoopmission.h"
 #include "coopdebuglog.h"
@@ -37,6 +38,7 @@
 #include "definitionmgr.h"
 #include "combatchunkid.h"
 #include "phys.h"
+#include "humanphys.h"
 #include "soldierobserver.h"
 #include "gametype.h"
 #include "dialogtests.h"
@@ -101,6 +103,227 @@ static bool Is_Coop_Secondary_Player(int client_id)
 
 	cPlayer * first_player = Get_First_Active_In_Game_Player();
 	return first_player != NULL && first_player->Get_Id() != client_id;
+}
+
+//-----------------------------------------------------------------------------
+static bool Is_Living_Coop_Player_Soldier(SoldierGameObj * soldier)
+{
+	return soldier != NULL &&
+		!soldier->Is_Delete_Pending() &&
+		!soldier->Is_Dead() &&
+		soldier->Get_Defense_Object()->Get_Health() > 0.0F;
+}
+
+//-----------------------------------------------------------------------------
+static SoldierGameObj * Find_Living_Coop_Ally(int client_id)
+{
+	for (
+		SLNode<cPlayer> * objnode = cPlayerManager::Get_Player_Object_List()->Head();
+		objnode;
+		objnode = objnode->Next()) {
+
+		cPlayer * p_player = objnode->Data();
+		if (p_player == NULL ||
+			 p_player->Get_Id() == client_id ||
+			 p_player->Get_Is_Active().Is_False() ||
+			 p_player->Get_Is_In_Game().Is_False()) {
+			continue;
+		}
+
+		SmartGameObj * smart_soldier = GameObjManager::Find_Soldier_Of_Client_ID(p_player->Get_Id());
+		SoldierGameObj * soldier = smart_soldier != NULL ? smart_soldier->As_SoldierGameObj() : NULL;
+		if (Is_Living_Coop_Player_Soldier(soldier)) {
+			return soldier;
+		}
+	}
+
+	return NULL;
+}
+
+//-----------------------------------------------------------------------------
+static bool Is_Hostile_Near_Soldier(SoldierGameObj * soldier)
+{
+	WWASSERT(soldier != NULL);
+
+	static const float COOP_ALLY_RESPAWN_ENEMY_RADIUS = 30.0F;
+	static const float COOP_ALLY_RESPAWN_ENEMY_RADIUS_SQ =
+		COOP_ALLY_RESPAWN_ENEMY_RADIUS * COOP_ALLY_RESPAWN_ENEMY_RADIUS;
+
+	Vector3 soldier_pos;
+	soldier->Get_Position(&soldier_pos);
+
+	for (
+		SLNode<BaseGameObj> * objnode = GameObjManager::Get_Game_Obj_List()->Head();
+		objnode;
+		objnode = objnode->Next()) {
+
+		BaseGameObj * base_obj = objnode->Data();
+		if (base_obj == NULL || base_obj->Is_Delete_Pending()) {
+			continue;
+		}
+
+		PhysicalGameObj * physical_obj = base_obj->As_PhysicalGameObj();
+		if (physical_obj == NULL ||
+			 physical_obj == soldier ||
+			 physical_obj->Is_Delete_Pending() ||
+			 physical_obj->Get_Defense_Object()->Get_Health() <= 0.0F ||
+			 !soldier->Is_Enemy(physical_obj)) {
+			continue;
+		}
+
+		Vector3 obj_pos;
+		physical_obj->Get_Position(&obj_pos);
+
+		Vector3 delta = obj_pos - soldier_pos;
+		float distance_sq = delta.X * delta.X + delta.Y * delta.Y + delta.Z * delta.Z;
+		if (distance_sq <= COOP_ALLY_RESPAWN_ENEMY_RADIUS_SQ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+struct CoopSpawnOffset
+{
+	float Forward;
+	float Side;
+};
+
+//-----------------------------------------------------------------------------
+static Matrix3D Build_Coop_Spawn_Test_Transform(const Matrix3D & base_transform, const CoopSpawnOffset & offset, float height_offset)
+{
+	Matrix3D test_transform = base_transform;
+	Vector3 position = base_transform.Get_Translation();
+	position += base_transform.Get_X_Vector() * offset.Forward;
+	position += base_transform.Get_Y_Vector() * offset.Side;
+	position.Z += height_offset;
+	test_transform.Set_Translation(position);
+	return test_transform;
+}
+
+//-----------------------------------------------------------------------------
+static bool Test_Coop_Spawn_Transform(SoldierGameObj * soldier, const Matrix3D & test_transform, Matrix3D & safe_transform)
+{
+	WWASSERT(soldier != NULL);
+
+	HumanPhysClass * human_phys = soldier->Peek_Human_Phys();
+	if (human_phys == NULL) {
+		safe_transform = test_transform;
+		return true;
+	}
+
+	return human_phys->Can_Teleport_And_Stand(test_transform, &safe_transform);
+}
+
+//-----------------------------------------------------------------------------
+static bool Find_Safe_Coop_Spawn_Transform(SoldierGameObj * soldier, const Matrix3D & base_transform, bool include_center, Matrix3D & safe_transform)
+{
+	static const float COOP_SPAWN_TEST_HEIGHT_OFFSET = 1.0F;
+	static const CoopSpawnOffset OFFSETS[] = {
+		{ 0.0F, 1.5F },
+		{ 0.0F, -1.5F },
+		{ -1.5F, 0.0F },
+		{ 1.5F, 0.0F },
+		{ -1.5F, 1.5F },
+		{ -1.5F, -1.5F },
+		{ 1.5F, 1.5F },
+		{ 1.5F, -1.5F },
+		{ 0.0F, 2.5F },
+		{ 0.0F, -2.5F },
+		{ -2.5F, 0.0F },
+		{ 2.5F, 0.0F },
+		{ -2.5F, 2.5F },
+		{ -2.5F, -2.5F },
+		{ 2.5F, 2.5F },
+		{ 2.5F, -2.5F },
+		{ 0.0F, 4.0F },
+		{ 0.0F, -4.0F },
+		{ -4.0F, 0.0F },
+		{ 4.0F, 0.0F }
+	};
+
+	if (include_center && Test_Coop_Spawn_Transform(soldier, base_transform, safe_transform)) {
+		return true;
+	}
+
+	if (include_center) {
+		Matrix3D raised_center = Build_Coop_Spawn_Test_Transform(base_transform, { 0.0F, 0.0F }, COOP_SPAWN_TEST_HEIGHT_OFFSET);
+		if (Test_Coop_Spawn_Transform(soldier, raised_center, safe_transform)) {
+			return true;
+		}
+	}
+
+	for (int index = 0; index < (int)(sizeof(OFFSETS) / sizeof(OFFSETS[0])); index++) {
+		Matrix3D test_transform = Build_Coop_Spawn_Test_Transform(base_transform, OFFSETS[index], COOP_SPAWN_TEST_HEIGHT_OFFSET);
+		if (Test_Coop_Spawn_Transform(soldier, test_transform, safe_transform)) {
+			return true;
+		}
+	}
+
+	HumanPhysClass * human_phys = soldier->Peek_Human_Phys();
+	if (human_phys != NULL) {
+		Vector3 safe_position;
+		if (human_phys->Find_Teleport_Location(base_transform.Get_Translation(), 4.0F, &safe_position)) {
+			safe_transform = base_transform;
+			safe_transform.Set_Translation(safe_position);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+static bool Try_Get_Coop_Ally_Spawn_Transform(int client_id, SoldierGameObj * soldier, Matrix3D & transform)
+{
+	SoldierGameObj * ally = Find_Living_Coop_Ally(client_id);
+	if (ally == NULL) {
+		return false;
+	}
+
+	if (Is_Hostile_Near_Soldier(ally)) {
+		CoopDebugLog::Log("cGod::Create_Commando ally spawn blocked by nearby hostile client_id=%d ally_net_id=%d",
+			client_id, ally->Get_Network_ID());
+		return false;
+	}
+
+	if (Find_Safe_Coop_Spawn_Transform(soldier, ally->Get_Transform(), false, transform)) {
+		Vector3 position = transform.Get_Translation();
+		CoopDebugLog::Log("cGod::Create_Commando ally spawn selected client_id=%d ally_net_id=%d pos=(%.2f, %.2f, %.2f)",
+			client_id, ally->Get_Network_ID(), position.X, position.Y, position.Z);
+		return true;
+	}
+
+	CoopDebugLog::Log("cGod::Create_Commando ally spawn failed safety checks client_id=%d ally_net_id=%d",
+		client_id, ally->Get_Network_ID());
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+static Matrix3D Get_Coop_Mission_Spawn_Transform(int client_id, SoldierGameObj * soldier, bool prefer_ally_spawn)
+{
+	if (prefer_ally_spawn) {
+		Matrix3D ally_transform;
+		if (Try_Get_Coop_Ally_Spawn_Transform(client_id, soldier, ally_transform)) {
+			return ally_transform;
+		}
+	}
+
+	Matrix3D primary_transform = SpawnManager::Get_Primary_Spawn_Location();
+	Matrix3D safe_transform;
+	bool include_center = !Is_Coop_Secondary_Player(client_id);
+	if (Find_Safe_Coop_Spawn_Transform(soldier, primary_transform, include_center, safe_transform)) {
+		return safe_transform;
+	}
+
+	if (!include_center && Find_Safe_Coop_Spawn_Transform(soldier, primary_transform, true, safe_transform)) {
+		return safe_transform;
+	}
+
+	CoopDebugLog::Log("cGod::Create_Commando no safe co-op spawn found; using primary spawn client_id=%d", client_id);
+	return primary_transform;
 }
 
 //-----------------------------------------------------------------------------
@@ -284,7 +507,7 @@ void cGod::Think(void)
 				if (State == GOD_STATE_COOP_RUNNING) {
 					CoopDebugLog::Log("cGod::Think COOP_RUNNING spawning missing body for player id=%d", p_player->Get_Id());
 				}
-				Create_Commando(p_player);
+				Create_Commando(p_player, State == GOD_STATE_COOP_RUNNING);
 			}
 		}
 	}
@@ -380,7 +603,7 @@ void cGod::Create_Ai_Player(void)
 }
 
 //-----------------------------------------------------------------------------
-SoldierGameObj * cGod::Create_Commando(int client_id, int player_type/*, int model_num*/)
+SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool prefer_ally_spawn/*, int model_num*/)
 {
    WWASSERT(cNetwork::I_Am_Server());
 	WWASSERT(player_type >= PLAYERTYPE_NEUTRAL && player_type <= PLAYERTYPE_LAST);
@@ -471,12 +694,10 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type/*, int mod
 
 	Matrix3D transform;
 	if (IS_MISSION && player_type == PLAYERTYPE_GDI) {
-		transform = SpawnManager::Get_Primary_Spawn_Location();
-		if (IS_COOP_MISSION && Is_Coop_Secondary_Player(client_id)) {
-			Vector3 position = transform.Get_Translation();
-			position += transform.Get_Y_Vector() * 1.5F;
-			position.Z += 0.25F;
-			transform.Set_Translation(position);
+		if (IS_COOP_MISSION) {
+			transform = Get_Coop_Mission_Spawn_Transform(client_id, p_soldier, prefer_ally_spawn);
+		} else {
+			transform = SpawnManager::Get_Primary_Spawn_Location();
 		}
 	} else {
 		transform = SpawnManager::Get_Multiplayer_Spawn_Location(player_type,p_soldier);
@@ -551,7 +772,7 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type/*, int mod
 }
 
 //-----------------------------------------------------------------------------
-SoldierGameObj * cGod::Create_Commando(cPlayer * p_player)
+SoldierGameObj * cGod::Create_Commando(cPlayer * p_player, bool prefer_ally_spawn)
 {
    WWASSERT(cNetwork::I_Am_Server());
 	WWASSERT(p_player != NULL);
@@ -560,7 +781,7 @@ SoldierGameObj * cGod::Create_Commando(cPlayer * p_player)
 	int player_type	= p_player->Get_Player_Type();
 	//int model_num		= p_player->Get_Model();
 
-	return Create_Commando(client_id, player_type/*, model_num*/);
+	return Create_Commando(client_id, player_type, prefer_ally_spawn/*, model_num*/);
 }
 
 //-----------------------------------------------------------------------------
