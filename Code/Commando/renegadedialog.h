@@ -440,6 +440,7 @@ enum class RenegadeDialogID {
 #define IDC_HOTKEY21                    1241
 #define IDC_HOTKEY22                    1242
 #define IDC_HOTKEY23                    1243
+#define IDC_HOTKEY24                    1244
 #define IDC_ADD_MAP_BUTTON              1245
 #define IDC_AVAILABLE_MAP_LIST_CTRL     1246
 #define IDC_MAP_CYCLE_LIST_CTRL         1247
@@ -896,6 +897,8 @@ enum class RenegadeDialogID {
 #define IDC_COOP_DIRECT_CONNECT_BUTTON  1664
 #define IDC_HOST_OPTIONS_TITLE          1665
 #define IDC_COOP_DIFFICULTY_COMBO       1666
+#define IDC_GAME_LIST_TITLE             1667
+#define IDC_COOP_ENABLE_SPRINT_CHECK    1668
 
 //
 //	These button IDs are used for "simple" buttons

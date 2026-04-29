@@ -306,6 +306,7 @@ CCameraClass::CCameraClass() :
 	Tilt( 0 ),
 	Heading( 0 ),
 	DistanceFraction(1.0f),
+	SprintZoomFraction(0.0f),
 	Enable2DTargeting( false ),
 	EnableWeaponHelp( false ),
 	CameraTarget2DOffset( 0.5f, 0.5f ),
@@ -724,6 +725,7 @@ void CCameraClass::Update()
 	}
 
 	if ( Is_Using_Host_Model()	) {	// if using a host model, update the
+		SprintZoomFraction = 0.0f;
 		Use_Host_Model();				// camera from it
 		return;
 	}
@@ -815,6 +817,27 @@ void CCameraClass::Update()
 
 		LastAnchorPosition = anchor_position;
 		LastHeading	= Heading;
+	}
+
+	const bool sprint_zoom_active =
+		IS_COOP_MISSION &&
+		cGameType::Is_Coop_Sprint_Enabled() &&
+		COMBAT_STAR != NULL &&
+		COMBAT_STAR->Is_Sprinting() &&
+		!CombatManager::Is_First_Person() &&
+		!IsStarSniping &&
+		COMBAT_STAR->Get_Vehicle() == NULL;
+	const float sprint_zoom_target = sprint_zoom_active ? 1.0f : 0.0f;
+	const float sprint_zoom_step = TimeManager::Get_Frame_Seconds() * 6.0f;
+	if (SprintZoomFraction < sprint_zoom_target) {
+		SprintZoomFraction = WWMath::Min(SprintZoomFraction + sprint_zoom_step, sprint_zoom_target);
+	} else if (SprintZoomFraction > sprint_zoom_target) {
+		SprintZoomFraction = WWMath::Max(SprintZoomFraction - sprint_zoom_step, sprint_zoom_target);
+	}
+
+	if (SprintZoomFraction > 0.0f) {
+		profile.Distance += 1.5f * SprintZoomFraction;
+		profile.FOV = WWMath::Clamp(profile.FOV + DEG_TO_RADF(5.0f) * SprintZoomFraction, MIN_FOV, MAX_FOV);
 	}
 
 	Set_View_Plane( profile.FOV );	// Apply Zoom
@@ -1714,4 +1737,3 @@ void	CCameraClass::Handle_Snap_Shot_Mode( void )
 
 	Set_Transform( tm );
 }
-

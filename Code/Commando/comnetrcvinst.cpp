@@ -50,6 +50,17 @@
 #include "ConsoleMode.h"
 #include "demosupport.h"
 
+static const int COOP_NETWORK_UPDATE_RATE = 30;
+
+static int Get_Effective_Net_Update_Rate(void)
+{
+	if (IS_COOP_MISSION) {
+		return COOP_NETWORK_UPDATE_RATE;
+	}
+
+	return cUserOptions::NetUpdateRate.Get();
+}
+
 //-----------------------------------------------------------------------------
 void	CombatNetworkReceiverInstanceClass::Print( const char *format, ... )
 {
@@ -147,7 +158,8 @@ bool CombatNetworkReceiverInstanceClass::Server_Update_Dynamic_Objects(bool is_u
 	//
 	static DWORD last_update_time = 0;
    DWORD time_now = TIMEGETTIME();
-	if (!is_urgent && (time_now - last_update_time < 1000 / (float) cUserOptions::NetUpdateRate.Get())) {
+	int net_update_rate = Get_Effective_Net_Update_Rate();
+	if (!is_urgent && (time_now - last_update_time < 1000 / (float) net_update_rate)) {
 		return(false);
 	}
 	last_update_time = time_now;
@@ -155,7 +167,7 @@ bool CombatNetworkReceiverInstanceClass::Server_Update_Dynamic_Objects(bool is_u
 	//
 	// cRemoteHost figures out when to update priorities based on this so keep it in sync with the NetUpdateRate.
 	//
-	cRemoteHost::Set_Priority_Update_Rate(cUserOptions::NetUpdateRate.Get());
+	cRemoteHost::Set_Priority_Update_Rate(net_update_rate);
 
    //
    // TSS - bug
@@ -255,10 +267,11 @@ bool CombatNetworkReceiverInstanceClass::Client_Update_Dynamic_Objects(bool is_u
    DWORD time_now_ms = TIMEGETTIME();
 	DWORD time_elapsed_ms = time_now_ms - last_update_time_ms;
 
-	int max_updates_per_second = cUserOptions::NetUpdateRate.Get();
+	int net_update_rate = Get_Effective_Net_Update_Rate();
+	int max_updates_per_second = net_update_rate;
 	WWASSERT(cServerFps::Get_Instance() != NULL);
 	int server_fps = cServerFps::Get_Instance()->Get_Fps();
-	if (server_fps > 0 && server_fps < cUserOptions::NetUpdateRate.Get()) {
+	if (server_fps > 0 && server_fps < net_update_rate) {
 		max_updates_per_second = server_fps;
 	}
 

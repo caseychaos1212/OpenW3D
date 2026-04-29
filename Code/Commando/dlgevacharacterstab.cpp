@@ -36,12 +36,116 @@
 
 #include "dlgevacharacterstab.h"
 
+#include "combatchunkid.h"
 #include "coopcharacterselectevent.h"
 #include "cnetwork.h"
+#include "definitionmgr.h"
 #include "dialogcontrol.h"
 #include "gametype.h"
+#include "physicalgameobj.h"
+#include "phys.h"
 #include "renegadedialog.h"
 
+#include <ctype.h>
+#include <string.h>
+
+
+static void Normalize_Character_Model_Name(const char *model_name, char *buffer, int buffer_size)
+{
+	if (buffer == NULL || buffer_size <= 0) {
+		return;
+	}
+
+	buffer[0] = 0;
+	if (model_name == NULL || model_name[0] == 0) {
+		return;
+	}
+
+	const char *name_start = model_name;
+	for (const char *scan = model_name; *scan != 0; scan++) {
+		if (*scan == '\\' || *scan == '/' || *scan == ':') {
+			name_start = scan + 1;
+		}
+	}
+
+	::strncpy(buffer, name_start, buffer_size - 1);
+	buffer[buffer_size - 1] = 0;
+
+	char *extension = ::strrchr(buffer, '.');
+	if (extension != NULL &&
+		 ::strlen(extension) == 4 &&
+		 ::tolower((unsigned char)extension[0]) == '.' &&
+		 ::tolower((unsigned char)extension[1]) == 'w' &&
+		 ::tolower((unsigned char)extension[2]) == '3' &&
+		 ::tolower((unsigned char)extension[3]) == 'd') {
+		*extension = 0;
+	}
+
+	for (char *scan = buffer; *scan != 0; scan++) {
+		*scan = (char)::tolower((unsigned char)*scan);
+	}
+}
+
+
+static bool Model_Names_Match(const char *left, const char *right)
+{
+	char normalized_left[128];
+	char normalized_right[128];
+	Normalize_Character_Model_Name(left, normalized_left, sizeof(normalized_left));
+	Normalize_Character_Model_Name(right, normalized_right, sizeof(normalized_right));
+
+	return normalized_left[0] != 0 &&
+		normalized_right[0] != 0 &&
+		::strcmp(normalized_left, normalized_right) == 0;
+}
+
+
+static bool Find_Soldier_Preset_For_Model(const char *model_name, StringClass &preset_name)
+{
+	if (model_name == NULL || model_name[0] == 0) {
+		return false;
+	}
+
+	for (DefinitionClass *definition = DefinitionMgrClass::Get_First(CLASSID_GAME_OBJECT_DEF_SOLDIER);
+		  definition != NULL;
+		  definition = DefinitionMgrClass::Get_Next(definition, CLASSID_GAME_OBJECT_DEF_SOLDIER)) {
+		PhysicalGameObjDef *object_def = (PhysicalGameObjDef *)definition;
+		if (object_def == NULL) {
+			continue;
+		}
+
+		PhysDefClass *phys_def = (PhysDefClass *)DefinitionMgrClass::Find_Definition(object_def->Get_Phys_Def_ID());
+		if (phys_def == NULL || phys_def->Get_Model_Name().Is_Empty()) {
+			continue;
+		}
+
+		if (Model_Names_Match(model_name, phys_def->Get_Model_Name().Peek_Buffer())) {
+			preset_name = definition->Get_Name();
+			return !preset_name.Is_Empty();
+		}
+	}
+
+	return false;
+}
+
+
+static bool Resolve_Coop_Character_Preset(EvaViewerObjectClass *object, StringClass &preset_name)
+{
+	preset_name = "";
+	if (object == NULL) {
+		return false;
+	}
+
+	const char *definition_name = object->Get_Definition_Name();
+	if (definition_name != NULL &&
+		 definition_name[0] != 0 &&
+		 DefinitionMgrClass::Find_Typed_Definition(definition_name, CLASSID_GAME_OBJECT_DEF_SOLDIER) != NULL) {
+		preset_name = definition_name;
+		return true;
+	}
+
+	return Find_Soldier_Preset_For_Model(object->Get_Model_Name(), preset_name);
+}
 
 
 ////////////////////////////////////////////////////////////////
@@ -89,13 +193,12 @@ EvaCharactersTabClass::On_Command (int ctrl_id, int message_id, unsigned int par
 {
 	if (ctrl_id == IDC_SELECT_BUTTON) {
 		EvaViewerObjectClass *object = Get_Current_Object ();
-		if (object != NULL &&
-			 object->Get_Definition_Name () != NULL &&
-			 object->Get_Definition_Name ()[0] != 0 &&
+		StringClass preset_name;
+		if (Resolve_Coop_Character_Preset(object, preset_name) &&
 			 IS_COOP_MISSION &&
-			 cNetwork::I_Am_Client ()) {
+			 cNetwork::I_Am_Client()) {
 			cCoopCharacterSelectEvent *event = new cCoopCharacterSelectEvent;
-			event->Init (object->Get_Definition_Name ());
+			event->Init(preset_name.Peek_Buffer());
 		}
 	} else {
 		EvaViewerTabClass::On_Command (ctrl_id, message_id, param);
@@ -135,10 +238,8 @@ EvaCharactersTabClass::Update_Select_Button (void)
 	bool can_select = false;
 	if (IS_COOP_MISSION && cNetwork::I_Am_Client ()) {
 		EvaViewerObjectClass *object = Get_Current_Object ();
-		can_select =
-			object != NULL &&
-			object->Get_Definition_Name () != NULL &&
-			object->Get_Definition_Name ()[0] != 0;
+		StringClass preset_name;
+		can_select = Resolve_Coop_Character_Preset(object, preset_name);
 	}
 
 	select_button->Show (IS_COOP_MISSION);

@@ -275,6 +275,7 @@ public:
 		}
 #else
 		obj->Set_Boolean_Control( ControlClass::BOOLEAN_WALK,					Input::Get_State( INPUT_FUNCTION_WALK_MODE ) );
+		obj->Set_Boolean_Control( ControlClass::BOOLEAN_SPRINT,				Input::Get_State( INPUT_FUNCTION_SPRINT ) );
 #endif
 		obj->Set_Analog_Control( ControlClass::ANALOG_MOVE_FORWARD, forward_amount );
 		obj->Set_Analog_Control( ControlClass::ANALOG_MOVE_LEFT, left_amount );

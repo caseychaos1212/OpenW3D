@@ -41,6 +41,7 @@
 #ifndef __GAME_INIT_MGR_H
 #define __GAME_INIT_MGR_H
 
+#include "gamedata.h"
 #include "renegadedialogmgr.h"
 
 
@@ -105,6 +106,7 @@ public:
 	static void		Think (void);
 	static void		Set_Needs_Game_Exit			(bool onoff)	{ NeedsGameExit = onoff; }
 	static void		Set_Needs_Game_Exit_All		(bool onoff)	{ NeedsGameExitAll = onoff; }
+	static void		Queue_Coop_Level_Transition	(const char *map_name, int difficulty_level);
 
 	//
 	//	WOL specific
@@ -145,6 +147,9 @@ private:
 
 	static bool		NeedsGameExit;
 	static bool		NeedsGameExitAll;
+	static bool		HasPendingCoopLevelTransition;
+	static char		PendingCoopLevelTransitionMap[MAX_MAPNAME_SIZE];
+	static int		PendingCoopLevelTransitionDifficulty;
 };
 
 

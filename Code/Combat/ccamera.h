@@ -136,6 +136,7 @@ protected:
 	float						Tilt;
 	float						Heading;
 	float						DistanceFraction;
+	float						SprintZoomFraction;
 
 	bool						Enable2DTargeting;
 	float						LagPersistTimer;

@@ -65,6 +65,8 @@
 
 bool MPLanGameListMenuClass::UpdateNickname = false;
 bool MPLanGameListMenuClass::IsCoopList = false;
+static RectClass DefaultGameListRect;
+static bool HasDefaultGameListRect = false;
 
 ////////////////////////////////////////////////////////////////
 //	Local constants
@@ -127,6 +129,9 @@ MPLanGameListMenuClass::On_Init_Dialog (void)
 	//
 	ListCtrlClass *list_ctrl = (ListCtrlClass *)Get_Dlg_Item (IDC_GAME_LIST_CTRL);
 	if (list_ctrl != NULL) {
+		DefaultGameListRect = list_ctrl->Get_Window_Rect();
+		HasDefaultGameListRect = true;
+
 		WideStringClass col_name;
 
 		//
@@ -291,9 +296,19 @@ MPLanGameListMenuClass::Apply_Coop_List_Layout(void)
 {
 	ListCtrlClass *list_ctrl = (ListCtrlClass *)Get_Dlg_Item(IDC_GAME_LIST_CTRL);
 	if (list_ctrl != NULL) {
-		list_ctrl->Set_Window_Rect(RectClass(8, 53, 392, IsCoopList ? 195 : 209));
+		if (!HasDefaultGameListRect) {
+			DefaultGameListRect = list_ctrl->Get_Window_Rect();
+			HasDefaultGameListRect = true;
+		}
+
+		RectClass list_rect = DefaultGameListRect;
+		if (IsCoopList) {
+			list_rect.Bottom = list_rect.Top + (DefaultGameListRect.Height() * (142.0F / 156.0F));
+		}
+		list_ctrl->Set_Window_Rect(list_rect);
 	}
 
+	Set_Dlg_Item_Text(IDC_GAME_LIST_TITLE, IsCoopList ? U_CHAR("Co-op Campaign") : TRANSLATE(IDS_MENU_TEXT280));
 	Get_Dlg_Item(IDC_COOP_DIRECT_ADDRESS_STATIC)->Show(IsCoopList);
 	Get_Dlg_Item(IDC_COOP_DIRECT_ADDRESS_EDIT)->Show(IsCoopList);
 	Get_Dlg_Item(IDC_COOP_DIRECT_PORT_STATIC)->Show(IsCoopList);

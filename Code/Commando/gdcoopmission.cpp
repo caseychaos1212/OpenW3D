@@ -12,6 +12,7 @@
 
 #include "assets.h"
 #include "combat.h"
+#include "gametype.h"
 #include "ini.h"
 #include "playertype.h"
 #include "wwpacket.h"
@@ -23,8 +24,10 @@ static const char *DEFAULT_COOP_PLAYER2_PRESET = "GDI_Logan_Sheppard_Tutorial";
 cGameDataCoopMission::cGameDataCoopMission(void) :
 	cGameData(),
 	Player2Preset(DEFAULT_COOP_PLAYER2_PRESET),
-	DifficultyLevel(CombatManager::Get_Difficulty_Level())
+	DifficultyLevel(CombatManager::Get_Difficulty_Level()),
+	EnableSprint(true)
 {
+	cGameType::Set_Coop_Sprint_Enabled(EnableSprint);
 	Set_Ini_Filename("svrcfg_coop.ini");
 	Set_Ip_And_Port();
 	Set_Game_Title(U_CHAR("Co-op Campaign"));
@@ -75,6 +78,13 @@ void cGameDataCoopMission::Set_Difficulty_Level(int level)
 }
 
 //-----------------------------------------------------------------------------
+void cGameDataCoopMission::Set_Sprint_Enabled(bool enabled)
+{
+	EnableSprint = enabled;
+	cGameType::Set_Coop_Sprint_Enabled(EnableSprint);
+}
+
+//-----------------------------------------------------------------------------
 void cGameDataCoopMission::Load_From_Server_Config(void)
 {
 	cGameData::Load_From_Server_Config(Get_Ini_Filename());
@@ -94,6 +104,8 @@ void cGameDataCoopMission::Load_From_Server_Config(void)
 
 	bool friendly_fire = p_ini->Get_Bool(INI_SECTION_NAME, "IsFriendlyFirePermitted", IsFriendlyFirePermitted.Get());
 	IsFriendlyFirePermitted.Set(friendly_fire);
+
+	Set_Sprint_Enabled(p_ini->Get_Bool(INI_SECTION_NAME, "EnableSprint", EnableSprint));
 
 	bool maps_loop = p_ini->Get_Bool(INI_SECTION_NAME, "DoMapsLoop", false);
 	Set_Do_Maps_Loop(maps_loop);
@@ -120,6 +132,7 @@ void cGameDataCoopMission::Save_To_Server_Config(void)
 	p_ini->Put_Int(INI_SECTION_NAME, "Difficulty", DifficultyLevel);
 	p_ini->Put_String(INI_SECTION_NAME, "CoopPlayer2Preset", Player2Preset.Is_Empty() ? "" : Player2Preset.Peek_Buffer());
 	p_ini->Put_Bool(INI_SECTION_NAME, "IsFriendlyFirePermitted", IsFriendlyFirePermitted.Get());
+	p_ini->Put_Bool(INI_SECTION_NAME, "EnableSprint", EnableSprint);
 	p_ini->Put_Bool(INI_SECTION_NAME, "DoMapsLoop", Do_Maps_Loop());
 
 	Save_INI(p_ini, Get_Ini_Filename());
@@ -133,6 +146,7 @@ void cGameDataCoopMission::Export_Tier_2_Data(cPacket & packet)
 
 	packet.Add(DifficultyLevel);
 	packet.Add_Terminated_String(Player2Preset.Is_Empty() ? "" : Player2Preset.Peek_Buffer(), true);
+	packet.Add(EnableSprint);
 }
 
 //-----------------------------------------------------------------------------
@@ -146,4 +160,7 @@ void cGameDataCoopMission::Import_Tier_2_Data(cPacket & packet)
 	char preset[256] = { 0 };
 	packet.Get_Terminated_String(preset, sizeof(preset), true);
 	Player2Preset = preset;
+
+	bool enable_sprint = packet.Get(enable_sprint);
+	Set_Sprint_Enabled(enable_sprint);
 }

@@ -36,6 +36,9 @@
 
 
 #include "gameinitmgr.h"
+
+#include <cstring>
+
 #include "gamedata.h"
 #include "gamemode.h"
 #include "cnetwork.h"
@@ -82,6 +85,7 @@
 #include "specialbuilds.h"
 #include "modpackagemgr.h"
 #include "teammanager.h"
+#include "campaign.h"
 
 #include "translatedb.h"
 #include "damage.h"
@@ -113,6 +117,9 @@ bool		GameInitMgrClass::RestoreMusic		= false;
 bool		GameInitMgrClass::NeedsGameExit		= false;
 bool		GameInitMgrClass::NeedsGameExitAll	= false;
 bool		GameInitMgrClass::IsCoopLevelTransition = false;
+bool		GameInitMgrClass::HasPendingCoopLevelTransition = false;
+char		GameInitMgrClass::PendingCoopLevelTransitionMap[MAX_MAPNAME_SIZE] = { 0 };
+int		GameInitMgrClass::PendingCoopLevelTransitionDifficulty = 0;
 int		GameInitMgrClass::Mode					= MODE_UNKNOWN;
 int		GameInitMgrClass::WOLReturnDialog	= RenegadeDialogMgrClass::LOC_INTERNET_MAIN;
 
@@ -1057,12 +1064,75 @@ GameInitMgrClass::Shutdown (void)
 
 ////////////////////////////////////////////////////////////////
 //
+//	Queue_Coop_Level_Transition
+//
+////////////////////////////////////////////////////////////////
+void
+GameInitMgrClass::Queue_Coop_Level_Transition(const char *map_name, int difficulty_level)
+{
+	if (map_name == NULL || map_name[0] == 0) {
+		return;
+	}
+
+	::strncpy(PendingCoopLevelTransitionMap, map_name, sizeof(PendingCoopLevelTransitionMap) - 1);
+	PendingCoopLevelTransitionMap[sizeof(PendingCoopLevelTransitionMap) - 1] = 0;
+	PendingCoopLevelTransitionDifficulty = difficulty_level;
+	HasPendingCoopLevelTransition = true;
+
+	CoopDebugLog::Log("GameInitMgrClass::Queue_Coop_Level_Transition map=%s difficulty=%d",
+		PendingCoopLevelTransitionMap, PendingCoopLevelTransitionDifficulty);
+}
+
+
+////////////////////////////////////////////////////////////////
+//
 //	Think
 //
 ////////////////////////////////////////////////////////////////
 void
 GameInitMgrClass::Think (void)
 {
+	if (HasPendingCoopLevelTransition) {
+		char map_name[MAX_MAPNAME_SIZE];
+		::strncpy(map_name, PendingCoopLevelTransitionMap, sizeof(map_name) - 1);
+		map_name[sizeof(map_name) - 1] = 0;
+		int difficulty_level = PendingCoopLevelTransitionDifficulty;
+
+		HasPendingCoopLevelTransition = false;
+		PendingCoopLevelTransitionMap[0] = 0;
+
+		CoopDebugLog::Log("GameInitMgrClass::Think handling co-op level transition map=%s difficulty=%d",
+			map_name, difficulty_level);
+
+		if (IS_COOP_MISSION && map_name[0] != 0) {
+			CampaignManager::Prepare_Coop_Campaign_Level(map_name, difficulty_level);
+
+			if (PTheGameData != NULL) {
+				StringClass map(map_name, true);
+				The_Game()->Set_Map_Name(map);
+
+				cGameDataCoopMission *coop_game = The_Game()->As_Coop_Mission();
+				if (coop_game != NULL) {
+					coop_game->Set_Difficulty_Level(difficulty_level);
+				}
+				The_Game()->IsIntermission.Set(false);
+			}
+
+			GameModeClass *combat_mode = GameModeManager::Find("Combat");
+			if (combat_mode != NULL && !combat_mode->Is_Inactive()) {
+				extern bool g_b_core_restart;
+				g_b_core_restart = true;
+				CoopDebugLog::Log("GameInitMgrClass::Think queued co-op core restart map=%s difficulty=%d",
+					map_name, difficulty_level);
+			} else {
+				CoopDebugLog::Log("GameInitMgrClass::Think starting co-op campaign directly map=%s difficulty=%d",
+					map_name, difficulty_level);
+				CampaignManager::Start_Coop_Campaign(map_name, difficulty_level);
+			}
+			return;
+		}
+	}
+
 	//
 	//	Safely exit the game and return to the menu (as necessary)
 	//

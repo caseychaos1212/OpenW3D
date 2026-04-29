@@ -278,6 +278,15 @@ void	CampaignManager::Start_Coop_Campaign( const char * mission_name, int diffic
 {
 	Debug_Say(( "CampaignManager::Start_Coop_Campaign( %s, %d )\n", mission_name, difficulty ));
 
+	Prepare_Coop_Campaign_Level(mission_name, difficulty);
+	GameInitMgrClass::Start_Game(mission_name, PLAYERTYPE_GDI, 0);
+}
+
+/*
+**
+*/
+void	CampaignManager::Prepare_Coop_Campaign_Level( const char * mission_name, int difficulty )
+{
 	State = Campaign_Find_Level_State(mission_name);
 	BackdropIndex = 0;
 
@@ -286,7 +295,6 @@ void	CampaignManager::Start_Coop_Campaign( const char * mission_name, int diffic
 
 	int mission = cGameData::Get_Mission_Number_From_Map_Name(mission_name);
 	Select_Backdrop_Number(mission);
-	GameInitMgrClass::Start_Game(mission_name, PLAYERTYPE_GDI, 0);
 }
 
 /*
@@ -342,17 +350,7 @@ void	CampaignManager::Continue( bool /* success */ )
 		transition_event->Init(mission_name, CombatManager::Get_Difficulty_Level());
 		cNetwork::Flush();
 
-		GameModeManager::Find ("Combat")->Suspend();
-		GameModeManager::Find ("Movie")->Deactivate();
-	    GameModeManager::Find ("ScoreScreen")->Deactivate ();
-
-		GameInitMgrClass::Set_Is_Coop_Level_Transition(true);
-		GameInitMgrClass::End_Game();
-		GameInitMgrClass::Set_Is_Coop_Level_Transition(false);
-
-		int mission = cGameData::Get_Mission_Number_From_Map_Name(mission_name);
-		Select_Backdrop_Number(mission);
-		GameInitMgrClass::Start_Game(mission_name, PLAYERTYPE_GDI, 0);
+		GameInitMgrClass::Queue_Coop_Level_Transition(mission_name, CombatManager::Get_Difficulty_Level());
 		return;
 	}
 

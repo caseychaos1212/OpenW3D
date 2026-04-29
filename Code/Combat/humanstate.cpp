@@ -518,7 +518,7 @@ void	HumanStateClass::Set_State( HumanStateType state, int sub_state )
 
 	if (( State == LADDER ) || ( State == IN_VEHICLE ) ||
 		 ( State == TRANSITION ) || ( State == TRANSITION_COMPLETE ) ||
-		 ( State == DEBUG_FLY )						 ) {
+		 ( State == DEBUG_FLY ) || ( State == SPRINT )	 ) {
 		HumanPhys->Enable_User_Control( true );
 	} else {
 		HumanPhys->Enable_User_Control( false );
@@ -579,6 +579,7 @@ const char *  HumanStateClass::Get_State_Name( void )
 		ADD_CASE(ON_CNC_FIRE);
 		ADD_CASE(ON_CNC_CHEM);
 		ADD_CASE(LOCKED_ANIMATION);
+		ADD_CASE(SPRINT);
 
 		default:
 			WWASSERT(0);
@@ -905,6 +906,11 @@ void	HumanStateClass::Update_Animation( void )
 			AnimControl->Set_Mode( ANIM_MODE_LOOP );
 		}
 
+	} else if ( State == SPRINT ) {
+
+		AnimControl->Set_Animation( "S_A_HUMAN.H_A_DSH1", 0.2f );
+		AnimControl->Set_Mode( ANIM_MODE_LOOP );
+
 	} else if ( State == DIVE ) {
 
 
@@ -1114,7 +1120,7 @@ void	HumanStateClass::Update_State( void )
 	** Handle Jump and landing
 	*/
 	if ( !HumanPhys->Is_In_Contact() ) {	// If I am not in contact with the ground
-		if ( State == UPRIGHT ) {				// If I am currently UPRIGHT
+		if ( State == UPRIGHT || State == SPRINT ) {				// If I am currently moving on the ground
 			Begin_Jump();							// Begin a jump
 		}
 	} else if ( State == AIRBORNE ) {		// If I am in contact, and in the , I just landed
@@ -1146,7 +1152,7 @@ void	HumanStateClass::Post_Think( void )
 {
 	// Update sub_state per movement
 	// do it for upright, land, ladder, airborne,
-	if ( Is_Sub_State_Adjustable() || Is_State_Interruptable() ) {
+	if ( Is_Sub_State_Adjustable() || Is_State_Interruptable() || State == SPRINT ) {
 
 		// Update the SubState
 		int new_sub_state = 0;
@@ -1234,6 +1240,8 @@ void	HumanStateClass::Post_Think( void )
 		if ( State == LADDER ) {
 			if ( new_sub_state & SUB_STATE_UP )			ideal_speed = 0.15f;
 			if ( new_sub_state & SUB_STATE_DOWN )		ideal_speed = 0.15f;
+		} else if ( State == SPRINT ) {
+			if ( new_sub_state & SUB_STATE_FORWARD )	ideal_speed = 11.0f;
 		}
 
 		// Turning is at speed 1

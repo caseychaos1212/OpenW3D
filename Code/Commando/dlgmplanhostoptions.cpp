@@ -1814,6 +1814,8 @@ MPLanHostCoopOptionsTabClass::On_Init_Dialog (void)
 
 	Check_Dlg_Button (IDC_ALLIED_FIRE_CHECK, The_Game ()->IsFriendlyFirePermitted.Is_True ());
 	Enable_Dlg_Item (IDC_ALLIED_FIRE_CHECK, true);
+	Check_Dlg_Button (IDC_COOP_ENABLE_SPRINT_CHECK, game_data->Is_Sprint_Enabled ());
+	Enable_Dlg_Item (IDC_COOP_ENABLE_SPRINT_CHECK, true);
 
 	Check_Dlg_Button (IDC_CAN_REPAIR_BUILDINGS_CHECK, false);
 	Check_Dlg_Button (IDC_DRIVER_IS_ALWAYS_GUNNER_CHECK, false);
@@ -1852,6 +1854,7 @@ MPLanHostCoopOptionsTabClass::On_Apply (void)
 		game_data->Set_Difficulty_Level(difficulty_combo->Get_Curr_Sel());
 	}
 	The_Game ()->IsFriendlyFirePermitted.Set (Is_Dlg_Button_Checked (IDC_ALLIED_FIRE_CHECK));
+	game_data->Set_Sprint_Enabled (Is_Dlg_Button_Checked (IDC_COOP_ENABLE_SPRINT_CHECK));
 	The_Game ()->CanRepairBuildings.Set (false);
 	The_Game ()->DriverIsAlwaysGunner.Set (false);
 	The_Game ()->SpawnWeapons.Set (true);
@@ -1906,6 +1909,8 @@ MPLanHostCnCOptionsTabClass::On_Init_Dialog (void)
 	Check_Dlg_Button (IDC_SPAWN_WEAPONS_CHECK, The_Game ()->SpawnWeapons.Is_True ());
 	Check_Dlg_Button (IDC_ALLIED_FIRE_CHECK, The_Game ()->IsFriendlyFirePermitted.Is_True ());
 	Enable_Dlg_Item (IDC_ALLIED_FIRE_CHECK, The_Game ()->Is_Editable_Friendly_Fire ());
+	Enable_Dlg_Item (IDC_COOP_ENABLE_SPRINT_CHECK, false);
+	Get_Dlg_Item (IDC_COOP_ENABLE_SPRINT_CHECK)->Show (false);
 
 	//
 	//	Configure the radar mode combobox

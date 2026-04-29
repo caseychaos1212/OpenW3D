@@ -37,8 +37,11 @@
 #include "nethandler.h"
 
 #include "cnetwork.h"
+#include "gametype.h"
 #include "playermanager.h"
 #include "playerkill.h"
+
+#define COOP_DEATH_SCORE_PENALTY 100.0f
 
 //-----------------------------------------------------------------------------
 bool GameCombatNetworkHandlerClass::Can_Damage(ArmedGameObj * /* p_armed_damager */,
@@ -134,6 +137,9 @@ void GameCombatNetworkHandlerClass::On_Soldier_Death(SoldierGameObj * p_soldier)
 		cPlayer * p_player = cPlayerManager::Find_Player(p_soldier->Get_Control_Owner());
 		if (p_player != NULL) {
 			p_player->Increment_Deaths();
+			if (IS_COOP_MISSION) {
+				p_player->Increment_Score(-COOP_DEATH_SCORE_PENALTY);
+			}
 		}
 	}
 
@@ -192,4 +198,3 @@ bool GameCombatNetworkHandlerClass::Is_Gameplay_Permitted(void)
 		}
 	}
 	*/
-

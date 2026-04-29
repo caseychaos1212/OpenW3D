@@ -1784,6 +1784,45 @@ void SoldierGameObj::Apply_Control( void )
 	}
 #endif
 
+	const bool sprint_input_enabled = IS_COOP_MISSION && cGameType::Is_Coop_Sprint_Enabled();
+	const bool sprint_requested =
+		sprint_input_enabled &&
+		Control.Get_Boolean( ControlClass::BOOLEAN_SPRINT ) &&
+		Control.Get_Analog( ControlClass::ANALOG_MOVE_FORWARD ) > 0.1f;
+	const bool sprint_state_ok =
+		(Get_State() == HumanStateClass::UPRIGHT || Get_State() == HumanStateClass::SPRINT) &&
+		!Is_Crouched() &&
+		!Is_Sniping() &&
+		!Is_On_Ladder() &&
+		Get_Vehicle() == NULL &&
+		Is_Control_Enabled() &&
+		Peek_Human_Phys()->Is_In_Contact();
+
+	if (sprint_requested && sprint_state_ok) {
+		if (Get_State() != HumanStateClass::SPRINT) {
+			HumanState.Set_State( HumanStateClass::SPRINT, HumanStateClass::SUB_STATE_FORWARD );
+		}
+	} else if (Get_State() == HumanStateClass::SPRINT) {
+		HumanState.Set_State( HumanStateClass::UPRIGHT );
+	}
+
+	if (Get_State() == HumanStateClass::SPRINT) {
+		Control.Set_Analog( ControlClass::ANALOG_MOVE_FORWARD, WWMath::Max(Control.Get_Analog( ControlClass::ANALOG_MOVE_FORWARD ), 0.0f) );
+		Control.Set_Analog( ControlClass::ANALOG_MOVE_LEFT, 0 );
+		Control.Set_Boolean( ControlClass::BOOLEAN_WALK, 0 );
+		Control.Set_Boolean( ControlClass::BOOLEAN_CROUCH, 0 );
+		Control.Set_Boolean( ControlClass::BOOLEAN_DIVE_FORWARD, 0 );
+		Control.Set_Boolean( ControlClass::BOOLEAN_DIVE_BACKWARD, 0 );
+		Control.Set_Boolean( ControlClass::BOOLEAN_DIVE_LEFT, 0 );
+		Control.Set_Boolean( ControlClass::BOOLEAN_DIVE_RIGHT, 0 );
+		Control.Set_Boolean( ControlClass::BOOLEAN_WEAPON_FIRE_PRIMARY, 0 );
+		Control.Set_Boolean( ControlClass::BOOLEAN_WEAPON_FIRE_SECONDARY, 0 );
+		if (Get_Weapon() != NULL) {
+			Get_Weapon()->Set_Primary_Triggered(false);
+			Get_Weapon()->Set_Secondary_Triggered(false);
+		}
+	}
+
 	/*
 	if (	CombatManager::I_Am_Server() &&
 			Control.Get_Boolean(ControlClass::BOOLEAN_DROP_FLAG)	) {
@@ -1951,7 +1990,14 @@ void SoldierGameObj::Apply_Control( void )
 		Controller.Set_Move_Forward( 0 );
 	}
 
-	if ( ( Get_State() == HumanStateClass::UPRIGHT ) && Is_Crouched() ) {
+	if ( Get_State() == HumanStateClass::SPRINT ) {
+		Controller.Set_Move_Forward( WWMath::Max(Controller.Get_Move_Forward(), 0.0f) * 2.0f );
+		Controller.Set_Move_Left( 0 );
+		if (Get_Weapon() != NULL) {
+			Get_Weapon()->Set_Primary_Triggered(false);
+			Get_Weapon()->Set_Secondary_Triggered(false);
+		}
+	} else if ( ( Get_State() == HumanStateClass::UPRIGHT ) && Is_Crouched() ) {
 		float crouch_speed = GlobalSettingsDef::Get_Global_Settings ()->Get_Soldier_Crouch_Speed();
 		Controller.Set_Move_Forward( Controller.Get_Move_Forward() * crouch_speed );
 		Controller.Set_Move_Left( Controller.Get_Move_Left() * crouch_speed );
@@ -2643,6 +2689,11 @@ void	SoldierGameObj::Post_Think( void )
 	}
 
 {	WWPROFILE( "Soldier PostThink" );
+
+	if (Get_State() == HumanStateClass::SPRINT &&
+		 (!IS_COOP_MISSION || !cGameType::Is_Coop_Sprint_Enabled() || !Is_Control_Enabled())) {
+		HumanState.Set_State( HumanStateClass::UPRIGHT );
+	}
 
 	HumanState.Post_Think();
 

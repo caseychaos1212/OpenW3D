@@ -262,6 +262,7 @@ StringID	Functions[ NUM_FUNCTIONS ] = {
 	{	INPUT_FUNCTION_MOVE_DOWN,					"MoveDown"				},
 
 	{	INPUT_FUNCTION_WALK_MODE,					"WalkMode"				},
+	{	INPUT_FUNCTION_SPRINT,						"Sprint"					},
 
 	{	INPUT_FUNCTION_TURN_LEFT,					"TurnLeft"				},
 	{	INPUT_FUNCTION_TURN_RIGHT,					"TurnRight"				},
@@ -443,6 +444,7 @@ int	FunctionKeyStates[ NUM_FUNCTIONS ] =
 	BUTTON_HELD, //INPUT_FUNCTION_MOVE_DOWN,
 
 	BUTTON_HELD, //INPUT_FUNCTION_WALK_MODE,
+	BUTTON_HELD, //INPUT_FUNCTION_SPRINT,
 
 	BUTTON_HELD, //INPUT_FUNCTION_TURN_LEFT,
 	BUTTON_HELD, //INPUT_FUNCTION_TURN_RIGHT,
@@ -1454,6 +1456,48 @@ const KEY_NAME_MAPPING DIK_KEY_NAME_ARRAY[] =
 
 const int KEYNAME_MAP_COUNT	= sizeof (DIK_KEY_NAME_ARRAY) / sizeof (KEY_NAME_MAPPING);
 
+static bool
+Is_Key_Mapped_To_Function (int key_id, int ignored_function_id = -1)
+{
+	if (key_id == 0) {
+		return false;
+	}
+
+	for (int index = 0; index < NUM_FUNCTIONS; index ++) {
+		if (index == ignored_function_id) {
+			continue;
+		}
+
+		if (Input::Get_Primary_Key_For_Function(index) == key_id ||
+			 Input::Get_Secondary_Key_For_Function(index) == key_id) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static void
+Apply_Sprint_Default_Mapping (void)
+{
+	if (Input::Get_Primary_Key_For_Function(INPUT_FUNCTION_SPRINT) != 0 ||
+		 Input::Get_Secondary_Key_For_Function(INPUT_FUNCTION_SPRINT) != 0) {
+		return;
+	}
+
+	if (Input::Get_Primary_Key_For_Function(INPUT_FUNCTION_WALK_MODE) == DIK_SHIFT &&
+		 Input::Get_Secondary_Key_For_Function(INPUT_FUNCTION_WALK_MODE) == 0) {
+		Input::Set_Primary_Key_For_Function(INPUT_FUNCTION_WALK_MODE, DIK_CAPITAL);
+		Input::Set_Primary_Key_For_Function(INPUT_FUNCTION_SPRINT, DIK_LSHIFT);
+		return;
+	}
+
+	if (!Is_Key_Mapped_To_Function(DIK_LSHIFT, INPUT_FUNCTION_SPRINT) &&
+		 !Is_Key_Mapped_To_Function(DIK_SHIFT, INPUT_FUNCTION_SPRINT)) {
+		Input::Set_Primary_Key_For_Function(INPUT_FUNCTION_SPRINT, DIK_LSHIFT);
+	}
+}
+
 
 /*
 **
@@ -1503,6 +1547,8 @@ Input::Load_Configuration (const char *filename)
 			FunctionSecondaryKeys[index] = Get_Key (sec_key);
 		}
 	}
+
+	Apply_Sprint_Default_Mapping();
 
 	//
 	//	Load the accelerated keys from the ini

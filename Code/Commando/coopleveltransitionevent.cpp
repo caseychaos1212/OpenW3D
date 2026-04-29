@@ -21,10 +21,8 @@
 #include <cstring>
 
 #include "apppackettypes.h"
-#include "campaign.h"
 #include "cnetwork.h"
 #include "gameinitmgr.h"
-#include "gamemode.h"
 #include "gametype.h"
 #include "networkobjectfactory.h"
 
@@ -35,7 +33,7 @@ cCoopLevelTransitionEvent::cCoopLevelTransitionEvent(void) :
 	DifficultyLevel(0)
 {
 	MapName[0] = 0;
-	Set_App_Packet_Type(APPPACKETTYPE_GAMEOPTIONSEVENT);
+	Set_App_Packet_Type(APPPACKETTYPE_COOPLEVELTRANSITIONEVENT);
 }
 
 //-----------------------------------------------------------------------------
@@ -60,15 +58,7 @@ cCoopLevelTransitionEvent::Act(void)
 		return;
 	}
 
-	GameModeManager::Find("Movie")->Deactivate();
-	GameModeManager::Find("ScoreScreen")->Deactivate();
-	GameModeManager::Find("Combat")->Suspend();
-
-	GameInitMgrClass::Set_Is_Coop_Level_Transition(true);
-	GameInitMgrClass::End_Game();
-	GameInitMgrClass::Set_Is_Coop_Level_Transition(false);
-
-	CampaignManager::Start_Coop_Campaign(MapName, DifficultyLevel);
+	GameInitMgrClass::Queue_Coop_Level_Transition(MapName, DifficultyLevel);
 }
 
 //-----------------------------------------------------------------------------

@@ -66,9 +66,12 @@ public:
 	static bool				Is_Skirmish(void)								{return GameType == GAMETYPE_SKIRMISH;}
 	static bool				Is_Multiplay(void)							{return GameType == GAMETYPE_MULTIPLAY;}
 	static bool				Is_Soloplay(void)								{return GameType != GAMETYPE_MULTIPLAY && GameType != GAMETYPE_COOP_MISSION;}
+	static void				Set_Coop_Sprint_Enabled(bool enabled)	{CoopSprintEnabled = enabled;}
+	static bool				Is_Coop_Sprint_Enabled(void)				{return CoopSprintEnabled;}
 
 private:
 	static GameTypeEnum	GameType;
+	static bool				CoopSprintEnabled;
 };
 
 //-----------------------------------------------------------------------------

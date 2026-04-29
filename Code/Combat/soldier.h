@@ -211,6 +211,7 @@ public:
 	bool				Is_Wounded( void )		{ return Get_State() == HumanStateClass::WOUNDED; }
 	bool				In_Transition( void )	{ return Get_State() == HumanStateClass::TRANSITION; }
 	bool				Is_Airborne( void )		{ return Get_State() == HumanStateClass::AIRBORNE; }
+	bool				Is_Sprinting( void )		{ return Get_State() == HumanStateClass::SPRINT; }
 	bool				Is_Crouched( void )		{ return HumanState.Get_State_Flag( HumanStateClass::CROUCHED_FLAG ); }
 	bool				Is_Sniping( void )		{ return HumanState.Get_State_Flag( HumanStateClass::SNIPING_FLAG ); }
 	bool				Is_Slow( void )			{ return (Get_Sub_State() & HumanStateClass::SUB_STATE_SLOW) != 0; }
@@ -440,4 +441,3 @@ protected:
 };
 
 #endif	//	SOLDIER_H
-

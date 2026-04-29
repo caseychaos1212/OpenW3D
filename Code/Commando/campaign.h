@@ -59,6 +59,7 @@ public:
 
 	static	void	Start_Campaign( int difficulty );
 	static	void	Start_Coop_Campaign( const char * mission_name, int difficulty );
+	static	void	Prepare_Coop_Campaign_Level( const char * mission_name, int difficulty );
 	static	void	Continue( bool success = true );
 
 	static	void	Reset();

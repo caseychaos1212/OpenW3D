@@ -64,6 +64,7 @@ const INPUT_FUNCTION_NAME FUNCTION_NAMES[] =
 	{ INPUT_FUNCTION_TURN_LEFT,					IDS_FUNCTION_TURN_LEFT },
 	{ INPUT_FUNCTION_TURN_RIGHT,					IDS_FUNCTION_TURN_RIGHT },
 	{ INPUT_FUNCTION_WALK_MODE,					IDS_FUNCTION_WALK_MODE },
+	{ INPUT_FUNCTION_SPRINT,						0 },
 	{ INPUT_FUNCTION_JUMP,							IDS_FUNCTION_JUMP },
 	{ INPUT_FUNCTION_CROUCH,						IDS_FUNCTION_CROUCH },
 	{ INPUT_FUNCTION_ACTION,						IDS_FUNCTION_ACTION },
@@ -545,6 +546,10 @@ ControlsListTabClass::Clear_Key (int dik_id, bool clear_zoom)
 const unichar_t *
 ControlsListTabClass::Get_Function_Name (int function_id)
 {
+	if (function_id == INPUT_FUNCTION_SPRINT) {
+		return U_CHAR("Sprint");
+	}
+
 	const unichar_t *retval = NULL;
 	for (int index = 0; index < INPUT_NAME_COUNT; index ++) {
 
@@ -559,4 +564,3 @@ ControlsListTabClass::Get_Function_Name (int function_id)
 
 	return retval;
 }
-

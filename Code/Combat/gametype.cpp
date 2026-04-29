@@ -41,3 +41,4 @@
 //
 
 GameTypeEnum cGameType::GameType = GAMETYPE_NONE;
+bool cGameType::CoopSprintEnabled = true;

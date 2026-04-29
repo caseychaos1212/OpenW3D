@@ -67,6 +67,7 @@ ControlsBasicMvmtTabClass::ControlsBasicMvmtTabClass (void)	:
 	Add_Function (INPUT_FUNCTION_CROUCH,			IDC_HOTKEY9, IDC_HOTKEY21);
 	Add_Function (INPUT_FUNCTION_ACTION,			IDC_HOTKEY10,	IDC_HOTKEY22);
 	Add_Function (INPUT_FUNCTION_TURN_AROUND,		IDC_HOTKEY11,	IDC_HOTKEY23);
+	Add_Function (INPUT_FUNCTION_SPRINT,			IDC_HOTKEY12,	IDC_HOTKEY24);
 	return ;
 }
 
@@ -328,4 +329,3 @@ ControlsMultiPlayTabClass::ControlsMultiPlayTabClass (void)	:
 	Add_Function (INPUT_FUNCTION_EVA_MAP_SCREEN,				IDC_HOTKEY6, IDC_HOTKEY18);
 	return ;
 }
-

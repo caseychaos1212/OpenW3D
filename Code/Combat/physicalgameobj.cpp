@@ -1153,7 +1153,7 @@ void	PhysicalGameObj::Export_Rare( BitStreamClass &packet )
 	if ( IS_COOP_MISSION || As_VehicleGameObj() != NULL ) {
 		// Send hidden
 		bool hidden = false;
-		if ( Peek_Model() ) {
+		if ( Peek_Model() && As_SoldierGameObj() == NULL ) {
 			hidden = !!(Peek_Model()->Is_Hidden());
 		}
 		packet.Add( hidden );
@@ -1297,7 +1297,10 @@ void	PhysicalGameObj::Import_Rare( BitStreamClass &packet )
 		// Get Hidden
 		bool hidden = packet.Get( hidden );
 		if ( Peek_Model() ) {
-			Peek_Model()->Set_Hidden( hidden );
+			SoldierGameObj *soldier = As_SoldierGameObj();
+			if ( soldier == NULL || !soldier->Is_In_Vehicle() ) {
+				Peek_Model()->Set_Hidden( hidden );
+			}
 		}
 	}
 

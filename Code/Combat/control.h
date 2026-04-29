@@ -94,6 +94,7 @@ public:
 		BOOLEAN_WEAPON_FIRE_PRIMARY		=	BOOLEAN_CONTINUOUS_FIRST,
 		BOOLEAN_WEAPON_FIRE_SECONDARY,
 		BOOLEAN_WALK,
+		BOOLEAN_SPRINT,
 		BOOLEAN_CROUCH,
 		BOOLEAN_TOTAL,				// Number of boolean channels
 
@@ -164,4 +165,3 @@ inline float ControlClass::Get_Analog( AnalogControl control )
 }
 
 #endif	//	CONTROL_H
-

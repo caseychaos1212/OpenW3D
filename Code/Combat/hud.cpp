@@ -66,6 +66,7 @@
 #include "gametype.h"
 #include "gameobjmanager.h"
 #include "stylemgr.h"
+#include "playermanager.h"
 
 #define INVALID_HUD_WEAPON ((WeaponClass *)(uintptr_t)-1)
 
@@ -1416,6 +1417,39 @@ static	void	Target_Shutdown( void )
 static RectClass Get_Target_Box( PhysicalGameObj * obj );
 static void	Target_Box_Edge( const Vector2 & a, const Vector2 & b, unsigned int color );
 
+static	bool	Target_Get_Display_Name( DamageableGameObj * obj, BuildingGameObj * building, WideStringClass & name )
+{
+	name = U_CHAR("");
+
+	if ( obj == NULL ) {
+		return false;
+	}
+
+	SmartGameObj * smart_obj = obj->As_SmartGameObj();
+	if ( smart_obj != NULL && smart_obj->Get_Control_Owner() > 0 ) {
+		cPlayer * player = cPlayerManager::Find_Player( smart_obj->Get_Control_Owner() );
+		if ( player != NULL && !player->Get_Name().Is_Empty() ) {
+			name = player->Get_Name();
+			return true;
+		}
+	}
+
+	if ( obj->Get_Translated_Name_ID() == 0 ) {
+		return false;
+	}
+
+	TDBObjClass *translate_obj = TranslateDBClass::Find_Object( obj->Get_Translated_Name_ID() );
+	if ( translate_obj == NULL ) {
+		return false;
+	}
+
+	name = translate_obj->Get_String();
+	if ( building != NULL && HUDInfo::Get_Info_Object_Is_MCT() ) {
+		name = TRANSLATE( IDS_Enc_Struct_Nod_MCT_Name );
+	}
+	return true;
+}
+
 static	void	Target_Update( void )
 {
 	TargetRenderer->Reset();
@@ -1598,34 +1632,21 @@ static	void	Target_Update( void )
 			draw.Snap_To_Units( Vector2( 1, 1 ) );
 			TargetRenderer->Add_Quad( draw, uv, color );
 
-			if ( obj->Get_Translated_Name_ID() != 0 ) {
-				TDBObjClass *translate_obj = TranslateDBClass::Find_Object( obj->Get_Translated_Name_ID() );
-				if ( translate_obj ) {
-					WideStringClass translate_string=translate_obj->Get_String();
-
-					if ( building != NULL && HUDInfo::Get_Info_Object_Is_MCT() ) {
-						translate_string=TRANSLATE( IDS_Enc_Struct_Nod_MCT_Name );
-					}
-
-					Vector2 string_loc=draw.Upper_Left() + Vector2( 3.0f,1.0f );
-					if (translate_string!=TargetNameString) {
-						TargetNameRenderer->Reset();
-						TargetNameString=translate_string;
-						TargetNameLocation = string_loc;
-						TargetNameRenderer->Build_Sentence( TargetNameString );
-						TargetNameRenderer->Set_Location( TargetNameLocation );
-						TargetNameRenderer->Set_Base_Location( TargetNameLocation );
-						TargetNameRenderer->Draw_Sentence( color );
-					}
-					if (string_loc!=TargetNameLocation) {
-						TargetNameLocation=string_loc;
-						TargetNameRenderer->Set_Base_Location( TargetNameLocation );
-					}
-				}
-				else {
+			WideStringClass target_name;
+			if ( Target_Get_Display_Name( obj, building, target_name ) ) {
+				Vector2 string_loc=draw.Upper_Left() + Vector2( 3.0f,1.0f );
+				if (target_name!=TargetNameString) {
 					TargetNameRenderer->Reset();
-					TargetNameString="";
-					TargetNameLocation = Vector2(0.0f,0.0f);
+					TargetNameString=target_name;
+					TargetNameLocation = string_loc;
+					TargetNameRenderer->Build_Sentence( TargetNameString );
+					TargetNameRenderer->Set_Location( TargetNameLocation );
+					TargetNameRenderer->Set_Base_Location( TargetNameLocation );
+					TargetNameRenderer->Draw_Sentence( color );
+				}
+				if (string_loc!=TargetNameLocation) {
+					TargetNameLocation=string_loc;
+					TargetNameRenderer->Set_Base_Location( TargetNameLocation );
 				}
 			}
 			else {
@@ -1806,8 +1827,37 @@ static void	Target_Box_Edge( const Vector2 & a, const Vector2 & b, unsigned int 
 /*
 ** Score Display
 */
-/*
 Render2DTextClass * ScoreRenderer;
+
+static	int	Coop_Score_Player_Compare( const void * elem1, const void * elem2 )
+{
+	cPlayer * player1 = *((cPlayer **)elem1);
+	cPlayer * player2 = *((cPlayer **)elem2);
+
+	if (player1 == NULL && player2 == NULL) {
+		return 0;
+	}
+	if (player1 == NULL) {
+		return 1;
+	}
+	if (player2 == NULL) {
+		return -1;
+	}
+
+	if (player1->Get_Score() > player2->Get_Score()) {
+		return -1;
+	}
+	if (player1->Get_Score() < player2->Get_Score()) {
+		return 1;
+	}
+
+	int name_compare = player1->Get_Name().Compare_No_Case(player2->Get_Name());
+	if (name_compare != 0) {
+		return name_compare;
+	}
+
+	return player1->Get_Id() - player2->Get_Id();
+}
 
 static	void	Score_Init( void )
 {
@@ -1826,32 +1876,68 @@ static	void	Score_Shutdown( void )
 
 static	void	Score_Update( void )
 {
-	ScoreRenderer->Reset();
-
-	//TSS2001e if ( COMBAT_STAR ) {
-	if ( COMBAT_STAR && COMBAT_STAR->Get_Player_Data() ) {
-		int score = COMBAT_STAR->Get_Player_Data()->Get_Score();
-//		WideStringClass	scorestring;
-//		scorestring.Format( U_CHAR("%d"), score );
-		unichar_t score_string[12];	// 12 digits ought to be enough...
-		Generate_WChar_Text_From_Number(score_string,sizeof(score_string),false,score);
-
-		Vector2 position = Render2DClass::Get_Screen_Resolution().Center();
-		position.Y = Render2DClass::Get_Screen_Resolution().Bottom;
-		Vector2 size = ScoreRenderer->Get_Text_Extents( score_string );
-		size.X *= 0.5f;
-		position -= size;
-		ScoreRenderer->Set_Location( position );
-		ScoreRenderer->Draw_Text( score_string );
+	if ( ScoreRenderer == NULL ) {
+		return;
 	}
 
+	ScoreRenderer->Reset();
+
+	if ( !IS_COOP_MISSION ) {
+		return;
+	}
+
+	cPlayer * players[MAX_PLAYERS];
+	int player_count = 0;
+	SList<cPlayer> * player_list = cPlayerManager::Get_Player_Object_List();
+	if (player_list != NULL) {
+		for (SLNode<cPlayer> * player_node = player_list->Head(); player_node != NULL; player_node = player_node->Next()) {
+			cPlayer * player = player_node->Data();
+			if (player != NULL && player->Is_Active() && player_count < MAX_PLAYERS) {
+				players[player_count++] = player;
+			}
+		}
+	}
+
+	if (player_count == 0 && COMBAT_STAR != NULL && COMBAT_STAR->Get_Player_Data() != NULL) {
+		int score = (int)COMBAT_STAR->Get_Player_Data()->Get_Score();
+		WideStringClass score_string;
+		score_string.Format( U_CHAR("Score %d"), score );
+
+		Vector2 position = Render2DClass::Get_Screen_Resolution().Upper_Left();
+		position += Vector2( 16, 16 );
+		ScoreRenderer->Set_Location( position );
+		ScoreRenderer->Draw_Text( score_string.Peek_Buffer(), 0xFFFFFF00 );
+		return;
+	}
+
+	qsort(players, player_count, sizeof(cPlayer *), Coop_Score_Player_Compare);
+
+	WideStringClass score_string;
+	score_string = U_CHAR("Scores\n");
+	for (int index = 0; index < player_count; index++) {
+		cPlayer * player = players[index];
+		WideStringClass display_name(player->Get_Name(), true);
+		if (display_name.Is_Empty()) {
+			display_name.Format(U_CHAR("Player %d"), player->Get_Id());
+		}
+
+		WideStringClass row;
+		row.Format(U_CHAR("%d. %-14s %d\n"), index + 1, display_name.Peek_Buffer(), (int)player->Get_Score());
+		score_string += row;
+	}
+
+	Vector2 position = Render2DClass::Get_Screen_Resolution().Upper_Left();
+	position += Vector2( 16, 16 );
+	ScoreRenderer->Set_Location( position );
+	ScoreRenderer->Draw_Text( score_string.Peek_Buffer(), 0xFFFFFF00 );
 }
 
 static	void	Score_Render( void )
 {
-	ScoreRenderer->Render();
+	if ( ScoreRenderer != NULL && IS_COOP_MISSION ) {
+		ScoreRenderer->Render();
+	}
 }
-*/
 
 /*
 ** Objective Display
@@ -1924,19 +2010,152 @@ static	void	Objective_Shutdown( void )
 }
 
 #define	POG_FLY_TIME	2.0f
+#define	OBJECTIVE_MARKER_HALF_SIZE	32.0f
+#define	OBJECTIVE_MARKER_SCREEN_MARGIN	72.0f
+
+static	Vector2	Objective_Direction_From_Angle( float angle )
+{
+	Vector2 offset;
+	offset.Y = WWMath::Fast_Sin( -angle + DEG_TO_RAD( -90 ) );
+	offset.X = WWMath::Fast_Cos( -angle + DEG_TO_RAD( -90 ) );
+	return offset;
+}
+
+static	Vector2	Objective_Normalized_To_Screen( const Vector3 & view_pos )
+{
+	RectClass screen = Render2DClass::Get_Screen_Resolution();
+	Vector2 screen_pos;
+	screen_pos.X = screen.Left + ((view_pos.X + 1.0f) * screen.Width() * 0.5f);
+	screen_pos.Y = screen.Top + ((1.0f - view_pos.Y) * screen.Height() * 0.5f);
+	return screen_pos;
+}
+
+static	Vector2	Objective_Clamp_To_Screen( const Vector2 & screen_pos )
+{
+	RectClass screen = Render2DClass::Get_Screen_Resolution();
+	Vector2 clamped = screen_pos;
+	clamped.X = WWMath::Clamp( clamped.X, screen.Left + OBJECTIVE_MARKER_SCREEN_MARGIN, screen.Right - OBJECTIVE_MARKER_SCREEN_MARGIN );
+	clamped.Y = WWMath::Clamp( clamped.Y, screen.Top + OBJECTIVE_MARKER_SCREEN_MARGIN, screen.Bottom - OBJECTIVE_MARKER_SCREEN_MARGIN );
+	return clamped;
+}
+
+static	Vector2	Objective_Clamp_Direction_To_Screen( const Vector2 & direction )
+{
+	RectClass screen = Render2DClass::Get_Screen_Resolution();
+	Vector2 dir = direction;
+	if ( WWMath::Fabs( dir.X ) < 0.001f && WWMath::Fabs( dir.Y ) < 0.001f ) {
+		dir.Y = -1.0f;
+	}
+
+	float half_width = MAX( screen.Width() * 0.5f - OBJECTIVE_MARKER_SCREEN_MARGIN, 1.0f );
+	float half_height = MAX( screen.Height() * 0.5f - OBJECTIVE_MARKER_SCREEN_MARGIN, 1.0f );
+	float scale_x = (WWMath::Fabs( dir.X ) > 0.001f) ? (half_width / WWMath::Fabs( dir.X )) : 1000000.0f;
+	float scale_y = (WWMath::Fabs( dir.Y ) > 0.001f) ? (half_height / WWMath::Fabs( dir.Y )) : 1000000.0f;
+	float scale = MIN( scale_x, scale_y );
+
+	Vector2 screen_pos = screen.Center();
+	dir *= scale;
+	screen_pos += dir;
+	return Objective_Clamp_To_Screen( screen_pos );
+}
+
+static	RectClass	Objective_Get_Marker_Box( const Vector3 & world_pos, float * set_angle, float * set_range )
+{
+	float angle = 0.0f;
+	float range = 0.0f;
+
+	if ( COMBAT_STAR ) {
+		Vector3 rel_pos;
+		Matrix3D::Inverse_Transform_Vector( COMBAT_STAR->Get_Transform(), world_pos, &rel_pos );
+		angle = ::atan2( rel_pos.Y, rel_pos.X );
+		range = rel_pos.Length();
+	}
+
+	Vector2 screen_pos = Render2DClass::Get_Screen_Resolution().Center();
+	if ( COMBAT_CAMERA != NULL ) {
+		Vector3 projected_pos;
+		CameraClass::ProjectionResType projection_result = COMBAT_CAMERA->Project( projected_pos, world_pos );
+		if ( projection_result == CameraClass::INSIDE_FRUSTUM || projection_result == CameraClass::OUTSIDE_FAR_CLIP ) {
+			screen_pos = Objective_Clamp_To_Screen( Objective_Normalized_To_Screen( projected_pos ) );
+		} else if ( projection_result == CameraClass::OUTSIDE_FRUSTUM ) {
+			screen_pos = Objective_Clamp_Direction_To_Screen( Vector2( projected_pos.X, -projected_pos.Y ) );
+		} else {
+			screen_pos = Objective_Clamp_Direction_To_Screen( Objective_Direction_From_Angle( angle ) );
+		}
+	}
+
+	RectClass marker_box( -OBJECTIVE_MARKER_HALF_SIZE, -OBJECTIVE_MARKER_HALF_SIZE, OBJECTIVE_MARKER_HALF_SIZE, OBJECTIVE_MARKER_HALF_SIZE );
+	marker_box += screen_pos;
+
+	if ( set_angle != NULL ) {
+		*set_angle = angle;
+	}
+	if ( set_range != NULL ) {
+		*set_range = range;
+	}
+	return marker_box;
+}
+
+static	void	Objective_Add_Arrow( Render2DClass * renderer, const RectClass & marker_box, float angle, unsigned int color = 0xFFFFFFFF )
+{
+	Vector2 arrow_vertex;
+	arrow_vertex.X = WWMath::Fast_Sin( angle + DEG_TO_RAD( 180 + 45 ) );
+	arrow_vertex.Y = WWMath::Fast_Cos( angle + DEG_TO_RAD( 180 + 45 ) );
+	Vector2 verts[4];
+	verts[0] = Vector2( arrow_vertex.X, arrow_vertex.Y );
+	verts[1] = Vector2( arrow_vertex.Y, -arrow_vertex.X );
+	verts[2] = Vector2( -arrow_vertex.Y, arrow_vertex.X );
+	verts[3] = Vector2( -arrow_vertex.X, -arrow_vertex.Y );
+
+	Vector2 offset = Objective_Direction_From_Angle( angle );
+	offset *= 35;
+	offset += marker_box.Center();
+
+	const float SIN_45=0.70710678118654752440084436210485f;
+	for ( int i = 0; i < 4; i++ ) {
+		verts[i] *= 0.5f * 16 / SIN_45;
+		verts[i] += offset;
+	}
+	renderer->Add_Quad( verts[0], verts[1], verts[2], verts[3], color );
+}
+
+static	void	Objective_Draw_Marker_Text( Render2DSentenceClass * renderer, const RectClass & marker_box, const WideStringClass & text, float y_offset )
+{
+	renderer->Build_Sentence( text );
+	Vector2 text_size = renderer->Get_Text_Extents( text );
+	Vector2 position = marker_box.Lower_Left();
+	position += Vector2( 0, y_offset );
+	position.X = (int)(marker_box.Center().X - (text_size.X/2));
+
+	RectClass screen = Render2DClass::Get_Screen_Resolution();
+	float min_x = screen.Left + 8.0f;
+	float max_x = screen.Right - text_size.X - 8.0f;
+	float min_y = screen.Top + 8.0f;
+	float max_y = screen.Bottom - text_size.Y - 8.0f;
+	if ( max_x < min_x ) {
+		max_x = min_x;
+	}
+	if ( max_y < min_y ) {
+		max_y = min_y;
+	}
+	position.X = WWMath::Clamp( position.X, min_x, max_x );
+	position.Y = WWMath::Clamp( position.Y, min_y, max_y );
+
+	renderer->Set_Location( position );
+	renderer->Draw_Sentence();
+}
 
 static	void	Objective_Update( void )
 {
-	RectClass	pog_box( 0, 0, 64, 64 );
-	pog_box += Render2DClass::Get_Screen_Resolution().Upper_Right() - pog_box.Upper_Right();
-	pog_box += Vector2( -16, 8 );
-
-#define	POG_SPACING		Vector2( 10, 0 )
-
 	bool rebuild = false;
 
 	int objective_count = ObjectiveManager::Get_Num_HUD_Objectives();
 	if ( objective_count > 0 ) {
+		if ( CurrentObjectiveIndex >= objective_count ) {
+			CurrentObjectiveIndex = 0;
+			rebuild = true;
+		}
+
 		// maintain the index
 		if ( CurrentObjective != ObjectiveManager::Get_Objective( CurrentObjectiveIndex ) ) {
 			CurrentObjectiveIndex = 0;
@@ -1968,152 +2187,89 @@ static	void	Objective_Update( void )
 		CurrentObjective = NULL;
 	}
 
-	// re-Create the Pogs, if needed
-	if ( rebuild || ObjectiveManager::Are_HUD_Objectives_Changed() )
-	{
-//		Debug_Say(( "Rebuild Hud Pogs\n" ));
-
+	if ( objective_count == 0 && ObjectivePogRenderers.Count() > 0 ) {
 		Objective_Release_Pogs();
-		// Reset text
+	}
+	if ( objective_count == 0 && ObjectiveManager::Are_HUD_Objectives_Changed() ) {
+		ObjectiveManager::Clear_HUD_Objectives_Changed();
+	}
+
+	// Re-create the POG renderers when the objective list or textures change.
+	if ( objective_count > 0 &&
+		 (rebuild || ObjectiveManager::Are_HUD_Objectives_Changed() || ObjectivePogRenderers.Count() != objective_count) ) {
+		Objective_Release_Pogs();
 		ObjectiveTextRenderer->Reset();
 		CachedRange=0;
 		CachedObjectiveIndex=-1;
 
-		int count = objective_count;
-		pog_box += POG_SPACING * (float)count;
-
-		bool dont_clear = false;
-
-		for ( int i = count - 1; i >= 0; i-- ) {
-			int index = (i + CurrentObjectiveIndex) % objective_count;
-			pog_box -= POG_SPACING;
-			// Add Pog
+		for ( int index = 0; index < objective_count; index++ ) {
 			Render2DClass * renderer = new Render2DClass();
 			if ( renderer ) {
 				renderer->Set_Texture( ObjectiveManager::Get_HUD_Objectives_Pog_Texture_Name( index ) );
 				renderer->Set_Coordinate_Range( Render2DClass::Get_Screen_Resolution() );
-				float	age = ObjectiveManager::Get_HUD_Objectives_Age( index );
-				if ( age < POG_FLY_TIME ) {
-					Vector2 offset = Render2DClass::Get_Screen_Resolution().Center() - Render2DClass::Get_Screen_Resolution().Upper_Right();
-					offset.X *= 0.75f;
-					float fly = WWMath::Clamp( (2.0f-(2.0f*age/POG_FLY_TIME)), 0, 1 );
-					offset *= fly;
-					pog_box += offset;
-					renderer->Add_Quad( pog_box );
-					pog_box -= offset;
-					dont_clear = true;
-
-					// AND, make an extra renderer for the radar star
-					Render2DClass * renderer = new Render2DClass();
-					if ( renderer ) {
-						renderer->Set_Texture( "HUD_STAR.TGA" );
-						renderer->Set_Coordinate_Range( Render2DClass::Get_Screen_Resolution() );
-
-						RectClass	star_box( -32, -32, 32, 32 );
-						star_box.Scale( fly );
-
-						Vector2	star_fly_start = Render2DClass::Get_Screen_Resolution().Center();
-						Vector2	star_fly_end = Render2DClass::Get_Screen_Resolution().Lower_Left();
-						star_fly_start.X *= 0.85f;
-						star_fly_start.Y *= 1.175f;
-						star_fly_end.X += 40.0f;
-						star_fly_end.Y *= 0.8f;
-
-						star_box += star_fly_end;
-						Vector2	offset = star_fly_start - star_fly_end;
-						offset *= fly;
-						star_box += offset;
-
-						Vector3 color3( 0,1,0 );
-						if ( ObjectiveManager::Get_Objective(index) != NULL ) {
-							color3 = ObjectiveManager::Get_Objective(index)->Type_To_Color();
-						}
-						unsigned int color = color3.Convert_To_ARGB();
-						renderer->Add_Quad( star_box, color  );
-						ObjectivePogRenderers.Add( renderer );
-					}
-
-				} else {
-					renderer->Add_Quad( pog_box );
-				}
 				ObjectivePogRenderers.Add( renderer );
 			}
 		}
-		if ( !dont_clear ) {
-			ObjectiveManager::Clear_HUD_Objectives_Changed();
-		}
+		ObjectiveManager::Clear_HUD_Objectives_Changed();
 	}
 
 	ObjectiveArrowRenderer->Reset();
+	ObjectiveTextRenderer->Reset();
 
 	float range = 0;
 	int count = objective_count;
+	RectClass current_pog_box( 0, 0, 0, 0 );
+	float current_angle = 0;
+	bool has_current_pog = false;
 	if ( count > 0 ) {
-		// Create Arrow
-		float angle = 0;
-		Vector3	objective_pos = ObjectiveManager::Get_HUD_Objectives_Location( CurrentObjectiveIndex );
+		for ( int index = 0; index < count && index < ObjectivePogRenderers.Count(); index++ ) {
+			Render2DClass * renderer = ObjectivePogRenderers[index];
+			if ( renderer != NULL ) {
+				renderer->Reset();
 
-		if ( COMBAT_STAR ) {
-			Vector3 rel_pos;
-			Matrix3D::Inverse_Transform_Vector( COMBAT_STAR->Get_Transform(), objective_pos, &rel_pos );
-			angle = ::atan2( rel_pos.Y, rel_pos.X );
-			range = rel_pos.Length();
+				float angle = 0;
+				float marker_range = 0;
+				RectClass marker_box = Objective_Get_Marker_Box( ObjectiveManager::Get_HUD_Objectives_Location( index ), &angle, &marker_range );
+
+				float age = ObjectiveManager::Get_HUD_Objectives_Age( index );
+				if ( age < POG_FLY_TIME ) {
+					Vector2 offset = Render2DClass::Get_Screen_Resolution().Center() - marker_box.Center();
+					float fly = WWMath::Clamp( (2.0f-(2.0f*age/POG_FLY_TIME)), 0, 1 );
+					offset *= fly;
+					marker_box += offset;
+				}
+
+				renderer->Add_Quad( marker_box );
+
+				if ( index == CurrentObjectiveIndex ) {
+					current_pog_box = marker_box;
+					current_angle = angle;
+					range = marker_range;
+					has_current_pog = true;
+				}
+			}
 		}
 
-		Vector2 arrow_vertex;
-		arrow_vertex.X = WWMath::Fast_Sin( angle + DEG_TO_RAD( 180 + 45 ) );
-		arrow_vertex.Y = WWMath::Fast_Cos( angle + DEG_TO_RAD( 180 + 45 ) );
-		Vector2 verts[4];
-		verts[0] = Vector2( arrow_vertex.X, arrow_vertex.Y );
-		verts[1] = Vector2( arrow_vertex.Y, -arrow_vertex.X );
-		verts[2] = Vector2( -arrow_vertex.Y, arrow_vertex.X );
-		verts[3] = Vector2( -arrow_vertex.X, -arrow_vertex.Y );
-		Vector2 offset;
-		offset.Y = WWMath::Fast_Sin( -angle + DEG_TO_RAD( -90 ) );
-		offset.X = WWMath::Fast_Cos( -angle + DEG_TO_RAD( -90 ) );
-		offset *= 35;
-		offset += pog_box.Center();
-
-		const float SIN_45=0.70710678118654752440084436210485f;
-		for ( int i = 0; i < 4; i++ ) {
-			verts[i] *= 0.5f * 16 / SIN_45;//::sin( DEG_TO_RAD( 45 ) );
-			verts[i] += offset;
+		if ( has_current_pog ) {
+			Objective_Add_Arrow( ObjectiveArrowRenderer, current_pog_box, current_angle );
 		}
-		ObjectiveArrowRenderer->Add_Quad( verts[0], verts[1], verts[2], verts[3] );
 	}
 
 	int irange=(int)(range);
 	irange=(irange/10)*10;
-	if (CachedObjectiveIndex!=CurrentObjectiveIndex || irange!=CachedRange) {
-		ObjectiveTextRenderer->Reset();
+	if (objective_count>0 && has_current_pog) {
+		CachedRange=irange;
+		CachedObjectiveIndex=CurrentObjectiveIndex;
 
-		if (objective_count>0) {
-			CachedRange=irange;
-			CachedObjectiveIndex=CurrentObjectiveIndex;
+		WideStringClass str(ObjectiveManager::Get_HUD_Objectives_Message( CurrentObjectiveIndex ),true);
+		Objective_Draw_Marker_Text( ObjectiveTextRenderer, current_pog_box, str, -15 );
 
-			// Draw message
-			Vector2 position = pog_box.Lower_Left();
-			position += Vector2( 0, -15 );
-			WideStringClass str(ObjectiveManager::Get_HUD_Objectives_Message( CurrentObjectiveIndex ),true);
-			ObjectiveTextRenderer->Build_Sentence( str );
-			Vector2 text_size = ObjectiveTextRenderer->Get_Text_Extents( str );
-			position.X = (int)(pog_box.Center().X - (text_size.X/2));
-			ObjectiveTextRenderer->Set_Location( position );
-			ObjectiveTextRenderer->Draw_Sentence();
-
-			// Draw range
-			position = pog_box.Lower_Left();
-			str.Format( TRANSLATE(IDS_HUD_RANGE), irange );
-			ObjectiveTextRenderer->Build_Sentence( str );
-			text_size = ObjectiveTextRenderer->Get_Text_Extents( str );
-			position.X = (int)(pog_box.Center().X - (text_size.X/2));
-			ObjectiveTextRenderer->Set_Location( position );
-			ObjectiveTextRenderer->Draw_Sentence();
-		}
-		else {
-			CachedRange=0;
-			CachedObjectiveIndex=-1;
-		}
+		str.Format( TRANSLATE(IDS_HUD_RANGE), irange );
+		Objective_Draw_Marker_Text( ObjectiveTextRenderer, current_pog_box, str, 0 );
+	}
+	else {
+		CachedRange=0;
+		CachedObjectiveIndex=-1;
 	}
 
 	TeammatePogRenderer->Reset();
@@ -2125,58 +2281,20 @@ static	void	Objective_Update( void )
 			 !teammate->Is_Dead() &&
 			 teammate->Get_Defense_Object() != NULL &&
 			 teammate->Get_Defense_Object()->Get_Health() > 0.0f) {
-			RectClass teammate_box( 0, 0, 64, 64 );
-			teammate_box += Render2DClass::Get_Screen_Resolution().Upper_Right() - teammate_box.Upper_Right();
-			teammate_box += Vector2( -16, 80 );
-			TeammatePogRenderer->Add_Quad(teammate_box, 0xFF44AAFF);
-
 			Vector3 teammate_pos;
 			teammate->Get_Position(&teammate_pos);
 
 			float angle = 0;
 			float range = 0;
-			Vector3 rel_pos;
-			Matrix3D::Inverse_Transform_Vector( COMBAT_STAR->Get_Transform(), teammate_pos, &rel_pos );
-			angle = ::atan2( rel_pos.Y, rel_pos.X );
-			range = rel_pos.Length();
+			RectClass teammate_box = Objective_Get_Marker_Box( teammate_pos, &angle, &range );
+			TeammatePogRenderer->Add_Quad(teammate_box, 0xFF44AAFF);
+			Objective_Add_Arrow( TeammateArrowRenderer, teammate_box, angle, 0xFF44AAFF );
 
-			Vector2 arrow_vertex;
-			arrow_vertex.X = WWMath::Fast_Sin( angle + DEG_TO_RAD( 180 + 45 ) );
-			arrow_vertex.Y = WWMath::Fast_Cos( angle + DEG_TO_RAD( 180 + 45 ) );
-			Vector2 verts[4];
-			verts[0] = Vector2( arrow_vertex.X, arrow_vertex.Y );
-			verts[1] = Vector2( arrow_vertex.Y, -arrow_vertex.X );
-			verts[2] = Vector2( -arrow_vertex.Y, arrow_vertex.X );
-			verts[3] = Vector2( -arrow_vertex.X, -arrow_vertex.Y );
-			Vector2 offset;
-			offset.Y = WWMath::Fast_Sin( -angle + DEG_TO_RAD( -90 ) );
-			offset.X = WWMath::Fast_Cos( -angle + DEG_TO_RAD( -90 ) );
-			offset *= 35;
-			offset += teammate_box.Center();
-
-			const float SIN_45=0.70710678118654752440084436210485f;
-			for ( int i = 0; i < 4; i++ ) {
-				verts[i] *= 0.5f * 16 / SIN_45;
-				verts[i] += offset;
-			}
-			TeammateArrowRenderer->Add_Quad( verts[0], verts[1], verts[2], verts[3], 0xFF44AAFF );
-
-			Vector2 position = teammate_box.Lower_Left();
-			position += Vector2( 0, -15 );
 			WideStringClass str(U_CHAR("Teammate"), true);
-			TeammateTextRenderer->Build_Sentence( str );
-			Vector2 text_size = TeammateTextRenderer->Get_Text_Extents( str );
-			position.X = (int)(teammate_box.Center().X - (text_size.X/2));
-			TeammateTextRenderer->Set_Location( position );
-			TeammateTextRenderer->Draw_Sentence();
+			Objective_Draw_Marker_Text( TeammateTextRenderer, teammate_box, str, -15 );
 
-			position = teammate_box.Lower_Left();
 			str.Format( TRANSLATE(IDS_HUD_RANGE), ((int)range / 10) * 10 );
-			TeammateTextRenderer->Build_Sentence( str );
-			text_size = TeammateTextRenderer->Get_Text_Extents( str );
-			position.X = (int)(teammate_box.Center().X - (text_size.X/2));
-			TeammateTextRenderer->Set_Location( position );
-			TeammateTextRenderer->Draw_Sentence();
+			Objective_Draw_Marker_Text( TeammateTextRenderer, teammate_box, str, 0 );
 		}
 	}
 }
@@ -2833,7 +2951,7 @@ void 	HUDClass::Init(bool render_available)
 		Info_Init();
 		Damage_Init();
 		Target_Init();
-		//Score_Init();
+		Score_Init();
 		Objective_Init();
 
 		HUD_Help_Text_Init();
@@ -2850,7 +2968,7 @@ void 	HUDClass::Shutdown()
 	if (_HUDInited) {
 
 		Objective_Shutdown();
-		//Score_Shutdown();
+		Score_Shutdown();
 		Target_Shutdown();
 		Damage_Shutdown();
 		Info_Shutdown();
@@ -2899,7 +3017,7 @@ void 	HUDClass::Render()
 		Info_Render();
 		Damage_Render();
 		Target_Render();
-		//Score_Render();
+		Score_Render();
 		HUD_Help_Text_Render();
 		Objective_Render();
 		RadarManager::Render();
@@ -2987,7 +3105,7 @@ void 	HUDClass::Think()
 	Weapon_Chart_Update();
 	Damage_Update();
 	Target_Update();
-	//Score_Update();
+	Score_Update();
 	Objective_Update();
 
 	// Radar

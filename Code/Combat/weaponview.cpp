@@ -292,6 +292,15 @@ void 	WeaponViewClass::Think()
 		return;
 	}
 
+	bool sprinting = COMBAT_STAR != NULL && COMBAT_STAR->Is_Sprinting();
+	if (sprinting && WeaponModel == NULL) {
+		if ( HandsPhysObj != NULL && COMBAT_SCENE->Contains( HandsPhysObj ) ) {
+			COMBAT_SCENE->Remove_Object( HandsPhysObj );
+		}
+		WeaponState = WEAPON_STATE_EXIT;
+		return;
+	}
+
 	// Setup camera bob
 	if ( COMBAT_STAR ) {
 		Vector3 vel;
@@ -361,6 +370,12 @@ void 	WeaponViewClass::Think()
 			}
 
 		}
+	}
+
+	if (sprinting) {
+		new_weapon_state = WEAPON_STATE_EXIT;
+		muzzle_flash_on = false;
+		ForceFireLoop = false;
 	}
 
 	const char* cur_weapon_model_name="";
@@ -611,6 +626,14 @@ void 	WeaponViewClass::Think()
 	if ( WeaponModel ) {
 		WeaponAnimControl.Update( TimeManager::Get_Frame_Seconds() );
 	}
+
+	if (sprinting && WeaponState == WEAPON_STATE_EXIT && HandAnimControl.Is_Complete()) {
+		if ( HandsPhysObj != NULL && COMBAT_SCENE->Contains( HandsPhysObj ) ) {
+			COMBAT_SCENE->Remove_Object( HandsPhysObj );
+		}
+		Release_Weapon_Assets();
+		WeaponState = WEAPON_STATE_EXIT;
+	}
 }
 
 Vector3	WeaponViewClass::Get_Muzzle_Pos()
@@ -844,4 +867,3 @@ static void	Set_Bob_Recoil( float amount )
 {
 	BobRecoil = amount;
 }
-

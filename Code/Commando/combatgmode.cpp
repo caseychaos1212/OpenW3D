@@ -1137,7 +1137,7 @@ void CombatGameModeClass::Core_Restart(void)
 
 	INIT_STATUS("Reloading...");
 
-	if ( IS_MISSION ) {
+	if ( IS_MISSION && !IS_COOP_MISSION ) {
 #ifndef MULTIPLAYERDEMO
 		StringClass new_name;
 		WWASSERT(PTheGameData != NULL);
@@ -1185,6 +1185,10 @@ void CombatGameModeClass::Core_Restart(void)
 				}
 			}
 		}
+	}
+
+	if (IS_COOP_MISSION) {
+		cGod::Reset();
 	}
 
 	//

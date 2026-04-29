@@ -131,6 +131,7 @@ bool												cNetwork::LastServerConnectionStateBad = false;
 bool												cNetwork::SensibleUpdates					= true;
 
 static const int CONNECT_VERSION_DIAGNOSTICS_MAGIC = 0x43564431; // CVD1
+static const unsigned int COOP_NETWORK_BANDWIDTH_BPS = 2000000;
 
 struct ConnectVersionDiagnostics
 {
@@ -149,6 +150,13 @@ struct ConnectVersionDiagnostics
 static const char * Match_Text(int left, int right)
 {
 	return left == right ? "match" : "DIFF";
+}
+
+static int Get_Bandwidth_Graph_Scale(unsigned int bandwidth_bps)
+{
+	int bw_scale = (bandwidth_bps * 2) / 10;
+	bw_scale = (bw_scale / 1000) * 1000;
+	return bw_scale;
 }
 
 static void Log_Connection_Message(const char *format, ...)
@@ -262,7 +270,15 @@ void cNetwork::Init_Client([[maybe_unused]] unsigned short my_port)
 
 	unsigned int bbo = 0;
 	//if (IS_SOLOPLAY || GameModeManager::Find("LAN")->Is_Active()) {
-	if (IS_SOLOPLAY ||
+	if (IS_COOP_MISSION) {
+
+		bbo = COOP_NETWORK_BANDWIDTH_BPS;
+
+		WWASSERT(bbo > 0);
+		cBandwidthGraph::Set_Scale(Get_Bandwidth_Graph_Scale(bbo));
+
+		HaveDoneTeamChangeDialog = false;
+	} else if (IS_SOLOPLAY ||
 		 (GameModeManager::Find("LAN")->Is_Active() && !cGameSpyAdmin::Is_Gamespy_Game() && !cGameSpyAdmin::Is_Direct_Internet_Game())) {
 
 		bbo = cBandwidth::Get_Bandwidth_Bps_From_Type(BANDWIDTH_LANT1);
@@ -277,9 +293,7 @@ void cNetwork::Init_Client([[maybe_unused]] unsigned short my_port)
 		//bbo = cUserOptions::BandwidthBps.Get();
 		WWASSERT(bbo > 0);
 
-		int bw_scale = (bbo * 2) / 10;
-		bw_scale = (bw_scale / 1000) * 1000;
-		cBandwidthGraph::Set_Scale(bw_scale);
+		cBandwidthGraph::Set_Scale(Get_Bandwidth_Graph_Scale(bbo));
 
 		if (GameModeManager::Find("WOL")->Is_Active()) {
 			HaveDoneTeamChangeDialog = true;
@@ -756,7 +770,13 @@ void cNetwork::Init_Server(void)
 
 
 	//if (IS_SOLOPLAY || GameModeManager::Find("LAN")->Is_Active()) {
-	if (IS_SOLOPLAY ||
+	if (IS_COOP_MISSION) {
+
+		ULONG bbo = COOP_NETWORK_BANDWIDTH_BPS;
+		WWASSERT(bbo > 0);
+		PServerConnection->Set_Bandwidth_Budget_Out(bbo);
+		cBandwidthGraph::Set_Scale(Get_Bandwidth_Graph_Scale(bbo));
+	} else if (IS_SOLOPLAY ||
 		 (GameModeManager::Find("LAN")->Is_Active() && !cGameSpyAdmin::Is_Gamespy_Game() && !cGameSpyAdmin::Is_Direct_Internet_Game())) {
 
 		ULONG bbo = cBandwidth::Get_Bandwidth_Bps_From_Type(BANDWIDTH_LANT1);
@@ -784,9 +804,7 @@ void cNetwork::Init_Server(void)
 
 		PServerConnection->Set_Bandwidth_Budget_Out(bw);
 		//PServerConnection->Set_Bandwidth_Budget_Out(cUserOptions::BandwidthBps.Get());
-		int bw_scale = (cUserOptions::BandwidthBps.Get() * 2) / 10;
-		bw_scale = (bw_scale / 1000) * 1000;
-		cBandwidthGraph::Set_Scale(bw_scale);
+		cBandwidthGraph::Set_Scale(Get_Bandwidth_Graph_Scale(cUserOptions::BandwidthBps.Get()));
 	}
 
    double max_acceptable_packetloss_pc = 10;

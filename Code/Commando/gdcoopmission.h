@@ -41,10 +41,13 @@ public:
 	void					Set_Player2_Preset(const StringClass & preset) {Player2Preset = preset;}
 	int					Get_Difficulty_Level(void) const {return DifficultyLevel;}
 	void					Set_Difficulty_Level(int level);
+	bool					Is_Sprint_Enabled(void) const {return EnableSprint;}
+	void					Set_Sprint_Enabled(bool enabled);
 
 private:
 	StringClass			Player2Preset;
 	int					DifficultyLevel;
+	bool					EnableSprint;
 };
 
 #endif // GDCOOPMISSION_H
