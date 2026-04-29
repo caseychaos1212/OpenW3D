@@ -58,6 +58,7 @@ ObjectivesViewerClass			ObjectiveManager::Viewer;
 bool									ObjectiveManager::DebugMode = false;
 bool									ObjectiveManager::HUDUpdate = true;
 int									ObjectiveManager::NumSpecifiedTertiaryObjectives;
+static ObjectiveManager::CoopSyncCallback CoopObjectiveSyncCallback = NULL;
 
 
 /*
@@ -458,6 +459,7 @@ void	ObjectiveManager::Add_Objective( int id, int type, int status, int short_de
 
 	Viewer.Update ();
 	HUDUpdate = true;
+	Notify_Coop_Sync( COOP_SYNC_ADD, objective, id );
 	return ;
 }
 
@@ -465,6 +467,7 @@ void	ObjectiveManager::Remove_Objective( int id )
 {
 	Objective * objective = Find_Objective( id );
 	if ( objective != NULL ) {
+		Notify_Coop_Sync( COOP_SYNC_REMOVE, objective, id );
 
 #if 01
 		WideStringClass message;
@@ -527,6 +530,7 @@ void	ObjectiveManager::Set_Objective_Status( int id, int status )
 		}
 		CombatManager::Get_Message_Window ()->Add_Message( message, objective->Type_To_Base_Color() );
 #endif
+		Notify_Coop_Sync( COOP_SYNC_STATUS, objective, id );
 
 	} else {
 		Debug_Say(( "Objective not found to set status\n" ));
@@ -545,6 +549,7 @@ void	ObjectiveManager::Change_Objective_Type( int id, int type )
 		objective->Type = type;
 		objective->Update_Object_Blip();
 		//DebugManager::Display_Text( "Mission objective priority changed\n", objective->Type_To_Color () );
+		Notify_Coop_Sync( COOP_SYNC_TYPE, objective, id );
 	} else {
 		Debug_Say(( "Objective not found to change type\n" ));
 	}
@@ -561,6 +566,7 @@ void	ObjectiveManager::Set_Objective_Radar_Blip( int id, Vector3 position )
 		objective->Set_Object( NULL );
 		objective->Position = position;
 		objective->DrawBlip = true;
+		Notify_Coop_Sync( COOP_SYNC_RADAR_BLIP, objective, id );
 	} else {
 		Debug_Say(( "Objective not found to set_radar_blip\n" ));
 	}
@@ -571,6 +577,7 @@ void	ObjectiveManager::Set_Objective_Radar_Blip( int id, PhysicalGameObj * objec
 	Objective * objective = Find_Objective( id );
 	if ( objective != NULL ) {
 		objective->Set_Object( object );
+		Notify_Coop_Sync( COOP_SYNC_RADAR_BLIP, objective, id );
 	} else {
 		Debug_Say(( "Objective not found to set_radar_blip\n" ));
 	}
@@ -626,6 +633,7 @@ void	ObjectiveManager::Set_Objective_HUD_Info( int id, float priority, const cha
 
 		Sort_Objectives();
 		HUDUpdate = true;
+		Notify_Coop_Sync( COOP_SYNC_HUD_INFO, objective, id );
 
 	} else {
 		Debug_Say(( "Objective not found to Set_Objective_HUD_Info\n" ));
@@ -643,11 +651,24 @@ void	ObjectiveManager::Set_Objective_HUD_Info( int id, float priority, const cha
 		objective->Position = position;
 		Sort_Objectives();
 		HUDUpdate = true;
+		Notify_Coop_Sync( COOP_SYNC_HUD_INFO, objective, id );
 
 	} else {
 		Debug_Say(( "Objective not found to Set_Objective_HUD_Info\n" ));
 	}
 
+}
+
+void	ObjectiveManager::Set_Coop_Sync_Callback( CoopSyncCallback callback )
+{
+	CoopObjectiveSyncCallback = callback;
+}
+
+void	ObjectiveManager::Notify_Coop_Sync( int operation, const Objective *objective, int objective_id )
+{
+	if ( CoopObjectiveSyncCallback != NULL ) {
+		CoopObjectiveSyncCallback( operation, objective, objective_id );
+	}
 }
 
 int	ObjectiveManager::Get_Num_HUD_Objectives( void )

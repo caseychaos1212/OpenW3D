@@ -70,6 +70,7 @@
 #include "transitioneffect.h"
 #include "phys3.h"
 #include "surfaceeffects.h"
+#include "gametype.h"
 
 
 // Hibernate after 30 seconds
@@ -1149,7 +1150,7 @@ void	PhysicalGameObj::Export_Rare( BitStreamClass &packet )
 
 	// We want to copy the hidden status for cinematics, (specefically, airstrip drops of vehicles)
 	// but, we only want to change vehicles visibility
-	if ( As_VehicleGameObj() != NULL ) {
+	if ( IS_COOP_MISSION || As_VehicleGameObj() != NULL ) {
 		// Send hidden
 		bool hidden = false;
 		if ( Peek_Model() ) {
@@ -1292,7 +1293,7 @@ void	PhysicalGameObj::Import_Rare( BitStreamClass &packet )
 	}
 
 
-	if ( As_VehicleGameObj() != NULL ) {
+	if ( IS_COOP_MISSION || As_VehicleGameObj() != NULL ) {
 		// Get Hidden
 		bool hidden = packet.Get( hidden );
 		if ( Peek_Model() ) {

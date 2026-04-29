@@ -64,6 +64,7 @@ EvaViewerTabClass::EvaViewerTabClass (const DialogResource *dialog_resource)	:
 	DescriptionCtrl (NULL),
 	AffiliationCtrl (NULL),
 	ViewerCtrl (NULL),
+	ShowAllObjects (false),
 	EncyclopediaType (EncyclopediaMgrClass::TYPE_CHARACTER),
 	ChildDialogClass (dialog_resource)
 {
@@ -99,7 +100,7 @@ EvaViewerTabClass::On_Init_Dialog (void)
 		//
 		//	Check to see if this entry should be displayed
 		//
-		if (EncyclopediaMgrClass::Is_Object_Revealed (EncyclopediaType, object.Get_ID ())) {
+		if (ShowAllObjects || EncyclopediaMgrClass::Is_Object_Revealed (EncyclopediaType, object.Get_ID ())) {
 
 			//
 			//	Add an entry to the list control for this object
@@ -374,6 +375,27 @@ EvaViewerTabClass::View_Entry (int entry_index)
 	}
 
 	return ;
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//	Get_Current_Object
+//
+////////////////////////////////////////////////////////////////
+EvaViewerObjectClass *
+EvaViewerTabClass::Get_Current_Object (void)
+{
+	if (ListCtrl == NULL) {
+		return NULL;
+	}
+
+	int entry_index = ListCtrl->Get_Curr_Sel ();
+	if (entry_index < 0) {
+		return NULL;
+	}
+
+	return (EvaViewerObjectClass *)ListCtrl->Get_Entry_Data (entry_index, 0);
 }
 
 

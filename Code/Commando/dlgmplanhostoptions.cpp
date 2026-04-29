@@ -107,8 +107,10 @@ MPLanHostOptionsMenuClass::On_Init_Dialog (void)
 	WWASSERT(PTheGameData != NULL);
 	WWASSERT(The_Game ()->Is_Cnc() || The_Game ()->Is_Coop_Mission());
 	if (The_Game ()->Is_Coop_Mission()) {
+		Set_Dlg_Item_Text(IDC_HOST_OPTIONS_TITLE, U_CHAR("Host Co-op Campaign"));
 		Set_Dlg_Item_Text(IDC_GAME_TYPE_TITLE, U_CHAR("Co-op Campaign"));
 	} else {
+		Set_Dlg_Item_Text(IDC_HOST_OPTIONS_TITLE, TRANSLATE(IDS_MENU_TEXT289));
 		Set_Dlg_Item_Text(IDC_GAME_TYPE_TITLE, TRANSLATE(IDS_MP_GAME_CNC));
 	}
 
@@ -1790,13 +1792,25 @@ MPLanHostCoopOptionsTabClass::On_Init_Dialog (void)
 	cGameDataCoopMission *game_data = The_Game ()->As_Coop_Mission ();
 	WWASSERT (game_data != NULL);
 
-	Set_Dlg_Item_Text (IDC_STARTING_CREDITS_STATIC, U_CHAR("Difficulty (0-2)"));
+	Set_Dlg_Item_Text (IDC_STARTING_CREDITS_STATIC, U_CHAR("Difficulty"));
 
 	EditCtrlClass * edit = (EditCtrlClass *)Get_Dlg_Item(IDC_STARTING_CREDITS_EDIT);
 	if (edit != NULL) {
-		edit->Set_Text_Limit(1);
+		edit->Show(false);
+		edit->Enable(false);
 	}
-	Set_Dlg_Item_Int (IDC_STARTING_CREDITS_EDIT,	game_data->Get_Difficulty_Level ());
+
+	ComboBoxCtrlClass *difficulty_combo = (ComboBoxCtrlClass *)Get_Dlg_Item(IDC_COOP_DIFFICULTY_COMBO);
+	if (difficulty_combo != NULL) {
+		difficulty_combo->Show(true);
+		difficulty_combo->Enable(true);
+		difficulty_combo->Reset_Content();
+		difficulty_combo->Add_String(U_CHAR("Easy"));
+		difficulty_combo->Add_String(U_CHAR("Normal"));
+		difficulty_combo->Add_String(U_CHAR("Hard"));
+		int difficulty = game_data->Get_Difficulty_Level();
+		difficulty_combo->Set_Curr_Sel(std::min(std::max(difficulty, 0), 2));
+	}
 
 	Check_Dlg_Button (IDC_ALLIED_FIRE_CHECK, The_Game ()->IsFriendlyFirePermitted.Is_True ());
 	Enable_Dlg_Item (IDC_ALLIED_FIRE_CHECK, true);
@@ -1833,7 +1847,10 @@ MPLanHostCoopOptionsTabClass::On_Apply (void)
 	cGameDataCoopMission *game_data = The_Game ()->As_Coop_Mission ();
 	WWASSERT (game_data != NULL);
 
-	game_data->Set_Difficulty_Level (Get_Dlg_Item_Int (IDC_STARTING_CREDITS_EDIT));
+	ComboBoxCtrlClass *difficulty_combo = (ComboBoxCtrlClass *)Get_Dlg_Item(IDC_COOP_DIFFICULTY_COMBO);
+	if (difficulty_combo != NULL && difficulty_combo->Get_Curr_Sel() >= 0) {
+		game_data->Set_Difficulty_Level(difficulty_combo->Get_Curr_Sel());
+	}
 	The_Game ()->IsFriendlyFirePermitted.Set (Is_Dlg_Button_Checked (IDC_ALLIED_FIRE_CHECK));
 	The_Game ()->CanRepairBuildings.Set (false);
 	The_Game ()->DriverIsAlwaysGunner.Set (false);
@@ -1868,7 +1885,15 @@ MPLanHostCnCOptionsTabClass::On_Init_Dialog (void)
 	EditCtrlClass * edit = (EditCtrlClass *)Get_Dlg_Item(IDC_STARTING_CREDITS_EDIT);
 	if (edit != NULL)
 	{
+		edit->Show(true);
+		edit->Enable(true);
 		edit->Set_Text_Limit(5);
+	}
+
+	ComboBoxCtrlClass *difficulty_combo = (ComboBoxCtrlClass *)Get_Dlg_Item(IDC_COOP_DIFFICULTY_COMBO);
+	if (difficulty_combo != NULL) {
+		difficulty_combo->Show(false);
+		difficulty_combo->Enable(false);
 	}
 
 	Set_Dlg_Item_Int (IDC_STARTING_CREDITS_EDIT,	game_data->Get_Starting_Credits ());

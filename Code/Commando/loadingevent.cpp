@@ -45,6 +45,8 @@
 #include "playermanager.h"
 #include "apppackettypes.h"
 #include "gamedataupdateevent.h"
+#include "coopobjectivesyncevent.h"
+#include "gametype.h"
 
 
 DECLARE_NETWORKOBJECT_FACTORY(cLoadingEvent, NETCLASSID_LOADINGEVENT);
@@ -101,6 +103,7 @@ cLoadingEvent::Act(void)
 			//
 			cGameDataUpdateEvent * p_event = new cGameDataUpdateEvent();
 			p_event->Init(p_player->Get_Id());
+			cCoopObjectiveSyncEvent::Send_Snapshot(p_player->Get_Id());
 		}
 	}
 

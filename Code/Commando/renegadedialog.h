@@ -889,6 +889,13 @@ enum class RenegadeDialogID {
 #define IDC_BUY_RENEGADE                1659
 #define IDC_VISIT_WEB_BUTTON            11037
 #define IDC_EXIT_BUTTON                 11038
+#define IDC_COOP_DIRECT_ADDRESS_STATIC  1660
+#define IDC_COOP_DIRECT_ADDRESS_EDIT    1661
+#define IDC_COOP_DIRECT_PORT_STATIC     1662
+#define IDC_COOP_DIRECT_PORT_EDIT       1663
+#define IDC_COOP_DIRECT_CONNECT_BUTTON  1664
+#define IDC_HOST_OPTIONS_TITLE          1665
+#define IDC_COOP_DIFFICULTY_COMBO       1666
 
 //
 //	These button IDs are used for "simple" buttons
@@ -1018,4 +1025,3 @@ enum class RenegadeDialogID {
 const DialogResource * GetRenegadeDialog(RenegadeDialogID id);
 
 #endif //__DIALOG_RESOURCE_H
-

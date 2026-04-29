@@ -72,11 +72,27 @@
 #include "hudinfo.h"
 #include "string_ids.h"
 #include "translatedb.h"
+#include "gametype.h"
 
 /*
 ** PowerUpGameObjDef
 */
 DECLARE_FORCE_LINK( PowerUp )
+
+static bool Is_Coop_Powerup_Proximity_Hit(PowerUpGameObj *powerup, SoldierGameObj *soldier)
+{
+	if (!IS_COOP_MISSION || powerup == NULL || soldier == NULL || soldier->Get_Control_Owner() < 0) {
+		return false;
+	}
+
+	Vector3 powerup_position;
+	Vector3 soldier_position;
+	powerup->Get_Position(&powerup_position);
+	soldier->Get_Position(&soldier_position);
+
+	const Vector3 delta = soldier_position - powerup_position;
+	return delta.Length2() <= 6.25F;
+}
 
 SimplePersistFactoryClass<PowerUpGameObjDef, CHUNKID_GAME_OBJECT_DEF_POWERUP>	_PowerUpGameObjDefPersistFactory;
 
@@ -892,6 +908,9 @@ void	PowerUpGameObj::Think( void )
 
 				PhysAABoxIntersectionTestClass test( box, DEFAULT_COLLISION_GROUP, COLLISION_TYPE_PHYSICAL );
 				bool result = obj->Peek_Physical_Object()->Intersection_Test(test);
+				if (!result) {
+					result = Is_Coop_Powerup_Proximity_Hit(this, soldier);
+				}
 				if ( result ) {
 					Grant( soldier );		// Don't grant any more
 					break;

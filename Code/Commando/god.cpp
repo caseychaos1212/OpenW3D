@@ -33,12 +33,14 @@
 #include "gdcoopmission.h"
 #include "coopdebuglog.h"
 #include "coopinventory.h"
+#include "coopcameraevent.h"
 #include "playertype.h"
 #include "objlibrary.h"
 #include "definitionmgr.h"
 #include "combatchunkid.h"
 #include "phys.h"
 #include "humanphys.h"
+#include "soldier.h"
 #include "soldierobserver.h"
 #include "gametype.h"
 #include "dialogtests.h"
@@ -74,6 +76,16 @@ typedef enum {
 
 int		cGod::State		= GOD_STATE_UNINITIALIZED;
 InventoryClass	cGod::LevelStartInventory;
+
+struct CoopCharacterPresetSelection
+{
+	int ClientId;
+	StringClass PresetName;
+};
+
+static const int MAX_COOP_CHARACTER_PRESET_SELECTIONS = 8;
+static CoopCharacterPresetSelection CoopCharacterPresetSelections[MAX_COOP_CHARACTER_PRESET_SELECTIONS];
+static int CoopCharacterPresetSelectionCount = 0;
 
 //-----------------------------------------------------------------------------
 static cPlayer * Get_First_Active_In_Game_Player(void)
@@ -346,6 +358,75 @@ static bool Get_Preset_Model_Name(const StringClass & preset_name, StringClass &
 }
 
 //-----------------------------------------------------------------------------
+static int Find_Coop_Character_Preset_Selection(int client_id)
+{
+	for (int index = 0; index < CoopCharacterPresetSelectionCount; index++) {
+		if (CoopCharacterPresetSelections[index].ClientId == client_id) {
+			return index;
+		}
+	}
+
+	return -1;
+}
+
+//-----------------------------------------------------------------------------
+static bool Get_Coop_Character_Preset(int client_id, StringClass & preset_name)
+{
+	int index = Find_Coop_Character_Preset_Selection(client_id);
+	if (index < 0) {
+		return false;
+	}
+
+	preset_name = CoopCharacterPresetSelections[index].PresetName;
+	return !preset_name.Is_Empty();
+}
+
+//-----------------------------------------------------------------------------
+static void Store_Coop_Character_Preset(int client_id, const StringClass & preset_name)
+{
+	int index = Find_Coop_Character_Preset_Selection(client_id);
+	if (index < 0) {
+		if (CoopCharacterPresetSelectionCount < MAX_COOP_CHARACTER_PRESET_SELECTIONS) {
+			index = CoopCharacterPresetSelectionCount++;
+		} else {
+			index = 0;
+		}
+	}
+
+	CoopCharacterPresetSelections[index].ClientId = client_id;
+	CoopCharacterPresetSelections[index].PresetName = preset_name;
+}
+
+//-----------------------------------------------------------------------------
+static bool Is_Valid_Coop_Character_Preset(const StringClass & preset_name)
+{
+	if (preset_name.Is_Empty()) {
+		return false;
+	}
+
+	return DefinitionMgrClass::Find_Typed_Definition(
+		preset_name.Peek_Buffer(),
+		CLASSID_GAME_OBJECT_DEF_SOLDIER) != NULL;
+}
+
+//-----------------------------------------------------------------------------
+static bool Apply_Coop_Character_Preset(SoldierGameObj * soldier, const StringClass & preset_name)
+{
+	if (soldier == NULL || !Is_Valid_Coop_Character_Preset(preset_name)) {
+		return false;
+	}
+
+	StringClass model_name;
+	if (!Get_Preset_Model_Name(preset_name, model_name)) {
+		return false;
+	}
+
+	soldier->Set_Model(model_name.Peek_Buffer());
+	soldier->Set_Object_Dirty_Bit(NetworkObjectClass::BIT_RARE, true);
+	return true;
+}
+
+//-----------------------------------------------------------------------------
 static void Attach_Mission_Start_Script(SoldierGameObj * soldier)
 {
 	WWASSERT(soldier != NULL);
@@ -508,6 +589,9 @@ void cGod::Think(void)
 					CoopDebugLog::Log("cGod::Think COOP_RUNNING spawning missing body for player id=%d", p_player->Get_Id());
 				}
 				Create_Commando(p_player, State == GOD_STATE_COOP_RUNNING);
+				if (State == GOD_STATE_COOP_RUNNING) {
+					cCoopCameraEvent::Sync_Current_Camera_State();
+				}
 			}
 		}
 	}
@@ -616,7 +700,7 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
 	StringClass preset_name;
 	preset_name.Format("Commando");
 	StringClass primary_mission_preset;
-	StringClass player2_model_preset;
+	StringClass coop_model_preset;
 
 	if (IS_MISSION) {
 
@@ -633,15 +717,20 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
 #endif // !MULTIPLAYERDEMO
 		primary_mission_preset = preset_name;
 
-		if (IS_COOP_MISSION && player_type == PLAYERTYPE_GDI && Is_Coop_Secondary_Player(client_id)) {
-			cGameDataCoopMission * coop_game = The_Game()->As_Coop_Mission();
-			WWASSERT(coop_game != NULL);
+		if (IS_COOP_MISSION && player_type == PLAYERTYPE_GDI) {
+			if (Get_Coop_Character_Preset(client_id, coop_model_preset)) {
+				CoopDebugLog::Log("cGod::Create_Commando character selection client_id=%d preset=%s",
+					client_id, coop_model_preset.Peek_Buffer());
+			} else if (Is_Coop_Secondary_Player(client_id)) {
+				cGameDataCoopMission * coop_game = The_Game()->As_Coop_Mission();
+				WWASSERT(coop_game != NULL);
 
-			const StringClass & player2_preset = coop_game->Get_Player2_Preset();
-			if (!player2_preset.Is_Empty()) {
-				player2_model_preset = player2_preset;
-			} else {
-				Debug_Say(("Co-op player 2 preset is not configured; falling back to %s\n", primary_mission_preset.Peek_Buffer()));
+				const StringClass & player2_preset = coop_game->Get_Player2_Preset();
+				if (!player2_preset.Is_Empty()) {
+					coop_model_preset = player2_preset;
+				} else {
+					Debug_Say(("Co-op player 2 preset is not configured; falling back to %s\n", primary_mission_preset.Peek_Buffer()));
+				}
 			}
 		}
 
@@ -665,16 +754,16 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
 	WWASSERT(p_soldier != NULL);
 	WWASSERT(p_soldier->Peek_Physical_Object() != NULL);
 
-	if (!player2_model_preset.Is_Empty()) {
-		StringClass player2_model_name;
-		if (Get_Preset_Model_Name(player2_model_preset, player2_model_name)) {
-			CoopDebugLog::Log("cGod::Create_Commando player2 model override client_id=%d preset=%s model=%s",
-				client_id, player2_model_preset.Peek_Buffer(), player2_model_name.Peek_Buffer());
-			p_soldier->Set_Model(player2_model_name);
+	if (!coop_model_preset.Is_Empty()) {
+		StringClass coop_model_name;
+		if (Get_Preset_Model_Name(coop_model_preset, coop_model_name)) {
+			CoopDebugLog::Log("cGod::Create_Commando model override client_id=%d preset=%s model=%s",
+				client_id, coop_model_preset.Peek_Buffer(), coop_model_name.Peek_Buffer());
+			p_soldier->Set_Model(coop_model_name.Peek_Buffer());
 			p_soldier->Set_Object_Dirty_Bit(NetworkObjectClass::BIT_RARE, true);
 		} else {
-			Debug_Say(("Co-op player 2 preset %s is invalid; using %s model\n",
-				player2_model_preset.Peek_Buffer(), primary_mission_preset.Peek_Buffer()));
+			Debug_Say(("Co-op character preset %s is invalid; using %s model\n",
+				coop_model_preset.Peek_Buffer(), primary_mission_preset.Peek_Buffer()));
 		}
 	}
 
@@ -782,6 +871,84 @@ SoldierGameObj * cGod::Create_Commando(cPlayer * p_player, bool prefer_ally_spaw
 	//int model_num		= p_player->Get_Model();
 
 	return Create_Commando(client_id, player_type, prefer_ally_spawn/*, model_num*/);
+}
+
+//-----------------------------------------------------------------------------
+bool cGod::Set_Coop_Character_Preset(int client_id, const char *preset_name)
+{
+	if (!IS_COOP_MISSION || !cNetwork::I_Am_Server() || preset_name == NULL || preset_name[0] == 0) {
+		return false;
+	}
+
+	cPlayer *player = cPlayerManager::Find_Player(client_id);
+	if (player == NULL || !player->Is_Active()) {
+		return false;
+	}
+
+	StringClass selected_preset(preset_name, true);
+	if (!Is_Valid_Coop_Character_Preset(selected_preset)) {
+		Debug_Say(("Co-op character preset %s is invalid\n", selected_preset.Peek_Buffer()));
+		return false;
+	}
+
+	Store_Coop_Character_Preset(client_id, selected_preset);
+
+	SoldierGameObj *soldier = GameObjManager::Find_Soldier_Of_Client_ID(client_id);
+	if (soldier == NULL || soldier->Is_Delete_Pending()) {
+		return true;
+	}
+
+	return Apply_Coop_Character_Preset(soldier, selected_preset);
+}
+
+//-----------------------------------------------------------------------------
+bool cGod::Can_Coop_Respawn_Player(int client_id)
+{
+	if (!IS_COOP_MISSION || !cNetwork::I_Am_Server()) {
+		return false;
+	}
+
+	cPlayer *player = cPlayerManager::Find_Player(client_id);
+	if (player == NULL || !player->Is_Active()) {
+		return false;
+	}
+
+	SoldierGameObj *soldier = GameObjManager::Find_Soldier_Of_Client_ID(client_id);
+	if (soldier == NULL || soldier->Is_Delete_Pending()) {
+		return true;
+	}
+
+	if (soldier->Is_Dead()) {
+		return true;
+	}
+
+	if (soldier->Get_Defense_Object() != NULL &&
+		 soldier->Get_Defense_Object()->Get_Health() <= 0.0f) {
+		return true;
+	}
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+SoldierGameObj * cGod::Coop_Respawn_Player(int client_id)
+{
+	if (!Can_Coop_Respawn_Player(client_id)) {
+		return NULL;
+	}
+
+	cPlayer *player = cPlayerManager::Find_Player(client_id);
+	WWASSERT(player != NULL);
+	if (player == NULL) {
+		return NULL;
+	}
+
+	SoldierGameObj *old_soldier = GameObjManager::Find_Soldier_Of_Client_ID(client_id);
+	if (old_soldier != NULL && !old_soldier->Is_Delete_Pending()) {
+		old_soldier->Set_Delete_Pending();
+	}
+
+	return Create_Commando(player, true);
 }
 
 //-----------------------------------------------------------------------------

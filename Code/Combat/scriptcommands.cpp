@@ -92,6 +92,25 @@
 #define	SCRIPT_TRACE(x)	if (ScriptTrace) {Debug_Say(x);}
 bool		ScriptTrace	= false;
 
+static ScriptControlEnableCallback ScriptControlCallback = NULL;
+static ScriptCameraHostCallback ScriptCameraHostCallbackPtr = NULL;
+static ScriptForceCameraLookCallback ScriptForceCameraLookCallbackPtr = NULL;
+
+void ScriptCommands_Set_Control_Enable_Callback(ScriptControlEnableCallback callback)
+{
+	ScriptControlCallback = callback;
+}
+
+void ScriptCommands_Set_Camera_Host_Callback(ScriptCameraHostCallback callback)
+{
+	ScriptCameraHostCallbackPtr = callback;
+}
+
+void ScriptCommands_Set_Force_Camera_Look_Callback(ScriptForceCameraLookCallback callback)
+{
+	ScriptForceCameraLookCallbackPtr = callback;
+}
+
 #define	SCRIPT_PTR_CHECK( x )				if ( x == NULL ) { Debug_Say(( "NULL Script Ptr at %s line %d\n", __FILE__, __LINE__ )); return;	}
 #define	SCRIPT_PTR_CHECK_RET( x, ret )	if ( x == NULL ) { Debug_Say(( "NULL Script Ptr at %s line %d\n", __FILE__, __LINE__ )); return ret;	}
 
@@ -1357,6 +1376,10 @@ void	Set_Camera_Host( GameObject * obj )
 
 		COMBAT_CAMERA->Set_Host_Model( pgobj->Peek_Model() );
 	}
+
+	if (ScriptCameraHostCallbackPtr != NULL) {
+		ScriptCameraHostCallbackPtr(obj);
+	}
 }
 
 void	Force_Camera_Look( const Vector3 & target )
@@ -1365,6 +1388,10 @@ void	Force_Camera_Look( const Vector3 & target )
 	SCRIPT_TRACE((	"ST>Force_Camera_Look( %f %f %f )\n", target.X, target.Y, target.Z ));
 	if ( COMBAT_CAMERA ) {
 		COMBAT_CAMERA->Force_Look( target );
+	}
+
+	if (ScriptForceCameraLookCallbackPtr != NULL) {
+		ScriptForceCameraLookCallbackPtr(target);
 	}
 }
 
@@ -1484,16 +1511,24 @@ bool Get_Damage_Bone_Direction( void )
 /*
 **
 */
-void	Control_Enable( GameObject * obj, bool enable )
+void	ScriptCommands_Control_Enable( GameObject * obj, bool enable )
 {
 	SCRIPT_PTR_CHECK( obj );
 	SCRIPT_TRACE((	"ST>Control_Enable( %d, %d )\n", obj->Get_ID(), enable ));
 	SmartGameObj *smart = obj->As_SmartGameObj();
 	if (smart) {
 		smart->Control_Enable( enable );
+		if (ScriptControlCallback != NULL) {
+			ScriptControlCallback(obj, enable);
+		}
 	} else {
 		Debug_Say(( "This object can't Control_Enable\n" ));
 	}
+}
+
+void	Control_Enable( GameObject * obj, bool enable )
+{
+	ScriptCommands_Control_Enable(obj, enable);
 }
 
 
@@ -2763,6 +2798,7 @@ void	Set_Is_Visible( GameObject * object, bool visible )
 	}
 	if ( soldier ) {
 		soldier->Set_Is_Visible( visible );
+		soldier->Set_Object_Dirty_Bit(NetworkObjectClass::BIT_RARE, true);
 	} else {
 		Debug_Say(( "Can only Set_Is_Visible on a SoldierGameObj\n" ));
 	}

@@ -348,8 +348,18 @@ set(COMMANDO_SRC
     clientbboevent.h
     clientgoodbyeevent.cpp
     clientgoodbyeevent.h
+    coopcontrollockevent.cpp
+    coopcontrollockevent.h
+    coopcameraevent.cpp
+    coopcameraevent.h
+    coopcharacterselectevent.cpp
+    coopcharacterselectevent.h
     coopleveltransitionevent.cpp
     coopleveltransitionevent.h
+    coopobjectivesyncevent.cpp
+    coopobjectivesyncevent.h
+    cooprespawnrequestevent.cpp
+    cooprespawnrequestevent.h
     consolecommandevent.cpp
     consolecommandevent.h
     csconsolecommandevent.cpp

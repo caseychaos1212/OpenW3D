@@ -44,10 +44,14 @@
 #include "dlghelpscreen.h"
 #include "gameinitmgr.h"
 #include "suicideevent.h"
+#include "cooprespawnrequestevent.h"
 #include "changeteamevent.h"
 #include "cstextobj.h"
+#include "gameobjmanager.h"
+#include "soldier.h"
 #include "WWAudio.h"
 #include "dialogmgr.h"
+#include "dlgevaencyclopedia.h"
 #include "menubackdrop.h"
 #include "input.h"
 #include "string_ids.h"
@@ -216,14 +220,19 @@ CnCReferenceMenuClass::On_Command (int ctrl_id, int message_id, unsigned int par
 
 		case IDC_OPTIONS_MULTIPLAY_SUICIDE:
 		{
-			cSuicideEvent * p_suicide = new cSuicideEvent;
-			p_suicide->Init();
+			if (IS_COOP_MISSION) {
+				cCoopRespawnRequestEvent *event = new cCoopRespawnRequestEvent;
+				event->Init();
+			} else {
+				cSuicideEvent * p_suicide = new cSuicideEvent;
+				p_suicide->Init();
 
-			//
-			// Play a custom SFX for feedback
-			//
-			WWASSERT(WWAudioClass::Get_Instance() != NULL);
-			WWAudioClass::Get_Instance()->Create_Instant_Sound("Committed_Suicide", Matrix3D(1));
+				//
+				// Play a custom SFX for feedback
+				//
+				WWASSERT(WWAudioClass::Get_Instance() != NULL);
+				WWAudioClass::Get_Instance()->Create_Instant_Sound("Committed_Suicide", Matrix3D(1));
+			}
 
 			GameInitMgrClass::Continue_Game();
 			End_Dialog();
@@ -235,6 +244,13 @@ CnCReferenceMenuClass::On_Command (int ctrl_id, int message_id, unsigned int par
 
 		case IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS:
 		{
+			if (IS_COOP_MISSION) {
+				EVAEncyclopediaMenuClass::Display(EVAEncyclopediaMenuClass::TAB_CHARACTERS);
+				End_Dialog();
+				allow_default_processing = false;
+				break;
+			}
+
 			cChangeTeamEvent * p_event = new cChangeTeamEvent;
 			p_event->Init();
 
@@ -350,6 +366,11 @@ CnCReferenceMenuClass::On_Frame_Update (void)
 	//
 	// Enable or disable the suicide button
 	//
+	bool is_coop_respawn_enabled =
+		The_Game() != NULL &&
+		IS_COOP_MISSION &&
+		cNetwork::I_Am_Client();
+
 	bool is_suicide_enabled =
 		The_Game() != NULL &&
 		!IS_MISSION &&
@@ -357,10 +378,25 @@ CnCReferenceMenuClass::On_Frame_Update (void)
 		//GameModeManager::Find("Combat") != NULL &&
 		//GameModeManager::Find("Combat")->Is_Active();
 
-	bool can_suicide_now = (time_now_ms - LastSuicideTimeMs >= ACTION_TIMEOUT_MS);
+	bool can_respawn_now = false;
+	if (is_coop_respawn_enabled) {
+		SoldierGameObj *soldier = GameObjManager::Find_Soldier_Of_Client_ID(cNetwork::Get_My_Id());
+		can_respawn_now =
+			soldier == NULL ||
+			soldier->Is_Delete_Pending() ||
+			soldier->Is_Dead() ||
+			(soldier->Get_Defense_Object() != NULL && soldier->Get_Defense_Object()->Get_Health() <= 0.0f);
+	}
 
+	bool can_suicide_now = is_coop_respawn_enabled ?
+		can_respawn_now :
+		(time_now_ms - LastSuicideTimeMs >= ACTION_TIMEOUT_MS);
+
+	Set_Dlg_Item_Text(
+		IDC_OPTIONS_MULTIPLAY_SUICIDE,
+		is_coop_respawn_enabled ? U_CHAR("Respawn") : TRANSLATE(IDS_MENU_TEXT567));
 	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_SUICIDE)->Enable (can_suicide_now);
-	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_SUICIDE)->Show (is_suicide_enabled);
+	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_SUICIDE)->Show (is_suicide_enabled || is_coop_respawn_enabled);
 
 	//
 	// Enable or disable the change teams button
@@ -374,10 +410,18 @@ CnCReferenceMenuClass::On_Frame_Update (void)
 		//GameModeManager::Find("Combat") != NULL &&
 		//GameModeManager::Find("Combat")->Is_Active();
 
+	bool is_coop_character_enabled =
+		The_Game() != NULL &&
+		IS_COOP_MISSION &&
+		cNetwork::I_Am_Client();
+
 	bool can_change_teams_now = (time_now_ms - LastChangeTeamTimeMs >= ACTION_TIMEOUT_MS);
 
-	Get_Dlg_Item (IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS)->Enable (can_change_teams_now);
-	Get_Dlg_Item (IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS)->Show (is_team_change_enabled);
+	Set_Dlg_Item_Text(
+		IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS,
+		is_coop_character_enabled ? U_CHAR("Character") : TRANSLATE(IDS_MENU_TEXT875));
+	Get_Dlg_Item (IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS)->Enable (is_coop_character_enabled || can_change_teams_now);
+	Get_Dlg_Item (IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS)->Show (is_coop_character_enabled || is_team_change_enabled);
 
 	//
 	//	Decrement the "delay on this screen" timer...
@@ -512,4 +556,3 @@ CnCReferenceMenuClass::Exit_Game (void)
 				Stop_Main_Loop(EXIT_SUCCESS);
 			}
 			/**/
-

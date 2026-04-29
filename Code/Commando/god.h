@@ -68,6 +68,9 @@ class cGod
 		static	void				Store_Inventory( SoldierGameObj * );
 		static	void				Restore_Inventory( SoldierGameObj * );
 		static	void				Reset_Inventory( void );
+		static	bool				Can_Coop_Respawn_Player(int client_id);
+		static	SoldierGameObj *	Coop_Respawn_Player(int client_id);
+		static	bool				Set_Coop_Character_Preset(int client_id, const char *preset_name);
 
 	private:
 		static SoldierGameObj * Create_Commando(int client_id, int player_type, bool prefer_ally_spawn = false);

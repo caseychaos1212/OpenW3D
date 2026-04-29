@@ -64,6 +64,7 @@
 #include "weaponbag.h"
 #include "string_ids.h"
 #include "gametype.h"
+#include "gameobjmanager.h"
 #include "stylemgr.h"
 
 #define INVALID_HUD_WEAPON ((WeaponClass *)(uintptr_t)-1)
@@ -1858,6 +1859,9 @@ static	void	Score_Render( void )
 DynamicVectorClass<Render2DClass *>	ObjectivePogRenderers;
 Render2DClass * ObjectiveArrowRenderer;
 Render2DSentenceClass * ObjectiveTextRenderer;
+Render2DClass * TeammatePogRenderer;
+Render2DClass * TeammateArrowRenderer;
+Render2DSentenceClass * TeammateTextRenderer;
 
 int	CurrentObjectiveIndex = 0;
 void * CurrentObjective = NULL;
@@ -1875,6 +1879,14 @@ static	void	Objective_Init( void )
 	FontCharsClass *font = StyleMgrClass::Peek_Font( StyleMgrClass::FONT_INGAME_TXT );
 	ObjectiveTextRenderer = new Render2DSentenceClass();
 	ObjectiveTextRenderer->Set_Font( font );
+	TeammatePogRenderer = new Render2DClass();
+	TeammatePogRenderer->Set_Texture( "HUD_STAR.TGA" );
+	TeammatePogRenderer->Set_Coordinate_Range( Render2DClass::Get_Screen_Resolution() );
+	TeammateArrowRenderer = new Render2DClass();
+	TeammateArrowRenderer->Set_Texture( OBJECTIVE_ARROW_TEXTURE );
+	TeammateArrowRenderer->Set_Coordinate_Range( Render2DClass::Get_Screen_Resolution() );
+	TeammateTextRenderer = new Render2DSentenceClass();
+	TeammateTextRenderer->Set_Font( font );
 
 	CurrentObjectiveIndex=0;
 	CurrentObjective=NULL;
@@ -1900,6 +1912,15 @@ static	void	Objective_Shutdown( void )
 
 	delete ObjectiveTextRenderer;
 	ObjectiveTextRenderer = NULL;
+
+	delete TeammatePogRenderer;
+	TeammatePogRenderer = NULL;
+
+	delete TeammateArrowRenderer;
+	TeammateArrowRenderer = NULL;
+
+	delete TeammateTextRenderer;
+	TeammateTextRenderer = NULL;
 }
 
 #define	POG_FLY_TIME	2.0f
@@ -2094,6 +2115,70 @@ static	void	Objective_Update( void )
 			CachedObjectiveIndex=-1;
 		}
 	}
+
+	TeammatePogRenderer->Reset();
+	TeammateArrowRenderer->Reset();
+	TeammateTextRenderer->Reset();
+	if (IS_COOP_MISSION && COMBAT_STAR != NULL) {
+		SoldierGameObj *teammate = GameObjManager::Find_Different_Player_Soldier(COMBAT_STAR->Get_Control_Owner());
+		if (teammate != NULL &&
+			 !teammate->Is_Dead() &&
+			 teammate->Get_Defense_Object() != NULL &&
+			 teammate->Get_Defense_Object()->Get_Health() > 0.0f) {
+			RectClass teammate_box( 0, 0, 64, 64 );
+			teammate_box += Render2DClass::Get_Screen_Resolution().Upper_Right() - teammate_box.Upper_Right();
+			teammate_box += Vector2( -16, 80 );
+			TeammatePogRenderer->Add_Quad(teammate_box, 0xFF44AAFF);
+
+			Vector3 teammate_pos;
+			teammate->Get_Position(&teammate_pos);
+
+			float angle = 0;
+			float range = 0;
+			Vector3 rel_pos;
+			Matrix3D::Inverse_Transform_Vector( COMBAT_STAR->Get_Transform(), teammate_pos, &rel_pos );
+			angle = ::atan2( rel_pos.Y, rel_pos.X );
+			range = rel_pos.Length();
+
+			Vector2 arrow_vertex;
+			arrow_vertex.X = WWMath::Fast_Sin( angle + DEG_TO_RAD( 180 + 45 ) );
+			arrow_vertex.Y = WWMath::Fast_Cos( angle + DEG_TO_RAD( 180 + 45 ) );
+			Vector2 verts[4];
+			verts[0] = Vector2( arrow_vertex.X, arrow_vertex.Y );
+			verts[1] = Vector2( arrow_vertex.Y, -arrow_vertex.X );
+			verts[2] = Vector2( -arrow_vertex.Y, arrow_vertex.X );
+			verts[3] = Vector2( -arrow_vertex.X, -arrow_vertex.Y );
+			Vector2 offset;
+			offset.Y = WWMath::Fast_Sin( -angle + DEG_TO_RAD( -90 ) );
+			offset.X = WWMath::Fast_Cos( -angle + DEG_TO_RAD( -90 ) );
+			offset *= 35;
+			offset += teammate_box.Center();
+
+			const float SIN_45=0.70710678118654752440084436210485f;
+			for ( int i = 0; i < 4; i++ ) {
+				verts[i] *= 0.5f * 16 / SIN_45;
+				verts[i] += offset;
+			}
+			TeammateArrowRenderer->Add_Quad( verts[0], verts[1], verts[2], verts[3], 0xFF44AAFF );
+
+			Vector2 position = teammate_box.Lower_Left();
+			position += Vector2( 0, -15 );
+			WideStringClass str(U_CHAR("Teammate"), true);
+			TeammateTextRenderer->Build_Sentence( str );
+			Vector2 text_size = TeammateTextRenderer->Get_Text_Extents( str );
+			position.X = (int)(teammate_box.Center().X - (text_size.X/2));
+			TeammateTextRenderer->Set_Location( position );
+			TeammateTextRenderer->Draw_Sentence();
+
+			position = teammate_box.Lower_Left();
+			str.Format( TRANSLATE(IDS_HUD_RANGE), ((int)range / 10) * 10 );
+			TeammateTextRenderer->Build_Sentence( str );
+			text_size = TeammateTextRenderer->Get_Text_Extents( str );
+			position.X = (int)(teammate_box.Center().X - (text_size.X/2));
+			TeammateTextRenderer->Set_Location( position );
+			TeammateTextRenderer->Draw_Sentence();
+		}
+	}
 }
 
 static	void	Objective_Render( void )
@@ -2103,6 +2188,9 @@ static	void	Objective_Render( void )
 	}
 	ObjectiveArrowRenderer->Render();
 	ObjectiveTextRenderer->Render();
+	TeammatePogRenderer->Render();
+	TeammateArrowRenderer->Render();
+	TeammateTextRenderer->Render();
 }
 
 /*

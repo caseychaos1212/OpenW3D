@@ -152,6 +152,7 @@ public:
 	void		Set_Description_Ctrl (DialogTextClass *ctrl)	{ DescriptionCtrl = ctrl; }
 	void		Set_Affiliation_Ctrl (DialogTextClass *ctrl)	{ AffiliationCtrl = ctrl; }
 	void		Set_Viewer_Ctrl (ViewerCtrlClass *ctrl)		{ ViewerCtrl = ctrl; }
+	void		Set_Show_All_Objects (bool onoff)				{ ShowAllObjects = onoff; }
 
 	void		Set_Encyclopedia_Type (EncyclopediaMgrClass::TYPE type)	{ EncyclopediaType = type; }
 
@@ -169,6 +170,7 @@ protected:
 	void		On_Init_Dialog (void) override;
 	void		On_Destroy_Dialog (void);
 	void		View_Entry (int entry_index);
+	EvaViewerObjectClass *	Get_Current_Object (void);
 
 	void		Build_Object_List (void);
 	void		Prepare_Model (RenderObjClass *model);
@@ -186,6 +188,7 @@ protected:
 	DialogTextClass *	AffiliationCtrl;
 	ViewerCtrlClass *	ViewerCtrl;
 	StringClass			INIFilename;
+	bool					ShowAllObjects;
 
 	EncyclopediaMgrClass::TYPE	EncyclopediaType;
 
@@ -194,4 +197,3 @@ protected:
 
 
 #endif //__DLG_EVA_VIEWER_TAB_H
-

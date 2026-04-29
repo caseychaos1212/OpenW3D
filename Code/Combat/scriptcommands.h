@@ -72,6 +72,14 @@ class		ScriptClass;
 class		ScriptSaver;
 class		ScriptLoader;
 
+typedef void (*ScriptControlEnableCallback)(GameObject *obj, bool enable);
+typedef void (*ScriptCameraHostCallback)(GameObject *obj);
+typedef void (*ScriptForceCameraLookCallback)(const Vector3 &target);
+void ScriptCommands_Set_Control_Enable_Callback(ScriptControlEnableCallback callback);
+void ScriptCommands_Set_Camera_Host_Callback(ScriptCameraHostCallback callback);
+void ScriptCommands_Set_Force_Camera_Look_Callback(ScriptForceCameraLookCallback callback);
+void ScriptCommands_Control_Enable(GameObject *obj, bool enable);
+
 
 /*
 ** Script Commands

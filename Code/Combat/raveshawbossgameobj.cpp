@@ -77,6 +77,7 @@
 #include "stealtheffect.h"
 #include "damageablestaticphys.h"
 #include "boxrobj.h"
+#include "scriptcommands.h"
 #include <algorithm>
 
 
@@ -3118,7 +3119,7 @@ RaveshawBossGameObjClass::STATE_IMPL_BEGIN(HAVOC_STATE_GRABBED) (void)
 {
 	if (COMBAT_STAR != NULL) {
 		COMBAT_STAR->Peek_Physical_Object ()->Enable_Objects_Simulation (false);
-		COMBAT_STAR->Control_Enable (false);
+		ScriptCommands_Control_Enable(COMBAT_STAR, false);
 	}
 
 	//
@@ -3172,7 +3173,7 @@ RaveshawBossGameObjClass::STATE_IMPL_BEGIN(HAVOC_STATE_FLYING) (void)
 	//
 	//	Restore control to the player
 	//
-	COMBAT_STAR->Control_Enable (true);
+	ScriptCommands_Control_Enable(COMBAT_STAR, true);
 	CombatManager::Set_First_Person (RestoreFirstPerson);
 
 	//

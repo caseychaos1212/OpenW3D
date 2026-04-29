@@ -53,10 +53,15 @@
 #include "specialbuilds.h"
 #include "editctrl.h"
 #include "DlgPasswordPrompt.h"
+#include "DlgMessageBox.h"
 #include "registry.h"
 #include "_globals.h"
 #include "dlgmplanhostoptions.h"
 #include "gdcoopmission.h"
+#include "gamespyadmin.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 bool MPLanGameListMenuClass::UpdateNickname = false;
 bool MPLanGameListMenuClass::IsCoopList = false;
@@ -122,7 +127,6 @@ MPLanGameListMenuClass::On_Init_Dialog (void)
 	//
 	ListCtrlClass *list_ctrl = (ListCtrlClass *)Get_Dlg_Item (IDC_GAME_LIST_CTRL);
 	if (list_ctrl != NULL) {
-
 		WideStringClass col_name;
 
 		//
@@ -168,6 +172,19 @@ MPLanGameListMenuClass::On_Init_Dialog (void)
 		Enable_Dlg_Item(IDC_MENU_MP_LAN_HOST_BUTTON, enable);
 	}
 
+	EditCtrlClass *address_edit = (EditCtrlClass *)Get_Dlg_Item(IDC_COOP_DIRECT_ADDRESS_EDIT);
+	if (address_edit != NULL) {
+		address_edit->Set_Text_Limit(63);
+	}
+
+	EditCtrlClass *port_edit = (EditCtrlClass *)Get_Dlg_Item(IDC_COOP_DIRECT_PORT_EDIT);
+	if (port_edit != NULL) {
+		port_edit->Set_Text_Limit(5);
+		port_edit->Set_Text(U_CHAR("4848"));
+	}
+
+	Apply_Coop_List_Layout();
+
 	cGameChannelList::Remove_All();
 	MenuDialogClass::On_Init_Dialog ();
 	return ;
@@ -207,6 +224,10 @@ MPLanGameListMenuClass::On_Command (int ctrl_id, int message_id, unsigned int pa
 
 		case IDC_JOIN_GAME_BUTTON:
 			Join_Game ();
+			break;
+
+		case IDC_COOP_DIRECT_CONNECT_BUTTON:
+			Start_Direct_Coop_Connect();
 			break;
 
 		case IDC_MENU_MP_LAN_HOST_BUTTON:
@@ -257,6 +278,130 @@ MPLanGameListMenuClass::On_Command (int ctrl_id, int message_id, unsigned int pa
 
 	MenuDialogClass::On_Command (ctrl_id, message_id, param);
 	return ;
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//	Apply_Coop_List_Layout
+//
+////////////////////////////////////////////////////////////////
+void
+MPLanGameListMenuClass::Apply_Coop_List_Layout(void)
+{
+	ListCtrlClass *list_ctrl = (ListCtrlClass *)Get_Dlg_Item(IDC_GAME_LIST_CTRL);
+	if (list_ctrl != NULL) {
+		list_ctrl->Set_Window_Rect(RectClass(8, 53, 392, IsCoopList ? 195 : 209));
+	}
+
+	Get_Dlg_Item(IDC_COOP_DIRECT_ADDRESS_STATIC)->Show(IsCoopList);
+	Get_Dlg_Item(IDC_COOP_DIRECT_ADDRESS_EDIT)->Show(IsCoopList);
+	Get_Dlg_Item(IDC_COOP_DIRECT_PORT_STATIC)->Show(IsCoopList);
+	Get_Dlg_Item(IDC_COOP_DIRECT_PORT_EDIT)->Show(IsCoopList);
+	Get_Dlg_Item(IDC_COOP_DIRECT_CONNECT_BUTTON)->Show(IsCoopList);
+	Update_Coop_Direct_Connect_Enable();
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//	Start_Direct_Coop_Connect
+//
+////////////////////////////////////////////////////////////////
+void
+MPLanGameListMenuClass::Start_Direct_Coop_Connect(void)
+{
+	if (!IsCoopList) {
+		return;
+	}
+
+	WideStringClass nickname = Get_Dlg_Item_Text(IDC_NICKNAME_EDIT);
+	nickname.Trim();
+	if (nickname.Is_Empty()) {
+		DlgMsgBox::DoDialog(U_CHAR("Co-op Campaign"), U_CHAR("Enter a player name before connecting."));
+		return;
+	}
+	cNetInterface::Set_Nickname(nickname);
+
+	StringClass address;
+	WideStringClass wide_address = Get_Dlg_Item_Text(IDC_COOP_DIRECT_ADDRESS_EDIT);
+	wide_address.Trim();
+	wide_address.Convert_To(address);
+	address.Trim();
+
+	StringClass port_text;
+	WideStringClass wide_port = Get_Dlg_Item_Text(IDC_COOP_DIRECT_PORT_EDIT);
+	wide_port.Trim();
+	wide_port.Convert_To(port_text);
+	port_text.Trim();
+
+	if (address.Is_Empty()) {
+		DlgMsgBox::DoDialog(U_CHAR("Co-op Campaign"), U_CHAR("Enter an IP address before connecting."));
+		return;
+	}
+
+	USHORT port = 4848;
+	if (!port_text.Is_Empty()) {
+		char *end_port = NULL;
+		long parsed_port = ::strtol(port_text.Peek_Buffer(), &end_port, 10);
+		if (end_port == NULL || *end_port != 0 || parsed_port <= 0 || parsed_port > 65535) {
+			DlgMsgBox::DoDialog(U_CHAR("Co-op Campaign"), U_CHAR("Enter a valid port between 1 and 65535."));
+			return;
+		}
+		port = (USHORT)parsed_port;
+	}
+
+	char address_buffer[128] = { 0 };
+	::strncpy(address_buffer, address.Peek_Buffer(), sizeof(address_buffer) - 1);
+	char *address_port = ::strchr(address_buffer, ':');
+	if (address_port != NULL) {
+		*address_port = 0;
+		char *end_port = NULL;
+		long parsed_port = ::strtol(address_port + 1, &end_port, 10);
+		if (end_port == NULL || *end_port != 0 || parsed_port <= 0 || parsed_port > 65535) {
+			DlgMsgBox::DoDialog(U_CHAR("Co-op Campaign"), U_CHAR("Enter a valid port between 1 and 65535."));
+			return;
+		}
+		port = (USHORT)parsed_port;
+	}
+
+	ULONG ip = ::inet_addr(address_buffer);
+	if (ip == 0 || ip == (ULONG)-1) {
+		DlgMsgBox::DoDialog(U_CHAR("Co-op Campaign"), U_CHAR("Enter a valid IPv4 address."));
+		return;
+	}
+
+	cGameSpyAdmin::Start_Coop_Direct_Connect(ip, port);
+	End_Dialog();
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//	Update_Coop_Direct_Connect_Enable
+//
+////////////////////////////////////////////////////////////////
+void
+MPLanGameListMenuClass::Update_Coop_Direct_Connect_Enable(void)
+{
+	if (!IsCoopList) {
+		Enable_Dlg_Item(IDC_COOP_DIRECT_CONNECT_BUTTON, false);
+		return;
+	}
+
+	bool has_name = false;
+	EditCtrlClass *name_edit = (EditCtrlClass *)Get_Dlg_Item(IDC_NICKNAME_EDIT);
+	if (name_edit != NULL) {
+		has_name = (name_edit->Get_Text_Length() > 0);
+	}
+
+	bool has_address = false;
+	EditCtrlClass *address_edit = (EditCtrlClass *)Get_Dlg_Item(IDC_COOP_DIRECT_ADDRESS_EDIT);
+	if (address_edit != NULL) {
+		has_address = (address_edit->Get_Text_Length() > 0);
+	}
+
+	Enable_Dlg_Item(IDC_COOP_DIRECT_CONNECT_BUTTON, has_name && has_address);
 }
 
 
@@ -630,6 +775,9 @@ void MPLanGameListMenuClass::On_EditCtrl_Change(EditCtrlClass* edit, int id)
 		bool enable = (edit->Get_Text_Length() > 0);
 		Enable_Dlg_Item(IDC_JOIN_GAME_BUTTON, enable);
 		Enable_Dlg_Item(IDC_MENU_MP_LAN_HOST_BUTTON, enable);
+		Update_Coop_Direct_Connect_Enable();
+	} else if (IDC_COOP_DIRECT_ADDRESS_EDIT == id || IDC_COOP_DIRECT_PORT_EDIT == id) {
+		Update_Coop_Direct_Connect_Enable();
 	}
 }
 
@@ -650,6 +798,7 @@ MPLanGameListMenuClass::Display (void)
 	if (_TheInstance == NULL) {
 		START_DIALOG (MPLanGameListMenuClass);
 	} else {
+		_TheInstance->Apply_Coop_List_Layout();
 		if (_TheInstance->Is_Active_Menu () == false) {
 			DialogMgrClass::Rollback (_TheInstance);
 		}
@@ -675,6 +824,7 @@ MPLanGameListMenuClass::Display_Coop (void)
 	if (_TheInstance == NULL) {
 		START_DIALOG (MPLanGameListMenuClass);
 	} else {
+		_TheInstance->Apply_Coop_List_Layout();
 		if (_TheInstance->Is_Active_Menu () == false) {
 			DialogMgrClass::Rollback (_TheInstance);
 		}

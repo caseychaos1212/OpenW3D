@@ -471,6 +471,10 @@ void cPlayer::Get_Player_String(int /* rank */, WideStringClass & string, bool f
 	//
    // Name
    //
+	WideStringClass display_name(Name, true);
+	if (display_name.Is_Empty()) {
+		display_name.Format(U_CHAR("Player %d"), Id);
+	}
 	//	GAMESPY
 	/*
 	if (IsActive.Is_True()) {
@@ -480,9 +484,9 @@ void cPlayer::Get_Player_String(int /* rank */, WideStringClass & string, bool f
 	}
 	*/
 	if (cGameSpyAdmin::Is_Gamespy_Game()) {
-		substring.Format(U_CHAR("%-34s"), Name);
+		substring.Format(U_CHAR("%-34s"), display_name);
 	} else {
-		substring.Format(U_CHAR("%-9s"), Name);
+		substring.Format(U_CHAR("%-9s"), display_name);
 	}
 	if (IsActive.Is_True()) {
 		substring += U_CHAR("  ");

@@ -99,6 +99,9 @@ protected:
 
 	void		Update_Game_List (void);
 	void		Join_Game (void);
+	void		Apply_Coop_List_Layout (void);
+	void		Start_Direct_Coop_Connect (void);
+	void		Update_Coop_Direct_Connect_Enable (void);
 	void		ReceiveSignal(DlgPasswordPrompt&) override;
 	void		Connect_To_Server (void);
 

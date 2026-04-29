@@ -946,6 +946,9 @@ void	SoldierGameObj::Export_Rare( BitStreamClass &packet )
 	//
 	uint32 definition_id = Get_Definition ().Get_ID ();
 	packet.Add( definition_id );
+	if (IS_COOP_MISSION) {
+		packet.Add(IsVisible);
+	}
 }
 
 
@@ -966,6 +969,9 @@ void	SoldierGameObj::Import_Rare( BitStreamClass &packet )
 	//
 	uint32 definition_id	= 0;
 	packet.Get( definition_id );
+	if (IS_COOP_MISSION) {
+		packet.Get(IsVisible);
+	}
 
 	//
 	//	Did our definition change?

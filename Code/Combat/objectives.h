@@ -113,6 +113,17 @@ public:
 		STATUS_HIDDEN,
 	};
 
+	enum CoopSyncOperation {
+		COOP_SYNC_ADD,
+		COOP_SYNC_REMOVE,
+		COOP_SYNC_STATUS,
+		COOP_SYNC_TYPE,
+		COOP_SYNC_RADAR_BLIP,
+		COOP_SYNC_HUD_INFO,
+	};
+
+	typedef void (*CoopSyncCallback)(int operation, const Objective *objective, int objective_id);
+
 	static	void	Init( void );
 	static	void	Shutdown( void );
 	static	void	Reset( void );
@@ -155,6 +166,9 @@ public:
 	static	float			Get_HUD_Objectives_Age( int index );
 	static	bool			Are_HUD_Objectives_Changed( void )		{ return HUDUpdate; }
 	static	void			Clear_HUD_Objectives_Changed( void )	{ HUDUpdate = false; }
+
+	static	void			Set_Coop_Sync_Callback( CoopSyncCallback callback );
+	static	void			Notify_Coop_Sync( int operation, const Objective *objective, int objective_id );
 
 protected:
 

@@ -240,6 +240,29 @@ cGameSpyAdmin::Connect_To_Game_Server
 
 //----------------------------------------------------------------------------------
 void
+cGameSpyAdmin::Start_Coop_Direct_Connect
+(
+	ULONG ip,
+	USHORT port
+)
+{
+	Set_Game_Host_Ip(ip);
+	Set_Game_Host_Port(port);
+	IsCoopDirectConnect = true;
+	IsLaunchFromGamespyRequested = false;
+	IsLaunchedFromGamespy = false;
+	IsServerGamespyListed = false;
+
+	if (PTheGameData != NULL) {
+		delete PTheGameData;
+		PTheGameData = NULL;
+	}
+
+	Connect_To_Game_Server();
+}
+
+//----------------------------------------------------------------------------------
+void
 cGameSpyAdmin::Host_Coop_Direct_Game
 (
 	void

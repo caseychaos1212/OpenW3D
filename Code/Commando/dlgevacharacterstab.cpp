@@ -36,6 +36,12 @@
 
 #include "dlgevacharacterstab.h"
 
+#include "coopcharacterselectevent.h"
+#include "cnetwork.h"
+#include "dialogcontrol.h"
+#include "gametype.h"
+#include "renegadedialog.h"
+
 
 
 ////////////////////////////////////////////////////////////////
@@ -47,6 +53,7 @@ void
 EvaCharactersTabClass::On_Init_Dialog (void)
 {
 	Set_Encyclopedia_Type (EncyclopediaMgrClass::TYPE_CHARACTER);
+	Set_Show_All_Objects (IS_COOP_MISSION);
 
 	ListCtrlClass *list_ctrl				= (ListCtrlClass *)Get_Dlg_Item (IDC_LIST_CTRL);
 	DialogTextClass *affiliation_ctrl	= (DialogTextClass *)Get_Dlg_Item (IDC_AFFILIATION_STATIC);
@@ -67,5 +74,74 @@ EvaCharactersTabClass::On_Init_Dialog (void)
 	Set_INI_Filename ("characters.ini");
 
 	EvaViewerTabClass::On_Init_Dialog ();
+	Update_Select_Button ();
+	return ;
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//	On_Command
+//
+////////////////////////////////////////////////////////////////
+void
+EvaCharactersTabClass::On_Command (int ctrl_id, int message_id, unsigned int param)
+{
+	if (ctrl_id == IDC_SELECT_BUTTON) {
+		EvaViewerObjectClass *object = Get_Current_Object ();
+		if (object != NULL &&
+			 object->Get_Definition_Name () != NULL &&
+			 object->Get_Definition_Name ()[0] != 0 &&
+			 IS_COOP_MISSION &&
+			 cNetwork::I_Am_Client ()) {
+			cCoopCharacterSelectEvent *event = new cCoopCharacterSelectEvent;
+			event->Init (object->Get_Definition_Name ());
+		}
+	} else {
+		EvaViewerTabClass::On_Command (ctrl_id, message_id, param);
+	}
+
+	return ;
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//	On_ListCtrl_Sel_Change
+//
+////////////////////////////////////////////////////////////////
+void
+EvaCharactersTabClass::On_ListCtrl_Sel_Change (ListCtrlClass *list_ctrl, int ctrl_id, int old_index, int new_index)
+{
+	EvaViewerTabClass::On_ListCtrl_Sel_Change (list_ctrl, ctrl_id, old_index, new_index);
+	Update_Select_Button ();
+	return ;
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//	Update_Select_Button
+//
+////////////////////////////////////////////////////////////////
+void
+EvaCharactersTabClass::Update_Select_Button (void)
+{
+	DialogControlClass *select_button = Get_Dlg_Item (IDC_SELECT_BUTTON);
+	if (select_button == NULL) {
+		return ;
+	}
+
+	bool can_select = false;
+	if (IS_COOP_MISSION && cNetwork::I_Am_Client ()) {
+		EvaViewerObjectClass *object = Get_Current_Object ();
+		can_select =
+			object != NULL &&
+			object->Get_Definition_Name () != NULL &&
+			object->Get_Definition_Name ()[0] != 0;
+	}
+
+	select_button->Show (IS_COOP_MISSION);
+	select_button->Enable (can_select);
 	return ;
 }

@@ -51,8 +51,11 @@
 #include "gameinitmgr.h"
 #include "gametype.h"
 #include "suicideevent.h"
+#include "cooprespawnrequestevent.h"
 #include "changeteamevent.h"
 #include "cstextobj.h"
+#include "gameobjmanager.h"
+#include "soldier.h"
 #include "WWAudio.h"
 #include "dlghelpscreen.h"
 #include "crandom.h"
@@ -140,6 +143,11 @@ EVAEncyclopediaMenuClass::On_Init_Dialog (void)
 	//
 	// Enable or disable the suicide button
 	//
+	bool is_coop_respawn_enabled =
+		The_Game() != NULL &&
+		IS_COOP_MISSION &&
+		cNetwork::I_Am_Client();
+
 	bool is_suicide_enabled =
 		The_Game() != NULL &&
 		!IS_MISSION &&
@@ -147,8 +155,21 @@ EVAEncyclopediaMenuClass::On_Init_Dialog (void)
 		GameModeManager::Find("Combat") != NULL &&
 		GameModeManager::Find("Combat")->Is_Active();
 
-	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_SUICIDE)->Enable(is_suicide_enabled);
-	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_SUICIDE)->Show(is_suicide_enabled);
+	bool can_respawn_now = false;
+	if (is_coop_respawn_enabled) {
+		SoldierGameObj *soldier = GameObjManager::Find_Soldier_Of_Client_ID(cNetwork::Get_My_Id());
+		can_respawn_now =
+			soldier == NULL ||
+			soldier->Is_Delete_Pending() ||
+			soldier->Is_Dead() ||
+			(soldier->Get_Defense_Object() != NULL && soldier->Get_Defense_Object()->Get_Health() <= 0.0f);
+	}
+
+	Set_Dlg_Item_Text(
+		IDC_OPTIONS_MULTIPLAY_SUICIDE,
+		is_coop_respawn_enabled ? U_CHAR("Respawn") : TRANSLATE(IDS_MENU_TEXT874));
+	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_SUICIDE)->Enable(is_coop_respawn_enabled ? can_respawn_now : is_suicide_enabled);
+	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_SUICIDE)->Show(is_suicide_enabled || is_coop_respawn_enabled);
 
 
 	//
@@ -164,8 +185,16 @@ EVAEncyclopediaMenuClass::On_Init_Dialog (void)
 		GameModeManager::Find("Combat") != NULL &&
 		GameModeManager::Find("Combat")->Is_Active();
 
-	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS)->Enable(is_team_change_enabled);
-	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS)->Show(is_team_change_enabled);
+	bool is_coop_character_enabled =
+		The_Game() != NULL &&
+		IS_COOP_MISSION &&
+		cNetwork::I_Am_Client();
+
+	Set_Dlg_Item_Text(
+		IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS,
+		is_coop_character_enabled ? U_CHAR("Character") : TRANSLATE(IDS_MENU_TEXT568));
+	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS)->Enable(is_team_change_enabled || is_coop_character_enabled);
+	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS)->Show(is_team_change_enabled || is_coop_character_enabled);
 
 
 	MenuDialogClass::On_Init_Dialog ();
@@ -219,6 +248,26 @@ EVAEncyclopediaMenuClass::On_Command (int ctrl_id, int message_id, unsigned int 
 			allow_default_processing = false;
 			break;
 
+		case IDC_OPTIONS_MULTIPLAY_SUICIDE:
+			if (IS_COOP_MISSION) {
+				cCoopRespawnRequestEvent *event = new cCoopRespawnRequestEvent;
+				event->Init();
+				GameInitMgrClass::Continue_Game();
+				End_Dialog();
+				allow_default_processing = false;
+			}
+			break;
+
+		case IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS:
+			if (IS_COOP_MISSION) {
+				TabCtrlClass *tab_ctrl = (TabCtrlClass *)Get_Dlg_Item (IDC_GENERIC_TABCTRL);
+				if (tab_ctrl != NULL) {
+					tab_ctrl->Set_Curr_Tab (TAB_CHARACTERS);
+				}
+				allow_default_processing = false;
+			}
+			break;
+
 		case IDCANCEL:
 			ctrl_id = IDC_MENU_BACK_BUTTON;
 		case IDC_MENU_BACK_BUTTON:
@@ -256,6 +305,12 @@ EVAEncyclopediaMenuClass::Display (TAB_ID tab_id)
 	} else {
 		if (_TheInstance->Is_Active_Menu () == false) {
 			DialogMgrClass::Rollback (_TheInstance);
+		}
+		if (tab_id != TAB_NONE) {
+			TabCtrlClass *tab_ctrl = (TabCtrlClass *)_TheInstance->Get_Dlg_Item (IDC_GENERIC_TABCTRL);
+			if (tab_ctrl != NULL) {
+				tab_ctrl->Set_Curr_Tab (tab_id);
+			}
 		}
 	}
 

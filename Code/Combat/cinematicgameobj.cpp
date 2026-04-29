@@ -458,6 +458,8 @@ void	CinematicGameObj::Export_Rare( BitStreamClass &packet )
 
 	StringClass animation_name;
 	AnimCollisionManagerClass::AnimModeType anim_mode = AnimCollisionManagerClass::ANIMATE_TARGET;
+	float curr_frame = 0.0F;
+	float target_frame = 0.0F;
 
 	//
 	//	Dig the animation data out of the physics object
@@ -478,6 +480,8 @@ void	CinematicGameObj::Export_Rare( BitStreamClass &packet )
 		//	Get the animation mode
 		//
 		anim_mode = anim_mgr.Get_Animation_Mode ();
+		curr_frame = anim_mgr.Get_Current_Frame ();
+		target_frame = anim_mgr.Get_Target_Frame ();
 	}
 
 	//
@@ -485,6 +489,8 @@ void	CinematicGameObj::Export_Rare( BitStreamClass &packet )
 	//
 	packet.Add_Terminated_String( (const char *)animation_name, true );
 	packet.Add( anim_mode );
+	packet.Add( curr_frame );
+	packet.Add( target_frame );
 	return ;
 }
 
@@ -498,8 +504,12 @@ void	CinematicGameObj::Import_Rare( BitStreamClass &packet )
 	//
 	StringClass animation_name;
 	int anim_mode = AnimCollisionManagerClass::ANIMATE_TARGET;
+	float curr_frame = 0.0F;
+	float target_frame = 0.0F;
 	packet.Get_Terminated_String( animation_name.Get_Buffer( 256 ), 256, true );
 	packet.Get( anim_mode );
+	packet.Get( curr_frame );
+	packet.Get( target_frame );
 
 	//
 	//	Pass the animation information onto the controller
@@ -508,6 +518,8 @@ void	CinematicGameObj::Import_Rare( BitStreamClass &packet )
 	if (dynanim != NULL) {
 		AnimCollisionManagerClass &anim_mgr = dynanim->Get_Animation_Manager();
 		anim_mgr.Set_Animation( animation_name );
+		anim_mgr.Set_Current_Frame( curr_frame );
+		anim_mgr.Set_Target_Frame( target_frame );
 		anim_mgr.Set_Animation_Mode( (AnimCollisionManagerClass::AnimModeType)anim_mode );
 	}
 

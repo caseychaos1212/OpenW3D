@@ -52,6 +52,7 @@
 #include "stylemgr.h"
 #include "translatedb.h"
 #include "string_ids.h"
+#include "gametype.h"
 
 
 DynamicVectorClass<RadarMarkerClass>	RadarManager::Markers;
@@ -554,6 +555,20 @@ void	RadarManager::Update( const Matrix3D & player_tm, const Vector2 & center )
 	}
 }
 
+{WWPROFILE( "Coop Teammate" );
+	if (IS_COOP_MISSION && COMBAT_STAR != NULL) {
+		SoldierGameObj *teammate = GameObjManager::Find_Different_Player_Soldier(COMBAT_STAR->Get_Control_Owner());
+		if (teammate != NULL &&
+			 !teammate->Is_Dead() &&
+			 teammate->Get_Defense_Object() != NULL &&
+			 teammate->Get_Defense_Object()->Get_Health() > 0.0f) {
+			Vector3 teammate_pos;
+			teammate->Get_Position(&teammate_pos);
+			Add_Blip(teammate_pos, BLIP_SHAPE_TYPE_HUMAN, BLIP_COLOR_TYPE_GDI, 1.0f, false);
+		}
+	}
+}
+
 {WWPROFILE( "Markers" );
 	// for all markers
 	for ( i = 0; i < Markers.Count(); i++ ) {
@@ -672,4 +687,3 @@ bool	RadarMarkerClass::Load( ChunkLoadClass &cload )
 	}
 	return true;
 }
-
