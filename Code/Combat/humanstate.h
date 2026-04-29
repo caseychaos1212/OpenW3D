@@ -219,6 +219,8 @@ private:
 	static	const char *	Get_Wound_Anim( int ouch_type );
 	static	const char *	Get_Death_Anim( int ouch_type );
 	void					Update_Recoil(WeaponClass * weapon);
+	void					Apply_Leg_Twist(int new_sub_state, const Vector3 & move_vector);
+	void					Release_Leg_Twist(void);
 
 	// Jumping code
 	void					Begin_Jump( void );

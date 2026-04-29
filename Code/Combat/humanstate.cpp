@@ -123,6 +123,7 @@ void	HumanStateClass::Init( HumanPhysClass	* human_phys )
 
 void	HumanStateClass::Reset( void )
 {
+	Release_Leg_Twist();
 	REF_PTR_RELEASE( HumanPhys );
 
 	// Clear the sniping flag
@@ -390,6 +391,89 @@ void HumanStateClass::Update_Recoil(WeaponClass * weapon)
 	}
 }
 
+void HumanStateClass::Release_Leg_Twist(void)
+{
+	LegRotation = 0.0F;
+
+	if (HumanPhys == NULL || HumanPhys->Peek_Model() == NULL) {
+		return;
+	}
+
+	RenderObjClass * model = HumanPhys->Peek_Model();
+	int root_bone = model->Get_Bone_Index("c spine");
+	int torso_bone = model->Get_Bone_Index("c spine1");
+
+	if (root_bone >= 0 && model->Is_Bone_Captured(root_bone)) {
+		model->Release_Bone(root_bone);
+	}
+	if (torso_bone >= 0 && model->Is_Bone_Captured(torso_bone)) {
+		model->Release_Bone(torso_bone);
+	}
+}
+
+void HumanStateClass::Apply_Leg_Twist(int new_sub_state, const Vector3 & move_vector)
+{
+	if (HumanPhys == NULL || HumanPhys->Peek_Model() == NULL) {
+		LegRotation = 0.0F;
+		return;
+	}
+
+	float desired_leg_rotation = 0.0F;
+	if (Get_State() == UPRIGHT && !Get_State_Flag(CROUCHED_FLAG) && move_vector.Length2() > 0.0001F) {
+		float move_direction = WWMath::Atan2(-move_vector.Y, move_vector.X);
+
+		if (new_sub_state & SUB_STATE_FORWARD) {
+			desired_leg_rotation = -move_direction;
+		} else if (new_sub_state & SUB_STATE_BACKWARD) {
+			desired_leg_rotation = -move_direction + DEG_TO_RADF(180.0F);
+		} else if (new_sub_state & SUB_STATE_LEFT) {
+			desired_leg_rotation = -move_direction + DEG_TO_RADF(270.0F);
+		} else if (new_sub_state & SUB_STATE_RIGHT) {
+			desired_leg_rotation = -move_direction + DEG_TO_RADF(90.0F);
+		}
+
+		desired_leg_rotation = WWMath::Wrap(desired_leg_rotation, DEG_TO_RADF(-180.0F), DEG_TO_RADF(180.0F));
+		desired_leg_rotation = WWMath::Clamp(desired_leg_rotation, DEG_TO_RADF(-30.0F), DEG_TO_RADF(30.0F));
+		if (WWMath::Fabs(desired_leg_rotation) < DEG_TO_RADF(2.0F)) {
+			desired_leg_rotation = 0.0F;
+		}
+	}
+
+	float max_move = DEG_TO_RADF(180.0F) * TimeManager::Get_Frame_Seconds();
+	float rotation_delta = WWMath::Clamp(desired_leg_rotation - LegRotation, -max_move, max_move);
+	LegRotation += rotation_delta;
+	if (WWMath::Fabs(LegRotation) < DEG_TO_RADF(0.5F)) {
+		LegRotation = 0.0F;
+	}
+
+	RenderObjClass * model = HumanPhys->Peek_Model();
+	int root_bone = model->Get_Bone_Index("c spine");
+	int torso_bone = model->Get_Bone_Index("c spine1");
+	if (root_bone < 0 || torso_bone < 0) {
+		LegRotation = 0.0F;
+		return;
+	}
+
+	if (LegRotation != 0.0F) {
+		if (!model->Is_Bone_Captured(root_bone)) {
+			model->Capture_Bone(root_bone);
+		}
+		if (!model->Is_Bone_Captured(torso_bone)) {
+			model->Capture_Bone(torso_bone);
+		}
+
+		Matrix3D root_adjust(1);
+		root_adjust.Rotate_X(LegRotation);
+		model->Control_Bone(root_bone, root_adjust);
+
+		Matrix3D torso_adjust(1);
+		torso_adjust.Rotate_X(-LegRotation);
+		model->Control_Bone(torso_bone, torso_adjust);
+	} else {
+		Release_Leg_Twist();
+	}
+}
+
 void	HumanStateClass::Set_State( HumanStateType state, int sub_state )
 {
 	// Special case for death
@@ -421,6 +505,10 @@ void	HumanStateClass::Set_State( HumanStateType state, int sub_state )
 			Debug_Say(( "Already in this state\n" ));
 		}
 		return;
+	}
+
+	if ( state != UPRIGHT ) {
+		Release_Leg_Twist();
 	}
 
 //	Debug_Say(( "%p Set State %d, %x from %d\n", this, state, sub_state, State ));
@@ -1126,87 +1214,7 @@ void	HumanStateClass::Post_Think( void )
 			}
 
 
-#if 0		// Disable all leg twisting
-
-// ===================================================================			// LEG TWIST!!!!!
-
-			// Don't leg twist for crouched
-			if ( Get_State() == UPRIGHT && !Get_State_Flag( CROUCHED_FLAG ) ) {
-
-				float	legs_rotation = 0;
-
-				// Compare the facing to the motion, set leg_racing to the difference
-				if ( move_vector.Length() > 0 ) {
-					float move_direction = WWMath::Atan2( -move_vector.Y, move_vector.X );
-
-					if ( new_sub_state & SUB_STATE_FORWARD ) {
-						legs_rotation = -move_direction;
-					} else if ( new_sub_state & SUB_STATE_BACKWARD ) {
-						legs_rotation = -move_direction + DEG_TO_RAD( 180 );
-					} else if ( new_sub_state & SUB_STATE_LEFT ) {
-						legs_rotation = -move_direction + DEG_TO_RAD( 270 );
-					} else if ( new_sub_state & SUB_STATE_RIGHT ) {
-						legs_rotation = -move_direction + DEG_TO_RAD( 90 );
-					}
-
-					legs_rotation = WWMath::Wrap( legs_rotation, DEG_TO_RADF( -180 ), DEG_TO_RADF( 180 ) );
-//					legs_rotation = WWMath::Clamp( legs_rotation, DEG_TO_RADF( -45 ), DEG_TO_RADF( 45 ) );
-					legs_rotation = WWMath::Clamp( legs_rotation, DEG_TO_RADF( -30 ), DEG_TO_RADF( 30 ) );
-
-					if ( WWMath::Fabs( legs_rotation ) < DEG_TO_RAD( 25 ) ) {
-						legs_rotation = 0;
-					}
-				}
-
-				// Move LegRotation toward leg_rotation
-				float rot_diff = legs_rotation - LegRotation;
-				float max_mov = DEG_TO_RAD( 180 ) * TimeManager::Get_Frame_Seconds();
-//				float max_mov = DEG_TO_RAD( 90 ) * TimeManager::Get_Frame_Seconds();
-				rot_diff = WWMath::Clamp( rot_diff, -max_mov, max_mov );
-				LegRotation += rot_diff;
-				legs_rotation = LegRotation;
-
-				// I'm making this staic for now, because all human
-				// skeletons have the bone at the same index
-				static int  root_bone = -1;
-				if ( root_bone == -1 ) {			// Get root bone index
-					root_bone = HumanPhys->Peek_Model()->Get_Bone_Index( "c spine" );
-				}
-
-				static int  torso_bone = -1;
-				if ( torso_bone == -1 ) {			// Get torso bone index
-					torso_bone = HumanPhys->Peek_Model()->Get_Bone_Index( "c spine1" );
-				}
-
-				if ( legs_rotation != 0 ) {
-
-					WWASSERT( root_bone != -1 );
-					WWASSERT( torso_bone != -1 );
-
-					if ( !HumanPhys->Peek_Model()->Is_Bone_Captured( root_bone ) ) {
-						HumanPhys->Peek_Model()->Capture_Bone( root_bone );
-					}
-					if ( !HumanPhys->Peek_Model()->Is_Bone_Captured( torso_bone ) ) {
-						HumanPhys->Peek_Model()->Capture_Bone( torso_bone );
-					}
-
-					Matrix3D	root_adjust(1);				// adjust it
-					root_adjust.Rotate_X( legs_rotation );
-					HumanPhys->Peek_Model()->Control_Bone( root_bone, root_adjust );
-
-					Matrix3D	legs_adjust(1);				// adjust it
-					legs_adjust.Rotate_X( -legs_rotation );
-					HumanPhys->Peek_Model()->Control_Bone( torso_bone, legs_adjust );
-				} else {	// no adjustment, release
-	 				if ( HumanPhys->Peek_Model()->Is_Bone_Captured( root_bone ) ) {
-						HumanPhys->Peek_Model()->Release_Bone( root_bone );
-					}
-	 				if ( HumanPhys->Peek_Model()->Is_Bone_Captured( torso_bone ) ) {
-						HumanPhys->Peek_Model()->Release_Bone( torso_bone );
-					}
-				}
-			}
-#endif
+			Apply_Leg_Twist(new_sub_state, move_vector);
 		}
 
 		// Scale animation speed
@@ -1508,4 +1516,3 @@ void	HumanStateClass::Complete_Jump( void )
 	int ground_type = HumanPhys->Get_Contact_Surface_Type();
 	SurfaceEffectsManager::Apply_Effect( ground_type, SurfaceEffectsManager::HITTER_TYPE_FOOTSTEP_LAND, tm );
 }
-
