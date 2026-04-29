@@ -46,6 +46,8 @@
 #include "useroptions.h"
 #include "priority.h"
 #include "apppacketstats.h"
+#include "coopdebuglog.h"
+#include "gametype.h"
 
 //
 // Class statics
@@ -180,7 +182,14 @@ cClientHintManager::Think
 	//
 	// Sort the object list. Lowest priority first.
 	//
-	qsort(object_list, num_objects, sizeof(unsigned int), (int (__cdecl *)(const void *,const void *)) &Priority_Compare);
+	if (IS_COOP_MISSION && cNetwork::I_Am_Only_Client()) {
+		CoopDebugLog::Log("cClientHintManager::Think sorting objects count=%d total_net_objects=%d",
+			num_objects, count);
+	}
+	qsort(object_list, num_objects, sizeof(NetworkObjectClass *), (int (__cdecl *)(const void *,const void *)) &Priority_Compare);
+	if (IS_COOP_MISSION && cNetwork::I_Am_Only_Client()) {
+		CoopDebugLog::Log("cClientHintManager::Think sorting done count=%d", num_objects);
+	}
 
 
 	//

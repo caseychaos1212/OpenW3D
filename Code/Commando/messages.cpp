@@ -86,6 +86,7 @@
 #include "dlgcncwinscreen.h"
 #include "ConsoleMode.h"
 #include "CDKeyAuth.h"
+#include "coopdebuglog.h"
 
 static int LastSortedSecond;
 
@@ -1236,15 +1237,34 @@ void cNetwork::Shared_Client_And_Server_Think(void)
 bool cNetwork::Client_Think(void)
 {
 	bool ret_code = false;
+	static int coop_client_think_log_budget = 1200;
+	const bool log_coop_client_think = IS_COOP_MISSION && I_Am_Client() && coop_client_think_log_budget-- > 0;
 
 #ifndef FREEDEDICATEDSERVER
 
+	if (log_coop_client_think) {
+		CoopDebugLog::Log("cNetwork::Client_Think begin connection=%p have_id=%d destroy=%d receiver=%p",
+			PClientConnection,
+			PClientConnection != NULL ? PClientConnection->Have_Id() : 0,
+			PClientConnection != NULL ? PClientConnection->Is_Destroy() : 0,
+			Receiver);
+	}
+
 	if (PClientConnection->Is_Destroy()) {
+		if (log_coop_client_think) {
+			CoopDebugLog::Log("cNetwork::Client_Think connection destroy cleanup start");
+		}
 		Cleanup_Client();
+		if (log_coop_client_think) {
+			CoopDebugLog::Log("cNetwork::Client_Think connection destroy cleanup done");
+		}
 		return(ret_code);
 	}
 
    if (!PClientConnection->Have_Id()) {
+		if (log_coop_client_think) {
+			CoopDebugLog::Log("cNetwork::Client_Think no local id yet");
+		}
 		return(ret_code);
 	}
 
@@ -1286,12 +1306,30 @@ bool cNetwork::Client_Think(void)
 		}
 	}
 
+	if (log_coop_client_think) {
+		CoopDebugLog::Log("cNetwork::Client_Think cClientPingManager::Think start");
+	}
 	cClientPingManager::Think();
+	if (log_coop_client_think) {
+		CoopDebugLog::Log("cNetwork::Client_Think cClientPingManager::Think done");
+	}
 
+	if (log_coop_client_think) {
+		CoopDebugLog::Log("cNetwork::Client_Think cClientHintManager::Think start");
+	}
 	cClientHintManager::Think();
+	if (log_coop_client_think) {
+		CoopDebugLog::Log("cNetwork::Client_Think cClientHintManager::Think done");
+	}
 
 	WWASSERT(Receiver!= NULL);
+	if (log_coop_client_think) {
+		CoopDebugLog::Log("cNetwork::Client_Think Receiver::Client_Update_Dynamic_Objects start receiver=%p", Receiver);
+	}
 	ret_code = Receiver->Client_Update_Dynamic_Objects();
+	if (log_coop_client_think) {
+		CoopDebugLog::Log("cNetwork::Client_Think Receiver::Client_Update_Dynamic_Objects done ret=%d", ret_code);
+	}
 
 	//
 	// Pop up the team change dialog if it is appropriate and we have not already
@@ -1323,6 +1361,9 @@ bool cNetwork::Client_Think(void)
 
 #endif // !FREEDEDICATEDSERVER
 
+	if (log_coop_client_think) {
+		CoopDebugLog::Log("cNetwork::Client_Think done ret=%d", ret_code);
+	}
 	return(ret_code);
 }
 

@@ -25,6 +25,27 @@
 namespace
 {
 	static bool _did_reset = false;
+	static bool _checked_enabled = false;
+	static bool _enabled = false;
+
+	static bool Is_Logging_Enabled(void)
+	{
+		if (!_checked_enabled) {
+			const char *value = getenv("OPENW3D_COOP_DEBUG_LOG");
+			if (value == NULL || value[0] == 0) {
+				value = getenv("OPENW3D_COOP_RUNTIME_LOG");
+			}
+
+			_enabled = value != NULL && (
+				value[0] == '1' ||
+				value[0] == 't' || value[0] == 'T' ||
+				value[0] == 'y' || value[0] == 'Y' ||
+				value[0] == 'o' || value[0] == 'O');
+			_checked_enabled = true;
+		}
+
+		return _enabled;
+	}
 
 	static unsigned long Get_Process_Id(void)
 	{
@@ -122,6 +143,9 @@ namespace
 void CoopDebugLog::Reset(void)
 {
 	_did_reset = true;
+	if (!Is_Logging_Enabled()) {
+		return;
+	}
 
 	char line[256];
 	char prefix[96];
@@ -134,6 +158,10 @@ void CoopDebugLog::Reset(void)
 
 void CoopDebugLog::Log(const char *format, ...)
 {
+	if (!Is_Logging_Enabled()) {
+		return;
+	}
+
 	Ensure_Reset();
 
 	char message[2048];
