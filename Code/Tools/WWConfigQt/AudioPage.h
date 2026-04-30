@@ -18,11 +18,12 @@ public:
     explicit AudioPage(WWConfigBackend &backend, QWidget *parent = nullptr);
 
     void refresh();
+    bool save();
 
 private:
     void buildUi();
     void updateFromSettings();
-    void applySettings();
+    void updateSettingsFromControls();
     void setVolumeRow(QSlider *slider, QCheckBox *check, float value, bool enabled);
 
     WWConfigBackend &m_backend;

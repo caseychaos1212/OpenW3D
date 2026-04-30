@@ -157,15 +157,16 @@ void PerformancePage::buildUi()
     m_expertGroup = new QGroupBox(LocalizedText(m_backend, IDS_EXPERT_SETTINGS, tr("Expert Settings")), this);
     auto *groupLayout = new QGridLayout(m_expertGroup);
 
-    auto createSlider = [this]() {
+    auto createSlider = [this](int maximum = 2) {
         auto *slider = new QSlider(Qt::Horizontal, m_expertGroup);
-        slider->setRange(0, 2);
+        slider->setRange(0, maximum);
+        slider->setTickInterval(1);
+        slider->setTickPosition(QSlider::TicksBelow);
         return slider;
     };
 
     m_geometrySlider = createSlider();
-    m_shadowSlider = new QSlider(Qt::Horizontal, m_expertGroup);
-    m_shadowSlider->setRange(0, 3);
+    m_shadowSlider = createSlider(3);
     m_textureSlider = createSlider();
     m_particleSlider = createSlider();
     m_surfaceSlider = createSlider();
@@ -229,16 +230,24 @@ void PerformancePage::buildUi()
     });
 
     connect(m_autoButton, &QPushButton::clicked, this, [this]() {
+        const RenderSettings previousRenderSettings = m_backend.loadRenderSettings();
+        const VideoSettings previousVideoSettings = m_backend.loadVideoSettings();
+
         m_backend.autoConfigRenderSettings();
-        refresh();
-        emit settingsChanged();
+        m_settings = m_backend.loadRenderSettings();
+        m_videoSettings = m_backend.loadVideoSettings();
+
+        m_backend.saveRenderSettings(previousRenderSettings);
+        m_backend.saveVideoSettings(previousVideoSettings);
+
+        updateControlsFromSettings();
     });
 
     auto sliderChanged = [this]() {
         if (m_blockSignals) {
             return;
         }
-        applySettingsFromControls();
+        updateSettingsFromControls();
     };
 
     connect(m_geometrySlider, &QSlider::valueChanged, this, sliderChanged);
@@ -255,6 +264,12 @@ void PerformancePage::refresh()
 {
     loadSettings();
     updateControlsFromSettings();
+}
+
+bool PerformancePage::save()
+{
+    updateSettingsFromControls();
+    return m_backend.saveRenderSettings(m_settings);
 }
 
 void PerformancePage::loadSettings()
@@ -290,7 +305,7 @@ void PerformancePage::updateControlsFromSettings()
     m_blockSignals = false;
 }
 
-void PerformancePage::applySettingsFromControls()
+void PerformancePage::updateSettingsFromControls()
 {
     const int lodValue = [this]() {
         switch (m_geometrySlider->value()) {
@@ -310,9 +325,6 @@ void PerformancePage::applySettingsFromControls()
     m_settings.prelitMode = comboValue(m_lightingCombo, m_settings.prelitMode);
     m_settings.textureFilter = comboValue(m_filterCombo, m_settings.textureFilter);
     m_settings.staticShadows = m_terrainCheck->isChecked() ? 1 : 0;
-
-    m_backend.saveRenderSettings(m_settings);
-    emit settingsChanged();
 }
 
 void PerformancePage::applyPreset(int level)
@@ -337,7 +349,7 @@ void PerformancePage::applyPreset(int level)
     m_terrainCheck->setChecked(preset.terrainShadows);
     m_blockSignals = false;
 
-    applySettingsFromControls();
+    updateSettingsFromControls();
 }
 
 int PerformancePage::determinePresetLevel() const
@@ -404,7 +416,6 @@ int PerformancePage::geometryLevelFromSettings() const
 void PerformancePage::setExpertControlsEnabled(bool enabled)
 {
     m_expertGroup->setEnabled(enabled);
-    m_expertGroup->setVisible(enabled);
 }
 
 void PerformancePage::updateCapabilityCombos()

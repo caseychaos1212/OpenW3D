@@ -7,12 +7,14 @@
 #include <QAbstractItemView>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QFontMetrics>
 #include <QGridLayout>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QListWidget>
+#include <QSizePolicy>
 #include <QStyle>
 #include <QSlider>
 #include <QVBoxLayout>
@@ -78,6 +80,8 @@ void VideoPage::buildUi()
     displayLayout->addWidget(m_resolutionSlider, 0, 1);
     m_resolutionValue = new QLabel(tr("N/A"), displayGroup);
     m_resolutionValue->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_resolutionValue->setFixedWidth(m_resolutionValue->fontMetrics().horizontalAdvance(QStringLiteral("9999 x 9999")) + 8);
+    m_resolutionValue->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     displayLayout->addWidget(m_resolutionValue, 0, 2);
 
     displayLayout->addWidget(new QLabel(tr("Color Depth:"), displayGroup), 1, 0);
@@ -92,9 +96,7 @@ void VideoPage::buildUi()
 
     layout->addWidget(displayGroup);
 
-    auto *note = new QLabel(tr("Changes are saved straight to Renegade.ini so both the game and classic "
-                               "WWConfig see them immediately."),
-                            this);
+    auto *note = new QLabel(tr("Press OK to save video changes to Renegade.ini."), this);
     note->setWordWrap(true);
     layout->addWidget(note);
     layout->addStretch();
@@ -148,7 +150,13 @@ void VideoPage::refresh()
     updateControlStates();
     m_blockSignals = false;
     updateResolutionLabel();
-    applySelection(false);
+    applySelection();
+}
+
+bool VideoPage::save()
+{
+    applySelection();
+    return m_backend.saveVideoSettings(m_settings);
 }
 
 void VideoPage::populateDrivers()
@@ -285,7 +293,7 @@ void VideoPage::updateResolutionLabel()
     m_resolutionValue->setText(tr("%1 x %2").arg(mode.width).arg(mode.height));
 }
 
-void VideoPage::applySelection(bool persist)
+void VideoPage::applySelection()
 {
     if (m_activeResolutions.empty()) {
         return;
@@ -311,9 +319,6 @@ void VideoPage::applySelection(bool persist)
     }
     m_textureDepthLabel->setText(tr("Texture depth: %1-bit").arg(m_settings.textureDepth));
 
-    if (persist) {
-        m_backend.saveVideoSettings(m_settings);
-    }
 }
 
 void VideoPage::updateControlStates()

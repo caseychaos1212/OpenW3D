@@ -20,6 +20,7 @@ public:
     explicit VideoPage(WWConfigBackend &backend, QWidget *parent = nullptr);
 
     void refresh();
+    bool save();
 
 private:
     void buildUi();
@@ -27,7 +28,7 @@ private:
     void updateBitDepthOptions();
     void updateResolutionSlider();
     void updateResolutionLabel();
-    void applySelection(bool persist = true);
+    void applySelection();
     void updateControlStates();
 
     const VideoAdapterInfo *currentAdapter() const;

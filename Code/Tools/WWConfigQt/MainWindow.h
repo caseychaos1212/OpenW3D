@@ -17,6 +17,7 @@ public:
 
 private:
     void setupUi();
+    void saveChanges();
     void updateStatusText();
     void refreshTabs();
 

@@ -18,6 +18,7 @@ public:
     explicit PerformancePage(WWConfigBackend &backend, QWidget *parent = nullptr);
 
     void refresh();
+    bool save();
 
 signals:
     void settingsChanged();
@@ -26,7 +27,7 @@ private:
     void buildUi();
     void loadSettings();
     void updateControlsFromSettings();
-    void applySettingsFromControls();
+    void updateSettingsFromControls();
     void applyPreset(int level);
     int determinePresetLevel() const;
     int geometryLevelFromSettings() const;

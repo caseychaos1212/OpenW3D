@@ -4,8 +4,10 @@
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QLabel>
+#include <QPalette>
 #include <QPixmap>
 #include <QPushButton>
+#include <QSize>
 #include <QTabWidget>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -36,10 +38,15 @@ void MainWindow::setupUi()
     banner->setFrameShadow(QFrame::Sunken);
     banner->setAlignment(Qt::AlignCenter);
     banner->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    QPalette bannerPalette = banner->palette();
+    bannerPalette.setColor(QPalette::Window, Qt::black);
+    bannerPalette.setColor(QPalette::WindowText, Qt::white);
+    banner->setAutoFillBackground(true);
+    banner->setPalette(bannerPalette);
     QPixmap logo(QStringLiteral(":/wwconfig/logo.bmp"));
     if (!logo.isNull()) {
         banner->setPixmap(logo);
-        banner->setScaledContents(true);
+        banner->setScaledContents(false);
         banner->setMinimumHeight(logo.height());
     } else {
         banner->setText(tr("Renegade Config"));
@@ -59,9 +66,6 @@ void MainWindow::setupUi()
 
     m_performancePage = new PerformancePage(m_backend, m_tabWidget);
     m_tabWidget->addTab(m_performancePage, tr("Performance"));
-    connect(m_performancePage, &PerformancePage::settingsChanged, this, [this]() {
-        updateStatusText();
-    });
 
     auto *buttonRow = new QHBoxLayout();
     buttonRow->addStretch();
@@ -71,14 +75,31 @@ void MainWindow::setupUi()
     buttonRow->addWidget(cancelButton);
     layout->addLayout(buttonRow);
 
-    connect(okButton, &QPushButton::clicked, this, &QWidget::close);
+    connect(okButton, &QPushButton::clicked, this, [this]() {
+        saveChanges();
+        close();
+    });
     connect(cancelButton, &QPushButton::clicked, this, &QWidget::close);
 
     setCentralWidget(central);
-    resize(420, 480);
-    setMinimumSize(360, 360);
+    const QSize windowSize(420, 480);
+    resize(windowSize);
+    setMinimumSize(windowSize);
     setWindowTitle(tr("Renegade Config"));
     setWindowIcon(QIcon(QStringLiteral(":/wwconfig/wwconfig.ico")));
+}
+
+void MainWindow::saveChanges()
+{
+    if (m_videoPage) {
+        m_videoPage->save();
+    }
+    if (m_audioPage) {
+        m_audioPage->save();
+    }
+    if (m_performancePage) {
+        m_performancePage->save();
+    }
 }
 
 void MainWindow::updateStatusText()

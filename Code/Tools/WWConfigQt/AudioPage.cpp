@@ -125,13 +125,13 @@ void AudioPage::buildUi()
     m_stereoCheck = new QCheckBox(tr("Stereo playback"), this);
     layout->addWidget(m_stereoCheck, 0, Qt::AlignLeft);
 
-    auto *note = new QLabel(tr("Audio changes are saved to Renegade.ini immediately."), this);
+    auto *note = new QLabel(tr("Press OK to save audio changes to Renegade.ini."), this);
     note->setWordWrap(true);
     layout->addWidget(note);
     layout->addStretch();
 
     auto applyOnChange = [this]() {
-        applySettings();
+        updateSettingsFromControls();
     };
 
     connect(m_stereoCheck, &QCheckBox::toggled, this, applyOnChange);
@@ -156,6 +156,12 @@ void AudioPage::refresh()
     m_blockSignals = false;
 }
 
+bool AudioPage::save()
+{
+    updateSettingsFromControls();
+    return m_backend.saveAudioSettings(m_settings);
+}
+
 void AudioPage::updateFromSettings()
 {
     m_driverList->clear();
@@ -177,7 +183,7 @@ void AudioPage::updateFromSettings()
     setVolumeRow(m_cinematicSlider, m_cinematicEnableCheck, m_settings.cinematicVolume, m_settings.cinematicEnabled);
 }
 
-void AudioPage::applySettings()
+void AudioPage::updateSettingsFromControls()
 {
     if (m_blockSignals) {
         return;
@@ -203,7 +209,6 @@ void AudioPage::applySettings()
     m_settings.dialogVolume = std::clamp(m_dialogSlider->value() / 100.0f, 0.0f, 1.0f);
     m_settings.cinematicVolume = std::clamp(m_cinematicSlider->value() / 100.0f, 0.0f, 1.0f);
 
-    m_backend.saveAudioSettings(m_settings);
 }
 
 void AudioPage::setVolumeRow(QSlider *slider, QCheckBox *check, float value, bool enabled)
