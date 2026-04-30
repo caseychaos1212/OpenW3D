@@ -360,6 +360,8 @@ set(COMMANDO_SRC
     coopobjectivesyncevent.h
     cooprespawnrequestevent.cpp
     cooprespawnrequestevent.h
+    cooprespawnstateevent.cpp
+    cooprespawnstateevent.h
     consolecommandevent.cpp
     consolecommandevent.h
     csconsolecommandevent.cpp

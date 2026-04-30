@@ -32,6 +32,7 @@ set(COMBAT_SRC
     comcentergameobj.cpp
     coopdebuglog.cpp
     coopinventory.cpp
+    cooprespawnstate.cpp
     control.cpp
     conversation.cpp
     conversationmgr.cpp
@@ -161,6 +162,7 @@ set(COMBAT_SRC
     comcentergameobj.h
     coopdebuglog.h
     coopinventory.h
+    cooprespawnstate.h
     control.h
     conversation.h
     conversationmgr.h

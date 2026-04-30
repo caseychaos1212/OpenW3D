@@ -60,6 +60,7 @@
 #include "render2dsentence.h"
 #include "input.h"
 #include "building.h"
+#include "cooprespawnstate.h"
 #include "objectives.h"
 #include "weaponbag.h"
 #include "string_ids.h"
@@ -698,6 +699,50 @@ static	void	HUD_Help_Text_Shutdown( void )
 	delete HUDHelpTextRenderer;
 	HUDHelpTextRenderer = NULL;
 	return ;
+}
+
+Render2DSentenceClass * CoopRespawnStatusRenderer;
+
+static	void	Coop_Respawn_Status_Init( void )
+{
+	FontCharsClass *font = StyleMgrClass::Peek_Font( StyleMgrClass::FONT_INGAME_BIG_TXT );
+	WWASSERT(font != NULL);
+
+	CoopRespawnStatusRenderer = new Render2DSentenceClass;
+	CoopRespawnStatusRenderer->Set_Font(font);
+}
+
+static	void	Coop_Respawn_Status_Shutdown( void )
+{
+	delete CoopRespawnStatusRenderer;
+	CoopRespawnStatusRenderer = NULL;
+}
+
+static	void	Coop_Respawn_Status_Render( void )
+{
+	if (!cCoopRespawnState::Is_Waiting() || CoopRespawnStatusRenderer == NULL) {
+		return;
+	}
+
+	const WideStringClass &text = cCoopRespawnState::Get_Waiting_Text();
+	if (text.Is_Empty()) {
+		return;
+	}
+
+	CoopRespawnStatusRenderer->Reset();
+	CoopRespawnStatusRenderer->Build_Sentence(text);
+	Vector2 text_size = CoopRespawnStatusRenderer->Get_Text_Extents(text);
+
+	const RectClass &screen_rect = Render2DClass::Get_Screen_Resolution();
+	Vector2 position(
+		screen_rect.Center().X - (text_size.X * 0.5F),
+		screen_rect.Top + (screen_rect.Height() * 0.22F));
+
+	CoopRespawnStatusRenderer->Set_Location(Vector2(position.X + 1.0F, position.Y + 1.0F));
+	CoopRespawnStatusRenderer->Draw_Sentence(RGB_TO_INT32(0, 0, 0));
+	CoopRespawnStatusRenderer->Set_Location(position);
+	CoopRespawnStatusRenderer->Draw_Sentence(0xFFFFFFFF);
+	CoopRespawnStatusRenderer->Render();
 }
 
 static	void	Weapon_Init( void )
@@ -2955,6 +3000,7 @@ void 	HUDClass::Init(bool render_available)
 		Objective_Init();
 
 		HUD_Help_Text_Init();
+		Coop_Respawn_Status_Init();
 
 		_HUDInited = true;
 	}
@@ -2976,6 +3022,7 @@ void 	HUDClass::Shutdown()
 		Weapon_Shutdown();
 		Powerup_Shutdown();
 		HUD_Help_Text_Shutdown();
+		Coop_Respawn_Status_Shutdown();
 		SniperHUDClass::Shutdown();
 
 		for( int i = 0; i < NUM_RENDER_IMAGES; i++ ) {
@@ -3028,6 +3075,8 @@ void 	HUDClass::Render()
 			}
 		}
 	}
+
+	Coop_Respawn_Status_Render();
 #endif
 }
 

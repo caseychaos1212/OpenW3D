@@ -34,6 +34,7 @@
 #include "coopdebuglog.h"
 #include "coopinventory.h"
 #include "coopcameraevent.h"
+#include "cooprespawnstateevent.h"
 #include "crandom.h"
 #include "playertype.h"
 #include "objlibrary.h"
@@ -87,6 +88,17 @@ struct CoopCharacterPresetSelection
 static const int MAX_COOP_CHARACTER_PRESET_SELECTIONS = MAX_PLAYERS;
 static CoopCharacterPresetSelection CoopCharacterPresetSelections[MAX_COOP_CHARACTER_PRESET_SELECTIONS];
 static int CoopCharacterPresetSelectionCount = 0;
+
+struct CoopRespawnWaitState
+{
+	int ClientId;
+	bool Waiting;
+	int SpectateObjectId;
+};
+
+static const int MAX_COOP_RESPAWN_WAIT_STATES = MAX_PLAYERS;
+static CoopRespawnWaitState CoopRespawnWaitStates[MAX_COOP_RESPAWN_WAIT_STATES];
+static int CoopRespawnWaitStateCount = 0;
 
 static const char * COOP_GENERIC_GDI_PRESETS[] = {
 	"GDI_MiniGunner_0",
@@ -158,6 +170,97 @@ static bool Is_Living_Coop_Player_Soldier(SoldierGameObj * soldier)
 		!soldier->Is_Delete_Pending() &&
 		!soldier->Is_Dead() &&
 		soldier->Get_Defense_Object()->Get_Health() > 0.0F;
+}
+
+//-----------------------------------------------------------------------------
+static int Find_Coop_Respawn_Wait_State(int client_id)
+{
+	for (int index = 0; index < CoopRespawnWaitStateCount; index++) {
+		if (CoopRespawnWaitStates[index].ClientId == client_id) {
+			return index;
+		}
+	}
+
+	return -1;
+}
+
+//-----------------------------------------------------------------------------
+static int Get_Coop_Respawn_Wait_State(int client_id)
+{
+	int index = Find_Coop_Respawn_Wait_State(client_id);
+	if (index < 0 && CoopRespawnWaitStateCount < MAX_COOP_RESPAWN_WAIT_STATES) {
+		index = CoopRespawnWaitStateCount++;
+		CoopRespawnWaitStates[index].ClientId = client_id;
+		CoopRespawnWaitStates[index].Waiting = false;
+		CoopRespawnWaitStates[index].SpectateObjectId = 0;
+	}
+
+	return index;
+}
+
+//-----------------------------------------------------------------------------
+static bool Is_Coop_Respawn_Waiting_For(int client_id, SoldierGameObj * spectate_soldier)
+{
+	if (spectate_soldier == NULL) {
+		return false;
+	}
+
+	int index = Find_Coop_Respawn_Wait_State(client_id);
+	return index >= 0 &&
+		CoopRespawnWaitStates[index].Waiting &&
+		CoopRespawnWaitStates[index].SpectateObjectId == spectate_soldier->Get_ID();
+}
+
+//-----------------------------------------------------------------------------
+static void Set_Coop_Respawn_Waiting(int client_id, SoldierGameObj * spectate_soldier)
+{
+	if (!IS_COOP_MISSION || !cNetwork::I_Am_Server() || spectate_soldier == NULL) {
+		return;
+	}
+
+	int spectate_object_id = spectate_soldier->Get_ID();
+	int index = Get_Coop_Respawn_Wait_State(client_id);
+	if (index >= 0 &&
+		 CoopRespawnWaitStates[index].Waiting &&
+		 CoopRespawnWaitStates[index].SpectateObjectId == spectate_object_id) {
+		return;
+	}
+
+	if (index >= 0) {
+		CoopRespawnWaitStates[index].Waiting = true;
+		CoopRespawnWaitStates[index].SpectateObjectId = spectate_object_id;
+	}
+
+	CoopDebugLog::Log("cGod::Create_Commando waiting for safe ally spawn client_id=%d spectate_object_id=%d",
+		client_id, spectate_object_id);
+
+	cCoopRespawnStateEvent *event = new cCoopRespawnStateEvent;
+	event->Init(client_id, true, spectate_object_id);
+}
+
+//-----------------------------------------------------------------------------
+static void Clear_Coop_Respawn_Waiting(int client_id)
+{
+	if (!IS_COOP_MISSION || !cNetwork::I_Am_Server()) {
+		return;
+	}
+
+	int index = Find_Coop_Respawn_Wait_State(client_id);
+	if (index < 0 || !CoopRespawnWaitStates[index].Waiting) {
+		return;
+	}
+
+	CoopRespawnWaitStates[index].Waiting = false;
+	CoopRespawnWaitStates[index].SpectateObjectId = 0;
+
+	cCoopRespawnStateEvent *event = new cCoopRespawnStateEvent;
+	event->Init(client_id, false, 0);
+}
+
+//-----------------------------------------------------------------------------
+static void Reset_Coop_Respawn_Waiting(void)
+{
+	CoopRespawnWaitStateCount = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -322,16 +425,25 @@ static bool Find_Safe_Coop_Spawn_Transform(SoldierGameObj * soldier, const Matri
 }
 
 //-----------------------------------------------------------------------------
-static bool Try_Get_Coop_Ally_Spawn_Transform(int client_id, SoldierGameObj * soldier, Matrix3D & transform)
+static bool Try_Get_Coop_Ally_Spawn_Transform(int client_id, SoldierGameObj * soldier, Matrix3D & transform, SoldierGameObj ** wait_for_ally)
 {
+	if (wait_for_ally != NULL) {
+		*wait_for_ally = NULL;
+	}
+
 	SoldierGameObj * ally = Find_Living_Coop_Ally(client_id);
 	if (ally == NULL) {
 		return false;
 	}
 
 	if (Is_Hostile_Near_Soldier(ally)) {
-		CoopDebugLog::Log("cGod::Create_Commando ally spawn blocked by nearby hostile client_id=%d ally_net_id=%d",
-			client_id, ally->Get_Network_ID());
+		if (!Is_Coop_Respawn_Waiting_For(client_id, ally)) {
+			CoopDebugLog::Log("cGod::Create_Commando ally spawn blocked by nearby hostile client_id=%d ally_net_id=%d",
+				client_id, ally->Get_Network_ID());
+		}
+		if (wait_for_ally != NULL) {
+			*wait_for_ally = ally;
+		}
 		return false;
 	}
 
@@ -342,18 +454,35 @@ static bool Try_Get_Coop_Ally_Spawn_Transform(int client_id, SoldierGameObj * so
 		return true;
 	}
 
-	CoopDebugLog::Log("cGod::Create_Commando ally spawn failed safety checks client_id=%d ally_net_id=%d",
-		client_id, ally->Get_Network_ID());
+	if (!Is_Coop_Respawn_Waiting_For(client_id, ally)) {
+		CoopDebugLog::Log("cGod::Create_Commando ally spawn failed safety checks client_id=%d ally_net_id=%d",
+			client_id, ally->Get_Network_ID());
+	}
+	if (wait_for_ally != NULL) {
+		*wait_for_ally = ally;
+	}
 	return false;
 }
 
 //-----------------------------------------------------------------------------
-static Matrix3D Get_Coop_Mission_Spawn_Transform(int client_id, SoldierGameObj * soldier, bool prefer_ally_spawn)
+static bool Get_Coop_Mission_Spawn_Transform(int client_id, SoldierGameObj * soldier, bool prefer_ally_spawn, Matrix3D & transform, SoldierGameObj ** wait_for_ally)
 {
+	if (wait_for_ally != NULL) {
+		*wait_for_ally = NULL;
+	}
+
 	if (prefer_ally_spawn) {
 		Matrix3D ally_transform;
-		if (Try_Get_Coop_Ally_Spawn_Transform(client_id, soldier, ally_transform)) {
-			return ally_transform;
+		SoldierGameObj * waiting_ally = NULL;
+		if (Try_Get_Coop_Ally_Spawn_Transform(client_id, soldier, ally_transform, &waiting_ally)) {
+			transform = ally_transform;
+			return true;
+		}
+		if (waiting_ally != NULL) {
+			if (wait_for_ally != NULL) {
+				*wait_for_ally = waiting_ally;
+			}
+			return false;
 		}
 	}
 
@@ -361,15 +490,18 @@ static Matrix3D Get_Coop_Mission_Spawn_Transform(int client_id, SoldierGameObj *
 	Matrix3D safe_transform;
 	bool include_center = !Is_Coop_Secondary_Player(client_id);
 	if (Find_Safe_Coop_Spawn_Transform(soldier, primary_transform, include_center, safe_transform)) {
-		return safe_transform;
+		transform = safe_transform;
+		return true;
 	}
 
 	if (!include_center && Find_Safe_Coop_Spawn_Transform(soldier, primary_transform, true, safe_transform)) {
-		return safe_transform;
+		transform = safe_transform;
+		return true;
 	}
 
 	CoopDebugLog::Log("cGod::Create_Commando no safe co-op spawn found; using primary spawn client_id=%d", client_id);
-	return primary_transform;
+	transform = primary_transform;
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -675,9 +807,11 @@ void cGod::Think(void)
 				if (State == GOD_STATE_COOP_RUNNING) {
 					CoopDebugLog::Log("cGod::Think COOP_RUNNING spawning missing body for player id=%d", p_player->Get_Id());
 				}
-				Create_Commando(p_player, State == GOD_STATE_COOP_RUNNING);
+				SoldierGameObj * soldier = Create_Commando(p_player, State == GOD_STATE_COOP_RUNNING);
 				if (State == GOD_STATE_COOP_RUNNING) {
-					cCoopCameraEvent::Sync_Current_Camera_State();
+					if (soldier != NULL) {
+						cCoopCameraEvent::Sync_Current_Camera_State();
+					}
 				}
 			}
 		}
@@ -784,6 +918,18 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
 		CoopDebugLog::Log("cGod::Create_Commando begin client_id=%d player_type=%d", client_id, player_type);
 	}
 
+	if (IS_COOP_MISSION && prefer_ally_spawn && player_type == PLAYERTYPE_GDI) {
+		SoldierGameObj * ally = Find_Living_Coop_Ally(client_id);
+		if (ally != NULL && Is_Hostile_Near_Soldier(ally)) {
+			if (!Is_Coop_Respawn_Waiting_For(client_id, ally)) {
+				CoopDebugLog::Log("cGod::Create_Commando ally spawn blocked by nearby hostile client_id=%d ally_net_id=%d",
+					client_id, ally->Get_Network_ID());
+			}
+			Set_Coop_Respawn_Waiting(client_id, ally);
+			return NULL;
+		}
+	}
+
 	StringClass preset_name;
 	preset_name.Format("Commando");
 	StringClass primary_mission_preset;
@@ -863,12 +1009,20 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
 	Matrix3D transform;
 	if (IS_MISSION && player_type == PLAYERTYPE_GDI) {
 		if (IS_COOP_MISSION) {
-			transform = Get_Coop_Mission_Spawn_Transform(client_id, p_soldier, prefer_ally_spawn);
+			SoldierGameObj * wait_for_ally = NULL;
+			if (!Get_Coop_Mission_Spawn_Transform(client_id, p_soldier, prefer_ally_spawn, transform, &wait_for_ally)) {
+				Set_Coop_Respawn_Waiting(client_id, wait_for_ally);
+				p_soldier->Set_Delete_Pending();
+				return NULL;
+			}
 		} else {
 			transform = SpawnManager::Get_Primary_Spawn_Location();
 		}
 	} else {
 		transform = SpawnManager::Get_Multiplayer_Spawn_Location(player_type,p_soldier);
+	}
+	if (IS_COOP_MISSION) {
+		Clear_Coop_Respawn_Waiting(client_id);
 	}
 	p_soldier->Set_Transform(transform);
 	if (IS_COOP_MISSION) {
@@ -1012,7 +1166,11 @@ SoldierGameObj * cGod::Coop_Respawn_Player(int client_id)
 		old_soldier->Set_Delete_Pending();
 	}
 
-	return Create_Commando(player, true);
+	SoldierGameObj *soldier = Create_Commando(player, true);
+	if (soldier != NULL) {
+		cCoopCameraEvent::Sync_Current_Camera_State();
+	}
+	return soldier;
 }
 
 //-----------------------------------------------------------------------------
@@ -1074,6 +1232,7 @@ InventoryClass	_DeathInventory;
 void cGod::Reset( void )
 {
 	State = GOD_STATE_UNINITIALIZED;
+	Reset_Coop_Respawn_Waiting();
 	CoopInventoryManager::Reset();
 }
 
