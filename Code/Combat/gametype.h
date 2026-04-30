@@ -92,6 +92,8 @@ public:
 	static float			Get_Coop_AI_Share_Info_Radius(void)					{return CoopAIShareInfoRadius;}
 	static void				Set_Coop_AI_Weapon_Error_Multiplier(float multiplier)	{CoopAIWeaponErrorMultiplier = multiplier;}
 	static float			Get_Coop_AI_Weapon_Error_Multiplier(void)				{return CoopAIWeaponErrorMultiplier;}
+	static void				Set_Coop_AI_Special_Damage_State_Lock_Chance(float chance)	{CoopAISpecialDamageStateLockChance = chance;}
+	static float			Get_Coop_AI_Special_Damage_State_Lock_Chance(void)			{return CoopAISpecialDamageStateLockChance;}
 	static void				Set_Coop_AI_Attack_Wander_Enabled(bool enabled)		{CoopAIAttackWanderEnabled = enabled;}
 	static bool				Is_Coop_AI_Attack_Wander_Enabled(void)				{return CoopAIAttackWanderEnabled;}
 	static void				Set_Coop_AI_Damage_Retarget_Enabled(bool enabled)	{CoopAIDamageRetargetEnabled = enabled;}
@@ -114,6 +116,7 @@ private:
 	static float			CoopAITakeCoverBonus;
 	static float			CoopAIShareInfoRadius;
 	static float			CoopAIWeaponErrorMultiplier;
+	static float			CoopAISpecialDamageStateLockChance;
 	static bool				CoopAIAttackWanderEnabled;
 	static bool				CoopAIDamageRetargetEnabled;
 	static bool				CoopAIUnitCombatTypesEnabled;

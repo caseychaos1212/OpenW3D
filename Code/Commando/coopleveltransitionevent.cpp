@@ -45,6 +45,7 @@ cCoopLevelTransitionEvent::cCoopLevelTransitionEvent(void) :
 	AITakeCoverBonus(0.15f),
 	AIShareInfoRadius(15.0f),
 	AIWeaponErrorMultiplier(0.75f),
+	AISpecialDamageStateLockChance(0.35f),
 	AIEnableAttackWander(true),
 	AIEnableDamageRetarget(true),
 	AIEnableUnitCombatTypes(true)
@@ -80,6 +81,7 @@ cCoopLevelTransitionEvent::Init(const char *map_name, int difficulty_level)
 		AITakeCoverBonus = coop_game->Get_AI_Take_Cover_Bonus();
 		AIShareInfoRadius = coop_game->Get_AI_Share_Info_Radius();
 		AIWeaponErrorMultiplier = coop_game->Get_AI_Weapon_Error_Multiplier();
+		AISpecialDamageStateLockChance = coop_game->Get_AI_Special_Damage_State_Lock_Chance();
 		AIEnableAttackWander = coop_game->Is_AI_Attack_Wander_Enabled();
 		AIEnableDamageRetarget = coop_game->Is_AI_Damage_Retarget_Enabled();
 		AIEnableUnitCombatTypes = coop_game->Are_AI_Unit_Combat_Types_Enabled();
@@ -122,6 +124,7 @@ cCoopLevelTransitionEvent::Apply_Settings_To_Game_Data(void) const
 	coop_game->Set_AI_Take_Cover_Bonus(AITakeCoverBonus);
 	coop_game->Set_AI_Share_Info_Radius(AIShareInfoRadius);
 	coop_game->Set_AI_Weapon_Error_Multiplier(AIWeaponErrorMultiplier);
+	coop_game->Set_AI_Special_Damage_State_Lock_Chance(AISpecialDamageStateLockChance);
 	coop_game->Set_AI_Attack_Wander_Enabled(AIEnableAttackWander);
 	coop_game->Set_AI_Damage_Retarget_Enabled(AIEnableDamageRetarget);
 	coop_game->Set_AI_Unit_Combat_Types_Enabled(AIEnableUnitCombatTypes);
@@ -151,6 +154,7 @@ cCoopLevelTransitionEvent::Export_Creation(BitStreamClass & packet)
 	packet.Add(AITakeCoverBonus);
 	packet.Add(AIShareInfoRadius);
 	packet.Add(AIWeaponErrorMultiplier);
+	packet.Add(AISpecialDamageStateLockChance);
 	packet.Add(AIEnableAttackWander);
 	packet.Add(AIEnableDamageRetarget);
 	packet.Add(AIEnableUnitCombatTypes);
@@ -181,6 +185,7 @@ cCoopLevelTransitionEvent::Import_Creation(BitStreamClass & packet)
 	AITakeCoverBonus = packet.Get(AITakeCoverBonus);
 	AIShareInfoRadius = packet.Get(AIShareInfoRadius);
 	AIWeaponErrorMultiplier = packet.Get(AIWeaponErrorMultiplier);
+	AISpecialDamageStateLockChance = packet.Get(AISpecialDamageStateLockChance);
 	AIEnableAttackWander = packet.Get(AIEnableAttackWander);
 	AIEnableDamageRetarget = packet.Get(AIEnableDamageRetarget);
 	AIEnableUnitCombatTypes = packet.Get(AIEnableUnitCombatTypes);

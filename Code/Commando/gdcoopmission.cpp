@@ -31,6 +31,7 @@ static const float DEFAULT_COOP_AI_AGGRESSIVENESS_BONUS = 0.15f;
 static const float DEFAULT_COOP_AI_TAKE_COVER_BONUS = 0.15f;
 static const float DEFAULT_COOP_AI_SHARE_INFO_RADIUS = 15.0f;
 static const float DEFAULT_COOP_AI_WEAPON_ERROR_MULTIPLIER = 0.75f;
+static const float DEFAULT_COOP_AI_SPECIAL_DAMAGE_STATE_LOCK_CHANCE = 0.35f;
 static const bool DEFAULT_COOP_AI_ENABLE_ATTACK_WANDER = true;
 static const bool DEFAULT_COOP_AI_ENABLE_DAMAGE_RETARGET = true;
 static const bool DEFAULT_COOP_AI_ENABLE_UNIT_COMBAT_TYPES = true;
@@ -73,6 +74,19 @@ static float Clamp_Coop_AI_Probability_Bonus(float bonus)
 	}
 
 	return bonus;
+}
+
+//-----------------------------------------------------------------------------
+static float Clamp_Coop_AI_Chance(float chance)
+{
+	if (chance < 0.0f) {
+		return 0.0f;
+	}
+	if (chance > 1.0f) {
+		return 1.0f;
+	}
+
+	return chance;
 }
 
 //-----------------------------------------------------------------------------
@@ -119,6 +133,7 @@ cGameDataCoopMission::cGameDataCoopMission(void) :
 	AITakeCoverBonus(DEFAULT_COOP_AI_TAKE_COVER_BONUS),
 	AIShareInfoRadius(DEFAULT_COOP_AI_SHARE_INFO_RADIUS),
 	AIWeaponErrorMultiplier(DEFAULT_COOP_AI_WEAPON_ERROR_MULTIPLIER),
+	AISpecialDamageStateLockChance(DEFAULT_COOP_AI_SPECIAL_DAMAGE_STATE_LOCK_CHANCE),
 	AIEnableAttackWander(DEFAULT_COOP_AI_ENABLE_ATTACK_WANDER),
 	AIEnableDamageRetarget(DEFAULT_COOP_AI_ENABLE_DAMAGE_RETARGET),
 	AIEnableUnitCombatTypes(DEFAULT_COOP_AI_ENABLE_UNIT_COMBAT_TYPES)
@@ -267,6 +282,13 @@ void cGameDataCoopMission::Set_AI_Weapon_Error_Multiplier(float multiplier)
 }
 
 //-----------------------------------------------------------------------------
+void cGameDataCoopMission::Set_AI_Special_Damage_State_Lock_Chance(float chance)
+{
+	AISpecialDamageStateLockChance = Clamp_Coop_AI_Chance(chance);
+	cGameType::Set_Coop_AI_Special_Damage_State_Lock_Chance(AISpecialDamageStateLockChance);
+}
+
+//-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_AI_Attack_Wander_Enabled(bool enabled)
 {
 	AIEnableAttackWander = enabled;
@@ -304,6 +326,7 @@ void cGameDataCoopMission::Apply_Global_Settings(void) const
 	cGameType::Set_Coop_AI_Take_Cover_Bonus(AITakeCoverBonus);
 	cGameType::Set_Coop_AI_Share_Info_Radius(AIShareInfoRadius);
 	cGameType::Set_Coop_AI_Weapon_Error_Multiplier(AIWeaponErrorMultiplier);
+	cGameType::Set_Coop_AI_Special_Damage_State_Lock_Chance(AISpecialDamageStateLockChance);
 	cGameType::Set_Coop_AI_Attack_Wander_Enabled(AIEnableAttackWander);
 	cGameType::Set_Coop_AI_Damage_Retarget_Enabled(AIEnableDamageRetarget);
 	cGameType::Set_Coop_AI_Unit_Combat_Types_Enabled(AIEnableUnitCombatTypes);
@@ -347,6 +370,7 @@ void cGameDataCoopMission::Load_From_Server_Config(void)
 	Set_AI_Take_Cover_Bonus(p_ini->Get_Float(INI_SECTION_NAME, "AITakeCoverBonus", AITakeCoverBonus));
 	Set_AI_Share_Info_Radius(p_ini->Get_Float(INI_SECTION_NAME, "AIShareInfoRadius", AIShareInfoRadius));
 	Set_AI_Weapon_Error_Multiplier(p_ini->Get_Float(INI_SECTION_NAME, "AIWeaponErrorMultiplier", AIWeaponErrorMultiplier));
+	Set_AI_Special_Damage_State_Lock_Chance(p_ini->Get_Float(INI_SECTION_NAME, "AISpecialDamageStateLockChance", AISpecialDamageStateLockChance));
 	Set_AI_Attack_Wander_Enabled(p_ini->Get_Bool(INI_SECTION_NAME, "AIEnableAttackWander", AIEnableAttackWander));
 	Set_AI_Damage_Retarget_Enabled(p_ini->Get_Bool(INI_SECTION_NAME, "AIEnableDamageRetarget", AIEnableDamageRetarget));
 	Set_AI_Unit_Combat_Types_Enabled(p_ini->Get_Bool(INI_SECTION_NAME, "AIEnableUnitCombatTypes", AIEnableUnitCombatTypes));
@@ -388,6 +412,7 @@ void cGameDataCoopMission::Save_To_Server_Config(void)
 	p_ini->Put_Float(INI_SECTION_NAME, "AITakeCoverBonus", AITakeCoverBonus);
 	p_ini->Put_Float(INI_SECTION_NAME, "AIShareInfoRadius", AIShareInfoRadius);
 	p_ini->Put_Float(INI_SECTION_NAME, "AIWeaponErrorMultiplier", AIWeaponErrorMultiplier);
+	p_ini->Put_Float(INI_SECTION_NAME, "AISpecialDamageStateLockChance", AISpecialDamageStateLockChance);
 	p_ini->Put_Bool(INI_SECTION_NAME, "AIEnableAttackWander", AIEnableAttackWander);
 	p_ini->Put_Bool(INI_SECTION_NAME, "AIEnableDamageRetarget", AIEnableDamageRetarget);
 	p_ini->Put_Bool(INI_SECTION_NAME, "AIEnableUnitCombatTypes", AIEnableUnitCombatTypes);
@@ -417,6 +442,7 @@ void cGameDataCoopMission::Export_Tier_2_Data(cPacket & packet)
 	packet.Add(AITakeCoverBonus);
 	packet.Add(AIShareInfoRadius);
 	packet.Add(AIWeaponErrorMultiplier);
+	packet.Add(AISpecialDamageStateLockChance);
 	packet.Add(AIEnableAttackWander);
 	packet.Add(AIEnableDamageRetarget);
 	packet.Add(AIEnableUnitCombatTypes);
@@ -472,6 +498,9 @@ void cGameDataCoopMission::Import_Tier_2_Data(cPacket & packet)
 
 	float ai_weapon_error_multiplier = packet.Get(ai_weapon_error_multiplier);
 	Set_AI_Weapon_Error_Multiplier(ai_weapon_error_multiplier);
+
+	float ai_special_damage_state_lock_chance = packet.Get(ai_special_damage_state_lock_chance);
+	Set_AI_Special_Damage_State_Lock_Chance(ai_special_damage_state_lock_chance);
 
 	bool ai_enable_attack_wander = packet.Get(ai_enable_attack_wander);
 	Set_AI_Attack_Wander_Enabled(ai_enable_attack_wander);

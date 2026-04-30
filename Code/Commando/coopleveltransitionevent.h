@@ -50,6 +50,7 @@ private:
 	float						AITakeCoverBonus;
 	float						AIShareInfoRadius;
 	float						AIWeaponErrorMultiplier;
+	float						AISpecialDamageStateLockChance;
 	bool						AIEnableAttackWander;
 	bool						AIEnableDamageRetarget;
 	bool						AIEnableUnitCombatTypes;

@@ -4615,7 +4615,11 @@ void	SoldierGameObj::Set_Special_Damage_Mode( ArmorWarheadManager::SpecialDamage
 			// Remove old mode
 			Set_Special_Damage_Mode( ArmorWarheadManager::SPECIAL_DAMAGE_TYPE_NONE );
 
-			if ( Allow_Special_Damage_State_Lock() && IS_MISSION && mode != ArmorWarheadManager::SPECIAL_DAMAGE_TYPE_SUPER_FIRE ) {
+			bool allow_state_lock = Allow_Special_Damage_State_Lock() && IS_MISSION && mode != ArmorWarheadManager::SPECIAL_DAMAGE_TYPE_SUPER_FIRE;
+			if (allow_state_lock && IS_COOP_MISSION) {
+				allow_state_lock = FreeRandom.Get_Float() < cGameType::Get_Coop_AI_Special_Damage_State_Lock_Chance();
+			}
+			if (allow_state_lock) {
 				HumanState.Set_State( (HumanStateClass::HumanStateType)( mode -
 							ArmorWarheadManager::SPECIAL_DAMAGE_TYPE_FIRE + HumanStateClass::ON_FIRE ) );
 			}

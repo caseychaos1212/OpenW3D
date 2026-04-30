@@ -54,6 +54,7 @@ float cGameType::CoopAIAggressivenessBonus = 0.15f;
 float cGameType::CoopAITakeCoverBonus = 0.15f;
 float cGameType::CoopAIShareInfoRadius = 15.0f;
 float cGameType::CoopAIWeaponErrorMultiplier = 0.75f;
+float cGameType::CoopAISpecialDamageStateLockChance = 0.35f;
 bool cGameType::CoopAIAttackWanderEnabled = true;
 bool cGameType::CoopAIDamageRetargetEnabled = true;
 bool cGameType::CoopAIUnitCombatTypesEnabled = true;

@@ -68,6 +68,8 @@ public:
 	void					Set_AI_Share_Info_Radius(float radius);
 	float					Get_AI_Weapon_Error_Multiplier(void) const {return AIWeaponErrorMultiplier;}
 	void					Set_AI_Weapon_Error_Multiplier(float multiplier);
+	float					Get_AI_Special_Damage_State_Lock_Chance(void) const {return AISpecialDamageStateLockChance;}
+	void					Set_AI_Special_Damage_State_Lock_Chance(float chance);
 	bool					Is_AI_Attack_Wander_Enabled(void) const {return AIEnableAttackWander;}
 	void					Set_AI_Attack_Wander_Enabled(bool enabled);
 	bool					Is_AI_Damage_Retarget_Enabled(void) const {return AIEnableDamageRetarget;}
@@ -91,6 +93,7 @@ private:
 	float					AITakeCoverBonus;
 	float					AIShareInfoRadius;
 	float					AIWeaponErrorMultiplier;
+	float					AISpecialDamageStateLockChance;
 	bool					AIEnableAttackWander;
 	bool					AIEnableDamageRetarget;
 	bool					AIEnableUnitCombatTypes;
