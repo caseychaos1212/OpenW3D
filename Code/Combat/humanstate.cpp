@@ -495,7 +495,7 @@ void	HumanStateClass::Set_State( HumanStateType state, int sub_state )
 		}
 
 // FIXME StateLocked Hack
-		if ( !IS_SOLOPLAY ) {		// E3 HACK
+		if ( IS_MULTIPLAY ) {		// E3 HACK
 			StateLocked = false;
 		}
 	}
@@ -922,7 +922,7 @@ void	HumanStateClass::Update_Animation( void )
 		if ( SubState & SUB_STATE_BACKWARD )			anim_name = "S_A_HUMAN.H_A_DIV2";
 #else
 		int offset = FreeRandom.Get_Int( 2 );
-		if ( !IS_SOLOPLAY ) {
+		if ( IS_MULTIPLAY ) {
 			offset = 0;
 		}
 		if ( SubState & SUB_STATE_FORWARD ) 			offset += 0;
