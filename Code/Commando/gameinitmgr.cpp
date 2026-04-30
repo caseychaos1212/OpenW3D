@@ -181,6 +181,12 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned int
 	StringClass map(map_name,true);
 	WWASSERT(PTheGameData != NULL);
 	The_Game ()->Set_Map_Name (map);
+	if (IS_COOP_MISSION) {
+		cGameDataCoopMission *coop_game = The_Game()->As_Coop_Mission();
+		if (coop_game != NULL) {
+			coop_game->Apply_Global_Settings();
+		}
+	}
 
 	//
 	//	Determine if there is a mod specified... if so, load the mod package
@@ -1114,6 +1120,7 @@ GameInitMgrClass::Think (void)
 				cGameDataCoopMission *coop_game = The_Game()->As_Coop_Mission();
 				if (coop_game != NULL) {
 					coop_game->Set_Difficulty_Level(difficulty_level);
+					coop_game->Apply_Global_Settings();
 				}
 				The_Game()->IsIntermission.Set(false);
 			}

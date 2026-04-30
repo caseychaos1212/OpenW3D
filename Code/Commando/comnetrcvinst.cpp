@@ -199,11 +199,15 @@ bool CombatNetworkReceiverInstanceClass::Server_Update_Dynamic_Objects(bool is_u
 			continue;
 		}
 
-		if (!is_urgent && p_player->Get_Is_In_Game().Is_False()) {
+		if (p_player->Get_Is_In_Game().Is_False()) {
 			//
-			// Loading... delay sends
+			// Loading... delay sends. Co-op campaign transitions rebuild the map
+			// on every peer, so even urgent flushes must not consume creation
+			// bits before the client has finished loading the new level.
 			//
-			continue;
+			if (IS_COOP_MISSION || !is_urgent) {
+				continue;
+			}
 		}
 
 		//is_urgent = true;//XXX

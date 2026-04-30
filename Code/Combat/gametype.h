@@ -68,10 +68,28 @@ public:
 	static bool				Is_Soloplay(void)								{return GameType != GAMETYPE_MULTIPLAY && GameType != GAMETYPE_COOP_MISSION;}
 	static void				Set_Coop_Sprint_Enabled(bool enabled)	{CoopSprintEnabled = enabled;}
 	static bool				Is_Coop_Sprint_Enabled(void)				{return CoopSprintEnabled;}
+	static void				Set_Coop_Health_Pickups_Disabled(bool disabled)	{CoopHealthPickupsDisabled = disabled;}
+	static bool				Are_Coop_Health_Pickups_Disabled(void)				{return CoopHealthPickupsDisabled;}
+	static void				Set_Coop_Armor_Pickups_Disabled(bool disabled)	{CoopArmorPickupsDisabled = disabled;}
+	static bool				Are_Coop_Armor_Pickups_Disabled(void)				{return CoopArmorPickupsDisabled;}
+	static void				Set_Coop_Ammo_Pickups_Disabled(bool disabled)	{CoopAmmoPickupsDisabled = disabled;}
+	static bool				Are_Coop_Ammo_Pickups_Disabled(void)					{return CoopAmmoPickupsDisabled;}
+	static void				Set_Coop_Enemy_Health_Multiplier(float multiplier)	{CoopEnemyHealthMultiplier = multiplier;}
+	static float			Get_Coop_Enemy_Health_Multiplier(void)				{return CoopEnemyHealthMultiplier;}
+	static void				Set_Coop_Enemy_Damage_Multiplier(float multiplier)	{CoopEnemyDamageMultiplier = multiplier;}
+	static float			Get_Coop_Enemy_Damage_Multiplier(void)				{return CoopEnemyDamageMultiplier;}
+	static void				Set_Coop_Death_Score_Penalty(int penalty)			{CoopDeathScorePenalty = penalty;}
+	static int				Get_Coop_Death_Score_Penalty(void)					{return CoopDeathScorePenalty;}
 
 private:
 	static GameTypeEnum	GameType;
 	static bool				CoopSprintEnabled;
+	static bool				CoopHealthPickupsDisabled;
+	static bool				CoopArmorPickupsDisabled;
+	static bool				CoopAmmoPickupsDisabled;
+	static float			CoopEnemyHealthMultiplier;
+	static float			CoopEnemyDamageMultiplier;
+	static int				CoopDeathScorePenalty;
 };
 
 //-----------------------------------------------------------------------------

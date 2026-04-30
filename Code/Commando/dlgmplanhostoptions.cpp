@@ -308,6 +308,7 @@ void MPLanHostOptionsMenuClass::Start_Game(cGameData* theGame)
 	if (theGame->Is_Coop_Mission()) {
 		cGameDataCoopMission *coop_game = theGame->As_Coop_Mission();
 		WWASSERT(coop_game != NULL);
+		coop_game->Apply_Global_Settings();
 		CampaignManager::Start_Coop_Campaign(theGame->Get_Map_Name(), coop_game->Get_Difficulty_Level());
 		return;
 	}
@@ -1813,6 +1814,30 @@ MPLanHostCoopOptionsTabClass::On_Init_Dialog (void)
 	Enable_Dlg_Item (IDC_ALLIED_FIRE_CHECK, true);
 	Check_Dlg_Button (IDC_COOP_ENABLE_SPRINT_CHECK, game_data->Is_Sprint_Enabled ());
 	Enable_Dlg_Item (IDC_COOP_ENABLE_SPRINT_CHECK, true);
+	Get_Dlg_Item (IDC_COOP_ENABLE_SPRINT_CHECK)->Show (true);
+
+	Check_Dlg_Button (IDC_COOP_DISABLE_HEALTH_PICKUPS_CHECK, game_data->Are_Health_Pickups_Disabled ());
+	Check_Dlg_Button (IDC_COOP_DISABLE_ARMOR_PICKUPS_CHECK, game_data->Are_Armor_Pickups_Disabled ());
+	Check_Dlg_Button (IDC_COOP_DISABLE_AMMO_PICKUPS_CHECK, game_data->Are_Ammo_Pickups_Disabled ());
+	Enable_Dlg_Item (IDC_COOP_DISABLE_HEALTH_PICKUPS_CHECK, true);
+	Enable_Dlg_Item (IDC_COOP_DISABLE_ARMOR_PICKUPS_CHECK, true);
+	Enable_Dlg_Item (IDC_COOP_DISABLE_AMMO_PICKUPS_CHECK, true);
+	Get_Dlg_Item (IDC_COOP_DISABLE_HEALTH_PICKUPS_CHECK)->Show (true);
+	Get_Dlg_Item (IDC_COOP_DISABLE_ARMOR_PICKUPS_CHECK)->Show (true);
+	Get_Dlg_Item (IDC_COOP_DISABLE_AMMO_PICKUPS_CHECK)->Show (true);
+
+	Enable_Dlg_Item (IDC_COOP_ENEMY_HEALTH_EDIT, true);
+	Enable_Dlg_Item (IDC_COOP_ENEMY_DAMAGE_EDIT, true);
+	Enable_Dlg_Item (IDC_COOP_DEATH_PENALTY_EDIT, true);
+	Get_Dlg_Item (IDC_COOP_ENEMY_HEALTH_STATIC)->Show (true);
+	Get_Dlg_Item (IDC_COOP_ENEMY_HEALTH_EDIT)->Show (true);
+	Get_Dlg_Item (IDC_COOP_ENEMY_DAMAGE_STATIC)->Show (true);
+	Get_Dlg_Item (IDC_COOP_ENEMY_DAMAGE_EDIT)->Show (true);
+	Get_Dlg_Item (IDC_COOP_DEATH_PENALTY_STATIC)->Show (true);
+	Get_Dlg_Item (IDC_COOP_DEATH_PENALTY_EDIT)->Show (true);
+	Set_Dlg_Item_Int (IDC_COOP_ENEMY_HEALTH_EDIT, (int)(game_data->Get_Enemy_Health_Multiplier () * 100.0f + 0.5f));
+	Set_Dlg_Item_Int (IDC_COOP_ENEMY_DAMAGE_EDIT, (int)(game_data->Get_Enemy_Damage_Multiplier () * 100.0f + 0.5f));
+	Set_Dlg_Item_Int (IDC_COOP_DEATH_PENALTY_EDIT, game_data->Get_Death_Score_Penalty ());
 
 	Check_Dlg_Button (IDC_CAN_REPAIR_BUILDINGS_CHECK, false);
 	Check_Dlg_Button (IDC_DRIVER_IS_ALWAYS_GUNNER_CHECK, false);
@@ -1820,6 +1845,9 @@ MPLanHostCoopOptionsTabClass::On_Init_Dialog (void)
 	Enable_Dlg_Item (IDC_CAN_REPAIR_BUILDINGS_CHECK, false);
 	Enable_Dlg_Item (IDC_DRIVER_IS_ALWAYS_GUNNER_CHECK, false);
 	Enable_Dlg_Item (IDC_SPAWN_WEAPONS_CHECK, false);
+	Get_Dlg_Item (IDC_CAN_REPAIR_BUILDINGS_CHECK)->Show (false);
+	Get_Dlg_Item (IDC_DRIVER_IS_ALWAYS_GUNNER_CHECK)->Show (false);
+	Get_Dlg_Item (IDC_SPAWN_WEAPONS_CHECK)->Show (false);
 
 	ComboBoxCtrlClass *radar_combobox = (ComboBoxCtrlClass *)Get_Dlg_Item (IDC_RADAR_MODE_COMBO);
 	if (radar_combobox != NULL) {
@@ -1852,6 +1880,12 @@ MPLanHostCoopOptionsTabClass::On_Apply (void)
 	}
 	The_Game ()->IsFriendlyFirePermitted.Set (Is_Dlg_Button_Checked (IDC_ALLIED_FIRE_CHECK));
 	game_data->Set_Sprint_Enabled (Is_Dlg_Button_Checked (IDC_COOP_ENABLE_SPRINT_CHECK));
+	game_data->Set_Health_Pickups_Disabled (Is_Dlg_Button_Checked (IDC_COOP_DISABLE_HEALTH_PICKUPS_CHECK));
+	game_data->Set_Armor_Pickups_Disabled (Is_Dlg_Button_Checked (IDC_COOP_DISABLE_ARMOR_PICKUPS_CHECK));
+	game_data->Set_Ammo_Pickups_Disabled (Is_Dlg_Button_Checked (IDC_COOP_DISABLE_AMMO_PICKUPS_CHECK));
+	game_data->Set_Enemy_Health_Multiplier ((float)Get_Dlg_Item_Int (IDC_COOP_ENEMY_HEALTH_EDIT) / 100.0f);
+	game_data->Set_Enemy_Damage_Multiplier ((float)Get_Dlg_Item_Int (IDC_COOP_ENEMY_DAMAGE_EDIT) / 100.0f);
+	game_data->Set_Death_Score_Penalty (Get_Dlg_Item_Int (IDC_COOP_DEATH_PENALTY_EDIT));
 	The_Game ()->CanRepairBuildings.Set (false);
 	The_Game ()->DriverIsAlwaysGunner.Set (false);
 	The_Game ()->SpawnWeapons.Set (true);
@@ -1907,6 +1941,24 @@ MPLanHostCnCOptionsTabClass::On_Init_Dialog (void)
 	Enable_Dlg_Item (IDC_ALLIED_FIRE_CHECK, The_Game ()->Is_Editable_Friendly_Fire ());
 	Enable_Dlg_Item (IDC_COOP_ENABLE_SPRINT_CHECK, false);
 	Get_Dlg_Item (IDC_COOP_ENABLE_SPRINT_CHECK)->Show (false);
+	Enable_Dlg_Item (IDC_COOP_DISABLE_HEALTH_PICKUPS_CHECK, false);
+	Enable_Dlg_Item (IDC_COOP_DISABLE_ARMOR_PICKUPS_CHECK, false);
+	Enable_Dlg_Item (IDC_COOP_DISABLE_AMMO_PICKUPS_CHECK, false);
+	Enable_Dlg_Item (IDC_COOP_ENEMY_HEALTH_EDIT, false);
+	Enable_Dlg_Item (IDC_COOP_ENEMY_DAMAGE_EDIT, false);
+	Enable_Dlg_Item (IDC_COOP_DEATH_PENALTY_EDIT, false);
+	Get_Dlg_Item (IDC_COOP_DISABLE_HEALTH_PICKUPS_CHECK)->Show (false);
+	Get_Dlg_Item (IDC_COOP_DISABLE_ARMOR_PICKUPS_CHECK)->Show (false);
+	Get_Dlg_Item (IDC_COOP_DISABLE_AMMO_PICKUPS_CHECK)->Show (false);
+	Get_Dlg_Item (IDC_COOP_ENEMY_HEALTH_STATIC)->Show (false);
+	Get_Dlg_Item (IDC_COOP_ENEMY_HEALTH_EDIT)->Show (false);
+	Get_Dlg_Item (IDC_COOP_ENEMY_DAMAGE_STATIC)->Show (false);
+	Get_Dlg_Item (IDC_COOP_ENEMY_DAMAGE_EDIT)->Show (false);
+	Get_Dlg_Item (IDC_COOP_DEATH_PENALTY_STATIC)->Show (false);
+	Get_Dlg_Item (IDC_COOP_DEATH_PENALTY_EDIT)->Show (false);
+	Get_Dlg_Item (IDC_CAN_REPAIR_BUILDINGS_CHECK)->Show (true);
+	Get_Dlg_Item (IDC_DRIVER_IS_ALWAYS_GUNNER_CHECK)->Show (true);
+	Get_Dlg_Item (IDC_SPAWN_WEAPONS_CHECK)->Show (true);
 
 	//
 	//	Configure the radar mode combobox

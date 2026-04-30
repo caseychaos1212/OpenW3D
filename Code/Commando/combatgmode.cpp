@@ -1398,6 +1398,22 @@ void 	CombatGameModeClass::Think()
 
 		g_b_core_restart = false;
 
+		if (IS_COOP_MISSION && cNetwork::I_Am_Server()) {
+			for (SLNode<cPlayer> *player_node = cPlayerManager::Get_Player_Object_List()->Head();
+				player_node != NULL;
+				player_node = player_node->Next()) {
+				cPlayer *player = player_node->Data();
+				if (player == NULL || !player->Is_Human()) {
+					continue;
+				}
+
+				player->Set_Is_In_Game(false);
+				if (cNetwork::PServerConnection != NULL) {
+					cNetwork::PServerConnection->Set_Rhost_Is_In_Game(player->Get_Id(), false);
+				}
+			}
+		}
+
 		//Core_Restart();
 
 		cPlayer * p_me = cNetwork::Get_My_Player_Object();

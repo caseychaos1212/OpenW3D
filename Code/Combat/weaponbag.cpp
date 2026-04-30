@@ -41,7 +41,9 @@
 #include "weaponmanager.h"
 #include "wwpacket.h"
 #include "armedgameobj.h"
+#include "gametype.h"
 #include "inventory.h"
+#include "soldier.h"
 
 /*
 **
@@ -443,18 +445,24 @@ bool	WeaponBagClass::Move_Contents( WeaponBagClass * source )
 {
 	// Was anyhting actually moved?
 	bool moved = false;
+	SoldierGameObj *soldier = Owner != NULL ? Owner->As_SoldierGameObj() : NULL;
+	bool disable_ammo_pickups = IS_COOP_MISSION &&
+		cGameType::Are_Coop_Ammo_Pickups_Disabled() &&
+		soldier != NULL &&
+		soldier->Is_Human_Controlled();
 
 	// Move all the weapons and ammo from the source to me
 	// For each weapon in the source bag...
 	for( int i = 1; i < source->WeaponList.Count(); i++ ) {
 		WeaponClass * weapon = source->WeaponList[i];
+		int rounds = disable_ammo_pickups ? 0 : weapon->Get_Total_Rounds();
 
 		// If I already have it,
 		WeaponClass * my_weapon = Find_Weapon( weapon->Get_Definition() );
 		if ( my_weapon ) {
 			// Copy the ammo and the weapon
-			if ( !my_weapon->Is_Ammo_Maxed() && weapon->Get_Total_Rounds() != 0 ) {
-				my_weapon->Add_Rounds( weapon->Get_Total_Rounds() );
+			if ( !my_weapon->Is_Ammo_Maxed() && rounds != 0 ) {
+				my_weapon->Add_Rounds( rounds );
 				moved = true;
 			}
 
@@ -465,7 +473,7 @@ bool	WeaponBagClass::Move_Contents( WeaponBagClass * source )
 //			Debug_Say(( "Add %s %d\n", weapon->Get_Definition()->Get_Name(), weapon->Get_Total_Rounds() ));
 		} else {
 			// else, give it to me
-			Add_Weapon( weapon->Get_Definition(), weapon->Get_Total_Rounds(), weapon->Does_Weapon_Exist() );
+			Add_Weapon( weapon->Get_Definition(), rounds, weapon->Does_Weapon_Exist() );
 			if ( weapon->Does_Weapon_Exist() ) {
 				moved = true;
 			}

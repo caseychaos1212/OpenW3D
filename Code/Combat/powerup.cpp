@@ -94,6 +94,27 @@ static bool Is_Coop_Powerup_Proximity_Hit(PowerUpGameObj *powerup, SoldierGameOb
 	return delta.Length2() <= 6.25F;
 }
 
+static bool Is_Coop_Player_Powerup_Target(SmartGameObj *obj)
+{
+	SoldierGameObj *soldier = obj != NULL ? obj->As_SoldierGameObj() : NULL;
+	return IS_COOP_MISSION && soldier != NULL && soldier->Is_Human_Controlled();
+}
+
+static bool Is_Coop_Health_Pickup_Disabled_For(SmartGameObj *obj)
+{
+	return Is_Coop_Player_Powerup_Target(obj) && cGameType::Are_Coop_Health_Pickups_Disabled();
+}
+
+static bool Is_Coop_Armor_Pickup_Disabled_For(SmartGameObj *obj)
+{
+	return Is_Coop_Player_Powerup_Target(obj) && cGameType::Are_Coop_Armor_Pickups_Disabled();
+}
+
+static bool Is_Coop_Ammo_Pickup_Disabled_For(SmartGameObj *obj)
+{
+	return Is_Coop_Player_Powerup_Target(obj) && cGameType::Are_Coop_Ammo_Pickups_Disabled();
+}
+
 SimplePersistFactoryClass<PowerUpGameObjDef, CHUNKID_GAME_OBJECT_DEF_POWERUP>	_PowerUpGameObjDefPersistFactory;
 
 DECLARE_DEFINITION_FACTORY(PowerUpGameObjDef, CLASSID_GAME_OBJECT_DEF_POWERUP, "PowerUp") _PowerUpGameObjDefDefFactory;
@@ -274,11 +295,10 @@ const PersistFactoryClass & PowerUpGameObjDef::Get_Factory (void) const
 
 bool PowerUpGameObjDef::Has_Coop_Shared_Grant(void) const
 {
-	return GrantShieldType != 0 ||
-		GrantShieldStrengthMax != 0 ||
-		GrantHealthMax != 0 ||
-		GrantWeaponID != 0 ||
-		GrantWeaponClips ||
+	return (!cGameType::Are_Coop_Armor_Pickups_Disabled() && (GrantShieldType != 0 || GrantShieldStrengthMax != 0)) ||
+		(!cGameType::Are_Coop_Health_Pickups_Disabled() && GrantHealthMax != 0) ||
+		(GrantWeaponID != 0 && (GrantWeapon || !cGameType::Are_Coop_Ammo_Pickups_Disabled())) ||
+		(!cGameType::Are_Coop_Ammo_Pickups_Disabled() && GrantWeaponClips) ||
 		GrantKey != 0;
 }
 
@@ -290,13 +310,16 @@ bool PowerUpGameObjDef::Grant_Coop_Shared(SmartGameObj *obj, bool hud_display) c
 	WWASSERT(obj != NULL);
 
 	DefenseObjectClass *defense = obj->Get_Defense_Object();
+	bool armor_pickups_disabled = Is_Coop_Armor_Pickup_Disabled_For(obj);
+	bool health_pickups_disabled = Is_Coop_Health_Pickup_Disabled_For(obj);
+	bool ammo_pickups_disabled = Is_Coop_Ammo_Pickup_Disabled_For(obj);
 
-	if (GrantShieldType != 0 && GrantShieldType > (int)defense->Get_Shield_Type()) {
+	if (!armor_pickups_disabled && GrantShieldType != 0 && GrantShieldType > (int)defense->Get_Shield_Type()) {
 		defense->Set_Shield_Type(GrantShieldType);
 		granted = true;
 	}
 
-	if (GrantShieldStrengthMax != 0) {
+	if (!armor_pickups_disabled && GrantShieldStrengthMax != 0) {
 		float add = GrantShieldStrengthMax * (float)obj->Get_Definition().Get_DefenseObjectDef().ShieldStrengthMax;
 
 		switch (CombatManager::Get_Difficulty_Level()) {
@@ -313,7 +336,7 @@ bool PowerUpGameObjDef::Grant_Coop_Shared(SmartGameObj *obj, bool hud_display) c
 		}
 	}
 
-	if (GrantHealthMax != 0) {
+	if (!health_pickups_disabled && GrantHealthMax != 0) {
 		float add = GrantHealthMax * (float)obj->Get_Definition().Get_DefenseObjectDef().HealthMax;
 
 		switch (CombatManager::Get_Difficulty_Level()) {
@@ -331,12 +354,13 @@ bool PowerUpGameObjDef::Grant_Coop_Shared(SmartGameObj *obj, bool hud_display) c
 	}
 
 	if (GrantWeaponID != 0) {
-		if ((GrantWeapon && !obj->Get_Weapon_Bag()->Is_Weapon_Owned(GrantWeaponID)) ||
-			 !obj->Get_Weapon_Bag()->Is_Ammo_Full(GrantWeaponID)) {
-			obj->Get_Weapon_Bag()->Add_Weapon(GrantWeaponID, GrantWeaponRounds, GrantWeapon);
+		bool needs_weapon = GrantWeapon && !obj->Get_Weapon_Bag()->Is_Weapon_Owned(GrantWeaponID);
+		bool needs_ammo = !obj->Get_Weapon_Bag()->Is_Ammo_Full(GrantWeaponID);
+		if (needs_weapon || (!ammo_pickups_disabled && needs_ammo)) {
+			obj->Get_Weapon_Bag()->Add_Weapon(GrantWeaponID, ammo_pickups_disabled ? 0 : GrantWeaponRounds, GrantWeapon);
 			granted = true;
 		}
-	} else if (GrantWeaponClips) {
+	} else if (!ammo_pickups_disabled && GrantWeaponClips) {
 		WeaponBagClass *weapon_bag = obj->Get_Weapon_Bag();
 		for (int weapon_index = 0; weapon_index < weapon_bag->Get_Count(); weapon_index++) {
 			WeaponClass *weapon = weapon_bag->Peek_Weapon(weapon_index);
@@ -368,9 +392,15 @@ bool	PowerUpGameObjDef::Grant( SmartGameObj * obj, PowerUpGameObj * p_powerup, b
 	WWASSERT(CombatManager::I_Am_Server());
 
 	DefenseObjectClass * defense = obj->Get_Defense_Object();
+	bool armor_pickups_disabled = Is_Coop_Armor_Pickup_Disabled_For(obj);
+	bool health_pickups_disabled = Is_Coop_Health_Pickup_Disabled_For(obj);
+	bool ammo_pickups_disabled = Is_Coop_Ammo_Pickup_Disabled_For(obj);
+	bool mutator_blocked_grant = false;
 	// Grant the shield
 	if ( GrantShieldType != 0 ) {
-		if ( GrantShieldType > (int)defense->Get_Shield_Type() ) {
+		if (armor_pickups_disabled) {
+			mutator_blocked_grant = true;
+		} else if ( GrantShieldType > (int)defense->Get_Shield_Type() ) {
 			defense->Set_Shield_Type( GrantShieldType );
 			granted = true;
 		} else {
@@ -379,27 +409,33 @@ bool	PowerUpGameObjDef::Grant( SmartGameObj * obj, PowerUpGameObj * p_powerup, b
 	}
 
 	if ( GrantShieldStrengthMax != 0 ) {
-		float add = GrantShieldStrengthMax * (float)obj->Get_Definition().Get_DefenseObjectDef().ShieldStrengthMax;
+		if (armor_pickups_disabled) {
+			mutator_blocked_grant = true;
+		} else {
+			float add = GrantShieldStrengthMax * (float)obj->Get_Definition().Get_DefenseObjectDef().ShieldStrengthMax;
 
-		switch ( CombatManager::Get_Difficulty_Level() ) {
-			case 0:	add *= 2.0f;	break;
-			case 2:	add *= 0.75f;	break;
-		};
+			switch ( CombatManager::Get_Difficulty_Level() ) {
+				case 0:	add *= 2.0f;	break;
+				case 2:	add *= 0.75f;	break;
+			};
 
-		// Round up to next int
-		add = (int)(add + 0.95f);
+			// Round up to next int
+			add = (int)(add + 0.95f);
 
-		defense->Set_Shield_Strength_Max( defense->Get_Shield_Strength_Max() + add );
-		granted = true;
+			defense->Set_Shield_Strength_Max( defense->Get_Shield_Strength_Max() + add );
+			granted = true;
 
-		if ( hud_display && obj == COMBAT_STAR ) {
-			HUDClass::Add_Shield_Upgrade_Grant( add );
+			if ( hud_display && obj == COMBAT_STAR ) {
+				HUDClass::Add_Shield_Upgrade_Grant( add );
+			}
 		}
 
 	}
 
 	if ( GrantShieldStrength != 0 ) {
-		if ( (defense->Get_Shield_Strength() < defense->Get_Shield_Strength_Max()) ) {
+		if (armor_pickups_disabled) {
+			mutator_blocked_grant = true;
+		} else if ( (defense->Get_Shield_Strength() < defense->Get_Shield_Strength_Max()) ) {
 			defense->Add_Shield_Strength( GrantShieldStrength );
 			granted = true;
 
@@ -423,26 +459,32 @@ bool	PowerUpGameObjDef::Grant( SmartGameObj * obj, PowerUpGameObj * p_powerup, b
 
 	// Grant the Health
 	if ( GrantHealthMax != 0 ) {
-		float add = GrantHealthMax * (float)obj->Get_Definition().Get_DefenseObjectDef().HealthMax;
+		if (health_pickups_disabled) {
+			mutator_blocked_grant = true;
+		} else {
+			float add = GrantHealthMax * (float)obj->Get_Definition().Get_DefenseObjectDef().HealthMax;
 
-		switch ( CombatManager::Get_Difficulty_Level() ) {
-			case 0:	add *= 2.0f;	break;
-			case 2:	add *= 0.75f;	break;
-		};
+			switch ( CombatManager::Get_Difficulty_Level() ) {
+				case 0:	add *= 2.0f;	break;
+				case 2:	add *= 0.75f;	break;
+			};
 
-		// Round up to next int
-		add = (int)(add + 0.95f);
+			// Round up to next int
+			add = (int)(add + 0.95f);
 
-		defense->Set_Health_Max( defense->Get_Health_Max() + add );
-		granted = true;
+			defense->Set_Health_Max( defense->Get_Health_Max() + add );
+			granted = true;
 
-		if ( hud_display && obj == COMBAT_STAR ) {
-			HUDClass::Add_Health_Upgrade_Grant( add );
+			if ( hud_display && obj == COMBAT_STAR ) {
+				HUDClass::Add_Health_Upgrade_Grant( add );
+			}
 		}
 	}
 
 	if ( GrantHealth != 0 ) {
-		if ( defense->Get_Health() < defense->Get_Health_Max() ) {
+		if (health_pickups_disabled) {
+			mutator_blocked_grant = true;
+		} else if ( defense->Get_Health() < defense->Get_Health_Max() ) {
 			defense->Add_Health( GrantHealth );
 			granted = true;
 
@@ -465,20 +507,21 @@ bool	PowerUpGameObjDef::Grant( SmartGameObj * obj, PowerUpGameObj * p_powerup, b
 	// Grant the Weapon
 	if ( GrantWeaponID != 0 ) {
 
-		if ( ( GrantWeapon && !obj->Get_Weapon_Bag()->Is_Weapon_Owned( GrantWeaponID ) ) ||
-			  ( !obj->Get_Weapon_Bag()->Is_Ammo_Full( GrantWeaponID ) ) ) {
+		bool needs_weapon = GrantWeapon && !obj->Get_Weapon_Bag()->Is_Weapon_Owned( GrantWeaponID );
+		bool needs_ammo = !obj->Get_Weapon_Bag()->Is_Ammo_Full( GrantWeaponID );
+		if ( needs_weapon || ( !ammo_pickups_disabled && needs_ammo ) ) {
 
 			if ( obj == COMBAT_STAR && hud_display ) {
-				if ( GrantWeapon && !obj->Get_Weapon_Bag()->Is_Weapon_Owned( GrantWeaponID ) )  {
-					HUDClass::Add_Powerup_Weapon( GrantWeaponID, GrantWeaponRounds );
+				if ( needs_weapon )  {
+					HUDClass::Add_Powerup_Weapon( GrantWeaponID, ammo_pickups_disabled ? 0 : GrantWeaponRounds );
 				} else {
-					if ( !obj->Get_Weapon_Bag()->Is_Ammo_Full( GrantWeaponID ) ) {
+					if ( needs_ammo ) {
 						HUDClass::Add_Powerup_Ammo( GrantWeaponID, GrantWeaponRounds );
 					}
 				}
 			}
 
-			obj->Get_Weapon_Bag()->Add_Weapon( GrantWeaponID, GrantWeaponRounds, GrantWeapon );
+			obj->Get_Weapon_Bag()->Add_Weapon( GrantWeaponID, ammo_pickups_disabled ? 0 : GrantWeaponRounds, GrantWeapon );
 			granted = true;
 
 			if ( obj == COMBAT_STAR ) {
@@ -495,28 +538,33 @@ bool	PowerUpGameObjDef::Grant( SmartGameObj * obj, PowerUpGameObj * p_powerup, b
 					weapon_name = obj->Get_Weapon()->Get_Definition()->Get_Name();
 					ammo = obj->Get_Weapon()->Get_Total_Rounds();
 				}
-				DIAG_LOG(( "WEPU", "%1.2f; %1.2f; %1.2f; %s; %d; %s; %d", pos.X, pos.Y, pos.Z, grant_name, GrantWeaponRounds, weapon_name, ammo ));
+				DIAG_LOG(( "WEPU", "%1.2f; %1.2f; %1.2f; %s; %d; %s; %d", pos.X, pos.Y, pos.Z, grant_name, ammo_pickups_disabled ? 0 : GrantWeaponRounds, weapon_name, ammo ));
 			}
+		} else if ( ammo_pickups_disabled && needs_ammo ) {
+			mutator_blocked_grant = true;
 		} else {
 			no_grant_message = IDS_M00DSGN_DSGN1016I1DSGN_TXT; //"Your weapon is full."
 		}
 
 	} else if ( GrantWeaponClips ) {
+		if (ammo_pickups_disabled) {
+			mutator_blocked_grant = true;
+		} else {
+			//
+			//	Loop over all the weapons in the owner's bag
+			//
+			WeaponBagClass *weapon_bag = obj->Get_Weapon_Bag();
+			for ( int weapon_index = 0; weapon_index < weapon_bag->Get_Count(); weapon_index ++ ) {
+				WeaponClass	*weapon = weapon_bag->Peek_Weapon( weapon_index );
+				if( weapon != NULL && weapon->Get_Definition ()->CanReceiveGenericCnCAmmo ) {
 
-		//
-		//	Loop over all the weapons in the owner's bag
-		//
-		WeaponBagClass *weapon_bag = obj->Get_Weapon_Bag();
-		for ( int weapon_index = 0; weapon_index < weapon_bag->Get_Count(); weapon_index ++ ) {
-			WeaponClass	*weapon = weapon_bag->Peek_Weapon( weapon_index );
-			if( weapon != NULL && weapon->Get_Definition ()->CanReceiveGenericCnCAmmo ) {
-
-				//
-				//	Grant "x" number of clips to the weapon
-				//
-				int clip_rounds = weapon->Get_Definition()->ClipSize;
-				weapon->Add_Rounds( clip_rounds * GrantWeaponRounds );
-				granted = true;
+					//
+					//	Grant "x" number of clips to the weapon
+					//
+					int clip_rounds = weapon->Get_Definition()->ClipSize;
+					weapon->Add_Rounds( clip_rounds * GrantWeaponRounds );
+					granted = true;
+				}
 			}
 		}
 	}
@@ -551,6 +599,10 @@ bool	PowerUpGameObjDef::Grant( SmartGameObj * obj, PowerUpGameObj * p_powerup, b
 	*/
 
 	if ( AlwaysAllowGrant ) {
+		granted = true;
+	}
+
+	if (mutator_blocked_grant && !granted) {
 		granted = true;
 	}
 

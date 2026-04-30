@@ -38,10 +38,9 @@
 
 #include "cnetwork.h"
 #include "gametype.h"
+#include "gdcoopmission.h"
 #include "playermanager.h"
 #include "playerkill.h"
-
-#define COOP_DEATH_SCORE_PENALTY 100.0f
 
 //-----------------------------------------------------------------------------
 bool GameCombatNetworkHandlerClass::Can_Damage(ArmedGameObj * /* p_armed_damager */,
@@ -138,7 +137,13 @@ void GameCombatNetworkHandlerClass::On_Soldier_Death(SoldierGameObj * p_soldier)
 		if (p_player != NULL) {
 			p_player->Increment_Deaths();
 			if (IS_COOP_MISSION) {
-				p_player->Increment_Score(-COOP_DEATH_SCORE_PENALTY);
+				int death_score_penalty = cGameType::Get_Coop_Death_Score_Penalty();
+				cGameDataCoopMission *coop_game = The_Game() != NULL ? The_Game()->As_Coop_Mission() : NULL;
+				if (coop_game != NULL) {
+					coop_game->Apply_Global_Settings();
+					death_score_penalty = coop_game->Get_Death_Score_Penalty();
+				}
+				p_player->Increment_Score(-(float)death_score_penalty);
 			}
 		}
 	}

@@ -827,6 +827,13 @@ float	DefenseObjectClass::Do_Damage( const OffenseObjectClass & offense, float s
 		};
 	}
 
+	if (IS_COOP_MISSION && smart != NULL && Get_Owner() != NULL) {
+		SoldierGameObj *victim_soldier = Get_Owner()->As_SoldierGameObj();
+		if (victim_soldier != NULL && victim_soldier->Is_Human_Controlled() && smart->Is_Enemy(Get_Owner())) {
+			damage *= cGameType::Get_Coop_Enemy_Damage_Multiplier();
+		}
+	}
+
 	float	shield_damage = 0;
 
 	float damage_scale = 1;
@@ -1409,4 +1416,3 @@ void	DefenseObjectClass::Set_Shield_Type( ArmorType type )
 				smart->Get_Player_Data()->On_Kill(victim_id, victim_team);
 			}
 			*/
-

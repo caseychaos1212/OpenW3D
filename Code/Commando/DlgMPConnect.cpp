@@ -263,6 +263,7 @@ void DlgMPConnect::On_Periodic(void)
 			if (mTheGame->Is_Coop_Mission()) {
 				cGameDataCoopMission *coop_game = mTheGame->As_Coop_Mission();
 				WWASSERT(coop_game != NULL);
+				coop_game->Apply_Global_Settings();
 				CoopDebugLog::Log("DlgMPConnect::On_Periodic Start_Coop_Campaign map=%s difficulty=%d",
 					mTheGame->Get_Map_Name().Peek_Buffer(), coop_game->Get_Difficulty_Level());
 				CampaignManager::Start_Coop_Campaign(mTheGame->Get_Map_Name(), coop_game->Get_Difficulty_Level());

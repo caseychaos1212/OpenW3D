@@ -33,9 +33,17 @@ public:
 private:
 
 	virtual void			Act(void) override;
+	void						Apply_Settings_To_Game_Data(void) const;
 
 	char						MapName[MAX_MAPNAME_SIZE];
 	int						DifficultyLevel;
+	bool						EnableSprint;
+	bool						DisableHealthPickups;
+	bool						DisableArmorPickups;
+	bool						DisableAmmoPickups;
+	float						EnemyHealthMultiplier;
+	float						EnemyDamageMultiplier;
+	int						DeathScorePenalty;
 };
 
 //-----------------------------------------------------------------------------

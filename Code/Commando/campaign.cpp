@@ -45,6 +45,7 @@
 #include "cnetwork.h"
 #include "playertype.h"
 #include "gameinitmgr.h"
+#include "gdcoopmission.h"
 #include "scorescreen.h"
 #include "assets.h"
 #include "movie.h"
@@ -138,6 +139,10 @@ static int Campaign_Find_Next_Level_State(int state)
 static void Campaign_Set_Difficulty(int difficulty)
 {
 	CombatManager::Set_Difficulty_Level(difficulty);
+
+	if (IS_COOP_MISSION) {
+		return;
+	}
 
 	StringClass diff_string;
 	diff_string.Format("difficulty %d", difficulty);
@@ -290,6 +295,12 @@ void	CampaignManager::Prepare_Coop_Campaign_Level( const char * mission_name, in
 	State = Campaign_Find_Level_State(mission_name);
 	BackdropIndex = 0;
 
+	cGameDataCoopMission *coop_game = The_Game() != NULL ? The_Game()->As_Coop_Mission() : NULL;
+	if (coop_game != NULL) {
+		coop_game->Set_Difficulty_Level(difficulty);
+		coop_game->Apply_Global_Settings();
+	}
+
 	Campaign_Set_Difficulty(difficulty);
 	cGod::Reset_Inventory();
 
@@ -346,11 +357,18 @@ void	CampaignManager::Continue( bool /* success */ )
 		const char *mission_name = Campaign_Get_Level_Name(State);
 		WWASSERT(mission_name != NULL);
 
+		int difficulty_level = CombatManager::Get_Difficulty_Level();
+		cGameDataCoopMission *coop_game = The_Game() != NULL ? The_Game()->As_Coop_Mission() : NULL;
+		if (coop_game != NULL) {
+			coop_game->Apply_Global_Settings();
+			difficulty_level = coop_game->Get_Difficulty_Level();
+		}
+
 		cCoopLevelTransitionEvent *transition_event = new cCoopLevelTransitionEvent;
-		transition_event->Init(mission_name, CombatManager::Get_Difficulty_Level());
+		transition_event->Init(mission_name, difficulty_level);
 		cNetwork::Flush();
 
-		GameInitMgrClass::Queue_Coop_Level_Transition(mission_name, CombatManager::Get_Difficulty_Level());
+		GameInitMgrClass::Queue_Coop_Level_Transition(mission_name, difficulty_level);
 		return;
 	}
 

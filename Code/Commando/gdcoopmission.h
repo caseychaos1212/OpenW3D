@@ -36,6 +36,7 @@ public:
 	void					Save_To_Server_Config(void) override;
 	void					Export_Tier_2_Data(cPacket & packet) override;
 	void					Import_Tier_2_Data(cPacket & packet) override;
+	void					Apply_Global_Settings(void) const;
 
 	const StringClass &	Get_Player2_Preset(void) const {return Player2Preset;}
 	void					Set_Player2_Preset(const StringClass & preset) {Player2Preset = preset;}
@@ -43,11 +44,29 @@ public:
 	void					Set_Difficulty_Level(int level);
 	bool					Is_Sprint_Enabled(void) const {return EnableSprint;}
 	void					Set_Sprint_Enabled(bool enabled);
+	bool					Are_Health_Pickups_Disabled(void) const {return DisableHealthPickups;}
+	void					Set_Health_Pickups_Disabled(bool disabled);
+	bool					Are_Armor_Pickups_Disabled(void) const {return DisableArmorPickups;}
+	void					Set_Armor_Pickups_Disabled(bool disabled);
+	bool					Are_Ammo_Pickups_Disabled(void) const {return DisableAmmoPickups;}
+	void					Set_Ammo_Pickups_Disabled(bool disabled);
+	float					Get_Enemy_Health_Multiplier(void) const {return EnemyHealthMultiplier;}
+	void					Set_Enemy_Health_Multiplier(float multiplier);
+	float					Get_Enemy_Damage_Multiplier(void) const {return EnemyDamageMultiplier;}
+	void					Set_Enemy_Damage_Multiplier(float multiplier);
+	int					Get_Death_Score_Penalty(void) const {return DeathScorePenalty;}
+	void					Set_Death_Score_Penalty(int penalty);
 
 private:
 	StringClass			Player2Preset;
 	int					DifficultyLevel;
 	bool					EnableSprint;
+	bool					DisableHealthPickups;
+	bool					DisableArmorPickups;
+	bool					DisableAmmoPickups;
+	float					EnemyHealthMultiplier;
+	float					EnemyDamageMultiplier;
+	int					DeathScorePenalty;
 };
 
 #endif // GDCOOPMISSION_H

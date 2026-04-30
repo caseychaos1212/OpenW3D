@@ -37,6 +37,7 @@
 #include "damageablegameobj.h"
 #include "debug.h"
 #include "armedgameobj.h"
+#include "gametype.h"
 #include "playertype.h"
 #include "colors.h"
 
@@ -189,6 +190,16 @@ void	DamageableGameObj::Copy_Settings( const DamageableGameObjDef & definition )
 {
 	Set_Player_Type(definition.DefaultPlayerType);
 	DefenseObject.Init(definition.DefenseObjectDef, this );
+	if (IS_COOP_MISSION &&
+		 cGameType::Get_Coop_Enemy_Health_Multiplier() != 1.0f &&
+		 Player_Types_Are_Enemies(PLAYERTYPE_GDI, Get_Player_Type()) &&
+		 As_SmartGameObj() != NULL) {
+		float multiplier = cGameType::Get_Coop_Enemy_Health_Multiplier();
+		DefenseObject.Set_Health_Max(DefenseObject.Get_Health_Max() * multiplier);
+		DefenseObject.Set_Health(DefenseObject.Get_Health() * multiplier);
+		DefenseObject.Set_Shield_Strength_Max(DefenseObject.Get_Shield_Strength_Max() * multiplier);
+		DefenseObject.Set_Shield_Strength(DefenseObject.Get_Shield_Strength() * multiplier);
+	}
 	return ;
 }
 
@@ -453,5 +464,3 @@ bool DamageableGameObj::Is_Enemy(DamageableGameObj * p_obj)
 	WWASSERT(p_obj != NULL);
    return ( (p_obj != this) && Player_Types_Are_Enemies( Get_Player_Type(), p_obj->Get_Player_Type() ) );
 }
-
-

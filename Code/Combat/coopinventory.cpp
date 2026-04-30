@@ -194,7 +194,7 @@ void CoopInventoryManager::Record_And_Share_Weapon_Bag(SmartGameObj *recipient, 
 
 		CoopWeaponGrant grant;
 		grant.WeaponID = weapon->Get_ID();
-		grant.Rounds = weapon->Get_Total_Rounds();
+		grant.Rounds = cGameType::Are_Coop_Ammo_Pickups_Disabled() ? 0 : weapon->Get_Total_Rounds();
 		grant.HasWeapon = weapon->Does_Weapon_Exist();
 
 		if (grant.WeaponID == 0 || (!grant.HasWeapon && grant.Rounds == 0)) {

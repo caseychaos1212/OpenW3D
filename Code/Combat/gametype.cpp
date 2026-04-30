@@ -42,3 +42,9 @@
 
 GameTypeEnum cGameType::GameType = GAMETYPE_NONE;
 bool cGameType::CoopSprintEnabled = true;
+bool cGameType::CoopHealthPickupsDisabled = false;
+bool cGameType::CoopArmorPickupsDisabled = false;
+bool cGameType::CoopAmmoPickupsDisabled = false;
+float cGameType::CoopEnemyHealthMultiplier = 1.0f;
+float cGameType::CoopEnemyDamageMultiplier = 1.0f;
+int cGameType::CoopDeathScorePenalty = 100;
