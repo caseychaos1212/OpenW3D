@@ -80,6 +80,24 @@ public:
 	static float			Get_Coop_Enemy_Damage_Multiplier(void)				{return CoopEnemyDamageMultiplier;}
 	static void				Set_Coop_Death_Score_Penalty(int penalty)			{CoopDeathScorePenalty = penalty;}
 	static int				Get_Coop_Death_Score_Penalty(void)					{return CoopDeathScorePenalty;}
+	static void				Set_Coop_AI_Sight_Multiplier(float multiplier)		{CoopAISightMultiplier = multiplier;}
+	static float			Get_Coop_AI_Sight_Multiplier(void)					{return CoopAISightMultiplier;}
+	static void				Set_Coop_AI_Hearing_Multiplier(float multiplier)	{CoopAIHearingMultiplier = multiplier;}
+	static float			Get_Coop_AI_Hearing_Multiplier(void)				{return CoopAIHearingMultiplier;}
+	static void				Set_Coop_AI_Aggressiveness_Bonus(float bonus)		{CoopAIAggressivenessBonus = bonus;}
+	static float			Get_Coop_AI_Aggressiveness_Bonus(void)				{return CoopAIAggressivenessBonus;}
+	static void				Set_Coop_AI_Take_Cover_Bonus(float bonus)			{CoopAITakeCoverBonus = bonus;}
+	static float			Get_Coop_AI_Take_Cover_Bonus(void)					{return CoopAITakeCoverBonus;}
+	static void				Set_Coop_AI_Share_Info_Radius(float radius)			{CoopAIShareInfoRadius = radius;}
+	static float			Get_Coop_AI_Share_Info_Radius(void)					{return CoopAIShareInfoRadius;}
+	static void				Set_Coop_AI_Weapon_Error_Multiplier(float multiplier)	{CoopAIWeaponErrorMultiplier = multiplier;}
+	static float			Get_Coop_AI_Weapon_Error_Multiplier(void)				{return CoopAIWeaponErrorMultiplier;}
+	static void				Set_Coop_AI_Attack_Wander_Enabled(bool enabled)		{CoopAIAttackWanderEnabled = enabled;}
+	static bool				Is_Coop_AI_Attack_Wander_Enabled(void)				{return CoopAIAttackWanderEnabled;}
+	static void				Set_Coop_AI_Damage_Retarget_Enabled(bool enabled)	{CoopAIDamageRetargetEnabled = enabled;}
+	static bool				Is_Coop_AI_Damage_Retarget_Enabled(void)				{return CoopAIDamageRetargetEnabled;}
+	static void				Set_Coop_AI_Unit_Combat_Types_Enabled(bool enabled)	{CoopAIUnitCombatTypesEnabled = enabled;}
+	static bool				Are_Coop_AI_Unit_Combat_Types_Enabled(void)			{return CoopAIUnitCombatTypesEnabled;}
 
 private:
 	static GameTypeEnum	GameType;
@@ -90,6 +108,15 @@ private:
 	static float			CoopEnemyHealthMultiplier;
 	static float			CoopEnemyDamageMultiplier;
 	static int				CoopDeathScorePenalty;
+	static float			CoopAISightMultiplier;
+	static float			CoopAIHearingMultiplier;
+	static float			CoopAIAggressivenessBonus;
+	static float			CoopAITakeCoverBonus;
+	static float			CoopAIShareInfoRadius;
+	static float			CoopAIWeaponErrorMultiplier;
+	static bool				CoopAIAttackWanderEnabled;
+	static bool				CoopAIDamageRetargetEnabled;
+	static bool				CoopAIUnitCombatTypesEnabled;
 };
 
 //-----------------------------------------------------------------------------

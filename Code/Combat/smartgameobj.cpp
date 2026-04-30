@@ -59,6 +59,7 @@
 #include "soldier.h"
 #include "parameter.h"
 #include "crandom.h"
+#include "gametype.h"
 #include "playertype.h"
 #include "WWAudio.h"
 #include "LogicalListener.h"
@@ -819,8 +820,13 @@ bool	SmartGameObj::Is_Obj_Visible( PhysicalGameObj *obj )
 	Matrix3D	look_tm = Get_Look_Transform();
 	Matrix3D::Inverse_Transform_Vector( look_tm, diff, &diff );
 
+	float sight_scale = GlobalSightRangeScale;
+	if ( IS_COOP_MISSION ) {
+		sight_scale *= cGameType::Get_Coop_AI_Sight_Multiplier();
+	}
+
 	float dist = diff.Length();
-	if ( dist < Get_Definition().SightRange * GlobalSightRangeScale) {
+	if ( dist < Get_Definition().SightRange * sight_scale) {
 		// find view angle
 		diff.Z = 0;
 		diff.Normalize();
@@ -1060,4 +1066,3 @@ void	SmartGameObj::Reset_Controller( void )
 		CombatManager::Send_Control_Packet(this);
 		CombatManager::Send_State_Packet(this);
 		*/
-

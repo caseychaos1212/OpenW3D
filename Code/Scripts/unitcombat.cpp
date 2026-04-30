@@ -170,21 +170,12 @@ DECLARE_SCRIPT ( Unit_Combat,"Scoreboard_ID=0:int,Controller_ID=0:int,Script_Ove
 		{
 			script_override = 0;
 		}
-		if ( Get_Int_Parameter(3) )
+		int requested_soldier_type = Get_Int_Parameter(3);
+		soldier_type = 0;
+		if ( Commands->Are_Coop_AI_Unit_Combat_Types_Enabled() &&
+				requested_soldier_type >= 1 && requested_soldier_type <= 3 )
 		{
-			soldier_type = Get_Int_Parameter(3);
-		}
-		else
-		{
-			soldier_type = 0;
-		}
-		if ( soldier_type > 3 )
-		{
-			soldier_type;
-		}
-		else
-		{
-			soldier_type = 0;
+			soldier_type = requested_soldier_type;
 		}
 	}
 
@@ -1295,4 +1286,3 @@ DECLARE_SCRIPT ( Unit_Combat,"Scoreboard_ID=0:int,Controller_ID=0:int,Script_Ove
 	}
 
 };
-

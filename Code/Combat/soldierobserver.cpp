@@ -52,6 +52,7 @@
 #include "timemgr.h"
 #include "weaponbag.h"
 #include "wwprofile.h"
+#include "gametype.h"
 #include "playertype.h"
 
 
@@ -97,6 +98,45 @@ SoldierAIStateData	StateData[SoldierObserverClass::NUM_SOLDIER_AI_STATES] = {
 	{60,		SoldierObserverClass::SOLDIER_AI_ALERT_IDLE},	//	{60,		SoldierObserverClass::SOLDIER_AI_BULLET_HEARD},
 	{60,		SoldierObserverClass::SOLDIER_AI_BULLET_HEARD},
 };
+
+static float Clamp_AI_Chance(float chance)
+{
+	if (chance < 0.0f) {
+		return 0.0f;
+	}
+	if (chance > 1.0f) {
+		return 1.0f;
+	}
+
+	return chance;
+}
+
+static float Get_Effective_Aggressiveness(float aggressiveness)
+{
+	if (IS_COOP_MISSION) {
+		return Clamp_AI_Chance(aggressiveness + cGameType::Get_Coop_AI_Aggressiveness_Bonus());
+	}
+
+	return aggressiveness;
+}
+
+static float Get_Effective_Take_Cover_Probability(float probability)
+{
+	if (IS_COOP_MISSION) {
+		return Clamp_AI_Chance(probability + cGameType::Get_Coop_AI_Take_Cover_Bonus());
+	}
+
+	return probability;
+}
+
+static float Get_AI_Share_Info_Radius(void)
+{
+	if (IS_COOP_MISSION) {
+		return cGameType::Get_Coop_AI_Share_Info_Radius();
+	}
+
+	return 5.0f;
+}
 
 /*
 ** Speech
@@ -427,10 +467,11 @@ void SoldierObserverClass::Damaged(GameObject* obj, GameObject* damager, float /
 
 			damager->Get_Position( &pos );
 			pos -= my_pos;
-			if ( pos.Length() < target_range ) {
+			if ( pos.Length() < target_range ||
+					(IS_COOP_MISSION && cGameType::Is_Coop_AI_Damage_Retarget_Enabled()) ) {
 				PhysicalGameObj * pdamager = damager->As_PhysicalGameObj();
 				if ( pdamager && pdamager->Is_Enemy( soldier ) ) {
-					Debug_Say(( "Switching to nearer target\n" ));
+					Debug_Say(( "Switching to damage source target\n" ));
 					EnemyObject = damager;
 					ActionTimer = 0;  // Act on it now
 				}
@@ -765,6 +806,11 @@ void SoldierObserverClass::Notify_Neighbors_Sound( SoldierGameObj * soldier, con
 {
 	// Notify nearby neighbors of my knowledge
 	// for all physicalgameobjs
+	float share_radius = Get_AI_Share_Info_Radius();
+	if (share_radius <= 0.0f) {
+		return;
+	}
+
 	Vector3 my_pos;
 	soldier->Get_Position( &my_pos );
 	SLNode<SmartGameObj> *objnode;
@@ -778,7 +824,7 @@ void SoldierObserverClass::Notify_Neighbors_Sound( SoldierGameObj * soldier, con
 			obj->Get_Position( &obj_pos );
 
 			obj_pos -= my_pos;
-			if ( obj_pos.Length() <= 5 ) {
+			if ( obj_pos.Length() <= share_radius ) {
 				// Notify him of my info
 				const GameObjObserverList & observer_list = obj->Get_Observers();
 				for( int index = 0; index < observer_list.Count(); index++ ) {
@@ -793,6 +839,11 @@ void SoldierObserverClass::Notify_Neighbors_Enemy( SoldierGameObj * soldier, Gam
 {
 	// Notify nearby neighbors of my knowledge
 	// for all physicalgameobjs
+	float share_radius = Get_AI_Share_Info_Radius();
+	if (share_radius <= 0.0f) {
+		return;
+	}
+
 	Vector3 my_pos;
 	soldier->Get_Position( &my_pos );
 	SLNode<SmartGameObj> *objnode;
@@ -806,7 +857,7 @@ void SoldierObserverClass::Notify_Neighbors_Enemy( SoldierGameObj * soldier, Gam
 			obj->Get_Position( &obj_pos );
 
 			obj_pos -= my_pos;
-			if ( obj_pos.Length() <= 5 ) {
+			if ( obj_pos.Length() <= share_radius ) {
 				// Notify him of my info
 				const GameObjObserverList & observer_list = obj->Get_Observers();
 				for( int index = 0; index < observer_list.Count(); index++ ) {
@@ -1069,7 +1120,8 @@ void SoldierObserverClass::State_Act_Footsteps_Heard( SoldierGameObj * soldier )
 	Release_Cover_Position();
 
 	bool walking = false;
-	if ( FreeRandom.Get_Float() < Aggressiveness && !IsStationary ) {
+	float aggressiveness = Get_Effective_Aggressiveness(Aggressiveness);
+	if ( FreeRandom.Get_Float() < aggressiveness && !IsStationary ) {
 		SubStateString = "Walk To Footsteps";
 		Vector3	position;
 		PathfindClass *pathfind = PathfindClass::Get_Instance();
@@ -1117,7 +1169,7 @@ void SoldierObserverClass::State_Act_Bullet_Heard( SoldierGameObj * soldier, boo
 			done = Take_Cover( soldier );
 		}
 		if ( !done ) {
-			if ( FreeRandom.Get_Float() < TakeCoverProbability || IsStationary ) {
+			if ( FreeRandom.Get_Float() < Get_Effective_Take_Cover_Probability(TakeCoverProbability) || IsStationary ) {
 				SubStateString = "Face Random Crouched"; 	// Face and crouch
 				walk_position = current_position + Random_Vector(1);
 				if ( COMBAT_STAR ) {
@@ -1239,7 +1291,7 @@ void	SoldierObserverClass::State_Act_Attack( SoldierGameObj * soldier )
 			CoveredAttack = false;
 			ActionTimer = 5;	// for 3 seconds
 			done = true;
-		} else if ( FreeRandom.Get_Float() < Aggressiveness ) {
+		} else if ( FreeRandom.Get_Float() < Get_Effective_Aggressiveness(Aggressiveness) ) {
 
 			if ( soldier->Get_Weapon() != NULL ) {
 				/*
@@ -1269,7 +1321,10 @@ void	SoldierObserverClass::State_Act_Attack( SoldierGameObj * soldier )
 		effective_range = soldier->Get_Weapon()->Get_Effective_Range();
 	}
 
-	if ( !done && ( FreeRandom.Get_Float() < TakeCoverProbability ) && !IsStationary ) {		// 25% chance of not finding cover
+	float take_cover_probability = Get_Effective_Take_Cover_Probability(TakeCoverProbability);
+	float aggressiveness = Get_Effective_Aggressiveness(Aggressiveness);
+
+	if ( !done && ( FreeRandom.Get_Float() < take_cover_probability ) && !IsStationary ) {		// 25% chance of not finding cover
 		Release_Cover_Position();		// Give us the option of selecting our current spot
 		CoverEntryClass * cover = CoverManager::Request_Cover(current_position, enemy_pos, effective_range);
 		if (cover != NULL) {					// Yes, take it
@@ -1282,12 +1337,12 @@ void	SoldierObserverClass::State_Act_Attack( SoldierGameObj * soldier )
 		}
 	}
 
-	if ( FreeRandom.Get_Float() < Aggressiveness && !IsStationary ) {	// Charge Attack
+	if ( FreeRandom.Get_Float() < aggressiveness && !IsStationary ) {	// Charge Attack
 		Vector3	pos;
 		enemy->Get_Position( &pos );
 		SubStateString = "Charge Attack";
 		ActionTimer = 10;
-		bool kneel = ( FreeRandom.Get_Float() < (1-Aggressiveness) );
+		bool kneel = ( FreeRandom.Get_Float() < (1-aggressiveness) );
 		Action_Attack_Object( soldier, enemy, weapon_range, kneel, pos, 5 );
 	 	done = true;
 	}
@@ -1317,7 +1372,7 @@ void	SoldierObserverClass::State_Act_Attack( SoldierGameObj * soldier )
 
 		SubStateString = "Random Run Attack";
 		ActionTimer = 10;
-		bool kneel = ( FreeRandom.Get_Float() < (1-Aggressiveness) );
+		bool kneel = ( FreeRandom.Get_Float() < (1-aggressiveness) );
 		Action_Attack_Object( soldier, enemy, weapon_range, kneel, best_pos, 0.5f );
 	}
 }
@@ -1427,7 +1482,7 @@ bool SoldierObserverClass::Take_Cover( SoldierGameObj * soldier, bool force_face
 	}
 
 	// Possibily take a cover spot
-	if ( FreeRandom.Get_Float() < TakeCoverProbability ) {
+	if ( FreeRandom.Get_Float() < Get_Effective_Take_Cover_Probability(TakeCoverProbability) ) {
 		Release_Cover_Position();		// Give us the option of selecting our current spot
 		float cover_range = 20;
 		Vector3 current_position;

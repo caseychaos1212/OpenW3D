@@ -45,6 +45,7 @@
 uint32		LogicalListenerClass::m_OldestTimestamp	= 0;
 uint32		LogicalListenerClass::m_NewestTimestamp	= 1;
 float			LogicalListenerClass::m_GlobalScale			= 1.0F;
+float			LogicalListenerClass::m_GlobalScaleMultiplier	= 1.0F;
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -216,4 +217,3 @@ LogicalListenerClass::Load (ChunkLoadClass &cload)
 
 	return true;
 }
-

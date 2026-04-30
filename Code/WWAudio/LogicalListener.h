@@ -100,10 +100,12 @@ class LogicalListenerClass : public SoundSceneObjClass
 		//
 		virtual void			Set_Scale (float scale = 1.0F)	{ m_Scale = scale; }
 		virtual float			Get_Scale (void) const				{ return m_Scale; }
-		virtual float			Get_Effective_Scale (void) const	{ return m_Scale * m_GlobalScale; }
+		virtual float			Get_Effective_Scale (void) const	{ return m_Scale * m_GlobalScale * m_GlobalScaleMultiplier; }
 
 		static float			Get_Global_Scale (void)				{ return m_GlobalScale; }
 		static void				Set_Global_Scale (float scale)	{ m_GlobalScale = scale; }
+		static float			Get_Global_Scale_Multiplier (void)				{ return m_GlobalScaleMultiplier; }
+		static void				Set_Global_Scale_Multiplier (float scale)	{ m_GlobalScaleMultiplier = scale; }
 
 		virtual void			Set_DropOff_Radius (float /* radius */ = 1) override	{}
 		virtual float			Get_DropOff_Radius (void) const override			{ return 1.0F; }
@@ -140,6 +142,7 @@ class LogicalListenerClass : public SoundSceneObjClass
 		//	Private member data
 		//////////////////////////////////////////////////////////////////////
 		static float			m_GlobalScale;
+		static float			m_GlobalScaleMultiplier;
 		float						m_Scale;
 		uint32					m_TypeMask;
 		Vector3					m_Position;
@@ -150,4 +153,3 @@ class LogicalListenerClass : public SoundSceneObjClass
 
 
 #endif //__LOGICAL_LISTENER_H
-

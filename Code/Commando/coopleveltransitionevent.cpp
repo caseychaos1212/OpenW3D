@@ -38,7 +38,16 @@ cCoopLevelTransitionEvent::cCoopLevelTransitionEvent(void) :
 	DisableAmmoPickups(false),
 	EnemyHealthMultiplier(1.0f),
 	EnemyDamageMultiplier(1.0f),
-	DeathScorePenalty(100)
+	DeathScorePenalty(100),
+	AISightMultiplier(1.25f),
+	AIHearingMultiplier(1.5f),
+	AIAggressivenessBonus(0.15f),
+	AITakeCoverBonus(0.15f),
+	AIShareInfoRadius(15.0f),
+	AIWeaponErrorMultiplier(0.75f),
+	AIEnableAttackWander(true),
+	AIEnableDamageRetarget(true),
+	AIEnableUnitCombatTypes(true)
 {
 	MapName[0] = 0;
 	Set_App_Packet_Type(APPPACKETTYPE_COOPLEVELTRANSITIONEVENT);
@@ -65,6 +74,15 @@ cCoopLevelTransitionEvent::Init(const char *map_name, int difficulty_level)
 		EnemyHealthMultiplier = coop_game->Get_Enemy_Health_Multiplier();
 		EnemyDamageMultiplier = coop_game->Get_Enemy_Damage_Multiplier();
 		DeathScorePenalty = coop_game->Get_Death_Score_Penalty();
+		AISightMultiplier = coop_game->Get_AI_Sight_Multiplier();
+		AIHearingMultiplier = coop_game->Get_AI_Hearing_Multiplier();
+		AIAggressivenessBonus = coop_game->Get_AI_Aggressiveness_Bonus();
+		AITakeCoverBonus = coop_game->Get_AI_Take_Cover_Bonus();
+		AIShareInfoRadius = coop_game->Get_AI_Share_Info_Radius();
+		AIWeaponErrorMultiplier = coop_game->Get_AI_Weapon_Error_Multiplier();
+		AIEnableAttackWander = coop_game->Is_AI_Attack_Wander_Enabled();
+		AIEnableDamageRetarget = coop_game->Is_AI_Damage_Retarget_Enabled();
+		AIEnableUnitCombatTypes = coop_game->Are_AI_Unit_Combat_Types_Enabled();
 	}
 
 	Set_Object_Dirty_Bit(BIT_CREATION, true);
@@ -98,6 +116,15 @@ cCoopLevelTransitionEvent::Apply_Settings_To_Game_Data(void) const
 	coop_game->Set_Enemy_Health_Multiplier(EnemyHealthMultiplier);
 	coop_game->Set_Enemy_Damage_Multiplier(EnemyDamageMultiplier);
 	coop_game->Set_Death_Score_Penalty(DeathScorePenalty);
+	coop_game->Set_AI_Sight_Multiplier(AISightMultiplier);
+	coop_game->Set_AI_Hearing_Multiplier(AIHearingMultiplier);
+	coop_game->Set_AI_Aggressiveness_Bonus(AIAggressivenessBonus);
+	coop_game->Set_AI_Take_Cover_Bonus(AITakeCoverBonus);
+	coop_game->Set_AI_Share_Info_Radius(AIShareInfoRadius);
+	coop_game->Set_AI_Weapon_Error_Multiplier(AIWeaponErrorMultiplier);
+	coop_game->Set_AI_Attack_Wander_Enabled(AIEnableAttackWander);
+	coop_game->Set_AI_Damage_Retarget_Enabled(AIEnableDamageRetarget);
+	coop_game->Set_AI_Unit_Combat_Types_Enabled(AIEnableUnitCombatTypes);
 	coop_game->Apply_Global_Settings();
 }
 
@@ -118,6 +145,15 @@ cCoopLevelTransitionEvent::Export_Creation(BitStreamClass & packet)
 	packet.Add(EnemyHealthMultiplier);
 	packet.Add(EnemyDamageMultiplier);
 	packet.Add(DeathScorePenalty);
+	packet.Add(AISightMultiplier);
+	packet.Add(AIHearingMultiplier);
+	packet.Add(AIAggressivenessBonus);
+	packet.Add(AITakeCoverBonus);
+	packet.Add(AIShareInfoRadius);
+	packet.Add(AIWeaponErrorMultiplier);
+	packet.Add(AIEnableAttackWander);
+	packet.Add(AIEnableDamageRetarget);
+	packet.Add(AIEnableUnitCombatTypes);
 
 	Set_Delete_Pending();
 }
@@ -139,6 +175,15 @@ cCoopLevelTransitionEvent::Import_Creation(BitStreamClass & packet)
 	EnemyHealthMultiplier = packet.Get(EnemyHealthMultiplier);
 	EnemyDamageMultiplier = packet.Get(EnemyDamageMultiplier);
 	DeathScorePenalty = packet.Get(DeathScorePenalty);
+	AISightMultiplier = packet.Get(AISightMultiplier);
+	AIHearingMultiplier = packet.Get(AIHearingMultiplier);
+	AIAggressivenessBonus = packet.Get(AIAggressivenessBonus);
+	AITakeCoverBonus = packet.Get(AITakeCoverBonus);
+	AIShareInfoRadius = packet.Get(AIShareInfoRadius);
+	AIWeaponErrorMultiplier = packet.Get(AIWeaponErrorMultiplier);
+	AIEnableAttackWander = packet.Get(AIEnableAttackWander);
+	AIEnableDamageRetarget = packet.Get(AIEnableDamageRetarget);
+	AIEnableUnitCombatTypes = packet.Get(AIEnableUnitCombatTypes);
 
 	Apply_Settings_To_Game_Data();
 	Act();

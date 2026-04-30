@@ -468,6 +468,8 @@ typedef struct {
 	void	(* Set_Screen_Fade_Color) ( float r, float g, float b, float seconds );
 	void	(* Set_Screen_Fade_Opacity) ( float opacity, float seconds );
 
+	bool	(* Are_Coop_AI_Unit_Combat_Types_Enabled)( void );
+
 } ScriptCommands;
 
 

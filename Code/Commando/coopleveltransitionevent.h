@@ -44,6 +44,15 @@ private:
 	float						EnemyHealthMultiplier;
 	float						EnemyDamageMultiplier;
 	int						DeathScorePenalty;
+	float						AISightMultiplier;
+	float						AIHearingMultiplier;
+	float						AIAggressivenessBonus;
+	float						AITakeCoverBonus;
+	float						AIShareInfoRadius;
+	float						AIWeaponErrorMultiplier;
+	bool						AIEnableAttackWander;
+	bool						AIEnableDamageRetarget;
+	bool						AIEnableUnitCombatTypes;
 };
 
 //-----------------------------------------------------------------------------

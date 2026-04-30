@@ -64,6 +64,7 @@
 #include "doors.h"
 #include "pathaction.h"
 #include "crandom.h"
+#include "gametype.h"
 #include "playertype.h"
 #include "wwprofile.h"
 
@@ -1838,7 +1839,12 @@ public:
 		float dist = (my_pos - abs_pos).Length();
 		float move = TimeManager::Get_Total_Seconds() * ErrorScale;
 
-		float error_angle = WWMath::Fabs(Action->Get_Parameters().AttackError) +
+		float attack_error = WWMath::Fabs(Action->Get_Parameters().AttackError);
+		if ( IS_COOP_MISSION ) {
+			attack_error *= cGameType::Get_Coop_AI_Weapon_Error_Multiplier();
+		}
+
+		float error_angle = attack_error +
 									WWMath::Fabs(obj->Get_Weapon_Error());
 
 #if 0
@@ -1863,7 +1869,7 @@ public:
 
 		// If AttackErrorOverride, only use AttackError
 		if ( Action->Get_Parameters().AttackErrorOverride ) {
-			error_angle = WWMath::Fabs(Action->Get_Parameters().AttackError);
+			error_angle = attack_error;
 		}
 
 		error.Rotate_Z( DEG_TO_RADF( WWMath::Sin( move * 1.7f ) * error_angle ) );
@@ -2072,46 +2078,47 @@ public:
 
 		Attack_Absolute( target_pos );
 
-#if 0
-		// Elie Wander!
-		// Always wander if attacking!
-		WanderTimer -= TimeManager::Get_Frame_Seconds();
-		SoldierGameObj	* soldier = Action->Get_Action_Obj()->As_SoldierGameObj();
+		if ( IS_COOP_MISSION && cGameType::Is_Coop_AI_Attack_Wander_Enabled() ) {
+			// Elie Wander!
+			// Always wander if attacking!
+			WanderTimer -= TimeManager::Get_Frame_Seconds();
+			SoldierGameObj	* soldier = Action->Get_Action_Obj()->As_SoldierGameObj();
 
-		if ( !IsMoving && WanderTimer <= 0 && soldier != NULL && Action->Get_Parameters().AttackWanderAllowed ) {
-			WWPROFILE( "Wander" );
+			if ( !IsMoving && WanderTimer <= 0 && soldier != NULL && Action->Get_Parameters().AttackWanderAllowed ) {
+				WWPROFILE( "Wander" );
 
-			Vector3 rel_pos;
-			Matrix3D::Inverse_Transform_Vector( obj->Get_Transform(), WanderPos, &rel_pos );
+				Vector3 rel_pos;
+				Matrix3D::Inverse_Transform_Vector( obj->Get_Transform(), WanderPos, &rel_pos );
 //			Debug_Say(( "Wander Pos %f %f %f\n", WanderPos.X, WanderPos.Y, WanderPos.Z ));
 //			Debug_Say(( "Rel Pos %f %f %f\n", rel_pos.X, rel_pos.Y, rel_pos.Z ));
 
-			// If he is near the wander position, or very far from it, pick a new wander pos
-			float dist = rel_pos.Length();
-			if ( dist < 0.5 || dist > 8 ) {
-				WanderTimer = FreeRandom.Get_Float( 0.4f, 1.2f );	// random pause
-				// If near the move loc, wander away, else wander back
-				Vector3	dif = WanderPos - Action->Get_Parameters().MoveLocation;
-				WanderPos = Action->Get_Parameters().MoveLocation;
-				if ( dif.Length() < 2 ) {
+				// If he is near the wander position, or very far from it, pick a new wander pos
+				float dist = rel_pos.Length();
+				if ( dist < 0.5 || dist > 8 ) {
+					WanderTimer = FreeRandom.Get_Float( 0.4f, 1.2f );	// random pause
+					// If near the move loc, wander away, else wander back
+					Vector3	dif = WanderPos - Action->Get_Parameters().MoveLocation;
+					WanderPos = Action->Get_Parameters().MoveLocation;
+					if ( dif.Length() < 2 ) {
 #if 1
-					PathfindClass *pathfind = PathfindClass::Get_Instance();		//	Lookup a safe random position to walk to
-					pathfind->Find_Random_Spot( Action->Get_Parameters().MoveLocation, 5, &WanderPos );
+						PathfindClass *pathfind = PathfindClass::Get_Instance();		//	Lookup a safe random position to walk to
+						pathfind->Find_Random_Spot( Action->Get_Parameters().MoveLocation, 5, &WanderPos );
 #else
-					float angle = FreeRandom.Get_Float( 0, DEG_TO_RADF( 360.0f ) );
-					Vector3 move( ::sinf(angle), ::cosf(angle), 0 );
+						float angle = FreeRandom.Get_Float( 0, DEG_TO_RADF( 360.0f ) );
+						Vector3 move( ::sinf(angle), ::cosf(angle), 0 );
 //					Debug_Say(( " Move to %f %f %f\n", move.X, move.Y, move.Z ));
-					WanderPos += move * FreeRandom.Get_Float( 3, 5 );
+						WanderPos += move * FreeRandom.Get_Float( 3, 5 );
 #endif
 
-					soldier->Look_At( WanderPos + Vector3( 0,0,1 ), FreeRandom.Get_Float( 0.2f, 0.6f ) );
+						soldier->Look_At( WanderPos + Vector3( 0,0,1 ), FreeRandom.Get_Float( 0.2f, 0.6f ) );
 
+					}
 				}
-			}
 
-			Human_Move_To_Relative( rel_pos );
+				Human_Move_To_Relative( rel_pos );
+			}
 		}
-#endif
+
 		*set_target = target_pos;
 		return ACTION_IN_PROGRESS;
 	}

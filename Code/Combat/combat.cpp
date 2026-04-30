@@ -72,6 +72,7 @@
 #include "saveloadstatus.h"
 #include <stdio.h>
 #include "SoundEnvironment.h"
+#include "LogicalListener.h"
 #include "weaponview.h"
 #include "hud.h"
 #include "mapmgr.h"
@@ -333,7 +334,9 @@ void	CombatManager::Pre_Load_Level( bool render_available )
 	WeaponViewClass::Init();
 
 	SmartGameObj::Set_Global_Sight_Range_Scale( 1.0f );
-//	SoundSystem::Set_Global_Listener_Scale( 1.0f );
+	LogicalListenerClass::Set_Global_Scale( 1.0f );
+	LogicalListenerClass::Set_Global_Scale_Multiplier(
+		IS_COOP_MISSION ? cGameType::Get_Coop_AI_Hearing_Multiplier() : 1.0f);
 
 	//
 	//	Map initialization (temporary -- until its more data driven)
@@ -1368,7 +1371,6 @@ void	CombatManager::Register_Star_Killer( ArmedGameObj * killer )
 		StarKillerID = 0;
 	}
 }
-
 
 
 

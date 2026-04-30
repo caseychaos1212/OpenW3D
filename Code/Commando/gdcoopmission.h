@@ -56,6 +56,24 @@ public:
 	void					Set_Enemy_Damage_Multiplier(float multiplier);
 	int					Get_Death_Score_Penalty(void) const {return DeathScorePenalty;}
 	void					Set_Death_Score_Penalty(int penalty);
+	float					Get_AI_Sight_Multiplier(void) const {return AISightMultiplier;}
+	void					Set_AI_Sight_Multiplier(float multiplier);
+	float					Get_AI_Hearing_Multiplier(void) const {return AIHearingMultiplier;}
+	void					Set_AI_Hearing_Multiplier(float multiplier);
+	float					Get_AI_Aggressiveness_Bonus(void) const {return AIAggressivenessBonus;}
+	void					Set_AI_Aggressiveness_Bonus(float bonus);
+	float					Get_AI_Take_Cover_Bonus(void) const {return AITakeCoverBonus;}
+	void					Set_AI_Take_Cover_Bonus(float bonus);
+	float					Get_AI_Share_Info_Radius(void) const {return AIShareInfoRadius;}
+	void					Set_AI_Share_Info_Radius(float radius);
+	float					Get_AI_Weapon_Error_Multiplier(void) const {return AIWeaponErrorMultiplier;}
+	void					Set_AI_Weapon_Error_Multiplier(float multiplier);
+	bool					Is_AI_Attack_Wander_Enabled(void) const {return AIEnableAttackWander;}
+	void					Set_AI_Attack_Wander_Enabled(bool enabled);
+	bool					Is_AI_Damage_Retarget_Enabled(void) const {return AIEnableDamageRetarget;}
+	void					Set_AI_Damage_Retarget_Enabled(bool enabled);
+	bool					Are_AI_Unit_Combat_Types_Enabled(void) const {return AIEnableUnitCombatTypes;}
+	void					Set_AI_Unit_Combat_Types_Enabled(bool enabled);
 
 private:
 	StringClass			Player2Preset;
@@ -67,6 +85,15 @@ private:
 	float					EnemyHealthMultiplier;
 	float					EnemyDamageMultiplier;
 	int					DeathScorePenalty;
+	float					AISightMultiplier;
+	float					AIHearingMultiplier;
+	float					AIAggressivenessBonus;
+	float					AITakeCoverBonus;
+	float					AIShareInfoRadius;
+	float					AIWeaponErrorMultiplier;
+	bool					AIEnableAttackWander;
+	bool					AIEnableDamageRetarget;
+	bool					AIEnableUnitCombatTypes;
 };
 
 #endif // GDCOOPMISSION_H

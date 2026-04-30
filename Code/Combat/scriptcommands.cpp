@@ -41,6 +41,7 @@
 #include "smartgameobj.h"
 #include "damage.h"
 #include "gameobjmanager.h"
+#include "gametype.h"
 #include "crandom.h"
 #include "scriptman.h"
 #include "objlibrary.h"
@@ -63,6 +64,7 @@
 #include "translatedb.h"
 #include "vehicle.h"
 #include "combatchunkid.h"
+#include "LogicalListener.h"
 #include "LogicalSound.h"
 #include "soldierobserver.h"
 #include "cinematicgameobj.h"
@@ -3247,11 +3249,16 @@ void	Display_Encyclopedia_Event_UI( void )
 /*
 **
 */
-void	Scale_AI_Awareness( float sight_scale, [[maybe_unused]] float hearing_scale )
+void	Scale_AI_Awareness( float sight_scale, float hearing_scale )
 {
 	SCRIPT_TRACE((	"ST>Scale_AI_Awareness ( %f %f )\n", sight_scale, hearing_scale ));
 	SmartGameObj::Set_Global_Sight_Range_Scale( sight_scale );
-//	SoundSystem::Set_Global_Listener_Scale( hearing_scale );
+	LogicalListenerClass::Set_Global_Scale( hearing_scale );
+}
+
+bool Are_Coop_AI_Unit_Combat_Types_Enabled(void)
+{
+	return IS_COOP_MISSION && cGameType::Are_Coop_AI_Unit_Combat_Types_Enabled();
 }
 
 
@@ -3665,6 +3672,7 @@ ScriptCommands* Get_Script_Commands( void )
 	EngineCommands.Enable_Letterbox					= Enable_Letterbox;
 	EngineCommands.Set_Screen_Fade_Color			= Set_Screen_Fade_Color;
 	EngineCommands.Set_Screen_Fade_Opacity			= Set_Screen_Fade_Opacity;
+	EngineCommands.Are_Coop_AI_Unit_Combat_Types_Enabled	= Are_Coop_AI_Unit_Combat_Types_Enabled;
 
 	return &EngineCommands;
 }
