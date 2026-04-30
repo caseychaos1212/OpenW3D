@@ -1413,6 +1413,7 @@ void cNetwork::Hibernation_Think(void)
 
 			VisTableClass * p_vis_table = Peek_Temp_Vis_Table();
 			WWASSERT(p_vis_table != NULL);
+			DynamicVectorClass<Vector3> player_positions;
 
 			//
 			// Build a union of all players' PVS's
@@ -1429,6 +1430,9 @@ void cNetwork::Hibernation_Think(void)
 
 					Vector3 player_pos;
 					p_soldier->Get_Position(&player_pos);
+					if (IS_COOP_MISSION) {
+						player_positions.Add(player_pos);
+					}
 					player_pos.Z += 2; // Start near the player's head
 
 					VisTableClass * p_player_pvs = COMBAT_SCENE->Get_Vis_Table(player_pos);
@@ -1462,12 +1466,26 @@ void cNetwork::Hibernation_Think(void)
 					if (p_phys_obj != NULL &&
 						(p_vis_table == NULL || p_vis_table->Get_Bit(p_phys_obj->Get_Vis_Object_ID()))) {
 
-						// Only if within 300m of the star;
+						// Only if within 300m of a relevant player.
 						#define		MIN_HIB_DISTANCE		300
 						Vector3 pos;
 						p_phys_go->Get_Position( &pos );
-						pos -= star_pos;
-						if ( pos.Length2() < MIN_HIB_DISTANCE * MIN_HIB_DISTANCE ) {
+						bool is_near_player = false;
+						if (IS_COOP_MISSION && player_positions.Count() > 0) {
+							for (int index = 0; index < player_positions.Count(); index++) {
+								Vector3 player_delta = pos;
+								player_delta -= player_positions[index];
+								if (player_delta.Length2() < MIN_HIB_DISTANCE * MIN_HIB_DISTANCE) {
+									is_near_player = true;
+									break;
+								}
+							}
+						} else {
+							pos -= star_pos;
+							is_near_player = pos.Length2() < MIN_HIB_DISTANCE * MIN_HIB_DISTANCE;
+						}
+
+						if (is_near_player) {
 							p_phys_go->Reset_Hibernating();
 						}
 					}
