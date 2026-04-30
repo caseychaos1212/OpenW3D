@@ -518,7 +518,7 @@ void	HumanStateClass::Set_State( HumanStateType state, int sub_state )
 
 	if (( State == LADDER ) || ( State == IN_VEHICLE ) ||
 		 ( State == TRANSITION ) || ( State == TRANSITION_COMPLETE ) ||
-		 ( State == DEBUG_FLY ) || ( State == SPRINT )	 ) {
+		 ( State == DEBUG_FLY )	 ) {
 		HumanPhys->Enable_User_Control( true );
 	} else {
 		HumanPhys->Enable_User_Control( false );
