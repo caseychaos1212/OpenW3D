@@ -395,10 +395,6 @@ MPLanHostBasicOptionsTabClass::On_Init_Dialog (void)
 	} else {
 		Set_Dlg_Item_Int (IDC_NUM_PLAYERS_EDIT, std::min(The_Game ()->Get_Max_Players (), NetworkObjectClass::MAX_CLIENT_COUNT-1));
 	}
-	if (The_Game ()->Is_Coop_Mission()) {
-		Set_Dlg_Item_Int (IDC_NUM_PLAYERS_EDIT, 2);
-		Enable_Dlg_Item (IDC_NUM_PLAYERS_EDIT, false);
-	}
 
 	//
 	//	Configure the IP NIC Enumeration combobox
@@ -541,11 +537,11 @@ MPLanHostBasicOptionsTabClass::On_Apply (void)
 	The_Game ()->Set_Game_Title (Get_Dlg_Item_Text (IDC_GAME_NAME_EDIT));
 	The_Game ()->Set_Password (password);
 	// Has to be -1 since we use the last client as a reference for refreshing dirty bits.
+	int max_players = std::min(Get_Dlg_Item_Int (IDC_NUM_PLAYERS_EDIT), NetworkObjectClass::MAX_CLIENT_COUNT - 1);
 	if (The_Game ()->Is_Coop_Mission()) {
-		The_Game ()->Set_Max_Players (2);
-	} else {
-		The_Game ()->Set_Max_Players (std::min(Get_Dlg_Item_Int (IDC_NUM_PLAYERS_EDIT), NetworkObjectClass::MAX_CLIENT_COUNT - 1));
+		max_players = std::max(max_players, The_Game ()->Get_Min_Players());
 	}
+	The_Game ()->Set_Max_Players (max_players);
 
 	// Quickmatch games can not have passwords
 	if (The_Game()->IsPassworded.Is_True()) {
@@ -628,14 +624,15 @@ MPLanHostBasicOptionsTabClass::On_EditCtrl_Change (EditCtrlClass *edit, int ctrl
 	} else if (ctrlID == IDC_NUM_PLAYERS_EDIT) {
 
 		int max_players = std::min(BandTestMaxPlayers, NetworkObjectClass::MAX_CLIENT_COUNT-1);
+		int min_players = The_Game ()->Is_Coop_Mission() ? The_Game ()->Get_Min_Players() : 0;
 
 		//
 		//	Check to ensure the player count is within bounds...
 		//
 		int player_count = Get_Dlg_Item_Int (IDC_NUM_PLAYERS_EDIT);
-		if (player_count < 0 || player_count > NetworkObjectClass::MAX_CLIENT_COUNT-1) {
+		if (player_count < min_players || player_count > NetworkObjectClass::MAX_CLIENT_COUNT-1) {
 			player_count = std::min (player_count, NetworkObjectClass::MAX_CLIENT_COUNT-1);
-			player_count = std::max (player_count, 0);
+			player_count = std::max (player_count, min_players);
 			Set_Dlg_Item_Int (IDC_NUM_PLAYERS_EDIT, player_count);
 		}
 		bool wol_game = GameModeManager::Find("WOL")->Is_Active();
@@ -1858,7 +1855,6 @@ MPLanHostCoopOptionsTabClass::On_Apply (void)
 	The_Game ()->CanRepairBuildings.Set (false);
 	The_Game ()->DriverIsAlwaysGunner.Set (false);
 	The_Game ()->SpawnWeapons.Set (true);
-	The_Game ()->Set_Max_Players (2);
 
 	ComboBoxCtrlClass *radar_combobox = (ComboBoxCtrlClass *)Get_Dlg_Item (IDC_RADAR_MODE_COMBO);
 	if (radar_combobox != NULL) {

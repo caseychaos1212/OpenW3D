@@ -291,7 +291,6 @@ cGameSpyAdmin::Host_Coop_Direct_Game
 		PTheGameData->Set_Port(CoopDirectHostPort);
 	}
 
-	PTheGameData->Set_Max_Players(2);
 	PTheGameData->Set_QuickMatch_Server(false);
 
 	GameInitMgrClass::Set_Is_Client_Required(PTheGameData->IsDedicated.Is_False());

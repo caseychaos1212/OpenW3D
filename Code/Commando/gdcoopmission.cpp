@@ -14,11 +14,27 @@
 #include "combat.h"
 #include "gametype.h"
 #include "ini.h"
+#include "networkobject.h"
 #include "playertype.h"
 #include "wwpacket.h"
 #include "wwdebug.h"
 
 static const char *DEFAULT_COOP_PLAYER2_PRESET = "GDI_Logan_Sheppard_Tutorial";
+static const int DEFAULT_COOP_MAX_PLAYERS = 4;
+
+//-----------------------------------------------------------------------------
+static int Clamp_Coop_Max_Players(int max_players)
+{
+	const int max_network_players = NetworkObjectClass::MAX_CLIENT_COUNT - 1;
+	if (max_players < 1) {
+		return 1;
+	}
+	if (max_players > max_network_players) {
+		return max_network_players;
+	}
+
+	return max_players;
+}
 
 //-----------------------------------------------------------------------------
 cGameDataCoopMission::cGameDataCoopMission(void) :
@@ -31,7 +47,7 @@ cGameDataCoopMission::cGameDataCoopMission(void) :
 	Set_Ini_Filename("svrcfg_coop.ini");
 	Set_Ip_And_Port();
 	Set_Game_Title(U_CHAR("Co-op Campaign"));
-	Set_Max_Players(2);
+	Set_Max_Players(DEFAULT_COOP_MAX_PLAYERS);
 	Set_Intermission_Time_Seconds(0);
 	Set_Time_Limit_Minutes(0);
 	Set_Map_Name("M01.mix");
@@ -92,6 +108,9 @@ void cGameDataCoopMission::Load_From_Server_Config(void)
 	INIClass * p_ini = Get_INI(Get_Ini_Filename());
 	WWASSERT(p_ini != NULL);
 
+	int max_players = p_ini->Get_Int(INI_SECTION_NAME, "MaxPlayers", Get_Max_Players());
+	Set_Max_Players(Clamp_Coop_Max_Players(max_players));
+
 	int difficulty = p_ini->Get_Int(INI_SECTION_NAME, "Difficulty", DifficultyLevel);
 	Set_Difficulty_Level(difficulty);
 
@@ -110,7 +129,6 @@ void cGameDataCoopMission::Load_From_Server_Config(void)
 	bool maps_loop = p_ini->Get_Bool(INI_SECTION_NAME, "DoMapsLoop", false);
 	Set_Do_Maps_Loop(maps_loop);
 
-	Set_Max_Players(2);
 	IsTeamChangingAllowed.Set(false);
 	RemixTeams.Set(false);
 	IsClanGame.Set(false);
@@ -128,7 +146,7 @@ void cGameDataCoopMission::Save_To_Server_Config(void)
 	INIClass * p_ini = Get_INI(Get_Ini_Filename());
 	WWASSERT(p_ini != NULL);
 
-	p_ini->Put_Int(INI_SECTION_NAME, "MaxPlayers", 2);
+	p_ini->Put_Int(INI_SECTION_NAME, "MaxPlayers", Get_Max_Players());
 	p_ini->Put_Int(INI_SECTION_NAME, "Difficulty", DifficultyLevel);
 	p_ini->Put_String(INI_SECTION_NAME, "CoopPlayer2Preset", Player2Preset.Is_Empty() ? "" : Player2Preset.Peek_Buffer());
 	p_ini->Put_Bool(INI_SECTION_NAME, "IsFriendlyFirePermitted", IsFriendlyFirePermitted.Get());

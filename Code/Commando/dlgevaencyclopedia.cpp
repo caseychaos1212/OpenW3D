@@ -155,20 +155,10 @@ EVAEncyclopediaMenuClass::On_Init_Dialog (void)
 		GameModeManager::Find("Combat") != NULL &&
 		GameModeManager::Find("Combat")->Is_Active();
 
-	bool can_respawn_now = false;
-	if (is_coop_respawn_enabled) {
-		SoldierGameObj *soldier = GameObjManager::Find_Soldier_Of_Client_ID(cNetwork::Get_My_Id());
-		can_respawn_now =
-			soldier == NULL ||
-			soldier->Is_Delete_Pending() ||
-			soldier->Is_Dead() ||
-			(soldier->Get_Defense_Object() != NULL && soldier->Get_Defense_Object()->Get_Health() <= 0.0f);
-	}
-
 	Set_Dlg_Item_Text(
 		IDC_OPTIONS_MULTIPLAY_SUICIDE,
 		is_coop_respawn_enabled ? U_CHAR("Respawn") : TRANSLATE(IDS_MENU_TEXT874));
-	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_SUICIDE)->Enable(is_coop_respawn_enabled ? can_respawn_now : is_suicide_enabled);
+	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_SUICIDE)->Enable(is_coop_respawn_enabled || is_suicide_enabled);
 	Get_Dlg_Item(IDC_OPTIONS_MULTIPLAY_SUICIDE)->Show(is_suicide_enabled || is_coop_respawn_enabled);
 
 

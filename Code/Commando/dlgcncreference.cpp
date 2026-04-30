@@ -378,18 +378,8 @@ CnCReferenceMenuClass::On_Frame_Update (void)
 		//GameModeManager::Find("Combat") != NULL &&
 		//GameModeManager::Find("Combat")->Is_Active();
 
-	bool can_respawn_now = false;
-	if (is_coop_respawn_enabled) {
-		SoldierGameObj *soldier = GameObjManager::Find_Soldier_Of_Client_ID(cNetwork::Get_My_Id());
-		can_respawn_now =
-			soldier == NULL ||
-			soldier->Is_Delete_Pending() ||
-			soldier->Is_Dead() ||
-			(soldier->Get_Defense_Object() != NULL && soldier->Get_Defense_Object()->Get_Health() <= 0.0f);
-	}
-
 	bool can_suicide_now = is_coop_respawn_enabled ?
-		can_respawn_now :
+		true :
 		(time_now_ms - LastSuicideTimeMs >= ACTION_TIMEOUT_MS);
 
 	Set_Dlg_Item_Text(

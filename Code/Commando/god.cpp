@@ -34,6 +34,7 @@
 #include "coopdebuglog.h"
 #include "coopinventory.h"
 #include "coopcameraevent.h"
+#include "crandom.h"
 #include "playertype.h"
 #include "objlibrary.h"
 #include "definitionmgr.h"
@@ -83,9 +84,17 @@ struct CoopCharacterPresetSelection
 	StringClass PresetName;
 };
 
-static const int MAX_COOP_CHARACTER_PRESET_SELECTIONS = 8;
+static const int MAX_COOP_CHARACTER_PRESET_SELECTIONS = MAX_PLAYERS;
 static CoopCharacterPresetSelection CoopCharacterPresetSelections[MAX_COOP_CHARACTER_PRESET_SELECTIONS];
 static int CoopCharacterPresetSelectionCount = 0;
+
+static const char * COOP_GENERIC_GDI_PRESETS[] = {
+	"GDI_MiniGunner_0",
+	"GDI_MiniGunner_1Off",
+	"GDI_Grenadier_0",
+	"GDI_RocketSoldier_0",
+	"GDI_Engineer_0"
+};
 
 //-----------------------------------------------------------------------------
 static cPlayer * Get_First_Active_In_Game_Player(void)
@@ -107,14 +116,39 @@ static cPlayer * Get_First_Active_In_Game_Player(void)
 }
 
 //-----------------------------------------------------------------------------
+static int Get_Coop_Player_Index(int client_id)
+{
+	int player_index = 0;
+	for (
+		SLNode<cPlayer> * objnode = cPlayerManager::Get_Player_Object_List()->Head();
+		objnode;
+		objnode = objnode->Next()) {
+
+		cPlayer * p_player = objnode->Data();
+		if (p_player == NULL ||
+			 p_player->Get_Is_Active().Is_False() ||
+			 p_player->Get_Is_In_Game().Is_False()) {
+			continue;
+		}
+
+		if (p_player->Get_Id() == client_id) {
+			return player_index;
+		}
+
+		player_index++;
+	}
+
+	return -1;
+}
+
+//-----------------------------------------------------------------------------
 static bool Is_Coop_Secondary_Player(int client_id)
 {
 	if (!IS_COOP_MISSION) {
 		return false;
 	}
 
-	cPlayer * first_player = Get_First_Active_In_Game_Player();
-	return first_player != NULL && first_player->Get_Id() != client_id;
+	return Get_Coop_Player_Index(client_id) > 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -407,6 +441,59 @@ static bool Is_Valid_Coop_Character_Preset(const StringClass & preset_name)
 	return DefinitionMgrClass::Find_Typed_Definition(
 		preset_name.Peek_Buffer(),
 		CLASSID_GAME_OBJECT_DEF_SOLDIER) != NULL;
+}
+
+//-----------------------------------------------------------------------------
+static bool Choose_Random_Generic_GDI_Preset(StringClass & preset_name)
+{
+	const int count = sizeof(COOP_GENERIC_GDI_PRESETS) / sizeof(COOP_GENERIC_GDI_PRESETS[0]);
+	const int start = FreeRandom.Get_Int(count);
+
+	for (int offset = 0; offset < count; offset++) {
+		const char * candidate = COOP_GENERIC_GDI_PRESETS[(start + offset) % count];
+		StringClass candidate_name(candidate, true);
+		if (Is_Valid_Coop_Character_Preset(candidate_name)) {
+			preset_name = candidate_name;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+static bool Get_Default_Coop_Character_Preset(int client_id, StringClass & preset_name)
+{
+	if (!IS_COOP_MISSION) {
+		return false;
+	}
+
+	const int player_index = Get_Coop_Player_Index(client_id);
+	if (player_index < 1) {
+		return false;
+	}
+
+	if (player_index == 1) {
+		cGameDataCoopMission * coop_game = The_Game()->As_Coop_Mission();
+		WWASSERT(coop_game != NULL);
+
+		const StringClass & player2_preset = coop_game->Get_Player2_Preset();
+		if (!player2_preset.Is_Empty()) {
+			preset_name = player2_preset;
+			return true;
+		}
+
+		return false;
+	}
+
+	if (Choose_Random_Generic_GDI_Preset(preset_name)) {
+		Store_Coop_Character_Preset(client_id, preset_name);
+		CoopDebugLog::Log("cGod::Create_Commando default generic GDI character client_id=%d preset=%s",
+			client_id, preset_name.Peek_Buffer());
+		return true;
+	}
+
+	return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -721,16 +808,8 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
 			if (Get_Coop_Character_Preset(client_id, coop_model_preset)) {
 				CoopDebugLog::Log("cGod::Create_Commando character selection client_id=%d preset=%s",
 					client_id, coop_model_preset.Peek_Buffer());
-			} else if (Is_Coop_Secondary_Player(client_id)) {
-				cGameDataCoopMission * coop_game = The_Game()->As_Coop_Mission();
-				WWASSERT(coop_game != NULL);
-
-				const StringClass & player2_preset = coop_game->Get_Player2_Preset();
-				if (!player2_preset.Is_Empty()) {
-					coop_model_preset = player2_preset;
-				} else {
-					Debug_Say(("Co-op player 2 preset is not configured; falling back to %s\n", primary_mission_preset.Peek_Buffer()));
-				}
+			} else if (!Get_Default_Coop_Character_Preset(client_id, coop_model_preset) && Is_Coop_Secondary_Player(client_id)) {
+				Debug_Say(("Co-op secondary player preset is not configured; falling back to %s\n", primary_mission_preset.Peek_Buffer()));
 			}
 		}
 
@@ -909,25 +988,10 @@ bool cGod::Can_Coop_Respawn_Player(int client_id)
 	}
 
 	cPlayer *player = cPlayerManager::Find_Player(client_id);
-	if (player == NULL || !player->Is_Active()) {
+	if (player == NULL || !player->Is_Active() || player->Get_Is_In_Game().Is_False()) {
 		return false;
 	}
-
-	SoldierGameObj *soldier = GameObjManager::Find_Soldier_Of_Client_ID(client_id);
-	if (soldier == NULL || soldier->Is_Delete_Pending()) {
-		return true;
-	}
-
-	if (soldier->Is_Dead()) {
-		return true;
-	}
-
-	if (soldier->Get_Defense_Object() != NULL &&
-		 soldier->Get_Defense_Object()->Get_Health() <= 0.0f) {
-		return true;
-	}
-
-	return false;
+	return true;
 }
 
 //-----------------------------------------------------------------------------
