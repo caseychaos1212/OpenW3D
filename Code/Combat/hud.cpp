@@ -67,9 +67,21 @@
 #include "gametype.h"
 #include "gameobjmanager.h"
 #include "stylemgr.h"
-#include "playermanager.h"
 
 #define INVALID_HUD_WEAPON ((WeaponClass *)(uintptr_t)-1)
+
+static HUDClass::PlayerNameLookupCallback PlayerNameLookup = NULL;
+static HUDClass::CoopScoreListCallback CoopScoreListLookup = NULL;
+
+void HUDClass::Set_Player_Name_Lookup_Callback(PlayerNameLookupCallback callback)
+{
+	PlayerNameLookup = callback;
+}
+
+void HUDClass::Set_Coop_Score_List_Callback(CoopScoreListCallback callback)
+{
+	CoopScoreListLookup = callback;
+}
 
 
 static void Generate_WChar_Text_From_Number(unichar_t* text,int digits,int min_digits,int value)
@@ -1471,10 +1483,10 @@ static	bool	Target_Get_Display_Name( DamageableGameObj * obj, BuildingGameObj * 
 	}
 
 	SmartGameObj * smart_obj = obj->As_SmartGameObj();
-	if ( smart_obj != NULL && smart_obj->Get_Control_Owner() > 0 ) {
-		cPlayer * player = cPlayerManager::Find_Player( smart_obj->Get_Control_Owner() );
-		if ( player != NULL && !player->Get_Name().Is_Empty() ) {
-			name = player->Get_Name();
+	if ( smart_obj != NULL && smart_obj->Get_Control_Owner() > 0 && PlayerNameLookup != NULL ) {
+		WideStringClass player_name;
+		if ( PlayerNameLookup( smart_obj->Get_Control_Owner(), player_name ) && !player_name.Is_Empty() ) {
+			name = player_name;
 			return true;
 		}
 	}
@@ -1874,10 +1886,10 @@ static void	Target_Box_Edge( const Vector2 & a, const Vector2 & b, unsigned int 
 */
 Render2DTextClass * ScoreRenderer;
 
-static	int	Coop_Score_Player_Compare( const void * elem1, const void * elem2 )
+static	int	Coop_Score_Entry_Compare( const void * elem1, const void * elem2 )
 {
-	cPlayer * player1 = *((cPlayer **)elem1);
-	cPlayer * player2 = *((cPlayer **)elem2);
+	const HUDCoopScoreEntry * player1 = (const HUDCoopScoreEntry *)elem1;
+	const HUDCoopScoreEntry * player2 = (const HUDCoopScoreEntry *)elem2;
 
 	if (player1 == NULL && player2 == NULL) {
 		return 0;
@@ -1889,19 +1901,19 @@ static	int	Coop_Score_Player_Compare( const void * elem1, const void * elem2 )
 		return -1;
 	}
 
-	if (player1->Get_Score() > player2->Get_Score()) {
+	if (player1->Score > player2->Score) {
 		return -1;
 	}
-	if (player1->Get_Score() < player2->Get_Score()) {
+	if (player1->Score < player2->Score) {
 		return 1;
 	}
 
-	int name_compare = player1->Get_Name().Compare_No_Case(player2->Get_Name());
+	int name_compare = player1->Name.Compare_No_Case(player2->Name);
 	if (name_compare != 0) {
 		return name_compare;
 	}
 
-	return player1->Get_Id() - player2->Get_Id();
+	return player1->PlayerId - player2->PlayerId;
 }
 
 static	void	Score_Init( void )
@@ -1931,15 +1943,16 @@ static	void	Score_Update( void )
 		return;
 	}
 
-	cPlayer * players[MAX_PLAYERS];
+	static const int MAX_COOP_SCORE_PLAYERS = 255;
+	HUDCoopScoreEntry players[MAX_COOP_SCORE_PLAYERS];
 	int player_count = 0;
-	SList<cPlayer> * player_list = cPlayerManager::Get_Player_Object_List();
-	if (player_list != NULL) {
-		for (SLNode<cPlayer> * player_node = player_list->Head(); player_node != NULL; player_node = player_node->Next()) {
-			cPlayer * player = player_node->Data();
-			if (player != NULL && player->Is_Active() && player_count < MAX_PLAYERS) {
-				players[player_count++] = player;
-			}
+	if (CoopScoreListLookup != NULL) {
+		player_count = CoopScoreListLookup(players, MAX_COOP_SCORE_PLAYERS);
+		if (player_count < 0) {
+			player_count = 0;
+		}
+		if (player_count > MAX_COOP_SCORE_PLAYERS) {
+			player_count = MAX_COOP_SCORE_PLAYERS;
 		}
 	}
 
@@ -1955,19 +1968,19 @@ static	void	Score_Update( void )
 		return;
 	}
 
-	qsort(players, player_count, sizeof(cPlayer *), Coop_Score_Player_Compare);
+	qsort(players, player_count, sizeof(HUDCoopScoreEntry), Coop_Score_Entry_Compare);
 
 	WideStringClass score_string;
 	score_string = U_CHAR("Scores\n");
 	for (int index = 0; index < player_count; index++) {
-		cPlayer * player = players[index];
-		WideStringClass display_name(player->Get_Name(), true);
+		HUDCoopScoreEntry * player = &players[index];
+		WideStringClass display_name(player->Name, true);
 		if (display_name.Is_Empty()) {
-			display_name.Format(U_CHAR("Player %d"), player->Get_Id());
+			display_name.Format(U_CHAR("Player %d"), player->PlayerId);
 		}
 
 		WideStringClass row;
-		row.Format(U_CHAR("%d. %-14s %d\n"), index + 1, display_name.Peek_Buffer(), (int)player->Get_Score());
+		row.Format(U_CHAR("%d. %-14s %d\n"), index + 1, display_name.Peek_Buffer(), (int)player->Score);
 		score_string += row;
 	}
 

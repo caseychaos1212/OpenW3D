@@ -156,6 +156,7 @@ DialogTextClass::Create_Text_Renderer (void)
 			//
 			//	Render the title text using a glow
 			//
+			GlowRenderer.Build_Sentence (Title);
 			GlowRenderer.Reset_Polys ();
 			StyleMgrClass::Render_Glow (Title, &GlowRenderer, Rect, 5, 5, RGB_TO_INT32 (14, 0, 0), StyleMgrClass::CENTER_JUSTIFY);
 			StyleMgrClass::Render_Text (Title, &TextRenderer, RGB_TO_INT32 (255, 255, 36), 0, Rect, false, false, StyleMgrClass::CENTER_JUSTIFY, true);

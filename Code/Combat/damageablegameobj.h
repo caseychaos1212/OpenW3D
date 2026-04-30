@@ -147,12 +147,13 @@ public:
 	virtual	void								Export_Occasional( BitStreamClass &packet ) override;
 
 protected:
+	void					Apply_Coop_Enemy_Health_Multiplier(void);
 
 	DefenseObjectClass	DefenseObject;
 
 	int					PlayerType;
 	bool					IsHealthBarDisplayed;
+	float					CoopEnemyHealthMultiplierApplied;
 };
 
 #endif	//	DAMAGEABLEGAMEOBJ_H
-

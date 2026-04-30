@@ -37,6 +37,7 @@
 #include "dlgmplanhostoptions.h"
 #include "renegadedialog.h"
 #include "tabctrl.h"
+#include "dialogcontrol.h"
 #include "gamedata.h"
 #include "netutil.h"
 #include "listctrl.h"
@@ -1778,6 +1779,67 @@ MPLanHostVictoryOptionsTabClass::On_Command (int ctrl_id, int message_id, unsign
 //
 ////////////////////////////////////////////////////////////////
 
+static int Coop_Percent_From_Float(float value)
+{
+	if (value >= 0.0f) {
+		return (int)(value * 100.0f + 0.5f);
+	}
+
+	return (int)(value * 100.0f - 0.5f);
+}
+
+static float Coop_Float_From_Percent(int percent)
+{
+	return (float)percent / 100.0f;
+}
+
+static void Show_Coop_Option_Control(DialogBaseClass *dialog, int id, bool show, bool enable)
+{
+	DialogControlClass *control = dialog->Get_Dlg_Item(id);
+	if (control != NULL) {
+		control->Show(show);
+		control->Enable(enable);
+		control->Set_Dirty();
+	}
+}
+
+static void Show_Coop_Option_Controls(DialogBaseClass *dialog, bool show, bool enable)
+{
+	static const int coop_option_controls[] = {
+		IDC_COOP_ENABLE_SPRINT_CHECK,
+		IDC_COOP_DISABLE_HEALTH_PICKUPS_CHECK,
+		IDC_COOP_DISABLE_ARMOR_PICKUPS_CHECK,
+		IDC_COOP_DISABLE_AMMO_PICKUPS_CHECK,
+		IDC_COOP_ENEMY_HEALTH_STATIC,
+		IDC_COOP_ENEMY_HEALTH_EDIT,
+		IDC_COOP_ENEMY_DAMAGE_STATIC,
+		IDC_COOP_ENEMY_DAMAGE_EDIT,
+		IDC_COOP_DEATH_PENALTY_STATIC,
+		IDC_COOP_DEATH_PENALTY_EDIT,
+		IDC_COOP_AI_SIGHT_STATIC,
+		IDC_COOP_AI_SIGHT_EDIT,
+		IDC_COOP_AI_HEARING_STATIC,
+		IDC_COOP_AI_HEARING_EDIT,
+		IDC_COOP_AI_AGGRESSION_STATIC,
+		IDC_COOP_AI_AGGRESSION_EDIT,
+		IDC_COOP_AI_COVER_STATIC,
+		IDC_COOP_AI_COVER_EDIT,
+		IDC_COOP_AI_SHARE_STATIC,
+		IDC_COOP_AI_SHARE_EDIT,
+		IDC_COOP_AI_AIM_ERROR_STATIC,
+		IDC_COOP_AI_AIM_ERROR_EDIT,
+		IDC_COOP_AI_DAMAGE_LOCK_STATIC,
+		IDC_COOP_AI_DAMAGE_LOCK_EDIT,
+		IDC_COOP_AI_ATTACK_WANDER_CHECK,
+		IDC_COOP_AI_DAMAGE_RETARGET_CHECK,
+		IDC_COOP_AI_UNIT_COMBAT_TYPES_CHECK,
+	};
+
+	for (int index = 0; index < (int)(sizeof(coop_option_controls) / sizeof(coop_option_controls[0])); index++) {
+		Show_Coop_Option_Control(dialog, coop_option_controls[index], show, enable);
+	}
+}
+
 ////////////////////////////////////////////////////////////////
 //
 //	On_Init_Dialog
@@ -1810,6 +1872,8 @@ MPLanHostCoopOptionsTabClass::On_Init_Dialog (void)
 		difficulty_combo->Set_Curr_Sel(std::min(std::max(difficulty, 0), 2));
 	}
 
+	Show_Coop_Option_Controls(this, true, true);
+
 	Check_Dlg_Button (IDC_ALLIED_FIRE_CHECK, The_Game ()->IsFriendlyFirePermitted.Is_True ());
 	Enable_Dlg_Item (IDC_ALLIED_FIRE_CHECK, true);
 	Check_Dlg_Button (IDC_COOP_ENABLE_SPRINT_CHECK, game_data->Is_Sprint_Enabled ());
@@ -1819,6 +1883,9 @@ MPLanHostCoopOptionsTabClass::On_Init_Dialog (void)
 	Check_Dlg_Button (IDC_COOP_DISABLE_HEALTH_PICKUPS_CHECK, game_data->Are_Health_Pickups_Disabled ());
 	Check_Dlg_Button (IDC_COOP_DISABLE_ARMOR_PICKUPS_CHECK, game_data->Are_Armor_Pickups_Disabled ());
 	Check_Dlg_Button (IDC_COOP_DISABLE_AMMO_PICKUPS_CHECK, game_data->Are_Ammo_Pickups_Disabled ());
+	Check_Dlg_Button (IDC_COOP_AI_ATTACK_WANDER_CHECK, game_data->Is_AI_Attack_Wander_Enabled ());
+	Check_Dlg_Button (IDC_COOP_AI_DAMAGE_RETARGET_CHECK, game_data->Is_AI_Damage_Retarget_Enabled ());
+	Check_Dlg_Button (IDC_COOP_AI_UNIT_COMBAT_TYPES_CHECK, game_data->Are_AI_Unit_Combat_Types_Enabled ());
 	Enable_Dlg_Item (IDC_COOP_DISABLE_HEALTH_PICKUPS_CHECK, true);
 	Enable_Dlg_Item (IDC_COOP_DISABLE_ARMOR_PICKUPS_CHECK, true);
 	Enable_Dlg_Item (IDC_COOP_DISABLE_AMMO_PICKUPS_CHECK, true);
@@ -1835,9 +1902,16 @@ MPLanHostCoopOptionsTabClass::On_Init_Dialog (void)
 	Get_Dlg_Item (IDC_COOP_ENEMY_DAMAGE_EDIT)->Show (true);
 	Get_Dlg_Item (IDC_COOP_DEATH_PENALTY_STATIC)->Show (true);
 	Get_Dlg_Item (IDC_COOP_DEATH_PENALTY_EDIT)->Show (true);
-	Set_Dlg_Item_Int (IDC_COOP_ENEMY_HEALTH_EDIT, (int)(game_data->Get_Enemy_Health_Multiplier () * 100.0f + 0.5f));
-	Set_Dlg_Item_Int (IDC_COOP_ENEMY_DAMAGE_EDIT, (int)(game_data->Get_Enemy_Damage_Multiplier () * 100.0f + 0.5f));
+	Set_Dlg_Item_Int (IDC_COOP_ENEMY_HEALTH_EDIT, Coop_Percent_From_Float(game_data->Get_Enemy_Health_Multiplier ()));
+	Set_Dlg_Item_Int (IDC_COOP_ENEMY_DAMAGE_EDIT, Coop_Percent_From_Float(game_data->Get_Enemy_Damage_Multiplier ()));
 	Set_Dlg_Item_Int (IDC_COOP_DEATH_PENALTY_EDIT, game_data->Get_Death_Score_Penalty ());
+	Set_Dlg_Item_Int (IDC_COOP_AI_SIGHT_EDIT, Coop_Percent_From_Float(game_data->Get_AI_Sight_Multiplier ()));
+	Set_Dlg_Item_Int (IDC_COOP_AI_HEARING_EDIT, Coop_Percent_From_Float(game_data->Get_AI_Hearing_Multiplier ()));
+	Set_Dlg_Item_Int (IDC_COOP_AI_AGGRESSION_EDIT, Coop_Percent_From_Float(game_data->Get_AI_Aggressiveness_Bonus ()));
+	Set_Dlg_Item_Int (IDC_COOP_AI_COVER_EDIT, Coop_Percent_From_Float(game_data->Get_AI_Take_Cover_Bonus ()));
+	Set_Dlg_Item_Int (IDC_COOP_AI_SHARE_EDIT, (int)(game_data->Get_AI_Share_Info_Radius () + 0.5f));
+	Set_Dlg_Item_Int (IDC_COOP_AI_AIM_ERROR_EDIT, Coop_Percent_From_Float(game_data->Get_AI_Weapon_Error_Multiplier ()));
+	Set_Dlg_Item_Int (IDC_COOP_AI_DAMAGE_LOCK_EDIT, Coop_Percent_From_Float(game_data->Get_AI_Special_Damage_State_Lock_Chance ()));
 
 	Check_Dlg_Button (IDC_CAN_REPAIR_BUILDINGS_CHECK, false);
 	Check_Dlg_Button (IDC_DRIVER_IS_ALWAYS_GUNNER_CHECK, false);
@@ -1883,9 +1957,19 @@ MPLanHostCoopOptionsTabClass::On_Apply (void)
 	game_data->Set_Health_Pickups_Disabled (Is_Dlg_Button_Checked (IDC_COOP_DISABLE_HEALTH_PICKUPS_CHECK));
 	game_data->Set_Armor_Pickups_Disabled (Is_Dlg_Button_Checked (IDC_COOP_DISABLE_ARMOR_PICKUPS_CHECK));
 	game_data->Set_Ammo_Pickups_Disabled (Is_Dlg_Button_Checked (IDC_COOP_DISABLE_AMMO_PICKUPS_CHECK));
-	game_data->Set_Enemy_Health_Multiplier ((float)Get_Dlg_Item_Int (IDC_COOP_ENEMY_HEALTH_EDIT) / 100.0f);
-	game_data->Set_Enemy_Damage_Multiplier ((float)Get_Dlg_Item_Int (IDC_COOP_ENEMY_DAMAGE_EDIT) / 100.0f);
+	game_data->Set_Enemy_Health_Multiplier (Coop_Float_From_Percent(Get_Dlg_Item_Int (IDC_COOP_ENEMY_HEALTH_EDIT)));
+	game_data->Set_Enemy_Damage_Multiplier (Coop_Float_From_Percent(Get_Dlg_Item_Int (IDC_COOP_ENEMY_DAMAGE_EDIT)));
 	game_data->Set_Death_Score_Penalty (Get_Dlg_Item_Int (IDC_COOP_DEATH_PENALTY_EDIT));
+	game_data->Set_AI_Sight_Multiplier (Coop_Float_From_Percent(Get_Dlg_Item_Int (IDC_COOP_AI_SIGHT_EDIT)));
+	game_data->Set_AI_Hearing_Multiplier (Coop_Float_From_Percent(Get_Dlg_Item_Int (IDC_COOP_AI_HEARING_EDIT)));
+	game_data->Set_AI_Aggressiveness_Bonus (Coop_Float_From_Percent(Get_Dlg_Item_Int (IDC_COOP_AI_AGGRESSION_EDIT)));
+	game_data->Set_AI_Take_Cover_Bonus (Coop_Float_From_Percent(Get_Dlg_Item_Int (IDC_COOP_AI_COVER_EDIT)));
+	game_data->Set_AI_Share_Info_Radius ((float)Get_Dlg_Item_Int (IDC_COOP_AI_SHARE_EDIT));
+	game_data->Set_AI_Weapon_Error_Multiplier (Coop_Float_From_Percent(Get_Dlg_Item_Int (IDC_COOP_AI_AIM_ERROR_EDIT)));
+	game_data->Set_AI_Special_Damage_State_Lock_Chance (Coop_Float_From_Percent(Get_Dlg_Item_Int (IDC_COOP_AI_DAMAGE_LOCK_EDIT)));
+	game_data->Set_AI_Attack_Wander_Enabled (Is_Dlg_Button_Checked (IDC_COOP_AI_ATTACK_WANDER_CHECK));
+	game_data->Set_AI_Damage_Retarget_Enabled (Is_Dlg_Button_Checked (IDC_COOP_AI_DAMAGE_RETARGET_CHECK));
+	game_data->Set_AI_Unit_Combat_Types_Enabled (Is_Dlg_Button_Checked (IDC_COOP_AI_UNIT_COMBAT_TYPES_CHECK));
 	The_Game ()->CanRepairBuildings.Set (false);
 	The_Game ()->DriverIsAlwaysGunner.Set (false);
 	The_Game ()->SpawnWeapons.Set (true);
@@ -1928,6 +2012,7 @@ MPLanHostCnCOptionsTabClass::On_Init_Dialog (void)
 		difficulty_combo->Show(false);
 		difficulty_combo->Enable(false);
 	}
+	Show_Coop_Option_Controls(this, false, false);
 
 	Set_Dlg_Item_Int (IDC_STARTING_CREDITS_EDIT,	game_data->Get_Starting_Credits ());
 

@@ -64,6 +64,7 @@
 #include "ConsoleMode.h"
 #include "gamespyadmin.h"
 #include "demosupport.h"
+#include "hud.h"
 
 //
 // Class statics
@@ -76,6 +77,47 @@ const float					cPlayerManager::Y_INCREMENT_FACTOR		= 1.2f;
 int							cPlayerManager::XPos							= 0;
 int							cPlayerManager::YPos							= 0;
 Notifier<PlayerMgrEvent> cPlayerManager::mNotifier;
+
+static bool Player_Manager_Get_Player_Name(int player_id, WideStringClass &name)
+{
+	cPlayer *player = cPlayerManager::Find_Player(player_id);
+	if (player == NULL) {
+		name = U_CHAR("");
+		return false;
+	}
+
+	name = player->Get_Name();
+	return !name.Is_Empty();
+}
+
+static int Player_Manager_Get_Coop_Score_List(HUDCoopScoreEntry *entries, int max_entries)
+{
+	if (entries == NULL || max_entries <= 0) {
+		return 0;
+	}
+
+	int count = 0;
+	SList<cPlayer> *player_list = cPlayerManager::Get_Player_Object_List();
+	if (player_list == NULL) {
+		return 0;
+	}
+
+	for (SLNode<cPlayer> *player_node = player_list->Head();
+		player_node != NULL && count < max_entries;
+		player_node = player_node->Next()) {
+		cPlayer *player = player_node->Data();
+		if (player == NULL || !player->Is_Active()) {
+			continue;
+		}
+
+		entries[count].PlayerId = player->Get_Id();
+		entries[count].Score = player->Get_Score();
+		entries[count].Name = player->Get_Name();
+		count++;
+	}
+
+	return count;
+}
 
 //------------------------------------------------------------------------------------
 void cPlayerManager::Onetime_Init(void)
@@ -95,12 +137,16 @@ void cPlayerManager::Onetime_Init(void)
 		PTextRenderer->Set_Coordinate_Range(Render2DClass::Get_Screen_Resolution());
 	}
    ZeroMemory(Player_Array, sizeof(Player_Array));
+	HUDClass::Set_Player_Name_Lookup_Callback(Player_Manager_Get_Player_Name);
+	HUDClass::Set_Coop_Score_List_Callback(Player_Manager_Get_Coop_Score_List);
 }
 
 //------------------------------------------------------------------------------------
 void cPlayerManager::Onetime_Shutdown(void)
 {
 	WWDEBUG_SAY(("cPlayerManager::Onetime_Shutdown\n"));
+	HUDClass::Set_Player_Name_Lookup_Callback(NULL);
+	HUDClass::Set_Coop_Score_List_Callback(NULL);
 
 	if (!ConsoleBox.Is_Exclusive()) {
 		WWASSERT(PTextRenderer != NULL);
@@ -1514,6 +1560,5 @@ bool cPlayerManager::Load(ChunkLoadClass &cload)
 }
 
 //-----------------------------------------------------------------------------
-
 
 

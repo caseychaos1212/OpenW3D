@@ -41,11 +41,20 @@
 	#include "always.h"
 #endif
 
+#include "widestring.h"
+
 /*
 **
 */
 class	ChunkSaveClass;
 class	ChunkLoadClass;
+
+struct HUDCoopScoreEntry
+{
+	int PlayerId;
+	float Score;
+	WideStringClass Name;
+};
 
 /*
 **
@@ -69,6 +78,11 @@ public:
 
 	static	void	Force_Weapon_Chart_Update( void );
 	static	void	Force_Weapon_Chart_Display( void );
+
+	typedef bool (*PlayerNameLookupCallback)(int player_id, WideStringClass &name);
+	typedef int (*CoopScoreListCallback)(HUDCoopScoreEntry *entries, int max_entries);
+	static	void	Set_Player_Name_Lookup_Callback(PlayerNameLookupCallback callback);
+	static	void	Set_Coop_Score_List_Callback(CoopScoreListCallback callback);
 
 	// Powerups
 	static	void	Add_Powerup_Weapon( int id, int rounds );

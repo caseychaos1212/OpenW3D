@@ -161,9 +161,10 @@ bool	DamageableGameObjDef::Load( ChunkLoadClass &cload )
 ** DamageableGameObj
 */
 DamageableGameObj::DamageableGameObj( void ) :
-	IsHealthBarDisplayed( true )
+	PlayerType( PLAYERTYPE_NEUTRAL ),
+	IsHealthBarDisplayed( true ),
+	CoopEnemyHealthMultiplierApplied( 1.0f )
 {
-	Set_Player_Type(PLAYERTYPE_NEUTRAL);
 }
 
 DamageableGameObj::~DamageableGameObj( void )
@@ -188,18 +189,9 @@ void	DamageableGameObj::Init( const DamageableGameObjDef & definition )
 */
 void	DamageableGameObj::Copy_Settings( const DamageableGameObjDef & definition )
 {
-	Set_Player_Type(definition.DefaultPlayerType);
 	DefenseObject.Init(definition.DefenseObjectDef, this );
-	if (IS_COOP_MISSION &&
-		 cGameType::Get_Coop_Enemy_Health_Multiplier() != 1.0f &&
-		 Player_Types_Are_Enemies(PLAYERTYPE_GDI, Get_Player_Type()) &&
-		 As_SmartGameObj() != NULL) {
-		float multiplier = cGameType::Get_Coop_Enemy_Health_Multiplier();
-		DefenseObject.Set_Health_Max(DefenseObject.Get_Health_Max() * multiplier);
-		DefenseObject.Set_Health(DefenseObject.Get_Health() * multiplier);
-		DefenseObject.Set_Shield_Strength_Max(DefenseObject.Get_Shield_Strength_Max() * multiplier);
-		DefenseObject.Set_Shield_Strength(DefenseObject.Get_Shield_Strength() * multiplier);
-	}
+	CoopEnemyHealthMultiplierApplied = 1.0f;
+	Set_Player_Type(definition.DefaultPlayerType);
 	return ;
 }
 
@@ -251,6 +243,7 @@ enum	{
 
 	MICROCHUNKID_PLAYER_TYPE				=	1,
 	MICROCHUNKID_IS_HEALTH_BAR_DISPLAYED,
+	MICROCHUNKID_COOP_ENEMY_HEALTH_MULTIPLIER_APPLIED,
 };
 
 bool	DamageableGameObj::Save( ChunkSaveClass & csave )
@@ -262,6 +255,7 @@ bool	DamageableGameObj::Save( ChunkSaveClass & csave )
 	csave.Begin_Chunk( CHUNKID_VARIABLES );
 		WRITE_MICRO_CHUNK( csave, MICROCHUNKID_PLAYER_TYPE, PlayerType );
 		WRITE_MICRO_CHUNK( csave, MICROCHUNKID_IS_HEALTH_BAR_DISPLAYED, IsHealthBarDisplayed );
+		WRITE_MICRO_CHUNK( csave, MICROCHUNKID_COOP_ENEMY_HEALTH_MULTIPLIER_APPLIED, CoopEnemyHealthMultiplierApplied );
 	csave.End_Chunk();
 
 	csave.Begin_Chunk( CHUNKID_DEFENSEOBJECT );
@@ -285,6 +279,7 @@ bool	DamageableGameObj::Load( ChunkLoadClass &cload )
 					switch(cload.Cur_Micro_Chunk_ID()) {
 						READ_MICRO_CHUNK( cload, MICROCHUNKID_PLAYER_TYPE, PlayerType );
 						READ_MICRO_CHUNK( cload, MICROCHUNKID_IS_HEALTH_BAR_DISPLAYED, IsHealthBarDisplayed );
+						READ_MICRO_CHUNK( cload, MICROCHUNKID_COOP_ENEMY_HEALTH_MULTIPLIER_APPLIED, CoopEnemyHealthMultiplierApplied );
 						default:
 							Debug_Say(( "Unhandled MicroChunk:%d File:%s Line:%d\r\n",cload.Cur_Micro_Chunk_ID(),__FILE__,__LINE__));
 							break;
@@ -446,8 +441,44 @@ Vector3 DamageableGameObj::Get_Team_Color(void)
 void DamageableGameObj::Set_Player_Type(int id)
 {
 	PlayerType = id;
+	Apply_Coop_Enemy_Health_Multiplier();
 
 	Set_Object_Dirty_Bit( NetworkObjectClass::BIT_RARE, true );
+}
+
+//-----------------------------------------------------------------------------
+void DamageableGameObj::Apply_Coop_Enemy_Health_Multiplier(void)
+{
+	float target_multiplier = 1.0f;
+	if (IS_COOP_MISSION &&
+		 As_SmartGameObj() != NULL &&
+		 Player_Types_Are_Enemies(PLAYERTYPE_GDI, Get_Player_Type())) {
+		target_multiplier = cGameType::Get_Coop_Enemy_Health_Multiplier();
+	}
+
+	if (target_multiplier <= 0.0f) {
+		target_multiplier = 1.0f;
+	}
+
+	if (CoopEnemyHealthMultiplierApplied <= 0.0f) {
+		CoopEnemyHealthMultiplierApplied = 1.0f;
+	}
+
+	float scale = target_multiplier / CoopEnemyHealthMultiplierApplied;
+	if (scale > 0.999f && scale < 1.001f) {
+		return;
+	}
+
+	if (DefenseObject.Get_Health_Max() <= 0.0f &&
+		 DefenseObject.Get_Shield_Strength_Max() <= 0.0f) {
+		return;
+	}
+
+	DefenseObject.Set_Health_Max(DefenseObject.Get_Health_Max() * scale);
+	DefenseObject.Set_Health(DefenseObject.Get_Health() * scale);
+	DefenseObject.Set_Shield_Strength_Max(DefenseObject.Get_Shield_Strength_Max() * scale);
+	DefenseObject.Set_Shield_Strength(DefenseObject.Get_Shield_Strength() * scale);
+	CoopEnemyHealthMultiplierApplied = target_multiplier;
 }
 
 //-----------------------------------------------------------------------------

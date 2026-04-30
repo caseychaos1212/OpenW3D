@@ -827,9 +827,11 @@ float	DefenseObjectClass::Do_Damage( const OffenseObjectClass & offense, float s
 		};
 	}
 
-	if (IS_COOP_MISSION && smart != NULL && Get_Owner() != NULL) {
+	if (IS_COOP_MISSION && damage > 0.0f && offense.Get_Owner() != NULL && Get_Owner() != NULL) {
 		SoldierGameObj *victim_soldier = Get_Owner()->As_SoldierGameObj();
-		if (victim_soldier != NULL && victim_soldier->Is_Human_Controlled() && smart->Is_Enemy(Get_Owner())) {
+		if (victim_soldier != NULL &&
+			 victim_soldier->Is_Human_Controlled() &&
+			 Player_Types_Are_Enemies(victim_soldier->Get_Player_Type(), offense.Get_Owner()->Get_Player_Type())) {
 			damage *= cGameType::Get_Coop_Enemy_Damage_Multiplier();
 		}
 	}

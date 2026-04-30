@@ -208,8 +208,8 @@ public:
 	void	Set_Skin( ArmorType skin )		{ Skin = skin; }
 	ArmorType	Get_Skin( void ) const 	{ return Skin;	}
 
-	enum {MAX_MAX_HEALTH					= 2000};//500};
-	enum {MAX_MAX_SHIELD_STRENGTH		= 2000};//500};
+	enum {MAX_MAX_HEALTH					= 10000};
+	enum {MAX_MAX_SHIELD_STRENGTH		= 10000};
 
 	// Health
 	void				Set_Health(float health);
