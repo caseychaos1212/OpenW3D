@@ -48,6 +48,7 @@
 #include "string_ids.h"
 #include "rendobj.h"
 #include "input.h"
+#include "directinput.h"
 #include "dinput.h"
 #include "timemgr.h"
 #include "gametype.h"
@@ -221,6 +222,10 @@ RadioCommandDisplayClass::Update (DISPLAY_TYPE type)
 void
 RadioCommandDisplayClass::Display (bool onoff, DISPLAY_TYPE type)
 {
+	if (onoff && IS_COOP_MISSION && ObjectiveManager::Is_Viewer_Displayed ()) {
+		ObjectiveManager::Display_Viewer (false);
+	}
+
 	//
 	//	Display or hide the window
 	//
@@ -300,8 +305,8 @@ RadioCommandDisplayClass::Check_Keys (void)
 		is_key_down[DISPLAY_CMDS_01] = Input::Is_Button_Down (DIK_RCONTROL);
 		is_key_down[DISPLAY_CMDS_02] = Input::Is_Button_Down (DIK_RMENU);
 	} else {
-		is_key_down[DISPLAY_CMDS_01] = Input::Is_Button_Down (DIK_LCONTROL) || Input::Is_Button_Down (DIK_RCONTROL);
-		is_key_down[DISPLAY_CMDS_02] = Input::Is_Button_Down (DIK_LMENU) || Input::Is_Button_Down (DIK_RMENU);
+		is_key_down[DISPLAY_CMDS_01] = Input::Is_Button_Down (DIK_CONTROL);
+		is_key_down[DISPLAY_CMDS_02] = Input::Is_Button_Down (DIK_ALT);
 	}
 	is_key_down[DISPLAY_CMDS_03] = is_key_down[DISPLAY_CMDS_01] && is_key_down[DISPLAY_CMDS_02];
 
@@ -309,6 +314,9 @@ RadioCommandDisplayClass::Check_Keys (void)
 	//	Are any of the buttons being held?
 	//
 	bool is_any_key_down = is_key_down[DISPLAY_CMDS_01] || is_key_down[DISPLAY_CMDS_02];
+	if (IS_COOP_MISSION && is_any_key_down && ObjectiveManager::Is_Viewer_Displayed ()) {
+		ObjectiveManager::Display_Viewer (false);
+	}
 	if (is_any_key_down) {
 
 		//
