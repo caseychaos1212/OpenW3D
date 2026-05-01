@@ -259,7 +259,7 @@ RadioCommandDisplayClass::Render (void)
 	//
 	//	Don't do this for true single player
 	//
-	if (IS_MISSION) {
+	if (IS_MISSION && !IS_COOP_MISSION) {
 		return ;
 	}
 

@@ -194,6 +194,7 @@ static void Start_In_Game_Help(void)
 void	CombatGameModeClass::Combat_Keyboard( void )
 {
 	WWPROFILE( "Combat_Keyboard" );
+	const bool allow_multiplayer_messages = !IS_MISSION || IS_COOP_MISSION;
 
 #ifdef ATI_DEMO_HACK
 	// HACK: Make double-ESC exit back to desktop
@@ -274,8 +275,10 @@ void	CombatGameModeClass::Combat_Keyboard( void )
 		}/* else if (Input::Get_State( INPUT_FUNCTION_SERVER_INFO_TOGGLE )) {
 			START_DIALOG (CNCServerInfoDialogClass);
 		}*/
+	}
 
-		// Handle radio commands
+	// Handle radio commands
+	if (allow_multiplayer_messages && cNetwork::I_Am_Client() && COMBAT_STAR != NULL) {
 		for (int radioCmdIndex = INPUT_FUNCTION_RADIO_CMD_01; radioCmdIndex <= INPUT_FUNCTION_RADIO_CMD_30; ++radioCmdIndex) {
 			if (Input::Get_State((InputFunction)radioCmdIndex)) {
 				CNCModeSettingsDef* cncDef = CNCModeSettingsDef::Get_Instance();
@@ -321,7 +324,7 @@ void	CombatGameModeClass::Combat_Keyboard( void )
 	if (	(The_Game() != NULL &&
 		    (Input::Get_State(INPUT_FUNCTION_BEGIN_PUBLIC_MESSAGE) ||
 		     (Input::Get_State(INPUT_FUNCTION_BEGIN_TEAM_MESSAGE) && cNetwork::I_Am_Client()))) &&
-			!IS_MISSION)
+			allow_multiplayer_messages)
 	{
 		MPIngameChatPopupClass * p_dialog = new MPIngameChatPopupClass;
 		WWASSERT(p_dialog != NULL);

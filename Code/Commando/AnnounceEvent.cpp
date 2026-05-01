@@ -333,7 +333,7 @@ void SCAnnouncement::Import_Creation(BitStreamClass& packet)
 	packet.Get(mToID);
 	packet.Get(mFromID);
 	packet.Get(mAnnouncementID);
-	packet.Add(mRadioCmdID);
+	packet.Get(mRadioCmdID);
 
 	BYTE type = 0;
 	packet.Get(type);
