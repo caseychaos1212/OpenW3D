@@ -60,6 +60,7 @@
 #include "wwprofile.h"
 #include "diaglog.h"
 #include "gametype.h"
+#include "cooprespawnstate.h"
 #include "wwphysids.h"
 #include "buildingaggregate.h"
 #include "persistfactory.h"
@@ -716,6 +717,7 @@ void	Unignore_Star_And_Vehicle( void )
 void CCameraClass::Update()
 {
 	Handle_Input();
+	cCoopRespawnState::Update_Spectate_Camera();
 
 	WWASSERT( CurrentProfile );
 

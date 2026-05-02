@@ -11,15 +11,10 @@
 #include "cooprespawnstateevent.h"
 
 #include "apppackettypes.h"
-#include "ccamera.h"
 #include "cnetwork.h"
-#include "combat.h"
 #include "cooprespawnstate.h"
-#include "gameobjmanager.h"
 #include "gametype.h"
 #include "networkobjectfactory.h"
-#include "physicalgameobj.h"
-#include "scriptablegameobj.h"
 
 DECLARE_NETWORKOBJECT_FACTORY(cCoopRespawnStateEvent, NETCLASSID_COOPRESPAWNSTATEEVENT);
 
@@ -57,20 +52,8 @@ void cCoopRespawnStateEvent::Act(void)
 	}
 
 	cCoopRespawnState::Set_Waiting(Waiting, SpectateObjectId);
-
-	if (COMBAT_CAMERA == NULL) {
-		return;
-	}
-
-	if (!Waiting) {
-		COMBAT_CAMERA->Set_Host_Model(NULL);
-		return;
-	}
-
-	ScriptableGameObj *obj = GameObjManager::Find_ScriptableGameObj(SpectateObjectId);
-	PhysicalGameObj *physical = obj != NULL ? obj->As_PhysicalGameObj() : NULL;
-	if (physical != NULL) {
-		COMBAT_CAMERA->Set_Host_Model(physical->Peek_Model());
+	if (Waiting) {
+		cCoopRespawnState::Update_Spectate_Camera();
 	}
 }
 

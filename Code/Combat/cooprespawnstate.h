@@ -19,6 +19,7 @@ public:
 	static void Set_Waiting(bool waiting, int spectate_object_id);
 	static bool Is_Waiting(void);
 	static int Get_Spectate_Object_Id(void);
+	static void Update_Spectate_Camera(void);
 	static const WideStringClass &Get_Waiting_Text(void);
 };
 

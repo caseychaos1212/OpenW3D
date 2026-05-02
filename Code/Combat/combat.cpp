@@ -77,6 +77,7 @@
 #include "hud.h"
 #include "mapmgr.h"
 #include "gametype.h"
+#include "cooprespawnstate.h"
 #include "staticnetworkobject.h"
 #include "diaglog.h"
 #include "combatdazzle.h"
@@ -701,6 +702,7 @@ void 	CombatManager::Think()
   	COMBAT_SCENE->Update( TimeManager::Get_Frame_Seconds(), 0 );
 
 }{	WWPROFILE( "Star" );
+	cCoopRespawnState::Update_Spectate_Camera();
 	Update_Star();
 
 	// In normal mode, the camera must think before Post_Think, since the
