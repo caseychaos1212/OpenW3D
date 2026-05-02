@@ -94,6 +94,7 @@ public:
 	//
 	void				Set_Heading_Font (const char *font_name)	{ HeadingFontName = font_name; }
 	void				Set_Text_Font (const char *font_name)		{ TextFontName = font_name; }
+	void				Set_Text_Texture_Size_Hint (int hint)	{ TextTextureSizeHint = hint; IsViewDirty = true; }
 
 	//
 	//	Column support
@@ -180,6 +181,7 @@ private:
 
 	float							ColumnHeight;
 	float							LineSpacing;
+	int							TextTextureSizeHint;
 
 	StringClass					HeadingFontName;
 	StringClass					TextFontName;
@@ -326,4 +328,3 @@ private:
 
 
 #endif //__TEXT_WINDOW_H
-

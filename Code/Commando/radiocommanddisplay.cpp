@@ -125,15 +125,20 @@ RadioCommandDisplayClass::Initialize (void)
 		settings->Get_Objectives_Fadeout_Rect (), settings->Get_Objectives_Background_Rect ());
 
 	//
-	//	Configure the area where text can be displayed in the window
+	//	Configure the area where text can be displayed in the window.
+	//	The mission objectives text rect only covers the upper portion of
+	//	this backdrop; radio command pages need enough height for ten rows.
 	//
-	TextWindow->Set_Text_Area (settings->Get_Objectives_Text_Rect ());
+	RectClass radio_text_rect = settings->Get_Objectives_Text_Rect ();
+	radio_text_rect.Bottom = settings->Get_Objectives_Screen_Rect ().Bottom - 10.0F;
+	TextWindow->Set_Text_Area (radio_text_rect);
+	TextWindow->Set_Text_Texture_Size_Hint (512);
 
 	//
 	//	Configure the columns
 	//
-	TextWindow->Add_Column (TRANSLATE (IDS_MENU_RADIO_KEY), 0.3F, Vector3 (0.75F, 1.0F, 0.75F));
-	TextWindow->Add_Column (TRANSLATE (IDS_MENU_RADIO_KEY_MESSAGE), 0.7F, Vector3 (0.75F, 1.0F, 0.75F));
+	TextWindow->Add_Column (TRANSLATE (IDS_MENU_RADIO_KEY), 0.35F, Vector3 (0.75F, 1.0F, 0.75F));
+	TextWindow->Add_Column (TRANSLATE (IDS_MENU_RADIO_KEY_MESSAGE), 0.65F, Vector3 (0.75F, 1.0F, 0.75F));
 	TextWindow->Display_Columns (true);
 	DisplayTimer = 0.0F;
 	return ;

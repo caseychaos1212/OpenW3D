@@ -75,7 +75,8 @@ TextWindowClass::TextWindowClass (void) :
 	IsViewDirty (true),
 	TextRect (0, 0, 0, 0),
 	ColumnHeight (0),
-	LineSpacing (0)
+	LineSpacing (0),
+	TextTextureSizeHint (0)
 {
 	TextRenderers[0] = NULL;
 	TextRenderers[1] = NULL;
@@ -647,6 +648,7 @@ TextWindowClass::Build_View (void)
 
 	TextRenderers[0]->Set_Font (header_font);
 	TextRenderers[1]->Set_Font (font);
+	TextRenderers[1]->Set_Texture_Size_Hint (TextTextureSizeHint);
 	return ;
 }
 
@@ -711,7 +713,7 @@ TextWindowClass::Update_View (float *total_height, bool info_only)
 		//
 		//	Check to see if we've gone outside the client area of the text window
 		//
-		if ((y_pos + row_height) > TextRect.Right && info_only == false) {
+		if ((y_pos + row_height) > TextRect.Bottom && info_only == false) {
 			break;
 		}
 
