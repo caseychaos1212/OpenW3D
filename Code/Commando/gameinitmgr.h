@@ -62,6 +62,7 @@ public:
 	//	Level init
 	//
 	static void		Start_Game (const char *map_name, int teamChoice, unsigned int clanID);
+	static void		Start_Coop_Lobby (const char *map_name, int difficulty_level);
 	static void		End_Game (void);
 	static void		Continue_Game (void);
 	static void		Display_End_Game_Menu (void);

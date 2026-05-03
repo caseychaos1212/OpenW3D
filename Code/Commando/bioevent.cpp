@@ -46,6 +46,7 @@
 #include "playermanager.h"
 #include "god.h"
 #include "gametype.h"
+#include "cooplobbymgr.h"
 #include "apppackettypes.h"
 #include "gamedataupdateevent.h"
 #include "ConsoleMode.h"
@@ -179,6 +180,7 @@ cBioEvent::Act(void)
 			}
 
 		}
+		CoopLobbyMgrClass::Broadcast_State();
    } else {
 		cEvictionEvent * p_event = new cEvictionEvent;
 		p_event->Init(SenderId, eviction_code);

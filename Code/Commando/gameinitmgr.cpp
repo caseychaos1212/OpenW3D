@@ -91,6 +91,7 @@
 #include "damage.h"
 #include "ccamera.h"
 #include "coopdebuglog.h"
+#include "cooplobbymgr.h"
 #include "bones.h"
 #include "surfaceeffects.h"
 #include "ffactory.h"
@@ -289,6 +290,57 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned int
 	GameSideServerControlClass::Init();
 
 	return ;
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//	Start_Coop_Lobby
+//
+////////////////////////////////////////////////////////////////
+void
+GameInitMgrClass::Start_Coop_Lobby(const char *map_name, int difficulty_level)
+{
+	WWASSERT(map_name != NULL);
+	WWASSERT(IS_COOP_MISSION);
+
+	if (map_name == NULL || map_name[0] == 0) {
+		return;
+	}
+
+	if (!IsClientRequired) {
+		CampaignManager::Start_Coop_Campaign(map_name, difficulty_level);
+		return;
+	}
+
+	CoopDebugLog::Log("GameInitMgrClass::Start_Coop_Lobby begin map=%s difficulty=%d client_required=%d server_required=%d",
+		map_name, difficulty_level, IsClientRequired, IsServerRequired);
+
+	StringClass map(map_name, true);
+	WWASSERT(PTheGameData != NULL);
+	The_Game()->Set_Map_Name(map);
+
+	cGameDataCoopMission *coop_game = The_Game()->As_Coop_Mission();
+	if (coop_game != NULL) {
+		coop_game->Set_Difficulty_Level(difficulty_level);
+		coop_game->Apply_Global_Settings();
+	}
+
+	Start_Client_Server();
+	CoopDebugLog::Log("GameInitMgrClass::Start_Coop_Lobby Start_Client_Server done map=%s", map_name);
+	Transmit_Player_Data(PLAYERTYPE_GDI, 0);
+
+	GameModeManager::Find("Menu")->Deactivate();
+
+	if (Mode == MODE_LAN || Mode == MODE_COOP_LAN) {
+		PLC->Go_To_Location(LANLOC_LOBBY);
+	}
+
+	if (cNetwork::I_Am_Server()) {
+		CoopLobbyMgrClass::Open_Pre_Game(map_name, difficulty_level);
+	} else if (!CoopLobbyMgrClass::Is_Active()) {
+		CoopLobbyMgrClass::Open_Client_Pre_Game(map_name, difficulty_level);
+	}
 }
 
 

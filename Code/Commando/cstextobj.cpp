@@ -43,6 +43,7 @@
 #include "networkobjectfactory.h"
 #include "gamemode.h"
 #include "cnetwork.h"
+#include "cooplobbymgr.h"
 #include "networkobjectmgr.h"
 #include "apppackettypes.h"
 #include "floodprotectionmgr.h"
@@ -112,7 +113,7 @@ cCsTextObj::Act(void)
 {
 	WWASSERT(cNetwork::I_Am_Server());
 
-	if (GameModeManager::Find("Combat")->Is_Active()) {
+	if (GameModeManager::Find("Combat")->Is_Active() || CoopLobbyMgrClass::Is_Active()) {
 		cScTextObj * p_test_obj = new cScTextObj;
 		p_test_obj->Init(Text, Type, false, SenderId, Recipient);
 	}

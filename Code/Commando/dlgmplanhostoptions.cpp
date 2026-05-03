@@ -310,7 +310,7 @@ void MPLanHostOptionsMenuClass::Start_Game(cGameData* theGame)
 		cGameDataCoopMission *coop_game = theGame->As_Coop_Mission();
 		WWASSERT(coop_game != NULL);
 		coop_game->Apply_Global_Settings();
-		CampaignManager::Start_Coop_Campaign(theGame->Get_Map_Name(), coop_game->Get_Difficulty_Level());
+		GameInitMgrClass::Start_Coop_Lobby(theGame->Get_Map_Name(), coop_game->Get_Difficulty_Level());
 		return;
 	}
 

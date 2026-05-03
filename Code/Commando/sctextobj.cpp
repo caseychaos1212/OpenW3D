@@ -47,6 +47,7 @@
 #include "matrix3d.h"
 #include "playertype.h"
 #include "cnetwork.h"
+#include "cooplobbymgr.h"
 #include "translatedb.h"
 #include "string_ids.h"
 #include "apppackettypes.h"
@@ -325,6 +326,7 @@ cScTextObj::Act(void)
 				WideStringClass message;
 				message.Format(U_CHAR("%s\n"), Text);
 				formatted_text += message;
+				CoopLobbyMgrClass::Add_Chat_Message(formatted_text);
 				if (CombatManager::Get_Message_Window() != NULL) {
 					CombatManager::Get_Message_Window()->Add_Message(formatted_text, text_color);
 				}

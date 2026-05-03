@@ -25,6 +25,7 @@
 #include "gameinitmgr.h"
 #include "gdcoopmission.h"
 #include "gametype.h"
+#include "cooplobbymgr.h"
 #include "networkobjectfactory.h"
 
 DECLARE_NETWORKOBJECT_FACTORY(cCoopLevelTransitionEvent, NETCLASSID_COOPLEVELTRANSITIONEVENT);
@@ -98,6 +99,7 @@ cCoopLevelTransitionEvent::Act(void)
 		return;
 	}
 
+	CoopLobbyMgrClass::Close();
 	GameInitMgrClass::Queue_Coop_Level_Transition(MapName, DifficultyLevel);
 }
 

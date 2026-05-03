@@ -301,9 +301,9 @@ cGameSpyAdmin::Host_Coop_Direct_Game
 	cGameDataCoopMission *coop_game = PTheGameData->As_Coop_Mission();
 	WWASSERT(coop_game != NULL);
 	coop_game->Apply_Global_Settings();
-	CoopDebugLog::Log("cGameSpyAdmin::Host_Coop_Direct_Game Start_Coop_Campaign map=%s difficulty=%d",
+	CoopDebugLog::Log("cGameSpyAdmin::Host_Coop_Direct_Game Start_Coop_Lobby map=%s difficulty=%d",
 		PTheGameData->Get_Map_Name(), coop_game->Get_Difficulty_Level());
-	CampaignManager::Start_Coop_Campaign(PTheGameData->Get_Map_Name(), coop_game->Get_Difficulty_Level());
+	GameInitMgrClass::Start_Coop_Lobby(PTheGameData->Get_Map_Name(), coop_game->Get_Difficulty_Level());
 }
 
 //----------------------------------------------------------------------------------

@@ -198,6 +198,8 @@ set(COMMANDO_SRC
     dlgcncteaminfo.h
     dlgcncwinscreen.cpp
     dlgcncwinscreen.h
+    dlgcooplobby.cpp
+    dlgcooplobby.h
     dlgconfigaudiotab.cpp
     dlgconfigaudiotab.h
     dlgconfigperformancetab.cpp
@@ -356,6 +358,12 @@ set(COMMANDO_SRC
     coopcharacterselectevent.h
     coopleveltransitionevent.cpp
     coopleveltransitionevent.h
+    cooplobbymgr.cpp
+    cooplobbymgr.h
+    cooplobbyreadyevent.cpp
+    cooplobbyreadyevent.h
+    cooplobbystateevent.cpp
+    cooplobbystateevent.h
     coopobjectivesyncevent.cpp
     coopobjectivesyncevent.h
     cooprespawnrequestevent.cpp

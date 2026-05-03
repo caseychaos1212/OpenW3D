@@ -36,6 +36,7 @@
 
 #include "campaign.h"
 #include "coopleveltransitionevent.h"
+#include "cooplobbymgr.h"
 #include "debug.h"
 #include "gamemode.h"
 #include "gamedata.h"
@@ -364,11 +365,7 @@ void	CampaignManager::Continue( bool /* success */ )
 			difficulty_level = coop_game->Get_Difficulty_Level();
 		}
 
-		cCoopLevelTransitionEvent *transition_event = new cCoopLevelTransitionEvent;
-		transition_event->Init(mission_name, difficulty_level);
-		cNetwork::Flush();
-
-		GameInitMgrClass::Queue_Coop_Level_Transition(mission_name, difficulty_level);
+		CoopLobbyMgrClass::Open_Between_Levels(mission_name, difficulty_level);
 		return;
 	}
 

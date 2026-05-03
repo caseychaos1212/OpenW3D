@@ -70,6 +70,7 @@
 #include "sbbomanager.h"
 #include "clientgoodbyeevent.h"
 #include "coopdebuglog.h"
+#include "cooplobbymgr.h"
 //#include "helptext.h"
 #include	"natter.h"
 #include	"vistable.h"
@@ -1769,6 +1770,7 @@ void cNetwork::Connection_Handler(int new_rhost_id)
 	cGameOptionsEvent * p_event = new cGameOptionsEvent;
 	p_event->Init(new_rhost_id);
 	Send_Object_Update(p_event, new_rhost_id);
+	CoopLobbyMgrClass::Send_State_To_Client(new_rhost_id);
 
 #endif // not BETACLIENT
 }
