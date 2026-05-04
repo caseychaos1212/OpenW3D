@@ -28,6 +28,7 @@ public:
 
 private:
 	void Refresh(void);
+	void Refresh_Layout(void);
 	void Refresh_Header(void);
 	void Refresh_Player_List(void);
 	void Refresh_Options_List(void);
@@ -36,6 +37,8 @@ private:
 	void Refresh_Chat_List(void);
 	void Send_Chat(void);
 	void Add_Single_Column(ListCtrlClass *list_ctrl, const unichar_t *title);
+	void Set_Control_Rect(int ctrl_id, int x, int y, int width, int height);
+	void Show_Control(int ctrl_id, bool show);
 };
 
 #endif // __DLGCOOPLOBBY_H__

@@ -125,12 +125,38 @@ void CoopLobbyDialogClass::Refresh(void)
 		return;
 	}
 
+	Refresh_Layout();
 	Refresh_Header();
 	Refresh_Player_List();
 	Refresh_Options_List();
-	Refresh_Results_List();
-	Refresh_Stats_List();
+	if (CoopLobbyMgrClass::Get_Phase() == CoopLobbyMgrClass::PHASE_BETWEEN_LEVELS) {
+		Refresh_Results_List();
+		Refresh_Stats_List();
+	}
 	Refresh_Chat_List();
+}
+
+void CoopLobbyDialogClass::Refresh_Layout(void)
+{
+	bool show_results = CoopLobbyMgrClass::Get_Phase() == CoopLobbyMgrClass::PHASE_BETWEEN_LEVELS;
+
+	if (show_results) {
+		Set_Control_Rect(IDC_COOP_LOBBY_PLAYER_LIST, 8, 41, 176, 78);
+		Set_Control_Rect(IDC_COOP_LOBBY_OPTIONS_LIST, 190, 41, 202, 78);
+		Set_Control_Rect(IDC_COOP_LOBBY_RESULTS_LIST, 8, 126, 176, 70);
+		Set_Control_Rect(IDC_COOP_LOBBY_STATS_LIST, 190, 126, 202, 70);
+	} else {
+		Set_Control_Rect(IDC_COOP_LOBBY_PLAYER_LIST, 8, 41, 176, 155);
+		Set_Control_Rect(IDC_COOP_LOBBY_OPTIONS_LIST, 190, 41, 202, 155);
+	}
+
+	Show_Control(IDC_COOP_LOBBY_RESULTS_LIST, show_results);
+	Show_Control(IDC_COOP_LOBBY_STATS_LIST, show_results);
+	Set_Control_Rect(IDC_COOP_LOBBY_CHAT_LIST, 8, 203, 384, 45);
+	Set_Control_Rect(IDC_COOP_LOBBY_CHAT_EDIT, 8, 255, 236, 14);
+	Set_Control_Rect(IDC_COOP_LOBBY_SEND_BUTTON, 250, 252, 42, 19);
+	Set_Control_Rect(IDC_COOP_LOBBY_READY_BUTTON, 298, 252, 45, 19);
+	Set_Control_Rect(IDC_COOP_LOBBY_START_BUTTON, 349, 252, 43, 19);
 }
 
 void CoopLobbyDialogClass::Refresh_Header(void)
@@ -315,5 +341,32 @@ void CoopLobbyDialogClass::Add_Single_Column(ListCtrlClass *list_ctrl, const uni
 {
 	if (list_ctrl != NULL) {
 		list_ctrl->Add_Column(title, 1.0f, Vector3(1, 1, 1));
+	}
+}
+
+void CoopLobbyDialogClass::Set_Control_Rect(int ctrl_id, int x, int y, int width, int height)
+{
+	DialogControlClass *control = Get_Dlg_Item(ctrl_id);
+	if (control == NULL) {
+		return;
+	}
+
+	const RectClass &dialog_rect = Get_Rect();
+	float scale_x = dialog_rect.Width() / 400.0f;
+	float scale_y = dialog_rect.Height() / 300.0f;
+
+	RectClass rect;
+	rect.Left = dialog_rect.Left + (float)x * scale_x;
+	rect.Top = dialog_rect.Top + (float)y * scale_y;
+	rect.Right = rect.Left + (float)width * scale_x;
+	rect.Bottom = rect.Top + (float)height * scale_y;
+	control->Set_Window_Rect(rect);
+}
+
+void CoopLobbyDialogClass::Show_Control(int ctrl_id, bool show)
+{
+	DialogControlClass *control = Get_Dlg_Item(ctrl_id);
+	if (control != NULL) {
+		control->Show(show);
 	}
 }
