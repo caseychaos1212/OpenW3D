@@ -36,10 +36,14 @@
 
 
 #include "verchk.h"
-#include <windows.h>
-#include <winnt.h>
 #include "rawfile.h"
 #include "ffactory.h"
+#if defined(OPENW3D_WIN32)
+#include <windows.h>
+#elif defined(OPENW3D_SDL3)
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
 
 
 /******************************************************************************
@@ -89,25 +93,25 @@ bool GetVersionInfo(char* filename, VS_FIXEDFILEINFO* fileInfo) {
 }
 
 
-bool GetFileCreationTime(char* filename, FILETIME* createTime)
+bool GetFileCreationTime(const char* filename, FileCreationTime* createTime)
 	{
 	if (filename && createTime)
 		{
-		createTime->dwLowDateTime = 0;
-		createTime->dwHighDateTime = 0;
+		memset(createTime, 0, sizeof(*createTime));
 		FileClass* file = _TheFileFactory->Get_File(filename);
 
 		if (file && file->Open())
 			{
-			HANDLE handle = file->Get_File_Handle();
-
-			if (handle != INVALID_HANDLE_VALUE)
-				{
-				if (GetFileTime(handle, NULL, NULL, createTime))
-					{
-					return true;
-					}
-				}
+			unsigned int dateTime = file->Get_Date_Time();
+			unsigned int fatDate = dateTime >> 16;
+			unsigned int fatTime = dateTime & 0xffff;
+			createTime->year = 1980 + (fatDate >> 9);
+			createTime->month = (fatDate >> 5) & 0xf;
+			createTime->day = fatDate & 0x1f;
+			createTime->hour = fatTime >> 11;
+			createTime->minute = (fatTime >> 5) & 0x3f;
+			createTime->second = 2 * (fatTime & 0x1f);
+			return true;
 			}
 		}
 

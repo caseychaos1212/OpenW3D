@@ -104,15 +104,12 @@ void SendGameResults(unsigned int gameID, cGameData* theGame, SList<cPlayer>* pl
 	stats.Add_Field("VERS", (unsigned int)version.dwFileVersionMS);
 
 	// Executable build date
-	FILETIME createTime;
-	GetFileCreationTime(filename, &createTime);
-
-	SYSTEMTIME time;
-	FileTimeToSystemTime(&createTime, &time);
+	FileCreationTime time;
+	GetFileCreationTime(filename, &time);
 
 	char buildDate[20];
 	sprintf(buildDate, "%02d/%02d/%04d %02d:%02d:%02d",
-		time.wMonth, time.wDay, time.wYear, time.wHour, time.wMinute, time.wSecond);
+		time.month, time.day, time.year, time.hour, time.minute, time.second);
 	stats.Add_Field("DATE", buildDate);
 
 	// Proocessor information

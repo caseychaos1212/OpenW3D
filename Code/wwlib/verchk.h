@@ -44,11 +44,20 @@
 
 #include <windows.h>
 
+struct FileCreationTime {
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
+    int second;
+};
+
 // Obtain version information from the specified file.
 bool GetVersionInfo(char* filename, VS_FIXEDFILEINFO* fileInfo);
 
 // Retreive creation time of specified file.
-bool GetFileCreationTime(char* filename, FILETIME* createTime);
+bool GetFileCreationTime(const char* filename, FileCreationTime* createTime);
 
 ////////////////////////////////////////////////////////////////////////
 //
