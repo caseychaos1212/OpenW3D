@@ -83,7 +83,7 @@ protected:
 **   to surrender when asked in the Render method.
 ** - The ability to add and remove render objects from the scene
 ** - The ability to create an iterator for the user which uses the
-**   SceneIterator interface and allows the user to iterate through 
+**   SceneIterator interface and allows the user to iterate through
 **   all render objects or visible render objects in the scene.
 **
 ** The "registration" interface is used by certain render objects to enable
@@ -97,7 +97,7 @@ public:
 
 	SceneClass(void);
 	virtual ~SceneClass(void);
-	
+
 	virtual void				Add_Render_Object(RenderObjClass * obj);
 	virtual void				Remove_Render_Object(RenderObjClass * obj);
 
@@ -161,8 +161,8 @@ public:
 	///////////////////////////////////////////////////////////////////////////////////
 	//	Point visibility - used by DazzleRenderObj when no custom handler is installed
 	///////////////////////////////////////////////////////////////////////////////////
-	virtual float				Compute_Point_Visibility(	RenderInfoClass & rinfo,
-																		const Vector3 & point)	{ return 1.0f; }
+	virtual float				Compute_Point_Visibility(	RenderInfoClass & /*rinfo*/,
+																		const Vector3 & /*point*/)	{ return 1.0f; }
 
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +173,7 @@ public:
 
 protected:
 	void							Render(RenderInfoClass & rinfo);
-	
+
 	Vector3						AmbientLight;
 	PolyRenderType				PolyRenderMode;
 	ExtraPassPolyRenderType	ExtraPassPolyRenderMode;
@@ -193,8 +193,8 @@ protected:
 
 private:
 	virtual void				Customized_Render(RenderInfoClass & rinfo)=0;
-	virtual void				Pre_Render_Processing(RenderInfoClass & rinfo) {}
-	virtual void				Post_Render_Processing(RenderInfoClass & rinfo) {}
+	virtual void				Pre_Render_Processing(RenderInfoClass & /*rinfo*/) {}
+	virtual void				Post_Render_Processing(RenderInfoClass & /*rinfo*/) {}
 
 };
 
@@ -237,14 +237,14 @@ public:
 																		const Vector3 & point) override;
 
 protected:
-	
+
    // Has a visibility check been performed since scene was last rendered?
    bool Visibility_Checked;
 
 	RefRenderObjListClass	RenderList;
 	RefRenderObjListClass	UpdateList;
 	RefRenderObjListClass	LightList;
-	RefRenderObjListClass	ReleaseList;	
+	RefRenderObjListClass	ReleaseList;
 
 	friend class SimpleSceneIterator;
 

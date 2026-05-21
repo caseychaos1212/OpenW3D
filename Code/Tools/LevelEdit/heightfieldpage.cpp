@@ -151,14 +151,14 @@ HeightfieldPageClass::OnSize
 	UINT	nType,
 	int	cx,
 	int	cy
-) 
-{	
+)
+{
 	CDialog::OnSize (nType, cx, cy);
 
 	/*if (::IsWindow (m_ListCtrl) && (cx > 0) && (cy > 0)) {
 	}*/
 
-	return ;	
+	return ;
 }
 
 
@@ -168,12 +168,12 @@ HeightfieldPageClass::OnSize
 //
 /////////////////////////////////////////////////////////////////////////////
 void
-HeightfieldPageClass::OnDestroy (void) 
+HeightfieldPageClass::OnDestroy (void)
 {
 	::RemoveProp (m_hWnd, "TRANS_ACCS");
 
 	CDialog::OnDestroy ();
-	return ;	
+	return ;
 }
 
 
@@ -203,11 +203,11 @@ HeightfieldPageClass::OnInitDialog (void)
 	//	Select the current default texture...
 	//
 	int curr_texture = HeightfieldEditorClass::Get_Current_Texture ();
-	SendDlgItemMessage (IDC_TEXTURE0_BUTTON + curr_texture, BM_SETCHECK, TRUE);
+	SendDlgItemMessage (IDC_TEXTURE0_BUTTON + curr_texture, BM_SETCHECK, true);
 
 	SetProp (m_hWnd, "TRANS_ACCS", (HANDLE)1);
 	IsInitialized = true;
-	return TRUE;
+	return true;
 }
 
 
@@ -257,7 +257,7 @@ HeightfieldPageClass::OnCommand (WPARAM wParam, LPARAM lParam)
 			}
 
 			case IDC_BRUSH_INNER_RADIUS_EDIT:
-				
+
 				//
 				//	Update the heightfield editor with the new values
 				//
@@ -270,7 +270,7 @@ HeightfieldPageClass::OnCommand (WPARAM wParam, LPARAM lParam)
 				break;
 
 			case IDC_BRUSH_OUTTER_RADIUS_EDIT:
-				
+
 				//
 				//	Update the heightfield editor with the new values
 				//
@@ -327,7 +327,7 @@ HeightfieldPageClass::Update_Material_Button (int index)
 	HWND button_wnd	= ::GetDlgItem (m_hWnd, ctrl_id);
 
 	if (button_wnd != NULL) {
-		
+
 		HBITMAP thumbnail = NULL;
 
 		//
@@ -377,7 +377,7 @@ HeightfieldPageClass::OnMaterialSettingsButton (void)
 	HeightfieldMaterialSettingsDialogClass	dialog (this);
 	dialog.Set_Material (material_index);
 	if (dialog.DoModal () == IDOK) {
-		
+
 		//
 		//	Let the system know that this material has changed
 		//

@@ -92,14 +92,14 @@ GotoLocationDialogClass::OnInitDialog (void)
 	::Make_Edit_Float_Ctrl (::GetDlgItem (m_hWnd, IDC_YPOS_EDIT));
 	::Make_Edit_Float_Ctrl (::GetDlgItem (m_hWnd, IDC_ZPOS_EDIT));
 	::Make_Edit_Float_Ctrl (::GetDlgItem (m_hWnd, IDC_FACING_EDIT));
-	
+
 	//
 	//	Set the float control ranges
 	//
 	m_XPosSpin.SetRange32 (-1000000, 1000000);
 	m_YPosSpin.SetRange32 (-1000000, 1000000);
 	m_ZPosSpin.SetRange32 (-1000000, 1000000);
-	m_FacingSpin.SetRange32 (-1000000, 1000000);	
+	m_FacingSpin.SetRange32 (-1000000, 1000000);
 
 	//
 	//	Get the camera's position and rotation
@@ -119,7 +119,7 @@ GotoLocationDialogClass::OnInitDialog (void)
 	::SetDlgItemFloat (m_hWnd, IDC_YPOS_EDIT, position.Y);
 	::SetDlgItemFloat (m_hWnd, IDC_ZPOS_EDIT, position.Z);
 	::SetDlgItemFloat (m_hWnd, IDC_FACING_EDIT, RAD_TO_DEG (facing));
-	return TRUE;
+	return true;
 }
 
 

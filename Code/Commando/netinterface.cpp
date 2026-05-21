@@ -21,7 +21,7 @@
 // Project:      Network.lib, for Commando
 // Author:       Tom Spencer-Smith
 // Date:         Dec 1998
-// Description:  
+// Description:
 //
 
 #include "netinterface.h"
@@ -56,12 +56,24 @@ cNetInterface::~cNetInterface(void)
 WideStringClass cNetInterface::Get_Nickname(void)
 {
 	if (cGameSpyAdmin::Is_Gamespy_Game()) {
-		
+
 		//
 		// If the gamespy nickname is blank, set it to "Unnamed"
 		//
 		if (!::strcmp(cUserOptions::GameSpyNickname.Get(), "")) {
-			cUserOptions::GameSpyNickname.Set("Unnamed");
+			char hostname[MAX_COMPUTERNAME_LENGTH + 1] = {0};
+			DWORD size = sizeof(hostname);
+			if (!::GetComputerNameA(hostname, &size) || hostname[0] == '\0') {
+				strcpy(hostname, "Unnamed");
+			}
+
+			// GameSpy nicknames are limited to 30 characters elsewhere.
+			const size_t max_gamespy_length = 30;
+			if (strlen(hostname) > max_gamespy_length) {
+				hostname[max_gamespy_length] = '\0';
+			}
+
+			cUserOptions::GameSpyNickname.Set(hostname);
 		}
 
 		WideStringClass wide_name;
@@ -80,9 +92,9 @@ void cNetInterface::Set_Nickname(WideStringClass & name)
 		if (wide_name.Get_Length() > 30) {
 			wide_name[30] = 0;
 		}
-		StringClass name;
-		wide_name.Convert_To(name);
-		cUserOptions::GameSpyNickname.Set(name.Peek_Buffer());
+		StringClass nickname;
+		wide_name.Convert_To(nickname);
+		cUserOptions::GameSpyNickname.Set(nickname.Peek_Buffer());
 	} else {
 		Nickname = name;
 
@@ -97,7 +109,7 @@ void cNetInterface::Set_Nickname(WideStringClass & name)
 
 //-----------------------------------------------------------------------------
 void cNetInterface::Set_Random_Nickname(void)
-{      
+{
 	char name[MAX_COMPUTERNAME_LENGTH + 1];
 	DWORD size = sizeof(name);
 	::GetComputerNameA(name, &size);
@@ -162,7 +174,7 @@ int cNetInterface::Get_Side_Preference(void)
 
 	/*
 	Nickname = name;
-	
+
 	int max_len = 0;
 	if (cGameSpyAdmin::Is_Gamespy_Game()) {
 		max_len = 34;

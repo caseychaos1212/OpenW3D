@@ -47,8 +47,8 @@ int		WideStringClass::m_UsedTempStringCount	= 0;
 
 FastCriticalSectionClass WideStringClass::m_TempMutex;
 
-wchar_t		WideStringClass::m_NullChar				= 0;
-wchar_t *	WideStringClass::m_EmptyString			= &m_NullChar;
+unichar_t		WideStringClass::m_NullChar				= 0;
+unichar_t *	WideStringClass::m_EmptyString			= &m_NullChar;
 
 //
 // A trick to optimize strings that are allocated from the stack and used only temporarily
@@ -58,14 +58,14 @@ char		WideStringClass::m_TempString2[WideStringClass::MAX_TEMP_BYTES];
 char		WideStringClass::m_TempString3[WideStringClass::MAX_TEMP_BYTES];
 char		WideStringClass::m_TempString4[WideStringClass::MAX_TEMP_BYTES];
 
-wchar_t *	WideStringClass::m_FreeTempPtr[MAX_TEMP_STRING] = {
-	reinterpret_cast<wchar_t *> (m_TempString1 + sizeof (WideStringClass::_HEADER)),
-	reinterpret_cast<wchar_t *> (m_TempString2 + sizeof (WideStringClass::_HEADER)),
-	reinterpret_cast<wchar_t *> (m_TempString3 + sizeof (WideStringClass::_HEADER)),
-	reinterpret_cast<wchar_t *> (m_TempString4 + sizeof (WideStringClass::_HEADER))
+unichar_t *	WideStringClass::m_FreeTempPtr[MAX_TEMP_STRING] = {
+	reinterpret_cast<unichar_t *> (m_TempString1 + sizeof (WideStringClass::_HEADER)),
+	reinterpret_cast<unichar_t *> (m_TempString2 + sizeof (WideStringClass::_HEADER)),
+	reinterpret_cast<unichar_t *> (m_TempString3 + sizeof (WideStringClass::_HEADER)),
+	reinterpret_cast<unichar_t *> (m_TempString4 + sizeof (WideStringClass::_HEADER))
 };
 
-wchar_t *	WideStringClass::m_ResTempPtr[MAX_TEMP_STRING] = {
+unichar_t *	WideStringClass::m_ResTempPtr[MAX_TEMP_STRING] = {
 	NULL,
 	NULL,
 	NULL,
@@ -79,13 +79,13 @@ wchar_t *	WideStringClass::m_ResTempPtr[MAX_TEMP_STRING] = {
 //
 ///////////////////////////////////////////////////////////////////
 void
-WideStringClass::Get_String (int length, bool is_temp)
+WideStringClass::Get_String (size_t length, bool is_temp)
 {
 	if (!is_temp && length <= 1) {
 		m_Buffer = m_EmptyString;
 	} else {
 
-		wchar_t *string = NULL;
+		unichar_t *string = NULL;
 
 		//
 		//	Should we attempt to use a temp buffer for this string?
@@ -103,14 +103,14 @@ WideStringClass::Get_String (int length, bool is_temp)
 			//
 			for (int index = 0; index < MAX_TEMP_STRING; index ++) {
 				if (m_FreeTempPtr[index] != NULL) {
-					
+
 					//
 					//	Grab this unused buffer for our string
 					//
 					string					= m_FreeTempPtr[index];
 					m_ResTempPtr[index]	= m_FreeTempPtr[index];
-					m_FreeTempPtr[index]	= NULL;					
-					Set_Buffer_And_Allocated_Length (string, MAX_TEMP_LEN);
+					m_FreeTempPtr[index]	= NULL;
+					Set_Buffer_And_Allocated_Length (string, static_cast<size_t>(MAX_TEMP_LEN));
 
 					//
 					//	Increment the count of used buffers
@@ -136,17 +136,17 @@ WideStringClass::Get_String (int length, bool is_temp)
 //
 ///////////////////////////////////////////////////////////////////
 void
-WideStringClass::Resize (int new_len)
+WideStringClass::Resize (size_t new_len)
 {
-	int allocated_len = Get_Allocated_Length ();
+	size_t allocated_len = Get_Allocated_Length ();
 	if (new_len > allocated_len) {
 
 		//
 		//	Allocate the new buffer and copy the contents of our current
 		// string.
 		//
-		wchar_t *new_buffer = Allocate_Buffer (new_len);
-		wcscpy (new_buffer, m_Buffer);
+		unichar_t *new_buffer = Allocate_Buffer (new_len);
+		u_strcpy (new_buffer, m_Buffer);
 
 		//
 		//	Switch to the new buffer
@@ -164,20 +164,20 @@ WideStringClass::Resize (int new_len)
 //
 ///////////////////////////////////////////////////////////////////
 void
-WideStringClass::Uninitialised_Grow (int new_len)
+WideStringClass::Uninitialised_Grow (size_t new_len)
 {
-	int allocated_len = Get_Allocated_Length ();
+	size_t allocated_len = Get_Allocated_Length ();
 	if (new_len > allocated_len) {
-		
+
 		//
 		//	Switch to a newly allocated buffer
 		//
-		wchar_t *new_buffer = Allocate_Buffer (new_len);
-		Set_Buffer_And_Allocated_Length (new_buffer, new_len);	
+		unichar_t *new_buffer = Allocate_Buffer (new_len);
+		Set_Buffer_And_Allocated_Length (new_buffer, new_len);
 	}
 
 	//
-	// Whenever this function is called, clear the cached length 
+	// Whenever this function is called, clear the cached length
 	//
 	Store_Length (0);
 	return ;
@@ -205,7 +205,7 @@ WideStringClass::Free_String (void)
 				// at the same time we are.
 				//
 				FastCriticalSectionClass::LockClass lock(m_TempMutex);
-				
+
 				//
 				//	Release our hold on this temporary buffer
 				//
@@ -241,8 +241,8 @@ WideStringClass::Free_String (void)
 //	Format
 //
 ///////////////////////////////////////////////////////////////////
-int __cdecl
-WideStringClass::Format_Args (const wchar_t *format, const va_list & arg_list )
+int
+WideStringClass::Format_Args (const unichar_t *format, va_list arg_list )
 {
 	if (format == NULL) {
 		return 0;
@@ -251,16 +251,23 @@ WideStringClass::Format_Args (const wchar_t *format, const va_list & arg_list )
 	//
 	// Make a guess at the maximum length of the resulting string
 	//
-	wchar_t temp_buffer[512] = { 0 };
+	unichar_t temp_buffer[512] = { 0 };
 
 	//
 	//	Format the string
 	//
-	int retval = _vsnwprintf (temp_buffer, 512, format, arg_list);
-	
+	int retval = u_vsnprintf_u (temp_buffer, 512, format, arg_list);
+
+	//
+	// Ensure null termination if an error occurred
+	//
+	if (retval < 0 || retval >= 512) {
+		temp_buffer[511] = U_CHAR('\0');
+	}
+
 	//
 	//	Copy the string into our buffer
-	//	
+	//
 	(*this) = temp_buffer;
 
 	return retval;
@@ -272,12 +279,40 @@ WideStringClass::Format_Args (const wchar_t *format, const va_list & arg_list )
 //	Format
 //
 ///////////////////////////////////////////////////////////////////
-int __cdecl
-WideStringClass::Format (const wchar_t *format, ...)
+int
+WideStringClass::Format (const unichar_t *format, ...)
 {
 	if (format == NULL) {
 		return 0;
 	}
+
+#if W3D_USING_ICU
+	// If format exceeds this result will anyhow. 
+	unichar_t conv_buffer[512] = { 0 };
+	u_strncpy(conv_buffer, format, sizeof(conv_buffer) / sizeof(unichar_t));
+	conv_buffer[511] = U_CHAR('\0');
+
+	// Wide stdio classes on windows flip meaning of %s and %S relative to ICU so need to fix it here.
+	for (size_t i = 0; i < sizeof(conv_buffer) / sizeof(unichar_t) && conv_buffer[i] != U_CHAR('\0'); ++i)
+	{
+		if (conv_buffer[i] == U_CHAR('%')) {
+			++i;
+			if (conv_buffer[i] == U_CHAR('\0')) {
+				break;
+			}
+
+			if (conv_buffer[i] == U_CHAR('s')) {
+				conv_buffer[i] = U_CHAR('S');
+			}
+
+			if (conv_buffer[i] == U_CHAR('S')) {
+				conv_buffer[i] = U_CHAR('s');
+			}
+		}
+	}
+
+	format = conv_buffer;
+#endif
 
 	va_list arg_list;
 	va_start (arg_list, format);
@@ -285,16 +320,23 @@ WideStringClass::Format (const wchar_t *format, ...)
 	//
 	// Make a guess at the maximum length of the resulting string
 	//
-	wchar_t temp_buffer[512] = { 0 };
+	unichar_t temp_buffer[512] = { 0 };
 
 	//
 	//	Format the string
 	//
-	int retval = _vsnwprintf (temp_buffer, 512, format, arg_list);
-	
+	int retval = u_vsnprintf_u (temp_buffer, 512, format, arg_list);
+
+	//
+	// Ensure null termination if an error occurred
+	//
+	if (retval < 0 || retval >= 512) {
+		temp_buffer[511] = U_CHAR('\0');
+	}
+
 	//
 	//	Copy the string into our buffer
-	//	
+	//
 	(*this) = temp_buffer;
 
 	va_end (arg_list);
@@ -319,22 +361,19 @@ WideStringClass::Release_Resources (void)
 bool WideStringClass::Convert_From (const char *text)
 {
 	if (text != NULL) {
-		
-		int length;
+		size_t length = u_mbtows(nullptr, text, 0);
 
-		length = MultiByteToWideChar (CP_ACP, 0, text, -1, NULL, 0);
-		if (length > 0) {
+		if (length > 0 && length != size_t(-1)) {
+			length = u_mbtows(Get_Buffer(length), text, length);
 
-			Uninitialised_Grow (length);
-			Store_Length (length - 1);
-
-			// Convert.
-			MultiByteToWideChar (CP_ACP, 0, text, -1, m_Buffer, length);
-
-			// Success.
-			return (true);
+			if (length > 0 && length != size_t(-1)) {
+				Store_Length(length - 1);
+				return (true);
+			}
 		}
-   }
+
+		WWDEBUG_SAY(("Conversion from utf-8 to utf-16 failed\n"));
+	}
 
 	// Failure.
 	return (false);
@@ -344,17 +383,20 @@ bool WideStringClass::Convert_From (const char *text)
 // Test if a Unicode string is within the ANSI range. (0 - 255)
 ///////////////////////////////////////////////////////////////////
 bool WideStringClass::Is_ANSI(void)
-	{
+{
 	if (m_Buffer) {
 		for (int index = 0; m_Buffer[index] != 0; index++) {
-			unsigned short value = m_Buffer[index];
+			unichar_t value = m_Buffer[index];
 
-			if (value > 255) {
+			//
+			// This is not strictly ANSI, but rather Windows-1252 code page which aligns with UTF16
+			//
+			if (value > U_CHAR('\xFF')) {
 				return false;
 			}
 		}
 	}
 
 	return true;
-	}
+}
 

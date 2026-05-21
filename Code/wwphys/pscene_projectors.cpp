@@ -116,7 +116,7 @@ private:
 		const ShadowTexClass & operator = (const ShadowTexClass &);
 
 		bool					operator == (const ShadowTexClass &)						{ return false; }
-		bool					operator != (const ShadowTexClass & that)					{ return true; }
+		bool					operator != (const ShadowTexClass &)					{ return true; }
 		uint32				ObjectTypeID;			// use the Definition ID to uniquely identify object types
 		Quaternion			ObjectOrientation;	// orientation of the object when this shadow was generated
 		TextureClass *		Texture;					// texture

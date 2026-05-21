@@ -43,7 +43,6 @@
 
 
 #include "childdialog.h"
-#include "resource.h"
 #include "vector.h"
 #include "DlgMessageBox.h"
 
@@ -62,11 +61,11 @@ class InputCtrlClass;
 class ControlsListTabClass : public ChildDialogClass, public Observer<DlgMsgBoxEvent>
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
-	////////////////////////////////////////////////////////////////	
-	ControlsListTabClass (int res_id);
+	////////////////////////////////////////////////////////////////
+	ControlsListTabClass (const DialogResource *dialog_resource);
 
 	////////////////////////////////////////////////////////////////
 	//	Public methods
@@ -99,7 +98,7 @@ protected:
 	void				Remap_Key (int ctrl_id, int function_id, int input_id);
 	void				Clear_Key (int key_id, bool clear_zoom);
 	void				Prompt_User (void);
-	const wchar_t *	Get_Function_Name (int function_id);
+	const unichar_t *	Get_Function_Name (int function_id);
 
 	////////////////////////////////////////////////////////////////
 	//	Protected member data

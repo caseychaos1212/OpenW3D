@@ -65,17 +65,17 @@ sint32  Sem4::Wait(void) const
 		return -1; // no semaphore!
 
 	DWORD dwWaitResult = WaitForSingleObject(sem, INFINITE);
-	switch (dwWaitResult) { 
+	switch (dwWaitResult) {
 	case WAIT_OBJECT_0: // The semaphore object was signaled.
 		return 0;
 		break;
 	case WAIT_TIMEOUT: // Should not happen ;)
 		return -1;
-		break; 
+		break;
 	}
 	return -1;
 #endif
-} 
+}
 
 sint32 Sem4::Post(void) const
 {
@@ -98,13 +98,13 @@ sint32 Sem4::TryWait(void) const
 	if (!sem)
 		return -1;
 	DWORD dwWaitResult = WaitForSingleObject(sem, 0L);
-	switch (dwWaitResult) { 
+	switch (dwWaitResult) {
 	case WAIT_OBJECT_0: // The semaphore object was signaled.
 		return 0;
 		break;
 	case WAIT_TIMEOUT:
 		return -1;
-		break; 
+		break;
 	}
 	return -1;
 #endif
@@ -117,7 +117,7 @@ sint32 Sem4::GetValue(int *sval) const
 #else
 	if (!sem)
 		return -1;
-	long prev;
+	int prev;
 	if (!ReleaseSemaphore(sem, 0, &prev))
 		return -1;
 	if (sval)
@@ -135,7 +135,7 @@ sint32 Sem4::Destroy(void)
 #endif
 }
 
-#else  
+#else
 
 /****************************************************************************
 non threaded versions that do nothing
@@ -156,7 +156,7 @@ Sem4::~Sem4()
 sint32  Sem4::Wait(void) const
 {
   return(0);
-} 
+}
 
 sint32 Sem4::Post(void) const
 {

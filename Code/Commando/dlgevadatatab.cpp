@@ -34,6 +34,7 @@
  * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include "renegadedialog.h"
 #include "dlgevadatatab.h"
 #include "string_ids.h"
 #include "translatedb.h"
@@ -54,7 +55,7 @@
 //
 ////////////////////////////////////////////////////////////////
 EvaDataTabClass::EvaDataTabClass (void)	:
-	ChildDialogClass (IDD_ENCYCLOPEDIA_DATA_TAB)
+	ChildDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_ENCYCLOPEDIA_DATA_TAB))
 {
 	return ;
 }
@@ -112,8 +113,8 @@ EvaDataTabClass::Fill_Statistics_List (void)
 		Set_Dlg_Item_Int (IDC_WEAPONS_TEXT,				player->Get_Weapon_Fired_Count ());
 		Set_Dlg_Item_Int (IDC_POWERUPS_TEXT,			player->Get_Powerups_Collected ());
 		Set_Dlg_Item_Int (IDC_FRIENDLIES_TEXT,			player->Get_Allies_Killed ());
-		Set_Dlg_Item_Int (IDC_SHOTS_FIRED_TEXT,		player->Get_Shots_Fired ());		
-		Set_Dlg_Item_Int (IDC_ENEMIES_KILLED_TEXT,	player->Get_Enemies_Killed ());		
+		Set_Dlg_Item_Int (IDC_SHOTS_FIRED_TEXT,		player->Get_Shots_Fired ());
+		Set_Dlg_Item_Int (IDC_ENEMIES_KILLED_TEXT,	player->Get_Enemies_Killed ());
 		Set_Dlg_Item_Int (IDC_VEHICLE_KILLS_TEXT,		player->Get_Kills_From_Vehicle ());
 		Set_Dlg_Item_Int (IDC_VEHICLE_SQUISHES_TEXT,	player->Get_Squishes ());
 		Set_Dlg_Item_Int (IDC_VEHICLES_KILLED_TEXT,	player->Get_Vehiclies_Destroyed ());
@@ -151,9 +152,9 @@ EvaDataTabClass::Fill_Statistics_List (void)
 		int seconds		= (int)time;
 
 		if (hours > 0) {
-			time_string.Format (L"%.01d:%.02d:%.2d", hours, minutes, seconds);
+			time_string.Format (U_CHAR("%.01d:%.02d:%.2d"), hours, minutes, seconds);
 		} else {
-			time_string.Format (L"%.02d:%.2d", minutes, seconds);
+			time_string.Format (U_CHAR("%.02d:%.2d"), minutes, seconds);
 		}
 
 		Set_Dlg_Item_Text (IDC_VEHICLES_TIME_TEXT, time_string);
@@ -168,14 +169,14 @@ EvaDataTabClass::Fill_Statistics_List (void)
 		time		-= minutes * 60.0F;
 		seconds	= (int)time;
 
-		time_string.Format (L"%.02d", hours);
+		time_string.Format (U_CHAR("%.02d"), hours);
 		Set_Dlg_Item_Text (IDC_GAME_TIME_HOURS_TEXT, time_string);
-		time_string.Format (L"%.02d", minutes);
+		time_string.Format (U_CHAR("%.02d"), minutes);
 		Set_Dlg_Item_Text (IDC_GAME_TIME_MINS_TEXT, time_string);
-		time_string.Format (L"%.02d", seconds);
+		time_string.Format (U_CHAR("%.02d"), seconds);
 		Set_Dlg_Item_Text (IDC_GAME_TIME_SECS_TEXT, time_string);
-		
-		
+
+
 		/*WideStringClass entry;
 
 		entry.Format (TRANSLATE (IDS_EVA_DATA_GAME_TIME),  / 60.0F);

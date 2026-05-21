@@ -66,13 +66,13 @@ class LogicalListenerClass : public SoundSceneObjClass
 
 		//////////////////////////////////////////////////////////////////////
 		//	LogicalSoundClass specific
-		//////////////////////////////////////////////////////////////////////		
+		//////////////////////////////////////////////////////////////////////
 		virtual void			Set_Type_Mask (uint32 mask = 0)	{ m_TypeMask = mask; }
 		virtual uint32			Get_Type_Mask (void) const			{ return m_TypeMask; }
 
 		//////////////////////////////////////////////////////////////////////
 		//	Position/direction methods
-		//////////////////////////////////////////////////////////////////////		
+		//////////////////////////////////////////////////////////////////////
 		virtual void			Set_Position (const Vector3 &position) override		{ m_Position = position; }
 		virtual Vector3			Get_Position (void) const override						{ return m_Position; }
 
@@ -82,7 +82,7 @@ class LogicalListenerClass : public SoundSceneObjClass
 		//////////////////////////////////////////////////////////////////////
 		//	Culling methods (not used for listeners)
 		//////////////////////////////////////////////////////////////////////
-		virtual void			Cull_Sound (bool culled = true) override	{ };
+		virtual void			Cull_Sound (bool /* culled */ = true) override	{ };
 		virtual bool			Is_Sound_Culled (void) const override		{ return false; };
 
 		//////////////////////////////////////////////////////////////////////
@@ -105,12 +105,12 @@ class LogicalListenerClass : public SoundSceneObjClass
 		static float			Get_Global_Scale (void)				{ return m_GlobalScale; }
 		static void				Set_Global_Scale (float scale)	{ m_GlobalScale = scale; }
 
-		virtual void			Set_DropOff_Radius (float radius = 1) override	{}
+		virtual void			Set_DropOff_Radius (float /* radius */ = 1) override	{}
 		virtual float			Get_DropOff_Radius (void) const override			{ return 1.0F; }
 
 		//////////////////////////////////////////////////////////////////////
 		//	From PersistClass
-		//////////////////////////////////////////////////////////////////////				
+		//////////////////////////////////////////////////////////////////////
 		bool									Save (ChunkSaveClass &csave) override;
 		bool									Load (ChunkLoadClass &cload) override;
 		const PersistFactoryClass &	Get_Factory (void) const override;
@@ -118,7 +118,7 @@ class LogicalListenerClass : public SoundSceneObjClass
 
 		//////////////////////////////////////////////////////////////////////
 		//	Timestamp
-		//////////////////////////////////////////////////////////////////////				
+		//////////////////////////////////////////////////////////////////////
 		uint32					Get_Timestamp (void) const		{ return m_Timestamp; }
 		void					Set_Timestamp (int timestamp)	{ m_Timestamp = timestamp; }
 

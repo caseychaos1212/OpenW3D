@@ -42,11 +42,10 @@
 #include "hanim.h"
 #include "rendobj.h"
 #include "ww3d.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "render2d.h"
 #include "dialogcontrol.h"
 #include "dialogbase.h"
-#include "resource.h"
 #include "WWAudio.h"
 #include <algorithm>
 
@@ -157,12 +156,12 @@ void
 MainMenuTransitionClass::On_Frame_Update (void)
 {
 	if (Model != NULL && TransitionAnim != NULL) {
-		
+
 		//
 		//	Do we need to keep animating?
 		//
 		if (CurrentFrame < TargetFrame) {
-			
+
 			//
 			//	Get the frame rate
 			//
@@ -190,7 +189,7 @@ MainMenuTransitionClass::On_Frame_Update (void)
 			if (CurrentFrame >= TargetFrame && Type == SCREEN_OUT) {
 				Model->Remove ();
 			}
-		}	
+		}
 	}
 
 	DialogTransitionClass::On_Frame_Update ();
@@ -208,7 +207,7 @@ MainMenuTransitionClass::Update_Controls (void)
 {
 	const int ENTRIES = 6;
 
-	const int ControlIDArray[ENTRIES] = 
+	const int ControlIDArray[ENTRIES] =
 	{
 		IDC_MENU_START_SP_GAME_BUTTON,
 		//C_MENU_START_SKIRMISH_GAME_BUTTON,
@@ -236,7 +235,7 @@ MainMenuTransitionClass::Update_Controls (void)
 		//
 		StringClass bone_name;
 		bone_name.Format ("IF_MMTF%d", index + 1);
-		const Matrix3D &tm = Model->Get_Bone_Transform (bone_name);		
+		const Matrix3D &tm = Model->Get_Bone_Transform (bone_name);
 
 		//
 		//	Transform the position into screen space
@@ -246,7 +245,7 @@ MainMenuTransitionClass::Update_Controls (void)
 
 		Vector3 new_pos (0, 0, 0);
 		Camera->Project_Camera_Space_Point (new_pos, cam_space_pos);
-		
+
 		//
 		//	Convert the normalized screen space position to pixel coordinates
 		//

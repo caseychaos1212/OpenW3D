@@ -35,8 +35,8 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgcncserverinfo.h"
+#include "renegadedialog.h"
 #include "gamedata.h"
-#include "resource.h"
 #include "listctrl.h"
 #include "imagectrl.h"
 #include "playertype.h"
@@ -52,7 +52,6 @@
 #include "building.h"
 #include "damage.h"
 #include "vehicle.h"
-#include "resource.h"
 #include "wolgmode.h"
 #include <WWOnline/WOLUser.h>
 #include "translatedb.h"
@@ -77,7 +76,7 @@ enum
 //
 ////////////////////////////////////////////////////////////////
 CNCServerInfoDialogClass::CNCServerInfoDialogClass (void)	:
-	MenuDialogClass (IDD_CNC_SERVER_INFO)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_CNC_SERVER_INFO))
 {
 	return ;
 }
@@ -123,10 +122,10 @@ CNCServerInfoDialogClass::On_Init_Dialog (void)
 		//
 		WideStringClass description;
 		The_Game ()->Get_Description (description);
-		const wchar_t *buffer = description.Peek_Buffer ();
+		const unichar_t *buffer = description.Peek_Buffer ();
 
-		const wchar_t DELIMITER	= L'\t';
-		const wchar_t NEWLINE		= L'\n';
+		const unichar_t DELIMITER	= U_CHAR('\t');
+		const unichar_t NEWLINE		= U_CHAR('\n');
 
 		//
 		//	Fill the settings into the list control
@@ -136,9 +135,9 @@ CNCServerInfoDialogClass::On_Init_Dialog (void)
 		int item_index		= 0;
 		int index			= 0;
 		while (buffer[index] != 0) {
-			
+
 			if (buffer[index] == DELIMITER) {
-				
+
 				//
 				//	Insert a new entry
 				//

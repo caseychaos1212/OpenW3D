@@ -17,34 +17,44 @@
 */
 
 /* $Header: /Commando/Code/Tests/mathtest/P_timer.cpp 2     7/22/97 1:14p Greg_h $ */
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Voxel Technology                                             * 
- *                                                                                             * 
- *                    File Name : P_TIMER.CPP                                                  * 
- *                                                                                             * 
- *                   Programmer : Greg Hjelstrom                                               * 
- *                                                                                             * 
- *                   Start Date : 02/24/97                                                     * 
- *                                                                                             * 
- *                  Last Update : February 24, 1997 [GH]                                       * 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Voxel Technology                                             *
+ *                                                                                             *
+ *                    File Name : P_TIMER.CPP                                                  *
+ *                                                                                             *
+ *                   Programmer : Greg Hjelstrom                                               *
+ *                                                                                             *
+ *                   Start Date : 02/24/97                                                     *
+ *                                                                                             *
+ *                  Last Update : February 24, 1997 [GH]                                       *
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#include "p_timer.h"
+#include "P_timer.h"
 
+#if defined(OPENW3D_WIN32)
 #include <windows.h>
+#elif defined(OPENW3D_SDL3)
+#include <SDL3/SDL_timer.h>
+#endif
 
-unsigned Get_CPU_Clock ( void )
+uint64_t Get_CPU_Clock ( void )
 {
+#if defined(OPENW3D_WIN32)
 	LARGE_INTEGER LargeInt;
 
 	if (QueryPerformanceFrequency(&LargeInt)) {
-		return(LargeInt.LowPart);
+		return(LargeInt.QuadPart);
 	}
 	return 0;
+#elif defined(OPENW3D_SDL3)
+	return SDL_GetPerformanceCounter();
+#else
+	assert(0);
+#endif
 }

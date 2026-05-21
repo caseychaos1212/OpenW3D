@@ -42,6 +42,7 @@
 #define __WOLGMODE_H__
 
 #include "gamemode.h"
+#include "vector.h"
 #include "WOLBuddyMgr.h"
 #include <WWOnline/RefPtr.h>
 #include <wwlib/Notify.h>
@@ -105,18 +106,18 @@ class	WolGameModeClass :
 
 		void Init_WOL_Player(cPlayer* player);
 
-		RefPtr<WWOnline::UserData> Get_WOL_User_Data(const wchar_t* name);
+		RefPtr<WWOnline::UserData> Get_WOL_User_Data(const unichar_t* name);
 
-		void Page_WOL_User(const wchar_t* name, const wchar_t* msg);
-		void Reply_Last_Page(const wchar_t* msg);
+		void Page_WOL_User(const unichar_t* name, const unichar_t* msg);
+		void Reply_Last_Page(const unichar_t* msg);
 
-		void Locate_WOL_User(const wchar_t* name);
-		void Invite_WOL_User(const wchar_t* name, const wchar_t* msg);
-		void Join_WOL_User(const wchar_t* name);
+		void Locate_WOL_User(const unichar_t* name);
+		void Invite_WOL_User(const unichar_t* name, const unichar_t* msg);
+		void Join_WOL_User(const unichar_t* name);
 
-		bool Kick_Player(const wchar_t* name);
-		void Ban_Player(const wchar_t* name, unsigned long ip);
-		bool Is_Banned(const char *player_name, unsigned long ip);
+		bool Kick_Player(const unichar_t* name);
+		void Ban_Player(const unichar_t* name, unsigned int ip);
+		bool Is_Banned(const char *player_name, unsigned int ip);
 		void Read_Kick_List(void);
 		void Auto_Kick(void);
 
@@ -159,13 +160,13 @@ class	WolGameModeClass :
 		WOLQuickMatch* mQuickMatch;
 
 		cGameData* mTheGame;
-		unsigned long mGameID;
+		unsigned int mGameID;
 		bool mGameInProgress;
-		unsigned long mSendServerInfoTime;
+		unsigned int mSendServerInfoTime;
 		bool mQuietMode;
 		bool mConnected;
-		unsigned long mLastPatchCheckTime;
-		unsigned long mStartQuitProcessTime;
+		unsigned int mLastPatchCheckTime;
+		unsigned int mStartQuitProcessTime;
 		bool mPatchAvailable;
 		bool mMonitorConnection;
 
@@ -174,7 +175,7 @@ class	WolGameModeClass :
 		bool mChannelCreateSuccessFlag;
 
 		DynamicVectorClass<StringClass> KickNameList;
-		DynamicVectorClass<unsigned long> KickIPList;
+		DynamicVectorClass<unsigned int> KickIPList;
 
 
 		DynamicVectorClass<StringClass> IdleKickNameList;

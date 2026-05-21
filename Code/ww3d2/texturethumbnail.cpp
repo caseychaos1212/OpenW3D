@@ -19,6 +19,7 @@
 #include "texturethumbnail.h"
 #include "hashtemplate.h"
 #include "missingtexture.h"
+#include "pathutil.h"
 #include "TARGA.H"
 #include "ww3dformat.h"
 #include "ddsfile.h"
@@ -27,7 +28,9 @@
 #include "ffactory.h"
 #include "rawfile.h"
 #include "mixfile.h"
+#include "wwdialog.h"
 #include <windows.h>
+#include <climits>
 
 DLListClass<ThumbnailManagerClass> ThumbnailManagerClass::ThumbnailManagerList;
 static bool message_box_displayed=false;
@@ -37,7 +40,10 @@ const char* ThumbFileHeader="THU4";
 static void Create_Hash_Name(StringClass& name, const StringClass& thumb_name)
 {
 	name=thumb_name;
-	int len=name.Get_Length();
+	const size_t len_sz=name.Get_Length();
+	WWASSERT(len_sz >= 4);
+	WWASSERT(len_sz <= static_cast<size_t>(std::numeric_limits<int>::max()));
+	const int len = static_cast<int>(len_sz);
 	WWASSERT(!stricmp(&name[len-4],".tga") || !stricmp(&name[len-4],".dds"));
 	name[len-4]='\0';
 }
@@ -73,7 +79,7 @@ ThumbnailClass::ThumbnailClass(
 	unsigned original_mip_level_count,
 	WW3DFormat original_format,
 	bool allocated,
-	unsigned long date_time)
+	unsigned int date_time)
 	:
 	Manager(manager),
 	Name(name),
@@ -120,8 +126,10 @@ ThumbnailClass::ThumbnailClass(ThumbnailManagerClass* manager, const StringClass
 	if (dds_file.Is_Available() && dds_file.Load()) {
 		DateTime=dds_file.Get_Date_Time();
 
-		int len=Name.Get_Length();
-		WWASSERT(len>4);
+		const size_t len_sz=Name.Get_Length();
+		WWASSERT(len_sz>4);
+		WWASSERT(len_sz <= static_cast<size_t>(std::numeric_limits<int>::max()));
+		const int len = static_cast<int>(len_sz);
 		Name[len-3]='d';
 		Name[len-2]='d';
 		Name[len-1]='s';
@@ -161,7 +169,7 @@ ThumbnailClass::ThumbnailClass(ThumbnailManagerClass* manager, const StringClass
 		unsigned src_bpp=0;
 		Get_WW3D_Format(src_format,src_bpp,targa);
 		if (src_format==WW3D_FORMAT_UNKNOWN) {
-			WWDEBUG_SAY(("Unknown texture format for %s\n",filename));
+			WWDEBUG_SAY(("Unknown texture format for %s\n",filename.Peek_Buffer()));
 			return;
 		}
 
@@ -218,8 +226,10 @@ ThumbnailClass::ThumbnailClass(ThumbnailManagerClass* manager, const StringClass
 
 		unsigned char* src_surface=(unsigned char*)targa.GetImage();
 
-		int len=Name.Get_Length();
-		WWASSERT(len>4);
+		const size_t len_sz=Name.Get_Length();
+		WWASSERT(len_sz>4);
+		WWASSERT(len_sz <= static_cast<size_t>(std::numeric_limits<int>::max()));
+		const int len = static_cast<int>(len_sz);
 		Name[len-3]='t';
 		Name[len-2]='g';
 		Name[len-1]='a';
@@ -256,20 +266,23 @@ ThumbnailClass::~ThumbnailClass()
 void ThumbnailManagerClass::Create_Thumbnails()
 {
 	SimpleFileFactoryClass ff;
-	ff.Set_Sub_Directory("Data\\");
+	ff.Set_Sub_Directory("Data/");
 
 	MixFileFactoryClass mix(MixFileName, &ff);
 	FileFactoryClass* old_file_factory=_TheFileFactory;
 	_TheFileFactory=&mix;
 	if (mix.Is_Valid()) {
-		DynamicVectorClass<StringClass> list;
-		list.Set_Growth_Step (1000);
-		mix.Build_Filename_List(list);
-		for (int i=0;i<list.Count();++i) {
-			int len=list[i].Get_Length();
-			if (!stricmp(&list[i][len-4],".tga") || !stricmp(&list[i][len-4],".dds")) {
-				if (!Peek_Thumbnail_Instance(list[i])) {
-					new ThumbnailClass(this,list[i]);
+		DynamicVectorClass<StringClass> file_list;
+		file_list.Set_Growth_Step (1000);
+		mix.Build_Filename_List(file_list);
+	for (int i=0;i<file_list.Count();++i) {
+		const size_t len_sz=file_list[i].Get_Length();
+		WWASSERT(len_sz >= 4);
+		WWASSERT(len_sz <= static_cast<size_t>(std::numeric_limits<int>::max()));
+		const int len = static_cast<int>(len_sz);
+		if (!stricmp(&file_list[i][len-4],".tga") || !stricmp(&file_list[i][len-4],".dds")) {
+				if (!Peek_Thumbnail_Instance(file_list[i])) {
+					new ThumbnailClass(this,file_list[i]);
 				}
 			}
 		}
@@ -317,8 +330,8 @@ void ThumbnailManagerClass::Load()
 					int original_mip_level_count;
 					WW3DFormat original_format;
 					int name_len;
-					unsigned long date_time;
-					thumb_file->Read(&date_time,sizeof(unsigned long));
+					unsigned int date_time;
+					thumb_file->Read(&date_time,sizeof(unsigned int));
 					thumb_file->Read(&offset,sizeof(int));
 					thumb_file->Read(&width,sizeof(int));
 					thumb_file->Read(&height,sizeof(int));
@@ -399,7 +412,9 @@ void ThumbnailManagerClass::Save(bool force)
 		total_header_length+=4;	// int original format
 		total_header_length+=4;	// int name string length
 
-		total_header_length+=strlen(thumb->Get_Name());
+		size_t name_length = strlen(thumb->Get_Name());
+		WWASSERT(name_length <= static_cast<size_t>(INT_MAX));
+		total_header_length += static_cast<int>(name_length);
 		total_data_length+=thumb->Get_Width()*thumb->Get_Height()*2;
 		total_thumb_count++;
 	}
@@ -421,16 +436,18 @@ void ThumbnailManagerClass::Save(bool force)
 	for (ite.First();!ite.Is_Done();ite.Next()) {
 		ThumbnailClass* thumb=ite.Peek_Value();
 		const char* name=thumb->Get_Name();
-		int name_len=strlen(name);
+		size_t name_length = strlen(name);
+		WWASSERT(name_length <= static_cast<size_t>(INT_MAX));
+		int name_len = static_cast<int>(name_length);
 		int width=thumb->Get_Width();
 		int height=thumb->Get_Height();
 		int original_width=thumb->Get_Original_Texture_Width();
 		int original_height=thumb->Get_Original_Texture_Height();
 		int original_mip_level_count=thumb->Get_Original_Texture_Mip_Level_Count();
 		WW3DFormat original_format=thumb->Get_Original_Texture_Format();
-		unsigned long date_time=thumb->Get_Date_Time();
+		unsigned int date_time=thumb->Get_Date_Time();
 
-		thumb_file->Write(&date_time,sizeof(unsigned long));
+		thumb_file->Write(&date_time,sizeof(unsigned int));
 		thumb_file->Write(&offset,sizeof(int));
 		thumb_file->Write(&width,sizeof(int));
 		thumb_file->Write(&height,sizeof(int));
@@ -559,11 +576,13 @@ void ThumbnailManagerClass::Remove_From_Hash(ThumbnailClass* thumb)
 void ThumbnailManagerClass::Update_Thumbnail_File(const char* mix_file_name,bool display_message_box)
 {
 	SimpleFileFactoryClass ff;
-	ff.Set_Sub_Directory("Data\\");
+	ff.Set_Sub_Directory("Data/");
 
 	StringClass thumb_file_name(mix_file_name,true);
-	int len=thumb_file_name.Get_Length();
-	WWASSERT(len>4);
+	const size_t len_sz=thumb_file_name.Get_Length();
+	WWASSERT(len_sz>4);
+	WWASSERT(len_sz <= static_cast<size_t>(std::numeric_limits<int>::max()));
+	const int len = static_cast<int>(len_sz);
 	thumb_file_name[len-3]='t';
 	thumb_file_name[len-2]='h';
 	thumb_file_name[len-1]='u';
@@ -586,9 +605,9 @@ void ThumbnailManagerClass::Update_Thumbnail_File(const char* mix_file_name,bool
 		return;
 	}
 
-	unsigned long mix_date_time=mix_file->Get_Date_Time();
+	unsigned int mix_date_time=mix_file->Get_Date_Time();
 	if (thumb_file->Is_Available()) {
-		unsigned long thumb_date_time=thumb_file->Get_Date_Time();
+		unsigned int thumb_date_time=thumb_file->Get_Date_Time();
 		if (mix_date_time!=thumb_date_time) {
 			thumb_file->Delete();
 		}
@@ -613,13 +632,12 @@ void ThumbnailManagerClass::Update_Thumbnail_File(const char* mix_file_name,bool
 
 	if (display_message_box && !message_box_displayed) {
 		message_box_displayed=true;
-		::MessageBoxA(NULL,
+		::Show_Message_Box(MESSAGEBOX_BUTTONS_OK,
 			"Some or all texture thumbnails need to be updated.\n"
 			"This will take a while. The update will only be done once\n"
 			"each time a mix file changes and thumb database hasn't been\n"
 			"updated.",
-			"Updating texture thumbnails",
-			MB_OK);
+			"Updating texture thumbnails");
 	}
 
 	// we don't currently have a thumbnail file (either we just deleted it or it never existed, we don't care)
@@ -646,10 +664,8 @@ void ThumbnailManagerClass::Pre_Init(bool display_message_box)
 	// Collect all mix file names
 	DynamicVectorClass<StringClass> mix_names;
 
-	char cur_dir[256];
-	GetCurrentDirectoryA(sizeof(cur_dir),cur_dir);
-	StringClass new_dir(cur_dir,true);
-	new_dir+="\\Data";
+	StringClass cur_dir = cPathUtil::GetWorkingDirectory(true);
+	StringClass new_dir = cur_dir + "Data";
 	SetCurrentDirectoryA(new_dir);
 
 	WIN32_FIND_DATAA find_data;

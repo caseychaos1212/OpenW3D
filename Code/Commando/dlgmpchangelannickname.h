@@ -32,7 +32,6 @@
 *
 ******************************************************************************/
 
-#include "resource.h"
 #include <wwui/popupdialog.h>
 
 class DlgMpChangeLanNickname : public PopupDialogClass
@@ -45,7 +44,7 @@ protected:
 	~DlgMpChangeLanNickname();
 
 	void On_Init_Dialog(void) override;
-	void On_Command(int ctrlID, int mesage, DWORD param) override;
+	void On_Command(int ctrlID, int mesage, unsigned int param) override;
 	void On_EditCtrl_Change(EditCtrlClass* edit, int id) override;
 	void On_EditCtrl_Enter_Pressed(EditCtrlClass* edit, int id) override;
 

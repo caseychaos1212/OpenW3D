@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Command & Conquer                                            * 
- *                                                                                             * 
- *                     $Archive:: /G/wwlib/BUFF.H                                             $* 
- *                                                                                             * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Command & Conquer                                            *
+ *                                                                                             *
+ *                     $Archive:: /G/wwlib/BUFF.H                                             $*
+ *                                                                                             *
  *                      $Author:: Eric_c                                                      $*
- *                                                                                             * 
+ *                                                                                             *
  *                     $Modtime:: 4/02/99 11:59a                                              $*
- *                                                                                             * 
+ *                                                                                             *
  *                    $Revision:: 2                                                           $*
  *                                                                                             *
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 #if _MSC_VER >= 1000
 #pragma once
@@ -47,10 +47,10 @@
 */
 class Buffer {
 	public:
-		Buffer(char * ptr, long size=0);
-		Buffer(void * ptr=0, long size=0);
-		Buffer(void const * ptr, long size=0);
-		Buffer(long size);
+		Buffer(char * ptr, int size=0);
+		Buffer(void * ptr=0, int size=0);
+		Buffer(void const * ptr, int size=0);
+		Buffer(int size);
 		Buffer(Buffer const & buffer);
 		~Buffer(void);
 
@@ -60,7 +60,7 @@ class Buffer {
 
 		void Reset(void);
 		void * Get_Buffer(void) const {return(BufferPtr);}
-		long Get_Size(void) const {return(Size);}
+		int Get_Size(void) const {return(Size);}
 		bool Is_Valid(void) const {return(BufferPtr != 0);}
 
 	protected:
@@ -73,7 +73,7 @@ class Buffer {
 		/*
 		**	The size of the buffer memory.
 		*/
-		long Size;
+		int Size;
 
 		/*
 		**	Was the buffer allocated by this class? If so, then this class

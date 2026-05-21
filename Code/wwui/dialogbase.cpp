@@ -35,7 +35,6 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dialogbase.h"
-#include "dialogparser.h"
 #include "dialogcontrol.h"
 #include "buttonctrl.h"
 #include "dialogtext.h"
@@ -66,6 +65,7 @@
 #include "ProgressCtrl.h"
 #include "healthbarctrl.h"
 #include "systimer.h"
+#include "translatedb.h"
 
 #include <dinput.h>
 #include <algorithm>
@@ -82,14 +82,30 @@ const float	RES_SCREEN_HEIGHT	= 300;
 ////////////////////////////////////////////////////////////////
 DEFAULT_DLG_CMD_HANDLER		DialogBaseClass::DefaultCmdHandler = NULL;
 
+static WideStringClass TranslateDialogString(const unichar_t *text)
+{
+	WideStringClass result = text;
+	if (text) {
+		unichar_t *string_id = ::u_strstr(result.Peek_Buffer(), U_CHAR("IDS_"));
+		if (string_id) {
+			WideStringClass wide_string_id = string_id;
+			StringClass ascii_string_id;
+			wide_string_id.Convert_To(ascii_string_id);
+			const unichar_t *translation = TRANSLATE_BY_DESC(ascii_string_id);
+			result.Erase(string_id - result.Peek_Buffer(), result.Get_Length());
+			result += translation;
+		}
+	}
+	return result;
+}
 
 ////////////////////////////////////////////////////////////////
 //
 //	DialogBaseClass
 //
 ////////////////////////////////////////////////////////////////
-DialogBaseClass::DialogBaseClass (int res_id)	:
-	DialogResID (res_id),
+DialogBaseClass::DialogBaseClass (const DialogResource *dialog_resource)	:
+	DialogResource_ (dialog_resource),
 	AreControlsHidden (false),
 	LastFocusControl (NULL),
 	LastMouseClickTime (0),
@@ -120,23 +136,14 @@ DialogBaseClass::~DialogBaseClass (void)
 void
 DialogBaseClass::Start_Dialog (void)
 {
-	int dlg_width = 0;
-	int dlg_height = 0;
-	DynamicVectorClass<ControlDefinitionStruct> control_list;
-
-	//
-	//	Get all the information about the dialog that we'll need to create
-	// the dialog and its controls.
-	//
-	DialogParserClass::Parse_Template (DialogResID, &dlg_width, &dlg_height,
-								&Title, &control_list);
+	Title = TranslateDialogString(DialogResource_->caption);
 
 	//
 	//	Convert the dialog's width and height from dialog units to screen units
 	//
 	const RectClass &screen_rect	= Render2DClass::Get_Screen_Resolution ();
-	int dlg_screen_width				= int(((float)dlg_width / RES_SCREEN_WIDTH) * screen_rect.Width ());
-	int dlg_screen_height			= int(((float)dlg_height / RES_SCREEN_HEIGHT) * screen_rect.Height ());
+	int dlg_screen_width				= int(((float)DialogResource_->cx / RES_SCREEN_WIDTH) * screen_rect.Width ());
+	int dlg_screen_height			= int(((float)DialogResource_->cy / RES_SCREEN_HEIGHT) * screen_rect.Height ());
 
 	//
 	//	Center the dialog on the screen
@@ -149,14 +156,14 @@ DialogBaseClass::Start_Dialog (void)
 	//
 	//	Now create the controls
 	//
-	for (int index = 0; index < control_list.Count (); index ++) {
+	for (size_t index = 0; index < DialogResource_->count_controls; index ++) {
 
-		ControlDefinitionStruct &info = control_list[index];
+		const DialogResourceControl &info = DialogResource_->controls[index];
 
 		DialogControlClass *control = NULL;
 		switch (info.type)
 		{
-			case BUTTON:
+			case CONTROL_BUTTON:
 				if (	(info.style & 0xF) == BS_CHECKBOX ||
 						(info.style & 0xF) == BS_AUTOCHECKBOX)
 				{
@@ -169,7 +176,7 @@ DialogBaseClass::Start_Dialog (void)
 
 				break;
 
-			case STATIC:
+			case CONTROL_STATIC:
 				if ((info.style & 0xF) == SS_BITMAP) {
 					control = new ImageCtrlClass;
 				} else {
@@ -178,7 +185,7 @@ DialogBaseClass::Start_Dialog (void)
 
 				break;
 
-			case EDIT:
+			case CONTROL_EDIT:
 				if (info.style & ES_MULTILINE) {
 
 					if (info.style & ES_AUTOVSCROLL) {
@@ -192,55 +199,55 @@ DialogBaseClass::Start_Dialog (void)
 				}
 				break;
 
-			case COMBOBOX:
+			case CONTROL_COMBOBOX:
 				control = new ComboBoxCtrlClass;
 				break;
 
-			case SLIDER:
+			case CONTROL_SLIDER:
 				control = new SliderCtrlClass;
 				break;
 
-			case SCROLL_BAR:
+			case CONTROL_SCROLL_BAR:
 				control = new ScrollBarCtrlClass;
 				break;
 
-			case TAB:
+			case CONTROL_TAB:
 				control = new TabCtrlClass;
 				break;
 
-			case LIST_CTRL:
+			case CONTROL_LIST_CTRL:
 				control = new ListCtrlClass;
 				break;
 
-			case TREE_CTRL:
+			case CONTROL_TREE_CTRL:
 				control = new TreeCtrlClass;
 				break;
 
-			case MAP:
+			case CONTROL_MAP:
 				control = new MapCtrlClass;
 				break;
 
-			case VIEWER:
+			case CONTROL_VIEWER:
 				control = new ViewerCtrlClass;
 				break;
 
-			case HOTKEY:
+			case CONTROL_HOTKEY:
 				control = new InputCtrlClass;
 				break;
 
-			case SHORTCUT_BAR:
+			case CONTROL_SHORTCUT_BAR:
 				control = new ShortcutBarCtrlClass;
 				break;
 
-			case MERCHANDISE_CTRL:
+			case CONTROL_MERCHANDISE_CTRL:
 				control = new MerchandiseCtrlClass;
 				break;
 
-			case PROGRESS_BAR:
+			case CONTROL_PROGRESS_BAR:
 				control = new ProgressCtrlClass;
 				break;
 
-			case HEALTH_BAR:
+			case CONTROL_HEALTH_BAR:
 				control = new HealthBarCtrlClass;
 				break;
 		}
@@ -254,7 +261,7 @@ DialogBaseClass::Start_Dialog (void)
 			//	Set the generic control information
 			//
 			control->Set_Parent (this);
-			control->Set_Text (info.title);
+			control->Set_Text (TranslateDialogString(info.text));
 			control->Set_Style (info.style);
 			control->Set_ID (info.id);
 
@@ -499,10 +506,10 @@ DialogBaseClass::Get_Dlg_Item (int id) const
 //	Get_Dlg_Item_Text
 //
 ////////////////////////////////////////////////////////////////
-const wchar_t *
+const unichar_t *
 DialogBaseClass::Get_Dlg_Item_Text (int id) const
 {
-	const wchar_t *retval = NULL;
+	const unichar_t *retval = NULL;
 
 	//
 	//	Find the control
@@ -526,7 +533,7 @@ DialogBaseClass::Get_Dlg_Item_Text (int id) const
 //
 ////////////////////////////////////////////////////////////////
 void
-DialogBaseClass::Set_Dlg_Item_Text (int id, const wchar_t *text)
+DialogBaseClass::Set_Dlg_Item_Text (int id, const unichar_t *text)
 {
 	//
 	//	Find the control
@@ -563,12 +570,12 @@ DialogBaseClass::Get_Dlg_Item_Int (int id) const
 		//
 		//	Get the text from the control
 		//
-		const wchar_t *text = control->Get_Text ();
+		const unichar_t *text = control->Get_Text ();
 
 		//
 		//	Convert the text to an integer
 		//
-		retval = _wtoi (text);
+		u_sscanf_u(text, U_CHAR("%d"), &retval);
 	}
 
 	return retval;
@@ -593,7 +600,7 @@ DialogBaseClass::Set_Dlg_Item_Int (int id, int value)
 		//	Convert the value to a string
 		//
 		WideStringClass text;
-		text.Format (L"%d", value);
+		text.Format (U_CHAR("%d"), value);
 
 		//
 		//	Set the text of this control
@@ -624,12 +631,12 @@ DialogBaseClass::Get_Dlg_Item_Float (int id) const
 		//
 		//	Get the text from the control
 		//
-		const wchar_t *text = control->Get_Text ();
+		const unichar_t *text = control->Get_Text ();
 
 		//
 		//	Convert the text to an float
 		//
-		swscanf (text, L"%f", &retval);
+		u_sscanf_u (text, U_CHAR("%f"), &retval);
 	}
 
 	return retval;
@@ -654,7 +661,7 @@ DialogBaseClass::Set_Dlg_Item_Float (int id, float value)
 		//	Convert the value to a string
 		//
 		WideStringClass text;
-		text.Format (L"%.2f", value);
+		text.Format (U_CHAR("%.2f"), value);
 
 		//
 		//	Set the text of this control
@@ -920,7 +927,7 @@ DialogBaseClass::Update_Mouse_State (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-DialogBaseClass::On_Command (int ctrl_id, int message_id, DWORD param)
+DialogBaseClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	//
 	//	Allow the default handler to process this command
@@ -1550,12 +1557,12 @@ DialogBaseClass::Set_Rect (const RectClass &rect)
 		//
 		//	Offset this dialog
 		//
-		RectClass rect = ChildDialogList[index]->Get_Rect ();
-		rect.Left	+= offset.X;
-		rect.Right	+= offset.X;
-		rect.Top		+= offset.Y;
-		rect.Bottom	+= offset.Y;
-		ChildDialogList[index]->Set_Rect (rect);
+		RectClass offset_rect = ChildDialogList[index]->Get_Rect ();
+		offset_rect.Left	+= offset.X;
+		offset_rect.Right	+= offset.X;
+		offset_rect.Top		+= offset.Y;
+		offset_rect.Bottom	+= offset.Y;
+		ChildDialogList[index]->Set_Rect (offset_rect);
 	}
 
 	Rect = rect;
@@ -1629,7 +1636,7 @@ DialogBaseClass::On_Mouse_Wheel (int direction)
 	return ;
 }
 
-void DialogBaseClass::Set_Dirty(bool onoff)
+void DialogBaseClass::Set_Dirty(bool /* onoff */)
 {
 	int index;
 	for (index = 0; index < ControlList.Count (); index ++) {

@@ -94,6 +94,7 @@
 #include	"win.h"
 #include	"xpipe.h"
 #include	"xstraw.h"
+#include <limits>
 #include	<stdio.h>
 #include <malloc.h>
 #ifdef _UNIX
@@ -111,6 +112,7 @@
 #include	"wwstring.h"
 #include "widestring.h"
 #include "nstrdup.h"
+#include "wwdialog.h"
 
 
 // Instance of the static variable.
@@ -654,6 +656,9 @@ int INIClass::Save(Pipe & pipe) const
 	#else
 		const char *EOL="\r\n";
 	#endif
+	const size_t eol_len_size = ::strlen(EOL);
+	WWASSERT(eol_len_size <= static_cast<size_t>(std::numeric_limits<int>::max()));
+	const int eol_len = static_cast<int>(eol_len_size);
 
 	INISection * secptr = SectionList->First();
 	while (secptr && secptr->Is_Valid()) {
@@ -662,19 +667,25 @@ int INIClass::Save(Pipe & pipe) const
 		**	Output the section identifier.
 		*/
 		total += pipe.Put("[", 1);
-		total += pipe.Put(secptr->Section, strlen(secptr->Section));
+		const size_t section_len = ::strlen(secptr->Section);
+		WWASSERT(section_len <= static_cast<size_t>(std::numeric_limits<int>::max()));
+		total += pipe.Put(secptr->Section, static_cast<int>(section_len));
 		total += pipe.Put("]", 1);
-		total += pipe.Put(EOL, strlen(EOL));
+		total += pipe.Put(EOL, eol_len);
 
 		/*
 		**	Output all the entries and values in this section.
 		*/
 		INIEntry * entryptr = secptr->EntryList.First();
 		while (entryptr && entryptr->Is_Valid()) {
-			total += pipe.Put(entryptr->Entry, strlen(entryptr->Entry));
+			const size_t entry_len = ::strlen(entryptr->Entry);
+			WWASSERT(entry_len <= static_cast<size_t>(std::numeric_limits<int>::max()));
+			total += pipe.Put(entryptr->Entry, static_cast<int>(entry_len));
 			total += pipe.Put("=", 1);
-			total += pipe.Put(entryptr->Value, strlen(entryptr->Value));
-			total += pipe.Put(EOL, strlen(EOL));
+			const size_t value_len = ::strlen(entryptr->Value);
+			WWASSERT(value_len <= static_cast<size_t>(std::numeric_limits<int>::max()));
+			total += pipe.Put(entryptr->Value, static_cast<int>(value_len));
+			total += pipe.Put(EOL, eol_len);
 
 			entryptr = entryptr->Next();
 		}
@@ -683,7 +694,7 @@ int INIClass::Save(Pipe & pipe) const
 		**	After the last entry in this section, output an extra
 		**	blank line for readability purposes.
 		*/
-		total += pipe.Put(EOL, strlen(EOL));
+		total += pipe.Put(EOL, eol_len);
 
 		secptr = secptr->Next();
 	}
@@ -715,8 +726,8 @@ int INIClass::Save(Pipe & pipe) const
 INISection * INIClass::Find_Section(char const * section) const
 {
 	if (section != NULL) {
-//		long crc = CRCEngine()(section, strlen(section));
-		long crc = CRC(section);
+//		int crc = CRCEngine()(section, strlen(section));
+		int crc = CRC(section);
 
 		if (SectionIndex->Is_Present(crc)) {
 			return((*SectionIndex)[crc]);
@@ -988,9 +999,9 @@ int INIClass::Get_UUBlock(char const * section, void * block, int len) const
  * HISTORY:                                                                                    *
  *    11/6/2001 4:27PM ST : Created                                                            *
  *=============================================================================================*/
-const WideStringClass& INIClass::Get_Wide_String(WideStringClass& new_string, char const * section, char const * entry, wchar_t const * defvalue) const
+const WideStringClass& INIClass::Get_Wide_String(WideStringClass& new_string, char const * section, char const * entry, unichar_t const * defvalue) const
 {
-	wchar_t out[1024];
+	unichar_t out[1024];
 	char buffer[1024];
 
 	Base64Pipe b64pipe(Base64Pipe::DECODE);
@@ -1027,14 +1038,14 @@ const WideStringClass& INIClass::Get_Wide_String(WideStringClass& new_string, ch
  * HISTORY:                                                                                    *
  *   11/6/2001 4:29PM ST : Created                                                             *
  *=============================================================================================*/
-bool INIClass::Put_Wide_String(char const * section, char const * entry, const wchar_t * string)
+bool INIClass::Put_Wide_String(char const * section, char const * entry, const unichar_t * string)
 {
 	if (section == NULL || entry == NULL || string == NULL) {
 		return(false);
 	}
 
 	WideStringClass temp_string(string, true);
-	int len = temp_string.Get_Length();
+	size_t len = temp_string.Get_Length();
 
 	if (len == 0) {
 		Put_String(section, entry, "");
@@ -1042,7 +1053,7 @@ bool INIClass::Put_Wide_String(char const * section, char const * entry, const w
 
 		char *buffer = (char*) _alloca((len * 8) + 32);
 
-		BufferStraw straw(string, (len*2) + 2);		// Convert from shorts to bytes, plus 2 for terminator.
+		BufferStraw straw(string, static_cast<int>((len * 2) + 2));		// Convert from shorts to bytes, plus 2 for terminator.
 		Base64Straw bstraw(Base64Straw::ENCODE);
 		bstraw.Get_From(straw);
 
@@ -1153,7 +1164,7 @@ bool INIClass::Put_TextBlock(char const * section, char const * text)
 		/*
 		**	Scan backward looking for a good break position.
 		*/
-		int count = strlen(buffer);
+		int count = static_cast<int>(::strlen(buffer));
 		if (count > 0) {
 			if (count >= 75) {
 				while (count) {
@@ -1227,7 +1238,7 @@ int INIClass::Get_TextBlock(char const * section, char * buffer, int len) const
 
 		Get_String(section, Get_Entry(section, index), "", buffer, len);
 
-		int partial = strlen(buffer);
+		int partial = static_cast<int>(::strlen(buffer));
 		total += partial;
 		buffer += partial;
 		len -= partial;
@@ -1711,12 +1722,15 @@ int INIClass::Get_String(char const * section, char const * entry, char const * 
 	if (defvalue == NULL) {
 		buffer[0] = '\0';
 		return(0);
-	} else {
+	}
+
+	if (defvalue != buffer) {
 		strncpy(buffer, defvalue, size);
 		buffer[size-1] = '\0';
 		strtrim(buffer);
-		return(strlen(buffer));
 	}
+
+	return static_cast<int>(::strlen(buffer));
 }
 
 
@@ -1918,7 +1932,7 @@ bool INIClass::Put_Bool(char const * section, char const * entry, bool value)
  *    one is found, the value is interpreted as a boolean value and then returned. In the case *
  *    of no matching entry, the default value will be returned instead. The boolean value      *
  *    is interpreted using the standard boolean conventions. e.g., "Yes", "Y", "1", "True",    *
- *    "T" are all consider to be a TRUE boolean value.                                         *
+ *    "T" are all consider to be a true boolean value.                                         *
  *                                                                                             *
  * INPUT:   section  -- The section to search under.                                           *
  *                                                                                             *
@@ -2343,16 +2357,15 @@ int INIClass::CRC(const char *string)
 void INIClass::DuplicateCRCError(const char *message, const char *section, const char *entry)
 {
 	char buffer[512];
-	_snprintf(buffer, sizeof(buffer), "%s - Duplicate Entry \"%s\" in section \"%s\" (%s)\n", message,
+	snprintf(buffer, sizeof(buffer), "%s - Duplicate Entry \"%s\" in section \"%s\" (%s)\n", message,
 		entry, section, Filename);
 
 	OutputDebugStringA(buffer);
 	assert(0);
 
 #ifdef NDEBUG
-#ifdef _WINDOWS
-	MessageBoxA(0, buffer, "Duplicate CRC in INI file.", MB_ICONSTOP | MB_OK);
-#endif
+	::Show_Message_Box(MESSAGEBOX_BUTTON_OK | MESSAGEBOX_SEVERITY_ERROR,
+		buffer, "Duplicate CRC in INI file.");
 #endif
 }
 

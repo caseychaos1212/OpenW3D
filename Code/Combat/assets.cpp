@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Combat/assets.cpp                            $* 
- *                                                                                             * 
- *                      $Author:: Jani_p                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 8/31/01 8:03p                                               $* 
- *                                                                                             * 
- *                    $Revision:: 49                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Combat/assets.cpp                            $*
+ *                                                                                             *
+ *                      $Author:: Jani_p                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 8/31/01 8:03p                                               $*
+ *                                                                                             *
+ *                    $Revision:: 49                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "assets.h"
@@ -111,9 +111,9 @@ RenderObjClass * Create_Render_Obj_From_Filename( const char * filename )
 }
 
 TextureClass * Get_Texture_From_Filename
-( 
-	const char * filename, 
-	TextureClass::MipCountType mip_level_count 
+(
+	const char * filename,
+	TextureClass::MipCountType mip_level_count
 )
 {
 	StringClass	tex_name(true);
@@ -135,9 +135,9 @@ void Create_Animation_Name( StringClass& anim_name, const char * anim_filename, 
 		anim_name.Erase( anim_name.Get_Length() - 4, 4 );	// Strip off ".w3d"
 	}
 
-	if ( ::strchr( anim_name, '.' ) == 0 ) {	// Add model name
+	if ( ::strchr( anim_name.Peek_Buffer(), '.' ) == 0 ) {	// Add model name
 		StringClass temp(true);
-		temp.Format( "%s.%s", model_name, anim_name );
+		temp.Format( "%s.%s", model_name, anim_name.Peek_Buffer() );
 		anim_name = temp;
 	}
 }

@@ -209,7 +209,7 @@ PhysicsWorldClass::PhysicsWorldClass(void) :
 	VisCamera(NULL),
 	CurrentVisTable(NULL),
 	StaticProjectorsEnabled(false),
-	DynamicProjectorsEnabled(false), 
+	DynamicProjectorsEnabled(false),
 	ShadowMode(SHADOW_MODE_NONE),
 	ShadowAttenStart(25.0f),
 	ShadowAttenEnd(40.0f),
@@ -293,7 +293,7 @@ PhysicsWorldClass::~PhysicsWorldClass(void)
 	delete StaticCullingSystem;
 	delete DynamicCullingSystem;
 	delete DynamicObjVisSystem;
-	delete StaticLightingSystem;	
+	delete StaticLightingSystem;
 	delete StaticProjectorCullingSystem;
 	delete DynamicProjectorCullingSystem;
 	delete Pathfinder;
@@ -463,9 +463,9 @@ void PhysicsWorldClass::Update(float dt,int frameid)
 	{
 		WWPROFILE("Timestep");
 		float remaining = dt;
-		
+
 		while (remaining > 0) {
-			
+
 			float step = std::min(remaining,MAX_TIMESTEP);
 
 			/*
@@ -490,7 +490,7 @@ void PhysicsWorldClass::Update(float dt,int frameid)
 		}
 	}
 
-	{ 
+	{
 		WWPROFILE("Post Timestep");
 		RefPhysListIterator it(&TimestepList);
 		for (it.First(); !it.Is_Done(); it.Next()) {
@@ -557,7 +557,7 @@ void PhysicsWorldClass::Add_Dynamic_Object(PhysClass * newobj)
 
 	// Clean up any cached visibility data that may have been in the object
 	DynamicPhysClass * dynobj = newobj->As_DynamicPhysClass();
-	WWASSERT(dynobj != NULL);	
+	WWASSERT(dynobj != NULL);
 	if (dynobj != NULL) {
 		dynobj->Update_Visibility_Status();
 	}
@@ -690,12 +690,12 @@ void PhysicsWorldClass::Internal_Add_Static_Light(LightPhysClass * newlight)
 {	
 	// Add the object to the appropriate lists
 	StaticLightList.Add(newlight);
-	
+
 	//(gth) hack, I don't want static lights to get registered as vertex processors.
 	//so don't let the scene class know about them ;-)  I should probably come up with
 	//a better mechanism for this...
 	//SceneClass::Add_Render_Object(newlight->Peek_Model());
-	
+
 	if (newlight->Needs_Timestep()) {
 		TimestepList.Add(newlight);
 	}
@@ -742,7 +742,7 @@ void PhysicsWorldClass::Process_Release_List(void)
 		PhysClass * obj = ReleaseList.Remove_Head();
 		Remove_Object(obj);
 		obj->Release_Ref();
-	}	
+	}
 }
 
 
@@ -788,7 +788,7 @@ void PhysicsWorldClass::Remove_Object(PhysClass * obj)
 
 		DynamicCullingSystem->Remove_Object(obj);
 		ObjList.Remove(obj);
-	
+
 	} else if (cullsys == StaticCullingSystem) {
 
 		WWASSERT(obj->As_StaticPhysClass() != NULL);
@@ -800,9 +800,9 @@ void PhysicsWorldClass::Remove_Object(PhysClass * obj)
 		WWASSERT(obj->As_LightPhysClass() != NULL);
 		StaticLightingSystem->Remove_Object(obj->As_LightPhysClass());
 		StaticLightList.Remove(obj);
-	
+
 	} else {
-		
+
 		WWASSERT(0); // should never happen!
 
 	}
@@ -1063,7 +1063,7 @@ void PhysicsWorldClass::Add_Render_Object(RenderObjClass * obj)
 
 	// NOTE: The *ONLY* way this code should get activated is when the user
 	// or some deep dark w3d code is directly adding and removing render objects
-	// in the physics scene.  In this case, I wrap the render objects with 
+	// in the physics scene.  In this case, I wrap the render objects with
 	// RenderObjPhysClass's and set the UserData pointer to point back to this
 	// wrapper.
 	WWASSERT(obj != NULL);
@@ -1071,7 +1071,7 @@ void PhysicsWorldClass::Add_Render_Object(RenderObjClass * obj)
 	cullnode->Set_Model(obj);
 	Add_Dynamic_Object(cullnode);
 	Add_To_Dirty_Cull_List(cullnode);
-	
+
 	//
 	//	Make sure we don't save particle buffers or lines
 	//
@@ -1103,7 +1103,7 @@ void PhysicsWorldClass::Remove_Render_Object(RenderObjClass * obj)
 {
 	// NOTE: The *ONLY* way this code should get activated is when the user
 	// or some deep dark w3d code is directly adding and removing render objects
-	// in the physics scene.  In this case, I wrap the render objects with 
+	// in the physics scene.  In this case, I wrap the render objects with
 	// RenderObjPhysClass's and set the UserData pointer to point back to this
 	// wrapper.
 	Detach_Render_Object(obj);
@@ -1137,19 +1137,19 @@ void PhysicsWorldClass::Register(RenderObjClass * obj,RegType for_what)
 	WWASSERT(obj != NULL);
 	switch (for_what)
 	{
-		case ON_FRAME_UPDATE: 
-			UpdateList.Add(obj); 
+		case ON_FRAME_UPDATE:
+			UpdateList.Add(obj);
 			break;
-		case LIGHT: 
-			VertexProcList.Add(obj); 
+		case LIGHT:
+			VertexProcList.Add(obj);
 			break;
-		case RELEASE: 
+		case RELEASE:
 			{
 				if (obj->Get_Container() != NULL) {
 					obj->Get_Container()->Remove_Sub_Object(obj);
 				} else {
 					PhysClass * wrapper = (PhysClass *)obj->Get_User_Data();
-					
+
 					/*
 					** If there is no wrapper, the object isn't actually in the scene so do nothing
 					*/
@@ -1180,13 +1180,13 @@ void PhysicsWorldClass::Unregister(RenderObjClass * obj,RegType for_what)
 	WWASSERT(obj != NULL);
 	switch (for_what)
 	{
-		case ON_FRAME_UPDATE: 
-			UpdateList.Remove(obj); 
+		case ON_FRAME_UPDATE:
+			UpdateList.Remove(obj);
 			break;
-		case LIGHT: 
-			VertexProcList.Remove(obj); 
+		case LIGHT:
+			VertexProcList.Remove(obj);
 			break;
-		case RELEASE: 
+		case RELEASE:
 			WWASSERT_PRINT(0,("Error! Object %s tried to un-register from the release list\r\n",obj->Get_Name()));
 			break;
 	}
@@ -1219,11 +1219,11 @@ void PhysicsWorldClass::Pre_Render_Processing(CameraClass & camera)
 	RefRenderObjListIterator rit(&UpdateList);
 	for (rit.First(); !rit.Is_Done(); rit.Next()) {
 		rit.Peek_Obj()->On_Frame_Update();
-	}	
+	}
 
 	// Update culling info for all of the objects in the "dirty cull" list (these are
 	// objects which were added to the scene as pure render objects so I don't assume
-	// that the I have control over when their transform or bounding box is changed...)  
+	// that the I have control over when their transform or bounding box is changed...)
 	RefPhysListIterator it(&DirtyCullList);
 	for (it.First(); !it.Is_Done(); it.Next()) {
 		PhysClass * obj = it.Peek_Obj();
@@ -1244,13 +1244,13 @@ void PhysicsWorldClass::Pre_Render_Processing(CameraClass & camera)
 
 	// Collect the visible objects
 	bool use_umbra = false;
-#if (UMBRASUPPORT) 
+#if (UMBRASUPPORT)
 	use_umbra = UmbraSupport::Is_Umbra_Enabled();
 #endif
 
 	if (!use_umbra) {
 		// Get the lists of visible objects
-		{ 
+		{
 			WWPROFILE( "Collect Static Objs" );
 			StaticCullingSystem->Collect_Visible_Objects(camera.Get_Frustum(),pvs,VisibleStaticObjectList,VisibleWSMeshList);
 		}
@@ -1261,7 +1261,7 @@ void PhysicsWorldClass::Pre_Render_Processing(CameraClass & camera)
 			DynamicCullingSystem->Collect_Visible_Objects(camera.Get_Frustum(),pvs,VisibleDynamicObjectList);
 		}
 
-		// LOD processing 
+		// LOD processing
 		Optimize_LODs(camera,&VisibleDynamicObjectList,&VisibleStaticObjectList,&VisibleWSMeshList);
 
 		// Texture projectors
@@ -1301,7 +1301,7 @@ void PhysicsWorldClass::Post_Render_Processing(void)
 	VisibleDynamicObjectList.Reset_List();
 	VisibleStaticObjectList.Reset_List();
 	VisibleWSMeshList.Reset_List();
-	
+
 
 	// Update statistics
 	Per_Frame_Statistics_Update();
@@ -1416,7 +1416,7 @@ void PhysicsWorldClass::Customized_Render(RenderInfoClass & rinfo)
 	** Vis Sector Debugging
 	*/
 	if (VisSectorDisplayEnabled || VisSectorHistoryEnabled) {
-	
+
 		// list of previous vis sectors so we can render them
 		static StaticPhysClass * old_vis_sectors[3] = { NULL, NULL, NULL };
 		static int old_vis_index = 0;
@@ -1424,7 +1424,7 @@ void PhysicsWorldClass::Customized_Render(RenderInfoClass & rinfo)
 		Vector3 vis_sample_point;
 		Compute_Vis_Sample_Point(rinfo.Camera,&vis_sample_point);
 		StaticPhysClass * vis_sector = StaticCullingSystem->Find_Vis_Tile(vis_sample_point);
-		
+
 		if (vis_sector != NULL) {
 			MaterialPassClass * matpass = PhysResourceMgrClass::Get_Highlight_Material_Pass();
 			if (matpass) {			
@@ -1491,7 +1491,7 @@ void PhysicsWorldClass::Customized_Render(RenderInfoClass & rinfo)
 		}
 		REF_PTR_RELEASE(pvs);
 	}
-	
+
 	/*
 	** Light Source Debugging, render debug widgets at each light transform
 	*/
@@ -1560,7 +1560,7 @@ void PhysicsWorldClass::Render_Objects(
 					}
 				}
 			}
-		
+
 		} else {
 
 			// render the static world-space meshes
@@ -1616,9 +1616,9 @@ void PhysicsWorldClass::Render_Object(RenderInfoClass & context,PhysClass * obj)
 	/*
 	** Set up the lighting environment for this object
 	*/
-	bool do_lighting = (	(obj->Is_Pre_Lit() == false) && 
+	bool do_lighting = (	(obj->Is_Pre_Lit() == false) &&
 								(obj->Peek_Model()->Is_Not_Hidden_At_All())	);
-	
+
 	if (do_lighting) {
 
 		WWPROFILE("setup lights");
@@ -1640,7 +1640,7 @@ void PhysicsWorldClass::Render_Object(RenderInfoClass & context,PhysClass * obj)
 		}
 #endif
 		context.light_environment = &light_env;
-	
+
 	} else {
 
 		static LightEnvironmentClass _emptylightenvironment;
@@ -1688,10 +1688,10 @@ void PhysicsWorldClass::Render_Backface_Occluders
 	static LightEnvironmentClass lenv;
 
 	if (BackfaceDebugEnabled) {
-		
+
 		MaterialPassClass * matpass = PhysResourceMgrClass::Get_Highlight_Material_Pass();
 		if (matpass != NULL) {
-		
+
 			/*
 			** Flush the system and invert the backface culling check
 			*/
@@ -1699,7 +1699,7 @@ void PhysicsWorldClass::Render_Backface_Occluders
 			world->Flush_Special_Render_Info(context);
 		}
 			ShaderClass::Invert_Backface_Culling(true);
-			
+
 			/*
 			** Set up the render context to render everything bright green
 			*/
@@ -1720,7 +1720,7 @@ void PhysicsWorldClass::Render_Backface_Occluders
 			while (!it.Is_Done()) {
 				StaticPhysClass * sphys = it.Peek_Obj()->As_StaticPhysClass();
 				if (sphys && sphys->Is_Occluder()) {
-					sphys->Render(context);				
+					sphys->Render(context);
 				}
 				it.Next();
 			}
@@ -1732,7 +1732,7 @@ void PhysicsWorldClass::Render_Backface_Occluders
 			while (!it.Is_Done()) {
 				StaticPhysClass * sphys = it.Peek_Obj()->As_StaticPhysClass();
 				if (sphys && sphys->Is_Occluder()) {
-					sphys->Render(context);				
+					sphys->Render(context);
 				}
 				it.Next();
 			}
@@ -1848,7 +1848,7 @@ void PhysicsWorldClass::Re_Partition_Dynamic_Culling_System(DynamicVectorClass<A
 	for (int i=0; i<virtual_occludees.Count(); i++) {
 		bounds.Add_Box(virtual_occludees[i]);
 	}
-	
+
 	DynamicObjVisSystem->Re_Partition(	&virtual_occludees,
 													bounds.Center - bounds.Extent,
 													bounds.Center + bounds.Extent,
@@ -1998,7 +1998,7 @@ void PhysicsWorldClass::Per_Frame_Statistics_Update(void)
 	CurrentStats.FrameCount ++;
 
 	if (CurrentStats.FrameCount >= STATISTICS_FRAMES) {
-		
+
 		/*
 		** Collect the culling system stats
 		*/
@@ -2094,7 +2094,7 @@ void PhysicsWorldClass::Shatter_Mesh
 	** Clip the mesh into fragments
 	*/
 	ShatterSystem::Shatter_Mesh(mesh,impact_point,impact_normal);
-	
+
 	/*
 	** Wake up any dynamic objects in the area
 	*/
@@ -2118,23 +2118,23 @@ void PhysicsWorldClass::Shatter_Mesh
 		ProjectileClass * frag = NEW_REF(ProjectileClass,());
 		RenderObjClass * frag_model = ShatterSystem::Peek_Fragment(i);
 		Matrix3D frag_tm = frag_model->Get_Transform();
-		
+
 		frag->Set_Model(frag_model);
 		frag->Set_Transform(frag_tm);
 		frag->Set_Orientation_Mode_Tumbling();
-		
+
 		frag->Set_Lifetime(3.0f);
 		frag->Set_Gravity_Multiplier(2.0f);
-		frag->Set_Bounce_Count(1);		
+		frag->Set_Bounce_Count(1);
 
 		/*
-		** Vector from the impact to the center of the fragment is 
+		** Vector from the impact to the center of the fragment is
 		** used in generating the initial velocity and rotation of the fragment
 		*/
 		Vector3 dc = frag_tm.Get_Translation() - impact_point;
 		float dclen = dc.Length();
 		dc /= dclen;
-		
+
 		/*
 		** Generate a suitable velocity for the fragment
 		*/
@@ -2146,7 +2146,7 @@ void PhysicsWorldClass::Shatter_Mesh
 		frag_vel += 0.2f*dc;
 		frag_vel *= vel_table->Get_Value(dclen);
 		frag->Set_Velocity(frag_vel);
-		
+
 		/*
 		** Generate a rotation for the fragment.  The axis it rotates about
 		** will be in the plane of the impact, perpendicular to a vector from
@@ -2155,7 +2155,7 @@ void PhysicsWorldClass::Shatter_Mesh
 		Vector3 axis;
 		Vector3::Cross_Product(impact_velocity,dc,&axis);
 		frag->Set_Orientation_Mode_Tumbling(axis,avel_table->Get_Value(dclen));
-		
+
 		/*
 		** We cannot allow these object to get saved since their model was
 		** procedurally generated and it will not get loaded...
@@ -2176,7 +2176,7 @@ void PhysicsWorldClass::Shatter_Mesh
 		frag->Set_Lifetime(60.0f);
 		frag->Set_Gravity_Multiplier(0.0f);
 		frag->Set_Bounce_Count(100);
-		frag->Set_Orientation_Mode_Fixed();		
+		frag->Set_Orientation_Mode_Fixed();
 #endif
 
 		/*
@@ -2356,7 +2356,7 @@ PhysicsWorldClass::StatsStruct::StatsStruct(void)
 
 void PhysicsWorldClass::StatsStruct::Reset(void)
 {
-	FrameCount = 0; 
+	FrameCount = 0;
 	CullNodeCount = 0;
 	CullNodesAccepted = 0;
 	CullNodesTriviallyAccepted = 0;
@@ -2367,7 +2367,7 @@ void PhysicsWorldClass::StatsStruct::Reset(void)
 /*
 ** Force-Link relevant modules from WWPhys
 */
-void Force_Link_Modules(void) 
+void Force_Link_Modules(void)
 {
 	FORCE_LINK(decophys);
 	FORCE_LINK(humanphys);

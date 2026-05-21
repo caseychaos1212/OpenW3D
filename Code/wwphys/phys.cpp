@@ -179,7 +179,7 @@ void PhysClass::Init(const PhysDefClass & def)
 		}
 
 		if ( model == NULL ) {
-			WWDEBUG_SAY(( "***  FATAL ERROR : Failed to create model %s\n", def.ModelName ));
+			WWDEBUG_SAY(( "***  FATAL ERROR : Failed to create model %s\n", def.ModelName.Peek_Buffer() ));
 		}
 
 		Set_Model(model);
@@ -229,7 +229,7 @@ void PhysClass::Set_Model(RenderObjClass * model)
 	} else if (model != NULL) {
 		model->Set_Transform(FallbackTransform);
 	}
-	Model = model; 
+	Model = model;
 	if (Model) {
 		Model->Add_Ref(); 
 #if WWPHYS_SCENE_BRIDGE
@@ -248,7 +248,7 @@ void PhysClass::Set_Model(RenderObjClass * model)
 	Invalidate_Static_Lighting_Cache ();
 	Update_Cull_Box();
 }
-	
+
 void PhysClass::Set_Model_By_Name(const char * model_type_name)
 {
 	if (!Physics_Render_Assets_Available()) {
@@ -386,12 +386,12 @@ void PhysClass::Get_Shadow_Blob_Box(AABoxClass * set_obj_space_box)
 }
 
 void PhysClass::Render(RenderInfoClass & rinfo)
-{ 
+{
 	Push_Effects(rinfo);
 
-	if (Model) { 
-		Model->Render(rinfo); 
-	} 
+	if (Model) {
+		Model->Render(rinfo);
+	}
 
 	Pop_Effects(rinfo);
 }
@@ -411,7 +411,7 @@ void PhysClass::Invalidate_Static_Lighting_Cache(void)
 LightEnvironmentClass * PhysClass::Get_Static_Lighting_Environment(void)
 {
 	if (Is_Pre_Lit()) {
-	
+
 		/*
 		** This object doesn't need a lighting cache, make sure it doesn't have one
 		*/
@@ -421,7 +421,7 @@ LightEnvironmentClass * PhysClass::Get_Static_Lighting_Environment(void)
 			delete StaticLightingCache;
 			StaticLightingCache = NULL;
 		}
-	
+
 	} else if (Get_Flag(STATIC_LIGHTING_DIRTY)) {
 
 		/*
@@ -495,7 +495,7 @@ void PhysClass::Update_Sun_Status(void)
 	Inc_Ignore_Counter();
 	world->Cast_Ray(sunraytest);
 
-	// if the ray hits a static object which is casting a projected shadow, ignore that object 
+	// if the ray hits a static object which is casting a projected shadow, ignore that object
 	// and check again.
 	if (	(sunresult.Fraction < 1.0f) && 
 			(sunraytest.CollidedPhysObj != NULL) ) 
@@ -527,7 +527,7 @@ void PhysClass::Push_Effects(RenderInfoClass & rinfo)
 
 		ShaderClass shader = ShaderClass::_PresetOpaqueShader;
 		VertexMaterialClass * vmtl = VertexMaterialClass::Get_Preset(VertexMaterialClass::PRELIT_NODIFFUSE);
-		
+
 		DX8Wrapper::Set_Shader(shader);
 		DX8Wrapper::Set_Material(vmtl);
 
@@ -541,7 +541,7 @@ void PhysClass::Push_Effects(RenderInfoClass & rinfo)
 		DX8Wrapper::Set_Transform(D3DTS_VIEW,identity);
 		DX8Wrapper::Set_Transform(D3DTS_PROJECTION,identity);
 
-		
+
 		TexProjListIterator iterator(&ProjectionsOnMe);
 		for ( ; !iterator.Is_Done() ; iterator.Next()) {
 			TextureClass * tex = iterator.Peek_Obj()->Peek_Material_Pass()->Peek_Texture(0);
@@ -613,7 +613,7 @@ void PhysClass::Pop_Effects(RenderInfoClass & rinfo)
 {
 	if (!MaterialEffectsOnMe.Is_Empty()) {
 		RefMaterialEffectListIterator iterator(&MaterialEffectsOnMe);
-	
+
 		while (!iterator.Is_Done()) {
 
 			MaterialEffectClass * effect = iterator.Peek_Obj();
@@ -641,7 +641,7 @@ bool PhysClass::Save (ChunkSaveClass &csave)
 	WRITE_MICRO_CHUNK_PTR(csave,PHYS_VARIABLE_WIDGETUSER_PTR,widgetuser_ptr);
 	WRITE_MICRO_CHUNK_PTR(csave,PHYS_VARIABLE_EDITABLE_PTR,editable_ptr);
 	WRITE_MICRO_CHUNK(csave,PHYS_VARIABLE_FLAGS,Flags);
-	WRITE_MICRO_CHUNK(csave,PHYS_VARIABLE_INSTANCEID,InstanceID);	
+	WRITE_MICRO_CHUNK(csave,PHYS_VARIABLE_INSTANCEID,InstanceID);
 	if (Name.Get_Length() > 0) {
 		csave.Begin_Micro_Chunk(PHYS_VARIABLE_NAME);
 		WWASSERT(Name.Get_Length()+1 < 255);
@@ -691,8 +691,8 @@ bool PhysClass::Load (ChunkLoadClass &cload)
 	RenderObjClass * render_model = NULL;
 
 	while (cload.Open_Chunk()) {
-		
-		switch(cload.Cur_Chunk_ID()) 
+
+		switch(cload.Cur_Chunk_ID())
 		{
 			case PHYS_CHUNK_VARIABLES:
 				while (cload.Open_Micro_Chunk()) {
@@ -704,12 +704,12 @@ bool PhysClass::Load (ChunkLoadClass &cload)
 						READ_MICRO_CHUNK(cload,PHYS_VARIABLE_FLAGS,Flags);
 						READ_MICRO_CHUNK(cload,PHYS_VARIABLE_DEFID,defid);
 						READ_MICRO_CHUNK(cload,PHYS_VARIABLE_INSTANCEID,InstanceID);
-						
+
 						case PHYS_VARIABLE_NAME:
 							cload.Read(tmpstring,cload.Cur_Micro_Chunk_Length());
 							break;
 					}
-					cload.Close_Micro_Chunk();	
+					cload.Close_Micro_Chunk();
 				}
 				break;
 
@@ -776,7 +776,7 @@ bool PhysClass::Load (ChunkLoadClass &cload)
 				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 				break;
 		}
-		
+
 		if (cullable_ptr != NULL) {
 			SaveLoadSystemClass::Register_Pointer(cullable_ptr,(CullableClass *)this);
 		}
@@ -794,7 +794,7 @@ bool PhysClass::Load (ChunkLoadClass &cload)
 	** Set our definition pointer
 	*/
 	if (defid != -1) {
-		Definition = (PhysDefClass *)_TheDefinitionMgr.Find_Definition(defid);	
+		Definition = (PhysDefClass *)_TheDefinitionMgr.Find_Definition(defid);
 	} else {
 		Definition = NULL;
 	}
@@ -811,7 +811,7 @@ bool PhysClass::Load (ChunkLoadClass &cload)
 	if (Observer != NULL) {
 		REQUEST_POINTER_REMAP((void**)&Observer);
 	}
-	
+
 	/*
 	** Register all of the multiple-inheritance versions of our this pointer
 	*/
@@ -931,7 +931,7 @@ bool PhysClass::Expire(void)
 }
 
 //
-// TSS added this... not efficient to use if you are also 
+// TSS added this... not efficient to use if you are also
 // setting position
 //
 void PhysClass::Set_Facing(float new_facing)
@@ -942,7 +942,7 @@ void PhysClass::Set_Facing(float new_facing)
 	Matrix3D tm(1);
 	tm.Translate(pos);
 	tm.Rotate_Z(new_facing);
-	
+
 	Set_Transform(tm);
 }
 
@@ -966,7 +966,7 @@ bool PhysClass::Do_Any_Effects_Suppress_Shadows(void)
 **
 ***********************************************************************************************/
 
-enum 
+enum
 {
 	PHYSDEF_CHUNK_DEFINITION		= 0x055ffe07,			// parent class data.
 	PHYSDEF_CHUNK_VARIABLES,									// simple variables
@@ -981,7 +981,7 @@ enum
 };
 
 
-PhysDefClass::PhysDefClass(void) : 
+PhysDefClass::PhysDefClass(void) :
 	ModelName ("NULL"),
 	IsPreLit(false)
 {
@@ -1045,7 +1045,7 @@ bool PhysDefClass::Load(ChunkLoadClass &cload)
 {
 	while (cload.Open_Chunk()) {
 
-		switch(cload.Cur_Chunk_ID()) {			
+		switch(cload.Cur_Chunk_ID()) {
 
 			case PHYSDEF_CHUNK_DEFINITION:
 				DefinitionClass::Load(cload);

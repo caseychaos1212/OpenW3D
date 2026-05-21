@@ -49,7 +49,7 @@ static char THIS_FILE[] = __FILE__;
 //
 //  CHUNK ID's used by GraphicView
 //
-enum 
+enum
 {
 	GRAPHICVIEW_CHUNK_VARIABLES			= 0x00789931,
 
@@ -107,7 +107,7 @@ LRESULT CGraphicView::WindowProc
 		Timestep();
 		Repaint_View();
 		RemoveProp(m_hWnd,"WaitingToProcess");
-	} 
+	}
 
 	// Allow the base class to process this message
 	return CView::WindowProc(message, wParam, lParam);
@@ -170,11 +170,11 @@ BOOL CGraphicView::PreCreateWindow(CREATESTRUCT& cs)
 BOOL CGraphicView::Initialize_WW3D(int device,int bits)
 {
 	// Assume failure
-	BOOL ok = FALSE;
+	BOOL ok = false;
 	if (device < 0) {
-		return FALSE;
+		return false;
 	}
-	
+
 	// Initialize the rendering engine with the information from
 	// this window.
 	RECT rect;
@@ -211,10 +211,10 @@ BOOL CGraphicView::Initialize_WW3D(int device,int bits)
 		// full desired FOV, then give the other dimension an
 		// FOV proportional to its relative size
 		double hfov,vfov;
-		if (cy > cx) {						
+		if (cy > cx) {
 			vfov = (float)DEG_TO_RAD(45.0f);
 			hfov = (double)cx / (double)cy * vfov;
-		} else {		
+		} else {
 			hfov = (float)DEG_TO_RAD(45.0f);
 			vfov = (double)cy / (double)cx * hfov;
 		}
@@ -269,8 +269,8 @@ BOOL CGraphicView::Initialize_WW3D(int device,int bits)
 
 	Initialized = true;
 
-	// Return the TRUE/FALSE result code
-	return TRUE;
+	// Return the true/false result code
+	return true;
 }
 
 void CGraphicView::Save(ChunkSaveClass & csave)
@@ -343,25 +343,25 @@ CPhysTestDoc* CGraphicView::GetDocument() // non-debug version is inline
 /////////////////////////////////////////////////////////////////////////////
 // CGraphicView message handlers
 
-void CGraphicView::OnSize(UINT nType, int cx, int cy) 
+void CGraphicView::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
-	
+
 	if (Initialized)
 	{
-		// Change the resolution of the rendering device to 
+		// Change the resolution of the rendering device to
 		// match that of the view's current dimensions
 		WW3D::Set_Resolution (cx, cy, -1, true);
- 
+
 		// update the camera FOV settings
 		// take the larger of the two dimensions, give it the
 		// full desired FOV, then give the other dimension an
 		// FOV proportional to its relative size
 		double hfov,vfov;
-		if (cy > cx) {						
+		if (cy > cx) {
 			vfov = (float)DEG_TO_RAD(45.0f);
 			hfov = (double)cx / (double)cy * vfov;
-		} else {		
+		} else {
 			hfov = (float)DEG_TO_RAD(45.0f);
 			vfov = (double)cy / (double)cx * hfov;
 		}
@@ -379,10 +379,10 @@ void CGraphicView::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-void CGraphicView::OnInitialUpdate() 
+void CGraphicView::OnInitialUpdate()
 {
 	CView::OnInitialUpdate();
-	
+
 	CPhysTestDoc * doc = (CPhysTestDoc *)GetDocument();
 	if (doc) {
 		// tell the document to create the scene
@@ -396,13 +396,13 @@ void CGraphicView::Timestep(void)
 
 	// Compute the amount of time elapsed for this frame.
 	CPhysTestDoc * doc = (CPhysTestDoc *)GetDocument();
-	DWORD curtime = ::GetTickCount();
+	DWORD curtime = ::TIMEGETTIME();
 	DWORD elapsedtime = curtime - doc->LastTime;
 	if (elapsedtime > 100) {
 		elapsedtime = 100;
 	}
 	float dt = (float)elapsedtime / 1000.0f;
-	doc->LastTime = curtime;	
+	doc->LastTime = curtime;
 
 	// fly forward when control is held
 	if (::GetAsyncKeyState('A') & 0x8000) {
@@ -441,17 +441,17 @@ void CGraphicView::Timestep(void)
 			const float TETHER_ANGLE = DEG_TO_RADF(-20.0f);
 			Vector3 pos;
 			float zrot = obj->Get_Transform().Get_Z_Rotation();
-			obj->Get_Transform().Get_Translation(&pos);	
-			
+			obj->Get_Transform().Get_Translation(&pos);
+
 			Matrix3D tm(1);
-			
+
 			if (CameraMode == CAMERA_RIGID_TETHER) {
 				tm = obj->Get_Transform();
 			} else {
 				tm.Translate(pos);
 				tm.Rotate_Z(zrot);
 			}
-			
+
 			tm.Rotate_Y(DEG_TO_RADF(-90.0f));
 			tm.Rotate_Z(DEG_TO_RADF(-90.0f));
 			tm.Rotate_X(TETHER_ANGLE);
@@ -459,7 +459,7 @@ void CGraphicView::Timestep(void)
 			Camera->Set_Transform(tm);
 		}
 	}
-	
+
 	// update the PIP camera transform
 	Update_Pip_Camera();
 
@@ -493,11 +493,11 @@ void CGraphicView::Repaint_View(void)
 		//WW3D::Sync(WW3D::Get_Sync_Time() + (ticks_elapsed * m_animationSpeed));
 
 		// Render the scenes
-		WW3D::Begin_Render(TRUE, TRUE, Vector3(0,0,0));
-		WW3D::Render(doc->Scene,Camera,FALSE,FALSE);
-		WW3D::Render(PipScene,PipCamera,FALSE,TRUE);
+		WW3D::Begin_Render(true, true, Vector3(0,0,0));
+		WW3D::Render(doc->Scene,Camera,false,false);
+		WW3D::Render(PipScene,PipCamera,false,true);
 		WW3D::End_Render();
-	}        
+	}
 
 	_already_painting = false;
 }
@@ -505,12 +505,12 @@ void CGraphicView::Repaint_View(void)
 void CGraphicView::Set_Active(bool onoff)
 {
 	Active = onoff;
-	if (!Active) { 
-		::SetProp(m_hWnd,"Inactive",(HANDLE)1); 
-	} else { 
-		RemoveProp(m_hWnd,"Inactive"); 
+	if (!Active) {
+		::SetProp(m_hWnd,"Inactive",(HANDLE)1);
+	} else {
+		RemoveProp(m_hWnd,"Inactive");
 		CPhysTestDoc * doc = (CPhysTestDoc *)GetDocument();
-		doc->LastTime = ::GetTickCount();	
+		doc->LastTime = ::TIMEGETTIME();
 	}
 }
 
@@ -530,14 +530,14 @@ void CGraphicView::Enable_Collision_Box_Display(bool onoff)
 
 }
 
-void CGraphicView::OnDestroy() 
+void CGraphicView::OnDestroy()
 {
 	// remove our properties
-	::RemoveProp(m_hWnd,"Inactive"); 
+	::RemoveProp(m_hWnd,"Inactive");
 	::RemoveProp(m_hWnd,"WaitingToProcess");
 
 	CView::OnDestroy();
-	
+
 	// Free the camera object
 	REF_PTR_RELEASE(Camera);
 	REF_PTR_RELEASE(PipScene);
@@ -548,27 +548,27 @@ void CGraphicView::OnDestroy()
 	if (TimerID == 0) {
 		// Stop the timer
 		::timeKillEvent((UINT)TimerID);
-		TimerID = 0;        
+		TimerID = 0;
 	}
 
-	Initialized = FALSE;    
+	Initialized = false;
 }
 
 
-void CGraphicView::OnLButtonDown(UINT nFlags, CPoint point) 
+void CGraphicView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// Capture all mouse messages
 	SetCapture();
 
 	// Left mouse button is down
-	LMouseDown = TRUE;
+	LMouseDown = true;
 	LastPoint = point;
 
 	// Allow the base class to process this message
 	CView::OnLButtonDown(nFlags, point);
 }
 
-void CGraphicView::OnLButtonUp(UINT nFlags, CPoint point) 
+void CGraphicView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// if both buttons are now up, release the mouse
 	if (!RMouseDown) {
@@ -581,19 +581,19 @@ void CGraphicView::OnLButtonUp(UINT nFlags, CPoint point)
 	CView::OnLButtonUp(nFlags, point);
 }
 
-void CGraphicView::OnRButtonDown(UINT nFlags, CPoint point) 
+void CGraphicView::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// Capture all mouse messages
 	SetCapture();
 
 	// Right mouse button is down
-	RMouseDown = TRUE;
+	RMouseDown = true;
 	LastPoint = point;
-	
+
 	CView::OnRButtonDown(nFlags, point);
 }
 
-void CGraphicView::OnRButtonUp(UINT nFlags, CPoint point) 
+void CGraphicView::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	// if both buttons are now up, release the mouse
 	if (!LMouseDown) {
@@ -602,12 +602,12 @@ void CGraphicView::OnRButtonUp(UINT nFlags, CPoint point)
 
 	// Right mouse button is now up
 	RMouseDown = false;
-	
+
 	CView::OnRButtonUp(nFlags, point);
 }
 
 
-void CGraphicView::OnMouseMove(UINT nFlags, CPoint point) 
+void CGraphicView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// Get the document to display
 	CPhysTestDoc * doc = (CPhysTestDoc *)GetDocument();
@@ -623,7 +623,7 @@ void CGraphicView::OnMouseMove(UINT nFlags, CPoint point)
 
 		// Are we in a valid state?
 		if (Initialized && doc->Scene) {
-			
+
 			RECT rect;
 			GetClientRect (&rect);
 
@@ -648,7 +648,7 @@ void CGraphicView::OnMouseMove(UINT nFlags, CPoint point)
 
 			// If we're not in CAMERA_FOLLOW mode, just rotate our view
 			if (CameraMode != CAMERA_FOLLOW) {
-				
+
 				// Apply the rotation to the camera
 				Matrix3D transform = Camera->Get_Transform ();
 				Matrix3D::Multiply(transform,Build_Matrix3D(rotation),&transform);
@@ -660,7 +660,7 @@ void CGraphicView::OnMouseMove(UINT nFlags, CPoint point)
 
 				// Rotate and translate the camera
 				Camera->Set_Transform (transform);
-			
+
 			} else {
 
 				// We're in camera follow mode, this means the camera is always going
@@ -676,8 +676,8 @@ void CGraphicView::OnMouseMove(UINT nFlags, CPoint point)
 					Vector3 obj_pos;
 					obj->Get_Transform().Get_Translation(&obj_pos);
 					Matrix3D::Inverse_Transform_Vector(camera_tm,obj_pos,&relative_obj_pos);
-	
-				} 
+
+				}
 
 				camera_tm.Translate(relative_obj_pos);
 				Matrix3D rotation_tm;
@@ -687,7 +687,7 @@ void CGraphicView::OnMouseMove(UINT nFlags, CPoint point)
 
 				Camera->Set_Transform(camera_tm);
 			}
-		}        
+		}
 	}
 
 	LastPoint = point;

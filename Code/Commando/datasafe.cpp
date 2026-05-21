@@ -66,11 +66,11 @@
 **
 ** I need to make this stuff static so that I can templatize the derived class and have all expansions use the same data.
 */
-unsigned long GenericDataSafeClass::SimpleKey;
-unsigned long GenericDataSafeClass::HandleKey;
-unsigned long GenericDataSafeClass::Checksum;
-unsigned long GenericDataSafeClass::ShuffleDelay;
-unsigned long GenericDataSafeClass::SecurityCheckDelay;
+unsigned int GenericDataSafeClass::SimpleKey;
+unsigned int GenericDataSafeClass::HandleKey;
+unsigned int GenericDataSafeClass::Checksum;
+unsigned int GenericDataSafeClass::ShuffleDelay;
+unsigned int GenericDataSafeClass::SecurityCheckDelay;
 DataSafeHandleClass GenericDataSafeClass::SentinelOne = 0;
 int GenericDataSafeClass::NumLists = 0;
 DataSafeEntryListClass *GenericDataSafeClass::Safe[MAX_DATASAFE_LISTS];
@@ -81,11 +81,11 @@ int GenericDataSafeClass::CRCErrors = 0;
 #ifdef THREAD_SAFE_DATA_SAFE
 HANDLE GenericDataSafeClass::SafeMutex;
 #else //THREAD_SAFE_DATA_SAFE
-unsigned int GenericDataSafeClass::PreferredThread = GetCurrentThreadId();
+unsigned int GenericDataSafeClass::PreferredThread = ThreadClass::Get_Current_Thread_ID();
 #endif //THREAD_SAFE_DATA_SAFE
 
 #ifdef WWDEBUG
-unsigned long GenericDataSafeClass::LastDump = TIMEGETTIME();
+unsigned int GenericDataSafeClass::LastDump = TIMEGETTIME();
 int GenericDataSafeClass::NumSwaps = 0;
 int GenericDataSafeClass::NumFetches = 0;
 int GenericDataSafeClass::SlopCount = 0;
@@ -148,7 +148,7 @@ GenericDataSafeClass::GenericDataSafeClass(void)
 #ifdef THREAD_SAFE_DATA_SAFE
 		SafeMutex = CreateMutexA(NULL, false, NULL);
 #else
-		PreferredThread = GetCurrentThreadId();
+		PreferredThread = ThreadClass::Get_Current_Thread_ID();
 #endif //THREAD_SAFE_DATA_SAFE
 
 #ifdef FIXED_KEY
@@ -484,9 +484,9 @@ DataSafeEntryClass *GenericDataSafeClass::Get_Entry_By_Index(int list, int index
 void GenericDataSafeClass::Mem_Copy_Encrypt(void *dest, void *src, int size, bool do_checksum)
 {
 	ds_assert((size % 4) == 0);
-	unsigned long temp;
-	unsigned long *s = (unsigned long *) src;
-	unsigned long *d = (unsigned long *) dest;
+	unsigned int temp;
+	unsigned int *s = (unsigned int *) src;
+	unsigned int *d = (unsigned int *) dest;
 
 	if (do_checksum) {
 		for (int i = 0 ; i < (size / 4) ; i++) {
@@ -525,9 +525,9 @@ void GenericDataSafeClass::Mem_Copy_Encrypt(void *dest, void *src, int size, boo
 void GenericDataSafeClass::Mem_Copy_Decrypt(void *dest, void *src, int size, bool do_checksum)
 {
 	ds_assert((size % 4) == 0);
-	unsigned long temp;
-	unsigned long *s = (unsigned long *) src;
-	unsigned long *d = (unsigned long *) dest;
+	unsigned int temp;
+	unsigned int *s = (unsigned int *) src;
+	unsigned int *d = (unsigned int *) dest;
 
 	if (do_checksum) {
 		for (int i = 0 ; i < (size / 4) ; i++) {
@@ -561,10 +561,10 @@ void GenericDataSafeClass::Mem_Copy_Decrypt(void *dest, void *src, int size, boo
  * HISTORY:                                                                                    *
  *   6/19/2001 9:29PM ST : Created                                                             *
  *=============================================================================================*/
-void GenericDataSafeClass::Encrypt(void *data, int size, unsigned long key, bool do_checksum)
+void GenericDataSafeClass::Encrypt(void *data, int size, unsigned int key, bool do_checksum)
 {
 	ds_assert((size % 4) == 0);
-	unsigned long *data_ptr = (unsigned long*)data;
+	unsigned int *data_ptr = (unsigned int*)data;
 
 	if (do_checksum) {
 		for (int i = 0 ; i < (size / 4) ; i++) {
@@ -596,10 +596,10 @@ void GenericDataSafeClass::Encrypt(void *data, int size, unsigned long key, bool
  * HISTORY:                                                                                    *
  *   6/19/2001 9:29PM ST : Created                                                             *
  *=============================================================================================*/
-void GenericDataSafeClass::Decrypt(void *data, int size, unsigned long key, bool do_checksum)
+void GenericDataSafeClass::Decrypt(void *data, int size, unsigned int key, bool do_checksum)
 {
 	ds_assert((size % 4) == 0);
-	unsigned long *data_ptr = (unsigned long*)data;
+	unsigned int *data_ptr = (unsigned int*)data;
 
 	if (do_checksum) {
 		for (int i = 0 ; i < (size / 4) ; i++) {
@@ -736,7 +736,7 @@ int GenericDataSafeClass::Create_Safe_List(int type)
  * HISTORY:                                                                                    *
  *   6/25/2001 12:34PM ST : Created                                                            *
  *=============================================================================================*/
-void GenericDataSafeClass::Random_Insertion(DataSafeEntryClass *entry_ptr, int list, int type, bool is_slop)
+void GenericDataSafeClass::Random_Insertion(DataSafeEntryClass *entry_ptr, int list, int /* type */, bool is_slop)
 {
 	ds_assert(Safe[list] != NULL);
 	ds_assert(Safe[list]->EntryCount < MAX_ENTRIES_PER_LIST);
@@ -838,12 +838,12 @@ void GenericDataSafeClass::Swap_Entries(DataSafeEntryClass *first, DataSafeEntry
 		if (size == 4) {
 
 			/*
-			** Convert to long pointers to make it easy to read.
+			** Convert to int pointers to make it easy to read.
 			*/
-			long *p1 = (long*) first_data;
-			long *p2 = (long*) second_data;
+			int *p1 = (int*) first_data;
+			int *p2 = (int*) second_data;
 
-			long temp = *p1;
+			int temp = *p1;
 			*p1 = *p2;
 			*p2 = temp;
 
@@ -959,7 +959,7 @@ void GenericDataSafeClass::Shuffle(bool forced)
 	/*
 	** Only check the time every n calls.
 	*/
-	static unsigned long _calls = 0;
+	static unsigned int _calls = 0;
 	_calls++;
 	if (_calls < DATASAFE_TIME_CHECK_CALLS) {
 		return;
@@ -969,14 +969,14 @@ void GenericDataSafeClass::Shuffle(bool forced)
 	/*
 	** Locals.
 	*/
-	unsigned long new_key;
-	unsigned long mod_key;
+	unsigned int new_key;
+	unsigned int mod_key;
 	int i,j;
 
 	/*
 	** We should only do this once in a while
 	*/
-	unsigned long time = TIMEGETTIME();
+	unsigned int time = TIMEGETTIME();
 
 	if (forced || time < ShuffleDelay || (time | ShuffleDelay) == 0 || (time - ShuffleDelay) > SHUFFLE_TIME) {
 		//WWDEBUG_SAY(("Data Safe: Performing data shuffle and re-key\n"));
@@ -1218,7 +1218,7 @@ void GenericDataSafeClass::Say_Security_Fault(void)
 {
 	WideStringClass text(TRANSLATION(IDS_DATASAFE_DETECTED_TAMPERING), true);
 	if (cNetwork::I_Am_Server()) {
-		text += L"Host";
+		text += U_CHAR("Host");
 		cScTextObj *event_obj = new cScTextObj;
 		event_obj->Init(text, TEXT_MESSAGE_PUBLIC, false, HOST_TEXT_SENDER, -1);
 	} else {
@@ -1322,12 +1322,9 @@ void GenericDataSafeClass::Print_Safe_Stats_To_Debug_Output(void)
  * HISTORY:                                                                                    *
  *   7/16/2001 2:12PM ST : Created                                                             *
  *=============================================================================================*/
-void GenericDataSafeClass::Dump_Safe_Stats(char *dump_buffer, int buffer_size)
+void GenericDataSafeClass::Dump_Safe_Stats([[maybe_unused]] char *dump_buffer, [[maybe_unused]] int buffer_size)
 {
-#ifndef	WWDEBUG
-	dump_buffer = dump_buffer;
-	buffer_size = buffer_size;
-#else		//WWDEBUG
+#ifdef	WWDEBUG
 
 #define UPDATE_PTR									\
  	chars += strlen(dump_ptr);					\
@@ -1351,7 +1348,7 @@ void GenericDataSafeClass::Dump_Safe_Stats(char *dump_buffer, int buffer_size)
 	/*
 	** Precalculate some stats.
 	*/
-	unsigned long time = TIMEGETTIME() - LastDump;
+	unsigned int time = TIMEGETTIME() - LastDump;
 	LastDump = TIMEGETTIME();
 	time = time / 1000;
 	int fetches_per_second = 0;
@@ -1396,7 +1393,7 @@ void GenericDataSafeClass::Dump_Safe_Stats(char *dump_buffer, int buffer_size)
 	** Count the number of items currently stored in the data safe.
 	*/
 	int count = 0;
-	unsigned long bytes = 0;
+	unsigned int bytes = 0;
 	for (int i=0 ; i<NumLists ; i++) {
 		ds_assert(Safe[i] != NULL);
 		if (Safe[i] != NULL) {
@@ -1416,7 +1413,7 @@ void GenericDataSafeClass::Dump_Safe_Stats(char *dump_buffer, int buffer_size)
 	/*
 	** Print out the percentage of safe capacity in use.
 	*/
-	unsigned long percent = (count * 100) / (MAX_DATASAFE_LISTS * MAX_ENTRIES_PER_LIST);
+	unsigned int percent = (count * 100) / (MAX_DATASAFE_LISTS * MAX_ENTRIES_PER_LIST);
 	sprintf(dump_ptr, "\n  Safe is %d percent full\n\n", percent);
 	UPDATE_PTR;
 

@@ -42,15 +42,15 @@ public:
 		return (_FindString);
 	}
 
-	static void Compare (const char *string)	
+	static void Compare (const char *string)
 	{
 		_Found |= (strstr (string, _FindString) != NULL);
 	}
-	
+
 	static bool Found()
 	{
 		return (_Found);
-	}	
+	}
 
 	static void Found (bool found)
 	{
@@ -68,7 +68,7 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(FindDialog)
 	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -76,7 +76,7 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(FindDialog)
-	virtual BOOL OnInitDialog();
+	BOOL OnInitDialog() override;
 	afx_msg void OnChangeFindString();
 	afx_msg void OnUpdateFindString();
 	//}}AFX_MSG

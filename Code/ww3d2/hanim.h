@@ -17,22 +17,22 @@
 */
 
 /* $Header: /Commando/Code/ww3d2/hanim.h 3     12/13/01 7:01p Patrick $ */
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando / G 3D Library                                      * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/ww3d2/hanim.h                                $* 
- *                                                                                             * 
- *                       Author:: Greg_h                                                       * 
- *                                                                                             * 
- *                     $Modtime:: 12/13/01 6:54p                                              $* 
- *                                                                                             * 
- *                    $Revision:: 3                                                           $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando / G 3D Library                                      *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/ww3d2/hanim.h                                $*
+ *                                                                                             *
+ *                       Author:: Greg_h                                                       *
+ *                                                                                             *
+ *                     $Modtime:: 12/13/01 6:54p                                              $*
+ *                                                                                             *
+ *                    $Revision:: 3                                                           $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 
@@ -70,7 +70,7 @@ class HTreeClass;
 
 	This is the base class for all animation formats used in W3D.  It
 	contains the virtual interface that all animations must support.
-	
+
 **********************************************************************************/
 class HAnimClass : public RefCountClass, public	HashableClass
 {
@@ -92,8 +92,8 @@ public:
 //	virtual Vector3			Get_Translation(int pividx,float frame) = 0;
 //	virtual Quaternion		Get_Orientation(int pividx,float frame) = 0;
 	// Jani: Changed to pass in reference of destination to avoid copying
-	virtual void				Get_Translation(int pividx,float frame) {}	// todo: remove
-	virtual void				Get_Orientation(int pividx,float frame) {}	// todo: remove
+	//virtual void				Get_Translation(int pividx,float frame) {}	// todo: remove
+	//virtual void				Get_Orientation(int pividx,float frame) {}	// todo: remove
 	virtual void				Get_Translation(Vector3& translation, int pividx,float frame) const = 0;
 	virtual void				Get_Orientation(Quaternion& orientation, int pividx,float frame) const = 0;
 	virtual void				Get_Transform(Matrix3D&, int pividx, float frame) const = 0;
@@ -103,11 +103,11 @@ public:
 	virtual bool				Is_Node_Motion_Present(int pividx) = 0;
 
 	// Methods that test the presence of a certain motion channel.
-	virtual bool				Has_X_Translation (int pividx)	{ return true; }
-	virtual bool				Has_Y_Translation (int pividx)	{ return true; }
-	virtual bool				Has_Z_Translation (int pividx)	{ return true; }
-	virtual bool				Has_Rotation (int pividx)			{ return true; }
-	virtual bool				Has_Visibility (int pividx)		{ return true; }
+	virtual bool				Has_X_Translation (int /* pividx */)	{ return true; }
+	virtual bool				Has_Y_Translation (int /* pividx */)	{ return true; }
+	virtual bool				Has_Z_Translation (int /* pividx */)	{ return true; }
+	virtual bool				Has_Rotation (int /* pividx */)			{ return true; }
+	virtual bool				Has_Visibility (int /* pividx */)		{ return true; }
 
 	// Animated sound-triggering support
 	virtual bool				Has_Embedded_Sounds (void) const			{ return HasEmbeddedSounds; }
@@ -154,7 +154,7 @@ private:
 	// This info is packaged into a struct to minimize DynamicVectorClass overhead
 	struct WeightInfoStruct {
 		WeightInfoStruct() : Name(0) {}
-		~WeightInfoStruct() { if(Name) delete [] Name; } 
+		~WeightInfoStruct() { if(Name) delete [] Name; }
 
 		char *Name;
 		float Weight;
@@ -185,11 +185,11 @@ class HAnimComboDataClass : public AutoPoolClass<HAnimComboDataClass,256> {
 		void Set_HAnim(HAnimClass *motion);
 		void Give_HAnim(HAnimClass *motion) { if(HAnim) HAnim->Release_Ref(); HAnim = motion; }	// used for giving this object the reference
 
-		void Set_Frame(float frame)		{ PrevFrame = Frame; Frame = frame; }		
+		void Set_Frame(float frame)		{ PrevFrame = Frame; Frame = frame; }
 		void Set_Prev_Frame(float frame)	{ PrevFrame = frame; }
 		void Set_Weight(float weight)		{ Weight = weight; }
 		void Set_Pivot_Map(PivotMapClass *map);
-		
+
 
 		HAnimClass * Peek_HAnim(void)				const { return HAnim; }	// note: does not add reference
 		HAnimClass * Get_HAnim(void)				const { if(HAnim) HAnim->Add_Ref(); return HAnim; }	// note: does not add reference
@@ -247,12 +247,12 @@ public:
 	PivotMapClass	* Peek_Pivot_Weight_Map( int indx );
 
 
-	// add an entry to the dynamic vector 
+	// add an entry to the dynamic vector
 	void Append_Anim_Combo_Data(HAnimComboDataClass * AnimComboData);
 
 	// remove an entry from the vector
 	void Remove_Anim_Combo_Data(HAnimComboDataClass * AnimComboData);
-	
+
 	// retrieve a specific combo data
 	HAnimComboDataClass * Peek_Anim_Combo_Data(int index) { return HAnimComboData[index]; }
 
@@ -262,4 +262,4 @@ protected:
 
 };
 
-#endif 
+#endif

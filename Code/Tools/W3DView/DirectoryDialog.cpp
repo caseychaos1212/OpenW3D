@@ -50,7 +50,7 @@ UINT_PTR CALLBACK Browse_For_Folder_Hook_Proc
 	HWND		hdlg,
 	UINT		message,
 	WPARAM	wparam,
-	LPARAM	lparam
+	LPARAM	/* lparam */
 )
 {
 	//
@@ -64,7 +64,7 @@ UINT_PTR CALLBACK Browse_For_Folder_Hook_Proc
 		::SetDlgItemText (hdlg, 1152, "xxx.xxx");
 	}
 
-	return FALSE;
+	return false;
 }
 
 
@@ -98,7 +98,7 @@ Browse_For_Folder (HWND parent_wnd, LPCTSTR initial_path, CString &path)
 	if (::GetOpenFileName (&openfilename) == IDOK) {
 		path		= ::Strip_Filename_From_Path (filename);
 		retval	= true;
-	}	
+	}
 
 	return retval;
 }

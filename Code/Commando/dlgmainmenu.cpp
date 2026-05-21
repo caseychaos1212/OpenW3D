@@ -37,13 +37,14 @@
 
 #include "dlgmainmenu.h"
 #include "assetmgr.h"
+#include "renegadedialog.h"
 #include "rendobj.h"
 #include "hanim.h"
 #include "gameinitmgr.h"
 #include "mainmenutransition.h"
 #include "menubackdrop.h"
 #include "scene.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "mesh.h"
 #include "meshgeometry.h"
 #include "dialogmgr.h"
@@ -78,7 +79,7 @@ bool MainMenuDialogClass::Animated = true;
 //
 ////////////////////////////////////////////////////////////////
 MainMenuDialogClass::MainMenuDialogClass (void)	:
-	MenuDialogClass (IDD_MENU_MAIN),
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MENU_MAIN)),
 	TitleTransModel (NULL),
 	LogoModel (NULL),
 	GizmoModel (NULL),
@@ -154,7 +155,9 @@ MainMenuDialogClass::On_Menu_Activate (bool onoff)
 
 			// Put the logo pack into the scene when reactivated.
 			if (LogoModel && LogoModel->Peek_Scene() == NULL) {
-				Get_BackDrop()->Peek_Scene()->Add_Render_Object(LogoModel);
+				if (MenuBackDropClass *backdrop = Get_BackDrop()) {
+					backdrop->Peek_Scene()->Add_Render_Object(LogoModel);
+				}
 			}
 
 			//
@@ -223,14 +226,18 @@ MainMenuDialogClass::Get_Transition_In (DialogBaseClass *prev_dlg)
 	//	Add the transition model to the scene
 	//
 	if (TitleTransModel != NULL && TitleTransModel->Peek_Scene () == NULL) {
-		Get_BackDrop ()->Peek_Scene ()->Add_Render_Object (TitleTransModel);
+		if (MenuBackDropClass *backdrop = Get_BackDrop ()) {
+			backdrop->Peek_Scene ()->Add_Render_Object (TitleTransModel);
+		}
 	}
 
 	//
 	//	Add the logo to the screen
 	//
 	if (LogoModel != NULL && LogoModel->Peek_Scene () == NULL) {
-		Get_BackDrop ()->Peek_Scene ()->Add_Render_Object (LogoModel);
+		if (MenuBackDropClass *backdrop = Get_BackDrop ()) {
+			backdrop->Peek_Scene ()->Add_Render_Object (LogoModel);
+		}
 	}
 
 	//
@@ -242,7 +249,9 @@ MainMenuDialogClass::Get_Transition_In (DialogBaseClass *prev_dlg)
 	{
 		transition = new MainMenuTransitionClass;
 		transition->Set_Model (TitleTransModel);
-		transition->Set_Camera (Get_BackDrop ()->Peek_Camera ());
+		if (MenuBackDropClass *backdrop = Get_BackDrop ()) {
+			transition->Set_Camera (backdrop->Peek_Camera ());
+		}
 		transition->Set_Type (DialogTransitionClass::SCREEN_IN);
 		transition->Set_Dialogs (this, prev_dlg);
 
@@ -276,7 +285,9 @@ MainMenuDialogClass::Get_Transition_Out (DialogBaseClass *next_dlg)
 	{
 		transition = new MainMenuTransitionClass;
 		transition->Set_Model (TitleTransModel);
-		transition->Set_Camera (Get_BackDrop ()->Peek_Camera ());
+		if (MenuBackDropClass *backdrop = Get_BackDrop ()) {
+			transition->Set_Camera (backdrop->Peek_Camera ());
+		}
 		transition->Set_Type (DialogTransitionClass::SCREEN_OUT);
 		transition->Set_Dialogs (this, next_dlg);
 
@@ -302,15 +313,15 @@ MainMenuDialogClass::Choose_Skirmish_Map (void)
 {
 	DynamicVectorClass<StringClass>	map_list;
 	WIN32_FIND_DATAA find_info	= { 0 };
-	BOOL keep_going				= TRUE;
+	BOOL keep_going				= true;
 	HANDLE file_find				= NULL;
 	StringClass file_filter;
 
 	//
 	// Look for any skirmish maps.
 	//
-	file_filter.Format("data\\skirmish*.mix");
-	keep_going = TRUE;
+	file_filter.Format("data/skirmish*.mix");
+	keep_going = true;
 	for (file_find = ::FindFirstFileA (file_filter, &find_info);
 		 (file_find != INVALID_HANDLE_VALUE) && keep_going;
 		  keep_going = ::FindNextFileA (file_find, &find_info))
@@ -326,8 +337,8 @@ MainMenuDialogClass::Choose_Skirmish_Map (void)
 		//
 		// No skirmish maps found. Look for a C&C map.
 		//
-		file_filter.Format("data\\c&c_*.mix");
-		keep_going = TRUE;
+		file_filter.Format("data/c&c_*.mix");
+		keep_going = true;
 		for (file_find = ::FindFirstFileA (file_filter, &find_info);
 			 (file_find != INVALID_HANDLE_VALUE) && keep_going;
 			  keep_going = ::FindNextFileA (file_find, &find_info))
@@ -356,7 +367,7 @@ MainMenuDialogClass::Choose_Skirmish_Map (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-MainMenuDialogClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MainMenuDialogClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	bool allow_default = true;
 
@@ -389,7 +400,7 @@ MainMenuDialogClass::On_Command (int ctrl_id, int message_id, DWORD param)
 		}
 
 		case IDC_MENU_MP_LAN_GAME_BUTTON:
-			
+
 			//
 			// Clear any gamespyadmin flags
 			//
@@ -399,7 +410,7 @@ MainMenuDialogClass::On_Command (int ctrl_id, int message_id, DWORD param)
 				GameInitMgrClass::Initialize_LAN ();
 			} else {
 				DlgMsgBox::DoDialog(
-					TRANSLATE(IDS_MP_UNABLE_INITIALIZE_LAN), 
+					TRANSLATE(IDS_MP_UNABLE_INITIALIZE_LAN),
 					TRANSLATE(IDS_MP_NO_LAN_IP_ADDRESSES_FOUND));
 				allow_default = false;
 			}
@@ -444,14 +455,16 @@ MainMenuDialogClass::Display (void)
 		//
 		if (Animated) {
 
-			if (dialog->Get_BackDrop ()->Peek_Model () == NULL) {
-				dialog->Get_BackDrop ()->Set_Model ("IF_BACK01");
-				dialog->Get_BackDrop ()->Set_Animation ("IF_BACK01.IF_BACK01");
+			if (MenuBackDropClass *backdrop = dialog->Get_BackDrop ()) {
+				if (backdrop->Peek_Model () == NULL) {
+					backdrop->Set_Model ("IF_BACK01");
+					backdrop->Set_Animation ("IF_BACK01.IF_BACK01");
 
-				/*RenderObjClass *model = WW3DAssetManager::Get_Instance ()->Create_Render_Obj ("IF_RENLOGO");
-				if (model != NULL) {
-					dialog->Get_BackDrop ()->Peek_Scene ()->Add_Render_Object(model);
-				}*/
+					/*RenderObjClass *model = WW3DAssetManager::Get_Instance ()->Create_Render_Obj ("IF_RENLOGO");
+					if (model != NULL) {
+						backdrop->Peek_Scene ()->Add_Render_Object(model);
+					}*/
+				}
 			}
 		}
 
@@ -482,8 +495,8 @@ MainMenuDialogClass::Update_Version_Number (void)
 	//
 	// Version 1.0 by default
 	//
-	DWORD version_major = 1;
-	DWORD version_minor = 0;
+	unsigned int version_major = 1;
+	unsigned int version_minor = 0;
 	Get_Version_Number(&version_major, &version_minor);
 
 	//
@@ -494,7 +507,7 @@ MainMenuDialogClass::Update_Version_Number (void)
 	WideStringClass build_number(BuildInfoClass::Get_Build_Number_String(), true);
 	WideStringClass build_initials(BuildInfoClass::Get_Builder_Initials(), true);
 	WideStringClass build_date(BuildInfoClass::Get_Build_Date_String(), true);
-	version_string.Format (L"v%d.%.3d %s-%s %s", (version_major >> 16), (version_major & 0xFFFF), build_initials, build_number, build_date);
+	version_string.Format (U_CHAR("v%d.%.3d %s-%s %s"), (version_major >> 16), (version_major & 0xFFFF), build_initials.Peek_Buffer(), build_number.Peek_Buffer(), build_date.Peek_Buffer());
 	Set_Dlg_Item_Text (IDC_VERSION_STATIC, version_string);
 }
 
@@ -522,9 +535,9 @@ MainMenuDialogClass::Update_Version_Number (void)
 
 
 				//TRANSLATE_ME
-				//const wchar_t * title	= L"Unable to initialize LAN";
+				//const unichar_t * title	= U_CHAR("Unable to initialize LAN");
 				//IDS_MP_UNABLE_INITIALIZE_LAN
-				//const wchar_t * text	= L"No LAN IP addresses found.";
+				//const unichar_t * text	= U_CHAR("No LAN IP addresses found.");
 				//IDS_MP_NO_LAN_IP_ADDRESSES_FOUND
 
 				//DlgMsgBox::DoDialog(title, text);

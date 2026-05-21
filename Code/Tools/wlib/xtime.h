@@ -22,7 +22,7 @@ xtime                      Neal Kettler
 This is version 2 of the Wtime library (now xtime).  It now supports
 time storage from the year 0 to well after the sun
 will have gone supernova (OK, OK I admit it'll break in the
-year 5 Million.) 
+year 5 Million.)
 
 The call to update the current time will break in 2038.
 Hopefully by then somebody will replace the lame time()
@@ -79,7 +79,7 @@ class Xtime
     void      PrintDate(char *out) const;
 **********/
 
-    sint32    getDay(void) const;    // Get days since year 0 
+    sint32    getDay(void) const;    // Get days since year 0
     sint32    getMsec(void) const;   // Get milliseconds into the day
 
     void      setDay(sint32 day);
@@ -102,7 +102,7 @@ class Xtime
     int    getYWeek(void) const;  // Week of Year (1-53)
     int    getYear(void) const;   // Year (e.g. 1997)
 
-    // Modify the time components.  Return FALSE if fail
+    // Modify the time components.  Return false if fail
     bit8      setSecond(sint32 sec);
     bit8      setMinute(sint32 min);
     bit8      setHour(sint32 hour);
@@ -110,11 +110,11 @@ class Xtime
     bit8      setMonth(sint32 month);
     bit8      setMDay(sint32 mday);
 
-    void      normalize(void);  // move msec overflows to the day 
+    void      normalize(void);  // move msec overflows to the day
 
     // Compare two times
     int       compare(const Xtime &other) const;
-    
+
     // comparisons
     bit8   operator == ( const Xtime &other ) const;
     bit8   operator != ( const Xtime &other ) const;

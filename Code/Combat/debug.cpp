@@ -331,7 +331,7 @@ void wwdebug_assert_handler(const char * message)
 	DebugManager::Display( message );
 }
 
-bool wwdebug_trigger_handler(int trigger_num)
+bool wwdebug_trigger_handler([[maybe_unused]] int trigger_num)
 {
 #ifdef WWDEBUG
 	switch( trigger_num ) {
@@ -353,12 +353,12 @@ bool wwdebug_trigger_handler(int trigger_num)
 	return false;
 }
 
-void wwdebug_profile_start_handler( const char * title )
+void wwdebug_profile_start_handler( const char * /* title */ )
 {
 	// Perhaps switch to the ProfileManager calls...
 }
 
-void wwdebug_profile_stop_handler( const char * title )
+void wwdebug_profile_stop_handler( const char * /* title */ )
 {
 }
 
@@ -485,7 +485,7 @@ void operator delete (void *ptr) noexcept
 #endif
 }
 
-void operator delete(void *p, size_t size) noexcept
+void operator delete(void *p, size_t /* size */) noexcept
 {
     operator delete(p);
 }
@@ -822,7 +822,7 @@ void Load_Image_Helper(void)
 
 		int symload = 0;
 
-		if (_SymInitialize != NULL && _SymInitialize(GetCurrentProcess(), NULL, FALSE)) {
+		if (_SymInitialize != NULL && _SymInitialize(GetCurrentProcess(), NULL, false)) {
 
 			if (_SymSetOptions != NULL) {
 				_SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_UNDNAME);

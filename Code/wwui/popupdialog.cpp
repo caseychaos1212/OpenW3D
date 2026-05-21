@@ -52,8 +52,8 @@ const int	TITLE_BORDER_HEIGHT	= 8;
 //	PopupDialogClass
 //
 ////////////////////////////////////////////////////////////////
-PopupDialogClass::PopupDialogClass (int res_id)	:
-	DialogBaseClass (res_id)
+PopupDialogClass::PopupDialogClass (const DialogResource *dialog_resource)	:
+	DialogBaseClass (dialog_resource)
 {
 	//
 	//	Configure the renderers
@@ -87,7 +87,7 @@ PopupDialogClass::~PopupDialogClass (void)
 }
 
 
-void PopupDialogClass::Set_Title(const wchar_t* title)
+void PopupDialogClass::Set_Title(const unichar_t* title)
 	{
 	DialogBaseClass::Set_Title(title);
 	Build_Background_Renderers();

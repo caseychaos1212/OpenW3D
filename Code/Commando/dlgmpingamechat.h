@@ -43,7 +43,6 @@
 
 #include "popupdialog.h"
 #include "childdialog.h"
-#include "resource.h"
 #include "sctextobj.h"
 
 
@@ -78,23 +77,23 @@ public:
 	bool	On_EditCtrl_Key_Down (EditCtrlClass *edit_ctrl, uint32 key_id, uint32 key_data) override;
 	void	On_EditCtrl_Change(EditCtrlClass *edit_ctrl, int ctrl_id) override;
 	void	On_EditCtrl_Enter_Pressed (EditCtrlClass *edit_ctrl, int ctrl_id) override;
-	void	On_Command (int ctrl_id, int message_id, DWORD param) override;
+	void	On_Command (int ctrl_id, int message_id, unsigned int param) override;
 
 protected:
 
 	////////////////////////////////////////////////////////////////
 	//	Protected methods
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	void Process_Message(void);
 	void Send_Message(WideStringClass& message, TextMessageEnum type, int recipientID);
-	bool Process_Commands(const wchar_t* message);
+	bool Process_Commands(const unichar_t* message);
 
 	//
 	//	Auto completetion
 	//
 	void	Auto_Complete_Name (void);
-	void	Complete_Player_Name (const wchar_t *typed_name, WideStringClass &completed_name);
-	bool	Find_Current_Command (const wchar_t *	message, int &start_index, int &end_index);
+	void	Complete_Player_Name (const unichar_t *typed_name, WideStringClass &completed_name);
+	bool	Find_Current_Command (const unichar_t *	message, int &start_index, int &end_index);
 
 
 	////////////////////////////////////////////////////////////////
@@ -136,7 +135,7 @@ public:
 	//	Inherited
 	//
 	void	On_Init_Dialog (void) override;
-	void	On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void	On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 	void	Render (void) override;
 
 	//

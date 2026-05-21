@@ -117,10 +117,10 @@ void
 CameraSettingsFormClass::Update_Controls (void)
 {
 	CameraMgr *pcamera_mgr = ::Get_Camera_Mgr ();
-	if (pcamera_mgr != NULL) {		
+	if (pcamera_mgr != NULL) {
 		const Matrix3D &transform = pcamera_mgr->Get_Camera ()->Get_Transform ();
 		CString temp_string;
-		
+
 		// Put the x position of the camera into the controls
 		temp_string.Format ("%.2f", transform.Get_X_Translation ());
 		SetDlgItemText (IDC_POSX_EDIT, temp_string);
@@ -172,7 +172,7 @@ CameraSettingsFormClass::OnDeltaPosDepthSpin
 	if (pNMUpDown) {
 		Set_Depth (pNMUpDown->iPos);
 	}
-	
+
 	*pResult = 0;
 	return ;
 }
@@ -195,19 +195,8 @@ CameraSettingsFormClass::OnUpdateDepthEdit (void)
 // Set_Depth
 //
 void
-CameraSettingsFormClass::Set_Depth (int new_depth)
+CameraSettingsFormClass::Set_Depth (int /* new_depth */)
 {
-	CameraMgr *pcamera_mgr = ::Get_Camera_Mgr ();
-	if (pcamera_mgr != NULL) {
-		
-		// Get the current 'near' clip plane
-		double near_plane = 0;
-		double far_plane = 0;
-		//pcamera_mgr->Get_Camera ()->Get_Clip_Planes (near_plane, far_plane);
-
-		// Set the new 'far' clip plane
-		//pcamera_mgr->Get_Camera ()->Set_Clip_Planes (near_plane, (double)new_depth);
-	}
 
 	return ;
 }
@@ -227,15 +216,15 @@ CameraSettingsFormClass::WindowProc
 {
 	// Is this the message we are expecting?
 	if ((message == WM_SHOWWINDOW) || (message == WM_ACTIVATE)) {
-		
+
 		// Make sure the controls reflect the current state when we are
 		// shown
 		if ((BOOL)LOWORD (wParam)) {
 			Update_Controls ();
 		}
-	} 
+	}
 
-	// Allow the base class to process this message	
+	// Allow the base class to process this message
 	return DockableFormClass::WindowProc(message, wParam, lParam);
 }
 

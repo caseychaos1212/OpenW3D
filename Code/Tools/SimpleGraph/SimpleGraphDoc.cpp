@@ -65,7 +65,7 @@ CSimpleGraphDoc::~CSimpleGraphDoc()
 BOOL CSimpleGraphDoc::OnNewDocument()
 {
 	if (!CDocument::OnNewDocument())
-		return FALSE;
+		return false;
 
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
@@ -78,10 +78,10 @@ BOOL CSimpleGraphDoc::OnNewDocument()
 	POSITION pos = GetFirstViewPosition ();
 	CSimpleGraphView *view = (CSimpleGraphView *)GetNextView (pos);
 	view->Set_Ranges (Vector2 (0, 0), Vector2 (100, 100));
-	view->InvalidateRect (NULL, TRUE);
-	view->UpdateWindow ();	
+	view->InvalidateRect (NULL, true);
+	view->UpdateWindow ();
 
-	return TRUE;
+	return true;
 }
 
 
@@ -100,7 +100,7 @@ void CSimpleGraphDoc::Serialize(CArchive& ar)
 		file.Attach ((void *)ar.GetFile ()->m_hFile);
 		ChunkSaveClass csave (&file);
 
-		Vector2 range_min,range_max;		
+		Vector2 range_min,range_max;
 		view->Get_Ranges(range_min,range_max);
 		_TheLookupTableManager.Save_Table_Desc(csave, m_Spline, range_min, range_max);
 

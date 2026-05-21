@@ -31,11 +31,11 @@
 
 class CWdumpDoc : public CDocument
 {
-//Moumine 1/2/2002    11:12:25 AM ---Need this as public in project W3dShellExt  
+//Moumine 1/2/2002    11:12:25 AM ---Need this as public in project W3dShellExt
 #if ! defined _W3DSHELLEXT
-protected: // create from serialization only 
+protected: // create from serialization only
 #else
-public: 
+public:
 #endif
 	CWdumpDoc();
 protected:
@@ -53,13 +53,13 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CWdumpDoc)
 	public:
-	virtual BOOL OnNewDocument();
-	virtual void Serialize(CArchive& ar);
+	virtual BOOL OnNewDocument() override;
+	virtual void Serialize(CArchive& ar) override;
 	//}}AFX_VIRTUAL
 
 // Implementation
 public:
-	virtual ~CWdumpDoc();
+	~CWdumpDoc() override;
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;

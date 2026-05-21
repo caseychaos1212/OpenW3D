@@ -38,7 +38,7 @@
 #include "cdverify.h"
 #include "wwstring.h"
 #include "popupdialog.h"
-#include "resource.h"
+#include "renegadedialog.h"
 #include <algorithm>
 
 
@@ -61,9 +61,9 @@ public:
 	////////////////////////////////////////////////////////////////
 	CDVerifyDialogClass (void)	:
 		Object (NULL),
-		PopupDialogClass (IDD_CDVERIFY) {}
+		PopupDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_CDVERIFY)) {}
 
-	void	On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void	On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 	void	Set_Object (CDVerifyClass *object)	{ Object = object; }
 
 private:
@@ -105,8 +105,8 @@ CDVerifyClass::Get_CD_Path (StringClass &drive_path)
 			if (::GetVolumeInformationA (drive_root_name, volume_name, sizeof (volume_name),
 						NULL, NULL, NULL, NULL, 0))
 			{
-				int cmp_len	= ::strlen (volume_name);
-				cmp_len		= std::max (cmp_len, 11);
+				size_t cmp_len = ::strlen (volume_name);
+				cmp_len = std::max<size_t> (cmp_len, static_cast<size_t>(11));
 
 				//
 				//	Is this the movies CD?
@@ -156,7 +156,7 @@ CDVerifyClass::Display_UI (Observer<CDVerifyEvent> *observer)
 //
 ////////////////////////////////////////////////////////////////
 void
-CDVerifyDialogClass::On_Command (int ctrl_id, int message_id, DWORD param)
+CDVerifyDialogClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	//
 	//	Check to see if the CD is in the drive now...
@@ -177,7 +177,7 @@ CDVerifyDialogClass::On_Command (int ctrl_id, int message_id, DWORD param)
 			End_Dialog ();
 		}
 	} else if (ctrl_id == IDCANCEL) {
-		
+
 		//
 		//	Notify anybody who cares that the user has cancelled the operation
 		//
@@ -187,7 +187,7 @@ CDVerifyDialogClass::On_Command (int ctrl_id, int message_id, DWORD param)
 		//
 		//	Close the dialog
 		//
-		End_Dialog ();		
+		End_Dialog ();
 	}
 
 	PopupDialogClass::On_Command (ctrl_id, message_id, param);

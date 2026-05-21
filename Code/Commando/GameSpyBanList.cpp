@@ -54,6 +54,7 @@
 #include "sctextobj.h"
 #include "ConsoleMode.h"
 #include "gamesideservercontrol.h"
+#include "wwstring.h"
 #include <cstdio>
 
 
@@ -121,8 +122,8 @@ void cGameSpyBanList::Ban_User(const char *nickname, const char *challenge_respo
 
 	if (outf) {
 		fprintf(outf, "\"%s\" \"%s\" \"%s\" \"%s\" \"%s\"; \"%s\" console BAN\n", t->Get_Rule_Type() ? "Allow" : "Deny",
-			t->Get_Nick_Name(), t->Get_Hash_ID(), 
-			t->Get_Ip_Address() ? cNetUtil::Address_To_String(t->Get_Ip_Address()) : "", 
+			t->Get_Nick_Name(), t->Get_Hash_ID(),
+			t->Get_Ip_Address() ? cNetUtil::Address_To_String(t->Get_Ip_Address()) : "",
 			t->Get_Ip_Address() ? "255.255.255.255" : "", nickname ? nickname : "");
 		fclose(outf);
 	}
@@ -133,10 +134,10 @@ void cGameSpyBanList::Think(void) {
 	cPlayer *player = NULL;
 	for (SLNode<cPlayer> *player_node = cPlayerManager::Get_Player_Object_List ()->Head ()
 		; player_node != NULL; player_node = player_node->Next ()) {
-		
+
 		player = player_node->Data ();
 		WWASSERT (player != NULL);
-		
+
 		if (player->Get_Is_Active().Is_False() || !player->Is_Human()) {
 			continue;
 		}
@@ -145,7 +146,7 @@ void cGameSpyBanList::Think(void) {
 			Final_Player_Kick(player->Get_Id());
 		} else if (player->Get_GameSpy_Kick_State() == GAMESPY_KICK_STATE_INITIAL &&
 				player->Get_GameSpy_Auth_State() == GAMESPY_AUTH_STATE_ACCEPTED) {
-			if (Is_User_Banned(StringClass(player->Get_Name()), player->Get_GameSpy_Hash_Id(), 
+			if (Is_User_Banned(StringClass(player->Get_Name()), player->Get_GameSpy_Hash_Id(),
 					player->Get_Ip_Address())) {
 				Begin_Player_Kick(player->Get_Id());
 			} else {
@@ -162,7 +163,7 @@ bool cGameSpyBanList::Begin_Player_Kick(int id) {
 	if (player && player->Get_Is_Active().Is_True() && player->Is_Human()) {
 
 		cScTextObj * p_message = new cScTextObj;
-		p_message->Init(L"You've been kicked from the server. Please quit.", TEXT_MESSAGE_PRIVATE, true, HOST_TEXT_SENDER, player->Get_Id());
+		p_message->Init(U_CHAR("You've been kicked from the server. Please quit."), TEXT_MESSAGE_PRIVATE, true, HOST_TEXT_SENDER, player->Get_Id());
 		player->Set_GameSpy_Kick_State(GAMESPY_KICK_STATE_BEGIN);
 		return true;
 	}
@@ -173,8 +174,8 @@ bool cGameSpyBanList::Final_Player_Kick(int id) {
 
 	cPlayer *player = cPlayerManager::Find_Player(id);
 	if (player && player->Get_Is_Active().Is_True() && player->Is_Human()) {
-		StringClass user_name = static_cast<const wchar_t *>(player->Get_Name());
-		ConsoleBox.Print("%s was kicked\n", user_name);
+		StringClass user_name = static_cast<const unichar_t *>(player->Get_Name());
+		ConsoleBox.Print("%s was kicked\n", user_name.Peek_Buffer());
 		player->Set_GameSpy_Kick_State(GAMESPY_KICK_STATE_KICKED);
 		cNetwork::Server_Kill_Connection(id);
 		cNetwork::Cleanup_After_Client(id);
@@ -183,7 +184,7 @@ bool cGameSpyBanList::Final_Player_Kick(int id) {
 	return false;
 }
 
-bool cGameSpyBanList::Is_User_Banned(const char *nickname, const char *challenge_response, 
+bool cGameSpyBanList::Is_User_Banned(const char *nickname, const char *challenge_response,
 									 DWORD ipaddress) {
 
 	BanEntry *t = BanList->First();
@@ -192,7 +193,7 @@ bool cGameSpyBanList::Is_User_Banned(const char *nickname, const char *challenge
 
 	for (;t && t->Is_Valid(); t = t->Next()) {
 
-		if (challenge_response && *challenge_response && 
+		if (challenge_response && *challenge_response &&
 				strcmp(challenge_response, t->Get_Hash_ID()) == 0) {
 			ret = true;
 		} else if (t->Get_Hash_ID() && strlen(t->Get_Hash_ID())){
@@ -200,7 +201,7 @@ bool cGameSpyBanList::Is_User_Banned(const char *nickname, const char *challenge
 			continue;
 		}
 
-		if (ipaddress && t->Get_Ip_Address() && ((ipaddress & t->Get_Ip_Netmask()) == 
+		if (ipaddress && t->Get_Ip_Address() && ((ipaddress & t->Get_Ip_Netmask()) ==
 				(t->Get_Ip_Address() & t->Get_Ip_Netmask()))) {
 			ret = true;
 		} else if (t->Get_Ip_Address()) {
@@ -212,14 +213,14 @@ bool cGameSpyBanList::Is_User_Banned(const char *nickname, const char *challenge
 			char *a = strdup(t->Get_Nick_Name());
 			char *b = strdup(nickname);
 
-			_strupr(a); _strupr(b);
+            openw3d::string_to_upper(a); openw3d::string_to_upper(b);
 
 			//
 			// This code means that you can put a BAN name in as
 			// "%foo" == match on "foo" at the end of the string
 			// "foo%" == match on "foo" at the beginning of the string
 			// "%foo%" == match on "foo" anywhere in the string
-			// 
+			//
 			// to match on a literal % in the nickname use %%
 			//
 			// Note the use of small var names to make it even more confusing
@@ -269,7 +270,7 @@ bool cGameSpyBanList::Is_User_Banned(const char *nickname, const char *challenge
 void cGameSpyBanList::Strip_Escapes(char *var) {
 	char *q = (char *)var;
 	while ((q = strstr(q, "%%")) != NULL) {
-		memmove(q, q+1, strlen(q)); 
+		memmove(q, q+1, strlen(q));
 		q++;
 	}
 }

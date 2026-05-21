@@ -70,6 +70,13 @@
 #define	VALUE_NAME_RENDER_DEVICE_WINDOWED			"RenderDeviceWindowed"
 #define	VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH		"RenderDeviceTextureDepth"
 
+#define	VALUE_INI_RENDER_DEVICE_NAME					"Name"
+#define	VALUE_INI_RENDER_DEVICE_WIDTH				"Width"
+#define	VALUE_INI_RENDER_DEVICE_HEIGHT				"Height"
+#define	VALUE_INI_RENDER_DEVICE_DEPTH				"Depth"
+#define	VALUE_INI_RENDER_DEVICE_WINDOWED			"Windowed"
+#define	VALUE_INI_RENDER_DEVICE_TEXTURE_DEPTH		"TextureDepth"
+
 const unsigned MAX_TEXTURE_STAGES=2;
 
 enum {
@@ -119,7 +126,7 @@ WWINLINE void DX8_ErrorCode(HRESULT res)
 #define DX8CALL_HRES(x,res) DX8_Assert(); res = DX8Wrapper::_Get_D3D_Device8()->x; DX8_ErrorCode(res); number_of_DX8_calls++;
 #define DX8CALL(x) DX8_Assert(); DX8_ErrorCode(DX8Wrapper::_Get_D3D_Device8()->x); number_of_DX8_calls++;
 #define DX8CALL_D3D(x) DX8_Assert(); DX8_ErrorCode(DX8Wrapper::_Get_D3D8()->x); number_of_DX8_calls++;
-#define DX8_THREAD_ASSERT() if (_DX8SingleThreaded) { WWASSERT_PRINT(DX8Wrapper::_Get_Main_Thread_ID()==ThreadClass::_Get_Current_Thread_ID(),"DX8Wrapper::DX8 calls must be called from the main thread!"); }
+#define DX8_THREAD_ASSERT() if (_DX8SingleThreaded) { WWASSERT_PRINT(DX8Wrapper::_Get_Main_Thread_ID()==ThreadClass::Get_Current_Thread_ID(),"DX8Wrapper::DX8 calls must be called from the main thread!"); }
 #else
 #define DX8CALL_HRES(x,res) res = DX8Wrapper::_Get_D3D_Device8()->x; number_of_DX8_calls++;
 #define DX8CALL(x) DX8Wrapper::_Get_D3D_Device8()->x; number_of_DX8_calls++;
@@ -353,7 +360,7 @@ public:
 	static unsigned Get_Last_Frame_Texture_Stage_State_Changes();
 	static unsigned Get_Last_Frame_DX8_Calls();
 
-	static unsigned long Get_FrameCount(void);
+	static unsigned int Get_FrameCount(void);
 
 	// Needed by shader class
 	static bool						Get_Fog_Enable() { return FogEnable; }
@@ -381,7 +388,7 @@ public:
 	**	DX8Wrapper::Set_Render_Target (swap_chain_ptr);
 	**
 	**	WW3D::Begin_Render (true, true, Vector3 (0, 0, 0));
-	**	WW3D::Render (scene, camera, FALSE, FALSE);
+	**	WW3D::Render (scene, camera, false, false);
 	**	WW3D::End_Render ();
 	**
 	**	swap_chain_ptr->Present (NULL, NULL, NULL, NULL);
@@ -537,7 +544,7 @@ protected:
 	static unsigned						sampler_state_changes;
 	static bool								CurrentDX8LightEnables[4];
 
-	static unsigned long FrameCount;
+	static unsigned int FrameCount;
 
 	static DX8Caps*						CurrentCaps;
 
@@ -642,14 +649,14 @@ WWINLINE void DX8Wrapper::Set_DX8_Light(int index, D3DLIGHT9* light)
 	if (light) {
 		DX8_RECORD_LIGHT_CHANGE();
 		DX8CALL(SetLight(index,light));
-		DX8CALL(LightEnable(index,TRUE));
+		DX8CALL(LightEnable(index,true));
 		CurrentDX8LightEnables[index]=true;
 		SNAPSHOT_SAY(("DX8 - SetLight\n"));
 	}
 	else if (CurrentDX8LightEnables[index]) {
 		DX8_RECORD_LIGHT_CHANGE();
 		CurrentDX8LightEnables[index]=false;
-		DX8CALL(LightEnable(index,FALSE));
+		DX8CALL(LightEnable(index,false));
 		SNAPSHOT_SAY(("DX8 - DisableLight\n"));
 	}
 }
@@ -665,7 +672,7 @@ WWINLINE void DX8Wrapper::Set_DX8_Texture_Stage_State(unsigned stage, D3DTEXTURE
 		SNAPSHOT_SAY(("DX8 - SetTextureStageState(stage: %d, state: %s, value: %s)\n",
 			stage,
 			Get_DX8_Texture_Stage_State_Name(state),
-			value_name));
+			value_name.Peek_Buffer()));
 	}
 #endif
 
@@ -691,7 +698,7 @@ WWINLINE void DX8Wrapper::Set_DX8_Texture_Sampler_State(unsigned sampler, D3DSAM
 		SNAPSHOT_SAY(("DX8 - SetTextureSamplerState(sampler: %d, state: %s, value: %s)\n",
 			sampler,
 			Get_DX8_Texture_Sampler_State_Name(state),
-			value_name));
+			value_name.Peek_Buffer()));
 	}
 #endif
 
@@ -926,16 +933,18 @@ WWINLINE void DX8Wrapper::Set_Transform(D3DTRANSFORMSTATETYPE transform,const Ma
 		break;
 	case D3DTS_PROJECTION:
 		{
-			Matrix4 ProjectionMatrix=m.Transpose();
+			Matrix4 m2=m.Transpose();
 			ZFar=0.0f;
 			ZNear=0.0f;
-			DX8CALL(SetTransform(D3DTS_PROJECTION,(D3DMATRIX*)&ProjectionMatrix));
+			DX8CALL(SetTransform(D3DTS_PROJECTION,(D3DMATRIX*)&m2));
 		}
 		break;
 	default:
-		DX8_RECORD_MATRIX_CHANGE();
-		Matrix4 m2=m.Transpose();
-		DX8CALL(SetTransform(transform,(D3DMATRIX*)&m2));
+		{
+			DX8_RECORD_MATRIX_CHANGE();
+			Matrix4 m2=m.Transpose();
+			DX8CALL(SetTransform(transform,(D3DMATRIX*)&m2));
+		}
 		break;
 	}
 }

@@ -74,7 +74,7 @@ END_MESSAGE_MAP()
 //
 /////////////////////////////////////////////////////////////////////////
 BOOL
-StringPickerMainDialogClass::OnInitDialog (void) 
+StringPickerMainDialogClass::OnInitDialog (void)
 {
 	CDialog::OnInitDialog ();
 
@@ -92,7 +92,7 @@ StringPickerMainDialogClass::OnInitDialog (void)
 	StringPicker.Create (this);
 	StringPicker.SetWindowPos (NULL, rect.left, rect.top, rect.Width (), rect.Height (), SWP_NOZORDER);
 	StringPicker.ShowWindow (SW_SHOW);
-	return TRUE;
+	return true;
 }
 
 

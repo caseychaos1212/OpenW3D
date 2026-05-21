@@ -132,7 +132,7 @@ SliderCtrlClass::Create_Control_Renderer (void)
 
 	//
 	//	Calculate the rectangle for the control
-	//	
+	//
 	RectClass rect1;
 	RectClass rect2;
 	rect1.Left		= ClientRect.Left;
@@ -165,7 +165,7 @@ SliderCtrlClass::Create_Control_Renderer (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-SliderCtrlClass::On_Set_Cursor (const Vector2 &mouse_pos)
+SliderCtrlClass::On_Set_Cursor (const Vector2 &/* mouse_pos */)
 {
 	//
 	//	Change the mouse cursor
@@ -231,7 +231,7 @@ SliderCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
 	//
 	//	Snap the slider to the mouse position
 	//
-	Set_Pos (Slider_Pos_From_Mouse_Pos (mouse_pos));	
+	Set_Pos (Slider_Pos_From_Mouse_Pos (mouse_pos));
 	return ;
 }
 
@@ -242,7 +242,7 @@ SliderCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-SliderCtrlClass::On_LButton_Up (const Vector2 &mouse_pos)
+SliderCtrlClass::On_LButton_Up (const Vector2 &/* mouse_pos */)
 {
 	Release_Capture ();
 	IsDragging = false;
@@ -290,7 +290,7 @@ void
 SliderCtrlClass::On_Kill_Focus (DialogControlClass *focus)
 {
 	IsDragging = false;
-	Set_Dirty ();	
+	Set_Dirty ();
 
 	DialogControlClass::On_Kill_Focus (focus);
 	return ;
@@ -303,7 +303,7 @@ SliderCtrlClass::On_Kill_Focus (DialogControlClass *focus)
 //
 ////////////////////////////////////////////////////////////////
 bool
-SliderCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
+SliderCtrlClass::On_Key_Down (uint32 key_id, uint32 /* key_data */)
 {
 	bool handled = true;
 
@@ -357,15 +357,15 @@ int
 SliderCtrlClass::Slider_Pos_From_Mouse_Pos (const Vector2 &mouse_pos)
 {
 	int retval = 0;
-	
+
 	if (mouse_pos.X < ClientRect.Left) {
-		
+
 		//
 		// Mouse is to the left of the control
 		//
 		retval = MinPos;
 	} else if (mouse_pos.X >= ClientRect.Right) {
-		
+
 		//
 		//	Mouse is to the right of the control
 		//
@@ -430,7 +430,7 @@ SliderCtrlClass::Set_Pos (int pos, bool send_notification)
 		//
 		if (send_notification) {
 			ADVISE_NOTIFY (On_SliderCtrl_Pos_Changed (this, Get_ID (), CurrPos));
-		}		
+		}
 	}
 
 	return ;

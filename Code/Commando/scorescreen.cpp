@@ -16,27 +16,27 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Commando/scorescreen.cpp                     $* 
- *                                                                                             * 
- *                      $Author:: Byon_g                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 1/24/02 11:20a                                              $* 
- *                                                                                             * 
- *                    $Revision:: 27                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Commando/scorescreen.cpp                     $*
+ *                                                                                             *
+ *                      $Author:: Byon_g                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 1/24/02 11:20a                                              $*
+ *                                                                                             *
+ *                    $Revision:: 27                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "scorescreen.h"
 #include "campaign.h"
-#include "resource.h"
+#include "renegadedialog.h"
 #include "translatedb.h"
 #include "string_ids.h"
 #include "imagectrl.h"
@@ -150,7 +150,7 @@ void ScoreScreenGameModeClass::Save_Stats( void )
 //
 ////////////////////////////////////////////////////////////////
 ScoreScreenDialogClass::ScoreScreenDialogClass (void)	:
-	MenuDialogClass (IDD_SCORE_SCREEN)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_SCORE_SCREEN))
 {
 	ScoreScreenActive = true;
 	return ;
@@ -171,7 +171,7 @@ ScoreScreenDialogClass::On_Init_Dialog (void)
 	int level_of_play_stars			= Get_Level_Of_Play_Stars();
 	int saves_loaded_stars			= Get_Saves_Loaded_Stars();
 	int secondary_missions_stars	= Get_Secondary_Missions_Stars();
-	int overall_stars = (time_to_finish_stars + level_of_play_stars + 
+	int overall_stars = (time_to_finish_stars + level_of_play_stars +
 						saves_loaded_stars + secondary_missions_stars) / 4;
 
 	// Update the ranking
@@ -250,7 +250,7 @@ ScoreScreenDialogClass::On_Init_Dialog (void)
 
 	// Build Rank Text
 	int rank_ids[5] = { IDS_SS_RANK_1, IDS_SS_RANK_2, IDS_SS_RANK_3, IDS_SS_RANK_4, IDS_SS_RANK_5 };
-	WideStringClass rank_name = L"";
+	WideStringClass rank_name = U_CHAR("");
 	rank_name += TRANSLATE( rank_ids[ overall_stars-1 ] );
 	if ( cheater ) {
 		rank_name += TRANSLATE( IDS_SS_CHEATER );
@@ -268,24 +268,24 @@ ScoreScreenDialogClass::On_Init_Dialog (void)
 
 	WideStringClass wstr;
 
-	wstr.Format( L"%d", _SSStats_building_destroyed );
+	wstr.Format( U_CHAR("%d"), _SSStats_building_destroyed );
 	Set_Dlg_Item_Text( IDC_SCORE_SCREEN_BUILDING_COUNT, wstr );
-	wstr.Format( L"%d", _SSStats_vehicles_destroyed );
+	wstr.Format( U_CHAR("%d"), _SSStats_vehicles_destroyed );
 	Set_Dlg_Item_Text( IDC_SCORE_SCREEN_VEHICLE_COUNT, wstr );
-	wstr.Format( L"%d", _SSStats_enemies_killed );
+	wstr.Format( U_CHAR("%d"), _SSStats_enemies_killed );
 	Set_Dlg_Item_Text( IDC_SCORE_SCREEN_ENEMY_COUNT, wstr );
-	wstr.Format( L"%d", _SSStats_enemies_killed );
+	wstr.Format( U_CHAR("%d"), _SSStats_enemies_killed );
 	Set_Dlg_Item_Text( IDC_SCORE_SCREEN_ENEMY_COUNT, wstr );
 
-	wstr.Format( L"%d", _SSStats_head_hit );
+	wstr.Format( U_CHAR("%d"), _SSStats_head_hit );
 	Set_Dlg_Item_Text( IDC_SCORE_SCREEN_HEAD_COUNT, wstr );
-	wstr.Format( L"%d", _SSStats_torso_hit );
+	wstr.Format( U_CHAR("%d"), _SSStats_torso_hit );
 	Set_Dlg_Item_Text( IDC_SCORE_SCREEN_TORSO_COUNT, wstr );
-	wstr.Format( L"%d", _SSStats_arm_hit );
+	wstr.Format( U_CHAR("%d"), _SSStats_arm_hit );
 	Set_Dlg_Item_Text( IDC_SCORE_SCREEN_ARM_COUNT, wstr );
-	wstr.Format( L"%d", _SSStats_crotch_hit );
+	wstr.Format( U_CHAR("%d"), _SSStats_crotch_hit );
 	Set_Dlg_Item_Text( IDC_SCORE_SCREEN_CROTCH_COUNT, wstr );
-	wstr.Format( L"%d", _SSStats_leg_hit );
+	wstr.Format( U_CHAR("%d"), _SSStats_leg_hit );
 	Set_Dlg_Item_Text( IDC_SCORE_SCREEN_LEG_COUNT, wstr );
 
 	WideStringClass text;
@@ -339,14 +339,14 @@ ScoreScreenDialogClass::On_Destroy (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-ScoreScreenDialogClass::On_Command (int ctrl_id, int mesage_id, DWORD param)
+ScoreScreenDialogClass::On_Command (int ctrl_id, int mesage_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
 		case IDCANCEL:
 		case IDOK:
 			End_Dialog();
-		
+
 			break;
 
 		default:
@@ -365,19 +365,19 @@ ScoreScreenDialogClass::On_Command (int ctrl_id, int mesage_id, DWORD param)
 */
 float	level_star_times[] = {
 /*	STARS	 2		3		4		5	*/
-/* 0 */	 10,		
-/* 1 */	 20,		
-/* 2 */	 40,		
-/* 3 */	 20,		
-/* 4 */	 25,		
-/* 5 */	 30,		
-/* 6 */	 20,		
-/* 7 */	 35,		
-/* 8 */	 20,		
-/* 9 */	 25,		
-/* 10 */	 35,		
-/* 11 */	 25,		
-/* 12 */	 10,		
+/* 0 */	 10,
+/* 1 */	 20,
+/* 2 */	 40,
+/* 3 */	 20,
+/* 4 */	 25,
+/* 5 */	 30,
+/* 6 */	 20,
+/* 7 */	 35,
+/* 8 */	 20,
+/* 9 */	 25,
+/* 10 */	 35,
+/* 11 */	 25,
+/* 12 */	 10,
 /* 13 */	 10,			// Mission 0
 };
 

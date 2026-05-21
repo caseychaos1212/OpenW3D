@@ -108,13 +108,13 @@ cWinEvent::Act(void)
 
 	WideStringClass champ_text;
 	champ_text.Format(
-		L"%s %s",
-		The_Game()->Get_Team_Word(),
-		cTeamManager::Get_Team_Name(Winner));
+		U_CHAR("%s %s"),
+		The_Game()->Get_Team_Word().Peek_Buffer(),
+		cTeamManager::Get_Team_Name(Winner).Peek_Buffer());
 
 	win_text.Format(
-		L"%s %s",
-		champ_text,
+		U_CHAR("%s %s"),
+		champ_text.Peek_Buffer(),
 		TRANSLATION(IDS_MP_WIN_FORMATTING));
 
 	/*
@@ -122,12 +122,12 @@ cWinEvent::Act(void)
 
 		if (Loser == PLAYER_ID_UNKNOWN) {
 			win_text.Format(
-				L"%s %s",
+				U_CHAR("%s %s"),
 				cPlayerManager::Get_Player_Name(Winner),
 				TRANSLATION(IDS_MP_WIN_FORMATTING));
 		} else {
 			win_text.Format(
-				L"%s %s %s",
+				U_CHAR("%s %s %s"),
 				cPlayerManager::Get_Player_Name(Winner),
 				TRANSLATION(IDS_MP_DEFEATS),
 				cPlayerManager::Get_Player_Name(Loser));
@@ -182,7 +182,7 @@ cWinEvent::Import_Creation(BitStreamClass & packet)
 	WWASSERT(cNetwork::I_Am_Only_Client());
 
 	int win_type = 0;
-	DWORD duration_s = 0;
+	unsigned int duration_s = 0;
 	WideStringClass mvp_name;
 	int mvp_count = 0;
 
@@ -222,8 +222,8 @@ cWinEvent::Import_Creation(BitStreamClass & packet)
 	The_Game()->Set_Mvp_Count(mvp_count);
 
 #ifndef MULTIPLAYERDEMO
-	ULONG mod_name_crc = packet.Get(mod_name_crc);
-	ULONG map_name_crc = packet.Get(map_name_crc);
+	unsigned int mod_name_crc = packet.Get(mod_name_crc);
+	unsigned int map_name_crc = packet.Get(map_name_crc);
 
 	//
 	//	Try to find the map from its CRC

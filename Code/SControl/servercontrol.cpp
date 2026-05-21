@@ -40,6 +40,8 @@
 #include	<stdlib.h>
 #include	"servercontrol.h"
 #include "systimer.h"
+#include <limits>
+#include "wwstring.h"
 
 /*
 ** Single instance of server control.
@@ -112,7 +114,7 @@ ServerControlClass::~ServerControlClass(void)
  * HISTORY:                                                                                    *
  *   11/16/2001 4:01PM ST : Created                                                            *
  *=============================================================================================*/
-bool ServerControlClass::Start_Listening(unsigned short port, char *password, const char*(*app_request_callback)(char*), void(*app_response_callback)(char*), bool loopback, unsigned long ip)
+bool ServerControlClass::Start_Listening(unsigned short port, char *password, const char*(*app_request_callback)(char*), void(*app_response_callback)(char*), bool loopback, unsigned int ip)
 {
 	LocalPort = port;
 	if (LocalPort != 0) {
@@ -190,7 +192,7 @@ void ServerControlClass::Service(void)
 
 		char buffer[1024];
 		int buffer_len = sizeof(buffer);
-		unsigned long address;
+		unsigned int address;
 		unsigned short port;
 
 		Comms.Service();
@@ -243,7 +245,7 @@ void ServerControlClass::Service(void)
  * HISTORY:                                                                                    *
  *   11/16/2001 4:03PM ST : Created                                                            *
  *=============================================================================================*/
-void ServerControlClass::Parse_Message(void *buffer, int len, unsigned long address, unsigned short port)
+void ServerControlClass::Parse_Message(void *buffer, [[maybe_unused]] int len, unsigned int address, unsigned short port)
 {
 	ControlMessageStruct *message = (ControlMessageStruct*) buffer;
 	assert(len <= sizeof(ControlMessageStruct));
@@ -260,7 +262,7 @@ void ServerControlClass::Parse_Message(void *buffer, int len, unsigned long addr
 		char text[MAX_SERVER_CONTROL_MESSAGE_SIZE + 1];
 		memcpy(text, message->Message, MAX_SERVER_CONTROL_MESSAGE_SIZE);
 		text[MAX_SERVER_CONTROL_MESSAGE_SIZE] = 0;
-		strupr(text);
+        openw3d::string_to_upper(text);
 
 		switch (message->Type) {
 			/*
@@ -345,7 +347,7 @@ void ServerControlClass::Parse_Message(void *buffer, int len, unsigned long addr
  * HISTORY:                                                                                    *
  *   11/16/2001 4:06PM ST : Created                                                            *
  *=============================================================================================*/
-void ServerControlClass::Add_Remote_Control(unsigned long ip, unsigned short port)
+void ServerControlClass::Add_Remote_Control(unsigned int ip, unsigned short port)
 {
 	RemoteControlStruct *control = Get_Controller(ip, port);
 
@@ -377,7 +379,7 @@ void ServerControlClass::Add_Remote_Control(unsigned long ip, unsigned short por
  * HISTORY:                                                                                    *
  *   11/16/2001 4:07PM ST : Created                                                            *
  *=============================================================================================*/
-void ServerControlClass::Remove_Remote_Control(unsigned long ip, unsigned short port)
+void ServerControlClass::Remove_Remote_Control(unsigned int ip, unsigned short port)
 {
 	RemoteControlStruct *control;
 	for (int i=0 ; i<RemoteControllers.Count() ; i++) {
@@ -406,7 +408,7 @@ void ServerControlClass::Remove_Remote_Control(unsigned long ip, unsigned short 
  * HISTORY:                                                                                    *
  *   11/16/2001 4:07PM ST : Created                                                            *
  *=============================================================================================*/
-bool ServerControlClass::Is_Authenticated(unsigned long ip, unsigned short port)
+bool ServerControlClass::Is_Authenticated(unsigned int ip, unsigned short port)
 {
 	RemoteControlStruct *control = Get_Controller(ip, port);
 	if (control && control->Secure && TIMEGETTIME() - control->Time < CONTROL_TIMEOUT) {
@@ -431,7 +433,7 @@ bool ServerControlClass::Is_Authenticated(unsigned long ip, unsigned short port)
  * HISTORY:                                                                                    *
  *   11/16/2001 4:08PM ST : Created                                                            *
  *=============================================================================================*/
-ServerControlClass::RemoteControlStruct *ServerControlClass::Get_Controller(unsigned long ip, unsigned short port)
+ServerControlClass::RemoteControlStruct *ServerControlClass::Get_Controller(unsigned int ip, unsigned short port)
 {
 	RemoteControlStruct *control;
 	for (int i=0 ; i<RemoteControllers.Count() ; i++) {
@@ -458,7 +460,7 @@ ServerControlClass::RemoteControlStruct *ServerControlClass::Get_Controller(unsi
  * HISTORY:                                                                                    *
  *   11/16/2001 4:09PM ST : Created                                                            *
  *=============================================================================================*/
-void ServerControlClass::Reset_Timeout(unsigned long ip, unsigned short port)
+void ServerControlClass::Reset_Timeout(unsigned int ip, unsigned short port)
 {
 	RemoteControlStruct *control = Get_Controller(ip, port);
 	if (control && control->Secure && TIMEGETTIME() - control->Time < CONTROL_TIMEOUT) {
@@ -483,14 +485,17 @@ void ServerControlClass::Reset_Timeout(unsigned long ip, unsigned short port)
  * HISTORY:                                                                                    *
  *   11/16/2001 4:09PM ST : Created                                                            *
  *=============================================================================================*/
-void ServerControlClass::Send_Message(const char *text, unsigned long ip, unsigned short port)
+void ServerControlClass::Send_Message(const char *text, unsigned int ip, unsigned short port)
 {
-	ControlMessageStruct message;
-	message.Type = CONTROL_REQUEST;
-	strcpy(message.Message, text);
+	    ControlMessageStruct message;
+        message.Type = CONTROL_REQUEST;
+        strcpy(message.Message, text);
 
-	Comms.Write(&message, sizeof(message.Type) + strlen(text) + 1, &ip, port);
-	Comms.Service();
+        const size_t message_length = ::strlen(text);
+        const size_t total_length = sizeof(message.Type) + message_length + 1;
+        assert(total_length <= static_cast<size_t>(std::numeric_limits<int>::max()));
+        Comms.Write(&message, static_cast<int>(total_length), &ip, port);
+        Comms.Service();
 }
 
 
@@ -512,28 +517,32 @@ void ServerControlClass::Send_Message(const char *text, unsigned long ip, unsign
  * HISTORY:                                                                                    *
  *   11/16/2001 4:10PM ST : Created                                                            *
  *=============================================================================================*/
-void ServerControlClass::Respond(const char *text, unsigned long ip, unsigned short port)
+void ServerControlClass::Respond(const char *text, unsigned int ip, unsigned short port)
 {
 
 	ControlMessageStruct message;
 
-	const char *outmsg = text;
-	while (strlen(outmsg)) {
+	const char* outmsg = text;
+	while (*outmsg != '\0') {
 		message.Type = CONTROL_RESPONSE;
-		strncpy(message.Message, outmsg, sizeof(message.Message)-1);
-		message.Message[sizeof(message.Message)-1] = 0;
-		int outlen = 0;
+		strncpy(message.Message, outmsg, sizeof(message.Message) - 1);
+		message.Message[sizeof(message.Message) - 1] = 0;
+		size_t outlen = 0;
 
-		if (strlen(outmsg) > sizeof(message.Message)-1) {
-			outlen = sizeof(message.Message)-1;
-			outmsg += (sizeof(message.Message)-1);
-		} else {
-			outlen = strlen(outmsg);
+		const size_t remaining_length = ::strlen(outmsg);
+		if (remaining_length > sizeof(message.Message) - 1) {
+			outlen = sizeof(message.Message) - 1;
+			outmsg += outlen;
+		}
+		else {
+			outlen = remaining_length;
 			outmsg += outlen;
 		}
 
 
-		Comms.Write(&message, sizeof(message.Type) + outlen + 1, &ip, port);
+		const size_t total_length = sizeof(message.Type) + outlen + 1;
+		assert(total_length <= static_cast<size_t>(std::numeric_limits<int>::max()));
+		Comms.Write(&message, static_cast<int>(total_length), &ip, port);
 		Comms.Service();
 	}
 }

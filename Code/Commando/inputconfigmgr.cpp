@@ -42,6 +42,7 @@
 #include "registry.h"
 #include "chunkio.h"
 #include "debug.h"
+#include "pathutil.h"
 #include "translatedb.h"
 #include "string_ids.h"
 #include "slavemaster.h"
@@ -195,7 +196,7 @@ InputConfigMgrClass::Save_Current_Configuration (void)
 //
 ////////////////////////////////////////////////////////////////
 int
-InputConfigMgrClass::Add_Configuration (const wchar_t *display_name)
+InputConfigMgrClass::Add_Configuration (const unichar_t *display_name)
 {
 	//
 	//	Get a filename for the configuration
@@ -241,7 +242,7 @@ InputConfigMgrClass::Delete_Configuration (int index)
 	//
 	bool load_default = false;
 	if (index == CurrentConfigIndex) {
-		CurrentConfigIndex = -1;		
+		CurrentConfigIndex = -1;
 		load_default = true;
 	}
 
@@ -252,7 +253,7 @@ InputConfigMgrClass::Delete_Configuration (int index)
 	Get_Config_Path (config_path);
 
 	StringClass full_path;
-	full_path.Format ("%s\\%s", config_path, ConfigList[index].Get_Filename ());
+	full_path.Format ("%s/%s", config_path.Peek_Buffer(), ConfigList[index].Get_Filename ());
 
 	//
 	//	Delete the configuration file
@@ -448,9 +449,9 @@ InputConfigMgrClass::Get_Unique_Config_Filename (StringClass &filename)
 		//
 		//	Check to see if this file exists
 		//
-		full_path.Format ("%s\\%s", (const char *)config_path, filename);
+		full_path.Format ("%s/%s", config_path.Peek_Buffer(), filename.Peek_Buffer());
 
-	} while (::GetFileAttributesA (full_path) != 0xFFFFFFFF);
+	} while (cPathUtil::PathExists (full_path));
 
 	return ;
 }
@@ -705,6 +706,6 @@ InputConfigMgrClass::Get_Config_Path (StringClass &full_path)
 	//
 	//	Build the full path from the EXE's directory
 	//
-	full_path.Format ("%s\\data\\config", path);
+	full_path.Format ("%s/data/config", path);
 	return ;
 }

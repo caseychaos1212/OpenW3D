@@ -73,7 +73,7 @@ END_MESSAGE_MAP()
 //
 /////////////////////////////////////////////////////////////////////////////
 BOOL
-LODSettingsDialogClass::OnInitDialog (void) 
+LODSettingsDialogClass::OnInitDialog (void)
 {
 	CDialog::OnInitDialog ();
 
@@ -82,7 +82,7 @@ LODSettingsDialogClass::OnInitDialog (void)
 	//
 	m_DistanceSpin.SetRange (0, 10000);
 	m_DistanceSpin.SetPos (m_Distance);
-	return TRUE;
+	return true;
 }
 
 
@@ -92,7 +92,7 @@ LODSettingsDialogClass::OnInitDialog (void)
 //
 /////////////////////////////////////////////////////////////////////////////
 void
-LODSettingsDialogClass::OnOK (void) 
+LODSettingsDialogClass::OnOK (void)
 {
 	m_Distance = m_DistanceSpin.GetPos ();
 	CDialog::OnOK ();

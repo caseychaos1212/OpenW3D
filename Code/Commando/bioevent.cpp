@@ -65,7 +65,7 @@ cBioEvent::cBioEvent(void) :
 
 //-----------------------------------------------------------------------------
 void
-cBioEvent::Init(int teamChoice, unsigned long clanID)
+cBioEvent::Init(int teamChoice, unsigned int clanID)
 {
 	WWASSERT(cNetwork::I_Am_Client());
 
@@ -123,7 +123,7 @@ cBioEvent::Act(void)
 			WideStringClass new_nickname;
 			int count = 1;
 			do {
-				new_nickname.Format(L"%s(%d)", Nickname, count++);
+				new_nickname.Format(U_CHAR("%s(%d)"), Nickname.Peek_Buffer(), count++);
 			} while (cGameSpyAdmin::Is_Nickname_Collision(new_nickname));
 
 			Nickname = new_nickname;

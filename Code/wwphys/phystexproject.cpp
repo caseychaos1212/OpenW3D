@@ -60,7 +60,7 @@
  * HISTORY:                                                                                    *
  *   3/30/2000  gth : Created.                                                                 *
  *=============================================================================================*/
-PhysTexProjectClass::PhysTexProjectClass(void) 
+PhysTexProjectClass::PhysTexProjectClass(void)
 {
 }
 
@@ -111,7 +111,7 @@ bool PhysTexProjectClass::Compute_Perspective_Projection
 	AABoxClass box;
 	model->Get_Obj_Space_Bounding_Box(box);
 	const Matrix3D & tm = model->Get_Transform();
-	
+
 	return TexProjectClass::Compute_Perspective_Projection(box,tm,lightpos,nearz,farz);
 }
 

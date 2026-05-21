@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Commando/campaign.cpp          $* 
- *                                                                                             * 
- *                      $Author:: Ian_l                                                       $* 
- *                                                                                             * 
- *                     $Modtime:: 1/19/02 12:30p                                              $* 
- *                                                                                             * 
- *                    $Revision:: 33                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Commando/campaign.cpp          $*
+ *                                                                                             *
+ *                      $Author:: Ian_l                                                       $*
+ *                                                                                             *
+ *                     $Modtime:: 1/19/02 12:30p                                              $*
+ *                                                                                             *
+ *                    $Revision:: 33                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "campaign.h"
@@ -74,8 +74,8 @@ struct BackdropDescriptionStruct {
 	int State;
 	DynamicVectorClass<StringClass>	Lines;
 
-	bool operator == (BackdropDescriptionStruct const & rec) const	{ return false; }
-	bool operator != (BackdropDescriptionStruct const & rec) const	{ return true; }
+	bool operator == (BackdropDescriptionStruct const & ) const	{ return false; }
+	bool operator != (BackdropDescriptionStruct const & ) const	{ return true; }
 };
 
 DynamicVectorClass<BackdropDescriptionStruct>	BackdropDescriptions;
@@ -214,7 +214,7 @@ void	CampaignManager::Start_Campaign( int difficulty )
 /*
 **
 */
-void	CampaignManager::Continue( bool success )
+void	CampaignManager::Continue( bool /* success */ )
 {
 	BackdropIndex = 0;
 
@@ -320,7 +320,7 @@ void	CampaignManager::Continue( bool success )
 		//
 		//	Parse the parameters
 		//
-		int len = ::strlen( state_description );
+		const size_t len = ::strlen( state_description );
 		StringClass foo( len + 1, true );
 		StringClass filename( len + 1, true );
 		StringClass description( len + 1, true );
@@ -334,7 +334,7 @@ void	CampaignManager::Continue( bool success )
 			//
 			//	Add this movie name to the registry (that way the user
 			// can watch it later)
-			//	
+			//
 			RegistryClass registry( APPLICATION_SUB_KEY_NAME_MOVIES );
 			if ( registry.Is_Valid() ) {
 				registry.Set_String( filename, description );
@@ -345,7 +345,7 @@ void	CampaignManager::Continue( bool success )
 
 		Debug_Say(( "Failed to Parse Campaign Description %s\n", state_description ));
 
-		State = NOT_IN_CAMPAIGN_STATE;		
+		State = NOT_IN_CAMPAIGN_STATE;
 		RenegadeDialogMgrClass::Goto_Location (RenegadeDialogMgrClass::LOC_MAIN_MENU);
 	}
 
@@ -353,7 +353,7 @@ void	CampaignManager::Continue( bool success )
 
 void	CampaignManager::Reset()
 {
-	State = NOT_IN_CAMPAIGN_STATE;		
+	State = NOT_IN_CAMPAIGN_STATE;
 }
 
 /*
@@ -400,7 +400,7 @@ void	CampaignManager::Select_Backdrop_Number( int state_number )
 	}
 }
 
-void	CampaignManager::Select_Backdrop_Number_By_MP_Type( int type )
+void	CampaignManager::Select_Backdrop_Number_By_MP_Type( [[maybe_unused]] int type )
 {
 	//
 	//	Setup Load Menu
@@ -413,15 +413,15 @@ void	CampaignManager::Select_Backdrop_Number_By_MP_Type( int type )
 	#define	MULTIPLAY_LOAD_MENU_NUMBER_CNC2					95
 	int load_menu_number = 0;
 	if ( type == cGameData::GAME_TYPE_DEATHMATCH ) {
-		load_menu_number = MULTIPLAY_LOAD_MENU_NUMBER_DEATHMATCH;	
+		load_menu_number = MULTIPLAY_LOAD_MENU_NUMBER_DEATHMATCH;
 	}
 	if ( type == cGameData::GAME_TYPE_TEAM_DEATHMATCH ) {
-		load_menu_number = MULTIPLAY_LOAD_MENU_NUMBER_TEAM_DEATHMATCH;	
+		load_menu_number = MULTIPLAY_LOAD_MENU_NUMBER_TEAM_DEATHMATCH;
 	}
 	if ( type == cGameData::GAME_TYPE_CNC ) {
-		load_menu_number = MULTIPLAY_LOAD_MENU_NUMBER_CNC1;	
+		load_menu_number = MULTIPLAY_LOAD_MENU_NUMBER_CNC1;
 		if ( FreeRandom.Get_Int() & 1 ) {
-			load_menu_number = MULTIPLAY_LOAD_MENU_NUMBER_CNC2;	
+			load_menu_number = MULTIPLAY_LOAD_MENU_NUMBER_CNC2;
 		}
 	}
 	Select_Backdrop_Number( load_menu_number );
@@ -467,6 +467,6 @@ void	CampaignManager::Select_Backdrop_Number_By_MP_Type( int type )
 
 	/*
 	if ( type == cGameData::GAME_TYPE_CTF ) {
-		load_menu_number = MULTIPLAY_LOAD_MENU_NUMBER_CTF;	
+		load_menu_number = MULTIPLAY_LOAD_MENU_NUMBER_CTF;
 	}
 	*/

@@ -22,8 +22,9 @@
 #include "StdAfx.h"
 #include "WWConfig.h"
 #include "WWConfigDlg.h"
-#include "argv.h"
+#include "ffactory.h"
 #include "locale_api.h"
+#include "openw3d.h"
 #include "wwconfig_ids.h"
 
 
@@ -83,36 +84,48 @@ BOOL CWWConfigApp::InitInstance()
 	//-------------------------------------------------------------------------
 	// Get the Command line parameters.
 	//-------------------------------------------------------------------------
-	CString cmd(m_lpCmdLine);
+	const char *cmd = m_lpCmdLine != NULL ? m_lpCmdLine : "";
+
+	if (!OpenW3D::Set_Config_File_Path_From_Command_Line(cmd)) {
+		::MessageBoxA(NULL, "Missing value for --ini.", "WWConfig", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	OpenW3D::Get_Config_File_Path();
 
 	//=========================================================================
 	// Init the strings.
 	//=========================================================================
 	int language = -1;
 
-	if( cmd.Find( "-French") !=-1 ) {
+	if (OpenW3D::Command_Line_Has_Arg(cmd, "-French")) {
 		language = 	IDL_FRENCH;
-	} else if( cmd.Find( "-German") !=-1 ) {
+	} else if (OpenW3D::Command_Line_Has_Arg(cmd, "-German")) {
 		language = 	IDL_GERMAN;
-	} else if( cmd.Find( "-Japanese") !=-1 ) {
+	} else if (OpenW3D::Command_Line_Has_Arg(cmd, "-Japanese")) {
 		language = 	IDL_JAPANESE;
-	} else if( cmd.Find( "-Korean") !=-1 ) {
+	} else if (OpenW3D::Command_Line_Has_Arg(cmd, "-Korean")) {
 		language = 	IDL_KOREAN;
-	} else if( cmd.Find( "-Chinese") !=-1 ) {
+	} else if (OpenW3D::Command_Line_Has_Arg(cmd, "-Chinese")) {
 		language = 	IDL_CHINESE;
-	} else if( cmd.Find( "-English") !=-1 ) {
+	} else if (OpenW3D::Command_Line_Has_Arg(cmd, "-English")) {
 		language = 	IDL_ENGLISH;
 	}
-	
+
 	Locale_Init( language, "WWConfig.loc" );
+
+	SimpleFileFactoryClass *ff = dynamic_cast<SimpleFileFactoryClass *>(_TheWritingFileFactory);
+	ff->Append_Sub_Directory("DATA/");
+	ff = dynamic_cast<SimpleFileFactoryClass *>(_TheFileFactory);
+	ff->Append_Sub_Directory("DATA/");
 
 	//
 	//
 	//
-	if (cmd.Find("-autoconfig")!=-1) {
+	if (OpenW3D::Command_Line_Has_Arg(cmd, "-autoconfig")) {
 		AutoConfigSettings();
 	}
-	else if (cmd.Find("-driverversion")!=-1) {
+	else if (OpenW3D::Command_Line_Has_Arg(cmd, "-driverversion")) {
 		CheckDriverVersion();
 	}
 	else {
@@ -136,15 +149,15 @@ BOOL CWWConfigApp::InitInstance()
 	//-------------------------------------------------------------------------
 	Locale_Restore();
 
-	// Since the dialog has been closed, return FALSE so that we exit the
+	// Since the dialog has been closed, return false so that we exit the
 	//  application, rather than start the application's message pump.
-	return FALSE;
+	return false;
 }
 
-int CWWConfigApp::ExitInstance() 
+int CWWConfigApp::ExitInstance()
 {
 	// TODO: Add your specialized code here and/or call the base class
-	
+
 	CWinApp::ExitInstance();
 	return GlobalExitValue;
 }

@@ -130,7 +130,7 @@ public:
 	void				Stats_Add_Leg_Hit( void )					{ StatLegHits++; }
 	void				Stats_Add_Crotch_Hit( void )				{ StatCrotchHits++; }
 	void				Stats_Add_Weapon_Fired( int weapon_id );
-	
+
 	float				Get_Game_Time(void) const					{return StatTimeInGame;}
 	float				Get_Session_Time(void) const				{return StatTimeInSession;}	// Note: This is per-session, it is not saved or loaded!
 	int				Get_Enemies_Killed(void) const			{return StatEnemiesKilled;}
@@ -156,7 +156,7 @@ public:
 	int				Get_Crotch_Hit(void) const					{return StatCrotchHits;}
 
 	int				Get_Weapon_Fired_Count( void ) const;
-	bool				Get_Weapon_Fired( int index, unsigned long& weaponID, unsigned long& firedCount) const;
+	bool				Get_Weapon_Fired( int index, unsigned int& weaponID, unsigned int& firedCount) const;
 
 	float				Get_Punish_Timer( void )					{return PunishTimer;}
 	void				Inc_Punish_Timer( float amount )			{PunishTimer += amount;}

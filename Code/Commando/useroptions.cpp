@@ -47,6 +47,7 @@
 #include "GameSpy_QnR.h"
 #include "gamespyadmin.h"
 #include "specialbuilds.h"
+#include "openw3d.h"
 #include "useroptions.h"
 
 extern char DefaultRegistryModifier[1024];
@@ -89,6 +90,13 @@ cUserOptions::ParseResult cUserOptions::Parse_Command_Line(int argc, char *argv[
 {
 	ParseResult retcode = ParseResult::SUCCESS;
 
+	if (!OpenW3D::Set_Config_File_Path_From_Command_Line(argc, argv)) {
+		return ParseResult::FAILURE;
+	}
+
+	// Resolve the config file path before later arguments can change the working directory.
+	OpenW3D::Get_Config_File_Path();
+
 	//
 	// Loop through all the command line arguments.
 	//
@@ -107,6 +115,15 @@ cUserOptions::ParseResult cUserOptions::Parse_Command_Line(int argc, char *argv[
 			continue;
 		}
 
+		if (strcmp(cmd, "--ini") == 0) {
+			i++;
+			if (i >= argc) {
+				retcode = FAILURE;
+				break;
+			}
+			continue;
+		}
+
 		// Look for ip override.
 		if (strcmp(cmd, "--ip") == 0) {
 			const char *argval = argv[i + 1];
@@ -115,7 +132,7 @@ cUserOptions::ParseResult cUserOptions::Parse_Command_Line(int argc, char *argv[
 				retcode = FAILURE;
 				break;
 			}
-			extern ULONG g_ip_override;
+			extern unsigned int g_ip_override;
 			g_ip_override = ::inet_addr(argval);
 			continue;
 		}
@@ -216,7 +233,7 @@ cUserOptions::ParseResult cUserOptions::Parse_Command_Line(int argc, char *argv[
             const char *tport = strchr(argval, ':');
 			if (tport) {
                 char *end_port = nullptr;
-                long arg_port = strtol(tport + 1, &end_port, 10);
+                int arg_port = strtol(tport + 1, &end_port, 10);
                 if (end_port != nullptr && *end_port != '\0') {
                     return FAILURE;
                 }
@@ -289,8 +306,9 @@ void cUserOptions::Print_Command_Line_Help(bool error)
 	_splitpath(path, NULL, NULL, filename, filesuffix);
 	_makepath(path, NULL, NULL, filename, filesuffix);
 
-	fprintf(file, "usage: %s [--ip IP] [--multi] [--regmod MOD] [--slave] [--startserver]\n", path);
+	fprintf(file, "usage: %s [--ip IP] [--multi] [--regmod MOD] [--slave] [--startserver INI]\n", path);
 	fprintf(file, "    [--gamedir PATH]\n");
+	fprintf(file, "    [--ini PATH]\n");
 	fprintf(file, "    [--gamespyserver ADDRESS] [--nodx]\n");
 #ifndef BETACLIENT
 	fprintf(file, "    [--gamespy-connect IP[:PORT]]\n");
@@ -337,11 +355,11 @@ void cUserOptions::Set_Bandwidth_Type(BANDWIDTH_TYPE_ENUM bandwidth_type)
 
 	if (bandwidth_type != BANDWIDTH_CUSTOM) {
 		if (bandwidth_type == BANDWIDTH_AUTO && BandwidthCheckerClass::Got_Bandwidth()) {
-			ULONG bps = BandwidthCheckerClass::Get_Upstream_Bandwidth();
+			unsigned int bps = BandwidthCheckerClass::Get_Upstream_Bandwidth();
 			WWASSERT(bps > 0);
 			BandwidthBps.Set(bps);
 		} else {
-			ULONG bps = cBandwidth::Get_Bandwidth_Bps_From_Type(bandwidth_type);
+			unsigned int bps = cBandwidth::Get_Bandwidth_Bps_From_Type(bandwidth_type);
 			WWASSERT(bps > 0);
 			BandwidthBps.Set(bps);
 		}

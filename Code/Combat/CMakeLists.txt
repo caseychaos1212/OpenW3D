@@ -272,6 +272,7 @@ add_library(combat STATIC)
 
 target_link_libraries(combat PRIVATE
     wwcommon
+    wwlib
     dinput8
     dxguid
 )
@@ -279,12 +280,13 @@ target_link_libraries(combat PRIVATE
 target_sources(combat PRIVATE ${COMBAT_SRC})
 
 # This module needs building differently for the level editor
-if (REN_BUILD_TOOLS)
+if (W3D_TOOLS)
     # Targets to build.
     add_library(combate STATIC)
 
     target_link_libraries(combate PRIVATE
         wwcommon
+        wwlib
     )
 
     target_compile_definitions(combate PRIVATE PARAM_EDITING_ON)

@@ -102,8 +102,8 @@ public:
 
 	/////////////////////////////////////////////////////////////////////////
 	// Public methods
-	/////////////////////////////////////////////////////////////////////////		
-	
+	/////////////////////////////////////////////////////////////////////////
+
 	//
 	//	Path evaluation
 	//
@@ -166,8 +166,8 @@ protected:
 		PathDataStruct (PathfindPortalClass *portal, const Vector3 &point)
 			:	m_Portal (portal), m_Point (point)	{ }
 
-		bool operator== (const PathDataStruct &src) { return false; }
-		bool operator!= (const PathDataStruct &src) { return true; }
+		bool operator== (const PathDataStruct &/* src*/) { return false; }
+		bool operator!= (const PathDataStruct &/* src*/) { return true; }
 
 		PathfindPortalClass *	m_Portal;
 		Vector3						m_Point;
@@ -187,12 +187,12 @@ protected:
 	/////////////////////////////////////////////////////////////////////////
 	// Protected methods
 	/////////////////////////////////////////////////////////////////////////
-	void		Initialize (float sector_fudge = 0);	
+	void		Initialize (float sector_fudge = 0);
 
 	void		Resolve_Path (unsigned int milliseconds);
 	void		Process_Portals (PathNodeClass *node);
 	void		Submit_Node (float traversal_cost, PathNodeClass *current_node, PathfindPortalClass *portal, PathfindSectorClass *dest_sector, const Matrix3D &current_tm, const Matrix3D &ending_tm);
-	
+
 	void		Reset_Lists (void);
 
 	//
@@ -231,14 +231,14 @@ private:
 	// Private member data
 	/////////////////////////////////////////////////////////////////////////
 	Vector3											m_StartPos;
-	Vector3											m_DestPos;		
+	Vector3											m_DestPos;
 	STATE_DESC										m_State;
 	float												m_Priority;
 	uint32											m_BirthTime;
 
 	PathfindSectorClass *						m_StartSector;
 	PathfindSectorClass *						m_DestSector;
-	
+
 	DynamicVectorClass<PathNodeClass *>		m_NodeList;
 	BinaryHeapClass<float>						m_BinaryHeap;
 

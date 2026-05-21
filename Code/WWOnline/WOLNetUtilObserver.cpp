@@ -207,7 +207,7 @@ ULONG STDMETHODCALLTYPE NetUtilObserver::Release(void)
 *
 ******************************************************************************/
 
-STDMETHODIMP NetUtilObserver::OnPing(HRESULT result, int time, unsigned long ip, int handle)
+STDMETHODIMP NetUtilObserver::OnPing(HRESULT result, int time, unsigned int ip, int handle)
 	{
 	if (mOuter == NULL)
 		{
@@ -247,7 +247,7 @@ STDMETHODIMP NetUtilObserver::OnPing(HRESULT result, int time, unsigned long ip,
 
 		// Notify others about the ping result.
 		mOuter->NotifyObservers(*ping);
-	
+
 		// Remove ping from request list.
 		std::vector<RawPing>::iterator iter = mOuter->mPingRequests.begin();
 
@@ -282,7 +282,7 @@ STDMETHODIMP NetUtilObserver::OnPing(HRESULT result, int time, unsigned long ip,
 ******************************************************************************/
 
 STDMETHODIMP NetUtilObserver::OnLadderList(HRESULT result, WOL::Ladder* list,
-			int rungCount, long timeStamp, int keyRung)
+			int /* rungCount */, int timeStamp, int keyRung)
 	{
 	if (mOuter == NULL)
 		{
@@ -375,7 +375,7 @@ STDMETHODIMP NetUtilObserver::OnLadderList(HRESULT result, WOL::Ladder* list,
 *
 ******************************************************************************/
 
-void NetUtilObserver::ProcessLadderListResults(WOL::Ladder* list, long timeStamp)
+void NetUtilObserver::ProcessLadderListResults(WOL::Ladder* list, int timeStamp)
 	{
 	if (mOuter->mLadderPending)
 		{
@@ -396,17 +396,17 @@ void NetUtilObserver::ProcessLadderListResults(WOL::Ladder* list, long timeStamp
 		while (wolLadder)
 			{
 			// Get the name of the user we requested information for.
-			const wchar_t* requestName = wcschr(*request, L':');
+			const unichar_t* requestName = u_strchr(*request, U_CHAR(':'));
 			WWASSERT(requestName != NULL && "Invalid ladder request");
 			requestName++;
 
-			wchar_t ladderName[64];
-			mbstowcs(ladderName, (const char*)wolLadder->login_name, sizeof(wolLadder->login_name));
+			unichar_t ladderName[64];
+			u_mbtows(ladderName, (const char*)wolLadder->login_name, sizeof(wolLadder->login_name));
 
 			WWDEBUG_SAY(("WOL: LadderInfo [%08lX] Requested '%S', Received '%S'\n", type, requestName, ladderName));
 
 			// If the ladder name matches the requested name then there is ladder info available.
-			bool hasLadderData = (wcsicmp(requestName, ladderName) == 0);
+			bool hasLadderData = (u_strcasecmp(requestName, ladderName, U_COMPARE_CODE_POINT_ORDER) == 0);
 
 			if (type == LadderType_Clan)
 				{
@@ -445,7 +445,7 @@ void NetUtilObserver::ProcessLadderListResults(WOL::Ladder* list, long timeStamp
 					if (ladderData.IsValid())
 						{
 						ladderData->UpdateData(*wolLadder, timeStamp);
-						}															 
+						}
 					else if (hasLadderData)
 						{
 						ladderData = LadderData::Create(*wolLadder, timeStamp);
@@ -493,9 +493,9 @@ void NetUtilObserver::ProcessLadderListResults(WOL::Ladder* list, long timeStamp
 
 void NetUtilObserver::NotifyClanLadderUpdate(const UserList& users, const RefPtr<SquadData>& squad)
 	{
-	const unsigned int userCount = users.size();
+	const size_t userCount = users.size();
 
-	for (unsigned int index = 0; index < userCount; ++index)
+	for (size_t index = 0; index < userCount; ++index)
 		{
 		const RefPtr<UserData>& user = users[index];
 
@@ -563,7 +563,7 @@ STDMETHODIMP NetUtilObserver::OnNewNick(HRESULT result, LPCSTR message, LPCSTR n
 		{
 		login = LoginInfo::Create(nickname, password, true);
 		}
-		
+
 	NewLoginInfoEvent event(login, message);
 	mOuter->NotifyObservers(event);
 
@@ -619,7 +619,7 @@ STDMETHODIMP NetUtilObserver::OnAgeCheck(HRESULT result, int years, int consent)
 *
 ******************************************************************************/
 
-STDMETHODIMP NetUtilObserver::OnWDTState(HRESULT result, unsigned char* , int )
+STDMETHODIMP NetUtilObserver::OnWDTState(HRESULT /* result */, unsigned char* , int )
 	{
 	WWDEBUG_SAY(("WOLWARNING: OnWDTState not implemented\n"));
 	return S_OK;
@@ -639,8 +639,8 @@ STDMETHODIMP NetUtilObserver::OnWDTState(HRESULT result, unsigned char* , int )
 *
 ******************************************************************************/
 
-STDMETHODIMP NetUtilObserver::OnHighscore(HRESULT result, WOL::Highscore* list,
-		int count, long time, int keyRung)
+STDMETHODIMP NetUtilObserver::OnHighscore(HRESULT /* result */, WOL::Highscore* /* list */,
+		int /* count */, int /* time */, int /* keyRung */)
 	{
 	WWDEBUG_SAY(("WOLWARNING: OnHighscore not implemented\n"));
 	return S_OK;

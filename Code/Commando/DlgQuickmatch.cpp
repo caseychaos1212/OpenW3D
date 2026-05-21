@@ -38,8 +38,7 @@
 #include "DlgWOLWait.h"
 #include "DlgMessageBox.h"
 #include "dlgmpwolquickmatchoptions.h"
-#include "resource.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "gameinitmgr.h"
 #include "WOLJoinGame.h"
 #include "string_ids.h"
@@ -100,7 +99,7 @@ bool DlgQuickMatch::DoDialog(void)
 ******************************************************************************/
 
 DlgQuickMatch::DlgQuickMatch() :
-		MenuDialogClass(IDD_MP_WOL_QUICKMATCH_CONNECT),
+		MenuDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_QUICKMATCH_CONNECT)),
 		mTimeoutTime(0),
 		mResendTime(0)
 	{
@@ -185,7 +184,7 @@ void DlgQuickMatch::On_Init_Dialog(void)
 
 	if (output)
 		{
-		output->Add_Column(L"", 1.0F, Vector3 (1, 1, 1));
+		output->Add_Column(U_CHAR(""), 1.0F, Vector3 (1, 1, 1));
 		}
 
 	Connect();
@@ -230,7 +229,7 @@ void DlgQuickMatch::On_Frame_Update(void)
 			}
 		}
 
-	unsigned long theTime = TIMEGETTIME();
+	unsigned int theTime = TIMEGETTIME();
 
 	if ((mResendTime > 0) && (theTime >= mResendTime))
 		{
@@ -264,7 +263,7 @@ void DlgQuickMatch::On_Frame_Update(void)
 *
 ******************************************************************************/
 
-void DlgQuickMatch::On_Command(int ctrl, int message, DWORD param)
+void DlgQuickMatch::On_Command(int ctrl, int message, unsigned int param)
 	{
 	if (ctrl == IDC_MENU_BACK_BUTTON)
 		{
@@ -359,7 +358,7 @@ void DlgQuickMatch::SendMatchingInfo(void)
 
 void DlgQuickMatch::OutputMessage(int messageID)
 	{
-	const wchar_t* message = TranslateDBClass::Get_String(messageID);
+	const unichar_t* message = TranslateDBClass::Get_String(messageID);
 	OutputMessage(message);
 	}
 
@@ -379,7 +378,7 @@ void DlgQuickMatch::OutputMessage(int messageID)
 *
 ******************************************************************************/
 
-void DlgQuickMatch::OutputMessage(const wchar_t* message)
+void DlgQuickMatch::OutputMessage(const unichar_t* message)
 	{
 	WWDEBUG_SAY(("QM: %S\n", message));
 
@@ -418,14 +417,14 @@ void DlgQuickMatch::OutputMessage(const wchar_t* message)
 void DlgQuickMatch::HandleNotification(QuickMatchEvent& status)
 	{
 	QuickMatchEvent::Event event = status.GetEvent();
-	const wchar_t* msg = (const wchar_t*)status.Subject();
+	const unichar_t* msg = (const unichar_t*)status.Subject();
 
 	if (QuickMatchEvent::QMERROR == event)
 		{
 		const WideStringClass& statusMsg = status.Subject();
 
 		// If no match then resend the request in 10 seconds.
-		if (statusMsg.Compare_No_Case(L"QM:NoMatch") == 0)
+		if (statusMsg.Compare_No_Case(U_CHAR("QM:NoMatch")) == 0)
 			{
 			msg = TRANSLATE(IDS_QM_NOMATCH);
 			}
@@ -433,7 +432,7 @@ void DlgQuickMatch::HandleNotification(QuickMatchEvent& status)
 			{
 			#ifdef QUICKMATCH_OPTIONS
 			// Unable to match user because preferred modes are all zero.
-			if (statusMsg.Compare_No_Case(L"QM:NoModes") == 0)
+			if (statusMsg.Compare_No_Case(U_CHAR("QM:NoModes")) == 0)
 				{
 				DlgMsgBox::DoDialog(TRANSLATE (IDS_MENU_INVALID_QM_SETTINGS_TITLE), TRANSLATE (IDS_MENU_INVALID_QM_SETTINGS),
 						DlgMsgBox::Okay, this);
@@ -448,8 +447,8 @@ void DlgQuickMatch::HandleNotification(QuickMatchEvent& status)
 		GameInitMgrClass::Set_WOL_Return_Dialog(RenegadeDialogMgrClass::LOC_INTERNET_MAIN);
 
 		// Join the game
-		const wchar_t* gameName = (const wchar_t*)status.Subject();
-		WOLJoinGame::JoinTheGame(gameName, L"", false);
+		const unichar_t* gameName = (const unichar_t*)status.Subject();
+		WOLJoinGame::JoinTheGame(gameName, U_CHAR(""), false);
 		return;
 		}
 
@@ -472,7 +471,7 @@ void DlgQuickMatch::HandleNotification(QuickMatchEvent& status)
 *
 ******************************************************************************/
 
-void DlgQuickMatch::HandleNotification(DlgMsgBoxEvent& msgbox)
+void DlgQuickMatch::HandleNotification([[maybe_unused]] DlgMsgBoxEvent& msgbox)
 	{
 #ifdef QUICKMATCH_OPTIONS
 	Add_Ref();

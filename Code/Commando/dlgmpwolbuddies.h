@@ -42,7 +42,6 @@
 #define __DLG_MP_WOL_BUDDIES_H
 
 #include "menudialog.h"
-#include "resource.h"
 #include "WOLBuddyMgr.h"
 #include "DlgMessageBox.h"
 
@@ -59,7 +58,7 @@ class MPWolBuddiesMenuClass :
 {
 public:
 	static void Display(void);
-	
+
 protected:
 	MPWolBuddiesMenuClass(void);
 	~MPWolBuddiesMenuClass();
@@ -69,7 +68,7 @@ protected:
 	const MPWolBuddiesMenuClass& operator=(const MPWolBuddiesMenuClass&);
 
 	void On_Init_Dialog(void) override;
-	void On_Command(int ctrl_id, int mesage_id, DWORD param) override;
+	void On_Command(int ctrl_id, int mesage_id, unsigned int param) override;
 	void On_Frame_Update(void) override;
 
 	void Adjust_Buttons_For_Buddy_Location(int location);

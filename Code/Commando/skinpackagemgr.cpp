@@ -107,7 +107,7 @@ void
 SkinPackageMgrClass::Build_List (void)
 {
 	WIN32_FIND_DATAA find_info	= { 0 };
-	BOOL keep_going				= TRUE;
+	BOOL keep_going				= true;
 	HANDLE file_find				= NULL;
 
 	//
@@ -116,7 +116,7 @@ SkinPackageMgrClass::Build_List (void)
 	for (file_find = ::FindFirstFileA ("*.pkg", &find_info);
 		 (file_find != INVALID_HANDLE_VALUE) && keep_going;
 		  keep_going = ::FindNextFileA (file_find, &find_info))
-	{		
+	{
 		//
 		//	Create the package from the data in this mix file
 		//
@@ -129,10 +129,10 @@ SkinPackageMgrClass::Build_List (void)
 		PackageList.Add (package);
 	}
 
-	if (file_find != INVALID_HANDLE_VALUE) {			  
-		::FindClose (file_find); 
+	if (file_find != INVALID_HANDLE_VALUE) {
+		::FindClose (file_find);
 	}
-	
+
 	return ;
 }
 

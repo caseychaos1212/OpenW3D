@@ -34,6 +34,7 @@
  * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include "renegadedialog.h"
 #include "dlgcredits.h"
 #include "wwfile.h"
 #include "ffactory.h"
@@ -45,7 +46,7 @@
 //
 ////////////////////////////////////////////////////////////////
 CreditsMenuClass::CreditsMenuClass (void)	:
-	MenuDialogClass (IDD_OPTIONS_CREDITS)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_OPTIONS_CREDITS))
 {
 	return ;
 }
@@ -67,7 +68,7 @@ CreditsMenuClass::On_Init_Dialog (void)
 	FileClass *credits_txt_file = _TheFileFactory->Get_File (CREDITS_TXT_FILENAME);
 	if (credits_txt_file != NULL && credits_txt_file->Is_Available ()) {
 		if (credits_txt_file->Open ()) {
-			
+
 			//
 			//	Read the data from the file
 			//
@@ -81,13 +82,13 @@ CreditsMenuClass::On_Init_Dialog (void)
 			//	strip off any carriage-returns
 			//
 			WideStringClass wide_text;
-			wchar_t *buffer		= wide_text.Get_Buffer (size + 1);
-			int dest_index		= 0;
+			unichar_t *buffer		= wide_text.Get_Buffer (size + 1);
+			size_t dest_index		= 0;
 
-			int len = ascii_text.Get_Length ();
-			for (int index = 0; index < len; index ++) {
-				if (ascii_text[index] != '\r') {
-					buffer[dest_index ++] = (unsigned char)ascii_text[index];
+			size_t len = ascii_text.Get_Length ();
+				for (size_t index = 0; index < len; index ++) {
+					if (ascii_text[static_cast<int>(index)] != '\r') {
+						buffer[dest_index ++] = static_cast<unsigned char>(ascii_text[static_cast<int>(index)]);
 				}
 			}
 			buffer[dest_index] = 0;
@@ -97,13 +98,13 @@ CreditsMenuClass::On_Init_Dialog (void)
 			//
 			Set_Dlg_Item_Text (IDC_CREDITS_EDIT, wide_text);
 		}
-		
+
 		//
 		//	Close the text file
 		//
 		_TheFileFactory->Return_File (credits_txt_file);
 	}
-	
+
 	MenuDialogClass::On_Init_Dialog ();
 	return ;
 }
@@ -115,7 +116,7 @@ CreditsMenuClass::On_Init_Dialog (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-CreditsMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+CreditsMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	MenuDialogClass::On_Command (ctrl_id, message_id, param);
 	return ;

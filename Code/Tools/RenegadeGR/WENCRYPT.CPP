@@ -25,10 +25,10 @@ Author      : Joe Howes
 Start Date  : Jul 9, 1999
 Last Update : Jul 20, 1999
 ------------------------------------------------------------------------------
- 
+
 A simple encryption system for game results packets.  Specifically designed
 to work only with unsigned char buffers of least 15 bytes long.
- 
+
 \****************************************************************************/
 #include <string.h>
 #include <sys/types.h>
@@ -72,8 +72,8 @@ unsigned char* PrepareEncryptedPacket(unsigned char* packet, int* size)
 	encbuf = SimpleEncrypt(rlebuf, size);
 	if( rlebuf != NULL )  free(rlebuf);
 	if( encbuf == NULL )  return NULL;                     // SimpleEncrypt fills the error in
-	
- 
+
+
     // Now we have to wrap the encrypted data inside a valid PacketClass blob
 	wrap.Add_Field((char*)"CNTL", (void*)encbuf, *size);
 	free(encbuf);
@@ -98,8 +98,8 @@ unsigned char*  DecryptPacket(unsigned char* encbuf, int* size)
         rlebuf = SimpleDecrypt(encbuf, size);
 	if( rlebuf == NULL )
 		return NULL;					// SimpleDecrypt fills the error in
- 
- 
+
+
         packet = RLDecode(rlebuf, size); 		        // Allocates memory!!
 	if( packet == NULL )
 		return NULL;					// RLDecode fills the error in
@@ -220,7 +220,7 @@ unsigned char* RLDecode(unsigned char* src, int* size)
 				dstsize += (int)src[i+1];	// Add the occurences
 				i += 2;				// Skip the token
 			}
-		}	
+		}
 		else if( src[i] == escape && i == (*size-1) )
 		{
 			*size = ERR_SPURIOUS_ESCAPE;
@@ -230,7 +230,7 @@ unsigned char* RLDecode(unsigned char* src, int* size)
 			dstsize++;
 	}
 
-	
+
 	// Build the new buffer
 	dst = malloc( dstsize );
 	j = 0;
@@ -250,7 +250,7 @@ unsigned char* RLDecode(unsigned char* src, int* size)
 				j += k;
 				i += 2;				// Skip the token
 			}
-		}	
+		}
 		else if( src[i] == escape && i == (*size-1) )
 		{
 			*size = ERR_SPURIOUS_ESCAPE;
@@ -271,15 +271,15 @@ unsigned char* RLDecode(unsigned char* src, int* size)
 | FUNCTION:  ran3()                                                                     |
 | From 'Numerical Recipies In C', Chapter 7, 'Portable Random Number Generators'.       |
 `--------------------------------------------------------------------------------------*/
-float ran3(long* idnum)
+float ran3(int* idnum)
 {
         static int      inext, inextp;
-        static long     ma[66];
+        static int     ma[66];
         static int      iff = 0;
-        long            mj, mk;
+        int            mj, mk;
         int             i, ii, k;
- 
- 
+
+
         if( *idnum < 0 || iff == 0 )
         {
                 iff = 1;
@@ -321,19 +321,19 @@ float ran3(long* idnum)
 | Make a key the same length as the buffer.  Gameres packets are typically		|
 | < 600 bytes so period isn't a concern.										|
 `------------------------------------------------------------------------------*/
-void GenerateKey(unsigned char* key, int len, long seed)
+void GenerateKey(unsigned char* key, int len, int seed)
 {
 	int     i;
         float   running;
-	long	num;
- 
- 
+	int	num;
+
+
         if( seed > 0 )  seed *= -1;             // Initial val must be negative
         running = ran3(&seed);
- 
+
         for(i = 0; i < len; i++)
         {
-                num = (long)(running * (float)255.0);
+                num = (int)(running * (float)255.0);
                 if( num < 0 )  num *= -1;
 		key[i] = (unsigned char)num;
                 running = ran3(&seed);
@@ -357,9 +357,9 @@ unsigned char* SimpleEncrypt(const unsigned char* src, int* len)
 	unsigned char*	key;
 	unsigned char*	dst;
 	unsigned char	offset = 0;
-	long		offsetseed = 0;
-	unsigned long	netseed;
-	long		seed;
+	int		offsetseed = 0;
+	unsigned int	netseed;
+	int		seed;
 	float		limit;
 
 
@@ -374,28 +374,28 @@ unsigned char* SimpleEncrypt(const unsigned char* src, int* len)
 		free( dst );
 		return NULL;
 	}
-	
+
 	// Generate the random stuff
-	seed = (long)time(NULL);
+	seed = (int)time(NULL);
 	if( seed > 0 )  seed *= -1;			// Don't check for seed == 0 because a ligit
 							// packet builder should never set a seed of
-							// 0 and it's another mistake a cracker could 
+							// 0 and it's another mistake a cracker could
 							// possibly make.
-	netseed = htonl((unsigned long)seed);
+	netseed = htonl((unsigned int)seed);
 	GenerateKey(key, *len, seed);
 
 	// We want the offset to be somewhere between byte 10 and byte (255-14), or
 	// (*len - 4), whichever is smaller
-	offsetseed = (long)time(NULL);
+	offsetseed = (int)time(NULL);
 	if( offsetseed > 0 )  offsetseed *= -1;
 	limit = ((*len) < 241) ? (float)((*len)-14) : (float)241.0;
 	offset = (unsigned char)(ran3(&offsetseed) * limit);
 	offset += (unsigned char)10;
 
-	
+
 	// Construct the buffer
 	for(i = 0, j = 0; i < *len; i++)
-	{  
+	{
 		if( j == 5 )
 			dst[j++] = offset;
 
@@ -427,8 +427,8 @@ unsigned char* SimpleDecrypt(unsigned char* src, int* len)
         unsigned char*  key;
         unsigned char*  dst;
         unsigned char   offset = 0;
-        unsigned long  	netseed;
-        long   		seed;
+        unsigned int  	netseed;
+        int   		seed;
 
 
 
@@ -444,12 +444,12 @@ unsigned char* SimpleDecrypt(unsigned char* src, int* len)
 		delete[] dst;
 		return NULL;
 	}
- 
-	
+
+
 	// Generate the key
 	offset = src[5];
 	memcpy(&netseed, &src[offset], 4);
-	seed = (long)ntohl(netseed);
+	seed = (int)ntohl(netseed);
 	if( seed > 0 )
 	{
 		*len = -3;
@@ -473,8 +473,8 @@ unsigned char* SimpleDecrypt(unsigned char* src, int* len)
 			j++;
 		}
         }
- 
- 
+
+
 	*len -= 5;
 	delete[] key;
         return dst;

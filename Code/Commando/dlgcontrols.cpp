@@ -38,9 +38,8 @@
 #include "dlgcontrols.h"
 #include "dlgcontroltabs.h"
 #include "dlgcontrolsaveload.h"
-#include "resource.h"
 #include "tabctrl.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "inputconfigmgr.h"
 
 
@@ -56,7 +55,7 @@ ControlsMenuClass *	ControlsMenuClass::_TheInstance	= NULL;
 //
 ////////////////////////////////////////////////////////////////
 ControlsMenuClass::ControlsMenuClass (void)	:
-	MenuDialogClass (IDD_MENU_CONTROLS)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MENU_CONTROLS))
 {
 	_TheInstance = this;
 	return ;
@@ -85,7 +84,7 @@ ControlsMenuClass::On_Init_Dialog (void)
 {
 	TabCtrlClass *tab_ctrl = (TabCtrlClass *)Get_Dlg_Item (IDC_CONTROL_TABCTRL);
 	if (tab_ctrl != NULL) {
-		
+
 		//
 		//	Add the tabs to the control
 		//
@@ -107,7 +106,7 @@ ControlsMenuClass::On_Init_Dialog (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-ControlsMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+ControlsMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
@@ -144,7 +143,7 @@ ControlsMenuClass::Apply_Changes (void)
 	TabCtrlClass *tab_ctrl = (TabCtrlClass *)Get_Dlg_Item (IDC_CONTROL_TABCTRL);
 	if (tab_ctrl != NULL) {
 		if (tab_ctrl->Apply_Changes_On_Tabs ()) {
-			
+
 			//
 			//	Save the changes
 			//
@@ -152,7 +151,7 @@ ControlsMenuClass::Apply_Changes (void)
 		}
 	}
 
-	return; 
+	return;
 }
 
 
@@ -171,7 +170,7 @@ ControlsMenuClass::Reload (void)
 	if (tab_ctrl != NULL) {
 		tab_ctrl->Reload_Tabs ();
 	}
-	
+
 	return ;
 }
 

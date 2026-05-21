@@ -57,18 +57,18 @@ public:
 	//////////////////////////////////////////////////////////////
 	//	Public constructors/destructor
 	//////////////////////////////////////////////////////////////
-	ControlsMenuClass (void);	
+	ControlsMenuClass (void);
 	~ControlsMenuClass (void);
 
 	//////////////////////////////////////////////////////////////
 	//	Public methods
 	//////////////////////////////////////////////////////////////
-	
+
 	//
 	//	Inherited
 	//
 	void		On_Init_Dialog (void) override;
-	void		On_Command (int ctrl_id, int message_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int message_id, unsigned int param) override;
 
 	//
 	//	Configuration support

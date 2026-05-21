@@ -150,7 +150,7 @@ void MultiHUDClass::Shutdown(void)
 }
 
 //-----------------------------------------------------------------------------
-void MultiHUDClass::Render_Text(WideStringClass & text, float x, float y, ULONG color)
+void MultiHUDClass::Render_Text(WideStringClass & text, float x, float y, unsigned int color)
 {
 	if (NameRenderer) {
 		//
@@ -366,7 +366,7 @@ void MultiHUDClass::Show_Player_Names(void)
 		} else {
 			PhysicalGameObj * p_blocker = ((CombatPhysObserverClass *)raytest.CollidedPhysObj->Get_Observer())->As_PhysicalGameObj();
 	      //if (p_blocker != p_smart_obj) {
-	      if ((p_blocker == NULL) || 
+	      if ((p_blocker == NULL) ||
 				 ((p_blocker != p_smart_obj) && (p_blocker != p_vehicle))) {
 			   //
 				// The ray failed to collide with the soldier in question
@@ -389,12 +389,12 @@ void MultiHUDClass::Show_Player_Names(void)
 
 #ifdef WWDEBUG
 			if (p_player->Invulnerable.Is_True()) {
-				text += L"\n";
+				text += U_CHAR("\n");
 				text += TRANSLATE (IDS_MENU_GOD);
 			}
 
 			if (p_player->Get_Damage_Scale_Factor() < 100) {
-				text += L"\n";
+				text += U_CHAR("\n");
 				text += TRANSLATE (IDS_MENU_VIP);
 			}
 #endif // WWDEBUG
@@ -405,11 +405,11 @@ void MultiHUDClass::Show_Player_Names(void)
 			WWASSERT(The_Game() != NULL);
 			WideStringClass mvp_name = The_Game()->Get_Mvp_Name();
 			if (!p_player->Get_Name().Compare_No_Case(mvp_name.Peek_Buffer())) {
-				text += L"\n";
+				text += U_CHAR("\n");
 				text += TRANSLATE(IDS_MP_MVP);
 				if (The_Game()->Get_Mvp_Count() > 1) {
 					WideStringClass consecutives_text;
-					consecutives_text.Format(L" * %d", The_Game()->Get_Mvp_Count());
+					consecutives_text.Format(U_CHAR(" * %d"), The_Game()->Get_Mvp_Count());
 					text += consecutives_text;
 				}
 			}
@@ -422,7 +422,7 @@ void MultiHUDClass::Show_Player_Names(void)
 				 p_soldier->Is_Teammate(COMBAT_STAR) &&
 				 p_player->Get_Num_Wol_Games() <= cPlayer::NUM_NEWBIE_GAMES) {
 
-				text += L"\n";
+				text += U_CHAR("\n");
 				text += TRANSLATE(IDS_MP_RECRUIT);
 			}
 
@@ -442,7 +442,7 @@ void MultiHUDClass::Show_Player_Names(void)
 
 #ifdef WWDEBUG
 //-----------------------------------------------------------------------------
-void MultiHUDClass::Render_Debug_Text(LPCSTR text, float x, float y, ULONG color)
+void MultiHUDClass::Render_Debug_Text(const char *text, float x, float y, unsigned int color)
 {
 	//
 	// Text comes out blurry with the new text system if the text position
@@ -697,7 +697,7 @@ void MultiHUDClass::Show_Player_Rhost_Data(SmartGameObj * smart_obj)
 			sub_string.Format( "Rs:%05d ", p_rhost->Get_Total_Resends());
 			text += sub_string;
 
-			unsigned long time = TIMEGETTIME() - p_rhost->Get_Creation_Time();
+			unsigned int time = TIMEGETTIME() - p_rhost->Get_Creation_Time();
 			time = time / 1000;
 			sub_string.Format( " Con: %03d.%02d.%02d", time / (60*60), (time / 60) % 60, time % 60);
 			text += sub_string;

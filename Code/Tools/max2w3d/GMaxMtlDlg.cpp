@@ -80,9 +80,9 @@ GameMtl* ConvertStdMtl(Mtl* stdmtl);
 bool _UsingLargeFonts(false);
 
 
-// GMaxMtlDlg::GMaxMtlDlg -- constructor                                                       * 
+// GMaxMtlDlg::GMaxMtlDlg -- constructor                                                       *
 //============================================================================================
-GMaxMtlDlg::GMaxMtlDlg(HWND hwMtlEdit, IMtlParams *imp, GameMtl *m) 
+GMaxMtlDlg::GMaxMtlDlg(HWND hwMtlEdit, IMtlParams *imp, GameMtl *m)
 {
 	Ip = GetCOREInterface();
 	HwndEdit = hwMtlEdit;
@@ -109,18 +109,18 @@ GMaxMtlDlg::GMaxMtlDlg(HWND hwMtlEdit, IMtlParams *imp, GameMtl *m)
 		PassDialog[i] = NULL;
 	}
 
-	TheMtl = m; 
+	TheMtl = m;
 	IParams = imp;
 	IsActive = 0;
 
 	Build_Dialog(hwMtlEdit);
 }
 
-// GMaxMtlDlg::~GMaxMtlDlg -- destructor!                                                       
+// GMaxMtlDlg::~GMaxMtlDlg -- destructor!
 //============================================================================================
 GMaxMtlDlg::~GMaxMtlDlg() {
 	for (int i=0; i<MAX_PASSES; i++) {
-		if (PassDialog[i]) { 
+		if (PassDialog[i]) {
 			delete PassDialog[i];
 			PassDialog[i] = NULL;
 		}
@@ -128,15 +128,15 @@ GMaxMtlDlg::~GMaxMtlDlg() {
 	TheMtl->SetParamDlg(NULL);
 }
 
-// GMaxMtlDlg::ClassID -- Returns the ClassID of GameMtl                                        
+// GMaxMtlDlg::ClassID -- Returns the ClassID of GameMtl
 //============================================================================================
 Class_ID GMaxMtlDlg::ClassID(){
-	return GameMaterialClassID;  
+	return GameMaterialClassID;
 }
 
-// GMaxMtlDlg::SetThing -- Sets the material to be edited                                       
+// GMaxMtlDlg::SetThing -- Sets the material to be edited
 //============================================================================================
-void GMaxMtlDlg::SetThing(ReferenceTarget *m) 
+void GMaxMtlDlg::SetThing(ReferenceTarget *m)
 {
 	assert (m);
 	assert (m->SuperClassID()==MATERIAL_CLASS_ID);
@@ -160,9 +160,9 @@ void GMaxMtlDlg::SetThing(ReferenceTarget *m)
 	ReloadDialog();
 }
 
-// GMaxMtlDlg::SetTime -- Sets the time value, updates the material and the dialog              
+// GMaxMtlDlg::SetTime -- Sets the time value, updates the material and the dialog
 //============================================================================================
-void GMaxMtlDlg::SetTime(TimeValue t) 
+void GMaxMtlDlg::SetTime(TimeValue t)
 {
 	if (t!=CurTime) {
 		CurTime = t;
@@ -170,29 +170,29 @@ void GMaxMtlDlg::SetTime(TimeValue t)
 		ReloadDialog();
 	}
 }
-	
-// GMaxMtlDlg::ReloadDialog -- Updates the values in all of the dialog's controls               
+
+// GMaxMtlDlg::ReloadDialog -- Updates the values in all of the dialog's controls
 //============================================================================================
-void GMaxMtlDlg::ReloadDialog() 
+void GMaxMtlDlg::ReloadDialog()
 {
 	//Init the pass count panel
 	assert(TheMtl && HwndPassCount && HwndSurfaceType);
 	// Init the surface count panel
 	::SendMessage (HwndSurfaceType, WM_USER+101, 0, 0L);
 	#ifdef WANT_DISPLACEMENT_MAPS
-		::SendMessage (HwndDisplacementMap, WM_USER+101, 0, 0L);	
+		::SendMessage (HwndDisplacementMap, WM_USER+101, 0, 0L);
 	#endif //WANT_DISPLACEMENT_MAPS
 	// Init the pass count panel
 	char a[12];
 	sprintf(a, "%d", TheMtl->Get_Pass_Count());
-	SetWindowText(GetDlgItem(HwndPassCount, IDC_GAMEMTL_PASSCOUNT_STATIC), a);	
+	SetWindowText(GetDlgItem(HwndPassCount, IDC_GAMEMTL_PASSCOUNT_STATIC), a);
 	//Init each pass panel
 	for(int i = 0; i < TheMtl->Get_Pass_Count(); i++){
 		PassDialog[i]->ReloadDialog();
 	}
 }
 
-// GMaxMtlDlg::ActivateDlg -- Activates and deactivates the dialog                              
+// GMaxMtlDlg::ActivateDlg -- Activates and deactivates the dialog
 //============================================================================================
 void GMaxMtlDlg::ActivateDlg(BOOL onoff){
 	for(int i = 0; i < TheMtl->Get_Pass_Count(); i++){
@@ -201,12 +201,12 @@ void GMaxMtlDlg::ActivateDlg(BOOL onoff){
 	}
 }
 
-// GMaxMtlDlg::Invalidate -- causes the dialog to be redrawn                                    
+// GMaxMtlDlg::Invalidate -- causes the dialog to be redrawn
 //============================================================================================
-void GMaxMtlDlg::Invalidate(){	
+void GMaxMtlDlg::Invalidate(){
 	InvalidateRect(HwndSurfaceType,NULL,0);
 	#ifdef WANT_DISPLACEMENT_MAPS
-		InvalidateRect(HwndDisplacementMap,NULL,0);	
+		InvalidateRect(HwndDisplacementMap,NULL,0);
 	#endif //WANT_DISPLACEMENT_MAPS
 	InvalidateRect(HwndPassCount,NULL,0);
 }
@@ -214,7 +214,7 @@ BOOL	GMaxMtlDlg::DisplacementMapProc(HWND hDlg, UINT message, WPARAM wParam, LPA
 	switch (message){
 		case WM_INITDIALOG:
 		case WM_USER + 101:{
-			SetDlgItemInt (hDlg, IDC_AMOUNT_EDIT, TheMtl->Get_Displacement_Amount () * 100, TRUE);
+			SetDlgItemInt (hDlg, IDC_AMOUNT_EDIT, TheMtl->Get_Displacement_Amount () * 100, true);
 			SetupIntSpinner(hDlg, IDC_AMOUNT_SPIN, IDC_AMOUNT_EDIT, -999, 999, TheMtl->Get_Displacement_Amount () * 100);
 			Texmap *map = TheMtl->Get_Displacement_Map ();
 			if (map != NULL) {
@@ -230,13 +230,13 @@ BOOL	GMaxMtlDlg::DisplacementMapProc(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case WM_COMMAND:
 			switch(LOWORD(wParam)){
 			case IDC_TEXTURE_BUTTON:
-				if(HIWORD(wParam) == BN_CLICKED){					
+				if(HIWORD(wParam) == BN_CLICKED){
 					PostMessage(HwndEdit, WM_TEXMAP_BUTTON, TheMtl->Get_Displacement_Map_Index (), (LPARAM)TheMtl);
 				}
 			break;
 		}
 	}
-	return FALSE;
+	return false;
 }
 //============================================================================================
 BOOL	GMaxMtlDlg::SurfaceTypeProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam){
@@ -275,7 +275,7 @@ BOOL	GMaxMtlDlg::SurfaceTypeProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			int sort_level = TheMtl->Get_Sort_Level();
 			ISpinnerControl *spinner = GetISpinner(::GetDlgItem(hDlg, IDC_SORT_LEVEL_SPIN));
 			assert(spinner);
-			spinner->SetValue(sort_level, FALSE);
+			spinner->SetValue(sort_level, false);
 			::SendDlgItemMessage(hDlg, IDC_ENABLE_SORT_LEVEL, BM_SETCHECK,
 				sort_level == SORT_LEVEL_NONE ? BST_UNCHECKED : BST_CHECKED, 0);
 			break;
@@ -287,21 +287,21 @@ BOOL	GMaxMtlDlg::SurfaceTypeProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		}
 		case WM_USER+140:{
 			ShowWindow(HwndEdit, SW_HIDE);
-			return TRUE;
+			return true;
 		}
 		case WM_NOTIFY:{
 			NMHDR * header = (NMHDR *)lParam;
-			switch(header->code) { 
+			switch(header->code) {
 				case PSN_SETACTIVE:{
 					SetCurrentPage(0);
-					return TRUE;
+					return true;
 				}
 				case PSN_RESET:{
-					SetWindowLong(hDlg,DWL_MSGRESULT,FALSE);
+					SetWindowLong(hDlg,DWL_MSGRESULT,false);
 					::SendMessage(hDlg, WM_USER+140,0,0);
-					return TRUE;
+					return true;
 				}
-			
+
 			}
 			break;
 		}
@@ -321,13 +321,13 @@ BOOL	GMaxMtlDlg::SurfaceTypeProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 						ISpinnerControl *spinner = GetISpinner(::GetDlgItem(hDlg, IDC_SORT_LEVEL_SPIN));
 						assert(spinner);
 						if (state == BST_UNCHECKED){
-							spinner->SetValue(SORT_LEVEL_NONE, FALSE);
+							spinner->SetValue(SORT_LEVEL_NONE, false);
 							TheMtl->Set_Sort_Level(SORT_LEVEL_NONE);
 						}else{
 							if(state == BST_CHECKED){
 							// Sort level was enabled, so set it's level to 1 if it was NONE before.
 								if (spinner->GetIVal() == SORT_LEVEL_NONE){
-									spinner->SetValue(1, FALSE);
+									spinner->SetValue(1, false);
 									TheMtl->Set_Sort_Level(1);
 								}
 							}
@@ -430,11 +430,11 @@ BOOL	GMaxMtlDlg::SurfaceTypeProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			break;
 		}
 	}
-	return FALSE;
+	return false;
 }
 //============================================================================================
 BOOL	GMaxMtlDlg::PassCountProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam){
-	switch (message){		
+	switch (message){
 		case WM_INITDIALOG:
 			break;
 		case WM_COMMAND:{
@@ -449,7 +449,7 @@ BOOL	GMaxMtlDlg::PassCountProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			break;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 //============================================================================================
@@ -462,7 +462,7 @@ static BOOL CALLBACK DisplacementMapDlgProc(HWND hwndDlg, UINT msg, WPARAM wPara
 		SetWindowLong(hwndDlg, GWL_USERDATA,(LPARAM)theDlg);
 	} else {
 		if ((theDlg = (GMaxMtlDlg *)GetWindowLong(hwndDlg, GWL_USERDATA) ) == NULL) {
-			return FALSE; 
+			return false;
 		}
 	}
 	theDlg->IsActive = 1;
@@ -484,7 +484,7 @@ static BOOL CALLBACK SurfaceTypePanelDlgProc(HWND hwndDlg, UINT msg, WPARAM wPar
 		PropSheet_Changed(GetParent(hwndDlg), hwndDlg); //Enable the "Apply" at all time
 	} else {
 		if ((theDlg = (GMaxMtlDlg *)GetWindowLong(hwndDlg, GWL_USERDATA) ) == NULL) {
-			return FALSE; 
+			return false;
 		}
 	}
 	theDlg->IsActive = 1;
@@ -503,11 +503,11 @@ static BOOL CALLBACK PassCountPanelDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam
 			theDlg = (GMaxMtlDlg*)lParam;
 			theDlg->HwndPassCount = hwndDlg;
 			SetWindowLong(hwndDlg, GWL_USERDATA,(LPARAM)theDlg);
-			return FALSE;
+			return false;
 		}
 	}
 	if ((theDlg = (GMaxMtlDlg *)GetWindowLong(hwndDlg, GWL_USERDATA) ) == NULL) {
-		return FALSE; 
+		return false;
 	}
 	theDlg->IsActive = 1;
 	BOOL res = theDlg->PassCountProc(hwndDlg,msg,wParam,lParam);
@@ -536,12 +536,12 @@ void GMaxMtlDlg::Set_Pass_Count_Dialog(void){
 			int npass(TheMtl->Get_Pass_Count());
 			if(res > npass){ //Add pages
 				for(int i = npass; i < res; i++){
-					PassDialog[i] = new GameMtlPassDlg(HwndEdit, IParams, TheMtl, i); 
+					PassDialog[i] = new GameMtlPassDlg(HwndEdit, IParams, TheMtl, i);
 				}
 			}else{//Remove pages
 				for(int i = npass; i > res; i--){
 					PropSheet_RemovePage(HwndEdit, i,NULL);
-					PassDialog[i] = NULL;//new GameMtlPassDlg(HwndEdit, IParams, TheMtl, i-1); 
+					PassDialog[i] = NULL;//new GameMtlPassDlg(HwndEdit, IParams, TheMtl, i-1);
 				}
 			}
 			TheMtl->Set_Pass_Count(res);
@@ -573,25 +573,25 @@ static BOOL CALLBACK PassCountDialogDlgProc(HWND hwndDlg, UINT msg, WPARAM wPara
 			break;
 			}
 		default:
-			return FALSE;
+			return false;
 	}
-	return TRUE;
+	return true;
 }
 
 
-/*********************************************************************************************** 
- * GMaxMtlDlg::Build_Dialog -- Adds the dialog to the material editor                          * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   06/26/1997 GH  : Created.                                                                 * 
+/***********************************************************************************************
+ * GMaxMtlDlg::Build_Dialog -- Adds the dialog to the material editor                          *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   06/26/1997 GH  : Created.                                                                 *
  *=============================================================================================*/
-void GMaxMtlDlg::Build_Dialog(HWND hParent)// = NULL 
+void GMaxMtlDlg::Build_Dialog(HWND hParent)// = NULL
 {
 	//Need to initialize this global here
 	if(GMaxMaterialDialog == NULL){
@@ -607,8 +607,8 @@ int CALLBACK GameMtl_PropSheetProc( HWND hDlg, UINT msg, LPARAM lParam){
 		case PSCB_INITIALIZED:{
 			ShowWindow(GetDlgItem(hDlg,IDCANCEL), SW_HIDE);
 			ShowWindow(GetDlgItem(hDlg,IDOK), SW_HIDE);
-			return TRUE;
-		} 			
+			return true;
+		}
 		case PSCB_PRECREATE:{
         if (((LPDLGTEMPLATEEX)lParam)->signature ==  0xFFFF){
             ((LPDLGTEMPLATEEX)lParam)->style &= ~DS_CONTEXTHELP;
@@ -616,10 +616,10 @@ int CALLBACK GameMtl_PropSheetProc( HWND hDlg, UINT msg, LPARAM lParam){
         else {
             ((LPDLGTEMPLATE)lParam)->style &= ~DS_CONTEXTHELP;
         }
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 //================================================
 void GMaxMtlDlg::Make_PropertySheet(HWND hParent){
@@ -676,7 +676,7 @@ void GMaxMtlDlg::Make_PropertySheet(HWND hParent){
 	RECT wind_rect;
 	GetWindowRect(HwndEdit, &wind_rect);
 	MoveWindow(HwndEdit, wind_rect.left, wind_rect.top,wind_rect.right - wind_rect.left,
-		wind_rect.bottom - wind_rect.top -40, TRUE);
+		wind_rect.bottom - wind_rect.top -40, true);
 //	Position beneath the toolbar and slightly to the right
 	SlideWindow(HwndEdit, 50,150);
 	PropSheet_SetCurSel(HwndEdit,NULL, pos -1);//Force WM_INITDLG for the page
@@ -690,7 +690,7 @@ void GMaxMtlDlg::Make_PropertySheet(HWND hParent){
 }
 //================================================
 static BOOL CALLBACK GmaxMaterialDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam,LPARAM lParam){
-	return FALSE;
+	return false;
 }
 //================================================
 void GMaxMtlDlg::Reinitialize(GameMtl* new_mtl, bool update_multimtl){// = false
@@ -699,7 +699,7 @@ void GMaxMtlDlg::Reinitialize(GameMtl* new_mtl, bool update_multimtl){// = false
 	if(TheMtl){
 		npages = TheMtl->Get_Pass_Count();
 	}
-	//save 
+	//save
 	int cur_page = CurrentPage;
 	for (int i(npages); i > 0; i--) {
 		PropSheet_RemovePage(HwndEdit, i,NULL);
@@ -749,7 +749,7 @@ void GMaxMtlDlg::Reinitialize(GameMtl* new_mtl, bool update_multimtl){// = false
 	}
 	char a[12];
 	sprintf(a, "%d", TheMtl->Get_Pass_Count());
-	SetWindowText(GetDlgItem(HwndSurfaceType, IDC_GAMEMTL_PASSCOUNT_STATIC), a);	
+	SetWindowText(GetDlgItem(HwndSurfaceType, IDC_GAMEMTL_PASSCOUNT_STATIC), a);
 	PropSheet_SetCurSel(HwndEdit,NULL, cur_page);//Force WM_INITDLG for the page
 	ReloadDialog();
 
@@ -773,14 +773,14 @@ void GMaxMtlDlg::AddToolTip(HWND hControl, UINT strID){
 	LoadString(AppInstance, strID,str , MAX_PATH);
 	ti.lpszText  = str;
 	GetClientRect(hControl, &ti.rect);
-	HWND hwndTT = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS,  NULL,  WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,		
+	HWND hwndTT = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS,  NULL,  WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,CW_USEDEFAULT, hControl,NULL ,AppInstance, NULL  );
 	SetWindowPos(hwndTT, HWND_TOPMOST, 0, 0,   0,    0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-   int res = SendMessage(hwndTT, TTM_ADDTOOL, 0, (LPARAM) (LPTOOLINFO) &ti);	
+   int res = SendMessage(hwndTT, TTM_ADDTOOL, 0, (LPARAM) (LPTOOLINFO) &ti);
 }
 //============================================================================================
 void GMaxMtlDlg::LoadButtonBitmaps(HWND hDlg){
-	//Get 
+	//Get
 	if(NULL == HGetMtlBmp){
 		HGetMtlBmp = LoadBitmap(AppInstance, MAKEINTRESOURCE(IDB_GETMTL));
 	}
@@ -788,7 +788,7 @@ void GMaxMtlDlg::LoadButtonBitmaps(HWND hDlg){
 		SendDlgItemMessage(hDlg,IDC_GETMTL, BM_SETIMAGE,(WPARAM) IMAGE_BITMAP, (LPARAM)HGetMtlBmp);
 		AddToolTip(GetDlgItem(hDlg,IDC_GETMTL), IDS_GETMTL);
 	}
-	//Browse 
+	//Browse
 	if(NULL == HBrowseMtlBmp){
 		HBrowseMtlBmp = LoadBitmap(AppInstance, MAKEINTRESOURCE(IDB_BROWSE));
 	}
@@ -796,7 +796,7 @@ void GMaxMtlDlg::LoadButtonBitmaps(HWND hDlg){
 		SendDlgItemMessage(hDlg,IDC_NAVIGATOR, BM_SETIMAGE,(WPARAM) IMAGE_BITMAP, (LPARAM)HBrowseMtlBmp);
 		AddToolTip(GetDlgItem(hDlg,IDC_NAVIGATOR), IDS_NAVIGATOR);
 	}
-	//Assign 
+	//Assign
 	if(NULL == HAssignMtlBmp){
 		HAssignMtlBmp = LoadBitmap(AppInstance, MAKEINTRESOURCE(IDB_ASSIGN));
 	}
@@ -804,7 +804,7 @@ void GMaxMtlDlg::LoadButtonBitmaps(HWND hDlg){
 		SendDlgItemMessage(hDlg,IDC_ASSIGN, BM_SETIMAGE,(WPARAM) IMAGE_BITMAP, (LPARAM)HAssignMtlBmp);
 		AddToolTip(GetDlgItem(hDlg,IDC_ASSIGN), IDS_ASSIGNMTL);
 	}
-	//Delete 
+	//Delete
 	if(NULL == HDeleteMtlBmp){
 		HDeleteMtlBmp = LoadBitmap(AppInstance, MAKEINTRESOURCE(IDB_DELETEMTL));
 	}
@@ -884,7 +884,7 @@ void GMaxMtlDlg::ApplyToSelection(GameMtl* mtl){
 			node->SetMtl(Game_multi_mtl);
 		}
 	}
-	Ip->ForceCompleteRedraw(TRUE);
+	Ip->ForceCompleteRedraw(true);
 	theHold.Accept(IDS_APPLYGAMEMTL);
 }
 //============================================================================================
@@ -923,7 +923,7 @@ void GMaxMtlDlg::DeleteMtl(){
 		DestroyDialog();
 		GMaxMaterialDialog = NULL;
 	}
-	Ip->ForceCompleteRedraw(TRUE);
+	Ip->ForceCompleteRedraw(true);
 	theHold.Accept(IDS_APPLYGAMEMTL);
 }
 //============================================================================================
@@ -988,7 +988,7 @@ void GMaxMtlDlg::ShowHideControls(){
 		ICustEdit* pEdit = GetICustEdit(GetDlgItem(HwndSurfaceType, IDC_SUBMTL_NUM));
 		pEdit->SetText(1);
 		ReleaseICustEdit(pEdit);
-		//SetDlgItemInt(HwndSurfaceType,IDC_SUBMTL_NUM, 1, FALSE);
+		//SetDlgItemInt(HwndSurfaceType,IDC_SUBMTL_NUM, 1, false);
 		ShowWindow(GetDlgItem(HwndSurfaceType,IDC_MULTIMTLNAME),SW_SHOW);
 		ShowWindow(GetDlgItem(HwndSurfaceType,IDC_MULTI_STATIC),SW_SHOW);
 		ShowWindow(GetDlgItem(HwndSurfaceType,IDC_NAME_STATIC),SW_HIDE);
@@ -1039,9 +1039,9 @@ void GMaxMtlDlg::PreviousSibling(){
 		}else{
 			Current_Submtl_Index = Game_multi_mtl->NumSubMtls()-1;
 		}
-		
+
 		Mtl* new_mtl = (GameMtl*)(Game_multi_mtl->GetSubMtl(Current_Submtl_Index));
-		
+
 		if(NULL != new_mtl){
 			if(new_mtl->ClassID() == GameMaterialClassID){// && new_mtl != TheMtl){
 				ICustEdit* pEdit = GetICustEdit(GetDlgItem(HwndSurfaceType, IDC_SUBMTL_NUM));
@@ -1071,7 +1071,7 @@ BOOL CALLBACK GameMtlMainProc(HWND hMainDlg, UINT msg, WPARAM wParam, LPARAM lPa
 				break;
 			}
 	}
-	return FALSE;
+	return false;
 }
 //============================================================================================
 GameMtl* GetMtlFromSelection(){
@@ -1144,13 +1144,13 @@ void GMaxMtlDlg::SetMultiMaterialBySlot( int iSlot, int iIndex ) {
 	// (gth) MATERIAL BEING CHANGED, user double clicked a member of a multi-material in the navagator
 	MtlBase * mtl_base = GetMtlEditInterface()->GetCurMtl();
 	if ((mtl_base->IsMultiMtl()) && (IsMtl(mtl_base))) {
-		
+
 		Mtl * mtl = (Mtl*)mtl_base;
 
 		// Sub material iIndex is "1-based" but the sdk is "0-based"
 		if ((iIndex > 0) && (iIndex <= mtl->NumSubMtls())) {
 
-			MtlBase * sub_mtl = ((Mtl*)mtl)->GetSubMtl(iIndex - 1); 
+			MtlBase * sub_mtl = ((Mtl*)mtl)->GetSubMtl(iIndex - 1);
 			if ((sub_mtl != NULL) && (sub_mtl->ClassID() == GameMaterialClassID)) {
 
 				Game_multi_mtl = (Mtl*)mtl;

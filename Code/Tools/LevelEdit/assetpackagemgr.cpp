@@ -76,7 +76,7 @@ AssetPackageMgrClass::Initialize (void)
 void
 AssetPackageMgrClass::Shutdown (void)
 {
-	
+
 	return ;
 }
 
@@ -120,7 +120,7 @@ AssetPackageMgrClass::Build_Package_List (STRING_LIST &list)
 	//	Search for all sub-directories in our current folder
 	//
 	WIN32_FIND_DATA find_info	= { 0 };
-	BOOL keep_going				= TRUE;
+	BOOL keep_going				= true;
 	HANDLE file_find				= NULL;
 	for (file_find = ::FindFirstFile (search_path, &find_info);
 		 (file_find != INVALID_HANDLE_VALUE) && keep_going;
@@ -139,10 +139,10 @@ AssetPackageMgrClass::Build_Package_List (STRING_LIST &list)
 	//
 	//	Close the search handle
 	//
-	if (file_find != INVALID_HANDLE_VALUE) {			  
-		::FindClose (file_find); 
+	if (file_find != INVALID_HANDLE_VALUE) {
+		::FindClose (file_find);
 	}
-	
+
 	return ;
 }
 
@@ -179,8 +179,8 @@ AssetPackageMgrClass::Create_Package (const char *name)
 	//
 	//	Attempt to create the directory
 	//
-	if (::CreateDirectory (new_path, NULL) == FALSE) {
-		
+	if (::CreateDirectory (new_path, NULL) == false) {
+
 		//
 		//	Warn the user on error
 		//
@@ -188,7 +188,7 @@ AssetPackageMgrClass::Create_Package (const char *name)
 		message.Format ("Unable to create the directory: %s", (const char *)new_path);
 		::MessageBox (NULL, message, "File Error", MB_ICONERROR | MB_OK | MB_TOPMOST);
 	} else {
-		
+
 		//
 		//	Make a directory for the levels to be stored in
 		//

@@ -36,6 +36,7 @@
 
 
 #include "dlgmpwolignorelist.h"
+#include "renegadedialog.h"
 #include "dlgmpwoladdignoreentry.h"
 #include "listctrl.h"
 #include "dlgmpwoldeleteignoreentry.h"
@@ -47,7 +48,7 @@
 //
 ////////////////////////////////////////////////////////////////
 MPWolIgnoreListPopupClass::MPWolIgnoreListPopupClass (void)	:
-	PopupDialogClass (IDD_MP_WOL_IGNORE_LIST)
+	PopupDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_IGNORE_LIST))
 {
 	WWDEBUG_SAY(("MPWolIgnoreListPopupClass: Instantiated\n"));
 	mBuddyMgr = WOLBuddyMgr::GetInstance(false);
@@ -81,7 +82,7 @@ MPWolIgnoreListPopupClass::On_Init_Dialog (void)
 
 	if (list_ctrl != NULL) {
 		//	Configure the columns
-		list_ctrl->Add_Column(L"", 1.0F, Vector3 (1, 1, 1));
+		list_ctrl->Add_Column(U_CHAR(""), 1.0F, Vector3 (1, 1, 1));
 
 		//	Populate the list
 		Refresh_List ();
@@ -97,7 +98,7 @@ MPWolIgnoreListPopupClass::On_Init_Dialog (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-MPWolIgnoreListPopupClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MPWolIgnoreListPopupClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id) {
 		case IDC_ADD_BUTTON:
@@ -108,7 +109,7 @@ MPWolIgnoreListPopupClass::On_Command (int ctrl_id, int message_id, DWORD param)
 			//	Get the name of the selected user
 			WideStringClass name(0, true);
 			Get_Selected_Entry(name);
-			
+
 			//	Display a confirmation dialog to the user.
 			if (name.Is_Empty () == false) {
 				MPWolDeleteIgnoreEntryPopupClass* dialog = new MPWolDeleteIgnoreEntryPopupClass;
@@ -146,7 +147,7 @@ MPWolIgnoreListPopupClass::Refresh_List (void)
 	if (curr_sel != -1) {
 		selected_user = list_ctrl->Get_Entry_Text (curr_sel, 0);
 	}
-	
+
 	//	Start fresh
 	list_ctrl->Delete_All_Entries ();
 	bool is_selection_set = false;

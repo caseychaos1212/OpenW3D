@@ -224,6 +224,7 @@ add_library(ww3d2 STATIC)
 
 target_link_libraries(ww3d2 PRIVATE
     wwcommon
+    wwlib
     vfw32
     winmm
 )
@@ -231,12 +232,13 @@ target_link_libraries(ww3d2 PRIVATE
 target_sources(ww3d2 PRIVATE ${WW3D2_SRC})
 
 # This module needs building differently for the level editor
-if (REN_BUILD_TOOLS)
+if (W3D_TOOLS)
     # Targets to build.
     add_library(ww3d2e STATIC)
 
     target_link_libraries(ww3d2e PRIVATE
         wwcommon
+        wwlib
         vfw32
         winmm
     )

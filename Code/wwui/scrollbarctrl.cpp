@@ -301,7 +301,7 @@ ScrollBarCtrlClass::Create_Control_Renderers (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-ScrollBarCtrlClass::On_Set_Cursor (const Vector2 &mouse_pos)
+ScrollBarCtrlClass::On_Set_Cursor (const Vector2 &/* mouse_pos */)
 {
 	//
 	//	Change the mouse cursor
@@ -479,7 +479,7 @@ ScrollBarCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-ScrollBarCtrlClass::On_LButton_Up (const Vector2 &mouse_pos)
+ScrollBarCtrlClass::On_LButton_Up (const Vector2 &/* mouse_pos */)
 {
 	Release_Capture ();
 
@@ -569,7 +569,7 @@ ScrollBarCtrlClass::On_Kill_Focus (DialogControlClass *focus)
 //
 ////////////////////////////////////////////////////////////////
 bool
-ScrollBarCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
+ScrollBarCtrlClass::On_Key_Down (uint32 key_id, uint32 /* key_data */)
 {
 	bool handled = true;
 
@@ -637,15 +637,15 @@ int
 ScrollBarCtrlClass::Slider_Pos_From_Mouse_Pos (const Vector2 &mouse_pos)
 {
 	int retval = 0;
-	
+
 	if (mouse_pos.Y < TrackRect.Top) {
-		
+
 		//
 		//	Mouse is above the track area of the control
 		//
 		retval = 0;
 	} else if (mouse_pos.Y >= TrackRect.Bottom) {
-		
+
 		//
 		//	Mouse is below the track areaa of the control
 		//
@@ -692,7 +692,7 @@ void
 ScrollBarCtrlClass::Scroll_Page (int direction, bool send_notify)
 {
 	//
-	//	Calculate a page scroll (if using uniform page sizes)	
+	//	Calculate a page scroll (if using uniform page sizes)
 	//
 	int pos = CurrPos + (direction * PageSize);
 	Set_Pos (pos, send_notify);
@@ -700,8 +700,8 @@ ScrollBarCtrlClass::Scroll_Page (int direction, bool send_notify)
 	//
 	//	Notify the advise sinks that the page has been scrolled
 	//
-	if (send_notify) {		
-		ADVISE_NOTIFY (On_VScroll_Page (this, Get_ID (), direction));		
+	if (send_notify) {
+		ADVISE_NOTIFY (On_VScroll_Page (this, Get_ID (), direction));
 	}
 
 	return ;
@@ -767,7 +767,7 @@ ScrollBarCtrlClass::Update_Thumb_Rect (void)
 	//	Recalculate the thumb position
 	//
 	float percent		= float(CurrPos - MinPos) / float(MaxPos - MinPos);
-	
+
 	//
 	//	Build the rectangle from the thumb's position
 	//

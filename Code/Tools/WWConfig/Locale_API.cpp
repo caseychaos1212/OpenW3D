@@ -40,6 +40,7 @@
 #include "locale_api.h"
 #include "rawfile.h"
 #include "wwconfig_ids.h"
+#include <cassert>
 
 
 /****************************************************************************/
@@ -47,10 +48,10 @@
 /****************************************************************************/
 
 //----------------------------------------------------------------------------
-// NOTE:	if USE_MULTI_FILE_FORMAT is "true", then a .lOC file must be in 
+// NOTE:	if USE_MULTI_FILE_FORMAT is "true", then a .lOC file must be in
 //			the same directory as this file.
 //----------------------------------------------------------------------------
-#define		USE_MULTI_FILE_FORMAT		FALSE
+#define		USE_MULTI_FILE_FORMAT		false
 
 #define		LANGUAGE_IS_DBCS(l)	(((l)==IDL_JAPANESE)||((l)==IDL_KOREAN)||((l)==IDL_CHINESE))		// [OYO]
 #define		CODEPAGE_IS_DBCS(C)	((C==932)||(C==949)||(C==950))										// [OYO]
@@ -68,10 +69,10 @@ int		LanguageID		= 0;
 /* LOCALE API                                                               */
 /****************************************************************************/
 wchar_t *		Remove_Quotes_Around_String ( wchar_t *old_string );
-void *	 	Load_File ( const CHAR *filename, long *filesize );
+void *	 	Load_File ( const CHAR *filename, int *filesize );
 
 //=============================================================================
-// These are wrapper functions around the LOCALE_ functions.  I made these to 
+// These are wrapper functions around the LOCALE_ functions.  I made these to
 // make using the single vs. multi language files more transparent to the program.
 //=============================================================================
 
@@ -154,7 +155,7 @@ int Locale_Init	( int language, const char *file )
 					}
 				}
 				break;
-							
+
 			default:
 				LanguageID	= IDL_ENGLISH;
 				break;
@@ -169,7 +170,7 @@ int Locale_Init	( int language, const char *file )
 	}
 
 	//-------------------------------------------------------------------------
-	// Use English in the situation where Chinese, Korean, or Japanese was 
+	// Use English in the situation where Chinese, Korean, or Japanese was
 	// requested but not available.
 	//-------------------------------------------------------------------------
 	if( LANGUAGE_IS_DBCS( LanguageID ) && !CODEPAGE_IS_DBCS( CodePage )) {
@@ -194,7 +195,7 @@ int Locale_Init	( int language, const char *file )
 		//---------------------------------------------------------------------
 		// Create a file buffer that holds all the strings in the file.
 		//---------------------------------------------------------------------
-		long		filesize;
+		int		filesize;
 		HRSRC 		hRsrc;
 		HGLOBAL		hGlobal;
 		int			PrimaryLanguage = LANG_NEUTRAL;
@@ -281,7 +282,7 @@ int Locale_Init	( int language, const char *file )
 
 	#endif
 
-	return result;	
+	return result;
 }
 
 /************************************************************************/
@@ -328,7 +329,7 @@ const CHAR* Locale_GetString( int StringID, CHAR *String )
 
 	#if( USE_MULTI_FILE_FORMAT )
 		wcscpy( wide_buffer, (wchar_t *)LOCALE_getstring( StringID ));
-	#else									  
+	#else
 		wcscpy( wide_buffer, (wchar_t *)LOCALE_getstr( LocaleFile, StringID ));
 	#endif
 
@@ -365,7 +366,7 @@ const wchar_t* Locale_GetString( int StringID, wchar_t *String )
 
 	#if( USE_MULTI_FILE_FORMAT )
 		wcscpy( wide_buffer, (wchar_t *)LOCALE_getstring( StringID ));
-	#else									  
+	#else
 		wcscpy( wide_buffer, (wchar_t *)LOCALE_getstr( LocaleFile, StringID ));
 	#endif
 
@@ -400,7 +401,7 @@ const wchar_t* Locale_GetString( int StringID )
 
 	#if( USE_MULTI_FILE_FORMAT )
 		wcscpy( wide_buffer, (wchar_t *)LOCALE_getstring( StringID ));
-	#else									  
+	#else
 		wcscpy( wide_buffer, (wchar_t *)LOCALE_getstr( LocaleFile, StringID ));
 	#endif
 
@@ -418,7 +419,7 @@ wchar_t *Remove_Quotes_Around_String ( wchar_t *old_string )
 {
 	wchar_t	wide_buffer[ _MAX_PATH * 3 ];
 	wchar_t * letter = old_string;
-	int		length;
+	size_t		length;
 
 	//----------------------------------------------------------------------
 	// If string is not NULL...
@@ -430,8 +431,8 @@ wchar_t *Remove_Quotes_Around_String ( wchar_t *old_string )
 
 		length = wcslen( wide_buffer );
 
-		if ( wide_buffer[ wcslen( wide_buffer )-1 ] == '"' ) {
-			wide_buffer[ wcslen( wide_buffer )-1 ] = '\0';
+		if ( length > 0 && wide_buffer[ length - 1 ] == '"' ) {
+			wide_buffer[ length - 1 ] = '\0';
 		}
 		wcscpy( old_string, wide_buffer );
 	}
@@ -457,7 +458,7 @@ wchar_t *Remove_Quotes_Around_String ( wchar_t *old_string )
  *   10/17/1994 JLB : Created.													*
  *==============================================================================*/
 
-void * Load_File ( const char *filename, long *filesize )
+void * Load_File ( const char *filename, int *filesize )
 {
 	int					size, bytes_read;
 	void				*ptr = NULL;
@@ -507,7 +508,7 @@ void * Load_File ( const char *filename, long *filesize )
 	}
 
 	if ( filesize != NULL ) {
-		*filesize = (long)size;
+		*filesize = (int)size;
 	}
 	return( ptr );
 }

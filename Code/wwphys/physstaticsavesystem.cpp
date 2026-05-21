@@ -63,7 +63,7 @@ uint32 PhysStaticDataSaveSystemClass::Chunk_ID(void) const
 }
 
 bool PhysStaticDataSaveSystemClass::Save(ChunkSaveClass &csave)
-{	
+{
 	WWMEMLOG(MEM_GAMEDATA);
 
 	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
@@ -83,7 +83,7 @@ bool PhysStaticDataSaveSystemClass::Load(ChunkLoadClass &cload)
 	WWMEMLOG(MEM_GAMEDATA);
 
 	while (cload.Open_Chunk()) {
-		switch (cload.Cur_Chunk_ID()) 
+		switch (cload.Cur_Chunk_ID())
 		{
 			case PSDSSC_CHUNKID_SCENE:
 				if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
@@ -134,7 +134,7 @@ bool PhysStaticObjectsSaveSystemClass::Save(ChunkSaveClass &csave)
 bool PhysStaticObjectsSaveSystemClass::Load(ChunkLoadClass &cload)
 {
 	while (cload.Open_Chunk()) {
-		switch (cload.Cur_Chunk_ID()) 
+		switch (cload.Cur_Chunk_ID())
 		{
 			case PSOSSC_CHUNKID_SCENE:
 				if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {

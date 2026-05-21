@@ -212,7 +212,7 @@ endif()
 target_sources(wwphys PRIVATE ${WWPHYS_SRC})
 
 # This module needs building differently for the level editor
-if (REN_BUILD_TOOLS)
+if (W3D_TOOLS)
     # Targets to build.
     add_library(wwphyse STATIC)
 

@@ -80,7 +80,7 @@ enum
 
 	OBSOLETE_STATICANIMPHYS_VARIABLE_DEFID					= 0x00,
 	STATICANIMPHYS_VARIABLE_COLLISIONMODE,
-};										
+};
 
 
 StaticAnimPhysClass::StaticAnimPhysClass(void) :
@@ -138,7 +138,7 @@ void StaticAnimPhysClass::Vis_Render(SpecialRenderInfoClass & rinfo)
 void StaticAnimPhysClass::Update_Cached_Model_Parameters(void)
 {
 	// check if there is a collideable mesh in the model and cache a pointer to it.
-	AnimManager.Update_Cached_Model_Parameters();	
+	AnimManager.Update_Cached_Model_Parameters();
 }
 
 void StaticAnimPhysClass::Update_Sun_Status(void)
@@ -152,7 +152,7 @@ void StaticAnimPhysClass::Update_Sun_Status(void)
 	Model->Get_Obj_Space_Bounding_Box(box);
 	float xysize2 = box.Extent.X * box.Extent.X + box.Extent.Y * box.Extent.Y;
 	if (xysize2 < MAX_XYSIZE2) {
-		PhysClass::Update_Sun_Status();	
+		PhysClass::Update_Sun_Status();
 	} else {
 		Set_Flag(IS_IN_THE_SUN,true);
 	}
@@ -179,94 +179,10 @@ void StaticAnimPhysClass::Set_Shadow(TexProjectClass * shadow)
 	}
 }
 
-void StaticAnimPhysClass::Debug_Display_Shadow(const Vector2 & v0,const Vector2 & v1)
-{
-
-	if (ShadowProjector != NULL) {
-		TextureClass * tex = ShadowProjector->Peek_Texture();
-		if (tex != NULL) {
-
-			ShaderClass shader = ShaderClass::_PresetOpaqueShader;
-			VertexMaterialClass * vmtl = VertexMaterialClass::Get_Preset(VertexMaterialClass::PRELIT_NODIFFUSE);
-			
-			DX8Wrapper::Set_Shader(shader);
-			DX8Wrapper::Set_Material(vmtl);
-
-			Matrix4 view,proj;
-			Matrix4 identity(true);
-
-			DX8Wrapper::Get_Transform(D3DTS_VIEW,view);
-			DX8Wrapper::Get_Transform(D3DTS_PROJECTION,proj);
-
-			DX8Wrapper::Set_Transform(D3DTS_WORLD,identity);
-			DX8Wrapper::Set_Transform(D3DTS_VIEW,identity);
-			DX8Wrapper::Set_Transform(D3DTS_PROJECTION,identity);
-		
-			DX8Wrapper::Set_Texture(0,tex);
-
-			DynamicVBAccessClass vbaccess(BUFFER_TYPE_DYNAMIC_DX8,dynamic_fvf_type,4);
-			{
-				DynamicVBAccessClass::WriteLockClass lock(&vbaccess);
-				VertexFormatXYZNDUV2 * verts = lock.Get_Formatted_Vertex_Array();
-				verts[0].x = -1.0f;
-				verts[0].y = 0.8f;
-				verts[0].z = 0.0;
-				verts[0].u1 = 0.0f;
-				verts[0].v1 = 0.0f;
-				verts[0].diffuse = 0xFFFFFFFF;
-
-				verts[1].x = -1.0f;
-				verts[1].y = 0.3f;
-				verts[1].z = 0.0;
-				verts[1].u1 = 0.0f;
-				verts[1].v1 = 1.0f;
-				verts[1].diffuse = 0xFFFFFFFF;
-
-				verts[2].x = -0.5f;
-				verts[2].y = 0.3f;
-				verts[2].z = 0.0;
-				verts[2].u1 = 1.0f;
-				verts[2].v1 = 1.0f;
-				verts[2].diffuse = 0xFFFFFFFF;
-
-				verts[3].x = -0.5f;
-				verts[3].y = 0.8f;
-				verts[3].z = 0.0;
-				verts[3].u1 = 1.0f;
-				verts[3].v1 = 0.0f;
-				verts[3].diffuse = 0xFFFFFFFF;
-			}
-
-			DynamicIBAccessClass ibaccess(BUFFER_TYPE_DYNAMIC_DX8,2*3);
-			{
-				DynamicIBAccessClass::WriteLockClass lock(&ibaccess);
-				unsigned short * indices = lock.Get_Index_Array();
-
-				indices[0] = 0;
-				indices[1] = 1;
-				indices[2] = 2;
-				indices[3] = 0;
-				indices[4] = 2;
-				indices[5] = 3;
-			}
-
-			DX8Wrapper::Set_Vertex_Buffer(vbaccess);
-			DX8Wrapper::Set_Index_Buffer(ibaccess,0);
-			DX8Wrapper::Draw_Triangles(0,2,0,4);
-
-			DX8Wrapper::Set_Transform(D3DTS_VIEW,view);
-			DX8Wrapper::Set_Transform(D3DTS_PROJECTION,proj);
-
-			REF_PTR_RELEASE(vmtl);
-		}
-	}
-
-}
-
 
 bool StaticAnimPhysClass::Needs_Timestep(void)
-{ 
-	return true; 
+{
+	return true;
 }
 
 void StaticAnimPhysClass::Timestep(float dt)
@@ -286,17 +202,17 @@ void StaticAnimPhysClass::Timestep(float dt)
 }
 
 
-bool StaticAnimPhysClass::Internal_Link_Rider(PhysClass * rider)	
+bool StaticAnimPhysClass::Internal_Link_Rider(PhysClass * rider)
 {
-	AnimManager.Link_Rider(rider); 
-	return true; 
+	AnimManager.Link_Rider(rider);
+	return true;
 }
 
 
 bool StaticAnimPhysClass::Internal_Unlink_Rider(PhysClass * rider)
-{ 
-	AnimManager.Unlink_Rider(rider); 
-	return true; 
+{
+	AnimManager.Unlink_Rider(rider);
+	return true;
 }
 
 void StaticAnimPhysClass::Save_State(ChunkSaveClass & csave)
@@ -309,8 +225,8 @@ void StaticAnimPhysClass::Save_State(ChunkSaveClass & csave)
 void StaticAnimPhysClass::Load_State(ChunkLoadClass & cload)
 {
 	while (cload.Open_Chunk()) {
-			
-		switch(cload.Cur_Chunk_ID()) 
+
+		switch(cload.Cur_Chunk_ID())
 		{
 			case STATICANIMPHYS_CHUNK_ANIMMANAGER:
 				AnimManager.Load(cload);
@@ -338,7 +254,7 @@ bool StaticAnimPhysClass::Save(ChunkSaveClass &csave)
 	csave.Begin_Chunk(STATICANIMPHYS_CHUNK_ANIMMANAGER);
 	AnimManager.Save(csave);
 	csave.End_Chunk();
-	
+
 	return true;
 }
 
@@ -351,8 +267,8 @@ bool StaticAnimPhysClass::Load(ChunkLoadClass &cload)
 	** Read in the chunks from the file
 	*/
 	while (cload.Open_Chunk()) {
-		
-		switch(cload.Cur_Chunk_ID()) 
+
+		switch(cload.Cur_Chunk_ID())
 		{
 			case STATICANIMPHYS_CHUNK_STATICPHYS:
 				StaticPhysClass::Load(cload);
@@ -363,10 +279,10 @@ bool StaticAnimPhysClass::Load(ChunkLoadClass &cload)
 					switch(cload.Cur_Micro_Chunk_ID()) {
 						READ_MICRO_CHUNK(cload,STATICANIMPHYS_VARIABLE_COLLISIONMODE,legacy_collision_mode);
 					}
-					cload.Close_Micro_Chunk();	
+					cload.Close_Micro_Chunk();
 				}
 				break;
-				
+
 			case STATICANIMPHYS_CHUNK_ANIMMANAGER:
 				AnimManager.Load(cload);
 				break;
@@ -375,7 +291,7 @@ bool StaticAnimPhysClass::Load(ChunkLoadClass &cload)
 				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 				break;
 		}
-		
+
 		cload.Close_Chunk();
 	}
 
@@ -430,7 +346,7 @@ DECLARE_DEFINITION_FACTORY(StaticAnimPhysDefClass, CLASSID_STATICANIMPHYSDEF, "S
 /*
 ** Chunk ID's used by StaticAnimPhysDefClass
 */
-enum 
+enum
 {
 	STATICANIMPHYSDEF_CHUNK_STATICPHYSDEF				= 0x055110100,			// (parent class)
 	STATICANIMPHYSDEF_CHUNK_PROJECTORMANAGERDEF,
@@ -481,9 +397,9 @@ StaticAnimPhysDefClass::StaticAnimPhysDefClass(void) :
 
 }
 
-uint32 StaticAnimPhysDefClass::Get_Class_ID (void) const	
-{ 
-	return CLASSID_STATICANIMPHYSDEF; 
+uint32 StaticAnimPhysDefClass::Get_Class_ID (void) const
+{
+	return CLASSID_STATICANIMPHYSDEF;
 }
 
 PersistClass * StaticAnimPhysDefClass::Create(void) const
@@ -558,8 +474,8 @@ bool StaticAnimPhysDefClass::Load(ChunkLoadClass &cload)
 				while (cload.Open_Micro_Chunk()) {
 					switch(cload.Cur_Micro_Chunk_ID()) {
 						// NOTE: these two variables/microchunks have been moved into the animation manager.
-						READ_MICRO_CHUNK(cload,STATICANIMPHYSDEF_VARIABLE_COLLISIONMODE,AnimManagerDef.CollisionMode);	
-						READ_MICRO_CHUNK_WWSTRING(cload,STATICANIMPHYSDEF_VARIABLE_ANIMATIONNAME,AnimManagerDef.AnimationName);	
+						READ_MICRO_CHUNK(cload,STATICANIMPHYSDEF_VARIABLE_COLLISIONMODE,AnimManagerDef.CollisionMode);
+						READ_MICRO_CHUNK_WWSTRING(cload,STATICANIMPHYSDEF_VARIABLE_ANIMATIONNAME,AnimManagerDef.AnimationName);
 
 						READ_MICRO_CHUNK(cload,STATICANIMPHYSDEF_VARIABLE_SHADOWDYNAMICOBJS,ShadowDynamicObjs);
 						READ_MICRO_CHUNK(cload,STATICANIMPHYSDEF_VARIABLE_SHADOWISADDITIVE,ShadowIsAdditive);
@@ -570,7 +486,7 @@ bool StaticAnimPhysDefClass::Load(ChunkLoadClass &cload)
 						READ_MICRO_CHUNK(cload,STATICANIMPHYSDEF_VARIABLE_COLLIDEINPATHFIND,DoesCollideInPathfind);
 						READ_MICRO_CHUNK(cload,STATICANIMPHYSDEF_VARIABLE_ISCOSMETIC,IsCosmetic);
 					}
-					cload.Close_Micro_Chunk();	
+					cload.Close_Micro_Chunk();
 				}
 				break;
 

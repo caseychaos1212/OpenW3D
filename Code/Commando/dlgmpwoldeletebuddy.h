@@ -43,7 +43,6 @@
 
 
 #include "popupdialog.h"
-#include "resource.h"
 #include "widestring.h"
 
 
@@ -55,22 +54,22 @@
 class MPWolDeleteBuddyPopupClass : public PopupDialogClass
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	MPWolDeleteBuddyPopupClass (void);
 
 	////////////////////////////////////////////////////////////////
 	//	Public methods
 	////////////////////////////////////////////////////////////////
 	void		On_Init_Dialog (void) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 
 	//
 	//	Content control
 	//
-	void		Set_User_Name (const wchar_t *user_name)	{ UserName = user_name; }
+	void		Set_User_Name (const unichar_t *user_name)	{ UserName = user_name; }
 
 protected:
 

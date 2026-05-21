@@ -35,11 +35,11 @@
 ******************************************************************************/
 
 #include "DlgMPConnect.h"
+#include "renegadedialog.h"
 #include "gamedata.h"
 #include "gameinitmgr.h"
 #include "campaign.h"
 #include "cnetwork.h"
-#include "resource.h"
 #include <wwdebug/wwdebug.h>
 #include "dlgmainmenu.h"
 #include "gamespyadmin.h"
@@ -65,7 +65,7 @@
 *
 ******************************************************************************/
 
-bool DlgMPConnect::DoDialog(int teamChoice, unsigned long clanID)
+bool DlgMPConnect::DoDialog(int teamChoice, unsigned int clanID)
 	{
 	DlgMPConnect* popup = new DlgMPConnect(teamChoice, clanID);
 
@@ -95,8 +95,8 @@ bool DlgMPConnect::DoDialog(int teamChoice, unsigned long clanID)
 *
 ******************************************************************************/
 
-DlgMPConnect::DlgMPConnect(int teamChoice, unsigned long clanID) :
-		PopupDialogClass(IDD_MULTIPLAY_CONNECTING),
+DlgMPConnect::DlgMPConnect(int teamChoice, unsigned int clanID) :
+		PopupDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MULTIPLAY_CONNECTING)),
 		mTeamChoice(teamChoice),
 		mClanID(clanID),
 		mTheGame(NULL),
@@ -190,7 +190,7 @@ void DlgMPConnect::Failed_To_Connect(void)
 *
 ******************************************************************************/
 
-void DlgMPConnect::On_Command(int ctrlID, int message, DWORD param)
+void DlgMPConnect::On_Command(int ctrlID, int message, unsigned int param)
 	{
 	if ((IDCANCEL == ctrlID) && (1 != param))
 		{
@@ -198,7 +198,7 @@ void DlgMPConnect::On_Command(int ctrlID, int message, DWORD param)
 			{
 			cNetwork::Cleanup_Client();
 			}
-		if (cGameSpyAdmin::Get_Is_Launched_From_Gamespy()) 
+		if (cGameSpyAdmin::Get_Is_Launched_From_Gamespy())
 			{
 			extern void Stop_Main_Loop (int);
 			Stop_Main_Loop(EXIT_SUCCESS);
@@ -256,7 +256,7 @@ void DlgMPConnect::On_Periodic(void)
 			}
 		else
 			{
-			WWDEBUG_SAY(("ERROR: %s\n", (const wchar_t*)outMsg));
+			WWDEBUG_SAY(("ERROR: %s\n", (const unichar_t*)outMsg));
 			}
 
 		// Release the keep alive reference (this will delete this object)

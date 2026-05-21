@@ -35,6 +35,7 @@
 ******************************************************************************/
 
 #include "DlgWOLSettings.h"
+#include "renegadedialog.h"
 #include "useroptions.h"
 #include "renegadedialogmgr.h"
 #include "mpsettingsmgr.h"
@@ -50,7 +51,6 @@
 #include <wwui/shortcutbarctrl.h>
 #include "bandwidthcheck.h"
 
-#include "resource.h"
 #include "string_ids.h"
 #include <wwtranslatedb/translatedb.h>
 #include <algorithm>
@@ -108,7 +108,7 @@ bool DlgWOLSettings::DoDialog(void)
 ******************************************************************************/
 
 DlgWOLSettings::DlgWOLSettings() :
-		MenuDialogClass(IDD_WOL_SETTINGS),
+		MenuDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_WOL_SETTINGS)),
 		DetectingBandwidth(false),
 		WaitingToExitDialog(false)
 	{
@@ -282,7 +282,7 @@ void DlgWOLSettings::On_Destroy(void)
 *
 ******************************************************************************/
 
-void DlgWOLSettings::On_Command(int ctrl, int message, DWORD param)
+void DlgWOLSettings::On_Command(int ctrl, int message, unsigned int param)
 	{
 	switch (ctrl)
 		{
@@ -455,9 +455,9 @@ void DlgWOLSettings::InitPersonaCombo(void)
 		{
 		// Populate the persona combo box with the list of WWOnline logins.
 		const LoginInfoList& logins = LoginInfo::GetList();
-		const unsigned int count = logins.size();
+		const size_t count = logins.size();
 
-		for (unsigned int index = 0; index < count; ++index)
+		for (size_t index = 0; index < count; ++index)
 			{
 			RefPtr<LoginInfo> login = logins[index];
 			WWASSERT(login.IsValid());
@@ -552,7 +552,7 @@ void DlgWOLSettings::DeleteSelectedPersona(void)
 
 		if (sel >= 0)
 			{
-			const wchar_t* name = combo->Get_Text();
+			const unichar_t* name = combo->Get_Text();
 
 			// Delete this login from our local cache and purge it from disk.
 			RefPtr<LoginInfo> login = LoginInfo::Find(name);
@@ -707,9 +707,9 @@ void DlgWOLSettings::InitServersCombo(const IRCServerList& servers)
 		int tmpSel = -1;
 
 		// walk the list of servers and add them to the combo box
-		const unsigned int serverCount = servers.size();
+		const size_t serverCount = servers.size();
 
-		for (unsigned int index = 0; index < serverCount; ++index)
+		for (size_t index = 0; index < serverCount; ++index)
 			{
 			const RefPtr<IRCServerData>& server = servers[index];
 
@@ -733,9 +733,9 @@ void DlgWOLSettings::InitServersCombo(const IRCServerList& servers)
 						float serverLat = server->GetLattitude();
 
 						// Find the ping server with the best time that matches this server's lat/long
-						const unsigned int pingersCount = pingers.size();
+						const size_t pingersCount = pingers.size();
 
-						for (unsigned int pingindex = 0; pingindex < pingersCount; ++pingindex)
+						for (size_t pingindex = 0; pingindex < pingersCount; ++pingindex)
 							{
 							const RefPtr<PingServerData>& thisPing = pingers[pingindex];
 							float pingLong = thisPing->GetLongitude();
@@ -854,7 +854,7 @@ void DlgWOLSettings::InitSideCombo(void)
 	if (combo)
 		{
 		//(gth) Renegade day 120 Patch: re-translate these strings each time!
-		struct {const wchar_t* TeamName; int TeamID;} _teams[] =
+		struct {const unichar_t* TeamName; int TeamID;} _teams[] =
 			{
 			{TRANSLATE (IDS_MENU_RANDOM), -1},
 			{TRANSLATE (IDS_MENU_TEXT933), 1},
@@ -952,9 +952,9 @@ void DlgWOLSettings::InitLocaleCombo(void)
 		std::vector<WideStringClass> localeNames;
 		mWOLSession->GetLocaleStrings(localeNames);
 
-		const unsigned int localeCount = localeNames.size();
+		const size_t localeCount = localeNames.size();
 
-		for (unsigned int index = 0; index < localeCount; ++index)
+		for (size_t index = 0; index < localeCount; ++index)
 			{
 			WideStringClass& locale = localeNames[index];
 			combo->Add_String(locale);
@@ -1065,7 +1065,7 @@ void DlgWOLSettings::InitConnectionSpeedCombo(void)
 ******************************************************************************/
 
 void DlgWOLSettings::On_ComboBoxCtrl_Sel_Change(ComboBoxCtrlClass* combo, int ctrl,
-		int oldSel, int newSel)
+		int /* oldSel */, int newSel)
 	{
 	switch (ctrl)
 		{

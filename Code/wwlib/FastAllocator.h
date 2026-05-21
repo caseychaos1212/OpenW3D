@@ -19,7 +19,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // FastAllocator.h
 //
-// Implements simple and fast memory allocators. Includes sample code for 
+// Implements simple and fast memory allocators. Includes sample code for
 // STL and overriding of specific or global new/delete.
 //
 // Allocators are very fast and prevent memory fragmentation. They use up
@@ -48,6 +48,7 @@
 #include <malloc.h>
 #include <stddef.h> //size_t & ptrdiff_t definition
 #include <string.h>
+#include <limits>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Forward Declarations
@@ -69,8 +70,8 @@ class FastAllocatorGeneral;  //Allocates and deletes items of any size. Can use 
 //    objects (especially smaller objects). If you have a class whose size is
 //    40K, you aren't going to be able to put even one of them on the stack.
 //    If you don't need an array but instead just need a single object, then you
-//    can simply create your object on the stack and be done with it. However, 
-//    there are some times when you need a temporary array of objects (or just 
+//    can simply create your object on the stack and be done with it. However,
+//    there are some times when you need a temporary array of objects (or just
 //    an array of chars or pointers) but don't know the size beforehand. That's
 //    where this class is useful.
 //
@@ -79,10 +80,10 @@ class FastAllocatorGeneral;  //Allocates and deletes items of any size. Can use 
 //      T           -- The type of object being allocated. Examples include char,
 //                     cRZString, int*, cRZRect*.
 //      nStackCount -- How many items to allocate on the stack before switching
-//                     to a heap allocation. Note that if you want to write 
+//                     to a heap allocation. Note that if you want to write
 //                     portable code, you need to use no more than about 2K
 //                     of stack space. So make sure nStackCount*sizeof(T) < 2048.
-//      bConstruct  -- This is normally 1, but setting it to 0 is a hint to the 
+//      bConstruct  -- This is normally 1, but setting it to 0 is a hint to the
 //                     compiler that you are constructing a type that has no
 //                     constructor. Testing showed that the VC++ compiler wasn't
 //                     completely able to optimize on its own. In particular, it
@@ -90,14 +91,14 @@ class FastAllocatorGeneral;  //Allocates and deletes items of any size. Can use 
 //                     enough to remore the pTArrayEnd assignment.
 //
 // Benchmarks:
-//    Testing one one machine showed that allocating and freeing a block of 
+//    Testing one one machine showed that allocating and freeing a block of
 //    2048 bytes via malloc/free took 8700 and 8400 clock ticks respectively.
 //    Using this stack allocator to do the same thing tooko 450 and 375 clock
-//    ticks respectively. 
+//    ticks respectively.
 //
 // Usage and examples:
-//    Since we are using a local allocator and not overloading global or class 
-//    operator new, you have to directory call StackAllocator::New instead  
+//    Since we are using a local allocator and not overloading global or class
+//    operator new, you have to directory call StackAllocator::New instead
 //    of operator new. So instead of saying:
 //       SomeStruct* pStructArray = new SomeStruct[13];
 //    you say:
@@ -163,7 +164,7 @@ public:
                T* pTArray = (T*)mTArray;
                const T* const pTArrayEnd = pTArray + nCount;
                while(pTArray < pTArrayEnd){
-                  new(pTArray)T; //Use the placement operator new. This simply calls the constructor 
+                  new(pTArray)T; //Use the placement operator new. This simply calls the constructor
                   ++pTArray;     //of T with 'this' set to the input address. Note that we don't put
                }                 //a '()' after the T this is because () causes trivial types like int
             }                    //and class* to be assigned zero/NULL. We don't want that.
@@ -331,7 +332,7 @@ WWINLINE void FastFixedAllocator::grow()
    n->next  = chunks;
    chunks   = n;
 	TotalHeapSize+=sizeof(Chunk);
-   
+
    const int nelem = Chunk::size/esize;
    char* start = n->mem;
    char* last = &start[(nelem-1)*esize];
@@ -363,9 +364,9 @@ class FastAllocatorGeneral
 	};
 public:
 	FastAllocatorGeneral();
-	void* Alloc(unsigned int n);
+	void* Alloc(size_t n);
 	void  Free(void* pAlloc);
-  	void* Realloc(void* pAlloc, unsigned int n);
+	void* Realloc(void* pAlloc, size_t n);
 
 	unsigned Get_Total_Heap_Size();
 	unsigned Get_Total_Allocated_Size();
@@ -421,25 +422,27 @@ WWINLINE unsigned FastAllocatorGeneral::Get_Total_Allocation_Count()
 //
 // ----------------------------------------------------------------------------
 
-WWINLINE void* FastAllocatorGeneral::Alloc(unsigned int n)
+WWINLINE void* FastAllocatorGeneral::Alloc(size_t n)
 {
    void* pMemory;
 	static int re_entrancy=0;
 	re_entrancy++;
 
-   //We actually allocate n+4 bytes. We store the # allocated 
+   //We actually allocate n+4 bytes. We store the # allocated
    //in the first 4 bytes, and return the ptr to the rest back
    //to the user.
-   n += sizeof(unsigned int); 
+   size_t total_size = n + sizeof(unsigned int);
 #ifdef MEMORY_OVERWRITE_TEST
-	n+=sizeof(unsigned int);
+	total_size+=sizeof(unsigned int);
 #endif
+	WWASSERT(total_size <= std::numeric_limits<unsigned int>::max());
+	unsigned int adjusted_size=static_cast<unsigned int>(total_size);
 
 	if (re_entrancy==1) {
-		ActualMemoryUsage+=n;
+		ActualMemoryUsage+=adjusted_size;
 	}
-	if (n<MAX_ALLOC_SIZE) {
-		int index=(n)/ALLOC_STEP;
+	if (adjusted_size<MAX_ALLOC_SIZE) {
+		int index=(adjusted_size)/ALLOC_STEP;
 		{
 			FastCriticalSectionClass::LockClass lock(CriticalSections[index]);
 			pMemory = allocators[index].Alloc();
@@ -447,17 +450,17 @@ WWINLINE void* FastAllocatorGeneral::Alloc(unsigned int n)
 	}
    else {
 		if (re_entrancy==1) {
-			AllocatedWithMalloc+=n;
+			AllocatedWithMalloc+=adjusted_size;
 			AllocatedWithMallocCount++;
 		}
-      pMemory = ::malloc(n);
+		pMemory = ::malloc(adjusted_size);
 	}
 #ifdef MEMORY_OVERWRITE_TEST
-	*((unsigned int*)((char*)pMemory+n)-1)=0xabbac0de;
+	*((unsigned int*)((char*)pMemory+adjusted_size)-1)=0xabbac0de;
 #endif
 
 	re_entrancy--;
-   *((unsigned int*)pMemory) = n;     //Write modified (augmented by 4) count into first four bytes.
+   *((unsigned int*)pMemory) = adjusted_size;     //Write modified (augmented by 4) count into first four bytes.
    return ((unsigned int*)pMemory)+1; //return ptr to bytes after it back to user.
 }
 
@@ -497,12 +500,13 @@ WWINLINE void FastAllocatorGeneral::Free(void* pAlloc)
 //  (2) realloc(pblock, 0) is equivalent to free(pblock) (except that NULL is returned).
 //  (3) if the realloc() fails, the object pointed to by pblock is left unchanged.
 //
-WWINLINE void* FastAllocatorGeneral::Realloc(void* pAlloc, unsigned int n){
+WWINLINE void* FastAllocatorGeneral::Realloc(void* pAlloc, size_t n){
    if(n){
+		WWASSERT(n <= std::numeric_limits<unsigned int>::max());
       void* const pNewAlloc = Alloc(n);      //Allocate the new memory. This never fails.
       if(pAlloc){
-         n = *(((unsigned int*)pAlloc)-1);   //Subtract four bytes and the count is stored there.
-         ::memcpy(pNewAlloc, pAlloc, n);     //Copy the old memory into the new memory.
+         unsigned int old_size = *(((unsigned int*)pAlloc)-1);   //Subtract four bytes and the count is stored there.
+         ::memcpy(pNewAlloc, pAlloc, old_size);     //Copy the old memory into the new memory.
          Free(pAlloc);                       //Delete the old memory.
       }
       return pNewAlloc;
@@ -529,7 +533,7 @@ extern FastAllocatorGeneral* generalAllocator;
 // system whereby it maintains buckets for integral sizes.
 //
 
-#if 0 //def _MSC_VER 
+#if 0 //def _MSC_VER
    //VC++ continues to be the one compiler that lacks the ability to compile
    //standard C++. So we define a version of the STL allocator specifically
    //for VC++, and let other compilers use a standard allocator template.
@@ -543,7 +547,7 @@ extern FastAllocatorGeneral* generalAllocator;
       typedef const T&  const_reference;
       typedef T         value_type;
 
-      T*            address(T& t)       const             { return (&t); } //These two are slightly strange but 
+      T*            address(T& t)       const             { return (&t); } //These two are slightly strange but
       const  T*     address(const T& t) const             { return (&t); } //required functions. Just do it.
       static T*     allocate(size_t n, const void* =NULL) { return (T*)generalAllocator->Alloc(n*sizeof(T)); }
       static void   construct(T* ptr, const T& value)     { new(ptr) T(value); }
@@ -553,15 +557,15 @@ extern FastAllocatorGeneral* generalAllocator;
 
       //This _Charalloc is required by VC++5 since it VC++5 predates
       //the language standardization. Allocator behaviour is one of the
-      //last things to have been hammered out. Important note: If you 
+      //last things to have been hammered out. Important note: If you
       //decide to write your own fast allocator, containers will allocate
-      //random objects through this function but delete them through 
+      //random objects through this function but delete them through
       //the above delallocate() function. So your version of deallocate
       //should *not* assume that it will only be given T objects to delete.
       char* _Charalloc(size_t n){ return (char*)::generalAllocator->Alloc(n*sizeof(char)); }
    };
 #else
-   //This is a C++ language standard allocator. Most C++ compilers after 1999 
+   //This is a C++ language standard allocator. Most C++ compilers after 1999
    //other than Microsoft C++ compile this fine. Otherwise. you might be able
    //to use the same allocator as VC++ uses above.
    template <class T>
@@ -654,7 +658,7 @@ typedef basic_string<char, char_traits<char>, FastSTLAllocator<char> > CharStrin
 ///////////////////////////////////////////////////////////////////////////////
 
 
-void main(){   
+void main(){
    IntArray intArray;
    intArray.push_back(3);
    intArray.pop_back();
@@ -666,7 +670,7 @@ void main(){
    IntDequeue intDequeue;
    intDequeue.push_back(3);
    intDequeue.pop_back();
-   
+
    IntQueue intQueue;
    intQueue.push(3);
    intQueue.pop();

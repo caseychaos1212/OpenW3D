@@ -42,7 +42,6 @@
 #define __DLG_MP_WOL_PAGE_BUDDY_H
 
 #include "popupdialog.h"
-#include "resource.h"
 #include "WOLBuddyMgr.h"
 
 ////////////////////////////////////////////////////////////////
@@ -58,16 +57,16 @@ public:
 	MPWolPageBuddyPopupClass(void);
 	~MPWolPageBuddyPopupClass(void);
 
-	void Set_Buddy_Name(const wchar_t* user_name);
+	void Set_Buddy_Name(const unichar_t* user_name);
 
 protected:
 
 	void On_Init_Dialog(void) override;
-	void On_Command(int ctrl_id, int mesage_id, DWORD param) override;
+	void On_Command(int ctrl_id, int mesage_id, unsigned int param) override;
 
 	void Send_Page(void);
 	void CheckIfCanSendPage(void);
-	
+
 	void On_ComboBoxCtrl_Edit_Change(ComboBoxCtrlClass* combo, int id) override;
 	void On_EditCtrl_Change(EditCtrlClass* edit, int id) override;
 	void On_EditCtrl_Enter_Pressed(EditCtrlClass* edit, int id) override;

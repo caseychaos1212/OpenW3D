@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Combat/radar.cpp                             $* 
- *                                                                                             * 
- *                      $Author:: Byon_g                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 1/23/02 5:48p                                               $* 
- *                                                                                             * 
- *                    $Revision:: 68                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Combat/radar.cpp                             $*
+ *                                                                                             *
+ *                      $Author:: Byon_g                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 1/23/02 5:48p                                               $*
+ *                                                                                             *
+ *                    $Revision:: 68                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "radar.h"
@@ -56,7 +56,7 @@
 
 DynamicVectorClass<RadarMarkerClass>	RadarManager::Markers;
 Render2DClass						*	RadarManager::Renderer;
-unsigned long							RadarManager::BlipColors[ NUM_BLIP_COLOR_TYPES ];
+unsigned int							RadarManager::BlipColors[ NUM_BLIP_COLOR_TYPES ];
 const PhysicalGameObj				*	RadarManager::BracketObj = NULL;
 RectClass								RadarManager::BlipUV[ NUM_BLIP_TYPES ];
 bool										RadarManager::IsHidden = false;
@@ -86,26 +86,14 @@ const char * RadarManager::Get_Blip_Shape_Type_Name( int index )
 	return names[index];
 }
 
-/*
-**
-*/
-static	const RectClass &	Scale_UV( const RectClass & uv, float texture_size )
+void	RadarManager::Set_Hidden( bool onoff )
 {
-	static RectClass new_uv;
-	new_uv = uv;
-	new_uv.Scale( 1/texture_size );
-	return new_uv;
-}
-
-
-void	RadarManager::Set_Hidden( bool onoff )	
-{ 
 	if ( IsHidden != onoff ) {
 
 		int sound_id = 0;
 		if ( onoff ) {
 			sound_id = HUDGlobalSettingsDef::Get_Instance()->RadarOnSoundID;
-		} else { 
+		} else {
 			sound_id = HUDGlobalSettingsDef::Get_Instance()->RadarOffSoundID;
 		}
 
@@ -113,7 +101,7 @@ void	RadarManager::Set_Hidden( bool onoff )
 			WWAudioClass::Get_Instance ()->Create_Instant_Sound (sound_id, Matrix3D (1));
 		}
 
-		IsHidden = onoff; 
+		IsHidden = onoff;
 	}
 }
 
@@ -150,35 +138,23 @@ void 	RadarManager::Init()
 
 	Renderer = new Render2DClass();
 	Renderer->Set_Texture( RADAR_TEXTURE );
-	Renderer->Set_Coordinate_Range( Render2DClass::Get_Screen_Resolution() ); 
+	Renderer->Set_Coordinate_Range( Render2DClass::Get_Screen_Resolution() );
 
 	// Init Colors
 	for ( i = 0; i < NUM_BLIP_COLOR_TYPES; i++ ) {
 		BlipColors[ i ] = 0xFFFFFFFF;
 	}
 	if ( HUDGlobalSettingsDef::Get_Instance() != NULL ) {
-		BlipColors[ BLIP_COLOR_TYPE_NOD ] =						HUDGlobalSettingsDef::Get_Instance()->Get_Nod_Color().Convert_To_ARGB(); 
-		BlipColors[ BLIP_COLOR_TYPE_GDI ] =						HUDGlobalSettingsDef::Get_Instance()->Get_GDI_Color().Convert_To_ARGB(); 
-		BlipColors[ BLIP_COLOR_TYPE_NEUTRAL ] =					HUDGlobalSettingsDef::Get_Instance()->Get_Neutral_Color().Convert_To_ARGB(); 
-		BlipColors[ BLIP_COLOR_TYPE_MUTANT ] =					HUDGlobalSettingsDef::Get_Instance()->Get_Mutant_Color().Convert_To_ARGB(); 
-		BlipColors[ BLIP_COLOR_TYPE_RENEGADE ] =				HUDGlobalSettingsDef::Get_Instance()->Get_Renegade_Color().Convert_To_ARGB(); 
-		BlipColors[ BLIP_COLOR_TYPE_PRIMARY_OBJECTIVE ] =		HUDGlobalSettingsDef::Get_Instance()->Get_Primary_Objective_Color().Convert_To_ARGB(); 
-		BlipColors[ BLIP_COLOR_TYPE_SECONDARY_OBJECTIVE ] =		HUDGlobalSettingsDef::Get_Instance()->Get_Secondary_Objective_Color().Convert_To_ARGB(); 
-		BlipColors[ BLIP_COLOR_TYPE_TERTIARY_OBJECTIVE ] =		HUDGlobalSettingsDef::Get_Instance()->Get_Tertiary_Objective_Color().Convert_To_ARGB(); 
+		BlipColors[ BLIP_COLOR_TYPE_NOD ] =						HUDGlobalSettingsDef::Get_Instance()->Get_Nod_Color().Convert_To_ARGB();
+		BlipColors[ BLIP_COLOR_TYPE_GDI ] =						HUDGlobalSettingsDef::Get_Instance()->Get_GDI_Color().Convert_To_ARGB();
+		BlipColors[ BLIP_COLOR_TYPE_NEUTRAL ] =					HUDGlobalSettingsDef::Get_Instance()->Get_Neutral_Color().Convert_To_ARGB();
+		BlipColors[ BLIP_COLOR_TYPE_MUTANT ] =					HUDGlobalSettingsDef::Get_Instance()->Get_Mutant_Color().Convert_To_ARGB();
+		BlipColors[ BLIP_COLOR_TYPE_RENEGADE ] =				HUDGlobalSettingsDef::Get_Instance()->Get_Renegade_Color().Convert_To_ARGB();
+		BlipColors[ BLIP_COLOR_TYPE_PRIMARY_OBJECTIVE ] =		HUDGlobalSettingsDef::Get_Instance()->Get_Primary_Objective_Color().Convert_To_ARGB();
+		BlipColors[ BLIP_COLOR_TYPE_SECONDARY_OBJECTIVE ] =		HUDGlobalSettingsDef::Get_Instance()->Get_Secondary_Objective_Color().Convert_To_ARGB();
+		BlipColors[ BLIP_COLOR_TYPE_TERTIARY_OBJECTIVE ] =		HUDGlobalSettingsDef::Get_Instance()->Get_Tertiary_Objective_Color().Convert_To_ARGB();
 	}
 
-#if 0
-	const HUDGlobalSettingsDef * settings = HUDGlobalSettingsDef::Get_Instance();
-	float radar_texture_size = settings->RadarTextureSize;
-
-	BlipUV[ BLIP_SHAPE_TYPE_NONE ] =			RectClass( 0,0,0,0 );
-	BlipUV[ BLIP_SHAPE_TYPE_HUMAN ] =		Scale_UV( settings->RadarHumanBlipUV, radar_texture_size );
-	BlipUV[ BLIP_SHAPE_TYPE_VEHICLE ] =		Scale_UV( settings->RadarVehicleBlipUV, radar_texture_size );
-	BlipUV[ BLIP_SHAPE_TYPE_STATIONARY ] =	Scale_UV( settings->RadarStationaryBlipUV, radar_texture_size );
-	BlipUV[ BLIP_SHAPE_TYPE_OBJECTIVE ] =	Scale_UV( settings->RadarObjectiveBlipUV, radar_texture_size );
-	BlipUV[ BLIP_BRACKET ] =					Scale_UV( settings->RadarBlipBracketUV, radar_texture_size );
-	BlipUV[ BLIP_SWEEP ] =						Scale_UV( settings->RadarSweepUV, radar_texture_size );
-#else
 	BlipUV[ BLIP_SHAPE_TYPE_NONE ] =		RectClass( 0,0,0,0 );
 	BlipUV[ BLIP_SHAPE_TYPE_HUMAN ] =		RectClass( RADAR_CIRCLE_UV_UL, RADAR_CIRCLE_UV_LR );
 	BlipUV[ BLIP_SHAPE_TYPE_VEHICLE ] =		RectClass( RADAR_TRIANGLE_UV_UL, RADAR_TRIANGLE_UV_LR );
@@ -192,7 +168,6 @@ void 	RadarManager::Init()
 	BlipUV[ BLIP_SHAPE_TYPE_OBJECTIVE ].Scale( INFO_UV_SCALE );
 	BlipUV[ BLIP_BRACKET ].Scale( INFO_UV_SCALE );
 	BlipUV[ BLIP_SWEEP ].Scale( INFO_UV_SCALE );
-#endif
 
 	// Clear radar renderer pointers, these are initialized on demand
 	for (i=0;i<8;++i) {
@@ -311,9 +286,9 @@ bool	RadarManager::Load( ChunkLoadClass &cload )
 Vector2	OldRadarCenter(0.0f,0.0f);
 Vector2	RadarCenter(0.0f,0.0f);
 float	RadarIntensity;
-long	RadarColor;
+int	RadarColor;
 
-float	RadarManager::Add_Blip( const Vector3 & pos, int shape_type, int color_type, float intensity, bool bracket, bool altitude_fade ) 
+float	RadarManager::Add_Blip( const Vector3 & pos, int shape_type, int color_type, float intensity, bool bracket, bool altitude_fade )
 {
 	if ( shape_type != BLIP_SHAPE_TYPE_NONE ) {
 
@@ -332,7 +307,7 @@ float	RadarManager::Add_Blip( const Vector3 & pos, int shape_type, int color_typ
 			}
 		}
 
-		if ( dist <= RADAR_FADE_STOP ) 
+		if ( dist <= RADAR_FADE_STOP )
 		{
 #if 0
 			// Find blip bearing
@@ -441,32 +416,16 @@ void	RadarManager::Update( const Matrix3D & player_tm, const Vector2 & center )
 	corner_offset.Normalize();						// scale to length width/2
 	corner_offset *= width;
 	RectClass uv = BlipUV[ BLIP_SWEEP ];
-	Renderer->Add_Tri( edge - corner_offset, center, edge,  
+	Renderer->Add_Tri( edge - corner_offset, center, edge,
 		uv.Lower_Left(),	uv.Upper_Right(), uv.Upper_Left(),	0xFF00FF00 & RadarColor );
 }
 #endif
 
-#if 0
-{WWPROFILE( "Compass" );
-	// Draw the compass
-	const HUDGlobalSettingsDef * settings = HUDGlobalSettingsDef::Get_Instance();
-	float radar_texture_size = settings->RadarTextureSize;
-	float	bering = WWMath::Wrap( (player_tm.Get_Z_Rotation() / DEG_TO_RAD( 360.0f )) + 0.25f, 0, 1 );
-	int frame = (int)((bering * 8.0f) + 0.5f);
-	RectClass compass( Vector2( 0, 0 ), settings->RadarCompassSize );
-//	compass += Render2DClass::Get_Screen_Resolution().Lower_Left() + settings->RadarCompassOffset;
-	compass += center + COMPASS_OFFSET;
-	RectClass compass_uv = Scale_UV( settings->RadarCompassBaseUV, radar_texture_size );
-	compass_uv += (settings->RadarCompassUVOffset/radar_texture_size) * (frame & 7);
-	Renderer->Add_Quad( compass, compass_uv, RadarColor );
-}
-
-#else
 	float	bering = WWMath::Wrap( (player_tm.Get_Z_Rotation() / DEG_TO_RAD( 360.0f )) + 0.25f, 0, 1 );
 	CurrentCompassRendererIndex = (int)((bering * 8.0f) + 0.5f);
 	CurrentCompassRendererIndex&=7;
 
-	int dir[8] = { IDS_HUD_COMPASS_N, IDS_HUD_COMPASS_NE, IDS_HUD_COMPASS_E, IDS_HUD_COMPASS_SE, 
+	int dir[8] = { IDS_HUD_COMPASS_N, IDS_HUD_COMPASS_NE, IDS_HUD_COMPASS_E, IDS_HUD_COMPASS_SE,
 						IDS_HUD_COMPASS_S, IDS_HUD_COMPASS_SW, IDS_HUD_COMPASS_W, IDS_HUD_COMPASS_NW };
 
 	// If the renderer object for this particular radar direction hasn't been created, create it now...
@@ -487,7 +446,7 @@ void	RadarManager::Update( const Matrix3D & player_tm, const Vector2 & center )
 	}
 	else {
 		// If the radar center has moved (which should never happen unless the screen size changes)
-		if (RadarCenter!=OldRadarCenter) {	
+		if (RadarCenter!=OldRadarCenter) {
 			CompassRenderers[CurrentCompassRendererIndex]->Reset();
 			CompassRenderers[CurrentCompassRendererIndex]->Build_Sentence( TRANSLATE(dir[CurrentCompassRendererIndex]));
 			Vector2 text_size=CompassRenderers[CurrentCompassRendererIndex]->Get_Text_Extents(TRANSLATE(dir[CurrentCompassRendererIndex]));
@@ -498,8 +457,6 @@ void	RadarManager::Update( const Matrix3D & player_tm, const Vector2 & center )
 			CompassRenderers[CurrentCompassRendererIndex]->Draw_Sentence();
 		}
 	}
-
-#endif
 
 
 	// Now build the blips
@@ -520,8 +477,8 @@ void	RadarManager::Update( const Matrix3D & player_tm, const Vector2 & center )
 			if ( obj->Peek_Physical_Object() == NULL ) continue;
 
 			// Don't draw dead soldiers
-			if (	obj->As_SoldierGameObj() && 
-					obj->Get_Defense_Object() && 
+			if (	obj->As_SoldierGameObj() &&
+					obj->Get_Defense_Object() &&
 					obj->Get_Defense_Object()->Get_Health() <= 0.0f ) {
 				continue;
 			}
@@ -536,7 +493,7 @@ void	RadarManager::Update( const Matrix3D & player_tm, const Vector2 & center )
 					WWASSERT(RadarMode == RADAR_TEAMMATES);
 					int other_pt = obj->Get_Player_Type();
 					int my_pt = COMBAT_STAR->Get_Player_Type();
-					if (my_pt != other_pt || 
+					if (my_pt != other_pt ||
 					   (my_pt != PLAYERTYPE_NOD && my_pt != PLAYERTYPE_GDI)) {
 						continue;
 					}
@@ -677,9 +634,9 @@ bool	RadarMarkerClass::Save( ChunkSaveClass & csave )
 {
 	csave.Begin_Chunk( CHUNKID_VARIABLES );
 		WRITE_MICRO_CHUNK( csave, 	MICROCHUNKID_ID, ID );
-		WRITE_MICRO_CHUNK( csave, 	MICROCHUNKID_POSITION, Position );                    
-		WRITE_MICRO_CHUNK( csave, 	MICROCHUNKID_TYPE, Type );                  
-		WRITE_MICRO_CHUNK( csave, 	MICROCHUNKID_COLOR, Color );                  
+		WRITE_MICRO_CHUNK( csave, 	MICROCHUNKID_POSITION, Position );
+		WRITE_MICRO_CHUNK( csave, 	MICROCHUNKID_TYPE, Type );
+		WRITE_MICRO_CHUNK( csave, 	MICROCHUNKID_COLOR, Color );
 	csave.End_Chunk();
 
 	return true;
@@ -694,9 +651,9 @@ bool	RadarMarkerClass::Load( ChunkLoadClass &cload )
 				while (cload.Open_Micro_Chunk()) {
 					switch(cload.Cur_Micro_Chunk_ID()) {
 						READ_MICRO_CHUNK( cload, 	MICROCHUNKID_ID, ID );
-						READ_MICRO_CHUNK( cload, 	MICROCHUNKID_POSITION, Position );                    
-						READ_MICRO_CHUNK( cload, 	MICROCHUNKID_TYPE, Type );                  
-						READ_MICRO_CHUNK( cload, 	MICROCHUNKID_COLOR, Color );                  
+						READ_MICRO_CHUNK( cload, 	MICROCHUNKID_POSITION, Position );
+						READ_MICRO_CHUNK( cload, 	MICROCHUNKID_TYPE, Type );
+						READ_MICRO_CHUNK( cload, 	MICROCHUNKID_COLOR, Color );
 
 						default:
 							Debug_Say(("Unhandled Chunk:%d File:%s Line:%d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));

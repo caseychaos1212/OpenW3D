@@ -41,7 +41,7 @@
 #include "RefPtr.h"
 #include "WaitCondition.h"
 
-namespace WOL 
+namespace WOL
 {
 #include <wolapi/WOLAPI.h>
 }
@@ -64,10 +64,10 @@ class Download :
 		bool IsDone(void) const;
 		void Process(void);
 
-		unsigned long GetSKU(void) const
+		unsigned int GetSKU(void) const
 			{return mWOLUpdate.SKU;}
 
-		unsigned long GetVersion(void) const
+		unsigned int GetVersion(void) const
 			{return mWOLUpdate.version;}
 
 		bool IsRequired(void) const
@@ -94,12 +94,12 @@ class Download :
 		int GetStatusCode(void) const
 			{return mStatusCode;}
 
-		const wchar_t* GetStatusText(void) const;
+		const unichar_t* GetStatusText(void) const;
 
 		int GetErrorCode(void) const
 			{return mErrorCode;}
 
-		const wchar_t* GetErrorText(void) const;
+		const unichar_t* GetErrorText(void) const;
 
 		void GetProgress(int& bytesRead, int& totalSize, int& timeElapsed, int& timeRemaining) const;
 
@@ -124,7 +124,7 @@ class Download :
 		WOL::Update mWOLUpdate;
 
 		CComPtr<WOL::IDownload> mDownloadObject;
-		unsigned long mDownloadCookie;
+		DWORD mDownloadCookie;
 
 		DLState mState;
 
@@ -210,14 +210,14 @@ class DownloadWait :
 		static RefPtr<DownloadWait> Create(const DownloadList& files);
 
 		void WaitBeginning(void) override;
-		
+
 		WaitResult GetResult(void) override;
 
-		void EndWait(WaitResult, const wchar_t*) override;
+		void EndWait(WaitResult, const unichar_t*) override;
 
 		void SetCallback(DownloadWaitCallback callback, void *userdata);
 
-		unsigned int GetDownloadCount(void) const
+		size_t GetDownloadCount(void) const
 			{return mFiles.size();}
 
 		const RefPtr<Download>& GetCurrentDownload(void) const

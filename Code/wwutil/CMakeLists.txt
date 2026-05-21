@@ -4,7 +4,14 @@ set(WWUTIL_SRC
     mathutil.h
     miscutil.cpp
     miscutil.h
-    stackdump.cpp
+    ProcessManager.cpp
+    ProcessManager.h
+    pathutil.cpp
+    pathutil.h
+    soutil.cpp
+    soutil.h
+    $<$<BOOL:${WIN32}>:stackdump-windows.cpp>
+    $<$<BOOL:${LINUX}>:stackdump-linux.cpp>
     stackdump.h
 )
 
@@ -14,5 +21,8 @@ add_library(wwutil STATIC)
 target_link_libraries(wwutil PRIVATE
     wwcommon
 )
+if(W3D_BUILD_OPTION_SDL3)
+    target_link_libraries(wwutil PRIVATE SDL3::SDL3-shared)
+endif()
 
 target_sources(wwutil PRIVATE ${WWUTIL_SRC})

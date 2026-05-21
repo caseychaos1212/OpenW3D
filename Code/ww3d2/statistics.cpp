@@ -94,7 +94,7 @@ static void Record_Texture_End()
 	texture_statistics_string="";
 	if (record_texture_mode==Debug_Statistics::RECORD_TEXTURE_DETAILS) {
 		char tmp_text[1024];
-		_snprintf(tmp_text,sizeof(tmp_text),
+		snprintf(tmp_text,sizeof(tmp_text),
 			"Set_DX8_Texture count: %d\nactual changes: %d\n\n"
 			"id      refs changes  size      name\n"
 			"--------------------------------------\n",
@@ -175,7 +175,7 @@ static bool Find_Record_Texture(TextureClass* t)
 					texture_statistics[a].change_count++;
 				}
 			}
-		
+
 			return true;
 		}
 	}

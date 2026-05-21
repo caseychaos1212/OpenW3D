@@ -35,7 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgevaencyclopedia.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "tabctrl.h"
 #include "dlgevaobjectivestab.h"
 #include "dlgevamaptab.h"
@@ -74,7 +74,7 @@ int								EVAEncyclopediaMenuClass::_NextTabIndex = -4;
 //
 ////////////////////////////////////////////////////////////////
 EVAEncyclopediaMenuClass::EVAEncyclopediaMenuClass (void)	:
-	MenuDialogClass (IDD_MENU_EVA_ENCYCLOPEDIA)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MENU_EVA_ENCYCLOPEDIA))
 {
 	_TheInstance = this;
 	return ;
@@ -204,7 +204,7 @@ EVAEncyclopediaMenuClass::On_Destroy (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-EVAEncyclopediaMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+EVAEncyclopediaMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	bool allow_default_processing = true;
 
@@ -274,7 +274,7 @@ EVAEncyclopediaMenuClass::Prompt_User (void)
 	//
 	//	Display the message box
 	//
-	DlgMsgBox::DoDialog (TRANSLATE (IDS_MENU_TEXT054), TRANSLATE (IDS_EXIT_GAME_VERIFICATION), DlgMsgBox::YesNo, this);	
+	DlgMsgBox::DoDialog (TRANSLATE (IDS_MENU_TEXT054), TRANSLATE (IDS_EXIT_GAME_VERIFICATION), DlgMsgBox::YesNo, this);
 	return ;
 }
 

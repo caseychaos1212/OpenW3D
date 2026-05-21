@@ -43,8 +43,8 @@
 
 
 #include "menudialog.h"
-#include "resource.h"
 #include "childdialog.h"
+#include "renegadedialog.h"
 #include <wwlib/vector.h>
 #include <wwlib/Signaler.h>
 
@@ -81,7 +81,7 @@ public:
 	////////////////////////////////////////////////////////////////
 	void		On_Init_Dialog (void) override;
 	void		On_Periodic(void) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 
 	void		Enable_Mod_Selection (bool onoff);
 
@@ -97,7 +97,7 @@ private:
 	//	Private member data
 	////////////////////////////////////////////////////////////////
 	bool											mStartTheGame;
-	unsigned long								mClanID;
+	unsigned int								mClanID;
 	MPLanHostMapCycleOptionsTabClass *	MapCycleDialog;
 };
 
@@ -164,7 +164,7 @@ public:
 	////////////////////////////////////////////////////////////////
 	void		On_Init_Dialog (void) override;
 	bool		On_Apply (void) override;
-	void		On_Command (int ctrl_id, int message_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int message_id, unsigned int param) override;
 	void		HandleNotification(DlgMsgBoxEvent&) override;
 
 protected:
@@ -207,7 +207,7 @@ public:
 	////////////////////////////////////////////////////////////////
 	void		On_Init_Dialog (void) override;
 	bool		On_Apply (void) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 	void		On_ListCtrl_DblClk (ListCtrlClass *list_ctrl, int ctrl_id, int item_index) override;
 	void		On_ComboBoxCtrl_Sel_Change (ComboBoxCtrlClass *combo_ctrl, int ctrl_id, int old_sel, int new_sel) override;
 
@@ -255,7 +255,7 @@ public:
 	////////////////////////////////////////////////////////////////
 	void		On_Init_Dialog (void) override;
 	bool		On_Apply (void) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 
 private:
 
@@ -284,7 +284,7 @@ public:
 	//	Public constructors/destructors
 	////////////////////////////////////////////////////////////////
 	MPLanHostCTFOptionsTabClass (void)	:
-		ChildDialogClass (IDD_MP_LAN_HOST_OPTIONS_CTF_SETTINGS)	{}
+		ChildDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_LAN_HOST_OPTIONS_CTF_SETTINGS))	{}
 
 	////////////////////////////////////////////////////////////////
 	//	Public methods
@@ -307,7 +307,7 @@ public:
 	//	Public constructors/destructors
 	////////////////////////////////////////////////////////////////
 	MPLanHostCnCOptionsTabClass (void)	:
-		ChildDialogClass (IDD_MP_LAN_HOST_OPTIONS_CNC_SETTINGS)	{}
+		ChildDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_LAN_HOST_OPTIONS_CNC_SETTINGS))	{}
 
 	////////////////////////////////////////////////////////////////
 	//	Public methods

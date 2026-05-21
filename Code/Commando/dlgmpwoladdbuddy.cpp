@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgmpwoladdbuddy.h"
+#include "renegadedialog.h"
 #include "WOLBuddyMgr.h"
 #include "WOLLogonMgr.h"
 #include "DlgMessageBox.h"
@@ -50,7 +51,7 @@
 //
 ////////////////////////////////////////////////////////////////
 MPWolAddBuddyPopupClass::MPWolAddBuddyPopupClass (void)	:
-	PopupDialogClass (IDD_MP_WOL_ADD_BUDDY)
+	PopupDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_ADD_BUDDY))
 {
 	WWDEBUG_SAY(("MPWolAddBuddyPopupClass: Instantiated\n"));
 	mBuddyMgr = WOLBuddyMgr::GetInstance(false);
@@ -115,7 +116,7 @@ void MPWolAddBuddyPopupClass::On_Activate (bool onoff)
 //
 ////////////////////////////////////////////////////////////////
 void
-MPWolAddBuddyPopupClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MPWolAddBuddyPopupClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
@@ -149,7 +150,7 @@ MPWolAddBuddyPopupClass::Add_Buddy (void)
 			mBuddyMgr->AddBuddy(buddy_name);
 			End_Dialog();
 		} else {
-			Set_Dlg_Item_Text(IDC_BUDDY_NAME_EDIT, L"");
+			Set_Dlg_Item_Text(IDC_BUDDY_NAME_EDIT, U_CHAR(""));
 			Enable_Dlg_Item(IDC_ADD_BUTTON, false);
 
 			DlgMsgBox::DoDialog(TRANSLATE (IDS_MENU_ERROR), TRANSLATE (IDS_MENU_CANT_ADD_AS_BUDDY_MESSAGE));
@@ -175,7 +176,7 @@ void MPWolAddBuddyPopupClass::On_EditCtrl_Change(EditCtrlClass* edit, int id)
 }
 
 
-void MPWolAddBuddyPopupClass::On_EditCtrl_Enter_Pressed(EditCtrlClass* edit, int id)
+void MPWolAddBuddyPopupClass::On_EditCtrl_Enter_Pressed(EditCtrlClass* /* edit */, int id)
 {
 	if (IDC_BUDDY_NAME_EDIT == id) {
 		Add_Buddy();

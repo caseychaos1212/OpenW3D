@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Command & Conquer                                            * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Tools/pluglib/jshell.cpp                     $* 
- *                                                                                             * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Command & Conquer                                            *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Tools/pluglib/jshell.cpp                     $*
+ *                                                                                             *
  *                      $Author:: Greg_h                                                      $*
- *                                                                                             * 
+ *                                                                                             *
  *                     $Modtime:: 11/07/00 2:32p                                              $*
- *                                                                                             * 
+ *                                                                                             *
  *                    $Revision:: 28                                                          $*
  *                                                                                             *
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  *   Fatal -- General purpose fatal error handler.                                             *
  *   Set_Bit -- Set bit in a bit array.                                                        *
  *   Get_Bit -- Fetch the bit value from a bit array.                                          *
@@ -50,7 +50,7 @@
  * INPUT:   array -- Pointer to the bit array.                                                 *
  *                                                                                             *
  *          bit   -- The bit number to set. I.e., bit 32 is the first bit in the second        *
- *                   long word of memory.                                                      *
+ *                   int word of memory.                                                      *
  *                                                                                             *
  *          value -- The value to set the bit. The only values supported are 0 and 1.          *
  *                                                                                             *

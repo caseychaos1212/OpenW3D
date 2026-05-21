@@ -34,8 +34,8 @@
 ******************************************************************************/
 
 #include "DlgWOLWait.h"
+#include "renegadedialog.h"
 #include "DlgMessageBox.h"
-#include "resource.h"
 #include "string_ids.h"
 #include <WWOnline/WOLSession.h>
 #include <wwui/mousemgr.h>
@@ -65,8 +65,8 @@ DlgWOLWait* DlgWOLWait::mTheInstance = NULL;
 *
 ******************************************************************************/
 
-bool DlgWOLWait::DoDialog(const wchar_t* title, RefPtr<WaitCondition>& wait,
-			Observer<DlgWOLWaitEvent>* observer, unsigned long timeout, unsigned long dialog_timeout)
+bool DlgWOLWait::DoDialog(const unichar_t* title, RefPtr<WaitCondition>& wait,
+			Observer<DlgWOLWaitEvent>* observer, unsigned int timeout, unsigned int dialog_timeout)
 	{
 	if (wait.IsValid())
 		{
@@ -110,8 +110,8 @@ bool DlgWOLWait::DoDialog(const wchar_t* title, RefPtr<WaitCondition>& wait,
 *
 ******************************************************************************/
 
-bool DlgWOLWait::DoDialog(const wchar_t* title, const wchar_t* button_text, RefPtr<WaitCondition>& wait,
-			Observer<DlgWOLWaitEvent>* observer, unsigned long timeout, unsigned long dialog_timeout)
+bool DlgWOLWait::DoDialog(const unichar_t* title, const unichar_t* button_text, RefPtr<WaitCondition>& wait,
+			Observer<DlgWOLWaitEvent>* observer, unsigned int timeout, unsigned int dialog_timeout)
 	{
 	if (wait.IsValid())
 		{
@@ -157,9 +157,9 @@ bool DlgWOLWait::DoDialog(const wchar_t* title, const wchar_t* button_text, RefP
 ******************************************************************************/
 
 bool DlgWOLWait::DoDialog(int titleID, RefPtr<WaitCondition>& wait,
-			Observer<DlgWOLWaitEvent>* observer, unsigned long timeout, unsigned long dialog_timeout)
+			Observer<DlgWOLWaitEvent>* observer, unsigned int timeout, unsigned int dialog_timeout)
 	{
-	const wchar_t* title = TranslateDBClass::Get_String(titleID);
+	const unichar_t* title = TranslateDBClass::Get_String(titleID);
 	return DoDialog(title, wait, observer, timeout, dialog_timeout);
 	}
 
@@ -180,8 +180,8 @@ bool DlgWOLWait::DoDialog(int titleID, RefPtr<WaitCondition>& wait,
 *
 ******************************************************************************/
 
-DlgWOLWait::DlgWOLWait(RefPtr<WaitCondition>& wait, unsigned long timeout, unsigned long dialog_timeout) :
-		PopupDialogClass(IDD_WOL_WAIT),
+DlgWOLWait::DlgWOLWait(RefPtr<WaitCondition>& wait, unsigned int timeout, unsigned int dialog_timeout) :
+		PopupDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_WOL_WAIT)),
 		mWait(wait),
 		mStartTime(0),
 		mTimeout(timeout),
@@ -276,7 +276,7 @@ void DlgWOLWait::On_Init_Dialog(void)
 
 void DlgWOLWait::On_Destroy(void)
 	{
-	WWDEBUG_SAY(("DlgWOLWait: Ending dialog '%S'\n", (const wchar_t*)Title));
+	WWDEBUG_SAY(("DlgWOLWait: Ending dialog '%S'\n", (const unichar_t*)Title));
 
 	if (!mShowDialog && mDialogTimeout != SHOW_NEVER)
 		{
@@ -361,7 +361,7 @@ void DlgWOLWait::CheckCondition(void)
 		}
 
 	// Change the waiting text if necessary.
-	const wchar_t* text = Get_Dlg_Item_Text(IDC_WAITTEXT);
+	const unichar_t* text = Get_Dlg_Item_Text(IDC_WAITTEXT);
 	const WideStringClass& waitText = mWait->GetWaitText();
 
 	if (waitText.Compare_No_Case(text) != 0)
@@ -371,9 +371,9 @@ void DlgWOLWait::CheckCondition(void)
 		}
 
 	// Watch for timeout
-	unsigned long currTime = TIMEGETTIME();
-	unsigned long timeout = mTimeout;
-	unsigned long dialog_timeout = mDialogTimeout;
+	unsigned int currTime = TIMEGETTIME();
+	unsigned int timeout = mTimeout;
+	unsigned int dialog_timeout = mDialogTimeout;
 
 	if (dialog_timeout == 0)
 		{
@@ -422,11 +422,11 @@ void DlgWOLWait::CheckCondition(void)
 *
 ******************************************************************************/
 
-void DlgWOLWait::On_Command(int ctrl, int message, DWORD param)
+void DlgWOLWait::On_Command(int ctrl, int /* message */, unsigned int /* param */)
 	{
 	if ((ctrl == IDCANCEL) && mWait.IsValid())
 		{
-		WWDEBUG_SAY(("DlgWOLWait: UserAborted '%S'\n", (const wchar_t*)mWait->GetWaitText()));
+		WWDEBUG_SAY(("DlgWOLWait: UserAborted '%S'\n", (const unichar_t*)mWait->GetWaitText()));
 		mWait->EndWait(WaitCondition::UserCancel, TRANSLATE(IDS_WOL_CANCELED));
 		}
 	}

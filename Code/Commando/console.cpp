@@ -224,7 +224,7 @@ void 	ConsoleGameModeClass::Think()
 
       if (enable_console) {
 		   InputActive = true;
-         PromptLength = strlen(InputLine);
+         PromptLength = ::strlen(InputLine);
 		   Input::Console_Enable();
 			Clear_Suggestion();
       }
@@ -242,14 +242,14 @@ WWPROFILE( "Input Active" );
 
 		while ( key ) {
 
-			int len = strlen( InputLine ) ;
+			size_t len = ::strlen( InputLine );
 
 			switch( key ) {
 
 				case ENTER_KEY:
 					if (ConsoleInputType == INPUT_FUNCTION_BEGIN_CONSOLE) {
 						Accept_Suggestion(InputLine + PromptLength);
-						len = strlen(InputLine);
+						len = ::strlen(InputLine);
 						Clear_Suggestion();
 					}
 					//Parse_Input( InputLine );
@@ -283,11 +283,11 @@ WWPROFILE( "Input Active" );
 					// Accept any suggested command line completion and fall through to default
 					if (ConsoleInputType == INPUT_FUNCTION_BEGIN_CONSOLE) {
 						Accept_Suggestion(InputLine + PromptLength);
-						len = strlen(InputLine);
+						len = ::strlen(InputLine);
 					}
 
 				default:
-					if ( len + 1 < MAX_INPUT_LINE_LENGTH) {
+					if ( len + 1 < static_cast<size_t>(MAX_INPUT_LINE_LENGTH)) {
 						InputLine[ len++ ] = key;
 						InputLine[ len ] = 0;
 
@@ -1555,7 +1555,7 @@ void	ConsoleGameModeClass::End_Profile_Log()
 	WWDEBUG_SAY(("\n\n"));
 	node=profile_log_head;
 	while (node) {
-		WWDEBUG_SAY(("%s\n",node->Get_String()));
+		WWDEBUG_SAY(("%s\n",node->Get_String().Peek_Buffer()));
 		node=node->Succ();
 	}
 
@@ -1710,18 +1710,18 @@ void	ConsoleGameModeClass::Update_Memory_Log( void )
 	const float OOMEGABYTE = 1.0f / MEGABYTE;
 
 	StringClass	memory_string(2048);
-	StringClass working_string(true);
+	StringClass temp_string(true);
 
 	memory_string.Format("Memory Category     Current(Mb)    Peak(Mb)\n");
 	int total = 0;
 	for (int i=0; i<WWMemoryLogClass::Get_Category_Count(); i++) {
 
 		// (gth) to compute Mb should I divide by the nearest power of two to a million?
-		working_string.Format("%-18s  %-10.2f     %-10.2f\r\n",
+		temp_string.Format("%-18s  %-10.2f     %-10.2f\r\n",
 										WWMemoryLogClass::Get_Category_Name(i),
 										(float)WWMemoryLogClass::Get_Current_Allocated_Memory(i) * OOMEGABYTE,
 										(float)WWMemoryLogClass::Get_Peak_Allocated_Memory(i) * OOMEGABYTE);
-		memory_string += working_string;
+		memory_string += temp_string;
 		total += WWMemoryLogClass::Get_Current_Allocated_Memory(i);
 	}
 
@@ -1732,30 +1732,30 @@ void	ConsoleGameModeClass::Update_Memory_Log( void )
 	memory_string += working_string;
 #endif
 
-	working_string.Format("SUB TOTAL:          %-10.2f\r\n\r\n",(float)total * OOMEGABYTE);
-	memory_string += working_string;
+	temp_string.Format("SUB TOTAL:          %-10.2f\r\n\r\n",(float)total * OOMEGABYTE);
+	memory_string += temp_string;
 
 	// display the estimated space used by textures residing in system ram
 	int tex_size=TextureClass::_Get_Total_Texture_Size();
-	working_string.Format("%-18s  %-10.2f\r\n","Textures(est)",(float)tex_size * OOMEGABYTE);
-	memory_string += working_string;
+	temp_string.Format("%-18s  %-10.2f\r\n","Textures(est)",(float)tex_size * OOMEGABYTE);
+	memory_string += temp_string;
 	total+=tex_size;
 
 	// display estimated vertex buffer space
 	unsigned vb_size=VertexBufferClass::Get_Total_Allocated_Memory();
-	working_string.Format("%-18s  %-10.2f\r\n","Vertex Buffers(est)",(float)vb_size * OOMEGABYTE);
-	memory_string += working_string;
+	temp_string.Format("%-18s  %-10.2f\r\n","Vertex Buffers(est)",(float)vb_size * OOMEGABYTE);
+	memory_string += temp_string;
 	total+=vb_size;
 
 	// display estimated index buffer space
 	unsigned ib_size=IndexBufferClass::Get_Total_Allocated_Memory();
-	working_string.Format("%-18s  %-10.2f\r\n","Index Buffers(est)",(float)ib_size * OOMEGABYTE);
-	memory_string += working_string;
+	temp_string.Format("%-18s  %-10.2f\r\n","Index Buffers(est)",(float)ib_size * OOMEGABYTE);
+	memory_string += temp_string;
 	total+=ib_size;
 
 	// total!
-	working_string.Format("TOTAL:              %-10.2f\r\n\r\n",(float)total * OOMEGABYTE);
-	memory_string += working_string;
+	temp_string.Format("TOTAL:              %-10.2f\r\n\r\n",(float)total * OOMEGABYTE);
+	memory_string += temp_string;
 
 	StatisticsDisplayManager::Set_Stat( "memory", memory_string, 0xffffffff );
 }

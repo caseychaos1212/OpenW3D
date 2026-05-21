@@ -87,7 +87,7 @@ public:
 		const TCHAR *  name,
 		ImpInterface * i,
 		Interface *    gi,
-		BOOL				suppressPrompts=FALSE
+		BOOL				suppressPrompts=false
 	);
 };
 
@@ -95,7 +95,7 @@ public:
 // DllMain
 //----------------------------------------------------------------------------
 
-static int         controlsInit = FALSE;
+static int         controlsInit = false;
 
 BOOL WINAPI        DllMain
 (
@@ -108,7 +108,7 @@ BOOL WINAPI        DllMain
 
 	if ( !controlsInit )
 	{
-		controlsInit = TRUE;
+		controlsInit = true;
 		InitCustomControls(hInstance);
 		InitCommonControls();
 	}
@@ -120,7 +120,7 @@ BOOL WINAPI        DllMain
 		case DLL_PROCESS_DETACH: break;
 	}
 
-	return TRUE;
+	return true;
 }
 
 
@@ -132,7 +132,7 @@ class ASF_ClassDesc : public ClassDesc
 {
 public:
 	int 			IsPublic()     { return 1; }
-	void *			Create(BOOL loading = FALSE) { return new ASF_Import; }
+	void *			Create(BOOL loading = false) { return new ASF_Import; }
 	const TCHAR *	ClassName()    { return GetString(IDS_SHORT_DESC); }
 	SClass_ID		SuperClassID() { return SCENE_IMPORT_CLASS_ID; }
 	Class_ID		ClassID()      { return Class_ID(0x74975aa6, 0x1810323f); }
@@ -194,7 +194,7 @@ const TCHAR *      ASF_Import::LongDesc()
 {
 	return GetString(IDS_LONG_DESC);
 }
-	
+
 const TCHAR *      ASF_Import::ShortDesc()
 {
 	return GetString(IDS_SHORT_DESC);
@@ -267,14 +267,14 @@ int                ASF_Import::DoImport
 	const TCHAR *  filename,
 	ImpInterface * iface,
 	Interface *    gi,
-	BOOL 
+	BOOL
 )
 {
 	int status;
 
 	status = asf_load ( filename, iface, gi );
 	if(status == 0)
-		status = IMPEXP_CANCEL;	
+		status = IMPEXP_CANCEL;
 
 	return (status <= 0) ? IMPEXP_FAIL : status;
 }

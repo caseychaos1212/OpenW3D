@@ -35,7 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgmpwollocalenag.h"
-#include "resource.h"
+#include "renegadedialog.h"
 #include "wollocalemgr.h"
 #include "comboboxctrl.h"
 
@@ -46,7 +46,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 MPWolLocaleNagDialogClass::MPWolLocaleNagDialogClass (void)	:
-	PopupDialogClass (IDD_MP_WOL_LOCALE_NAG)
+	PopupDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_LOCALE_NAG))
 {
 	return ;
 }
@@ -70,7 +70,7 @@ MPWolLocaleNagDialogClass::~MPWolLocaleNagDialogClass (void)
 //////////////////////////////////////////////////////////////////////
 void
 MPWolLocaleNagDialogClass::On_Init_Dialog (void)
-{	
+{
 	//
 	//	Fill the combobox with all the locales
 	//
@@ -90,10 +90,10 @@ MPWolLocaleNagDialogClass::On_Init_Dialog (void)
 //
 //////////////////////////////////////////////////////////////////////
 void
-MPWolLocaleNagDialogClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MPWolLocaleNagDialogClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	if (ctrl_id == IDOK) {
-		
+
 		//
 		//	Get the selected locale from the combobox
 		//

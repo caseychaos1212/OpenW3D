@@ -43,7 +43,6 @@
 
 
 #include "popupdialog.h"
-#include "resource.h"
 #include "WOLBuddyMgr.h"
 
 ////////////////////////////////////////////////////////////////
@@ -55,10 +54,10 @@ class MPWolIgnoreListPopupClass : public PopupDialogClass,
 	public Observer<WOLBuddyMgrEvent>
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	MPWolIgnoreListPopupClass (void);
 	~MPWolIgnoreListPopupClass();
 
@@ -66,7 +65,7 @@ public:
 	//	Public methods
 	////////////////////////////////////////////////////////////////
 	void		On_Init_Dialog (void) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 
 protected:
 

@@ -49,7 +49,7 @@ CWWConfigDlg::CWWConfigDlg (CWnd *pParent)
 	//{{AFX_DATA_INIT(CWWConfigDlg)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
-	
+
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	return ;
 }
@@ -94,8 +94,8 @@ CWWConfigDlg::OnInitDialog (void)
 
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
-	SetIcon (m_hIcon, TRUE);
-	SetIcon (m_hIcon, FALSE);
+	SetIcon (m_hIcon, true);
+	SetIcon (m_hIcon, false);
 
 	//
 	// Set Title of Dialog.
@@ -146,26 +146,26 @@ CWWConfigDlg::OnInitDialog (void)
 	//
 	CRect tab_rect;
 	m_TabCtrl.GetWindowRect (&tab_rect);
-	m_TabCtrl.AdjustRect (FALSE, &tab_rect);
+	m_TabCtrl.AdjustRect (false, &tab_rect);
 	ScreenToClient (&tab_rect);
 
 	VideoConfigDialogClass			*video_page = new VideoConfigDialogClass (this);
 	AudioConfigDialogClass			*audio_page = new AudioConfigDialogClass (this);
 	PerformanceConfigDialogClass	*performance_page = new PerformanceConfigDialogClass (this);
 
-	video_page->SetWindowPos		( NULL, tab_rect.left, tab_rect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);	
+	video_page->SetWindowPos		( NULL, tab_rect.left, tab_rect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 	audio_page->SetWindowPos		( NULL, tab_rect.left, tab_rect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-	performance_page->SetWindowPos	( NULL, tab_rect.left, tab_rect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);	
+	performance_page->SetWindowPos	( NULL, tab_rect.left, tab_rect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 
 	ConfigPages.Add ( video_page );
 	ConfigPages.Add ( audio_page );
 	ConfigPages.Add ( performance_page );
-	
+
 	//
 	//	Display the first category page
 	//
 	ConfigPages[0]->ShowWindow( SW_SHOW );
-	return TRUE;
+	return true;
 }
 
 
@@ -175,7 +175,7 @@ CWWConfigDlg::OnInitDialog (void)
 //
 ///////////////////////////////////////////////////////////////////
 void
-CWWConfigDlg::OnPaint (void) 
+CWWConfigDlg::OnPaint (void)
 {
 	if (IsIconic())
 	{
@@ -221,7 +221,7 @@ CWWConfigDlg::OnQueryDragIcon (void)
 //
 ///////////////////////////////////////////////////////////////////
 void
-CWWConfigDlg::OnOK (void) 
+CWWConfigDlg::OnOK (void)
 {
 	GlobalExitValue=0;
 	//
@@ -244,7 +244,7 @@ CWWConfigDlg::OnOK (void)
 void
 CWWConfigDlg::OnSelchangeTabCtrl
 (
-	NMHDR *		pNMHDR,
+	NMHDR *		/* pNMHDR */,
 	LRESULT *	pResult
 )
 {
@@ -255,7 +255,7 @@ CWWConfigDlg::OnSelchangeTabCtrl
 	//
 	int newtab = m_TabCtrl.GetCurSel ();
 	if (CurrentTab != newtab) {
-		
+
 		//
 		// Hide the old tab
 		//
@@ -280,7 +280,7 @@ CWWConfigDlg::OnSelchangeTabCtrl
 }
 
 
-void CWWConfigDlg::OnCancel() 
+void CWWConfigDlg::OnCancel()
 {
 	// TODO: Add extra cleanup here
 	GlobalExitValue=1;

@@ -56,7 +56,7 @@ class MouseModeClass
 
 		virtual ~MouseModeClass (void) { }
 
-		
+
 		///////////////////////////////////////////////////
 		//	Public methods
 		///////////////////////////////////////////////////
@@ -64,7 +64,7 @@ class MouseModeClass
 		//
 		//	Mouse message handlers
 		//
-		virtual void					Handle_LButton_Dblclk (UINT flags, CPoint point) { }
+		virtual void					Handle_LButton_Dblclk (UINT /* flags */, CPoint /* point */) { }
 		virtual void					Handle_LButton_Down (UINT flags, CPoint point);
 		virtual void					Handle_LButton_Up (UINT flags, CPoint point);
 		virtual void					Handle_RButton_Down (UINT flags, CPoint point);
@@ -84,7 +84,7 @@ class MouseModeClass
 		///////////////////////////////////////////////////
 		//	Protected member data
 		///////////////////////////////////////////////////
-		
+
 		CPoint							m_LastMousePoint;
 		CPoint							m_MousePoint;
 		bool								m_bUpdate;
@@ -223,7 +223,7 @@ public:
 	virtual void			Handle_LButton_Down (UINT flags, CPoint point);
 	virtual void			Handle_LButton_Up (UINT flags, CPoint point);
 	virtual void			Handle_RButton_Down (UINT flags, CPoint point);
-	virtual void			Handle_RButton_Up (UINT flags, CPoint point);	
+	virtual void			Handle_RButton_Up (UINT flags, CPoint point);
 
 	virtual void			On_Mode_Set (void);
 	virtual void			On_Mode_Exit (void);
@@ -245,7 +245,7 @@ public:
 	MMObjectDropClass (void)				{ }
 	virtual ~MMObjectDropClass (void)	{ }
 
-	
+
 	///////////////////////////////////////////////////
 	//	Public methods
 	///////////////////////////////////////////////////
@@ -253,10 +253,10 @@ public:
 	//
 	//	Mouse message handlers
 	//
-	virtual void					Handle_LButton_Down (UINT flags, CPoint point)	{ }
-	virtual void					Handle_LButton_Up (UINT flags, CPoint point)		{ }
-	virtual void					Handle_RButton_Down (UINT flags, CPoint point)	{ }
-	virtual void					Handle_RButton_Up (UINT flags, CPoint point)		{ }
+	virtual void					Handle_LButton_Down (UINT /* flags */, CPoint /* point */)	{ }
+	virtual void					Handle_LButton_Up (UINT /* flags */, CPoint /* point */)		{ }
+	virtual void					Handle_RButton_Down (UINT /* flags */, CPoint /* point */)	{ }
+	virtual void					Handle_RButton_Up (UINT /* flags */, CPoint /* point */)		{ }
 };
 
 
@@ -286,7 +286,7 @@ public:
 
 	virtual ~MMObjectManipulateClass (void) { }
 
-	
+
 	///////////////////////////////////////////////////
 	//	Public methods
 	///////////////////////////////////////////////////
@@ -361,7 +361,7 @@ public:
 	MMObjectSelectClass (void) {}
 	virtual ~MMObjectSelectClass (void) {}
 
-	
+
 	///////////////////////////////////////////////////
 	//	Public methods
 	///////////////////////////////////////////////////
@@ -369,10 +369,10 @@ public:
 	//
 	//	Mouse message handlers
 	//
-	virtual void					Handle_LButton_Down (UINT flags, CPoint point)	{ }
-	virtual void					Handle_LButton_Up (UINT flags, CPoint point)		{ }
-	virtual void					Handle_RButton_Down (UINT flags, CPoint point)	{ }
-	virtual void					Handle_RButton_Up (UINT flags, CPoint point)		{ }
+	virtual void					Handle_LButton_Down (UINT /* flags */, CPoint /* point */)	{ }
+	virtual void					Handle_LButton_Up (UINT /* flags */, CPoint /* point */)		{ }
+	virtual void					Handle_RButton_Down (UINT /* flags */, CPoint /* point */)	{ }
+	virtual void					Handle_RButton_Up (UINT /* flags */, CPoint /* point */)		{ }
 };
 
 
@@ -399,7 +399,7 @@ public:
 
 	virtual ~MMWaypathEditClass (void) { }
 
-	
+
 	///////////////////////////////////////////////////
 	//	Public methods
 	///////////////////////////////////////////////////
@@ -457,7 +457,7 @@ public:
 
 	virtual ~MMGrabHandleDragClass (void) {}
 
-	
+
 	///////////////////////////////////////////////////
 	//	Public methods
 	///////////////////////////////////////////////////
@@ -465,11 +465,11 @@ public:
 	//
 	//	Mouse message handlers
 	//
-	virtual void					Handle_LButton_Dblclk (UINT flags, CPoint point) {}
-	virtual void					Handle_LButton_Down (UINT flags, CPoint point) {}
+	virtual void					Handle_LButton_Dblclk (UINT /* flags */, CPoint /* point */) {}
+	virtual void					Handle_LButton_Down (UINT /* flags */, CPoint /* point */) {}
 	virtual void					Handle_LButton_Up (UINT flags, CPoint point);
-	virtual void					Handle_RButton_Down (UINT flags, CPoint point) {}
-	virtual void					Handle_RButton_Up (UINT flags, CPoint point) {}
+	virtual void					Handle_RButton_Down (UINT /* flags */, CPoint /* point */) {}
+	virtual void					Handle_RButton_Up (UINT /* flags */, CPoint /* point */) {}
 	virtual void					Handle_Mouse_Move (UINT flags, CPoint point);
 	virtual void					On_Mode_Set (void) { m_Node = NULL; }
 
@@ -561,7 +561,7 @@ private:
 
 	///////////////////////////////////////////////////
 	//	Private member data
-	///////////////////////////////////////////////////	
+	///////////////////////////////////////////////////
 	class MouseModeClass *	m_pModeObjects[MOUSE_MODE::MODE_COUNT];
 	MOUSE_MODE					m_MouseMode;
 

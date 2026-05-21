@@ -34,6 +34,7 @@
  * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include "renegadedialog.h"
 #include "dlghelpscreen.h"
 #if 0
 #include "dialogresource.h"
@@ -61,7 +62,7 @@
 //
 ////////////////////////////////////////////////////////////////
 HelpScreenDialogClass::HelpScreenDialogClass (void)	:
-	MenuDialogClass ( IDD_HELP_SCREEN )
+	MenuDialogClass ( GetRenegadeDialog(RenegadeDialogID::IDD_HELP_SCREEN) )
 {
 	return ;
 }
@@ -127,7 +128,7 @@ HelpScreenDialogClass::On_Init_Dialog (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-HelpScreenDialogClass::On_Command (int ctrl_id, int message_id, DWORD param)
+HelpScreenDialogClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
@@ -186,7 +187,7 @@ HelpScreenDialogClass::On_Menu_Activate (bool onoff)
 				delete OldBackdrop;
 				OldBackdrop = NULL;
 			}
-		}		
+		}
 	}
 
 	return ;
@@ -210,7 +211,7 @@ HelpScreenDialogClass::On_Destroy (void)
 			delete OldBackdrop;
 			OldBackdrop = NULL;
 		}
-	}		
+	}
 
 	return ;
 }

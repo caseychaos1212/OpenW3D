@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Blowfish Component                                           * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Launcher/BFISH.H                             $* 
- *                                                                                             * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Blowfish Component                                           *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Launcher/BFISH.H                             $*
+ *                                                                                             *
  *                      $Author:: Denzil_l                                                    $*
- *                                                                                             * 
+ *                                                                                             *
  *                     $Modtime:: 12/02/97 9:35p                                              $*
- *                                                                                             * 
+ *                                                                                             *
  *                    $Revision:: 1                                                           $*
  *                                                                                             *
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #ifndef BFISH_H
@@ -47,9 +47,9 @@
 **	weaknesses, but is still relatively new. Blowfish is particularly strong
 **	against brute force attacks. It is also quite strong against linear and
 **	differential cryptanalysis. Unlike public key encription, it is very
-**	fast at encryption, as far as cryptography goes. Its weakness is that 
-**	it takes a relatively long time to set up with a new key (1/100th of 
-**	a second on a P6-200). The time to set up a key is equivalent to 
+**	fast at encryption, as far as cryptography goes. Its weakness is that
+**	it takes a relatively long time to set up with a new key (1/100th of
+**	a second on a P6-200). The time to set up a key is equivalent to
 **	encrypting 4240 bytes.
 */
 class BlowfishEngine {
@@ -72,9 +72,9 @@ class BlowfishEngine {
 	private:
 		bool IsKeyed;
 
-		void Sub_Key_Encrypt(unsigned long & left, unsigned long & right);
+		void Sub_Key_Encrypt(unsigned int & left, unsigned int & right);
 
-		void Process_Block(void const * plaintext, void * cyphertext, unsigned long const * ptable);
+		void Process_Block(void const * plaintext, void * cyphertext, unsigned int const * ptable);
 		void Initialize_Tables(void);
 
 		enum {
@@ -86,19 +86,19 @@ class BlowfishEngine {
 		**	filled with a number generated from pi. Thus they are not random but
 		**	they don't hold a weak pattern either.
 		*/
-		static unsigned long const P_Init[ROUNDS+2];
-		static unsigned long const S_Init[4][UCHAR_MAX+1];
+		static unsigned int const P_Init[ROUNDS+2];
+		static unsigned int const S_Init[4][UCHAR_MAX+1];
 
 		/*
 		**	Permutation tables for encryption and decryption.
 		*/
- 		unsigned long P_Encrypt[ROUNDS+2];
- 		unsigned long P_Decrypt[ROUNDS+2];
+ 		unsigned int P_Encrypt[ROUNDS+2];
+ 		unsigned int P_Decrypt[ROUNDS+2];
 
 		/*
 		**	S-Box tables (four).
 		*/
-		unsigned long bf_S[4][UCHAR_MAX+1];
+		unsigned int bf_S[4][UCHAR_MAX+1];
 };
 
 #endif

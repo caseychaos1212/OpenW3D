@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Commando/suicideevent.cpp                    $* 
- *                                                                                             * 
- *                      $Author:: Tom_s                                                       $* 
- *                                                                                             * 
- *                     $Modtime:: 12/01/01 1:38p                                              $* 
- *                                                                                             * 
- *                    $Revision:: 9                                                           $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Commando/suicideevent.cpp                    $*
+ *                                                                                             *
+ *                      $Author:: Tom_s                                                       $*
+ *                                                                                             *
+ *                     $Modtime:: 12/01/01 1:38p                                              $*
+ *                                                                                             *
+ *                    $Revision:: 9                                                           $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "suicideevent.h"
@@ -95,7 +95,7 @@ cSuicideEvent::Act(void)
 	// Increment Deaths
 	//
 	cPlayer * p_player = cPlayerManager::Find_Player(SenderId);
-	if (p_player != NULL) 
+	if (p_player != NULL)
 	{
 		//p_player->Increment_Deaths();
 		p_player->Set_Money(0);
@@ -105,8 +105,8 @@ cSuicideEvent::Act(void)
 	// Tell everyone
 	//
 	WideStringClass text;
-	//text.Format(L"_%s_committed_suicide_", p_player->Get_Name());
-	text.Format(L"%s %s", p_player->Get_Name(), TRANSLATE(IDS_MP_COMMITTED_SUICIDE));
+	//text.Format(U_CHAR("_%s_committed_suicide_"), p_player->Get_Name());
+	text.Format(U_CHAR("%s %s"), p_player->Get_Name().Peek_Buffer(), TRANSLATE(IDS_MP_COMMITTED_SUICIDE));
 	cScTextObj * p_message = new cScTextObj;
 	p_message->Init(text, TEXT_MESSAGE_PUBLIC, false, HOST_TEXT_SENDER, -1);
 

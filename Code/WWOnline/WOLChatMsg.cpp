@@ -35,6 +35,8 @@
 #include "WOLChatMsg.h"
 #include <wolapi/chatdefs.h>
 
+#include <windows.h>
+#include <ocidl.h>
 namespace WOL
 {
 #include <wolapi/WOLAPI.h>
@@ -95,7 +97,7 @@ ChatMessage::ChatMessage(const WOL::User* sender, const char* message, bool isPr
 *
 ******************************************************************************/
 
-ChatMessage::ChatMessage(const WOL::User* sender, const wchar_t* message, bool isPrivate, bool isAction) :
+ChatMessage::ChatMessage(const WOL::User* sender, const unichar_t* message, bool isPrivate, bool isAction) :
 		mMessage(message),
 		mIsPrivate(isPrivate),
 		mIsAction(isAction),
@@ -130,7 +132,7 @@ ChatMessage::ChatMessage(const WOL::User* sender, const wchar_t* message, bool i
 *
 ******************************************************************************/
 
-ChatMessage::ChatMessage(const wchar_t* sender, const wchar_t* message, bool isPrivate, bool isAction) :
+ChatMessage::ChatMessage(const unichar_t* sender, const unichar_t* message, bool isPrivate, bool isAction) :
 		mSenderName(sender),
 		mMessage(message),
 		mIsPrivate(isPrivate),
@@ -270,7 +272,7 @@ bool ChatMessage::IsSenderSquelched(void) const
 *
 ******************************************************************************/
 
-bool ChatMessage::IsSenderInClan(unsigned long clanID) const
+bool ChatMessage::IsSenderInClan(unsigned int clanID) const
 	{
 	return (mSenderClanID == clanID);
 	}
@@ -292,7 +294,7 @@ bool ChatMessage::IsSenderInClan(unsigned long clanID) const
 *
 ******************************************************************************/
 
-bool IsAnsiText(const wchar_t* text)
+bool IsAnsiText(const unichar_t* text)
 	{
 	for (int index = 0; text[index] != 0; index ++)
 		{

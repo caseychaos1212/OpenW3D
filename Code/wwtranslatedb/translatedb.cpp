@@ -37,7 +37,6 @@
 
 #include "translatedb.h"
 
-#include <windows.h>
 #include <string.h>
 
 #include "persist.h"
@@ -95,7 +94,7 @@ enum
 	VARID_LANGUAGE_ID
 };
 
-const wchar_t *	STRING_NOT_FOUND				= L"TDBERR";
+const unichar_t *	STRING_NOT_FOUND				= U_CHAR("TDBERR");
 const char *	ENGLISH_STRING_NOT_FOUND	= "TDBERR";
 
 ///////////////////////////////////////////////////////////////////////
@@ -148,13 +147,13 @@ TranslateDBClass::Free_Categories (void)
 	//
 	//	Loop over and free all the translation categories
 	//
-	for (int index = 0; index < m_CategoryList.Count (); index ++) {			
+	for (int index = 0; index < m_CategoryList.Count (); index ++) {
 		TDBCategoryClass *category = m_CategoryList[index];
 		if (category != NULL) {
 			delete category;
 		}
 	}
-	
+
 	m_CategoryList.Delete_All ();
 	return ;
 }
@@ -171,7 +170,7 @@ TranslateDBClass::Free_Objects (void)
 	//
 	//	Loop over and free all the translation objects
 	//
-	for (int index = 0; index < m_ObjectList.Count (); index ++) {			
+	for (int index = 0; index < m_ObjectList.Count (); index ++) {
 		TDBObjClass *translate_obj = m_ObjectList[index];
 		if (translate_obj != NULL) {
 			delete translate_obj;
@@ -219,7 +218,7 @@ TranslateDBClass::Save (ChunkSaveClass &csave)
 		//	Loop over and save all the translation categories
 		//
 		int index;
-		for (index = 0; index < m_CategoryList.Count (); index ++) {			
+		for (index = 0; index < m_CategoryList.Count (); index ++) {
 			TDBCategoryClass *category = m_CategoryList[index];
 
 			//
@@ -233,20 +232,20 @@ TranslateDBClass::Save (ChunkSaveClass &csave)
 		}
 
 	csave.End_Chunk ();
-	
+
 	csave.Begin_Chunk (CHUNKID_OBJECTS);
 
 		//
 		//	Loop over and save all the translation objects
 		//
-		for (index = 0; index < m_ObjectList.Count (); index ++) {			
+		for (index = 0; index < m_ObjectList.Count (); index ++) {
 			TDBObjClass *translate_obj = m_ObjectList[index];
 
 			//
 			//	Save this translation object
 			//
 			if (translate_obj != NULL) {
-				
+
 				//
 				//	Check to ensure this category isn't filtered out...
 				//
@@ -279,10 +278,10 @@ TranslateDBClass::Load (ChunkLoadClass &cload)
 	Free_Objects ();
 	Free_Categories ();
 
-	bool retval = true;	
+	bool retval = true;
 	while (cload.Open_Chunk ()) {
 		switch (cload.Cur_Chunk_ID ()) {
-			
+
 			//
 			//	Load all the presets from this chunk
 			//
@@ -383,7 +382,7 @@ TranslateDBClass::Load_Variables (ChunkLoadClass &cload)
 			READ_MICRO_CHUNK (cload, VARID_VERSION_NUMBER,	m_VersionNumber);
 			READ_MICRO_CHUNK (cload, VARID_LANGUAGE_ID,		m_LanguageID);
 		}
-			
+
 		cload.Close_Micro_Chunk ();
 	}
 
@@ -424,19 +423,9 @@ TranslateDBClass::Export_Table (const char *filename)
 	//
 	//	Create the file
 	//
-	HANDLE file = ::CreateFileA (filename,
-										  GENERIC_WRITE,
-										  0,
-										  NULL,
-										  CREATE_ALWAYS,
-										  0L,
-										  NULL);
-
-	WWASSERT (file != INVALID_HANDLE_VALUE);
-	if (file != INVALID_HANDLE_VALUE) {
-
-		TextFileClass file_obj;
-		file_obj.Attach (file);
+    TextFileClass file_obj;
+    file_obj.Open(filename, FileClass::WRITE);
+    if (file_obj.Is_Open()) {
 
 		//
 		//	Loop over all the translation objects and write a tab delimited
@@ -445,15 +434,15 @@ TranslateDBClass::Export_Table (const char *filename)
 		for (int index = 0; index < m_ObjectList.Count (); index ++) {
 			TDBObjClass *object = m_ObjectList[index];
 			if (object != NULL && object->As_StringTwiddlerClass () == NULL) {
-				
-				StringClass english_string = object->Get_English_String ();
 
-				int length = english_string.Get_Length ();
-				for (int index = 0; index < length; index ++) {
-					if (english_string[index] == '\n') {
-						english_string[index] = ' ';
-					}
+			StringClass english_string = object->Get_English_String ();
+
+			const size_t length = english_string.Get_Length ();
+			for (size_t index = 0; index < length; index ++) {
+				if (english_string[static_cast<int>(index)] == '\n') {
+					english_string[static_cast<int>(index)] = ' ';
 				}
+			}
 
 				//
 				//	Lookup the string's category
@@ -467,7 +456,7 @@ TranslateDBClass::Export_Table (const char *filename)
 				//
 				//	Lookup the string's sound preset
 				//
-				StringClass sound_preset_name;							
+				StringClass sound_preset_name;
 				DefinitionClass *definition = DefinitionMgrClass::Find_Definition (object->Get_Sound_ID (), false);
 				if (definition != NULL) {
 					sound_preset_name = definition->Get_Name ();
@@ -487,14 +476,8 @@ TranslateDBClass::Export_Table (const char *filename)
 				file_obj.Write_Line (text_entry);
 			}
 		}
-
-		//
-		//	Close the file
-		//
-		file_obj.Detach ();
-		::CloseHandle (file);
 	}
-	
+
 	return ;
 }
 
@@ -510,19 +493,9 @@ TranslateDBClass::Export_C_Header (const char *filename)
 	//
 	//	Create the file
 	//
-	HANDLE file = ::CreateFileA (filename,
-										  GENERIC_WRITE,
-										  0,
-										  NULL,
-										  CREATE_ALWAYS,
-										  0L,
-										  NULL);
-
-	WWASSERT (file != INVALID_HANDLE_VALUE);
-	if (file != INVALID_HANDLE_VALUE) {
-
-		TextFileClass file_obj;
-		file_obj.Attach (file);
+    TextFileClass file_obj;
+    file_obj.Open(filename, FileClass::WRITE);
+    if (file_obj.Is_Open()) {
 
 		//
 		//	Wtite the 'C' style header framework
@@ -550,12 +523,12 @@ TranslateDBClass::Export_C_Header (const char *filename)
 		for (int index = 0; index < m_ObjectList.Count (); index ++) {
 			TDBObjClass *object = m_ObjectList[index];
 			if (object != NULL) {
-				
+
 				//
 				//	Write a #define for this object's ID
 				//
 				StringClass id_entry;
-				id_entry.Format ("#define %s		%d", (const char *)object->Get_ID_Desc (), object->Get_ID ());				
+				id_entry.Format ("#define %s		%d", (const char *)object->Get_ID_Desc (), object->Get_ID ());
 				file_obj.Write_Line (id_entry);
 			}
 		}
@@ -563,14 +536,8 @@ TranslateDBClass::Export_C_Header (const char *filename)
 		file_obj.Write_Line ("// TRANSLATEDB: End ID Block");
 		file_obj.Write_Line ("");
 		file_obj.Write_Line ("#endif //__STRING_IDS_H");
-
-		//
-		//	Close the file
-		//
-		file_obj.Detach ();
-		::CloseHandle (file);
 	}
-	
+
 	return ;
 }
 
@@ -586,19 +553,9 @@ TranslateDBClass::Import_C_Header (const char *filename)
 	//
 	//	Create the file
 	//
-	HANDLE file = ::CreateFileA (filename,
-										  GENERIC_READ,
-										  FILE_SHARE_READ,
-										  NULL,
-										  OPEN_EXISTING,
-										  0L,
-										  NULL);
-
-	WWASSERT (file != INVALID_HANDLE_VALUE);
-	if (file != INVALID_HANDLE_VALUE) {
-
-		TextFileClass file_obj;
-		file_obj.Attach (file);
+    TextFileClass file_obj;
+    file_obj.Open(filename, FileClass::READ);
+    if (file_obj.Is_Open()) {
 
 		StringClass line;
 		bool found_id_block = false;
@@ -611,7 +568,7 @@ TranslateDBClass::Import_C_Header (const char *filename)
 		}
 
 		if (found_id_block) {
-			
+
 			//
 			//	Read each ID define from the header file
 			//
@@ -619,7 +576,7 @@ TranslateDBClass::Import_C_Header (const char *filename)
 			while (found_end_block == false && file_obj.Read_Line (line)) {
 
 				if (::strnicmp (line, "#define ", 8) == 0) {
-					
+
 					//
 					//	Break the #define into its parts
 					//
@@ -629,26 +586,26 @@ TranslateDBClass::Import_C_Header (const char *filename)
 					//
 					//	Find out where each word begins and ends
 					//
-					int count = line.Get_Length ();
-					for (int index = 8; curr_break < 4 && index < count; index ++) {						
+			const size_t count = line.Get_Length ();
+			for (size_t index = 8; curr_break < 4 && index < count; index ++) {
 
-						bool is_whitespace = (line[index] == ' ' || line[index] == '\t');
-						
-						if (is_whitespace == (curr_break & 1) || index == count - 1) {
-							word_breaks[curr_break ++] = index;
-						}
-					}
+				bool is_whitespace = (line[static_cast<int>(index)] == ' ' || line[static_cast<int>(index)] == '\t');
+
+				if (is_whitespace == (curr_break & 1) || index == count - 1) {
+					word_breaks[curr_break ++] = static_cast<int>(index);
+				}
+			}
 
 					//
 					//	Did we encounter the right number of words?
 					//
 					if (curr_break == 4) {
-						
+
 						//
 						//	Isolate the words
 						//
 						char id_desc_text[64]	= { 0 };
-						char id_text[64]			= { 0 };						
+						char id_text[64]			= { 0 };
 						::strncpy (id_desc_text,	line.Peek_Buffer () + word_breaks[0], word_breaks[1] - word_breaks[0]);
 						::strncpy (id_text,			line.Peek_Buffer () + word_breaks[2], word_breaks[3] - word_breaks[2]);
 
@@ -677,22 +634,16 @@ TranslateDBClass::Import_C_Header (const char *filename)
 					}
 
 				} else {
-					
+
 					//
 					//	Check for block-end conditions
 					//
 					found_end_block = (line.Compare_No_Case ("// TRANSLATEDB: End ID Block") == 0);
 				}
 			}
-		}
-
-		//
-		//	Close the file
-		//
-		file_obj.Detach ();
-		::CloseHandle (file);
+        }
 	}
-	
+
 	return ;
 }
 
@@ -718,7 +669,7 @@ TDBObjClass *
 TranslateDBClass::Get_Object (int index)
 {
 	TDBObjClass *object = NULL;
-	
+
 	WWASSERT (index >= 0 && index < m_ObjectList.Count ());
 	if (index >= 0 && index < m_ObjectList.Count ()) {
 		object = m_ObjectList[index];
@@ -825,7 +776,7 @@ TranslateDBClass::Remove_Category (int index)
 	//
 	WWASSERT (index >= 0 && index < m_CategoryList.Count ());
 	if (index >= 0 && index < m_CategoryList.Count ()) {
-		
+
 		//
 		//	Free the object that was in this slot
 		//
@@ -835,7 +786,7 @@ TranslateDBClass::Remove_Category (int index)
 			//
 			//	Remove all objects from the category
 			//
-			int category_id = category->Get_ID ();			
+			int category_id = category->Get_ID ();
 			for (	TDBObjClass *object = Get_First_Object (category_id);
 					object != NULL;
 					object = Get_Next_Object (category_id, object))
@@ -872,7 +823,7 @@ TranslateDBClass::Add_Object (TDBObjClass *new_obj)
 
 		//
 		//	Try to find an unused ID for the object (if necessary)
-		//		
+		//
 		if (new_obj->Get_ID () < ID_MIN) {
 			new_obj->Set_ID (Find_Unique_ID ());
 		}
@@ -890,7 +841,7 @@ TranslateDBClass::Add_Object (TDBObjClass *new_obj)
 		while (m_ObjectList.Count () <= obj_index) {
 			m_ObjectList.Add (NULL);
 		}
-		
+
 		//
 		//	Add the object to our list
 		//
@@ -923,7 +874,7 @@ TranslateDBClass::Remove_Object (int index)
 	//
 	WWASSERT (index >= 0 && index < m_ObjectList.Count ());
 	if (index >= 0 && index < m_ObjectList.Count ()) {
-		
+
 		//
 		//	Free the object that was in this slot
 		//
@@ -931,7 +882,7 @@ TranslateDBClass::Remove_Object (int index)
 		if (object != NULL) {
 			// Remove the object from the hash table
 			StringClass lower_case_name(object->Get_ID_Desc(),true);
-			_strlwr(lower_case_name.Peek_Buffer());
+            lower_case_name.To_Lower();
 			m_ObjectHash.Remove(lower_case_name);
 			delete object;
 		}
@@ -1006,7 +957,7 @@ TDBCategoryClass *
 TranslateDBClass::Get_Category (int index)
 {
 	TDBCategoryClass *category = NULL;
-	
+
 	WWASSERT (index >= 0 && index < m_CategoryList.Count ());
 	if (index >= 0 && index < m_CategoryList.Count ()) {
 		category = m_CategoryList[index];
@@ -1027,7 +978,7 @@ TranslateDBClass::Find_Category (uint32 id)
 	TDBCategoryClass *category = NULL;
 
 	//
-	//	Loop over all the categories until we've found a matching ID 
+	//	Loop over all the categories until we've found a matching ID
 	//
 	for (int index = 0; index < m_CategoryList.Count ();	index ++) {
 		if (m_CategoryList[index]->Get_ID () == id) {
@@ -1121,16 +1072,16 @@ TranslateDBClass::Get_Next_Object (uint32 category_id, TDBObjClass *curr_obj)
 	//
 	//	Loop over the objects we know about and return the first
 	// one that matches the given category ID
-	//	
+	//
 	for (int index = start_index; index < m_ObjectList.Count (); index ++) {
-		TDBObjClass *curr_obj = m_ObjectList[index];
-		if (curr_obj != NULL) {
+		TDBObjClass *check_obj = m_ObjectList[index];
+		if (check_obj != NULL) {
 
 			//
 			//	Does this object belong to the category we are enumerating?
 			//
-			if (curr_obj->Get_Category_ID () == category_id) {
-				object = curr_obj;
+			if (check_obj->Get_Category_ID () == category_id) {
+				object = check_obj;
 				break;
 			}
 		}
@@ -1149,19 +1100,19 @@ void
 Convert_Chars_To_Newline (StringClass &string)
 {
 	StringClass retval;
-	
-	int count = string.Get_Length ();
+
+	const size_t count = string.Get_Length ();
 
 	//
 	//	Copy characters between the strings
 	//
-	for (int index = 0; index < count; index ++) {
-		
-		if (index + 1 < count && string[index] == '\\' && string[index + 1] == 'n') {
+	for (size_t index = 0; index < count; index ++) {
+
+		if (index + 1 < count && string[static_cast<int>(index)] == '\\' && string[static_cast<int>(index + 1)] == 'n') {
 			retval += '\n';
 			index ++;
 		} else {
-			retval += string[index];
+			retval += string[static_cast<int>(index)];
 		}
 	}
 
@@ -1181,22 +1132,9 @@ TranslateDBClass::Import_Strings (const char *filename)
 	//
 	//	Open the file
 	//
-	HANDLE file = ::CreateFileA (	filename,
-											GENERIC_READ,
-											FILE_SHARE_READ,
-											NULL,
-											OPEN_EXISTING,
-											0L,
-											NULL);
-
-	WWASSERT (file != INVALID_HANDLE_VALUE);
-	if (file != INVALID_HANDLE_VALUE) {
-
-		//
-		//	Attach this file to a text file class for easier parsing
-		//
-		TextFileClass file_obj;
-		file_obj.Attach (file);
+    TextFileClass file_obj;
+    file_obj.Open(filename, FileClass::READ);
+    if (file_obj.Is_Open()) {
 
 		//
 		//	Keep reading data from the file until we've reached the end
@@ -1205,7 +1143,7 @@ TranslateDBClass::Import_Strings (const char *filename)
 		bool keep_going = true;
 		StringClass line;
 		while (keep_going && file_obj.Read_Line (line)) {
-			
+
 			//
 			//	Convert the string to an array of values
 			//
@@ -1216,7 +1154,7 @@ TranslateDBClass::Import_Strings (const char *filename)
 			//	We can't keep going unless we've got at least 3 columns of information
 			//
 			if (value_count >= 3) {
-				
+
 				//
 				//	Lookup the category this entry belongs to
 				//
@@ -1228,7 +1166,7 @@ TranslateDBClass::Import_Strings (const char *filename)
 				TDBObjClass *new_obj = new TDBObjClass;
 				new_obj->Set_Category_ID (category ? category->Get_ID () : 0);
 				new_obj->Set_ID_Desc (value_array[1]);
-				
+
 				//
 				//	Set the english string
 				//
@@ -1288,7 +1226,7 @@ int Build_List_From_String
 		 (delimiter != NULL) &&
 		 (string_list != NULL))
 	{
-		int delim_len = ::strlen (delimiter);
+		const size_t delim_len = ::strlen (delimiter);
 
 		//
 		// Determine how many entries there will be in the list
@@ -1298,7 +1236,7 @@ int Build_List_From_String
 			  (entry != NULL) && (entry[1] != 0);
 			  entry = ::strstr (entry, delimiter))
 		{
-			
+
 			//
 			// Move past the current delimiter (if necessary)
 			//
@@ -1309,14 +1247,14 @@ int Build_List_From_String
 			// Increment the count of entries
 			count ++;
 		}
-	
+
 		if (count > 0) {
 
 			//
 			// Allocate enough StringClass objects to hold all the strings in the list
 			//
 			(*string_list) = new StringClass[count];
-		
+
 			//
 			// Parse the string and pull out its entries.
 			//
@@ -1325,7 +1263,7 @@ int Build_List_From_String
 				  (entry != NULL) && (entry[1] != 0);
 				  entry = ::strstr (entry, delimiter))
 			{
-				
+
 				//
 				// Move past the current delimiter (if necessary)
 				//
@@ -1337,7 +1275,7 @@ int Build_List_From_String
 				// Copy this entry into its own string
 				//
 				StringClass entry_string = entry;
-				char *delim_start = (char *)::strstr (entry_string, delimiter);				
+				char *delim_start = (char *)::strstr (entry_string, delimiter);
 				if (delim_start != NULL) {
 					delim_start[0] = 0;
 				}
@@ -1355,7 +1293,7 @@ int Build_List_From_String
 			(*string_list) = new StringClass[count];
 			(*string_list)[0] = buffer;
 		}
-				
+
 	}
 
 	//

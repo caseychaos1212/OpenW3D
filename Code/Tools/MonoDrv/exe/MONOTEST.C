@@ -29,15 +29,15 @@
 #define	MESSAGE3	"Another line of text.\n"
 
 
-long Print(HANDLE handle, char const * text)
+int Print(HANDLE handle, char const * text)
 {
-	long retval = 0;
+	int retval = 0;
 	if (text != NULL)  {
 		WriteFile(handle, text, strlen(text), &retval, NULL);
 		printf(text);
 	}
 	return(retval);
-}	
+}
 
 
 int __cdecl main(int argc, char *argv[])
@@ -48,7 +48,7 @@ int __cdecl main(int argc, char *argv[])
 
 	handle1 = CreateFile("\\\\.\\MONO", GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle1 != INVALID_HANDLE_VALUE)  {
-		long retval;
+		int retval;
 		struct  {
 			int X,Y,W,H;
 		} windowcontrol;

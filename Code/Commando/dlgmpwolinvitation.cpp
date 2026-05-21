@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgmpwolinvitation.h"
+#include "renegadedialog.h"
 #include "renegadedialogmgr.h"
 #include "dlgmpwolpagebuddy.h"
 #include "translatedb.h"
@@ -46,8 +47,8 @@
 //	MPWolInvitationPopupClass
 //
 ////////////////////////////////////////////////////////////////
-MPWolInvitationPopupClass::MPWolInvitationPopupClass(const RefPtr<WWOnline::UserData>& host, const wchar_t* invite) :
-		PopupDialogClass(IDD_MP_WOL_INVITATION_REPLY),
+MPWolInvitationPopupClass::MPWolInvitationPopupClass(const RefPtr<WWOnline::UserData>& host, const unichar_t* invite) :
+		PopupDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_INVITATION_REPLY)),
 		mHost(host),
 		mInviteMessage(invite)
 {
@@ -84,7 +85,7 @@ void MPWolInvitationPopupClass::On_Init_Dialog(void)
 //	On_Command
 //
 ////////////////////////////////////////////////////////////////
-void MPWolInvitationPopupClass::On_Command(int ctrl_id, int message_id, DWORD param)
+void MPWolInvitationPopupClass::On_Command(int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id) {
 		// Join the user

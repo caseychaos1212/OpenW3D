@@ -36,6 +36,7 @@
 
 
 #include <win.h>
+#include <cstddef>
 
 class WideStringClass;
 class StringClass;
@@ -117,8 +118,8 @@ class ConsoleModeClass
 		/*
 		** Input parsing variables.
 		*/
-		unsigned long LastKeypressTime;
-		int		Pos;
+		unsigned int LastKeypressTime;
+		size_t		Pos;
 
 		/*
 		** Console title bar contents.
@@ -138,12 +139,12 @@ class ConsoleModeClass
 		/*
 		** Last profile text CRC.
 		*/
-		unsigned long LastProfileCRC;
+		unsigned int LastProfileCRC;
 
 		/*
 		** Last time we printed the profile.
 		*/
-		unsigned long LastProfilePrint;
+		unsigned int LastProfilePrint;
 
 };
 

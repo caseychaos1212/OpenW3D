@@ -76,7 +76,7 @@ void main ()
 	box0.center[0] = 0.0f;
 	box0.center[1] = 0.0f;
 	box0.center[2] = 0.0f;
-	
+
 	box0.basis[0][0] = 1.0f;
 	box0.basis[0][1] = 0.0f;
 	box0.basis[0][2] = 0.0f;
@@ -100,7 +100,7 @@ void main ()
 	box1.center[0] = 0.0f;
 	box1.center[1] = -10.0f;
 	box1.center[2] = 20.0f;
-	
+
 	float line[3] = { 0.0f, 0.707f, 0.707f };
 	float length = float(sqrt(line[0]*line[0]+line[1]*line[1]+line[2]*line[2]));
 	line[0] /= length;
@@ -129,32 +129,31 @@ void main ()
 
 	BoxClass mybox0(box0);
 	BoxClass mybox1(box1);
-	unsigned long high;
-	unsigned long cycles0;
-	unsigned long cycles1;
-	unsigned long cycles2;
+	uint64_t cycles0;
+	uint64_t cycles1;
+	uint64_t cycles2;
 
 	while (box1.center[2] > -20.0f) {
 
-		cycles0 = Get_CPU_Clock(high);
+		cycles0 = Get_CPU_Clock();
 		IntersectType type = BoxesIntersect(1.0f,box0,box1);
-		cycles0 = Get_CPU_Clock(high) - cycles0;
+		cycles0 = Get_CPU_Clock() - cycles0;
 
-		cycles1 = Get_CPU_Clock(high);
+		cycles1 = Get_CPU_Clock();
 		IntersectType mytype = Boxes_Intersect(mybox0,mybox1,1.0f);
-		cycles1 = Get_CPU_Clock(high) - cycles1;
+		cycles1 = Get_CPU_Clock() - cycles1;
 
-		cycles2 = Get_CPU_Clock(high);
+		cycles2 = Get_CPU_Clock();
 		IntersectType mytype2 = Boxes_Intersect(mybox0,mybox1);
-		cycles2 = Get_CPU_Clock(high) - cycles2;
+		cycles2 = Get_CPU_Clock() - cycles2;
 
 		cout << cycles0 << "   "<< cycles1 << "   " << cycles2 << "   " << type << "  " << mytype<< "  " << mytype2 << endl;
-		
+
 		box1.center[2] -= 1.0f;
 		mybox1.Center[2] -= 1.0f;
 
 	}
-	
+
 //	if (type == itIntersects) {
 //		ostr << "type = " << type << endl;
 //	}
@@ -207,14 +206,14 @@ void main ()
 	}
 #endif
 
-	
+
 	/*
 	** box0
 	*/
 	box0.center[0] = 6.1978f;
 	box0.center[1] = 2.6640f;
 	box0.center[2] = 0.840f;
-	
+
 	box0.extent[0] = 0.1341f;
 	box0.extent[1] = 0.320672f;
 	box0.extent[2] = 0.840f;
@@ -228,7 +227,7 @@ void main ()
 	box0.basis[1][0] = 0.514136f;
 	box0.basis[1][1] = 0.857709f;
 	box0.basis[1][2] = 0.0f;
-	
+
 	box0.basis[2][0] = 0.0f;
 	box0.basis[2][1] = 0.0f;
 	box0.basis[2][2] = 1.0f;
@@ -264,10 +263,10 @@ void main ()
 
 
 void benchmark_transformations(void)
-{ 
-	unsigned long high;
-	unsigned long cycles0;
-	unsigned long cycles1;
+{
+	unsigned int high;
+	uint64_t cycles0;
+	uint64_t cycles1;
 
 	/*
 	** Testing speed of the matrix library...
@@ -302,13 +301,13 @@ void benchmark_transformations(void)
 	Vector res;
 	Vector3 myres;
 
-	cycles0 = Get_CPU_Clock(high);
+	cycles0 = Get_CPU_Clock();
 	MultiplyVM (v,mat,res);
-	cycles0 = Get_CPU_Clock(high) - cycles0;
+	cycles0 = Get_CPU_Clock() - cycles0;
 
-	cycles1 = Get_CPU_Clock(high);
+	cycles1 = Get_CPU_Clock();
 	myres = mymat * myv;
-	cycles1 = Get_CPU_Clock(high) - cycles1;
+	cycles1 = Get_CPU_Clock() - cycles1;
 
 	cout << "c cycles = " << cycles0 << endl;
 	cout << "c++ cycles = " << cycles1 << endl;

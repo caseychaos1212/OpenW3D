@@ -76,7 +76,7 @@ public:
 		TEAM_MUTANT_NOD,
 		TEAM_COUNT
 	} TEAM;
-	
+
 	//////////////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
 	//////////////////////////////////////////////////////////////////////////
@@ -102,12 +102,12 @@ public:
 	TYPE								Get_Type (void)							{ return Type; }
 	TEAM								Get_Team (void)							{ return Team; }
 
-	const wchar_t *					Get_Name (int index);
+	const unichar_t *					Get_Name (int index);
 	int								Get_Cost (int index)						{ return CostList[index]; }
 	int								Get_Definition (int index)				{ return DefinitionList[index]; }
 	const StringClass &			Get_Texture (int index)					{ return TextureList[index]; }
 
-	const wchar_t *					Get_Enlisted_Name (int index);
+	const unichar_t *					Get_Enlisted_Name (int index);
 	int								Get_Enlisted_Definition (int index)	{ return DefinitionList[index]; }
 	const StringClass &			Get_Enlisted_Texture (int index)		{ return TextureList[index]; }
 
@@ -121,7 +121,7 @@ public:
 	//	Singleton access
 	//
 	static PurchaseSettingsDefClass *	Find_Definition (TYPE type, TEAM team);
-	
+
 	//
 	//	Editable support
 	//
@@ -144,7 +144,7 @@ protected:
 		MAX_ALTERNATES = 3,
 		MAX_ENTRIES = 10
 	};
-	
+
 	//////////////////////////////////////////////////////////////////////////
 	//	Protected member data
 	//////////////////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ protected:
 
 	int					AlternateDefinitionList[MAX_ENTRIES][MAX_ALTERNATES];
 	StringClass			AlternateTextureList[MAX_ENTRIES][MAX_ALTERNATES];
-	
+
 	static PurchaseSettingsDefClass *	DefinitionArray[TYPE_COUNT][TEAM_COUNT];
 };
 

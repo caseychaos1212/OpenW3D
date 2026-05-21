@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : LightMap                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Tool $* 
- *                                                                                             * 
- *                      $Author:: Ian_l               $* 
- *                                                                                             * 
- *                     $Modtime:: 7/19/01 8:13p       $* 
- *                                                                                             * 
- *                    $Revision:: 11                                                        $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : LightMap                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Tool $*
+ *                                                                                             *
+ *                      $Author:: Ian_l               $*
+ *                                                                                             *
+ *                     $Modtime:: 7/19/01 8:13p       $*
+ *                                                                                             *
+ *                    $Revision:: 11                                                        $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 // Includes.
@@ -120,7 +120,7 @@ END_MESSAGE_MAP()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   6/1/99    IML : Created.                                                                  * 
+ *   6/1/99    IML : Created.                                                                  *
  *=============================================================================================*/
 LightMapApp::LightMapApp()
 {
@@ -138,7 +138,7 @@ LightMapApp::LightMapApp()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   6/1/99    IML : Created.                                                                  * 
+ *   6/1/99    IML : Created.                                                                  *
  *=============================================================================================*/
 BOOL LightMapApp::InitInstance()
 {
@@ -154,14 +154,14 @@ BOOL LightMapApp::InitInstance()
 
 	Do_Version_Check();
 
-	// Set the working path. 
+	// Set the working path.
 	_getdcwd (0, WorkingPath, sizeof (WorkingPath));
 	strcat (WorkingPath, "\\");
 
 	// Set the instance name.
 	computernamesize = sizeof (computername);
 	GetComputerName (computername, &computernamesize);
-	itoa (GetCurrentProcessId(), processidname, 16); 
+	itoa (GetCurrentProcessId(), processidname, 16);
 	strcpy (InstanceName, computername);
 	strcat (InstanceName, processidname);
 
@@ -200,7 +200,7 @@ BOOL LightMapApp::InitInstance()
 	pDocTemplate = new CSingleDocTemplate(
 		IDR_MAINFRAME,
 		RUNTIME_CLASS(LightMapDoc),
-		RUNTIME_CLASS(CMainFrame),       
+		RUNTIME_CLASS(CMainFrame),
 		RUNTIME_CLASS(LightMapView));
 	AddDocTemplate(pDocTemplate);
 
@@ -210,14 +210,14 @@ BOOL LightMapApp::InitInstance()
 	ParseCommandLine (cmdInfo);
 
 	EnableShellOpen();
-	RegisterShellFileTypes (TRUE);
+	RegisterShellFileTypes (true);
 
 	// Dispatch commands specified on the command line.
-	if (!ProcessShellCommand (cmdInfo)) return (FALSE);
-	
+	if (!ProcessShellCommand (cmdInfo)) return (false);
+
 	m_pMainWnd->DragAcceptFiles();
 
-	return (TRUE);
+	return (true);
 }
 
 
@@ -236,14 +236,14 @@ BOOL LightMapApp::InitInstance()
  *   05/15/00    IML : Created.                                                                *
  *=============================================================================================*/
 void LightMapApp::Do_Version_Check()
-{	
+{
 	const char *networkpath		= "\\\\Mobius\\Project7\\Projects\\Renegade\\Programming\\Tools\\Lightmap";
 	const char *newversiontext = "There is a newer version of the Lightmap tool. Please run 'Renegade Update' to update your local copy.";
 
 	char pathname [_MAX_PATH];
 	char filename [_MAX_FNAME];
 	char extension [_MAX_EXT];
-	
+
 	::GetModuleFileName (NULL, pathname, MAX_PATH);
 	_splitpath (pathname, NULL, NULL, filename, extension);
 	strcpy (pathname, "\\\\Mobius\\Project7\\Projects\\Renegade\\Programming\\Tools\\Lightmap\\");
@@ -270,11 +270,11 @@ void LightMapApp::Do_Version_Check()
  *=============================================================================================*/
 BOOL CALLBACK TopLevelWindowSearch (HWND hwnd, LPARAM lParam)
 {
-	BOOL bcontinue = TRUE;
+	BOOL bcontinue = true;
 
 	// Is this a viewer window?
 	if (::GetProp (hwnd, "LIGHTMAP") != 0) {
-		bcontinue = FALSE;
+		bcontinue = false;
 		(*((HWND*)lParam)) = hwnd;
 	}
 
@@ -292,9 +292,9 @@ BOOL CALLBACK TopLevelWindowSearch (HWND hwnd, LPARAM lParam)
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   6/1/99    IML : Created.                                                                  * 
+ *   6/1/99    IML : Created.                                                                  *
  *=============================================================================================*/
-LightMapDoc* LightMapApp::GetDoc() 
+LightMapDoc* LightMapApp::GetDoc()
 {
 	POSITION pos = GetFirstDocTemplatePosition();
 	CDocTemplate *pDocTemplate = GetNextDocTemplate (pos);
@@ -317,12 +317,12 @@ LightMapDoc* LightMapApp::GetDoc()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   6/1/99    IML : Created.                                                                  * 
+ *   6/1/99    IML : Created.                                                                  *
  *=============================================================================================*/
 void LightMapApp::OnAppAbout()
 {
 	CAboutDlg aboutDlg;
-	
+
 	aboutDlg.DoModal();
 }
 
@@ -337,11 +337,11 @@ void LightMapApp::OnAppAbout()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   6/1/99    IML : Created.                                                                  * 
+ *   6/1/99    IML : Created.                                                                  *
  *=============================================================================================*/
-void LightMapApp::OnFileOpen() 
+void LightMapApp::OnFileOpen()
 {
-	CFileDialog dialog (TRUE, NULL, NULL, File_Dialog_Flags(), File_Dialog_Filter());
+	CFileDialog dialog (true, NULL, NULL, File_Dialog_Flags(), File_Dialog_Filter());
 
 	if (dialog.DoModal() == IDOK) {
 		if (GetDoc()->OnOpenDocument (dialog.GetPathName())) {
@@ -362,7 +362,7 @@ void LightMapApp::OnFileOpen()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   6/1/99    IML : Created.                                                                  * 
+ *   6/1/99    IML : Created.                                                                  *
  *=============================================================================================*/
 bool LightMapApp::Explorer_Style()
 {
@@ -384,7 +384,7 @@ bool LightMapApp::Explorer_Style()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   6/1/99    IML : Created.                                                                  * 
+ *   6/1/99    IML : Created.                                                                  *
  *=============================================================================================*/
 DWORD LightMapApp::File_Dialog_Flags()
 {
@@ -396,7 +396,7 @@ DWORD LightMapApp::File_Dialog_Flags()
 
 
 /***********************************************************************************************
- * CAboutDlg::OnInitDialog --																						  *		
+ * CAboutDlg::OnInitDialog --																						  *
  *                                                                                             *
  * INPUT:                                                                                      *
  *                                                                                             *
@@ -405,18 +405,18 @@ DWORD LightMapApp::File_Dialog_Flags()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   6/1/99    IML : Created.                                                                  * 
+ *   6/1/99    IML : Created.                                                                  *
  *=============================================================================================*/
-BOOL CAboutDlg::OnInitDialog() 
+BOOL CAboutDlg::OnInitDialog()
 {
 	// Allow the base class to process this message.
 	CDialog::OnInitDialog();
-	
+
 	// Put the version string into the dialog.
 	CString version_string;
 	version_string.Format ("Version %d.%d", (theApp.Application_Version() >> 16), (theApp.Application_Version() & 0xffff));
 	GetDlgItem (IDC_VERSION_TEXT)->SetWindowText (version_string);
-	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+
+	return true;  // return true unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return false
 }

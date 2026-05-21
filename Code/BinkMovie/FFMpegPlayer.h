@@ -20,9 +20,13 @@
 #include "MoviePlayer.h"
 #include "rect.h"
 #include "render2dsentence.h"
-#include "wwstring.h"
 #include <memory>
 #include <vector>
+
+#ifdef W3D_HAS_OPENAL
+#include <AL/al.h>
+static constexpr int BINK_AL_BUFFER_COUNT = 32; 
+#endif
 
 class FontCharsClass;
 class SubTitleManagerClass;
@@ -38,6 +42,11 @@ private:
 	std::unique_ptr<FFmpegFile> Bink;
 	AVFrame *CurrentFrame;
 	SwsContext *ScalingContext;
+#ifdef W3D_HAS_OPENAL
+	ALuint ALSource;
+	ALuint ALBuffers[BINK_AL_BUFFER_COUNT];
+	unsigned ALBufferIndex;
+#endif
 	uint64_t StartTime;
 	bool GotFrame;
 	bool FrameChanged;
@@ -55,7 +64,7 @@ private:
 	std::vector<TextureInfoStruct> TextureInfos;
 	Render2DClass Renderer;
 	std::unique_ptr<SubTitleManagerClass> SubTitleManager;
-	
+
 	void On_Frame(AVFrame *frame, int stream_idx, int stream_type);
 
 	static void On_Frame(AVFrame *frame, int stream_idx, int stream_type, void *user_data)

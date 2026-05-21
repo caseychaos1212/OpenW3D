@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgmplanhostoptions.h"
+#include "renegadedialog.h"
 #include "tabctrl.h"
 #include "gamedata.h"
 #include "netutil.h"
@@ -71,7 +72,7 @@
 //
 ////////////////////////////////////////////////////////////////
 MPLanHostOptionsMenuClass::MPLanHostOptionsMenuClass (void)	:
-	MenuDialogClass (IDD_MP_LAN_HOST_OPTIONS),
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_LAN_HOST_OPTIONS)),
 	mStartTheGame (false),
 	mClanID (0),
 	MapCycleDialog (NULL)
@@ -122,7 +123,7 @@ MPLanHostOptionsMenuClass::On_Init_Dialog (void)
 
 		TABCTRL_ADD_TAB (tab_ctrl, MPLanHostAdvancedOptionsTabClass);
 		TABCTRL_ADD_TAB (tab_ctrl, MPLanHostVictoryOptionsTabClass);
-		
+
 		//
 		//	Keep a pointer around to the map cycle tab so we can
 		// modify its contents as necessary
@@ -182,7 +183,7 @@ MPLanHostOptionsMenuClass::On_Periodic (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-MPLanHostOptionsMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MPLanHostOptionsMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id) {
 		case IDC_MENU_MP_LAN_START_BUTTON:
@@ -235,7 +236,7 @@ MPLanHostOptionsMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
 							}
 						} else {
 							WideStringClass errorMsg(0, true);
-							errorMsg.Format(L"%s\n\n%s", TRANSLATE(IDS_MENU_TEXT330), (const wchar_t*)outMsg);
+							errorMsg.Format(U_CHAR("%s\n\n%s"), TRANSLATE(IDS_MENU_TEXT330), (const unichar_t*)outMsg);
 							DlgMsgBox::DoDialog(TRANSLATE(IDS_MENU_TEXT329), errorMsg);
 						}
 					}
@@ -317,7 +318,7 @@ MPLanHostBasicOptionsTabClass* MPLanHostBasicOptionsTabClass::Get_Instance(void)
 }
 
 MPLanHostBasicOptionsTabClass::MPLanHostBasicOptionsTabClass (void)	:
-	ChildDialogClass (IDD_MP_LAN_HOST_OPTIONS_BASIC_TAB)
+	ChildDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_LAN_HOST_OPTIONS_BASIC_TAB))
 {
 	assert(_mInstance == NULL);
 	_mInstance = this;
@@ -383,9 +384,9 @@ MPLanHostBasicOptionsTabClass::On_Init_Dialog (void)
 
 	if (nic_combobox != NULL) {
 
-		ULONG * nics = NULL;
+		unsigned int * nics = NULL;
 		int nic_count = 0;
-		ULONG preferred_nick;
+		unsigned int preferred_nick;
 		if (!cGameSpyAdmin::Get_Is_Server_Gamespy_Listed()) {
 			 nics = cNicEnum::Get_Nics();
 			 nic_count = cNicEnum::Get_Num_Nics();
@@ -463,7 +464,7 @@ void MPLanHostBasicOptionsTabClass::InitSideChoiceCombo(int sidePref)
 
 	if (combo) {
 		//(gth) Renegade day 120 Patch: re-translate these strings each time!
-		struct {const wchar_t* TeamName; int TeamID;} _teams[] = {
+		struct {const unichar_t* TeamName; int TeamID;} _teams[] = {
 			{TRANSLATE (IDS_MENU_AUTO_TEAM), PLAYERTYPE_RENEGADE},
 			{TRANSLATE (IDS_MENU_TEXT933), PLAYERTYPE_GDI},
 			{TRANSLATE (IDS_MENU_TEXT934), PLAYERTYPE_NOD},
@@ -527,7 +528,7 @@ MPLanHostBasicOptionsTabClass::On_Apply (void)
 			int curr_sel = nic_combobox->Get_Curr_Sel ();
 			WWASSERT(curr_sel < cNicEnum::Get_Num_Nics());
 			if (curr_sel >= 0) {
-				ULONG * nics = cNicEnum::Get_Nics();
+				unsigned int * nics = cNicEnum::Get_Nics();
 				WWASSERT(nics != NULL);
 				cUserOptions::PreferredLanNic.Set(nics[curr_sel]);
 				The_Game()->Set_Ip_Address(nics[curr_sel]);
@@ -539,7 +540,7 @@ MPLanHostBasicOptionsTabClass::On_Apply (void)
 			int curr_sel = nic_combobox->Get_Curr_Sel ();
 			WWASSERT(curr_sel < cNicEnum::Get_Num_GameSpy_Nics());
 			if (curr_sel >= 0) {
-				ULONG * nics = cNicEnum::Get_GameSpy_Nics();
+				unsigned int * nics = cNicEnum::Get_GameSpy_Nics();
 				WWASSERT(nics != NULL);
 				cUserOptions::PreferredGameSpyNic.Set(nics[curr_sel]);
 				The_Game()->Set_Ip_Address(nics[curr_sel]);
@@ -551,7 +552,7 @@ MPLanHostBasicOptionsTabClass::On_Apply (void)
 			int curr_sel = nic_combobox->Get_Curr_Sel ();
 			WWASSERT(curr_sel < cNicEnum::Get_Num_GameSpy_Nics());
 			if (curr_sel >= 0) {
-				ULONG * nics = cNicEnum::Get_GameSpy_Nics();
+				unsigned int * nics = cNicEnum::Get_GameSpy_Nics();
 				WWASSERT(nics != NULL);
 				cUserOptions::PreferredGameSpyNic.Set(nics[curr_sel]);
 				The_Game()->Set_Ip_Address(nics[curr_sel]);
@@ -584,8 +585,8 @@ MPLanHostBasicOptionsTabClass::On_EditCtrl_Change (EditCtrlClass *edit, int ctrl
 		//
 		// Flag the game as passworded if the user enters text into the password edit.
 		//
-		const wchar_t* text = edit->Get_Text ();
-		bool hasPassword = (text && (wcslen (text) > 0));
+		const unichar_t* text = edit->Get_Text ();
+		bool hasPassword = (text && (u_strlen (text) > 0));
 		SendSignal (hasPassword);
 
 	} else if (ctrlID == IDC_NUM_PLAYERS_EDIT) {
@@ -619,7 +620,7 @@ MPLanHostBasicOptionsTabClass::On_EditCtrl_Change (EditCtrlClass *edit, int ctrl
 //
 ////////////////////////////////////////////////////////////////
 MPLanHostAdvancedOptionsTabClass::MPLanHostAdvancedOptionsTabClass (void)	:
-	ChildDialogClass (IDD_MP_LAN_HOST_OPTIONS_ADVANCED_TAB)
+	ChildDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_LAN_HOST_OPTIONS_ADVANCED_TAB))
 {
 	return ;
 }
@@ -660,7 +661,7 @@ MPLanHostAdvancedOptionsTabClass::On_Init_Dialog (void)
 	Check_Dlg_Button(IDC_TEAM_CHANGE_CHECK, mChangeTeams);
 	Enable_Dlg_Item(IDC_TEAM_CHANGE_CHECK, canChangeTeams);
 
-	// Remix teams is ON if team change is FALSE and remix setting is true.
+	// Remix teams is ON if team change is false and remix setting is true.
 	mRemixTeams = The_Game()->IsTeamChangingAllowed.Is_False() && The_Game()->RemixTeams.Is_True();
 	Check_Dlg_Button(IDC_REMIX_TEAMS_CHECK, mRemixTeams);
 	Enable_Dlg_Item(IDC_REMIX_TEAMS_CHECK, The_Game()->IsTeamChangingAllowed.Is_False());
@@ -760,7 +761,7 @@ MPLanHostAdvancedOptionsTabClass::On_Apply (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-MPLanHostAdvancedOptionsTabClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MPLanHostAdvancedOptionsTabClass::On_Command (int ctrl_id, int /* message_id */, unsigned int param)
 {
 	bool restart_enabled = true;
 
@@ -1005,7 +1006,7 @@ bool MPLanHostAdvancedOptionsTabClass::IsHostAClanMember(void) const
 //
 ////////////////////////////////////////////////////////////////
 MPLanHostMapCycleOptionsTabClass::MPLanHostMapCycleOptionsTabClass (void)	:
-	ChildDialogClass (IDD_MP_LAN_HOST_OPTIONS_MAP_TAB)
+	ChildDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_LAN_HOST_OPTIONS_MAP_TAB))
 {
 	return ;
 }
@@ -1044,7 +1045,7 @@ MPLanHostMapCycleOptionsTabClass::On_Init_Dialog (void)
 	//
 	ListCtrlClass *list_ctrl = (ListCtrlClass *)Get_Dlg_Item (IDC_AVAILABLE_MAP_LIST_CTRL);
 	if (list_ctrl != NULL) {
-		list_ctrl->Add_Column (L"", 1.0F, Vector3 (1, 1, 1));
+		list_ctrl->Add_Column (U_CHAR(""), 1.0F, Vector3 (1, 1, 1));
 	}
 
 	//
@@ -1052,7 +1053,7 @@ MPLanHostMapCycleOptionsTabClass::On_Init_Dialog (void)
 	//
 	list_ctrl = (ListCtrlClass *)Get_Dlg_Item (IDC_MAP_CYCLE_LIST_CTRL);
 	if (list_ctrl != NULL) {
-		list_ctrl->Add_Column (L"", 1.0F, Vector3 (1, 1, 1));
+		list_ctrl->Add_Column (U_CHAR(""), 1.0F, Vector3 (1, 1, 1));
 	}
 
 	//
@@ -1164,7 +1165,7 @@ MPLanHostMapCycleOptionsTabClass::Enable_Mod_Selection (bool onoff)
 		Enable_Dlg_Item (IDC_MOD_PACKAGE_COMBO, true);
 	} else {
 		Enable_Dlg_Item (IDC_MOD_PACKAGE_COMBO, false);
-		
+
 		//
 		//	Ensure no mod package is selected and rebuild the map list if necessary
 		//
@@ -1207,7 +1208,7 @@ MPLanHostMapCycleOptionsTabClass::Build_Mod_Package_List (void)
 	//
 	//	Add a default entry to the list
 	//
-	combobx_ctrl->Add_String (L"<None>");
+	combobx_ctrl->Add_String (U_CHAR("<None>"));
 
 	//
 	//	Loop over and add all the mod packages to the combobox
@@ -1308,7 +1309,7 @@ MPLanHostMapCycleOptionsTabClass::Remove_Map (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-MPLanHostMapCycleOptionsTabClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MPLanHostMapCycleOptionsTabClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
@@ -1334,9 +1335,9 @@ MPLanHostMapCycleOptionsTabClass::On_Command (int ctrl_id, int message_id, DWORD
 void
 MPLanHostMapCycleOptionsTabClass::On_ListCtrl_DblClk
 (
-	ListCtrlClass *list_ctrl,
+	ListCtrlClass * /* list_ctrl */,
 	int				ctrl_id,
-	int				item_index
+	int				/* item_index */
 )
 {
 	switch (ctrl_id)
@@ -1362,10 +1363,10 @@ MPLanHostMapCycleOptionsTabClass::On_ListCtrl_DblClk
 void
 MPLanHostMapCycleOptionsTabClass::On_ComboBoxCtrl_Sel_Change
 (
-	ComboBoxCtrlClass *	combo_ctrl,
-	int						ctrl_id,
-	int						old_sel,
-	int						new_sel
+	ComboBoxCtrlClass *	/* combo_ctrl */,
+	int						/* ctrl_id */,
+	int						/* old_sel */,
+	int						/* new_sel */
 )
 {
 	Populate_Map_List_Ctrl ();
@@ -1541,7 +1542,7 @@ MPLanHostMapCycleOptionsTabClass::Build_Map_List (void)
 	MapList.Delete_All ();
 
 	WIN32_FIND_DATAA find_info	= { 0 };
-	BOOL keep_going				= TRUE;
+	BOOL keep_going				= true;
 	HANDLE file_find				= NULL;
 
 	//
@@ -1551,14 +1552,14 @@ MPLanHostMapCycleOptionsTabClass::Build_Map_List (void)
 	StringClass file_filter;
 	WWASSERT(The_Game() != NULL);
 	if (The_Game()->Is_Cnc()) {
-		file_filter.Format("data\\c&c_*.mix");
+		file_filter.Format("data/c&c_*.mix");
 	} else {
-		file_filter.Format("data\\mp_*.mix");
+		file_filter.Format("data/mp_*.mix");
 	}
 
 #ifdef WWDEBUG
 	if (cDevOptions::FilterLevelFiles.Is_False()) {
-		file_filter = "data\\*.mix";
+		file_filter = "data/*.mix";
 	}
 #endif // WWDEBUG
 
@@ -1593,7 +1594,7 @@ MPLanHostMapCycleOptionsTabClass::Build_Map_List (void)
 //
 ////////////////////////////////////////////////////////////////
 MPLanHostVictoryOptionsTabClass::MPLanHostVictoryOptionsTabClass (void)	:
-	ChildDialogClass (IDD_MP_LAN_HOST_OPTIONS_VICTORY_TAB)
+	ChildDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_LAN_HOST_OPTIONS_VICTORY_TAB))
 {
 	return ;
 }
@@ -1700,7 +1701,7 @@ MPLanHostVictoryOptionsTabClass::Update_Enable_State (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-MPLanHostVictoryOptionsTabClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MPLanHostVictoryOptionsTabClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	/*
 	switch (ctrl_id)

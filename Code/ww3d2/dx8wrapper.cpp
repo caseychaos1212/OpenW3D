@@ -65,6 +65,7 @@
 #include "textureloader.h"
 #include "missingtexture.h"
 #include "thread.h"
+#include <bit>
 #include <stdio.h>
 #include <d3dx9core.h>
 #include "dxerr_compat.h"
@@ -75,6 +76,9 @@
 #include "formconv.h"
 #include "dx8texman.h"
 #include "bound.h"
+#include "ini.h"
+#include "openw3d.h"
+#include "soutil.h"
 
 const int DEFAULT_RESOLUTION_WIDTH = 800;
 const int DEFAULT_RESOLUTION_HEIGHT = 600;
@@ -143,7 +147,7 @@ DX8Caps*							DX8Wrapper::CurrentCaps;
 
 D3DADAPTER_IDENTIFIER9		DX8Wrapper::CurrentAdapterIdentifier;
 
-unsigned long DX8Wrapper::FrameCount = 0;
+unsigned int DX8Wrapper::FrameCount = 0;
 
 bool								_DX8SingleThreaded										= false;
 
@@ -168,13 +172,27 @@ static DynamicVectorClass<RenderDeviceDescClass>	_RenderDeviceDescriptionTable;
 
 typedef IDirect3D9* (WINAPI *Direct3DCreate8Type) (UINT SDKVersion);
 Direct3DCreate8Type	Direct3DCreate8Ptr = NULL;
-HINSTANCE D3D8Lib = NULL;
+SharedObject *D3D9Lib = nullptr;
 
 /***********************************************************************************
 **
 ** DX8Wrapper Implementation
 **
 ***********************************************************************************/
+
+const char *Get_D3D9_Object_Name()
+{
+	// FIXME: support overriding object using config (args, ini, register, envvar)
+#ifdef _WIN32
+	return "d3d9.dll";
+#elif defined (__ELF__)
+	return "libdxvk_d3d9.so.0";
+#elif defined (__MACH__)
+	return "libdxvk_d3d9.0.dylib";
+#else
+	static_assert(false, "Unknown d3d9 name");
+#endif
+}
 
 void Log_DX8_ErrorCode(HRESULT res)
 {
@@ -187,7 +205,7 @@ void Log_DX8_ErrorCode(HRESULT res)
 	WWASSERT(0);
 }
 
-void Non_Fatal_Log_DX8_ErrorCode(HRESULT res,const char * file,int line)
+void Non_Fatal_Log_DX8_ErrorCode(HRESULT res,[[maybe_unused]] const char * file,[[maybe_unused]] int line)
 {
 	const char *error_string = DXGetErrorStringA(res);
 
@@ -206,7 +224,7 @@ bool DX8Wrapper::Init(void * hwnd, bool lite)
 	** Initialize all variables!
 	*/
 	_Hwnd = (HWND)hwnd;
-	_MainThreadID=ThreadClass::_Get_Current_Thread_ID();
+	_MainThreadID=ThreadClass::Get_Current_Thread_ID();
 	WWDEBUG_SAY(("DX8Wrapper main thread: 0x%x\n",_MainThreadID));
 	CurRenderDevice = -1;
 	ResolutionWidth = DEFAULT_RESOLUTION_WIDTH;
@@ -238,11 +256,11 @@ bool DX8Wrapper::Init(void * hwnd, bool lite)
 	Invalidate_Cached_Render_States();
 
 	if (!lite) {
-		D3D8Lib = LoadLibraryA("D3D9.DLL");
+		D3D9Lib = SharedObject::LoadObject(Get_D3D9_Object_Name());
 
-		if (D3D8Lib == NULL) return false;
+		if (D3D9Lib == NULL) return false;
 
-		Direct3DCreate8Ptr = (Direct3DCreate8Type) GetProcAddress(D3D8Lib, "Direct3DCreate9");
+		Direct3DCreate8Ptr = reinterpret_cast<Direct3DCreate8Type>(D3D9Lib->LoadFunction("Direct3DCreate9"));
 		if (Direct3DCreate8Ptr) {
 
 			/*
@@ -284,7 +302,7 @@ void DX8Wrapper::Shutdown(void)
 			_PresentParameters.MultiSampleType = D3DMULTISAMPLE_NONE;
 			_PresentParameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
 			_PresentParameters.Windowed = IsWindowed;
-			_PresentParameters.EnableAutoDepthStencil = FALSE;
+			_PresentParameters.EnableAutoDepthStencil = false;
 			_PresentParameters.Flags=0;
 			_PresentParameters.BackBufferFormat = DesktopMode.Format;
 			Reset_Device();
@@ -309,9 +327,9 @@ void DX8Wrapper::Shutdown(void)
 	_RenderDeviceShortNameTable.Delete_All();
 	_RenderDeviceDescriptionTable.Delete_All();
 
-	if (D3D8Lib) {
-		FreeLibrary(D3D8Lib);
-		D3D8Lib = NULL;
+	if (D3D9Lib) {
+		delete D3D9Lib;
+		D3D9Lib = NULL;
 	}
 
 	IsInitted = false;
@@ -339,17 +357,18 @@ void DX8Wrapper::Do_Onetime_Device_Dependent_Inits(void)
 	Set_Default_Global_Render_States();
 }
 
-inline DWORD F2DW(float f) { return *((unsigned*)&f); }
+inline DWORD F2DW(float f) { return std::bit_cast<DWORD>(f); }
+static constexpr float DX8_ZBIAS_DEPTH_UNIT = 1.0f / 16777216.0f;
 void DX8Wrapper::Set_Default_Global_Render_States(void)
 {
 	DX8_THREAD_ASSERT();
 	const D3DCAPS9 &caps = Get_Current_Caps()->Get_DX8_Caps();
 
-	Set_DX8_Render_State(D3DRS_RANGEFOGENABLE, (caps.RasterCaps & D3DPRASTERCAPS_FOGRANGE) ? TRUE : FALSE);
+	Set_DX8_Render_State(D3DRS_RANGEFOGENABLE, (caps.RasterCaps & D3DPRASTERCAPS_FOGRANGE) ? true : false);
 	Set_DX8_Render_State(D3DRS_FOGTABLEMODE, D3DFOG_NONE);
 	Set_DX8_Render_State(D3DRS_FOGVERTEXMODE, D3DFOG_LINEAR);
 	Set_DX8_Render_State(D3DRS_SPECULARMATERIALSOURCE, D3DMCS_MATERIAL);
-	Set_DX8_Render_State(D3DRS_COLORVERTEX, TRUE);
+	Set_DX8_Render_State(D3DRS_COLORVERTEX, true);
 	Set_DX8_Render_State(D3DRS_DEPTHBIAS,0);
 	Set_DX8_Render_State(D3DRS_SLOPESCALEDEPTHBIAS,0);
 	Set_DX8_Texture_Stage_State(1, D3DTSS_BUMPENVLSCALE, F2DW(1.0f));
@@ -710,7 +729,7 @@ bool DX8Wrapper::Set_Render_Device(int dev, int width, int height, int bits, int
 	if (windowed != -1)	IsWindowed = (windowed != 0);
 
 	WWDEBUG_SAY(("Attempting Set_Render_Device: name: %s, width: %d, height: %d, windowed: %d\r\n",
-		_RenderDeviceNameTable[CurRenderDevice],ResolutionWidth,ResolutionHeight,(IsWindowed ? 1 : 0)));
+		_RenderDeviceNameTable[CurRenderDevice].Peek_Buffer(),ResolutionWidth,ResolutionHeight,(IsWindowed ? 1 : 0)));
 
 	WWASSERT(D3DDevice == NULL);
 
@@ -728,7 +747,7 @@ bool DX8Wrapper::Set_Render_Device(int dev, int width, int height, int bits, int
 	_PresentParameters.hDeviceWindow = _Hwnd;
 	_PresentParameters.Windowed = IsWindowed;
 
-	_PresentParameters.EnableAutoDepthStencil = TRUE;				// Driver will attempt to match Z-buffer depth
+	_PresentParameters.EnableAutoDepthStencil = true;				// Driver will attempt to match Z-buffer depth
 	_PresentParameters.Flags=0;											// We're not going to lock the backbuffer
 
 	_PresentParameters.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
@@ -850,7 +869,7 @@ bool DX8Wrapper::Set_Render_Device(int dev, int width, int height, int bits, int
 			rect.bottom = ResolutionHeight;
 			DWORD dwstyle = ::GetWindowLong (_Hwnd, GWL_STYLE);
 
-			AdjustWindowRect (&rect, dwstyle, FALSE);
+			AdjustWindowRect (&rect, dwstyle, false);
 
 			// Resize the window to fit this resolution
 			::SetWindowPos (_Hwnd,
@@ -1002,7 +1021,7 @@ const char * DX8Wrapper::Get_Render_Device_Name(int device_index)
 	return _RenderDeviceShortNameTable[device_index];
 }
 
-bool DX8Wrapper::Set_Device_Resolution(int width,int height,int bits,int windowed, bool resize_window)
+bool DX8Wrapper::Set_Device_Resolution(int width,int height,int /*bits*/,int /*windowed*/, bool /*resize_window*/)
 {
 	if (D3DDevice != NULL) {
 
@@ -1059,27 +1078,18 @@ bool DX8Wrapper::Registry_Save_Render_Device( const char * sub_key )
 	return Registry_Save_Render_Device(sub_key, CurRenderDevice, ResolutionWidth, ResolutionHeight, BitDepth, IsWindowed, TextureBitDepth);
 }
 
-bool DX8Wrapper::Registry_Save_Render_Device( const char *sub_key, int device, int width, int height, int depth, bool windowed, int texture_depth)
+bool DX8Wrapper::Registry_Save_Render_Device( const char */*sub_key*/, int device, int width, int height, int depth, bool windowed, int texture_depth)
 {
-	RegistryClass * registry = new RegistryClass( sub_key );
-	WWASSERT( registry );
+	INIClass ini(W3D_CONF_FILE);
 
-	if ( !registry->Is_Valid() ) {
-		delete registry;
-		WWDEBUG_SAY(( "Error getting Registry\n" ));
-		return false;
-	}
+	ini.Put_String(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_NAME, _RenderDeviceShortNameTable[device]);
+	ini.Put_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_WIDTH, width);
+	ini.Put_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_HEIGHT, height);
+	ini.Put_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_DEPTH, depth);
+	ini.Put_Bool(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_WINDOWED, windowed != 0);
+	ini.Put_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_TEXTURE_DEPTH, texture_depth);
 
-	registry->Set_String( VALUE_NAME_RENDER_DEVICE_NAME,
-		_RenderDeviceShortNameTable[device] );
-	registry->Set_Int( VALUE_NAME_RENDER_DEVICE_WIDTH,	width );
-	registry->Set_Int( VALUE_NAME_RENDER_DEVICE_HEIGHT, height );
-	registry->Set_Int( VALUE_NAME_RENDER_DEVICE_DEPTH, depth );
-	registry->Set_Int( VALUE_NAME_RENDER_DEVICE_WINDOWED, windowed );
-	registry->Set_Int( VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH, texture_depth );
-
-	delete registry;
-	return true;
+	return OpenW3D::Save_Config(ini);
 }
 
 bool DX8Wrapper::Registry_Load_Render_Device( const char * sub_key, bool resize_window )
@@ -1173,22 +1183,21 @@ bool DX8Wrapper::Registry_Load_Render_Device( const char * sub_key, bool resize_
 	return Set_Any_Render_Device();
 }
 
-bool DX8Wrapper::Registry_Load_Render_Device( const char * sub_key, char *device, int device_len, int &width, int &height, int &depth, int &windowed, int &texture_depth)
+bool DX8Wrapper::Registry_Load_Render_Device( const char * /*sub_key*/, char *device, int device_len, int &width, int &height, int &depth, int &windowed, int &texture_depth)
 {
-	RegistryClass registry( sub_key );
+	INIClass ini(W3D_CONF_FILE);
 
-	if ( registry.Is_Valid() ) {
-		registry.Get_String( VALUE_NAME_RENDER_DEVICE_NAME,
-			device, device_len);
+	if (ini.Is_Present(W3D_SECTION_RENDER)) {
+		ini.Get_String(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_NAME, "", device, device_len);
 
-		width =		registry.Get_Int( VALUE_NAME_RENDER_DEVICE_WIDTH, -1 );
-		height =		registry.Get_Int( VALUE_NAME_RENDER_DEVICE_HEIGHT, -1 );
-		depth =		registry.Get_Int( VALUE_NAME_RENDER_DEVICE_DEPTH, -1 );
-		windowed =	registry.Get_Int( VALUE_NAME_RENDER_DEVICE_WINDOWED, -1 );
-		texture_depth = registry.Get_Int( VALUE_NAME_RENDER_DEVICE_TEXTURE_DEPTH, -1 );
+		width =	ini.Get_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_WIDTH, -1);
+		height = ini.Get_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_HEIGHT, -1);
+		depth =	ini.Get_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_DEPTH, -1);
+		windowed = ini.Get_Bool(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_WINDOWED, false);
+		texture_depth = ini.Get_Int(W3D_SECTION_RENDER, VALUE_INI_RENDER_DEVICE_TEXTURE_DEPTH, -1);
 		return true;
 	}
-	*device=0;
+	*device='\0';
 	width=-1;
 	height=-1;
 	depth=-1;
@@ -1198,7 +1207,7 @@ bool DX8Wrapper::Registry_Load_Render_Device( const char * sub_key, char *device
 }
 
 
-bool DX8Wrapper::Find_Color_And_Z_Mode(int resx,int resy,int bitdepth,D3DFORMAT * set_colorbuffer,D3DFORMAT * set_zmode)
+bool DX8Wrapper::Find_Color_And_Z_Mode(int resx,int resy,int /*bitdepth*/,D3DFORMAT * set_colorbuffer,D3DFORMAT * set_zmode)
 {
 	static D3DFORMAT _formats16[] =
 	{
@@ -1437,7 +1446,7 @@ unsigned DX8Wrapper::Get_Last_Frame_Texture_Changes()			{ return last_frame_text
 unsigned DX8Wrapper::Get_Last_Frame_Render_State_Changes()	{ return last_frame_render_state_changes; }
 unsigned DX8Wrapper::Get_Last_Frame_Texture_Stage_State_Changes()	{ return last_frame_texture_stage_state_changes; }
 unsigned DX8Wrapper::Get_Last_Frame_DX8_Calls()					{ return last_frame_number_of_DX8_calls; }
-unsigned long DX8Wrapper::Get_FrameCount(void) {return FrameCount;}
+unsigned int DX8Wrapper::Get_FrameCount(void) {return FrameCount;}
 
 void DX8_Assert()
 {
@@ -1788,7 +1797,7 @@ void DX8Wrapper::Draw(
 
 #ifdef MESH_RENDER_SNAPSHOT_ENABLED
 	if (WW3D::Is_Snapshot_Activated()) {
-		unsigned long passes=0;
+		DWORD passes=0;
 		SNAPSHOT_SAY(("ValidateDevice: "));
 		HRESULT res=D3DDevice->ValidateDevice(&passes);
 		switch (res) {
@@ -2175,7 +2184,7 @@ IDirect3DTexture9 * DX8Wrapper::_Create_DX8_Texture(
 		else {
 			StringClass format_name(0,true);
 			Get_WW3D_Format_Name(format, format_name);
-			WWDEBUG_SAY(("...Texture creation failed. (%d x %d, format: %s, mips: %d\n",width,height,format_name,mip_level_count));
+			WWDEBUG_SAY(("...Texture creation failed. (%d x %d, format: %s, mips: %d\n",width,height,format_name.Peek_Buffer(),mip_level_count));
 		}
 
 	}
@@ -2689,8 +2698,8 @@ DX8Wrapper::Create_Additional_Swap_Chain (HWND render_window)
 	params.MultiSampleType						= D3DMULTISAMPLE_NONE;
 	params.SwapEffect								= D3DSWAPEFFECT_FLIP; /* or D3DSWAPEFFECT_COPY?  */
 	params.hDeviceWindow							= render_window;
-	params.Windowed								= TRUE;
-	params.EnableAutoDepthStencil				= TRUE;
+	params.Windowed								= true;
+	params.EnableAutoDepthStencil				= true;
 	params.AutoDepthStencilFormat				= _PresentParameters.AutoDepthStencilFormat;
 	params.Flags									= 0;
 	params.FullScreen_RefreshRateInHz			= D3DPRESENT_RATE_DEFAULT;
@@ -2734,7 +2743,7 @@ void DX8Wrapper::Set_Gamma(float gamma,float bright,float contrast,bool calibrat
 	DWORD flag=(calibrate?D3DSGR_CALIBRATE:D3DSGR_NO_CALIBRATION);
 
 	D3DGAMMARAMP ramp;
-	float			 limit;	
+	float			 limit;
 
 	// IML: I'm not really sure what the intent of the 'limit' variable is. It does not produce useful results for my purposes.
 	if (uselimit) {
@@ -2969,7 +2978,7 @@ void DX8Wrapper::Get_DX8_Render_State_Value_Name(StringClass& name, D3DRENDERSTA
 	case D3DRS_POINTSCALEENABLE:
 	case D3DRS_MULTISAMPLEANTIALIAS:
 	case D3DRS_INDEXEDVERTEXBLENDENABLE:
-		name=value ? "TRUE" : "FALSE";
+		name=value ? "true" : "false";
 		break;
 
 	case D3DRS_SRCBLEND:
@@ -3002,10 +3011,11 @@ void DX8Wrapper::Get_DX8_Render_State_Value_Name(StringClass& name, D3DRENDERSTA
 	case D3DRS_POINTSCALE_C:
 	case D3DRS_POINTSIZE_MAX:
 	case D3DRS_TWEENFACTOR:
+	case D3DRS_DEPTHBIAS:
+	case D3DRS_SLOPESCALEDEPTHBIAS:
 		name.Format("%f",*(float*)&value);
 		break;
 
-	case D3DRS_DEPTHBIAS:
 	case D3DRS_STENCILREF:
 		name.Format("%d",value);
 		break;
@@ -3402,9 +3412,9 @@ void DX8Wrapper::Set_DX8_ZBias(int zbias)
 		DX8CALL(SetTransform(D3DTS_PROJECTION,(D3DMATRIX*)&tmp));
 	}
 	else {
-		//float ZBias_float = zbias / 8.0f;
-		Set_DX8_Render_State (D3DRS_DEPTHBIAS, ZBias);
-		Set_DX8_Render_State (D3DRS_SLOPESCALEDEPTHBIAS, ZBias);
+		const float depth_bias = (ZBias == 0) ? 0.0f : -static_cast<float>(ZBias) * DX8_ZBIAS_DEPTH_UNIT;
+		Set_DX8_Render_State (D3DRS_DEPTHBIAS, F2DW(depth_bias));
+		Set_DX8_Render_State (D3DRS_SLOPESCALEDEPTHBIAS, F2DW(0.0f));
 	}
 }
 
@@ -3419,7 +3429,7 @@ void DX8Wrapper::Set_DX8_Render_State(D3DRENDERSTATETYPE state, unsigned value)
 		Get_DX8_Render_State_Value_Name(value_name,state,value);
 		SNAPSHOT_SAY(("DX8 - SetRenderState(state: %s, value: %s)\n",
 			Get_DX8_Render_State_Name(state),
-			value_name));
+			value_name.Peek_Buffer()));
 	}
 #endif
 

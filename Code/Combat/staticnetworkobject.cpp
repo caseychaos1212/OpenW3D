@@ -519,7 +519,7 @@ DoorNetworkObjectClass::Get_Description (StringClass & description)
 		default:								DIE;
 	}
 
-   line.Format("DoorState:  %d (%s)\n", DoorState, state_string);
+   line.Format("DoorState:  %d (%s)\n", DoorState, state_string.Peek_Buffer());
 	description += line;
 
 	if (PhysObj != NULL) {
@@ -718,7 +718,7 @@ ElevatorNetworkObjectClass::Get_Description (StringClass & description)
 		default:													DIE;
 	}
 
-	line.Format("State:            %d (%s)\n", State, state_string);
+	line.Format("State:            %d (%s)\n", State, state_string.Peek_Buffer());
 	description += line;
 
 	//
@@ -731,7 +731,7 @@ ElevatorNetworkObjectClass::Get_Description (StringClass & description)
 		default:															DIE;
 	}
 
-	line.Format("DoorStateTop:     %d (%s)\n", DoorStateTop, state_string);
+	line.Format("DoorStateTop:     %d (%s)\n", DoorStateTop, state_string.Peek_Buffer());
 	description += line;
 
 	//
@@ -744,7 +744,7 @@ ElevatorNetworkObjectClass::Get_Description (StringClass & description)
 		default:															DIE;
 	}
 
-	line.Format("DoorStateBottom:  %d (%s)\n", DoorStateBottom, state_string);
+	line.Format("DoorStateBottom:  %d (%s)\n", DoorStateBottom, state_string.Peek_Buffer());
 		description += line;
 
 
@@ -799,13 +799,13 @@ DSAPONetworkObjectClass::Initialize (StaticAnimPhysClass *phys_obj)
 	//	Get a pointer to the object
 	//
 	if (PhysObj != NULL) {
-		DamageableStaticPhysClass *phys_obj = PhysObj->As_DamageableStaticPhysClass ();
-		if (phys_obj != NULL) {
+		DamageableStaticPhysClass *dsphys_obj = PhysObj->As_DamageableStaticPhysClass ();
+		if (dsphys_obj != NULL) {
 
 			//
 			//	Copy the object's state
 			//
-			Health = phys_obj->DefenseObject.Get_Health ();
+			Health = dsphys_obj->DefenseObject.Get_Health ();
 		}
 	}
 

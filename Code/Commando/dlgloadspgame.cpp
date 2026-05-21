@@ -37,7 +37,7 @@
 
 #include "dlgloadspgame.h"
 #include "listctrl.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "gamedata.h"
 #include "gamemode.h"
 #include "gameinitmgr.h"
@@ -104,16 +104,16 @@ LoadSPGameMenuClass::On_Init_Dialog (void)
 		//start_index = Build_List ("data\\*.mix", start_index);
 		//start_index = Build_List ("data\\m??_*.mix", start_index);
 		StringClass file_filter;
-		file_filter = "data\\m*.mix";
+		file_filter = "data/m*.mix";
 
 #ifdef WWDEBUG
 		if (cDevOptions::FilterLevelFiles.Is_False()) {
-			file_filter = "data\\*.mix";
+			file_filter = "data/mix";
 		}
 #endif // WWDEBUG
 
 		start_index = Build_List (file_filter, start_index);
-		Build_List ("data\\save\\*.sav", start_index);
+		Build_List ("data/save/*.sav", start_index);
 
 		//
 		//	Sort the list and select the first entry
@@ -145,7 +145,7 @@ LoadSPGameMenuClass::Build_List (const char *search_string, int start_index)
 	ListCtrlClass *list_ctrl = (ListCtrlClass *)Get_Dlg_Item (IDC_LOAD_GAME_LIST_CTRL);
 
 	WIN32_FIND_DATAA find_info	= { 0 };
-	BOOL keep_going				= TRUE;
+	BOOL keep_going				= true;
 	HANDLE file_find			= NULL;
 
 	//
@@ -159,11 +159,11 @@ LoadSPGameMenuClass::Build_List (const char *search_string, int start_index)
 		//	Strip the search mask from the string
 		//
 		path_name	= search_string;
-		int len		= ::strlen (search_string);
-		int index	= search_dir - search_string;
-		path_name.Erase (index, len - index);
+		const size_t len		= ::strlen (search_string);
+		const size_t index_offset	= static_cast<size_t>(search_dir - search_string);
+		path_name.Erase (static_cast<int>(index_offset), static_cast<int>(len - index_offset));
 	}
-	
+
 	//
 	//	Build a list of all the saved games we know about
 	//
@@ -211,7 +211,7 @@ LoadSPGameMenuClass::Build_List (const char *search_string, int start_index)
 					case 13:	description = TRANSLATE( IDS_LoadScreen_MX0_Title ); break;
 				}
 			}
-			
+
 			//
 			//	Get the time this file was last written
 			//
@@ -225,8 +225,8 @@ LoadSPGameMenuClass::Build_List (const char *search_string, int start_index)
 			//
 			WideStringClass time_string;
 			WideStringClass date_string;
-			time_string.Format (L"%d:%02d:%02d", system_time.wHour, system_time.wMinute, system_time.wSecond);
-			date_string.Format (L"%d/%d/%d", system_time.wMonth, system_time.wDay, system_time.wYear);
+			time_string.Format (U_CHAR("%d:%02d:%02d"), system_time.wHour, system_time.wMinute, system_time.wSecond);
+			date_string.Format (U_CHAR("%d/%d/%d"), system_time.wMonth, system_time.wDay, system_time.wYear);
 
 			//
 			//	Add this entry to the list control
@@ -243,9 +243,9 @@ LoadSPGameMenuClass::Build_List (const char *search_string, int start_index)
 				//	Build the full path to the file
 				//
 				StringClass file_path = path_name;
-				file_path += "\\";
+				file_path += "/";
 				file_path += find_info.cFileName;
-				
+
 				list_ctrl->Set_Entry_Data (item_index, 0, (uintptr_t)new FILETIME(local_time));
 				list_ctrl->Set_Entry_Data (item_index, 1, (uintptr_t)new StringClass(file_path));
 				list_ctrl->Set_Entry_Data (item_index, 2, (uintptr_t)new StringClass(find_info.cFileName));
@@ -253,8 +253,8 @@ LoadSPGameMenuClass::Build_List (const char *search_string, int start_index)
 		}
 	}
 
-	if (file_find != INVALID_HANDLE_VALUE) {			  
-		::FindClose (file_find); 
+	if (file_find != INVALID_HANDLE_VALUE) {
+		::FindClose (file_find);
 	}
 
 	return index;
@@ -265,7 +265,7 @@ LoadSPGameMenuClass::Build_List (const char *search_string, int start_index)
 //	Is_Game_Allowed
 //
 ////////////////////////////////////////////////////////////////
-bool		
+bool
 LoadSPGameMenuClass::Is_Game_Allowed
 (
 	const char * filename
@@ -294,7 +294,7 @@ LoadSPGameMenuClass::Is_Game_Allowed
 //	Get_Game_Rank
 //
 ////////////////////////////////////////////////////////////////
-int	
+int
 LoadSPGameMenuClass::Get_Game_Rank
 (
 	const char * filename
@@ -321,7 +321,7 @@ LoadSPGameMenuClass::Get_Game_Rank
 //	Set_Game_Rank
 //
 ////////////////////////////////////////////////////////////////
-void	
+void
 LoadSPGameMenuClass::Set_Game_Rank
 (
 	const char * filename,
@@ -403,7 +403,7 @@ LoadSPGameMenuClass::On_ListCtrl_Delete_Entry
 )
 {
 	if (ctrl_id == IDC_LOAD_GAME_LIST_CTRL) {
-		
+
 		//
 		//	Remove the data we associated with this entry
 		//
@@ -413,18 +413,18 @@ LoadSPGameMenuClass::On_ListCtrl_Delete_Entry
 		list_ctrl->Set_Entry_Data (item_index, 0, 0);
 		list_ctrl->Set_Entry_Data (item_index, 1, 0);
 		list_ctrl->Set_Entry_Data (item_index, 2, 0);
-		
+
 		//
 		//	Free the data
 		//
 		if (file_time != NULL) {
 			delete file_time;
 		}
-		
+
 		if (path != NULL) {
 			delete path;
 		}
-				
+
 		if (filename != NULL) {
 			delete filename;
 		}
@@ -439,7 +439,7 @@ LoadSPGameMenuClass::On_ListCtrl_Delete_Entry
 //	LoadListSortCallback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 LoadSPGameMenuClass::LoadListSortCallback (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param)
 {
 	int retval = 0;
@@ -451,7 +451,7 @@ LoadSPGameMenuClass::LoadListSortCallback (ListCtrlClass *list_ctrl, int item_in
 	BOOL	sort_ascending	= HIWORD (user_param);
 
 	if (sort_col_index == 0 || sort_col_index == 1) {
-		
+
 		//
 		//	Sort by time
 		//
@@ -460,13 +460,13 @@ LoadSPGameMenuClass::LoadListSortCallback (ListCtrlClass *list_ctrl, int item_in
 		retval = ::CompareFileTime (file_time1, file_time2);
 
 	} else {
-		
+
 		//
 		//	Sort by name
 		//
-		const wchar_t *name1 = list_ctrl->Get_Entry_Text (item_index1, 2);
-		const wchar_t *name2 = list_ctrl->Get_Entry_Text (item_index2, 2);
-		retval = ::wcsicmp (name1, name2);
+		const unichar_t *name1 = list_ctrl->Get_Entry_Text (item_index1, 2);
+		const unichar_t *name2 = list_ctrl->Get_Entry_Text (item_index2, 2);
+		retval = ::u_strcasecmp (name1, name2, U_COMPARE_CODE_POINT_ORDER);
 	}
 
 	//
@@ -486,7 +486,7 @@ LoadSPGameMenuClass::LoadListSortCallback (ListCtrlClass *list_ctrl, int item_in
 //
 ////////////////////////////////////////////////////////////////
 void
-LoadSPGameMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+LoadSPGameMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
@@ -594,10 +594,10 @@ LoadSPGameMenuClass::Load_Game (void)
 void
 LoadSPGameMenuClass::On_ListCtrl_Sel_Change
 (
-	ListCtrlClass *list_ctrl,
-	int				ctrl_id,
-	int				old_index,
-	int				new_index
+	ListCtrlClass * /* list_ctrl */,
+	int				/* ctrl_id */,
+	int				/* old_index */,
+	int				/* new_index */
 )
 {
 	Update_Button_State ();
@@ -631,14 +631,14 @@ LoadSPGameMenuClass::Update_Button_State (void)
 
 		//
 		//	Get the filename associated with this entry
-		//		
+		//
 		if (list_ctrl->Get_Entry_Data (item_index, 0) != 0) {
 			StringClass filename = ((StringClass *)list_ctrl->Get_Entry_Data (item_index, 1))->Peek_Buffer ();
-			
+
 			//
 			//	Check to see if this is a saved game or a level file.
 			//
-			int len = filename.Get_Length ();
+			const size_t len = filename.Get_Length ();
 			if (len >= 4 && ::stricmp ((filename.Peek_Buffer () + (len - 4)), ".mix") != 0) {
 				enable = true;
 			}
@@ -647,7 +647,7 @@ LoadSPGameMenuClass::Update_Button_State (void)
 		//
 		//	Change the enable state of the button
 		//
-		Get_Dlg_Item (IDC_DELETE_GAME_BUTTON)->Enable (enable);	
+		Get_Dlg_Item (IDC_DELETE_GAME_BUTTON)->Enable (enable);
 	}
 
 	return ;
@@ -662,9 +662,9 @@ LoadSPGameMenuClass::Update_Button_State (void)
 void
 LoadSPGameMenuClass::On_ListCtrl_DblClk
 (
-	ListCtrlClass *list_ctrl,
-	int				ctrl_id,
-	int				item_index
+	ListCtrlClass * /* list_ctrl */,
+	int				/* ctrl_id */,
+	int				/* item_index */
 )
 {
 	Load_Game ();
@@ -696,12 +696,12 @@ LoadSPGameMenuClass::Delete_Game (bool prompt)
 
 		//
 		//	Determine what filename this entry refers to
-		//		
+		//
 		if (list_ctrl->Get_Entry_Data (item_index, 0) != 0) {
 			StringClass filename = ((StringClass *)list_ctrl->Get_Entry_Data (item_index, 1))->Peek_Buffer ();
 
 			// Never delete .MIX files
-			int len = filename.Get_Length ();
+			const size_t len = filename.Get_Length ();
 			if (len >= 4 && ::stricmp ((filename.Peek_Buffer () + (len - 4)), ".mix") != 0) {
 
 				if (prompt) {
@@ -745,7 +745,7 @@ void
 LoadSPGameMenuClass::HandleNotification (DlgMsgBoxEvent &event)
 {
 	if (event.Get_User_Data () == MBEVENT_DELETE_PROMPT) {
-		
+
 		//
 		//	The user has confirmed the delete, so delete the file
 		//

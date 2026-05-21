@@ -236,7 +236,7 @@ static BOOL CALLBACK ClipboardDlgProc
 	case WM_INITDIALOG:
 		the_clipboard.Init(hWnd);
 		break;
-	
+
 	case WM_DESTROY:
 		the_clipboard.Destroy(hWnd);
 		break;
@@ -268,9 +268,9 @@ static BOOL CALLBACK ClipboardDlgProc
 		break;
 
 	default:
-		return FALSE;
+		return false;
 	}
-	return TRUE; 
+	return true;
 }
 
 //----------------------------------------------------------------------------
@@ -318,8 +318,8 @@ static BOOL CALLBACK Pose_Name_Message_Handler
 
 		last_frame_spin->SetResetValue ( current_frame );
 
-		return TRUE;
-	
+		return true;
+
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
@@ -339,11 +339,11 @@ static BOOL CALLBACK Pose_Name_Message_Handler
 			EndDialog ( hWnd, 0 );
 			break;
 		}
-		return TRUE;
+		return true;
 
 	case CC_SPINNER_CHANGE:
 
-		// Do checking on the range spinners to make sure the low value never 
+		// Do checking on the range spinners to make sure the low value never
 		// exceeds the high value.
 
 		switch ( LOWORD(wParam) )
@@ -352,7 +352,7 @@ static BOOL CALLBACK Pose_Name_Message_Handler
 			if ( first_frame_spin->GetIVal () > last_frame_spin->GetIVal () )
 			{
 				last_frame_spin->SetValue ( first_frame_spin->GetIVal (),
-					FALSE );
+					false );
 			}
 			break;
 
@@ -360,15 +360,15 @@ static BOOL CALLBACK Pose_Name_Message_Handler
 			if ( last_frame_spin->GetIVal () < first_frame_spin->GetIVal () )
 			{
 				first_frame_spin->SetValue ( last_frame_spin->GetIVal (),
-					FALSE );
+					false );
 			}
 			break;
 		}
 
-		return TRUE;
+		return true;
 	}
 
-	return FALSE; 
+	return false;
 }
 
 //----------------------------------------------------------------------------
@@ -378,7 +378,7 @@ static BOOL CALLBACK Pose_Name_Message_Handler
 Clipboard_Class::Clipboard_Class()
 {
 	iu = NULL;
-	ip = NULL;	
+	ip = NULL;
 	hPanel = NULL;
 	first_pose = NULL;
 }
@@ -401,7 +401,7 @@ Clipboard_Class::~Clipboard_Class ()
 // Clipboard_Class::BeginEditParams
 //----------------------------------------------------------------------------
 
-void Clipboard_Class::BeginEditParams(Interface *ip,IUtil *iu) 
+void Clipboard_Class::BeginEditParams(Interface *ip,IUtil *iu)
 {
 	this->iu = iu;
 	this->ip = ip;
@@ -414,12 +414,12 @@ void Clipboard_Class::BeginEditParams(Interface *ip,IUtil *iu)
 		0
 	);
 }
-	
+
 //----------------------------------------------------------------------------
 // Clipboard_Class::EndEditParams
 //----------------------------------------------------------------------------
 
-void Clipboard_Class::EndEditParams ( Interface *ip, IUtil *iu ) 
+void Clipboard_Class::EndEditParams ( Interface *ip, IUtil *iu )
 {
 	this->iu = NULL;
 	this->ip = NULL;
@@ -435,11 +435,11 @@ void Clipboard_Class::SelectionSetChanged ( Interface * ip, IUtil * iu )
 {
 	if ( ip->GetSelNodeCount () == 0 )
 	{
-		EnableWindow ( GetDlgItem ( hPanel, ID_CREATE ), FALSE );
+		EnableWindow ( GetDlgItem ( hPanel, ID_CREATE ), false );
 	}
 	else
 	{
-		EnableWindow ( GetDlgItem ( hPanel, ID_CREATE ), TRUE );
+		EnableWindow ( GetDlgItem ( hPanel, ID_CREATE ), true );
 	}
 }
 
@@ -455,22 +455,22 @@ void Clipboard_Class::Init ( HWND hWnd )
 
 	if ( ip->GetSelNodeCount () == 0 )
 	{
-		EnableWindow ( GetDlgItem ( hWnd, ID_CREATE ), FALSE );
+		EnableWindow ( GetDlgItem ( hWnd, ID_CREATE ), false );
 	}
 	else
 	{
-		EnableWindow ( GetDlgItem ( hWnd, ID_CREATE ), TRUE );
+		EnableWindow ( GetDlgItem ( hWnd, ID_CREATE ), true );
 	}
 
 	if ( Is_Empty () )
 	{
-		EnableWindow ( GetDlgItem ( hWnd, ID_PASTE  ), FALSE );
-		EnableWindow ( GetDlgItem ( hWnd, ID_DELETE ), FALSE );
+		EnableWindow ( GetDlgItem ( hWnd, ID_PASTE  ), false );
+		EnableWindow ( GetDlgItem ( hWnd, ID_DELETE ), false );
 	}
 	else
 	{
-		EnableWindow ( GetDlgItem ( hWnd, ID_PASTE  ), TRUE );
-		EnableWindow ( GetDlgItem ( hWnd, ID_DELETE ), TRUE );
+		EnableWindow ( GetDlgItem ( hWnd, ID_PASTE  ), true );
+		EnableWindow ( GetDlgItem ( hWnd, ID_DELETE ), true );
 	}
 }
 
@@ -517,8 +517,8 @@ void Clipboard_Class::Create ( HWND hWnd )
 	SendDlgItemMessage ( hWnd, IDC_POSE_LIST, CB_SETCURSEL, 0, 0 );
 	Update_Object_List ( hWnd );
 
-	EnableWindow ( GetDlgItem ( hWnd, ID_PASTE  ), TRUE );
-	EnableWindow ( GetDlgItem ( hWnd, ID_DELETE ), TRUE );
+	EnableWindow ( GetDlgItem ( hWnd, ID_PASTE  ), true );
+	EnableWindow ( GetDlgItem ( hWnd, ID_DELETE ), true );
 }
 
 //----------------------------------------------------------------------------
@@ -591,8 +591,8 @@ void Clipboard_Class::Delete ( HWND hWnd )
 
 	if ( Is_Empty () )
 	{
-		EnableWindow ( GetDlgItem ( hWnd, ID_PASTE  ), FALSE );
-		EnableWindow ( GetDlgItem ( hWnd, ID_DELETE ), FALSE );
+		EnableWindow ( GetDlgItem ( hWnd, ID_PASTE  ), false );
+		EnableWindow ( GetDlgItem ( hWnd, ID_DELETE ), false );
 	}
 }
 
@@ -754,10 +754,10 @@ void Pose::Paste_Keys ( Interface * ip )
 
 					if ( c != NULL )
 					{
-						c->EnableORTs (FALSE);
+						c->EnableORTs (false);
 						Quat orientation = p->orientation (frame);
 						c->SetValue ( key_time, & orientation );
-						c->EnableORTs (TRUE);
+						c->EnableORTs (true);
 					}
 
 					// Paste position keys.
@@ -766,10 +766,10 @@ void Pose::Paste_Keys ( Interface * ip )
 
 					if ( c != NULL )
 					{
-						c->EnableORTs (FALSE);
+						c->EnableORTs (false);
 						Point3 position = p->position (frame);
 						c->SetValue ( key_time, & position );
-						c->EnableORTs (TRUE);
+						c->EnableORTs (true);
 					}
 				}
 			}

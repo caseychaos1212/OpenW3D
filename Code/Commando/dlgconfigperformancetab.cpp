@@ -34,8 +34,8 @@
  * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include "renegadedialog.h"
 #include "dlgconfigperformancetab.h"
-#include "resource.h"
 #include "registry.h"
 #include "comboboxctrl.h"
 #include "sliderctrl.h"
@@ -50,6 +50,8 @@
 #include "_globals.h"
 #include "translatedb.h"
 #include "string_ids.h"
+#include "ini.h"
+#include "openw3d.h"
 #include <algorithm>
 
 
@@ -70,7 +72,7 @@ typedef struct _PERFORMANCE_SETTING
 const int MAX_PERFORMANCE_LEVELS	= 4;
 const int MAX_EXPERT_OPTIONS		= 7;
 
-PERFORMANCE_SETTING _PerformanceLevels[MAX_PERFORMANCE_LEVELS][MAX_EXPERT_OPTIONS] = 
+PERFORMANCE_SETTING _PerformanceLevels[MAX_PERFORMANCE_LEVELS][MAX_EXPERT_OPTIONS] =
 {
 	//
 	//	Low detail
@@ -128,6 +130,16 @@ const char *VALUE_NAME_TEXTURE_RES		= "Texture_Resolution";
 const char *VALUE_NAME_PARTICLE_DETAIL	= "Particle_Detail";
 const char *VALUE_NAME_NPATCHES			= "NPatches";
 
+
+const char *VALUE_INI_DYN_LOD			= "DynamicLODBudget";
+const char *VALUE_INI_STATIC_LOD		= "StaticLODBudget";
+const char *VALUE_INI_DYN_SHADOWS		= "DynamicProjectors";
+const char *VALUE_INI_SHADOW_MODE		= "ShadowMode";
+const char *VALUE_INI_STATIC_SHADOWS	= "StaticProjectors";
+const char *VALUE_INI_TEXTURE_RES		= "TextureResolution";
+const char *VALUE_INI_PARTICLE_DETAIL	= "ParticleDetail";
+const char *VALUE_INI_NPATCHES			= "NPatches";
+
 const int MAX_LOD_HIGH	= 10000;
 const int MAX_LOD_MED	= 5000;
 const int MAX_LOD_LOW	= 0;
@@ -139,7 +151,7 @@ const int MAX_LOD_LOW	= 0;
 //
 ////////////////////////////////////////////////////////////////
 DlgConfigPerformanceTabClass::DlgConfigPerformanceTabClass (void)	:
-	ChildDialogClass (IDD_CONFIG_PERFORMANCE)
+	ChildDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_CONFIG_PERFORMANCE))
 {
 	return ;
 }
@@ -261,17 +273,17 @@ DlgConfigPerformanceTabClass::Setup_Controls (void)
 	((SliderCtrlClass *)Get_Dlg_Item (IDC_SURFACE_DETAIL_SLIDER))->Set_Range (0, 2);
 	((SliderCtrlClass *)Get_Dlg_Item (IDC_PARTICLE_DETAIL_SLIDER))->Set_Range (0, 2);
 
-	const wchar_t *PRELIT_MODE_NAMES[] =
+	const unichar_t *PRELIT_MODE_NAMES[] =
 	{
 		TRANSLATE (IDS_MENU_VERTEX),
 		TRANSLATE (IDS_MENU_MP_LIGHTMAPS),
 		TRANSLATE (IDS_MENU_MT_LIGHTMAPS)
 	};
-	
+
 	Set_Dlg_Item_Text (IDC_LIGHTING_MODE, PRELIT_MODE_NAMES [WW3D::Get_Prelit_Mode()]);
 	Enable_Dlg_Item (IDC_LIGHTING_MODE,	false);
 
-	const wchar_t *TEXTURE_FILTER_NAMES[] =
+	const unichar_t *TEXTURE_FILTER_NAMES[] =
 	{
 		TRANSLATE (IDS_BILINEAR),
 		TRANSLATE (IDS_TRILINEAR),
@@ -308,13 +320,13 @@ DlgConfigPerformanceTabClass::Load_Values (void)
 	SliderCtrlClass *particle_slider			= (SliderCtrlClass *)Get_Dlg_Item (IDC_PARTICLE_DETAIL_SLIDER);
 
 	//
-	//	Attempt to open the registry key
+	//	Attempt to open the config file
 	//
-	RegistryClass registry (APPLICATION_SUB_KEY_NAME_SYSTEM_SETTINGS);
-	if (registry.Is_Valid ()) {
+	INIClass ini(W3D_CONF_FILE);
+	if (ini.Is_Present(W3D_SECTION_SYSTEM)) {
 
 		//
-		//	Read the values from the registry
+		//	Read the values from the config file
 		//
 		int static_shadows	= registry.Get_Int (VALUE_NAME_STATIC_SHADOWS, 1);
 		int shadow_mode		= registry.Get_Int (VALUE_NAME_SHADOW_MODE, PhysicsWorldClass::SHADOW_MODE_BLOBS_PLUS);
@@ -428,7 +440,7 @@ DlgConfigPerformanceTabClass::Determine_Performance_Setting (void)
 //
 //////////////////////////////////////////////////////////////////////
 void
-DlgConfigPerformanceTabClass::On_Command (int ctrl_id, int message_id, DWORD param)
+DlgConfigPerformanceTabClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
@@ -550,7 +562,7 @@ DlgConfigPerformanceTabClass::Update_Expert_Controls (int level)
 void
 DlgConfigPerformanceTabClass::On_SliderCtrl_Pos_Changed
 (
-	SliderCtrlClass *	slider_ctrl,
+	SliderCtrlClass *	/* slider_ctrl */,
 	int					ctrl_id,
 	int					new_pos
 )
@@ -576,23 +588,22 @@ DlgConfigPerformanceTabClass::On_Apply (void)
 	SliderCtrlClass *texture_slider			= (SliderCtrlClass *)Get_Dlg_Item (IDC_TEXTURE_DETAIL_SLIDER);
 	SliderCtrlClass *surface_effect_slider = (SliderCtrlClass *)Get_Dlg_Item (IDC_SURFACE_DETAIL_SLIDER);
 	SliderCtrlClass *particle_slider			= (SliderCtrlClass *)Get_Dlg_Item (IDC_PARTICLE_DETAIL_SLIDER);
-	
-	//
-	//	Attempt to open the registry key
-	//
-	RegistryClass registry (APPLICATION_SUB_KEY_NAME_SYSTEM_SETTINGS);
-	if (registry.Is_Valid ()) {
 
-		//
-		//	Get the current settings from the dialog
-		//
-		int geometry_detail	= geometry_slider->Get_Pos ();
-		int shadow_mode		= char_shadows_slider->Get_Pos ();
-		int texture_red		= texture_slider->Get_Pos ();
-		int surface_effect	= surface_effect_slider->Get_Pos ();
-		int particle_detail	= particle_slider->Get_Pos ();
-		int static_shadows	= Is_Dlg_Button_Checked (IDC_TERRAIN_SHADOW_CHECK);
-		int npatches			= Is_Dlg_Button_Checked (IDC_NPATCH_CHECK);
+	//
+	//	Attempt to open the config file
+	//
+	INIClass ini(W3D_CONF_FILE);
+
+	//
+	//	Get the current settings from the dialog
+	//
+	int geometry_detail	= geometry_slider->Get_Pos ();
+	int shadow_mode		= char_shadows_slider->Get_Pos ();
+	int texture_red		= texture_slider->Get_Pos ();
+	int surface_effect	= surface_effect_slider->Get_Pos ();
+	int particle_detail	= particle_slider->Get_Pos ();
+	int static_shadows	= Is_Dlg_Button_Checked (IDC_TERRAIN_SHADOW_CHECK);
+	int npatches			= Is_Dlg_Button_Checked (IDC_NPATCH_CHECK);
 
 		//
 		//	Determine a good LOD budget to use
@@ -643,5 +654,41 @@ DlgConfigPerformanceTabClass::On_Apply (void)
 		SurfaceEffectsManager::Set_Mode ((SurfaceEffectsManager::MODE)surface_effect);
 	}
 
+	//
+	//	Store the values in the config file
+	//
+	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_DYN_LOD, lod_budget);
+	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_STATIC_LOD, lod_budget);
+
+	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_DYN_SHADOWS, (shadow_mode != PhysicsSceneClass::SHADOW_MODE_NONE));
+	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_STATIC_SHADOWS, static_shadows);
+
+	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_SHADOW_MODE,		shadow_mode);
+	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_TEXTURE_RES,		std::max (2 - texture_red, 0));
+	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_PARTICLE_DETAIL, particle_detail);
+
+
+
+	if (DX8Wrapper::Get_Current_Caps() && DX8Wrapper::Get_Current_Caps()->Support_NPatches ()) {
+		ini.Put_Bool (W3D_SECTION_SYSTEM, VALUE_INI_NPATCHES,	npatches != 0);
+	}
+
+	//
+	//	Pass the values onto the game
+	//
+	COMBAT_SCENE->Set_Polygon_Budgets (lod_budget, lod_budget);
+	COMBAT_SCENE->Enable_Dynamic_Projectors ((shadow_mode != PhysicsSceneClass::SHADOW_MODE_NONE));
+	COMBAT_SCENE->Enable_Static_Projectors ((static_shadows != 0));
+	// Note! It is important to invalidate all textures when
+	// changing the amount of render targets, as render target
+	// creation may have problems if the card is running low on
+	// texture memory!
+	if (COMBAT_SCENE->Get_Shadow_Mode()!=(PhysicsSceneClass::ShadowEnum)shadow_mode) {
+		WW3D::_Invalidate_Textures();
+		COMBAT_SCENE->Set_Shadow_Mode ((PhysicsSceneClass::ShadowEnum)shadow_mode);
+	}
+	WW3D::Set_Texture_Reduction (std::max (2 - texture_red, 0));
+	SurfaceEffectsManager::Set_Mode ((SurfaceEffectsManager::MODE)surface_effect);
+	OpenW3D::Save_Config(ini);
 	return true;
 }

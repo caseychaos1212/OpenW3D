@@ -63,8 +63,8 @@ public:
 	//	Public constructors/destructors
 	////////////////////////////////////////////////////////////////////
 	BuildingMonitorClass (void) :
-		Building (NULL)					{} 
-	~BuildingMonitorClass (void)		{} 
+		Building (NULL)					{}
+	~BuildingMonitorClass (void)		{}
 
 	////////////////////////////////////////////////////////////////////
 	//	Public methods
@@ -77,8 +77,8 @@ public:
 	const char *	Get_Name (void) override	{ return "BuildingMonitorClass"; }
 	void				Killed (GameObject *game_obj, GameObject *killer) override;
 	void				Damaged (GameObject *game_obj, GameObject *damager, float amount ) override;
-	void				Custom (GameObject *game_obj, int type, uintptr_t param, GameObject *sender) override;
-	
+	void				Custom (GameObject *game_obj, int type, intptr_t param, GameObject *sender) override;
+
 	//
 	//	Unused methods from the base class
 	//

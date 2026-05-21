@@ -54,7 +54,7 @@ class NetworkObjectClass;
 
 //////////////////////////////////////////////////////////////////////////////////
 //
-//	NetworkObjectFactoryClass 
+//	NetworkObjectFactoryClass
 //
 //	These factories act as virtual constructors for object network objects.  They
 //	are responsible for creating new network objects for a particular class of objects.
@@ -74,18 +74,18 @@ public:
 	//	Public methods
 	//////////////////////////////////////////////////////////////
 	virtual NetworkObjectClass *	Create (cPacket &packet) const = 0;
-	virtual void						Prep_Packet (NetworkObjectClass *object, cPacket &packet) const {};
+	virtual void						Prep_Packet (NetworkObjectClass */* object */, cPacket &/* packet */) const {};
 	virtual uint32						Get_Class_ID (void) const = 0;
 
 protected:
-	
+
 	//////////////////////////////////////////////////////////////
 	//	Protected member data
 	//////////////////////////////////////////////////////////////
 	NetworkObjectFactoryClass *	NextFactory;
 	NetworkObjectFactoryClass *	PrevFactory;
 
-	
+
 	//////////////////////////////////////////////////////////////
 	//	Friends
 	//////////////////////////////////////////////////////////////
@@ -95,7 +95,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////////////////////
 //
-//	SimpleNetworkObjectFactoryClass 
+//	SimpleNetworkObjectFactoryClass
 //
 //	Template class to automate the creation of simple network object factories.
 //

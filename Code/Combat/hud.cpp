@@ -69,7 +69,7 @@
 #define INVALID_HUD_WEAPON ((WeaponClass *)(uintptr_t)-1)
 
 
-static void Generate_WChar_Text_From_Number(wchar_t* text,int digits,int min_digits,int value)
+static void Generate_WChar_Text_From_Number(unichar_t* text,int digits,int min_digits,int value)
 {
 	text[digits]=0;
 	while (digits) {
@@ -81,7 +81,7 @@ static void Generate_WChar_Text_From_Number(wchar_t* text,int digits,int min_dig
 	}
 	if ((min_digits==0) && digits) {
 		int i=0;
-		while (wchar_t c=text[digits++]) {
+		while (unichar_t c=text[digits++]) {
 			text[i++]=c;
 		}
 		text[i]=0;
@@ -258,7 +258,7 @@ int							HUDHelpTextState = HUD_HELP_TEXT_DISPLAYING;
 /*
 **
 */
-unsigned long COLOR( float alpha, unsigned long color = 0x00FFFFFF )
+unsigned int COLOR( float alpha, unsigned int color = 0x00FFFFFF )
 {
 	alpha = WWMath::Clamp( alpha, 0, 1 ) * 255.0f;
 	color &= 0x00FFFFFF;
@@ -266,7 +266,7 @@ unsigned long COLOR( float alpha, unsigned long color = 0x00FFFFFF )
 	return color;
 }
 
-unsigned long Get_Health_Color( float percent )
+unsigned int Get_Health_Color( float percent )
 {
 	Vector3	color = HUDGlobalSettingsDef::Get_Instance()->Get_Health_High_Color();
 	if ( percent <= 0.5f ) {
@@ -346,7 +346,7 @@ static	void	Powerup_Shutdown( void )
 	RightPowerupIconList.Delete_All();
 }
 
-static	void	Powerup_Add( const wchar_t * name, int number, const char * texture_name, const RectClass & uv, const Vector2 & offset, bool right_list = true )
+static	void	Powerup_Add( const unichar_t * name, int number, const char * texture_name, const RectClass & uv, const Vector2 & offset, bool right_list = true )
 {
 	PowerupIconStruct * data = new PowerupIconStruct();
 	data->Renderer = new Render2DClass();
@@ -471,7 +471,7 @@ static	void	Powerup_Update( void )
 		// Draw powerup count
 		if ( LeftPowerupIconList[i]->Number != 0 ) {
 			WideStringClass num(0,true);
-			num.Format( L"%d", LeftPowerupIconList[i]->Number );
+			num.Format( U_CHAR("%d"), LeftPowerupIconList[i]->Number );
 			PowerupTextRenderer->Build_Sentence( num );
 			PowerupTextRenderer->Set_Location( Vector2( draw_box.Right - 12, draw_box.Top + 1 ) );
 			PowerupTextRenderer->Draw_Sentence( white );
@@ -531,7 +531,7 @@ static	void	Powerup_Update( void )
 		// Draw powerup count
 		if ( RightPowerupIconList[i]->Number != 0 ) {
 			WideStringClass num(0,true);
-			num.Format( L"%d", RightPowerupIconList[i]->Number );
+			num.Format( U_CHAR("%d"), RightPowerupIconList[i]->Number );
 			PowerupTextRenderer->Build_Sentence( num );
 			PowerupTextRenderer->Set_Location( Vector2( draw_box.Right - 12, draw_box.Top + 1 ) );
 			PowerupTextRenderer->Draw_Sentence( white );
@@ -680,7 +680,7 @@ static	void	HUD_Help_Text_Render( void )
 			//	Clear the text if necessary
 			//
 			if (HUDHelpTextState >= HUD_HELP_TEXT_DONE) {
-				HUDInfo::Set_HUD_Help_Text( L"" );
+				HUDInfo::Set_HUD_Help_Text( U_CHAR("") );
 				HUDHelpTextRenderer->Reset();
 			} else if (HUDHelpTextState == HUD_HELP_TEXT_FADING) {
 				HUDHelpTextTimer = HUD_HELP_TEXT_FADE_TIME;
@@ -774,13 +774,13 @@ const char * _Seat_Textures[3] = {
 	"hud_passseat.tga",	// SEAT_PASENGER,
 };
 
-static	void	Weapon_Reset( void ) 
+static	void	Weapon_Reset( void )
 {
 	_LastHUDWeapon = INVALID_HUD_WEAPON;		// force weapon to re-draw next
 	_LastVehicleSeat = -1;	// force vehicle seat to re-draw next
 }
 
-static	void	Weapon_Update( void ) 
+static	void	Weapon_Update( void )
 {
 	WeaponClass * weapon = NULL;
 	if ( COMBAT_STAR ) {
@@ -798,7 +798,7 @@ static	void	Weapon_Update( void )
 	if ( weapon != NULL ) {
 //		StringClass	text;
 //		text.Format( "%03d", weapon->Get_Clip_Rounds() );
-		wchar_t tmp_text[5];
+		unichar_t tmp_text[5];
 		if ( weapon->Get_Clip_Rounds() == -1 ) {
 			//text.Format( "999", weapon->Get_Total_Rounds() );
 			tmp_text[0]='9';
@@ -945,7 +945,7 @@ static	void	Weapon_Update( void )
 
 			// Right justify Name
 
-			WideStringClass name(0,true); // = L"Rocket Launcher";
+			WideStringClass name(0,true); // = U_CHAR("Rocket Launcher");
 			name = TranslateDBClass::Get_String( def->IconNameID );
 			WeaponNameRenderer->Build_Sentence( name );
 			Vector2 text_size = WeaponNameRenderer->Get_Text_Extents( name ) + Vector2( 1, 0 );
@@ -1152,7 +1152,7 @@ static	void	Weapon_Chart_Update( void )
 					continue;
 				}
 
-				long color = 0x000FF00;		// Dim
+				int color = 0x000FF00;		// Dim
 				if ( weapon_bag->Get_Index() == i ) {
 					color = 0x0000FF00;			// Bright
 				}
@@ -1208,7 +1208,7 @@ float	DamageIndicatorIntensity[ NUM_DAMAGE_INDICATORS ];
 bool	DamageIndicatorIntensityChanging;
 bool	DamageIndicatorOrientation;
 
-static	void	Damage_Reset( void ) 
+static	void	Damage_Reset( void )
 {
 	for ( int i = 0; i < NUM_DAMAGE_INDICATORS; i++ ) {
 		DamageIndicatorIntensity[ i ] = 0;
@@ -1217,7 +1217,7 @@ static	void	Damage_Reset( void )
 	CombatManager::Clear_Star_Damage_Direction();
 }
 
-static	void	Damage_Init( void ) 
+static	void	Damage_Init( void )
 {
 	DamageRenderer = new Render2DClass();
 	DamageRenderer->Set_Texture( HUD_MAIN_TEXTURE );
@@ -1261,8 +1261,8 @@ static	void	Damage_Add_Indicator( int index, float start_x, float start_y, float
 	}
 	uv.Scale( INFO_UV_SCALE );
 
-	unsigned long color_bits = (int)(DamageIndicatorIntensity[index] * 255) & 0x000000FF;
-  	unsigned long color = color_bits | color_bits<<8 | color_bits<<16;
+	unsigned int color_bits = (int)(DamageIndicatorIntensity[index] * 255) & 0x000000FF;
+  	unsigned int color = color_bits | color_bits<<8 | color_bits<<16;
 
 	switch (index) {
 		case 3:
@@ -1576,7 +1576,7 @@ static	void	Target_Update( void )
 				if ( health < 1 && health > 0 ) {
 					health = 1;
 				}
-				num.Format( L"%d", (int)health );
+				num.Format( U_CHAR("%d"), (int)health );
 				TargetNameRenderer->Build_Sentence( num );
 				Vector2 text_size = TargetNameRenderer->Get_Text_Extents( num );
 				text_size.U -= 1;
@@ -1831,8 +1831,8 @@ static	void	Score_Update( void )
 	if ( COMBAT_STAR && COMBAT_STAR->Get_Player_Data() ) {
 		int score = COMBAT_STAR->Get_Player_Data()->Get_Score();
 //		WideStringClass	scorestring;
-//		scorestring.Format( L"%d", score );
-		wchar_t score_string[12];	// 12 digits ought to be enough...
+//		scorestring.Format( U_CHAR("%d"), score );
+		unichar_t score_string[12];	// 12 digits ought to be enough...
 		Generate_WChar_Text_From_Number(score_string,sizeof(score_string),false,score);
 
 		Vector2 position = Render2DClass::Get_Screen_Resolution().Center();
@@ -2111,8 +2111,8 @@ static	void	Objective_Render( void )
 struct InfoEditorField {
 	const char * Name;
 	Vector2	*	 Value;
-	bool operator == (InfoEditorField const & rec) const	{ return false; }
-	bool operator != (InfoEditorField const & rec) const	{ return true; }
+	bool operator == (InfoEditorField const & ) const	{ return false; }
+	bool operator != (InfoEditorField const & ) const	{ return true; }
 };
 
 static	DynamicVectorClass<InfoEditorField>	InfoEditorFieldList;
@@ -2241,53 +2241,6 @@ static	void	Info_Editor_Init( void )
 	INFO_EDITOR_ADD( TARGET_NAME_UV_LR );
 	INFO_EDITOR_ADD( TARGET_NAME_OFFSET );
 #endif
-}
-
-static	void	Info_Editor_Update( void )
-{
-return;
-	bool changed = false;
-	static	int index = 0;
-
-	static float _move = 0;
-	float move = Input::Get_Amount( INPUT_FUNCTION_MOVE_LEFT ) - Input::Get_Amount( INPUT_FUNCTION_MOVE_RIGHT );
-	if ( _move != move ) {
-		_move = move;
-		index += (int)-move;
-		index = (int)WWMath::Wrap( index, (float)0, (float)(InfoEditorFieldList.Count()) );
-		if ( move != 0 ) {
-			changed = true;
-		}
-	}
-
-	float _forward = 0;
-	float forward = Input::Get_Amount( INPUT_FUNCTION_MOVE_FORWARD ) - Input::Get_Amount( INPUT_FUNCTION_MOVE_BACKWARD );
-	forward *= 10;
-	forward = WWMath::Clamp( forward, -1, 1 );
-	if ( _forward != forward ) {
-		_forward = forward;
-		InfoEditorFieldList[index].Value->V += forward;
-		if ( forward != 0 ) {
-			changed = true;
-		}
-	}
-
-	float _left = 0;
-	float left = Input::Get_Amount( INPUT_FUNCTION_TURN_LEFT ) - Input::Get_Amount( INPUT_FUNCTION_TURN_RIGHT );
-	left *= 10;
-	left = WWMath::Clamp( left, -1, 1 );
-	if ( _left != left ) {
-		_left = left;
-		InfoEditorFieldList[index].Value->U += left;
-		if ( left != 0 ) {
-			changed = true;
-		}
-	}
-
-	if ( changed ) {
-		Debug_Say(( "Vector2 %s( %d, %d );\n", InfoEditorFieldList[index].Name, (int)InfoEditorFieldList[index].Value->U, (int)InfoEditorFieldList[index].Value->V ));
-	}
-
 }
 
 static	void	Info_Editor_Shutdown( void )
@@ -2432,8 +2385,8 @@ static	void	Info_Update_Health_Shield( void )
 		health = 1;
 	}
 	//text.Format( "%03d", (int)health );
-	long lhealth=WWMath::Float_To_Long(health);
-	wchar_t tmp_text[5];
+	int lhealth=WWMath::Float_To_Long(health);
+	unichar_t tmp_text[5];
 	Generate_WChar_Text_From_Number(tmp_text,4,3,lhealth);
 
 	InfoHealthCountRenderer->Set_Location( draw.Upper_Right() + Vector2( 4,4) );
@@ -2504,8 +2457,8 @@ static	void	Info_Update_Health_Shield( void )
 		InfoShieldCountRenderer->Reset();
 //		StringClass	text;
 //		text.Format( "%03d", (int)shield );
-		long lshield=WWMath::Float_To_Long(shield);
-		wchar_t tmp_text[5];
+		int lshield=WWMath::Float_To_Long(shield);
+		unichar_t tmp_text[5];
 		Generate_WChar_Text_From_Number(tmp_text,4,3,lshield);
 		InfoShieldCountRenderer->Set_Location( draw.Upper_Left() + Vector2( 4,4) );
 		InfoShieldCountRenderer->Draw_Text( tmp_text );
@@ -2516,8 +2469,6 @@ static	void	Info_Update_Health_Shield( void )
 
 static	void	Info_Update( void )
 {
-//	Info_Editor_Update();
-
 	// Clear the renderer
 	InfoRenderer->Reset();
 
@@ -2969,7 +2920,7 @@ void 	HUDClass::Think()
 	Vector2	radar_center = InfoBase + RADAR_CENTER_OFFSET;
 	RadarManager::Update( tm, radar_center );
 
-	unsigned long reticle_color = HUDGlobalSettingsDef::Get_Instance()->Get_No_Relation_Color().Convert_To_ARGB();
+	unsigned int reticle_color = HUDGlobalSettingsDef::Get_Instance()->Get_No_Relation_Color().Convert_To_ARGB();
 
 	if ( HUDInfo::Get_Weapon_Target_Object() != NULL ) {
 		reticle_color = HUDGlobalSettingsDef::Get_Instance()->Get_Friendly_Color().Convert_To_ARGB();
@@ -3049,7 +3000,7 @@ void	HUDClass::Toggle_Hide_Points( void )
 //	_HUDHidePoints = !_HUDHidePoints;
 }
 
-void	HUDClass::Display_Points( float points )
+void	HUDClass::Display_Points( float /* points */ )
 {
 /*	if ( !_HUDHidePoints ) {
 		_HUDPoints = points;

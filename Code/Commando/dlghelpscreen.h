@@ -43,7 +43,6 @@
 
 
 #include "menudialog.h"
-#include "resource.h"
 
 
 ////////////////////////////////////////////////////////////////
@@ -54,10 +53,10 @@
 class HelpScreenDialogClass : public MenuDialogClass
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	HelpScreenDialogClass (void);
 	~HelpScreenDialogClass (void);
 
@@ -66,7 +65,7 @@ public:
 	//	Public methods
 	////////////////////////////////////////////////////////////////
 	void		On_Init_Dialog (void) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 	void		On_Menu_Activate (bool onoff) override;
 	void		On_Destroy (void) override;
 	bool		On_Key_Down (uint32 key_id, uint32 key_data) override;
@@ -78,7 +77,7 @@ public:
 
 private:
 	MenuBackDropClass *	OldBackdrop;
-	
+
 };
 
 

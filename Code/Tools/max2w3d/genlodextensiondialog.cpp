@@ -119,7 +119,7 @@ bool GenLodExtensionDialogClass::Get_Options(OptionsStruct * options)
 							(LPARAM) this
 						);
 
-	if (result == TRUE) {
+	if (result == true) {
 		return true;
 	} else {
 		return false;
@@ -153,7 +153,7 @@ bool GenLodExtensionDialogClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wPara
 				IDC_LOD_INDEX_EDIT,
 				MIN_LOD_INDEX,MAX_LOD_INDEX,INITIAL_LOD_INDEX
 			);
-			
+
 			return 1;
 
 		case WM_COMMAND:
@@ -199,7 +199,7 @@ static BOOL CALLBACK _gen_lod_ext_dialog_proc(HWND hwnd,UINT message,WPARAM wpar
 	if (dialog) {
 		return dialog->Dialog_Proc(hwnd, message, wparam, lparam);
 	} else {
-		return FALSE;
+		return false;
 	}
 }
 

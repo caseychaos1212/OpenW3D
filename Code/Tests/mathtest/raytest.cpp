@@ -45,6 +45,7 @@
 #include "obbox.h"
 #include "colmath.h"
 #include "p_timer.h"
+#include <cinttypes>
 #include <stdio.h>
 
 
@@ -61,7 +62,7 @@ class RayTriTestClass
 public:
 	Vector3			P0;
 	Vector3			P1;
-	Vector3			V0;		
+	Vector3			V0;
 	Vector3			V1;
 	Vector3			V2;
 	Vector3			N;
@@ -78,8 +79,8 @@ public:
 		const Vector3 v1,					// v1 of triangle
 		const Vector3 v2,					// v2 of triangle
 		float frac,							// expected fraction
-		bool sol								// expected start solid 
-	) : 
+		bool sol								// expected start solid
+	) :
 		P0(p0),P1(p1),V0(v0),V1(v1),V2(v2),Fraction(frac),StartBad(sol),LineSeg(P0,P1)
 	{
 		Tri.V[0] = &V0;
@@ -91,7 +92,7 @@ public:
 };
 
 
-RayTriTestClass RayTriTestCases[] = 
+RayTriTestClass RayTriTestCases[] =
 {
 	RayTriTestClass
 	(
@@ -105,7 +106,7 @@ RayTriTestClass RayTriTestCases[] =
 	),
 	RayTriTestClass				// ray going down +x, hitting a triangle at x=0.75
 	(
-		Vector3(0,0,0),		
+		Vector3(0,0,0),
 		Vector3(1,0,0),
 		Vector3(0.5,1,1),
 		Vector3(1,-1,1),
@@ -190,16 +191,16 @@ public:
 		const Vector3 center,			// center of the box
 		const Vector3 extent,			// extent of the box
 		float frac,							// expected fraction
-		bool sol								// expected start solid 
-	) : 
+		bool sol								// expected start solid
+	) :
 		P0(p0),P1(p1),Box(center,extent),Fraction(frac),StartBad(sol),LineSeg(P0,P1)
 	{
 	}
 };
 
-RayAABoxTestClass RayAABoxTestCases[] = 
+RayAABoxTestClass RayAABoxTestCases[] =
 {
-	RayAABoxTestClass						
+	RayAABoxTestClass
 	(
 		Vector3(5,0,0),					// p0 of ray
 		Vector3(0,0,0),					// p1 of ray
@@ -208,7 +209,7 @@ RayAABoxTestClass RayAABoxTestCases[] =
 		4.0f / 5.0f,						// expected fraction
 		false
 	),
-	RayAABoxTestClass						
+	RayAABoxTestClass
 	(
 		Vector3(-2,-5,0),					// p0 of ray
 		Vector3(0,0,0),					// p1 of ray
@@ -217,7 +218,7 @@ RayAABoxTestClass RayAABoxTestCases[] =
 		3.0f / 5.0f,						// expected fraction
 		false
 	),
-	RayAABoxTestClass						
+	RayAABoxTestClass
 	(
 		Vector3(-2,5,0),					// p0 of ray
 		Vector3(0,0,0),					// p1 of ray
@@ -251,7 +252,7 @@ void Test_Rays(void)
 {
 	CastResultStruct result;
 	CastResultStruct result_check;
-	volatile unsigned cycles;
+	uint64_t cycles;
 	int numtests;
 	int i;
 
@@ -262,7 +263,7 @@ void Test_Rays(void)
 
 	numtests = sizeof(RayTriTestCases)/sizeof(RayTriTestClass);
 	for (i=0; i<numtests; i++) {
-		
+
 		RayTriTestClass * testcase = &(RayTriTestCases[i]);
 
 		result.Fraction = 1.0;
@@ -272,9 +273,9 @@ void Test_Rays(void)
 		cycles = Get_CPU_Clock();
 		CollisionMath::Collide(testcase->LineSeg,testcase->Tri,&result);
 		cycles = Get_CPU_Clock() - cycles;
-	
-		printf("Ray -> Tri cycles: %d\n",cycles);
-		
+
+		printf("Ray -> Tri cycles: %" PRIu64 "\n", cycles);
+
 		CHECK(i,(fabs(testcase->Fraction - result.Fraction) < 0.001f));
 	}
 
@@ -285,7 +286,7 @@ void Test_Rays(void)
 
 	numtests = sizeof(RayAABoxTestCases)/sizeof(RayAABoxTestClass);
 	for (i=0; i<numtests; i++) {
-		
+
 		RayAABoxTestClass * testcase = &(RayAABoxTestCases[i]);
 
 		result.Fraction = 1.0;
@@ -295,9 +296,9 @@ void Test_Rays(void)
 		cycles = Get_CPU_Clock();
 		CollisionMath::Collide(testcase->LineSeg,testcase->Box,&result);
 		cycles = Get_CPU_Clock() - cycles;
-	
-		printf("Ray -> AABox cycles: %d\n",cycles);
-		
+
+		printf("Ray -> AABox cycles: %" PRIu64 "\n", cycles);
+
 		CHECK(i,(fabs(testcase->Fraction - result.Fraction) < 0.001f));
 	}
 
@@ -323,7 +324,7 @@ void Test_Rays(void)
 		cycles = Get_CPU_Clock();
 		CollisionMath::Collide(line,box,&result);
 		cycles = Get_CPU_Clock() - cycles;
-		
+
 		// double-check the result
 		result_check.Fraction = 1.0f;
 		result_check.StartBad = false;
@@ -336,7 +337,7 @@ void Test_Rays(void)
 			passed = true;
 		}
 
-		printf("test %3d  cycles: %6d\tfraction: %1.8f\t",i,cycles,result.Fraction);
+		printf("test %3d  cycles: %6" PRIu64 "\tfraction: %1.8f\t",i,cycles,result.Fraction);
 		if (passed) {
 			printf("passed\n");
 		} else if (result.StartBad) {
@@ -350,13 +351,13 @@ void Test_Rays(void)
 	/*
 	** Test the Overlap_Test function on some random AABoxes
 	*/
-	int total_tests = 0;
-	int total_cycles = 0;
-	int outside_tests = 0;
-	int outside_cycles = 0;
-	int overlap_tests = 0;
-	int overlap_cycles = 0;
-	
+	uint64_t total_tests = 0;
+	uint64_t total_cycles = 0;
+	uint64_t outside_tests = 0;
+	uint64_t outside_cycles = 0;
+	uint64_t overlap_tests = 0;
+	uint64_t overlap_cycles = 0;
+
 	CollisionMath::OverlapType overlap;
 	Print_Title("Testing ray-aabox overlap.");
 	for (i=0; i<10000; i++) {
@@ -374,9 +375,9 @@ void Test_Rays(void)
 		cycles = Get_CPU_Clock();
 		overlap = CollisionMath::Overlap_Test(box,line);
 		cycles = Get_CPU_Clock() - cycles;
-		
+
 		// print what happened
-		printf("test %3d  cycles: %6d\tfraction: %1.8f\t",i,cycles,result.Fraction);
+		printf("test %3d  cycles: %6" PRIu64 "\tfraction: %1.8f\t",i,cycles,result.Fraction);
 		if (overlap == CollisionMath::OUTSIDE) {
 			printf("outside\n");
 		} else if (overlap == CollisionMath::INSIDE) {
@@ -384,7 +385,7 @@ void Test_Rays(void)
 		} else {
 			printf("overlapped\n");
 		}
-		
+
 		// stats
 		total_tests++;
 		total_cycles += cycles;
@@ -397,11 +398,11 @@ void Test_Rays(void)
 		}
 	}
 
-	printf("Total Tests:              %d\n",total_tests);
+	printf("Total Tests:              %" PRIu64 "\n",total_tests);
 	printf("Average Cycles:           %f\n",(float)total_cycles / (float)total_tests);
-	printf("Outside Tests:            %d\n",outside_tests);
+	printf("Outside Tests:            %" PRIu64 "\n",outside_tests);
 	printf("Average Outside Cycles:   %f\n",(float)outside_cycles / (float)outside_tests);
-	printf("Overlap Tests:            %d\n",overlap_tests);
+	printf("Overlap Tests:            %" PRIu64 "\n",overlap_tests);
 	printf("Average Overlap Cycles:   %f\n",(float)overlap_cycles / (float)overlap_tests);
 
 }
@@ -423,7 +424,7 @@ void line_box_test(const LineSegClass & line,const OBBoxClass & box,CastResultSt
 	point[6] = box.Center + box.Basis * Vector3(-box.Extent.X,-box.Extent.Y,-box.Extent.Z);
 	point[7] = box.Center + box.Basis * Vector3( box.Extent.X,-box.Extent.Y,-box.Extent.Z);
 
-	static int triverts[12][3] = 
+	static int triverts[12][3] =
 	{
 		{ 0,1,2 },
 		{ 0,2,3 },
@@ -440,10 +441,10 @@ void line_box_test(const LineSegClass & line,const OBBoxClass & box,CastResultSt
 	};
 
 	// first, check if ray starts inside box?
-	
+
 	// now, check for collision with each triangle
 	for (int i=0; i<12; i++) {
-		
+
 		TriClass tri;
 		Vector3 normal;
 

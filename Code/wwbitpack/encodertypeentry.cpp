@@ -21,7 +21,7 @@
 // Project:      wwbitpack.lib
 // Author:       Tom Spencer-Smith
 // Date:         June 2000
-// Description:  
+// Description:
 //
 //-----------------------------------------------------------------------------
 #include "encodertypeentry.h" // I WANNA BE FIRST!
@@ -42,11 +42,11 @@ cEncoderTypeEntry::cEncoderTypeEntry()
 }
 
 //-----------------------------------------------------------------------------
-bool cEncoderTypeEntry::Is_Valid() const 
+bool cEncoderTypeEntry::Is_Valid() const
 {
-	return 
-		((Max - Min > -MISCUTIL_EPSILON) && 
-		 (Resolution > -MISCUTIL_EPSILON) && 
+	return
+		((Max - Min > -MISCUTIL_EPSILON) &&
+		 (Resolution > -MISCUTIL_EPSILON) &&
 		 (BitPrecision >= 0));
 }
 
@@ -92,18 +92,18 @@ void cEncoderTypeEntry::Init(int num_bits)
 	BitPrecision = num_bits;
 	Resolution = 1;
 
-	UINT max = 0;
+	uint32_t max = 0;
 	for (int i = 0; i < num_bits; i++) {
 		max += 1 << i;
 	}
 
 	Max = max;
 
-	WWASSERT(Is_Valid());	
+	WWASSERT(Is_Valid());
 }
 
 //-----------------------------------------------------------------------------
-bool cEncoderTypeEntry::Scale(double value, ULONG & scaled_value)
+bool cEncoderTypeEntry::Scale(double value, uint32_t & scaled_value)
 {
 	WWASSERT(Is_Valid());
 
@@ -113,14 +113,14 @@ bool cEncoderTypeEntry::Scale(double value, ULONG & scaled_value)
 		value = Clamp(value);
 	}
 
-	scaled_value = static_cast<ULONG>
+	scaled_value = static_cast<uint32_t>
 		(cMathUtil::Round((value - Min) / Resolution));
 
 	return is_in_range;
 }
 
 //-----------------------------------------------------------------------------
-double cEncoderTypeEntry::Unscale(ULONG u_value)
+double cEncoderTypeEntry::Unscale(uint32_t u_value)
 {
 	WWASSERT(Is_Valid());
 
@@ -137,7 +137,7 @@ double cEncoderTypeEntry::Clamp(double value)
 	WWASSERT(Is_Valid());
 
 	double retval = value;
-	
+
 	if (retval < Min) {
 		retval = Min;
 	} else if (retval > Max) {
@@ -150,7 +150,7 @@ double cEncoderTypeEntry::Clamp(double value)
 //-----------------------------------------------------------------------------
 void cEncoderTypeEntry::Calc_Bit_Precision(double resolution)
 {
-	// 
+	//
 	// Calculate the minimum number of bits required to encode this type with
 	// the specified resolution.
 	//
@@ -159,18 +159,18 @@ void cEncoderTypeEntry::Calc_Bit_Precision(double resolution)
 	WWASSERT(resolution > MISCUTIL_EPSILON);
 
 	double f_units = (double) ceil((Max - Min) / resolution - MISCUTIL_EPSILON) + 1;
-	WWASSERT(f_units <= UINT_MAX + MISCUTIL_EPSILON);
-	UINT units = (UINT) f_units;
+    WWASSERT(f_units <= UINT_MAX + MISCUTIL_EPSILON);
+	uint32_t units = (uint32_t) f_units;
 
 	BitPrecision = 0;
-	UINT max_units = 0;
+	uint32_t max_units = 0;
 	while (max_units < units) {
 		max_units += 1 << BitPrecision;
 		BitPrecision++;
 		if (BitPrecision == 1) {
 			max_units++;
 		}
-	}	
+	}
 
 	WWASSERT(BitPrecision > 0 && BitPrecision <= MAX_BITS);
 	WWASSERT(max_units > 0);
@@ -179,8 +179,8 @@ void cEncoderTypeEntry::Calc_Bit_Precision(double resolution)
 
 	/*TSS2001
 	if (Resolution > 0) {
-		WWASSERT(max_units == 
-			(UINT) ceil((Max - Min) / Resolution - MISCUTIL_EPSILON) + 1);
+		WWASSERT(max_units ==
+			(uint32_t) ceil((Max - Min) / Resolution - MISCUTIL_EPSILON) + 1);
 	}
 	*/
 }

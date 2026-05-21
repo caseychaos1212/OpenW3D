@@ -39,6 +39,7 @@
 #include "duplicatecombiner.h"
 #include "ffactory.h"
 #include "mixfile.h"
+#include "pathutil.h"
 #include "rawfile.h"
 #include "bittype.h"
 #include "mixcombiningdialog.h"
@@ -135,7 +136,7 @@ DuplicateRemoverClass::Internal_Process (void)
 	if (dest_factory.Is_Valid () && dest_factory.Build_Internal_Filename_List ()) {
 		Dialog->Set_Status_Text ("Building temporary files...");
 		Dialog->Set_Progress_Percent (0);
-		
+
 		//
 		//	Loop over each mix file...
 		//
@@ -145,10 +146,10 @@ DuplicateRemoverClass::Internal_Process (void)
 			//	Get the list of filenames inside this mix file
 			//
 			DynamicVectorClass<StringClass> filename_list;
-			mix_file_list[mix_index]->Get_Filename_List (filename_list);			
+			mix_file_list[mix_index]->Get_Filename_List (filename_list);
 
 			for (int file_index = 0; file_index < filename_list.Count (); file_index ++) {
-				StringClass filename = ::strlwr (filename_list[file_index].Peek_Buffer ());				
+				StringClass filename = ::strlwr (filename_list[file_index].Peek_Buffer ());
 
 				DynamicVectorClass<int> dup_indices;
 				dup_indices.Add (mix_index);
@@ -178,7 +179,7 @@ DuplicateRemoverClass::Internal_Process (void)
 					if (is_in_dest == false) {
 						Copy_File (mix_file_list[mix_index], &dest_factory, filename);
 					}
-					
+
 					//
 					//	Remove all the duplicates from the mix files
 					//
@@ -203,7 +204,7 @@ DuplicateRemoverClass::Internal_Process (void)
 		Dialog->Set_Progress_Percent (1.0F / float(mix_file_list.Count () + 1));
 		for (int index = 0; index < mix_file_list.Count (); index ++) {
 			mix_file_list[index]->Flush_Changes ();
-			Dialog->Set_Progress_Percent ((float)index / float(mix_file_list.Count () + 1));			
+			Dialog->Set_Progress_Percent ((float)index / float(mix_file_list.Count () + 1));
 		}
 		Dialog->Set_Progress_Percent (1.0F);
 	}
@@ -260,7 +261,7 @@ DuplicateRemoverClass::Copy_File
 		int file_size = src_file->Size ();
 		uint8 buffer[4096];
 		while (file_size > 0) {
-			
+
 			//
 			//	Read the data from the source file
 			//
@@ -270,7 +271,7 @@ DuplicateRemoverClass::Copy_File
 			if (copied_size <= 0) {
 				break;
 			}
-			
+
 			//
 			//	Copy the data to the dest file
 			//
@@ -308,7 +309,7 @@ DuplicateRemoverClass::Open_Mix_Files (DynamicVectorClass<MixFileFactoryClass *>
 	//	Loop over all the mix filenames in our list
 	//
 	for (int index = 0; index < MixFileList.Count (); index ++) {
-		
+
 		//
 		//	Create this mix file factory and add it to our list
 		//
@@ -365,19 +366,19 @@ DuplicateRemoverClass::Make_Temp_Directory (void)
 	::GetTempPath (sizeof (temp_dir), temp_dir);
 
 	CString temp_path = static_cast<const char *>(Make_Path (temp_dir, "mixcombiner"));
-	
+
 	//
 	//	Try to find a unique temp directory to store our data
 	//
-	int index = 0;	
-	do {		
+	int index = 0;
+	do {
 		TempDirectory.Format ("%s%.2d.DIR", (const char *)temp_path, index++);
-	} while (GetFileAttributes (TempDirectory) != 0xFFFFFFFF);
+	} while (cPathUtil::PathExists (TempDirectory));
 
 	//
 	//	Create the directory
 	//
-	::CreateDirectory (TempDirectory, NULL);	
+	::CreateDirectory (TempDirectory, NULL);
 	::SetCurrentDirectory (TempDirectory);
 	return ;
 }
@@ -395,7 +396,7 @@ DuplicateRemoverClass::Delete_Temp_Directory (void)
 	//	Change the current directory so we can remove the temporary one
 	//
 	::SetCurrentDirectory ("c:\\");
-	
+
 	//
 	//	Remove the temporary directory
 	//
@@ -418,19 +419,19 @@ DuplicateRemoverClass::Clean_Directory (LPCTSTR local_dir)
 	//
 	// Build a search mask from the directory
 	//
-	StringClass search_mask = StringClass (local_dir) + "\\*.*";	
-	
+	StringClass search_mask = StringClass (local_dir) + "\\*.*";
+
 	//
-	// Loop through all the files in this directory and add them	
+	// Loop through all the files in this directory and add them
 	// to our list
 	//
 	DynamicVectorClass<StringClass> file_list;
-	BOOL keep_going = TRUE;
+	BOOL keep_going = true;
 	WIN32_FIND_DATA find_info = { 0 };HANDLE hfind = ::FindFirstFile (search_mask, &find_info);
 	for (;(hfind != INVALID_HANDLE_VALUE) && keep_going;
 		  keep_going = ::FindNextFile (hfind, &find_info))
 	{
-		
+
 		//
 		// If this file isn't a directory, add it to the list
 		//
@@ -438,13 +439,13 @@ DuplicateRemoverClass::Clean_Directory (LPCTSTR local_dir)
 			StringClass filename = find_info.cFileName;
 			file_list.Add (filename);
 		} else if (find_info.cFileName[0] != '.') {
-			
+
 			//
 			//	Recurse into this subdirectory
 			//
 			StringClass full_path = Make_Path (local_dir, find_info.cFileName);
 			Clean_Directory (full_path);
-			
+
 			//
 			//	Add this directory to the list so it will get
 			// deleted with the files...
@@ -460,7 +461,7 @@ DuplicateRemoverClass::Clean_Directory (LPCTSTR local_dir)
 	if (hfind != NULL) {
 		::FindClose (hfind);
 	}
-	
+
 	//
 	//	Now loop through all the files and delete them
 	//
@@ -487,7 +488,8 @@ DuplicateRemoverClass::Make_Path (LPCTSTR path, LPCTSTR filename)
 	//
 	//	Delimit the path if necessary
 	//
-	if (full_path[full_path.Get_Length () - 1] != '\\') {
+	const size_t path_length = full_path.Get_Length ();
+	if (path_length == 0 || full_path[static_cast<int>(path_length - 1)] != '\\') {
 		full_path += "\\";
 	}
 
@@ -509,13 +511,13 @@ void
 DuplicateRemoverClass::Get_Temp_Filename (StringClass &full_path)
 {
 	CString temp_path = static_cast<const char *>(Make_Path (TempDirectory, "tempfile"));
-	
+
 	//
 	//	Try to find a unique temp filename
 	//
-	do {		
+	do {
 		full_path.Format ("%s%.5d.dat", (const char *)temp_path, TempFilenameStart++);
-	} while (GetFileAttributes (full_path) != 0xFFFFFFFF);
+	} while (cPathUtil::PathExists (full_path));
 
 	return ;
 }
@@ -550,9 +552,9 @@ DuplicateRemoverClass::Delete_File (LPCTSTR filename)
 		if ((attributes != 0xFFFFFFFF) &&
 			 ((attributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY))
 		{
-			retval = (::RemoveDirectory (filename) == TRUE);
+			retval = (::RemoveDirectory (filename) != 0);
 		} else {
-			retval = (::DeleteFile (filename) == TRUE);
+			retval = (::DeleteFile (filename) != 0);
 		}
 	}
 
@@ -575,7 +577,7 @@ DuplicateRemoverClass::Is_File_In_Factory (const StringClass &filename, MixFileF
 	//
 	DynamicVectorClass<StringClass> *test_filename_list = NULL;
 	factory->Get_Filename_List (&test_filename_list);
-	
+
 	//
 	//	Try to find the file inside this mix file
 	//

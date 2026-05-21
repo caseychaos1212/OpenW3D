@@ -37,7 +37,7 @@
 
 #include "dlgsavegame.h"
 #include "listctrl.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "gamedata.h"
 #include "gamemode.h"
 #include "gameinitmgr.h"
@@ -95,7 +95,7 @@ SaveGameMenuClass::On_Init_Dialog (void)
 	if (edit_ctrl) {
 		edit_ctrl->Set_Text_Limit (64);
 	}
-	
+
 	//
 	//	Populate the list
 	//
@@ -163,7 +163,7 @@ SaveGameMenuClass::On_ListCtrl_Delete_Entry
 )
 {
 	if (ctrl_id == IDC_LOAD_GAME_LIST_CTRL) {
-		
+
 		//
 		//	Remove the data we associated with this entry
 		//
@@ -173,10 +173,10 @@ SaveGameMenuClass::On_ListCtrl_Delete_Entry
 		list_ctrl->Set_Entry_Data (item_index, 2, 0);
 		if (file_time != NULL) {
 			delete file_time;
-		}		
+		}
 		if (filename != NULL) {
 			delete filename;
-		}		
+		}
 	}
 
 	return ;
@@ -188,7 +188,7 @@ SaveGameMenuClass::On_ListCtrl_Delete_Entry
 //	LoadListSortCallback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 SaveGameMenuClass::LoadListSortCallback (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param)
 {
 	int retval = 0;
@@ -206,7 +206,7 @@ SaveGameMenuClass::LoadListSortCallback (ListCtrlClass *list_ctrl, int item_inde
 	} else {
 
 		if (sort_col_index == 0 || sort_col_index == 1) {
-			
+
 			//
 			//	Sort by time
 			//
@@ -215,13 +215,13 @@ SaveGameMenuClass::LoadListSortCallback (ListCtrlClass *list_ctrl, int item_inde
 			retval = ::CompareFileTime (file_time1, file_time2);
 
 		} else {
-			
+
 			//
 			//	Sort by name
 			//
-			const wchar_t *name1 = list_ctrl->Get_Entry_Text (item_index1, 2);
-			const wchar_t *name2 = list_ctrl->Get_Entry_Text (item_index2, 2);
-			retval = ::wcsicmp (name1, name2);
+			const unichar_t *name1 = list_ctrl->Get_Entry_Text (item_index1, 2);
+			const unichar_t *name2 = list_ctrl->Get_Entry_Text (item_index2, 2);
+			retval = ::u_strcasecmp (name1, name2, U_COMPARE_CODE_POINT_ORDER);
 		}
 
 		//
@@ -243,7 +243,7 @@ SaveGameMenuClass::LoadListSortCallback (ListCtrlClass *list_ctrl, int item_inde
 //
 ////////////////////////////////////////////////////////////////
 void
-SaveGameMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+SaveGameMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
@@ -303,7 +303,7 @@ SaveGameMenuClass::Save_Game (bool prompt)
 			//
 			//	Build a full filename
 			//
-			full_path = "save\\";
+			full_path = "save/";
 			full_path += filename;
 
 			//
@@ -347,9 +347,9 @@ SaveGameMenuClass::Save_Game (bool prompt)
 void
 SaveGameMenuClass::On_ListCtrl_DblClk
 (
-	ListCtrlClass *list_ctrl,
-	int				ctrl_id,
-	int				item_index
+	ListCtrlClass * /* list_ctrl */,
+	int				/* ctrl_id */,
+	int				/* item_index */
 )
 {
 	return ;
@@ -368,8 +368,8 @@ SaveGameMenuClass::Get_Unique_Save_Filename (StringClass &filename)
 	bool done	= false;
 
 	while (!done) {
-		filename.Format ("save\\savegame%.2d.sav", slot ++);
-		
+		filename.Format ("save/savegame%.2d.sav", slot ++);
+
 		//
 		//	Check to see if this file exists
 		//
@@ -413,11 +413,11 @@ SaveGameMenuClass::Update_Text_Field (void)
 		if (list_ctrl->Get_Entry_Data (curr_sel, 0) != 0) {
 			Set_Dlg_Item_Text (IDC_FILENAME_EDIT, list_ctrl->Get_Entry_Text (curr_sel, 2));
 		} else {
-			Set_Dlg_Item_Text (IDC_FILENAME_EDIT, L"");
+			Set_Dlg_Item_Text (IDC_FILENAME_EDIT, U_CHAR(""));
 		}
 
 	} else {
-		Set_Dlg_Item_Text (IDC_FILENAME_EDIT, L"");
+		Set_Dlg_Item_Text (IDC_FILENAME_EDIT, U_CHAR(""));
 	}
 
 	return ;
@@ -432,10 +432,10 @@ SaveGameMenuClass::Update_Text_Field (void)
 void
 SaveGameMenuClass::On_ListCtrl_Sel_Change
 (
-	ListCtrlClass *list_ctrl,
-	int				ctrl_id,
-	int				old_index,
-	int				new_index
+	ListCtrlClass * /* list_ctrl */,
+	int				/* ctrl_id */,
+	int				/* old_index */,
+	int				/* new_index */
 )
 {
 	Update_Text_Field ();
@@ -468,7 +468,7 @@ SaveGameMenuClass::Delete_Game (bool prompt)
 
 		//
 		//	Determine what filename this entry refers to
-		//		
+		//
 		if (list_ctrl->Get_Entry_Data (item_index, 0) != 0) {
 			StringClass filename = ((StringClass *)list_ctrl->Get_Entry_Data (item_index, 2))->Peek_Buffer ();
 
@@ -491,9 +491,9 @@ SaveGameMenuClass::Delete_Game (bool prompt)
 				//
 				//	Build a full path from which to delete the file
 				//
-				StringClass full_path = "data\\save\\";
+				StringClass full_path = "data/save/";
 				full_path += filename;
-				
+
 				//
 				//	Delete the file and remove its entry from the list
 				//
@@ -534,21 +534,21 @@ SaveGameMenuClass::Reload_List (const char *current_filename)
 	//
 	//	Create an empty slot entry
 	//
-	int item_index = list_ctrl->Insert_Entry (0, L"");
+	int item_index = list_ctrl->Insert_Entry (0, U_CHAR(""));
 	if (item_index >= 0) {
 		list_ctrl->Set_Entry_Text (item_index, 2, TRANSLATE (IDS_MENU_EMPTY_SLOT));
 		list_ctrl->Set_Curr_Sel (item_index);
 	}
 
 	WIN32_FIND_DATAA find_info	= { 0 };
-	BOOL keep_going				= TRUE;
+	BOOL keep_going				= true;
 	HANDLE file_find				= NULL;
 
 	//
 	//	Build a list of all the saved games we know about
 	//
 	int index = 1;
-	for (file_find = ::FindFirstFileA ("data\\save\\*.sav", &find_info);
+	for (file_find = ::FindFirstFileA ("data/save/*.sav", &find_info);
 		 (file_find != INVALID_HANDLE_VALUE) && keep_going;
 		  keep_going = ::FindNextFileA (file_find, &find_info))
 	{
@@ -558,7 +558,7 @@ SaveGameMenuClass::Reload_List (const char *current_filename)
 		WideStringClass description;
 		WideStringClass map_name;
 		SaveGameManager::Peek_Description (find_info.cFileName, description, map_name);
-				
+
 		//
 		//	Get the time this file was last written
 		//
@@ -572,8 +572,8 @@ SaveGameMenuClass::Reload_List (const char *current_filename)
 		//
 		WideStringClass time_string;
 		WideStringClass date_string;
-		time_string.Format (L"%d:%02d:%02d", system_time.wHour, system_time.wMinute, system_time.wSecond);
-		date_string.Format (L"%d/%d/%d", system_time.wMonth, system_time.wDay, system_time.wYear);
+		time_string.Format (U_CHAR("%d:%02d:%02d"), system_time.wHour, system_time.wMinute, system_time.wSecond);
+		date_string.Format (U_CHAR("%d/%d/%d"), system_time.wMonth, system_time.wDay, system_time.wYear);
 
 		//
 		//	Add this entry to the list control
@@ -582,14 +582,14 @@ SaveGameMenuClass::Reload_List (const char *current_filename)
 		if (item_index >= 0) {
 			list_ctrl->Set_Entry_Text (item_index, 1, date_string);
 			list_ctrl->Set_Entry_Text (item_index, 2, description);
-			
+
 			list_ctrl->Set_Entry_Data (item_index, 0, (uintptr_t)new FILETIME(local_time));
 			list_ctrl->Set_Entry_Data (item_index, 2, (uintptr_t)new StringClass(find_info.cFileName));
 
 			//
 			//	Select this entry if its the default
 			//
-			if (	current_filename != NULL && 
+			if (	current_filename != NULL &&
 					::stricmp (current_filename, find_info.cFileName) == 0)
 			{
 				list_ctrl->Set_Curr_Sel (item_index);
@@ -597,14 +597,14 @@ SaveGameMenuClass::Reload_List (const char *current_filename)
 		}
 	}
 
-	if (file_find != INVALID_HANDLE_VALUE) {			  
-		::FindClose (file_find); 
+	if (file_find != INVALID_HANDLE_VALUE) {
+		::FindClose (file_find);
 	}
 
 	//
 	//	Sort the list
 	//
-	list_ctrl->Sort (LoadListSortCallback, MAKELONG (CurrSortCol, IsSortAscending));		
+	list_ctrl->Sort (LoadListSortCallback, MAKELONG (CurrSortCol, IsSortAscending));
 
 	//
 	//	Update the sort marker
@@ -633,7 +633,7 @@ SaveGameMenuClass::HandleNotification (DlgMsgBoxEvent &event)
 		}
 
 	} else if (event.Get_User_Data () == MBEVENT_DELETE_PROMPT) {
-		
+
 		//
 		//	The user has confirmed the delete, so delete the file
 		//
@@ -672,7 +672,7 @@ SaveGameMenuClass::Update_Button_State (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-SaveGameMenuClass::On_EditCtrl_Change (EditCtrlClass *edit_ctrl, int ctrl_id)
+SaveGameMenuClass::On_EditCtrl_Change (EditCtrlClass * /* edit_ctrl */, int ctrl_id)
 {
 	if (ctrl_id == IDC_FILENAME_EDIT) {
 		Update_Button_State ();
@@ -688,7 +688,7 @@ SaveGameMenuClass::On_EditCtrl_Change (EditCtrlClass *edit_ctrl, int ctrl_id)
 //
 ////////////////////////////////////////////////////////////////
 void
-SaveGameMenuClass::On_EditCtrl_Enter_Pressed (EditCtrlClass *edit_ctrl, int ctrl_id)
+SaveGameMenuClass::On_EditCtrl_Enter_Pressed (EditCtrlClass * /* edit_ctrl */, int ctrl_id)
 {
 	if (ctrl_id == IDC_FILENAME_EDIT) {
 		Save_Game (true);
@@ -717,7 +717,7 @@ SaveGameMenuClass::Check_HD_Space (void)
 		return false;
 	}
 	diskspace = freebytecount.QuadPart;
-	
+
 	//
 	//	Is there at least 2 megs of disk space available?
 	//

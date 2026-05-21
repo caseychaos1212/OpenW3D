@@ -73,7 +73,7 @@ CFancyToolbar::~CFancyToolbar (void)
             ::DeleteObject (m_pButtonArray[iButton].hBMPUp);
             m_pButtonArray[iButton].hBMPUp = NULL;
         }
-        
+
         if (m_pButtonArray[iButton].hBMPDn)
         {
             // Free the BMP for this button
@@ -96,7 +96,7 @@ CFancyToolbar::RegisterFancyToolbarClass (void)
     WNDCLASS classInfo = { 0 };
     if (::GetClassInfo (::AfxGetInstanceHandle (),
                         TOOLBAR_CLASS_NAME,
-                        &classInfo) != TRUE)
+                        &classInfo) == 0)
     {
         classInfo.style = CS_PARENTDC;
         classInfo.lpfnWndProc = ::DefWindowProc;
@@ -149,7 +149,7 @@ CFancyToolbar::Create
         EnableDocking (CBRS_ALIGN_ANY);
     }
 
-    // Return the TRUE/FALSE result code
+    // Return the true/false result code
     return bReturn;
 }
 
@@ -204,9 +204,9 @@ CFancyToolbar::AddButton
     m_pButtonArray[iButton].hBMPUp = ::LoadBitmap (::AfxGetResourceHandle (), MAKEINTRESOURCE (iBMPUp));
     m_pButtonArray[iButton].hBMPDn = ::LoadBitmap (::AfxGetResourceHandle (), MAKEINTRESOURCE (iBMPDn));
     m_pButtonArray[iButton].iCommandID = iCommandID;
-    m_pButtonArray[iButton].buttonType = buttonType;    
+    m_pButtonArray[iButton].buttonType = buttonType;
     m_pButtonArray[iButton].currentState = StateUp;
-    m_pButtonArray[iButton].bVisible = TRUE;
+    m_pButtonArray[iButton].bVisible = true;
     return ;
 }
 
@@ -254,7 +254,7 @@ CFancyToolbar::Paint (void)
                 iXPos += BUTTON_WIDTH;
             }
         }
-        
+
         // Free the windows DC
         ::ReleaseDC (m_hWnd, hDC);
     }
@@ -290,7 +290,7 @@ CFancyToolbar::ButtonFromPoint (const CPoint &point)
         // Increment the current position
         iXPos += BUTTON_WIDTH;
     }
-    
+
     // Return the zero based index of the button we're looking for
     return iIndex;
 }
@@ -337,7 +337,7 @@ CFancyToolbar::OnLButtonDown
             // Release the window's DC
             ::ReleaseDC (m_hWnd, hDC);
         }
-        
+
         // Is this a 'normal' or 2 state button?
         if (m_pButtonArray[iButton].buttonType == TypeNormal)
         {
@@ -356,7 +356,7 @@ CFancyToolbar::OnLButtonDown
                                              MAKELONG (m_pButtonArray[iButton].iCommandID, BN_CLICKED),
                                              (LPARAM)m_hWnd);
         }
-    }    
+    }
     else
     {
         CControlBar::OnLButtonDown (nFlags, point);
@@ -412,7 +412,7 @@ CFancyToolbar::OnLButtonUp
 
         // Let go of the mouse capture
         ::ReleaseCapture ();
-    }    
+    }
     else
     {
         CControlBar::OnLButtonUp (nFlags, point);
@@ -426,7 +426,7 @@ CFancyToolbar::OnLButtonUp
 //  OnDraw
 //
 void
-CFancyToolbar::OnDraw (CDC* pDC)
+CFancyToolbar::OnDraw (CDC* /* pDC */)
 {
     return ;
 }
@@ -454,11 +454,11 @@ CFancyToolbar::SetButtonState
     BOOL bRepaint
 )
 {
-    BOOL bFound = FALSE;
+    BOOL bFound = false;
 
     // Loop through all the buttons until we've found the one we're looking for
     for (int iButton = 0;
-         (iButton < m_iButtons) && (bFound == FALSE);
+         (iButton < m_iButtons) && (bFound == false);
          iButton ++)
     {
         if (m_pButtonArray[iButton].iCommandID == iCommandID)
@@ -475,7 +475,7 @@ CFancyToolbar::SetButtonState
             }
 
             // Found it!
-            bFound = TRUE;
+            bFound = true;
         }
     }
 
@@ -492,9 +492,9 @@ CFancyToolbar::GetButtonState (int iCommandID) const
     STATE_INFO stateInfo = StateUp;
 
     // Loop through all the buttons until we've found the one we're looking for
-    BOOL bFound = FALSE;
+    BOOL bFound = false;
     for (int iButton = 0;
-         (iButton < m_iButtons) && (bFound == FALSE);
+         (iButton < m_iButtons) && (bFound == false);
          iButton ++)
     {
         if (m_pButtonArray[iButton].iCommandID == iCommandID)
@@ -503,7 +503,7 @@ CFancyToolbar::GetButtonState (int iCommandID) const
             stateInfo = m_pButtonArray[iButton].currentState;
 
             // Found it!
-            bFound = TRUE;
+            bFound = true;
         }
     }
 

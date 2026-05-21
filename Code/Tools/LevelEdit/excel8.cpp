@@ -46,9 +46,9 @@ LPDISPATCH Workbooks::GetApplication()
 	return result;
 }
 
-long Workbooks::GetCreator()
+int Workbooks::GetCreator()
 {
-	long result;
+	int result;
 	InvokeHelper(0x95, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -75,9 +75,9 @@ void Workbooks::Close()
 	InvokeHelper(0x115, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
 }
 
-long Workbooks::GetCount()
+int Workbooks::GetCount()
 {
-	long result;
+	int result;
 	InvokeHelper(0x76, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -99,7 +99,7 @@ LPUNKNOWN Workbooks::Get_NewEnum()
 	return result;
 }
 
-LPDISPATCH Workbooks::Open(LPCTSTR Filename, const VARIANT& UpdateLinks, const VARIANT& ReadOnly, const VARIANT& Format, const VARIANT& Password, const VARIANT& WriteResPassword, const VARIANT& IgnoreReadOnlyRecommended, const VARIANT& Origin, 
+LPDISPATCH Workbooks::Open(LPCTSTR Filename, const VARIANT& UpdateLinks, const VARIANT& ReadOnly, const VARIANT& Format, const VARIANT& Password, const VARIANT& WriteResPassword, const VARIANT& IgnoreReadOnlyRecommended, const VARIANT& Origin,
 		const VARIANT& Delimiter, const VARIANT& Editable, const VARIANT& Notify, const VARIANT& Converter, const VARIANT& AddToMru)
 {
 	LPDISPATCH result;
@@ -110,7 +110,7 @@ LPDISPATCH Workbooks::Open(LPCTSTR Filename, const VARIANT& UpdateLinks, const V
 	return result;
 }
 
-void Workbooks::OpenText(LPCTSTR Filename, const VARIANT& Origin, const VARIANT& StartRow, const VARIANT& DataType, long TextQualifier, const VARIANT& ConsecutiveDelimiter, const VARIANT& Tab, const VARIANT& Semicolon, const VARIANT& Comma, 
+void Workbooks::OpenText(LPCTSTR Filename, const VARIANT& Origin, const VARIANT& StartRow, const VARIANT& DataType, int TextQualifier, const VARIANT& ConsecutiveDelimiter, const VARIANT& Tab, const VARIANT& Semicolon, const VARIANT& Comma,
 		const VARIANT& Space, const VARIANT& Other, const VARIANT& OtherChar, const VARIANT& FieldInfo, const VARIANT& TextVisualLayout)
 {
 	static BYTE parms[] =
@@ -143,9 +143,9 @@ LPDISPATCH _Application::GetApplication()
 	return result;
 }
 
-long _Application::GetCreator()
+int _Application::GetCreator()
 {
-	long result;
+	int result;
 	InvokeHelper(0x95, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -254,14 +254,14 @@ LPDISPATCH _Application::GetCommandBars()
 	return result;
 }
 
-long _Application::GetDDEAppReturnCode()
+int _Application::GetDDEAppReturnCode()
 {
-	long result;
+	int result;
 	InvokeHelper(0x14c, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::DDEExecute(long Channel, LPCTSTR String)
+void _Application::DDEExecute(int Channel, LPCTSTR String)
 {
 	static BYTE parms[] =
 		VTS_I4 VTS_BSTR;
@@ -269,9 +269,9 @@ void _Application::DDEExecute(long Channel, LPCTSTR String)
 		 Channel, String);
 }
 
-long _Application::DDEInitiate(LPCTSTR App, LPCTSTR Topic)
+int _Application::DDEInitiate(LPCTSTR App, LPCTSTR Topic)
 {
-	long result;
+	int result;
 	static BYTE parms[] =
 		VTS_BSTR VTS_BSTR;
 	InvokeHelper(0x14e, DISPATCH_METHOD, VT_I4, (void*)&result, parms,
@@ -279,7 +279,7 @@ long _Application::DDEInitiate(LPCTSTR App, LPCTSTR Topic)
 	return result;
 }
 
-void _Application::DDEPoke(long Channel, const VARIANT& Item, const VARIANT& Data)
+void _Application::DDEPoke(int Channel, const VARIANT& Item, const VARIANT& Data)
 {
 	static BYTE parms[] =
 		VTS_I4 VTS_VARIANT VTS_VARIANT;
@@ -287,7 +287,7 @@ void _Application::DDEPoke(long Channel, const VARIANT& Item, const VARIANT& Dat
 		 Channel, &Item, &Data);
 }
 
-VARIANT _Application::DDERequest(long Channel, LPCTSTR Item)
+VARIANT _Application::DDERequest(int Channel, LPCTSTR Item)
 {
 	VARIANT result;
 	static BYTE parms[] =
@@ -297,7 +297,7 @@ VARIANT _Application::DDERequest(long Channel, LPCTSTR Item)
 	return result;
 }
 
-void _Application::DDETerminate(long Channel)
+void _Application::DDETerminate(int Channel)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -335,13 +335,13 @@ VARIANT _Application::ExecuteExcel4Macro(LPCTSTR String)
 	return result;
 }
 
-LPDISPATCH _Application::Intersect(LPDISPATCH Arg1, LPDISPATCH Arg2, const VARIANT& Arg3, const VARIANT& Arg4, const VARIANT& Arg5, const VARIANT& Arg6, const VARIANT& Arg7, const VARIANT& Arg8, const VARIANT& Arg9, const VARIANT& Arg10, 
-		const VARIANT& Arg11, const VARIANT& Arg12, const VARIANT& Arg13, const VARIANT& Arg14, const VARIANT& Arg15, const VARIANT& Arg16, const VARIANT& Arg17, const VARIANT& Arg18, const VARIANT& Arg19, const VARIANT& Arg20, 
+LPDISPATCH _Application::Intersect(LPDISPATCH Arg1, LPDISPATCH Arg2, const VARIANT& Arg3, const VARIANT& Arg4, const VARIANT& Arg5, const VARIANT& Arg6, const VARIANT& Arg7, const VARIANT& Arg8, const VARIANT& Arg9, const VARIANT& Arg10,
+		const VARIANT& Arg11, const VARIANT& Arg12, const VARIANT& Arg13, const VARIANT& Arg14, const VARIANT& Arg15, const VARIANT& Arg16, const VARIANT& Arg17, const VARIANT& Arg18, const VARIANT& Arg19, const VARIANT& Arg20,
 		const VARIANT& Arg21, const VARIANT& Arg22, const VARIANT& Arg23, const VARIANT& Arg24, const VARIANT& Arg25, const VARIANT& Arg26, const VARIANT& Arg27, const VARIANT& Arg28, const VARIANT& Arg29, const VARIANT& Arg30)
 {
 	LPDISPATCH result;
 	static BYTE parms[] =
-		VTS_DISPATCH VTS_DISPATCH VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT 
+		VTS_DISPATCH VTS_DISPATCH VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT
 		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT;
 	InvokeHelper(0x2fe, DISPATCH_METHOD, VT_DISPATCH, (void*)&result, parms,
 		Arg1, Arg2, &Arg3, &Arg4, &Arg5, &Arg6, &Arg7, &Arg8, &Arg9, &Arg10, &Arg11, &Arg12, &Arg13, &Arg14, &Arg15, &Arg16, &Arg17, &Arg18, &Arg19, &Arg20, &Arg21, &Arg22, &Arg23, &Arg24, &Arg25, &Arg26, &Arg27, &Arg28, &Arg29, &Arg30);
@@ -372,28 +372,28 @@ LPDISPATCH _Application::GetRows()
 	return result;
 }
 
-VARIANT _Application::Run(const VARIANT& Macro, const VARIANT& Arg1, const VARIANT& Arg2, const VARIANT& Arg3, const VARIANT& Arg4, const VARIANT& Arg5, const VARIANT& Arg6, const VARIANT& Arg7, const VARIANT& Arg8, const VARIANT& Arg9, 
-		const VARIANT& Arg10, const VARIANT& Arg11, const VARIANT& Arg12, const VARIANT& Arg13, const VARIANT& Arg14, const VARIANT& Arg15, const VARIANT& Arg16, const VARIANT& Arg17, const VARIANT& Arg18, const VARIANT& Arg19, 
-		const VARIANT& Arg20, const VARIANT& Arg21, const VARIANT& Arg22, const VARIANT& Arg23, const VARIANT& Arg24, const VARIANT& Arg25, const VARIANT& Arg26, const VARIANT& Arg27, const VARIANT& Arg28, const VARIANT& Arg29, 
+VARIANT _Application::Run(const VARIANT& Macro, const VARIANT& Arg1, const VARIANT& Arg2, const VARIANT& Arg3, const VARIANT& Arg4, const VARIANT& Arg5, const VARIANT& Arg6, const VARIANT& Arg7, const VARIANT& Arg8, const VARIANT& Arg9,
+		const VARIANT& Arg10, const VARIANT& Arg11, const VARIANT& Arg12, const VARIANT& Arg13, const VARIANT& Arg14, const VARIANT& Arg15, const VARIANT& Arg16, const VARIANT& Arg17, const VARIANT& Arg18, const VARIANT& Arg19,
+		const VARIANT& Arg20, const VARIANT& Arg21, const VARIANT& Arg22, const VARIANT& Arg23, const VARIANT& Arg24, const VARIANT& Arg25, const VARIANT& Arg26, const VARIANT& Arg27, const VARIANT& Arg28, const VARIANT& Arg29,
 		const VARIANT& Arg30)
 {
 	VARIANT result;
 	static BYTE parms[] =
-		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT 
+		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT
 		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT;
 	InvokeHelper(0x103, DISPATCH_METHOD, VT_VARIANT, (void*)&result, parms,
 		&Macro, &Arg1, &Arg2, &Arg3, &Arg4, &Arg5, &Arg6, &Arg7, &Arg8, &Arg9, &Arg10, &Arg11, &Arg12, &Arg13, &Arg14, &Arg15, &Arg16, &Arg17, &Arg18, &Arg19, &Arg20, &Arg21, &Arg22, &Arg23, &Arg24, &Arg25, &Arg26, &Arg27, &Arg28, &Arg29, &Arg30);
 	return result;
 }
 
-VARIANT _Application::_Run2(const VARIANT& Macro, const VARIANT& Arg1, const VARIANT& Arg2, const VARIANT& Arg3, const VARIANT& Arg4, const VARIANT& Arg5, const VARIANT& Arg6, const VARIANT& Arg7, const VARIANT& Arg8, const VARIANT& Arg9, 
-		const VARIANT& Arg10, const VARIANT& Arg11, const VARIANT& Arg12, const VARIANT& Arg13, const VARIANT& Arg14, const VARIANT& Arg15, const VARIANT& Arg16, const VARIANT& Arg17, const VARIANT& Arg18, const VARIANT& Arg19, 
-		const VARIANT& Arg20, const VARIANT& Arg21, const VARIANT& Arg22, const VARIANT& Arg23, const VARIANT& Arg24, const VARIANT& Arg25, const VARIANT& Arg26, const VARIANT& Arg27, const VARIANT& Arg28, const VARIANT& Arg29, 
+VARIANT _Application::_Run2(const VARIANT& Macro, const VARIANT& Arg1, const VARIANT& Arg2, const VARIANT& Arg3, const VARIANT& Arg4, const VARIANT& Arg5, const VARIANT& Arg6, const VARIANT& Arg7, const VARIANT& Arg8, const VARIANT& Arg9,
+		const VARIANT& Arg10, const VARIANT& Arg11, const VARIANT& Arg12, const VARIANT& Arg13, const VARIANT& Arg14, const VARIANT& Arg15, const VARIANT& Arg16, const VARIANT& Arg17, const VARIANT& Arg18, const VARIANT& Arg19,
+		const VARIANT& Arg20, const VARIANT& Arg21, const VARIANT& Arg22, const VARIANT& Arg23, const VARIANT& Arg24, const VARIANT& Arg25, const VARIANT& Arg26, const VARIANT& Arg27, const VARIANT& Arg28, const VARIANT& Arg29,
 		const VARIANT& Arg30)
 {
 	VARIANT result;
 	static BYTE parms[] =
-		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT 
+		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT
 		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT;
 	InvokeHelper(0x326, DISPATCH_METHOD, VT_VARIANT, (void*)&result, parms,
 		&Macro, &Arg1, &Arg2, &Arg3, &Arg4, &Arg5, &Arg6, &Arg7, &Arg8, &Arg9, &Arg10, &Arg11, &Arg12, &Arg13, &Arg14, &Arg15, &Arg16, &Arg17, &Arg18, &Arg19, &Arg20, &Arg21, &Arg22, &Arg23, &Arg24, &Arg25, &Arg26, &Arg27, &Arg28, &Arg29, &Arg30);
@@ -429,13 +429,13 @@ LPDISPATCH _Application::GetThisWorkbook()
 	return result;
 }
 
-LPDISPATCH _Application::Union(LPDISPATCH Arg1, LPDISPATCH Arg2, const VARIANT& Arg3, const VARIANT& Arg4, const VARIANT& Arg5, const VARIANT& Arg6, const VARIANT& Arg7, const VARIANT& Arg8, const VARIANT& Arg9, const VARIANT& Arg10, const VARIANT& Arg11, 
-		const VARIANT& Arg12, const VARIANT& Arg13, const VARIANT& Arg14, const VARIANT& Arg15, const VARIANT& Arg16, const VARIANT& Arg17, const VARIANT& Arg18, const VARIANT& Arg19, const VARIANT& Arg20, const VARIANT& Arg21, 
+LPDISPATCH _Application::Union(LPDISPATCH Arg1, LPDISPATCH Arg2, const VARIANT& Arg3, const VARIANT& Arg4, const VARIANT& Arg5, const VARIANT& Arg6, const VARIANT& Arg7, const VARIANT& Arg8, const VARIANT& Arg9, const VARIANT& Arg10, const VARIANT& Arg11,
+		const VARIANT& Arg12, const VARIANT& Arg13, const VARIANT& Arg14, const VARIANT& Arg15, const VARIANT& Arg16, const VARIANT& Arg17, const VARIANT& Arg18, const VARIANT& Arg19, const VARIANT& Arg20, const VARIANT& Arg21,
 		const VARIANT& Arg22, const VARIANT& Arg23, const VARIANT& Arg24, const VARIANT& Arg25, const VARIANT& Arg26, const VARIANT& Arg27, const VARIANT& Arg28, const VARIANT& Arg29, const VARIANT& Arg30)
 {
 	LPDISPATCH result;
 	static BYTE parms[] =
-		VTS_DISPATCH VTS_DISPATCH VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT 
+		VTS_DISPATCH VTS_DISPATCH VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT
 		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT;
 	InvokeHelper(0x30b, DISPATCH_METHOD, VT_DISPATCH, (void*)&result, parms,
 		Arg1, Arg2, &Arg3, &Arg4, &Arg5, &Arg6, &Arg7, &Arg8, &Arg9, &Arg10, &Arg11, &Arg12, &Arg13, &Arg14, &Arg15, &Arg16, &Arg17, &Arg18, &Arg19, &Arg20, &Arg21, &Arg22, &Arg23, &Arg24, &Arg25, &Arg26, &Arg27, &Arg28, &Arg29, &Arg30);
@@ -484,7 +484,7 @@ LPDISPATCH _Application::GetExcel4MacroSheets()
 	return result;
 }
 
-void _Application::ActivateMicrosoftApp(long Index)
+void _Application::ActivateMicrosoftApp(int Index)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -575,9 +575,9 @@ LPDISPATCH _Application::GetAutoCorrect()
 	return result;
 }
 
-long _Application::GetBuild()
+int _Application::GetBuild()
 {
-	long result;
+	int result;
 	InvokeHelper(0x13a, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -597,14 +597,14 @@ void _Application::SetCalculateBeforeSave(BOOL bNewValue)
 		 bNewValue);
 }
 
-long _Application::GetCalculation()
+int _Application::GetCalculation()
 {
-	long result;
+	int result;
 	InvokeHelper(0x13c, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetCalculation(long nNewValue)
+void _Application::SetCalculation(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -711,14 +711,14 @@ void _Application::SetDisplayClipboardWindow(BOOL bNewValue)
 		 bNewValue);
 }
 
-long _Application::GetCommandUnderlines()
+int _Application::GetCommandUnderlines()
 {
-	long result;
+	int result;
 	InvokeHelper(0x143, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetCommandUnderlines(long nNewValue)
+void _Application::SetCommandUnderlines(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -741,7 +741,7 @@ void _Application::SetConstrainNumeric(BOOL bNewValue)
 		 bNewValue);
 }
 
-VARIANT _Application::ConvertFormula(const VARIANT& Formula, long FromReferenceStyle, const VARIANT& ToReferenceStyle, const VARIANT& ToAbsolute, const VARIANT& RelativeTo)
+VARIANT _Application::ConvertFormula(const VARIANT& Formula, int FromReferenceStyle, const VARIANT& ToReferenceStyle, const VARIANT& ToAbsolute, const VARIANT& RelativeTo)
 {
 	VARIANT result;
 	static BYTE parms[] =
@@ -766,14 +766,14 @@ void _Application::SetCopyObjectsWithCells(BOOL bNewValue)
 		 bNewValue);
 }
 
-long _Application::GetCursor()
+int _Application::GetCursor()
 {
-	long result;
+	int result;
 	InvokeHelper(0x489, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetCursor(long nNewValue)
+void _Application::SetCursor(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -781,21 +781,21 @@ void _Application::SetCursor(long nNewValue)
 		 nNewValue);
 }
 
-long _Application::GetCustomListCount()
+int _Application::GetCustomListCount()
 {
-	long result;
+	int result;
 	InvokeHelper(0x313, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-long _Application::GetCutCopyMode()
+int _Application::GetCutCopyMode()
 {
-	long result;
+	int result;
 	InvokeHelper(0x14a, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetCutCopyMode(long nNewValue)
+void _Application::SetCutCopyMode(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -803,14 +803,14 @@ void _Application::SetCutCopyMode(long nNewValue)
 		 nNewValue);
 }
 
-long _Application::GetDataEntryMode()
+int _Application::GetDataEntryMode()
 {
-	long result;
+	int result;
 	InvokeHelper(0x14b, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetDataEntryMode(long nNewValue)
+void _Application::SetDataEntryMode(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -848,7 +848,7 @@ void _Application::DeleteChartAutoFormat(LPCTSTR Name)
 		 Name);
 }
 
-void _Application::DeleteCustomList(long ListNum)
+void _Application::DeleteCustomList(int ListNum)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -923,14 +923,14 @@ void _Application::SetDisplayNoteIndicator(BOOL bNewValue)
 		 bNewValue);
 }
 
-long _Application::GetDisplayCommentIndicator()
+int _Application::GetDisplayCommentIndicator()
 {
-	long result;
+	int result;
 	InvokeHelper(0x4ac, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetDisplayCommentIndicator(long nNewValue)
+void _Application::SetDisplayCommentIndicator(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -1033,14 +1033,14 @@ void _Application::SetEnableAutoComplete(BOOL bNewValue)
 		 bNewValue);
 }
 
-long _Application::GetEnableCancelKey()
+int _Application::GetEnableCancelKey()
 {
-	long result;
+	int result;
 	InvokeHelper(0x448, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetEnableCancelKey(long nNewValue)
+void _Application::SetEnableCancelKey(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -1107,14 +1107,14 @@ void _Application::SetFixedDecimal(BOOL bNewValue)
 		 bNewValue);
 }
 
-long _Application::GetFixedDecimalPlaces()
+int _Application::GetFixedDecimalPlaces()
 {
-	long result;
+	int result;
 	InvokeHelper(0x160, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetFixedDecimalPlaces(long nNewValue)
+void _Application::SetFixedDecimalPlaces(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -1122,7 +1122,7 @@ void _Application::SetFixedDecimalPlaces(long nNewValue)
 		 nNewValue);
 }
 
-VARIANT _Application::GetCustomListContents(long ListNum)
+VARIANT _Application::GetCustomListContents(int ListNum)
 {
 	VARIANT result;
 	static BYTE parms[] =
@@ -1132,9 +1132,9 @@ VARIANT _Application::GetCustomListContents(long ListNum)
 	return result;
 }
 
-long _Application::GetCustomListNum(const VARIANT& ListArray)
+int _Application::GetCustomListNum(const VARIANT& ListArray)
 {
-	long result;
+	int result;
 	static BYTE parms[] =
 		VTS_VARIANT;
 	InvokeHelper(0x311, DISPATCH_METHOD, VT_I4, (void*)&result, parms,
@@ -1290,7 +1290,7 @@ CString _Application::GetLibraryPath()
 	return result;
 }
 
-void _Application::MacroOptions(const VARIANT& Macro, const VARIANT& Description, const VARIANT& HasMenu, const VARIANT& MenuText, const VARIANT& HasShortcutKey, const VARIANT& ShortcutKey, const VARIANT& Category, const VARIANT& StatusBar, 
+void _Application::MacroOptions(const VARIANT& Macro, const VARIANT& Description, const VARIANT& HasMenu, const VARIANT& MenuText, const VARIANT& HasShortcutKey, const VARIANT& ShortcutKey, const VARIANT& Category, const VARIANT& StatusBar,
 		const VARIANT& HelpContextID, const VARIANT& HelpFile)
 {
 	static BYTE parms[] =
@@ -1319,9 +1319,9 @@ VARIANT _Application::GetMailSession()
 	return result;
 }
 
-long _Application::GetMailSystem()
+int _Application::GetMailSystem()
 {
-	long result;
+	int result;
 	InvokeHelper(0x3cb, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -1348,14 +1348,14 @@ void _Application::SetMaxChange(double newValue)
 		 newValue);
 }
 
-long _Application::GetMaxIterations()
+int _Application::GetMaxIterations()
 {
-	long result;
+	int result;
 	InvokeHelper(0x171, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetMaxIterations(long nNewValue)
+void _Application::SetMaxIterations(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -1363,23 +1363,23 @@ void _Application::SetMaxIterations(long nNewValue)
 		 nNewValue);
 }
 
-long _Application::GetMemoryFree()
+int _Application::GetMemoryFree()
 {
-	long result;
+	int result;
 	InvokeHelper(0x172, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-long _Application::GetMemoryTotal()
+int _Application::GetMemoryTotal()
 {
-	long result;
+	int result;
 	InvokeHelper(0x173, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-long _Application::GetMemoryUsed()
+int _Application::GetMemoryUsed()
 {
-	long result;
+	int result;
 	InvokeHelper(0x174, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -1406,14 +1406,14 @@ void _Application::SetMoveAfterReturn(BOOL bNewValue)
 		 bNewValue);
 }
 
-long _Application::GetMoveAfterReturnDirection()
+int _Application::GetMoveAfterReturnDirection()
 {
-	long result;
+	int result;
 	InvokeHelper(0x478, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetMoveAfterReturnDirection(long nNewValue)
+void _Application::SetMoveAfterReturnDirection(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -1456,14 +1456,14 @@ LPDISPATCH _Application::GetODBCErrors()
 	return result;
 }
 
-long _Application::GetODBCTimeout()
+int _Application::GetODBCTimeout()
 {
-	long result;
+	int result;
 	InvokeHelper(0x4b4, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetODBCTimeout(long nNewValue)
+void _Application::SetODBCTimeout(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -1606,14 +1606,14 @@ BOOL _Application::GetRecordRelative()
 	return result;
 }
 
-long _Application::GetReferenceStyle()
+int _Application::GetReferenceStyle()
 {
-	long result;
+	int result;
 	InvokeHelper(0x17c, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetReferenceStyle(long nNewValue)
+void _Application::SetReferenceStyle(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -1692,14 +1692,14 @@ void _Application::SetDefaultChart(const VARIANT& FormatName, const VARIANT& Gal
 		 &FormatName, &Gallery);
 }
 
-long _Application::GetSheetsInNewWorkbook()
+int _Application::GetSheetsInNewWorkbook()
 {
-	long result;
+	int result;
 	InvokeHelper(0x3e1, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetSheetsInNewWorkbook(long nNewValue)
+void _Application::SetSheetsInNewWorkbook(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -1826,14 +1826,14 @@ void _Application::SetTop(double newValue)
 		 newValue);
 }
 
-long _Application::GetDefaultSaveFormat()
+int _Application::GetDefaultSaveFormat()
 {
-	long result;
+	int result;
 	InvokeHelper(0x4b9, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetDefaultSaveFormat(long nNewValue)
+void _Application::SetDefaultSaveFormat(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -1856,14 +1856,14 @@ void _Application::SetTransitionMenuKey(LPCTSTR lpszNewValue)
 		 lpszNewValue);
 }
 
-long _Application::GetTransitionMenuKeyAction()
+int _Application::GetTransitionMenuKeyAction()
 {
-	long result;
+	int result;
 	InvokeHelper(0x137, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetTransitionMenuKeyAction(long nNewValue)
+void _Application::SetTransitionMenuKeyAction(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2009,14 +2009,14 @@ BOOL _Application::GetWindowsForPens()
 	return result;
 }
 
-long _Application::GetWindowState()
+int _Application::GetWindowState()
 {
-	long result;
+	int result;
 	InvokeHelper(0x18c, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetWindowState(long nNewValue)
+void _Application::SetWindowState(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2024,14 +2024,14 @@ void _Application::SetWindowState(long nNewValue)
 		 nNewValue);
 }
 
-long _Application::GetUILanguage()
+int _Application::GetUILanguage()
 {
-	long result;
+	int result;
 	InvokeHelper(0x2, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetUILanguage(long nNewValue)
+void _Application::SetUILanguage(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2039,14 +2039,14 @@ void _Application::SetUILanguage(long nNewValue)
 		 nNewValue);
 }
 
-long _Application::GetDefaultSheetDirection()
+int _Application::GetDefaultSheetDirection()
 {
-	long result;
+	int result;
 	InvokeHelper(0xe5, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetDefaultSheetDirection(long nNewValue)
+void _Application::SetDefaultSheetDirection(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2054,14 +2054,14 @@ void _Application::SetDefaultSheetDirection(long nNewValue)
 		 nNewValue);
 }
 
-long _Application::GetCursorMovement()
+int _Application::GetCursorMovement()
 {
-	long result;
+	int result;
 	InvokeHelper(0xe8, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetCursorMovement(long nNewValue)
+void _Application::SetCursorMovement(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2069,14 +2069,14 @@ void _Application::SetCursorMovement(long nNewValue)
 		 nNewValue);
 }
 
-long _Application::GetControlCharacters()
+int _Application::GetControlCharacters()
 {
-	long result;
+	int result;
 	InvokeHelper(0xe9, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Application::SetControlCharacters(long nNewValue)
+void _Application::SetControlCharacters(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2113,9 +2113,9 @@ LPDISPATCH _Workbook::GetApplication()
 	return result;
 }
 
-long _Workbook::GetCreator()
+int _Workbook::GetCreator()
 {
-	long result;
+	int result;
 	InvokeHelper(0x95, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -2161,14 +2161,14 @@ LPDISPATCH _Workbook::GetActiveSheet()
 	return result;
 }
 
-long _Workbook::GetAutoUpdateFrequency()
+int _Workbook::GetAutoUpdateFrequency()
 {
-	long result;
+	int result;
 	InvokeHelper(0x5a2, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Workbook::SetAutoUpdateFrequency(long nNewValue)
+void _Workbook::SetAutoUpdateFrequency(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2191,14 +2191,14 @@ void _Workbook::SetAutoUpdateSaveChanges(BOOL bNewValue)
 		 bNewValue);
 }
 
-long _Workbook::GetChangeHistoryDuration()
+int _Workbook::GetChangeHistoryDuration()
 {
-	long result;
+	int result;
 	InvokeHelper(0x5a4, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Workbook::SetChangeHistoryDuration(long nNewValue)
+void _Workbook::SetChangeHistoryDuration(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2213,7 +2213,7 @@ LPDISPATCH _Workbook::GetBuiltinDocumentProperties()
 	return result;
 }
 
-void _Workbook::ChangeFileAccess(long Mode, const VARIANT& WritePassword, const VARIANT& Notify)
+void _Workbook::ChangeFileAccess(int Mode, const VARIANT& WritePassword, const VARIANT& Notify)
 {
 	static BYTE parms[] =
 		VTS_I4 VTS_VARIANT VTS_VARIANT;
@@ -2221,7 +2221,7 @@ void _Workbook::ChangeFileAccess(long Mode, const VARIANT& WritePassword, const 
 		 Mode, &WritePassword, &Notify);
 }
 
-void _Workbook::ChangeLink(LPCTSTR Name, LPCTSTR NewName, long Type)
+void _Workbook::ChangeLink(LPCTSTR Name, LPCTSTR NewName, int Type)
 {
 	static BYTE parms[] =
 		VTS_BSTR VTS_BSTR VTS_I4;
@@ -2291,14 +2291,14 @@ LPDISPATCH _Workbook::GetCommandBars()
 	return result;
 }
 
-long _Workbook::GetConflictResolution()
+int _Workbook::GetConflictResolution()
 {
-	long result;
+	int result;
 	InvokeHelper(0x497, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Workbook::SetConflictResolution(long nNewValue)
+void _Workbook::SetConflictResolution(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2350,14 +2350,14 @@ void _Workbook::DeleteNumberFormat(LPCTSTR NumberFormat)
 		 NumberFormat);
 }
 
-long _Workbook::GetDisplayDrawingObjects()
+int _Workbook::GetDisplayDrawingObjects()
 {
-	long result;
+	int result;
 	InvokeHelper(0x194, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Workbook::SetDisplayDrawingObjects(long nNewValue)
+void _Workbook::SetDisplayDrawingObjects(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2372,9 +2372,9 @@ BOOL _Workbook::ExclusiveAccess()
 	return result;
 }
 
-long _Workbook::GetFileFormat()
+int _Workbook::GetFileFormat()
 {
-	long result;
+	int result;
 	InvokeHelper(0x120, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -2428,7 +2428,7 @@ void _Workbook::SetIsAddin(BOOL bNewValue)
 		 bNewValue);
 }
 
-VARIANT _Workbook::LinkInfo(LPCTSTR Name, long LinkInfo, const VARIANT& Type, const VARIANT& EditionRef)
+VARIANT _Workbook::LinkInfo(LPCTSTR Name, int LinkInfo, const VARIANT& Type, const VARIANT& EditionRef)
 {
 	VARIANT result;
 	static BYTE parms[] =
@@ -2641,7 +2641,7 @@ void _Workbook::ReplyAll()
 	InvokeHelper(0x3d2, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
 }
 
-void _Workbook::RemoveUser(long Index)
+void _Workbook::RemoveUser(int Index)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2649,9 +2649,9 @@ void _Workbook::RemoveUser(long Index)
 		 Index);
 }
 
-long _Workbook::GetRevisionNumber()
+int _Workbook::GetRevisionNumber()
 {
-	long result;
+	int result;
 	InvokeHelper(0x494, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -2675,7 +2675,7 @@ LPDISPATCH _Workbook::GetRoutingSlip()
 	return result;
 }
 
-void _Workbook::RunAutoMacros(long Which)
+void _Workbook::RunAutoMacros(int Which)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -2688,7 +2688,7 @@ void _Workbook::Save()
 	InvokeHelper(0x11b, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
 }
 
-void _Workbook::SaveAs(const VARIANT& Filename, const VARIANT& FileFormat, const VARIANT& Password, const VARIANT& WriteResPassword, const VARIANT& ReadOnlyRecommended, const VARIANT& CreateBackup, long AccessMode, const VARIANT& ConflictResolution, 
+void _Workbook::SaveAs(const VARIANT& Filename, const VARIANT& FileFormat, const VARIANT& Password, const VARIANT& WriteResPassword, const VARIANT& ReadOnlyRecommended, const VARIANT& CreateBackup, int AccessMode, const VARIANT& ConflictResolution,
 		const VARIANT& AddToMru, const VARIANT& TextCodepage, const VARIANT& TextVisualLayout)
 {
 	static BYTE parms[] =
@@ -2743,7 +2743,7 @@ void _Workbook::SendMail(const VARIANT& Recipients, const VARIANT& Subject, cons
 		 &Recipients, &Subject, &ReturnReceipt);
 }
 
-void _Workbook::SendMailer(const VARIANT& FileFormat, long Priority)
+void _Workbook::SendMailer(const VARIANT& FileFormat, int Priority)
 {
 	static BYTE parms[] =
 		VTS_VARIANT VTS_I4;
@@ -2956,7 +2956,7 @@ void _Workbook::SetListChangesOnNewSheet(BOOL bNewValue)
 		 bNewValue);
 }
 
-void _Workbook::PurgeChangeHistoryNow(long Days, const VARIANT& SharingPassword)
+void _Workbook::PurgeChangeHistoryNow(int Days, const VARIANT& SharingPassword)
 {
 	static BYTE parms[] =
 		VTS_I4 VTS_VARIANT;
@@ -3026,9 +3026,9 @@ LPDISPATCH _Worksheet::GetApplication()
 	return result;
 }
 
-long _Worksheet::GetCreator()
+int _Worksheet::GetCreator()
 {
-	long result;
+	int result;
 	InvokeHelper(0x95, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -3080,9 +3080,9 @@ void _Worksheet::Set_CodeName(LPCTSTR lpszNewValue)
 		 lpszNewValue);
 }
 
-long _Worksheet::GetIndex()
+int _Worksheet::GetIndex()
 {
-	long result;
+	int result;
 	InvokeHelper(0x1e6, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -3183,7 +3183,7 @@ BOOL _Worksheet::GetProtectScenarios()
 	return result;
 }
 
-void _Worksheet::SaveAs(LPCTSTR Filename, const VARIANT& FileFormat, const VARIANT& Password, const VARIANT& WriteResPassword, const VARIANT& ReadOnlyRecommended, const VARIANT& CreateBackup, const VARIANT& AddToMru, const VARIANT& TextCodepage, 
+void _Worksheet::SaveAs(LPCTSTR Filename, const VARIANT& FileFormat, const VARIANT& Password, const VARIANT& WriteResPassword, const VARIANT& ReadOnlyRecommended, const VARIANT& CreateBackup, const VARIANT& AddToMru, const VARIANT& TextCodepage,
 		const VARIANT& TextVisualLayout)
 {
 	static BYTE parms[] =
@@ -3208,14 +3208,14 @@ void _Worksheet::Unprotect(const VARIANT& Password)
 		 &Password);
 }
 
-long _Worksheet::GetVisible()
+int _Worksheet::GetVisible()
 {
-	long result;
+	int result;
 	InvokeHelper(0x22e, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Worksheet::SetVisible(long nNewValue)
+void _Worksheet::SetVisible(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -3332,9 +3332,9 @@ LPDISPATCH _Worksheet::GetColumns()
 	return result;
 }
 
-long _Worksheet::GetConsolidationFunction()
+int _Worksheet::GetConsolidationFunction()
 {
-	long result;
+	int result;
 	InvokeHelper(0x315, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -3368,14 +3368,14 @@ void _Worksheet::SetEnableAutoFilter(BOOL bNewValue)
 		 bNewValue);
 }
 
-long _Worksheet::GetEnableSelection()
+int _Worksheet::GetEnableSelection()
 {
-	long result;
+	int result;
 	InvokeHelper(0x591, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void _Worksheet::SetEnableSelection(long nNewValue)
+void _Worksheet::SetEnableSelection(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -3495,8 +3495,8 @@ LPDISPATCH _Worksheet::PivotTables(const VARIANT& Index)
 	return result;
 }
 
-LPDISPATCH _Worksheet::PivotTableWizard(const VARIANT& SourceType, const VARIANT& SourceData, const VARIANT& TableDestination, const VARIANT& TableName, const VARIANT& RowGrand, const VARIANT& ColumnGrand, const VARIANT& SaveData, 
-		const VARIANT& HasAutoFormat, const VARIANT& AutoPage, const VARIANT& Reserved, const VARIANT& BackgroundQuery, const VARIANT& OptimizeCache, const VARIANT& PageFieldOrder, const VARIANT& PageFieldWrapCount, const VARIANT& ReadData, 
+LPDISPATCH _Worksheet::PivotTableWizard(const VARIANT& SourceType, const VARIANT& SourceData, const VARIANT& TableDestination, const VARIANT& TableName, const VARIANT& RowGrand, const VARIANT& ColumnGrand, const VARIANT& SaveData,
+		const VARIANT& HasAutoFormat, const VARIANT& AutoPage, const VARIANT& Reserved, const VARIANT& BackgroundQuery, const VARIANT& OptimizeCache, const VARIANT& PageFieldOrder, const VARIANT& PageFieldWrapCount, const VARIANT& ReadData,
 		const VARIANT& Connection)
 {
 	LPDISPATCH result;
@@ -3596,9 +3596,9 @@ void _Worksheet::SetTransitionFormEntry(BOOL bNewValue)
 		 bNewValue);
 }
 
-long _Worksheet::GetType()
+int _Worksheet::GetType()
 {
-	long result;
+	int result;
 	InvokeHelper(0x6c, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -3691,9 +3691,9 @@ LPDISPATCH Range::GetApplication()
 	return result;
 }
 
-long Range::GetCreator()
+int Range::GetCreator()
 {
-	long result;
+	int result;
 	InvokeHelper(0x95, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -3725,7 +3725,7 @@ void Range::SetAddIndent(const VARIANT& newValue)
 		 &newValue);
 }
 
-CString Range::GetAddress(const VARIANT& RowAbsolute, const VARIANT& ColumnAbsolute, long ReferenceStyle, const VARIANT& External, const VARIANT& RelativeTo)
+CString Range::GetAddress(const VARIANT& RowAbsolute, const VARIANT& ColumnAbsolute, int ReferenceStyle, const VARIANT& External, const VARIANT& RelativeTo)
 {
 	CString result;
 	static BYTE parms[] =
@@ -3735,7 +3735,7 @@ CString Range::GetAddress(const VARIANT& RowAbsolute, const VARIANT& ColumnAbsol
 	return result;
 }
 
-CString Range::GetAddressLocal(const VARIANT& RowAbsolute, const VARIANT& ColumnAbsolute, long ReferenceStyle, const VARIANT& External, const VARIANT& RelativeTo)
+CString Range::GetAddressLocal(const VARIANT& RowAbsolute, const VARIANT& ColumnAbsolute, int ReferenceStyle, const VARIANT& External, const VARIANT& RelativeTo)
 {
 	CString result;
 	static BYTE parms[] =
@@ -3745,7 +3745,7 @@ CString Range::GetAddressLocal(const VARIANT& RowAbsolute, const VARIANT& Column
 	return result;
 }
 
-void Range::AdvancedFilter(long Action, const VARIANT& CriteriaRange, const VARIANT& CopyToRange, const VARIANT& Unique)
+void Range::AdvancedFilter(int Action, const VARIANT& CriteriaRange, const VARIANT& CopyToRange, const VARIANT& Unique)
 {
 	static BYTE parms[] =
 		VTS_I4 VTS_VARIANT VTS_VARIANT VTS_VARIANT;
@@ -3753,7 +3753,7 @@ void Range::AdvancedFilter(long Action, const VARIANT& CriteriaRange, const VARI
 		 Action, &CriteriaRange, &CopyToRange, &Unique);
 }
 
-void Range::ApplyNames(const VARIANT& Names, const VARIANT& IgnoreRelativeAbsolute, const VARIANT& UseRowColumnNames, const VARIANT& OmitColumn, const VARIANT& OmitRow, long Order, const VARIANT& AppendLast)
+void Range::ApplyNames(const VARIANT& Names, const VARIANT& IgnoreRelativeAbsolute, const VARIANT& UseRowColumnNames, const VARIANT& OmitColumn, const VARIANT& OmitRow, int Order, const VARIANT& AppendLast)
 {
 	static BYTE parms[] =
 		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_I4 VTS_VARIANT;
@@ -3783,7 +3783,7 @@ CString Range::AutoComplete(LPCTSTR String)
 	return result;
 }
 
-void Range::AutoFill(LPDISPATCH Destination, long Type)
+void Range::AutoFill(LPDISPATCH Destination, int Type)
 {
 	static BYTE parms[] =
 		VTS_DISPATCH VTS_I4;
@@ -3791,7 +3791,7 @@ void Range::AutoFill(LPDISPATCH Destination, long Type)
 		 Destination, Type);
 }
 
-void Range::AutoFilter(const VARIANT& Field, const VARIANT& Criteria1, long Operator, const VARIANT& Criteria2, const VARIANT& VisibleDropDown)
+void Range::AutoFilter(const VARIANT& Field, const VARIANT& Criteria1, int Operator, const VARIANT& Criteria2, const VARIANT& VisibleDropDown)
 {
 	static BYTE parms[] =
 		VTS_VARIANT VTS_VARIANT VTS_I4 VTS_VARIANT VTS_VARIANT;
@@ -3804,7 +3804,7 @@ void Range::AutoFit()
 	InvokeHelper(0xed, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
 }
 
-void Range::AutoFormat(long Format, const VARIANT& Number, const VARIANT& Font, const VARIANT& Alignment, const VARIANT& Border, const VARIANT& Pattern, const VARIANT& Width)
+void Range::AutoFormat(int Format, const VARIANT& Number, const VARIANT& Font, const VARIANT& Alignment, const VARIANT& Border, const VARIANT& Pattern, const VARIANT& Width)
 {
 	static BYTE parms[] =
 		VTS_I4 VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT;
@@ -3817,7 +3817,7 @@ void Range::AutoOutline()
 	InvokeHelper(0x40c, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
 }
 
-void Range::BorderAround(const VARIANT& LineStyle, long Weight, long ColorIndex, const VARIANT& Color)
+void Range::BorderAround(const VARIANT& LineStyle, int Weight, int ColorIndex, const VARIANT& Color)
 {
 	static BYTE parms[] =
 		VTS_VARIANT VTS_I4 VTS_I4 VTS_VARIANT;
@@ -3887,9 +3887,9 @@ void Range::ClearOutline()
 	InvokeHelper(0x40d, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
 }
 
-long Range::GetColumn()
+int Range::GetColumn()
 {
-	long result;
+	int result;
 	InvokeHelper(0xf0, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -3942,9 +3942,9 @@ void Range::Copy(const VARIANT& Destination)
 		 &Destination);
 }
 
-long Range::CopyFromRecordset(LPUNKNOWN Data, const VARIANT& MaxRows, const VARIANT& MaxColumns)
+int Range::CopyFromRecordset(LPUNKNOWN Data, const VARIANT& MaxRows, const VARIANT& MaxColumns)
 {
-	long result;
+	int result;
 	static BYTE parms[] =
 		VTS_UNKNOWN VTS_VARIANT VTS_VARIANT;
 	InvokeHelper(0x480, DISPATCH_METHOD, VT_I4, (void*)&result, parms,
@@ -3952,7 +3952,7 @@ long Range::CopyFromRecordset(LPUNKNOWN Data, const VARIANT& MaxRows, const VARI
 	return result;
 }
 
-void Range::CopyPicture(long Appearance, long Format)
+void Range::CopyPicture(int Appearance, int Format)
 {
 	static BYTE parms[] =
 		VTS_I4 VTS_I4;
@@ -3960,9 +3960,9 @@ void Range::CopyPicture(long Appearance, long Format)
 		 Appearance, Format);
 }
 
-long Range::GetCount()
+int Range::GetCount()
 {
-	long result;
+	int result;
 	InvokeHelper(0x76, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -3975,7 +3975,7 @@ void Range::CreateNames(const VARIANT& Top, const VARIANT& Left, const VARIANT& 
 		 &Top, &Left, &Bottom, &Right);
 }
 
-void Range::CreatePublisher(const VARIANT& Edition, long Appearance, const VARIANT& ContainsPICT, const VARIANT& ContainsBIFF, const VARIANT& ContainsRTF, const VARIANT& ContainsVALU)
+void Range::CreatePublisher(const VARIANT& Edition, int Appearance, const VARIANT& ContainsPICT, const VARIANT& ContainsBIFF, const VARIANT& ContainsRTF, const VARIANT& ContainsVALU)
 {
 	static BYTE parms[] =
 		VTS_VARIANT VTS_I4 VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT;
@@ -4005,7 +4005,7 @@ void Range::Cut(const VARIANT& Destination)
 		 &Destination);
 }
 
-void Range::DataSeries(const VARIANT& Rowcol, long Type, long Date, const VARIANT& Step, const VARIANT& Stop, const VARIANT& Trend)
+void Range::DataSeries(const VARIANT& Rowcol, int Type, int Date, const VARIANT& Step, const VARIANT& Stop, const VARIANT& Trend)
 {
 	static BYTE parms[] =
 		VTS_VARIANT VTS_I4 VTS_I4 VTS_VARIANT VTS_VARIANT VTS_VARIANT;
@@ -4067,7 +4067,7 @@ LPDISPATCH Range::GetDirectPrecedents()
 	return result;
 }
 
-VARIANT Range::EditionOptions(long Type, long Option, const VARIANT& Name, const VARIANT& Reference, long Appearance, long ChartSize, const VARIANT& Format)
+VARIANT Range::EditionOptions(int Type, int Option, const VARIANT& Name, const VARIANT& Reference, int Appearance, int ChartSize, const VARIANT& Format)
 {
 	VARIANT result;
 	static BYTE parms[] =
@@ -4077,7 +4077,7 @@ VARIANT Range::EditionOptions(long Type, long Option, const VARIANT& Name, const
 	return result;
 }
 
-LPDISPATCH Range::GetEnd(long Direction)
+LPDISPATCH Range::GetEnd(int Direction)
 {
 	LPDISPATCH result;
 	static BYTE parms[] =
@@ -4121,7 +4121,7 @@ void Range::FillUp()
 	InvokeHelper(0xfb, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
 }
 
-LPDISPATCH Range::Find(const VARIANT& What, const VARIANT& After, const VARIANT& LookIn, const VARIANT& LookAt, const VARIANT& SearchOrder, long SearchDirection, const VARIANT& MatchCase, const VARIANT& MatchByte, 
+LPDISPATCH Range::Find(const VARIANT& What, const VARIANT& After, const VARIANT& LookIn, const VARIANT& LookAt, const VARIANT& SearchOrder, int SearchDirection, const VARIANT& MatchCase, const VARIANT& MatchByte,
 		const VARIANT& MatchControlCharacters, const VARIANT& MatchDiacritics, const VARIANT& MatchKashida, const VARIANT& MatchAlefHamza)
 {
 	LPDISPATCH result;
@@ -4189,14 +4189,14 @@ void Range::SetFormulaArray(const VARIANT& newValue)
 		 &newValue);
 }
 
-long Range::GetFormulaLabel()
+int Range::GetFormulaLabel()
 {
-	long result;
+	int result;
 	InvokeHelper(0x564, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void Range::SetFormulaLabel(long nNewValue)
+void Range::SetFormulaLabel(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -4355,7 +4355,7 @@ void Range::SetIndentLevel(const VARIANT& newValue)
 		 &newValue);
 }
 
-void Range::InsertIndent(long InsertAmount)
+void Range::InsertIndent(int InsertAmount)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -4408,9 +4408,9 @@ VARIANT Range::GetLeft()
 	return result;
 }
 
-long Range::GetListHeaderRows()
+int Range::GetListHeaderRows()
 {
-	long result;
+	int result;
 	InvokeHelper(0x4a3, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -4420,9 +4420,9 @@ void Range::ListNames()
 	InvokeHelper(0xfd, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
 }
 
-long Range::GetLocationInTable()
+int Range::GetLocationInTable()
 {
-	long result;
+	int result;
 	InvokeHelper(0x2b3, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -4594,14 +4594,14 @@ void Range::SetOutlineLevel(const VARIANT& newValue)
 		 &newValue);
 }
 
-long Range::GetPageBreak()
+int Range::GetPageBreak()
 {
-	long result;
+	int result;
 	InvokeHelper(0xff, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void Range::SetPageBreak(long nNewValue)
+void Range::SetPageBreak(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -4617,7 +4617,7 @@ void Range::Parse(const VARIANT& ParseLine, const VARIANT& Destination)
 		 &ParseLine, &Destination);
 }
 
-void Range::PasteSpecial(long Paste, long Operation, const VARIANT& SkipBlanks, const VARIANT& Transpose)
+void Range::PasteSpecial(int Paste, int Operation, const VARIANT& SkipBlanks, const VARIANT& Transpose)
 {
 	static BYTE parms[] =
 		VTS_I4 VTS_I4 VTS_VARIANT VTS_VARIANT;
@@ -4705,7 +4705,7 @@ void Range::RemoveSubtotal()
 	InvokeHelper(0x373, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
 }
 
-BOOL Range::Replace(const VARIANT& What, const VARIANT& Replacement, const VARIANT& LookAt, const VARIANT& SearchOrder, const VARIANT& MatchCase, const VARIANT& MatchByte, const VARIANT& MatchControlCharacters, const VARIANT& MatchDiacritics, 
+BOOL Range::Replace(const VARIANT& What, const VARIANT& Replacement, const VARIANT& LookAt, const VARIANT& SearchOrder, const VARIANT& MatchCase, const VARIANT& MatchByte, const VARIANT& MatchControlCharacters, const VARIANT& MatchDiacritics,
 		const VARIANT& MatchKashida, const VARIANT& MatchAlefHamza)
 {
 	BOOL result;
@@ -4726,9 +4726,9 @@ LPDISPATCH Range::GetResize(const VARIANT& RowSize, const VARIANT& ColumnSize)
 	return result;
 }
 
-long Range::GetRow()
+int Range::GetRow()
 {
-	long result;
+	int result;
 	InvokeHelper(0x101, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -4765,13 +4765,13 @@ LPDISPATCH Range::GetRows()
 	return result;
 }
 
-VARIANT Range::Run(const VARIANT& Arg1, const VARIANT& Arg2, const VARIANT& Arg3, const VARIANT& Arg4, const VARIANT& Arg5, const VARIANT& Arg6, const VARIANT& Arg7, const VARIANT& Arg8, const VARIANT& Arg9, const VARIANT& Arg10, 
-		const VARIANT& Arg11, const VARIANT& Arg12, const VARIANT& Arg13, const VARIANT& Arg14, const VARIANT& Arg15, const VARIANT& Arg16, const VARIANT& Arg17, const VARIANT& Arg18, const VARIANT& Arg19, const VARIANT& Arg20, 
+VARIANT Range::Run(const VARIANT& Arg1, const VARIANT& Arg2, const VARIANT& Arg3, const VARIANT& Arg4, const VARIANT& Arg5, const VARIANT& Arg6, const VARIANT& Arg7, const VARIANT& Arg8, const VARIANT& Arg9, const VARIANT& Arg10,
+		const VARIANT& Arg11, const VARIANT& Arg12, const VARIANT& Arg13, const VARIANT& Arg14, const VARIANT& Arg15, const VARIANT& Arg16, const VARIANT& Arg17, const VARIANT& Arg18, const VARIANT& Arg19, const VARIANT& Arg20,
 		const VARIANT& Arg21, const VARIANT& Arg22, const VARIANT& Arg23, const VARIANT& Arg24, const VARIANT& Arg25, const VARIANT& Arg26, const VARIANT& Arg27, const VARIANT& Arg28, const VARIANT& Arg29, const VARIANT& Arg30)
 {
 	VARIANT result;
 	static BYTE parms[] =
-		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT 
+		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT
 		VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_VARIANT;
 	InvokeHelper(0x103, DISPATCH_METHOD, VT_VARIANT, (void*)&result, parms,
 		&Arg1, &Arg2, &Arg3, &Arg4, &Arg5, &Arg6, &Arg7, &Arg8, &Arg9, &Arg10, &Arg11, &Arg12, &Arg13, &Arg14, &Arg15, &Arg16, &Arg17, &Arg18, &Arg19, &Arg20, &Arg21, &Arg22, &Arg23, &Arg24, &Arg25, &Arg26, &Arg27, &Arg28, &Arg29, &Arg30);
@@ -4839,7 +4839,7 @@ void Range::SetShrinkToFit(const VARIANT& newValue)
 		 &newValue);
 }
 
-void Range::Sort(const VARIANT& Key1, long Order1, const VARIANT& Key2, const VARIANT& Type, long Order2, const VARIANT& Key3, long Order3, long Header, const VARIANT& OrderCustom, const VARIANT& MatchCase, long Orientation, long SortMethod, 
+void Range::Sort(const VARIANT& Key1, int Order1, const VARIANT& Key2, const VARIANT& Type, int Order2, const VARIANT& Key3, int Order3, int Header, const VARIANT& OrderCustom, const VARIANT& MatchCase, int Orientation, int SortMethod,
 		const VARIANT& IgnoreControlCharacters, const VARIANT& IgnoreDiacritics, const VARIANT& IgnoreKashida)
 {
 	static BYTE parms[] =
@@ -4848,7 +4848,7 @@ void Range::Sort(const VARIANT& Key1, long Order1, const VARIANT& Key2, const VA
 		 &Key1, Order1, &Key2, &Type, Order2, &Key3, Order3, Header, &OrderCustom, &MatchCase, Orientation, SortMethod, &IgnoreControlCharacters, &IgnoreDiacritics, &IgnoreKashida);
 }
 
-void Range::SortSpecial(long SortMethod, const VARIANT& Key1, long Order1, const VARIANT& Type, const VARIANT& Key2, long Order2, const VARIANT& Key3, long Order3, long Header, const VARIANT& OrderCustom, const VARIANT& MatchCase, long Orientation)
+void Range::SortSpecial(int SortMethod, const VARIANT& Key1, int Order1, const VARIANT& Type, const VARIANT& Key2, int Order2, const VARIANT& Key3, int Order3, int Header, const VARIANT& OrderCustom, const VARIANT& MatchCase, int Orientation)
 {
 	static BYTE parms[] =
 		VTS_I4 VTS_VARIANT VTS_I4 VTS_VARIANT VTS_VARIANT VTS_I4 VTS_VARIANT VTS_I4 VTS_I4 VTS_VARIANT VTS_VARIANT VTS_I4;
@@ -4863,7 +4863,7 @@ LPDISPATCH Range::GetSoundNote()
 	return result;
 }
 
-LPDISPATCH Range::SpecialCells(long Type, const VARIANT& Value)
+LPDISPATCH Range::SpecialCells(int Type, const VARIANT& Value)
 {
 	LPDISPATCH result;
 	static BYTE parms[] =
@@ -4888,7 +4888,7 @@ void Range::SetStyle(const VARIANT& newValue)
 		 &newValue);
 }
 
-void Range::SubscribeTo(LPCTSTR Edition, long Format)
+void Range::SubscribeTo(LPCTSTR Edition, int Format)
 {
 	static BYTE parms[] =
 		VTS_BSTR VTS_I4;
@@ -4896,7 +4896,7 @@ void Range::SubscribeTo(LPCTSTR Edition, long Format)
 		 Edition, Format);
 }
 
-void Range::Subtotal(long GroupBy, long Function, const VARIANT& TotalList, const VARIANT& Replace, const VARIANT& PageBreaks, long SummaryBelowData)
+void Range::Subtotal(int GroupBy, int Function, const VARIANT& TotalList, const VARIANT& Replace, const VARIANT& PageBreaks, int SummaryBelowData)
 {
 	static BYTE parms[] =
 		VTS_I4 VTS_I4 VTS_VARIANT VTS_VARIANT VTS_VARIANT VTS_I4;
@@ -4926,7 +4926,7 @@ VARIANT Range::GetText()
 	return result;
 }
 
-void Range::TextToColumns(const VARIANT& Destination, long DataType, long TextQualifier, const VARIANT& ConsecutiveDelimiter, const VARIANT& Tab, const VARIANT& Semicolon, const VARIANT& Comma, const VARIANT& Space, const VARIANT& Other, 
+void Range::TextToColumns(const VARIANT& Destination, int DataType, int TextQualifier, const VARIANT& ConsecutiveDelimiter, const VARIANT& Tab, const VARIANT& Semicolon, const VARIANT& Comma, const VARIANT& Space, const VARIANT& Other,
 		const VARIANT& OtherChar, const VARIANT& FieldInfo)
 {
 	static BYTE parms[] =
@@ -5094,14 +5094,14 @@ LPDISPATCH Range::GetFormatConditions()
 	return result;
 }
 
-long Range::GetReadingOrder()
+int Range::GetReadingOrder()
 {
-	long result;
+	int result;
 	InvokeHelper(0x3cf, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-void Range::SetReadingOrder(long nNewValue)
+void Range::SetReadingOrder(int nNewValue)
 {
 	static BYTE parms[] =
 		VTS_I4;
@@ -5130,9 +5130,9 @@ LPDISPATCH Border::GetApplication()
 	return result;
 }
 
-long Border::GetCreator()
+int Border::GetCreator()
 {
-	long result;
+	int result;
 	InvokeHelper(0x95, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -5218,9 +5218,9 @@ LPDISPATCH Borders::GetApplication()
 	return result;
 }
 
-long Borders::GetCreator()
+int Borders::GetCreator()
 {
-	long result;
+	int result;
 	InvokeHelper(0x95, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
@@ -5262,14 +5262,14 @@ void Borders::SetColorIndex(const VARIANT& newValue)
 		 &newValue);
 }
 
-long Borders::GetCount()
+int Borders::GetCount()
 {
-	long result;
+	int result;
 	InvokeHelper(0x76, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }
 
-LPDISPATCH Borders::GetItem(long Index)
+LPDISPATCH Borders::GetItem(int Index)
 {
 	LPDISPATCH result;
 	static BYTE parms[] =
@@ -5331,7 +5331,7 @@ void Borders::SetWeight(const VARIANT& newValue)
 		 &newValue);
 }
 
-LPDISPATCH Borders::Get_Default(long Index)
+LPDISPATCH Borders::Get_Default(int Index)
 {
 	LPDISPATCH result;
 	static BYTE parms[] =
@@ -5355,9 +5355,9 @@ LPDISPATCH Interior::GetApplication()
 	return result;
 }
 
-long Interior::GetCreator()
+int Interior::GetCreator()
 {
-	long result;
+	int result;
 	InvokeHelper(0x95, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
 	return result;
 }

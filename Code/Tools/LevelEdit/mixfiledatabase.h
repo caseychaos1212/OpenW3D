@@ -71,21 +71,21 @@ public:
 	///////////////////////////////////////////////////////////////////
 	//	Public methods
 	///////////////////////////////////////////////////////////////////
-	
+
 	//
 	//	Database methods
 	//
 	bool				Open_Database (LPCTSTR ini_filename, LPCTSTR username = NULL, LPCTSTR password = NULL);
-	
+
 	//
 	//	File manipulation methods
 	//
-	bool				Add_File (LPCTSTR local_filename, LPCTSTR comment = NULL)	{ return true; }
-	bool				Check_In (LPCTSTR local_filename, LPCTSTR comment = NULL)	{ return true; }
+	bool				Add_File (LPCTSTR /* local_filename */, LPCTSTR /* comment */ = NULL)	{ return true; }
+	bool				Check_In (LPCTSTR /* local_filename */, LPCTSTR /* comment */ = NULL)	{ return true; }
 	bool				Check_Out (LPCTSTR local_filename, bool get_locally = true);
-	bool				Undo_Check_Out (LPCTSTR local_filename)							{ return true; }
+	bool				Undo_Check_Out (LPCTSTR /* local_filename */)							{ return true; }
 	bool				Get (LPCTSTR local_filename);
-	bool				Get_Subproject (LPCTSTR local_filename)							{ return true; }
+	bool				Get_Subproject (LPCTSTR /* local_filename */)							{ return true; }
 	bool				Get_All (LPCTSTR dest_path, LPCTSTR search_mask);
 
 	FileClass *		Get_File (LPCTSTR local_filename);
@@ -95,26 +95,26 @@ public:
 	//
 	//	Extended methods which provide UI
 	//
-	bool				Check_Out_Ex (LPCTSTR local_filename, HWND parent_wnd)	{ return true; }
-	bool				Check_In_Ex (LPCTSTR local_filename, HWND parent_wnd)		{ return true; }
+	bool				Check_Out_Ex (LPCTSTR /* local_filename */, HWND /* parent_wnd */)	{ return true; }
+	bool				Check_In_Ex (LPCTSTR /* local_filename */, HWND /* parent_wnd */)		{ return true; }
 
 	//
 	// Retry methods
 	//
-	bool				Retry_Check_Out (LPCTSTR local_filename, int attempts = 1, int delay = 250)	{ return true; }
-	bool				Retry_Check_In (LPCTSTR local_filename, int attempts = 1, int delay = 250)		{ return true; }
-	
+	bool				Retry_Check_Out (LPCTSTR /* local_filename */, int /* attempts */ = 1, int /* delay */ = 250)	{ return true; }
+	bool				Retry_Check_In (LPCTSTR /* local_filename */, int /* attempts */ = 1, int /* delay */ = 250)		{ return true; }
+
 	//
 	//	File information methods
-	//		
-	FILE_STATUS		Get_File_Status (LPCTSTR local_filename, StringClass *checked_out_user_name = NULL) { return CHECKED_OUT_TO_ME; }
+	//
+	FILE_STATUS		Get_File_Status (LPCTSTR /* local_filename */, StringClass * /* checked_out_user_name */ = NULL) { return CHECKED_OUT_TO_ME; }
 	bool				Is_File_Different (LPCTSTR local_filename) { return (Does_File_Exist (local_filename) == false); }
 	bool				Does_File_Exist (LPCTSTR local_filename);
 
 	//
 	// User information
 	//
-	BOOL				Is_Read_Only (void) const	{ return FALSE; }
+	bool				Is_Read_Only (void) const	{ return false; }
 
 	//
 	//	Misc information
@@ -127,12 +127,12 @@ public:
 	static MixFileDatabaseClass *	Get_Instance (void)	{ return _TheInstance; }
 
 protected:
-	
+
 	///////////////////////////////////////////////////////////////////
 	//	Protected methods
 	///////////////////////////////////////////////////////////////////
 	bool				Copy_File (FileClass *file, LPCTSTR local_filename);
-	void				Create_Directory_Structure (LPCTSTR path);	
+	void				Create_Directory_Structure (LPCTSTR path);
 	bool				Internal_Does_File_Exist (LPCSTR filename);
 	bool				Internal_Get (LPCSTR filename, LPCSTR local_path);
 	bool				Is_Texture (LPCSTR filename);
@@ -142,7 +142,7 @@ protected:
 
 	///////////////////////////////////////////////////////////////////
 	//	Protected member data
-	///////////////////////////////////////////////////////////////////	
+	///////////////////////////////////////////////////////////////////
 	StringClass		ModName;
 	StringClass		ModAssetPath;
 	StringClass		MixFilePath;

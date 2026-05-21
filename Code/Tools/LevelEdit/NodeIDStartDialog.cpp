@@ -85,12 +85,12 @@ NodeIDStartDialogClass::OnInitDialog (void)
 	//	Read the current value from the registry
 	//
 	int start_id = theApp.GetProfileInt (CONFIG_KEY, NODE_ID_START_VALUE, 100000);
-	
+
 	m_IDSpin.SetRange32 (100000, 1000000000);
 	m_IDSpin.SetPos (start_id);
 	SetDlgItemInt (IDC_ID, start_id);
-		
-	return TRUE;
+
+	return true;
 }
 
 

@@ -72,13 +72,13 @@ class WidgetUserClass
 public:
 
 	WidgetUserClass(void);
-	~WidgetUserClass(void);	
+	~WidgetUserClass(void);
 
 	/*
 	** Debug rendering of vectors, points, boxes, etc etc.  Each frame, these objects
 	** will be rendered during PhysClass::Render and then deleted.
 	*/
-	
+
 #ifdef WWDEBUG
 	void				Reset_Debug_Widget_List(void);
 	virtual void	Add_Debug_Point(const Vector3 & p,const Vector3 & color);
@@ -89,20 +89,20 @@ public:
 	void				Render_Debug_Widgets(RenderInfoClass & rinfo);
 #else
 	void				Reset_Debug_Widget_List(void)																	{}
-	void				Add_Debug_Point(const Vector3 & p,const Vector3 & color)								{}
-	void				Add_Debug_Vector(const Vector3 & p,const Vector3 & v,const Vector3 & color)	{}
-	void				Add_Debug_AABox(const AABoxClass & box,const Vector3 & color,float opacity = 0.25f)	{}
-	void				Add_Debug_OBBox(const OBBoxClass & box,const Vector3 & color,float opacity = 0.25f)	{}
-	void				Add_Debug_Axes(const Matrix3D & transform,const Vector3 & color)					{}
-	void				Render_Debug_Widgets(RenderInfoClass & rinfo)											{}
+	void				Add_Debug_Point(const Vector3 & /* p */,const Vector3 & /* color */)								{}
+	void				Add_Debug_Vector(const Vector3 & /* p */,const Vector3 & /* v */,const Vector3 & /* color */)	{}
+	void				Add_Debug_AABox(const AABoxClass & /* box */,const Vector3 & /* color */,float /* opacity */ = 0.25f)	{}
+	void				Add_Debug_OBBox(const OBBoxClass & /* box */,const Vector3 & /* color */,float /* opacity */ = 0.25f)	{}
+	void				Add_Debug_Axes(const Matrix3D & /* transform */,const Vector3 & /* color */)					{}
+	void				Render_Debug_Widgets(RenderInfoClass & /* rinfo */)											{}
 #endif
 
 protected:
 
 #ifdef WWDEBUG
-	void				Add_Debug_Widget(WidgetRenderOpClass * op);	
+	void				Add_Debug_Widget(WidgetRenderOpClass * op);
 #else
-	void				Add_Debug_Widget(WidgetRenderOpClass * op)												{}
+	void				Add_Debug_Widget(WidgetRenderOpClass * /* op */)												{}
 #endif
 
 	/*

@@ -64,7 +64,7 @@ unsigned StringClass::ReservedMask=0;
 //
 ///////////////////////////////////////////////////////////////////
 void
-StringClass::Get_String (int length, bool is_temp)
+StringClass::Get_String (size_t length, bool is_temp)
 {
 	WWMEMLOG(MEM_STRINGS);
 
@@ -78,7 +78,7 @@ StringClass::Get_String (int length, bool is_temp)
 	//
 	//	Should we attempt to use a temp buffer for this string?
 	//
-	if (is_temp && length <= MAX_TEMP_LEN && ReservedMask!=ALL_TEMP_STRINGS_USED_MASK) {
+	if (is_temp && length <= static_cast<size_t>(MAX_TEMP_LEN) && ReservedMask != ALL_TEMP_STRINGS_USED_MASK) {
 
 		//
 		//	Make sure no one else is requesting a temp pointer
@@ -98,7 +98,7 @@ StringClass::Get_String (int length, bool is_temp)
 			unsigned mask=1<<index;
 			if (!(ReservedMask&mask)) {
 				ReservedMask|=mask;
-				
+
 				//
 				//	Grab this unused buffer for our string
 				//
@@ -108,14 +108,14 @@ StringClass::Get_String (int length, bool is_temp)
 				temp_string+=sizeof(_HEADER);	// The buffer contains header as well, and it needs to be at the start
 				string=temp_string;
 
-				Set_Buffer_And_Allocated_Length (string, MAX_TEMP_LEN);
+				Set_Buffer_And_Allocated_Length(string, static_cast<size_t>(MAX_TEMP_LEN));
 				break;
 			}
 		}
 	}
 
 	if (string == NULL) {
-		
+
 		//
 		//	Allocate a new string as necessary
 		//
@@ -134,11 +134,11 @@ StringClass::Get_String (int length, bool is_temp)
 //
 ///////////////////////////////////////////////////////////////////
 void
-StringClass::Resize (int new_len)
+StringClass::Resize (size_t new_len)
 {
 	WWMEMLOG(MEM_STRINGS);
 
-	int allocated_len = Get_Allocated_Length ();
+	size_t allocated_len = Get_Allocated_Length ();
 	if (new_len > allocated_len) {
 
 		//
@@ -164,22 +164,22 @@ StringClass::Resize (int new_len)
 //
 ///////////////////////////////////////////////////////////////////
 void
-StringClass::Uninitialised_Grow (int new_len)
+StringClass::Uninitialised_Grow (size_t new_len)
 {
 	WWMEMLOG(MEM_STRINGS);
 
-	int allocated_len = Get_Allocated_Length ();
+	size_t allocated_len = Get_Allocated_Length ();
 	if (new_len > allocated_len) {
-		
+
 		//
 		//	Switch to a newly allocated buffer
 		//
 		char *new_buffer = Allocate_Buffer (new_len);
-		Set_Buffer_And_Allocated_Length (new_buffer, new_len);	
+		Set_Buffer_And_Allocated_Length (new_buffer, new_len);
 	}
-		
+
 	//
-	// Whenever this function is called, clear the cached length 
+	// Whenever this function is called, clear the cached length
 	//
 	Store_Length (0);
 	return ;
@@ -237,7 +237,7 @@ StringClass::Free_String (void)
 //
 ///////////////////////////////////////////////////////////////////
 int __cdecl
-StringClass::Format_Args (const char *format, const va_list & arg_list )
+StringClass::Format_Args (const char *format, va_list arg_list )
 {
 	//
 	// Make a guess at the maximum length of the resulting string
@@ -249,11 +249,11 @@ StringClass::Format_Args (const char *format, const va_list & arg_list )
 	//	Format the string
 	//
 
-	retval = vsnprintf (temp_buffer, 512, format, arg_list);
-	
+	retval = u_vsnprintf_n (temp_buffer, sizeof(temp_buffer), format, arg_list);
+
 	//
 	//	Copy the string into our buffer
-	//	
+	//
 	(*this) = temp_buffer;
 
 	return retval;
@@ -280,11 +280,11 @@ StringClass::Format (const char *format, ...)
 	//
 	//	Format the string
 	//
-	retval = vsnprintf (temp_buffer, 512, format, arg_list);
-	
+	retval = u_vsnprintf_n (temp_buffer, sizeof(temp_buffer), format, arg_list);
+
 	//
 	//	Copy the string into our buffer
-	//	
+	//
 	(*this) = temp_buffer;
 
 	va_end (arg_list);
@@ -307,25 +307,21 @@ StringClass::Release_Resources (void)
 // Copy_Wide
 //
 ///////////////////////////////////////////////////////////////////
-bool StringClass::Copy_Wide (const wchar_t *source)
+bool StringClass::Copy_Wide (const unichar_t *source)
 {
 	if (source != NULL) {
+		size_t length = u_wstomb(nullptr, source, 0);
 
-		int  length;
-		BOOL unmapped;
-			
-		length = WideCharToMultiByte (CP_ACP, 0 , source, -1, NULL, 0, NULL, &unmapped);
-		if (length > 0) {
+		if (length > 0 && length != size_t(-1)) {
+			length = u_wstomb(Get_Buffer(length), source, length);
 
-			// Convert.
-			WideCharToMultiByte (CP_ACP, 0, source, -1, Get_Buffer (length), length, NULL, NULL);
-
-			// Update length.
-			Store_Length (length - 1);
+			if (length > 0 && length != size_t(-1)) {
+				Store_Length(length - 1);
+				return (true);
+			}
 		}
 
-		// Were all characters successfully mapped?
-		return (!unmapped);
+		WWDEBUG_SAY(("Conversion from utf-16 to utf-8 failed\n"));
 	}
 
 	// Failure.

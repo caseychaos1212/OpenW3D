@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Installer                                                    * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Installer/WinMain.cpp  $* 
- *                                                                                             * 
- *                      $Author:: Ian_l                   $* 
- *                                                                                             * 
- *                     $Modtime:: 1/22/02 2:17p                 $* 
- *                                                                                             * 
- *                    $Revision:: 12                    $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Installer                                                    *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Installer/WinMain.cpp  $*
+ *                                                                                             *
+ *                      $Author:: Ian_l                   $*
+ *                                                                                             *
+ *                     $Modtime:: 1/22/02 2:17p                 $*
+ *                                                                                             *
+ *                    $Revision:: 12                    $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 
@@ -73,7 +73,7 @@ bool				  Is_Application_Running();
 bool				  Is_Win_95_Or_Above();
 bool				  Is_Win_2K_Or_Above();
 bool				  Running_As_Administrator();
-void				  Prog_End();	
+void				  Prog_End();
 
 
 /***********************************************************************************************
@@ -86,7 +86,7 @@ void				  Prog_End();
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   08/22/01    IML : Created.                                                                * 
+ *   08/22/01    IML : Created.                                                                *
  *=============================================================================================*/
 int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -123,7 +123,7 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 			//	Load the translation table.
 			file = _TheFileFactory->Get_File (installstringsfilename);
 			if (file == NULL) {
-				
+
 				// Output an appropriate Windows error message.
 				SetLastError (2);
 				FATAL_SYSTEM_ERROR;
@@ -132,9 +132,9 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 			if (file->Is_Available()) {
 
 				ChunkLoadClass cload (file);
-				
+
 				SaveLoadSystemClass::Load (cload);
-	
+
 			} else {
 
 				// Output an appropriate Windows error message.
@@ -152,7 +152,7 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 				if (!Running_As_Administrator()) FATAL_APP_ERROR (IDS_NOT_ADMINISTRATOR);
 			}
 
-			// Register function to be called at exit. 
+			// Register function to be called at exit.
 			atexit (Prog_End);
 
 			MyRegisterClass (hInstance);
@@ -197,7 +197,7 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   08/22/01    IML : Created.                                                                * 
+ *   08/22/01    IML : Created.                                                                *
  *=============================================================================================*/
 ATOM MyRegisterClass (HINSTANCE hInstance)
 {
@@ -205,7 +205,7 @@ ATOM MyRegisterClass (HINSTANCE hInstance)
 
 	WNDCLASSEX wcex;
 
-	wcex.cbSize = sizeof (WNDCLASSEX); 
+	wcex.cbSize = sizeof (WNDCLASSEX);
 
 	wcex.style			 = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc	 = (WNDPROC)WndProc;
@@ -233,7 +233,7 @@ ATOM MyRegisterClass (HINSTANCE hInstance)
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   08/22/01    IML : Created.                                                                * 
+ *   08/22/01    IML : Created.                                                                *
  *=============================================================================================*/
 LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -276,16 +276,16 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_SYSCOMMAND:
-			
+
 			switch (wParam) {
 
 				case SC_CLOSE:
-					
+
 					// Windows sent us a close message - probably in response to Alt-F4. Ignore it.
 					return (0);
 
 				case SC_SCREENSAVE:
-					
+
 					// Windows is about to start the screen saver. If we just return without passing
 					// this message to DefWindowProc then the screen saver will not be allowed to start.
 					return (0);
@@ -298,7 +298,7 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_KEYUP:
-			
+
 			// Test for SHIFT + ESC.
 			if ((wParam & 0xff) == VK_ESCAPE && ((GetKeyState (VK_SHIFT) & 0x8000) != 0x0)) {
 				_Installer.Cancel_Introduction();
@@ -339,12 +339,12 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 							SetForegroundWindow (hWnd);
 						}
 					}
-					return (TRUE);
+					return (true);
 				}
 			}
 			break;
-		}					 
-		
+		}
+
 		default:
 			break;
 	}
@@ -364,11 +364,11 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   08/22/01    IML : Created.                                                                * 
+ *   08/22/01    IML : Created.                                                                *
  *=============================================================================================*/
 bool Is_Autorun_Running()
 {
-	HANDLE autorunmutex = OpenMutex (MUTEX_ALL_ACCESS & SYNCHRONIZE, FALSE, AUTORUN_MUTEX_OBJECT);
+	HANDLE autorunmutex = OpenMutex (MUTEX_ALL_ACCESS & SYNCHRONIZE, false, AUTORUN_MUTEX_OBJECT);
 
 	if (autorunmutex != NULL) {
 
@@ -384,7 +384,7 @@ bool Is_Autorun_Running()
 		}
 
 		CloseHandle (autorunmutex);
-		
+
 		// If the Autorun window still exists bring it to the foreground.
 		if (window) {
 
@@ -409,11 +409,11 @@ bool Is_Autorun_Running()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   08/22/01    IML : Created.                                                                * 
+ *   08/22/01    IML : Created.                                                                *
  *=============================================================================================*/
 bool Is_Application_Running()
 {
-	HANDLE appmutex = CreateMutex (NULL, FALSE, APPLICATION_MUTEX_OBJECT);
+	HANDLE appmutex = CreateMutex (NULL, false, APPLICATION_MUTEX_OBJECT);
 	if (appmutex == NULL) FATAL_SYSTEM_ERROR;
 
 	// See if the application was already running.
@@ -440,12 +440,12 @@ bool Is_Application_Running()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   08/22/01    IML : Created.                                                                * 
+ *   08/22/01    IML : Created.                                                                *
  *=============================================================================================*/
 bool Is_Win_95_Or_Above()
 {
 	OSVERSIONINFO versioninfo;
-	BOOL			  result;	
+	BOOL			  result;
 	bool			  validos = false;
 
 	versioninfo.dwOSVersionInfoSize = sizeof (versioninfo);
@@ -469,12 +469,12 @@ bool Is_Win_95_Or_Above()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   08/22/01    IML : Created.                                                                * 
+ *   08/22/01    IML : Created.                                                                *
  *=============================================================================================*/
 bool Is_Win_2K_Or_Above()
 {
 	OSVERSIONINFO versioninfo;
-	BOOL			  result;	
+	BOOL			  result;
 	bool			  validos = false;
 
 	versioninfo.dwOSVersionInfoSize = sizeof (versioninfo);
@@ -498,7 +498,7 @@ bool Is_Win_2K_Or_Above()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   08/22/01    IML : Created.                                                                * 
+ *   08/22/01    IML : Created.                                                                *
  *=============================================================================================*/
 bool Running_As_Administrator()
 {
@@ -512,7 +512,7 @@ bool Running_As_Administrator()
 	SID_IDENTIFIER_AUTHORITY SystemSidAuthority = SECURITY_NT_AUTHORITY;
 
 	// Open a handle to the access token for this thread.
-	if (!OpenThreadToken (GetCurrentThread(), TOKEN_QUERY, FALSE, &hThread)) {
+	if (!OpenThreadToken (GetCurrentThread(), TOKEN_QUERY, false, &hThread)) {
 
 		if (GetLastError() == ERROR_NO_TOKEN) {
 
@@ -525,7 +525,7 @@ bool Running_As_Administrator()
 		}
 	}
 
-	// Query the size of the group information associated with the token. Note that we expect a FALSE result from GetTokenInformation
+	// Query the size of the group information associated with the token. Note that we expect a false result from GetTokenInformation
 	// because we've given it a NULL buffer. On exit cbTokenGroups will tell the size of the group information.
 	if (GetTokenInformation (hThread, TokenGroups, NULL, 0, &cbTokenGroups)) {
 		return (false);
@@ -547,7 +547,7 @@ bool Running_As_Administrator()
 	if (!GetTokenInformation (hThread, TokenGroups, ptg, cbTokenGroups, &cbTokenGroups)) {
 		return (false);
 	}
-	
+
 	// Create a System Identifier for the Admin group.
 	if (!AllocateAndInitializeSid (&SystemSidAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &psidAdmin)) {
 		return (false);
@@ -579,12 +579,12 @@ bool Running_As_Administrator()
  * WARNINGS:                                                                                   *
  *                                                                                             *
  * HISTORY:                                                                                    *
- *   08/22/01    IML : Created.                                                                * 
+ *   08/22/01    IML : Created.                                                                *
  *=============================================================================================*/
 void Prog_End()
 {
 	try {
-		
+
 		_Installer.On_Prog_End();
 
 	} catch (const WideStringClass &errormessage) {

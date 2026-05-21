@@ -39,6 +39,7 @@
 #include "inisup.h"
 #include <assert.h>
 #include <windows.h>
+#include <limits>
 
 //#include "wwdebug.h"
 
@@ -154,7 +155,7 @@ int RegistryClass::Get_Bin_Size( const char * name )
 {
 	assert( IsValid );
 
-	unsigned long size = 0;
+	DWORD size = 0;
 	::RegQueryValueExA( (HKEY)Key, name, NULL, NULL, NULL, &size );
 	return size;
 }
@@ -166,7 +167,7 @@ void RegistryClass::Get_Bin( const char * name, void *buffer, int buffer_size )
 	assert( buffer != NULL );
 	assert( buffer_size > 0 );
 
-	unsigned long size = buffer_size;
+	DWORD size = buffer_size;
 	::RegQueryValueExA( (HKEY)Key, name, NULL, NULL, (LPBYTE)buffer, &size );
 	return ;
 }
@@ -231,11 +232,12 @@ char *RegistryClass::Get_String( const char * name, char *value, int value_size,
 void	RegistryClass::Set_String( const char * name, const char *value )
 {
 	assert( IsValid );
-   int size = strlen( value ) + 1; // must include NULL
+	const size_t size = ::strlen( value ) + 1; // must include NULL
 	if (IsLocked) {
 		return;
 	}
-	if (::RegSetValueExA( (HKEY)Key, name, 0, REG_SZ, (LPBYTE)value, size ) !=
+	WWASSERT(size <= std::numeric_limits<DWORD>::max());
+	if (::RegSetValueExA( (HKEY)Key, name, 0, REG_SZ, (LPBYTE)value, static_cast<DWORD>(size) ) !=
 		ERROR_SUCCESS ) {
 	}
 }
@@ -248,7 +250,7 @@ void	RegistryClass::Get_Value_List( DynamicVectorClass<StringClass> &list )
 	//	Simply enumerate all the values in this key
 	//
 	int index = 0;
-	unsigned long sizeof_name = sizeof (value_name);
+	DWORD sizeof_name = sizeof (value_name);
 	while (::RegEnumValueA ((HKEY)Key, index ++,
 					value_name, &sizeof_name, 0, NULL, NULL, NULL) == ERROR_SUCCESS)
 	{
@@ -294,49 +296,49 @@ void	RegistryClass::Deleta_All_Values( void )
 }
 
 
-void	RegistryClass::Get_String( const wchar_t * name, WideStringClass &string, const wchar_t *default_string )
-{
-	assert( IsValid );
-	string = (default_string == NULL) ? L"" : default_string;
-
-	//
-	//	Get the size of the entry
-	//
-	DWORD data_size = 0;
-	DWORD type = 0;
-	LONG result = ::RegQueryValueExW ((HKEY)Key, name, NULL, &type, NULL, &data_size);
-	if (result == ERROR_SUCCESS && type == REG_SZ) {
-
-		//
-		//	Read the entry from the registry
-		//
-		::RegQueryValueExW ((HKEY)Key, name, NULL, &type,
-			(LPBYTE)string.Get_Buffer ((data_size / 2) + 1), &data_size);
-	}
-
-	return ;
-}
-
-
-void	RegistryClass::Set_String( const wchar_t * name, const wchar_t *value )
-{
-	assert( IsValid );
-
-   //
-	//	Determine the size
-	//
-	int size = wcslen( value ) + 1;
-	size		= size * 2;
-
-	//
-	//	Set the registry key
-	//
-	if (IsLocked) {
-		return;
-	}
-	::RegSetValueExW ( (HKEY)Key, name, 0, REG_SZ, (LPBYTE)value, size );
-	return ;
-}
+//void	RegistryClass::Get_String( const unichar_t * name, WideStringClass &string, const unichar_t *default_string )
+//{
+//	assert( IsValid );
+//	string = (default_string == NULL) ? U_CHAR("") : default_string;
+//
+//	//
+//	//	Get the size of the entry
+//	//
+//	DWORD data_size = 0;
+//	DWORD type = 0;
+//	LONG result = ::RegQueryValueExW ((HKEY)Key, reinterpret_cast<LPCWSTR>(name), NULL, &type, NULL, &data_size);
+//	if (result == ERROR_SUCCESS && type == REG_SZ) {
+//
+//		//
+//		//	Read the entry from the registry
+//		//
+//		::RegQueryValueExW ((HKEY)Key, reinterpret_cast<LPCWSTR>(name), NULL, &type,
+//			(LPBYTE)string.Get_Buffer ((data_size / 2) + 1), &data_size);
+//	}
+//
+//	return ;
+//}
+//
+//
+//void	RegistryClass::Set_String( const unichar_t * name, const unichar_t *value )
+//{
+//	assert( IsValid );
+//
+//	//
+//	//	Determine the size
+//	//
+//	const size_t size = (::u_strlen( value ) + 1) * sizeof(unichar_t);
+//
+//	//
+//	//	Set the registry key
+//	//
+//	if (IsLocked) {
+//		return;
+//	}
+//	WWASSERT(size <= std::numeric_limits<DWORD>::max());
+//	::RegSetValueExW ( (HKEY)Key, reinterpret_cast<LPCWSTR>(name), 0, REG_SZ, (LPBYTE)value, static_cast<DWORD>(size) );
+//	return ;
+//}
 
 
 
@@ -365,15 +367,15 @@ void	RegistryClass::Set_String( const wchar_t * name, const wchar_t *value )
 void RegistryClass::Save_Registry_Values(HKEY key, char *path, INIClass *ini)
 {
 	int index = 0;
-	long result = ERROR_SUCCESS;
+	LSTATUS result = ERROR_SUCCESS;
 	char save_name[512];
 
 	while (result == ERROR_SUCCESS) {
-		unsigned long type = 0;
+		DWORD type = 0;
 		unsigned char data[8192];
-		unsigned long data_size = sizeof(data);
+		DWORD data_size = sizeof(data);
 		char value_name[256];
-		unsigned long value_name_size = sizeof(value_name);
+		DWORD value_name_size = sizeof(value_name);
 
 		result = RegEnumValueA(key, index, value_name, &value_name_size, 0, &type, data, &data_size);
 
@@ -386,7 +388,7 @@ void RegistryClass::Save_Registry_Values(HKEY key, char *path, INIClass *ini)
 				case REG_DWORD:
 					strcpy(save_name, "DWORD_");
 					strcat(save_name, value_name);
-					ini->Put_Int(path, save_name, *((unsigned long*)data));
+					ini->Put_Int(path, save_name, *((unsigned int*)data));
 					break;
 
 				/*
@@ -444,14 +446,14 @@ void RegistryClass::Save_Registry_Tree(char *path, INIClass *ini)
 	HKEY sub_key;
 	int index = 0;
 	char name[256];
-	unsigned long name_size = sizeof(name);
+	DWORD name_size = sizeof(name);
 	char class_name[256];
-	unsigned long class_name_size = sizeof(class_name);
+	DWORD class_name_size = sizeof(class_name);
 	FILETIME file_time;
 	memset(&file_time, 0, sizeof(file_time));
 
 
-	long result = RegOpenKeyExA(HKEY_CURRENT_USER, path, 0, KEY_ALL_ACCESS, &base_key);
+	LSTATUS result = RegOpenKeyExA(HKEY_CURRENT_USER, path, 0, KEY_ALL_ACCESS, &base_key);
 
 	WWASSERT(result == ERROR_SUCCESS);
 
@@ -473,10 +475,10 @@ void RegistryClass::Save_Registry_Tree(char *path, INIClass *ini)
 				strcat(new_key_path, "\\");
 				strcat(new_key_path, name);
 
-				unsigned long num_subs = 0;
-				unsigned long num_values = 0;
+				DWORD num_subs = 0;
+				DWORD num_values = 0;
 
-				long new_result = RegOpenKeyExA(HKEY_CURRENT_USER, new_key_path, 0, KEY_ALL_ACCESS, &sub_key);
+				LSTATUS new_result = RegOpenKeyExA(HKEY_CURRENT_USER, new_key_path, 0, KEY_ALL_ACCESS, &sub_key);
 				if (new_result == ERROR_SUCCESS) {
 					new_result = RegQueryInfoKey(sub_key, NULL, NULL, 0, &num_subs, NULL, NULL, &num_values, NULL, NULL, NULL, NULL);
 
@@ -549,7 +551,7 @@ void RegistryClass::Load_Registry(const char *filename, char *old_path, char *ne
 		INIClass ini;
 		ini.Load(file);
 
-		int old_path_len = strlen(old_path);
+		const size_t old_path_len = ::strlen(old_path);
 		char path[1024];
 		char string[1024];
 		unsigned char buffer[8192];
@@ -627,14 +629,14 @@ void RegistryClass::Load_Registry(const char *filename, char *old_path, char *ne
 void RegistryClass::Delete_Registry_Values(HKEY key)
 {
 	int index = 0;
-	long result = ERROR_SUCCESS;
+	LSTATUS result = ERROR_SUCCESS;
 
 	while (result == ERROR_SUCCESS) {
-		unsigned long type = 0;
+		DWORD type = 0;
 		unsigned char data[8192];
-		unsigned long data_size = sizeof(data);
+		DWORD data_size = sizeof(data);
 		char value_name[256];
-		unsigned long value_name_size = sizeof(value_name);
+		DWORD value_name_size = sizeof(value_name);
 
 		result = RegEnumValueA(key, index, value_name, &value_name_size, 0, &type, data, &data_size);
 
@@ -668,15 +670,15 @@ void RegistryClass::Delete_Registry_Tree(char *path)
 		HKEY sub_key;
 		int index = 0;
 		char name[256];
-		unsigned long name_size = sizeof(name);
+		DWORD name_size = sizeof(name);
 		char class_name[256];
-		unsigned long class_name_size = sizeof(class_name);
+		DWORD class_name_size = sizeof(class_name);
 		FILETIME file_time;
 		memset(&file_time, 0, sizeof(file_time));
 		int max_times = 1000;
 
 
-		long result = RegOpenKeyExA(HKEY_CURRENT_USER, path, 0, KEY_ALL_ACCESS, &base_key);
+		LSTATUS result = RegOpenKeyExA(HKEY_CURRENT_USER, path, 0, KEY_ALL_ACCESS, &base_key);
 
 		if (result == ERROR_SUCCESS) {
 			Delete_Registry_Values(base_key);
@@ -693,13 +695,13 @@ void RegistryClass::Delete_Registry_Tree(char *path)
 					*/
 					char new_key_path[512];
 					strcpy(new_key_path, path);
-					strcat(new_key_path, "\\");
+					strcat(new_key_path, "/");
 					strcat(new_key_path, name);
 
-					unsigned long num_subs = 0;
-					unsigned long num_values = 0;
+					DWORD num_subs = 0;
+					DWORD num_values = 0;
 
-					long new_result = RegOpenKeyExA(HKEY_CURRENT_USER, new_key_path, 0, KEY_ALL_ACCESS, &sub_key);
+					LSTATUS new_result = RegOpenKeyExA(HKEY_CURRENT_USER, new_key_path, 0, KEY_ALL_ACCESS, &sub_key);
 					if (new_result == ERROR_SUCCESS) {
 						new_result = RegQueryInfoKey(sub_key, NULL, NULL, 0, &num_subs, NULL, NULL, &num_values, NULL, NULL, NULL, NULL);
 

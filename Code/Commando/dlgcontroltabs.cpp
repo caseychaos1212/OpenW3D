@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 
+#include "renegadedialog.h"
 #include "dlgcontroltabs.h"
 #include "input.h"
 #include "sliderctrl.h"
@@ -53,7 +54,7 @@
 //
 ////////////////////////////////////////////////////////////////
 ControlsBasicMvmtTabClass::ControlsBasicMvmtTabClass (void)	:
-	ControlsListTabClass (IDD_CONTROLS_BASIC_MOVMENT_TAB)
+	ControlsListTabClass (GetRenegadeDialog(RenegadeDialogID::IDD_CONTROLS_BASIC_MOVMENT_TAB))
 {
 	Add_Function (INPUT_FUNCTION_MOVE_FORWARD,	IDC_HOTKEY1, IDC_HOTKEY13);
 	Add_Function (INPUT_FUNCTION_MOVE_BACKWARD,	IDC_HOTKEY2, IDC_HOTKEY14);
@@ -76,7 +77,7 @@ ControlsBasicMvmtTabClass::ControlsBasicMvmtTabClass (void)	:
 //
 ////////////////////////////////////////////////////////////////
 ControlsAttackTabClass::ControlsAttackTabClass (void)	:
-	ControlsListTabClass (IDD_CONTROLS_ATTACK_TAB)
+	ControlsListTabClass (GetRenegadeDialog(RenegadeDialogID::IDD_CONTROLS_ATTACK_TAB))
 {
 	Add_Function (INPUT_FUNCTION_FIRE_WEAPON_PRIMARY,		IDC_HOTKEY1, IDC_HOTKEY13);
 	Add_Function (INPUT_FUNCTION_FIRE_WEAPON_SECONDARY,	IDC_HOTKEY2, IDC_HOTKEY14);
@@ -84,7 +85,7 @@ ControlsAttackTabClass::ControlsAttackTabClass (void)	:
 	Add_Function (INPUT_FUNCTION_NEXT_WEAPON,					IDC_HOTKEY4, IDC_HOTKEY16);
 	Add_Function (INPUT_FUNCTION_RELOAD_WEAPON,				IDC_HOTKEY5, IDC_HOTKEY17);
 	Add_Function (INPUT_FUNCTION_ZOOM_IN,						IDC_HOTKEY6, IDC_HOTKEY18);
-	Add_Function (INPUT_FUNCTION_ZOOM_OUT,						IDC_HOTKEY7, IDC_HOTKEY19);	
+	Add_Function (INPUT_FUNCTION_ZOOM_OUT,						IDC_HOTKEY7, IDC_HOTKEY19);
 	return ;
 }
 
@@ -128,7 +129,7 @@ ControlsAttackTabClass::On_Apply (void)
 ////////////////////////////////////////////////////////////////
 void
 ControlsAttackTabClass::Load_Controls (void)
-{	
+{
 	Check_Dlg_Button (IDC_DAMAGE_INDICATOR_CHECK, Input::Are_Damage_Indicators_Enabled ());
 	return ;
 }
@@ -154,7 +155,7 @@ ControlsAttackTabClass::On_Reload (void)
 //
 ////////////////////////////////////////////////////////////////
 ControlsWeaponsTabClass::ControlsWeaponsTabClass (void)	:
-	ControlsListTabClass (IDD_CONTROLS_WEAPONS_TAB)
+	ControlsListTabClass (GetRenegadeDialog(RenegadeDialogID::IDD_CONTROLS_WEAPONS_TAB))
 {
 	Add_Function (INPUT_FUNCTION_SELECT_WEAPON_1,	IDC_HOTKEY1, IDC_HOTKEY13);
 	Add_Function (INPUT_FUNCTION_SELECT_WEAPON_2,	IDC_HOTKEY2, IDC_HOTKEY14);
@@ -176,7 +177,7 @@ ControlsWeaponsTabClass::ControlsWeaponsTabClass (void)	:
 //
 ////////////////////////////////////////////////////////////////
 ControlsLookTabClass::ControlsLookTabClass (void)	:
-	ControlsListTabClass (IDD_CONTROLS_LOOK_TAB)
+	ControlsListTabClass (GetRenegadeDialog(RenegadeDialogID::IDD_CONTROLS_LOOK_TAB))
 {
 	Add_Function (INPUT_FUNCTION_CURSOR_TARGETING,		IDC_HOTKEY1, IDC_HOTKEY13);
 	Add_Function (INPUT_FUNCTION_FIRST_PERSON_TOGGLE,	IDC_HOTKEY2, IDC_HOTKEY14);
@@ -206,7 +207,7 @@ ControlsLookTabClass::On_Init_Dialog (void)
 	//	Configure the steering mode combobox
 	//
 //	ComboBoxCtrlClass *combo_box = (ComboBoxCtrlClass *)Get_Dlg_Item (IDC_STEERING_MODE_COMBO);
-//	if (combo_box != NULL) {		
+//	if (combo_box != NULL) {
 //		combo_box->Add_String (TRANSLATE (IDS_STEERING_MODE_NORMAL));
 //		combo_box->Add_String (TRANSLATE (IDS_STEERING_MODE_TARGET));
 //		combo_box->Set_Curr_Sel (1);
@@ -269,7 +270,7 @@ ControlsLookTabClass::On_Apply (void)
 ////////////////////////////////////////////////////////////////
 void
 ControlsLookTabClass::Load_Controls (void)
-{	
+{
 	//
 	//	Configure the mouse sensivity slider
 	//
@@ -292,7 +293,7 @@ ControlsLookTabClass::Load_Controls (void)
 	Check_Dlg_Button (IDC_INVERT_MOUSE_CHECK, Input::Get_Mouse_Invert ());
 	Check_Dlg_Button (IDC_INVERT_CURSOR_TARGETTING_CHECK, Input::Get_Mouse_2D_Invert ());
 	Check_Dlg_Button (IDC_LOCK_CAMERA_TO_TURRET_CHECK, cUserOptions::CameraLockedToTurret.Get());
-	
+
 	return ;
 }
 
@@ -317,7 +318,7 @@ ControlsLookTabClass::On_Reload (void)
 //
 ////////////////////////////////////////////////////////////////
 ControlsMultiPlayTabClass::ControlsMultiPlayTabClass (void)	:
-	ControlsListTabClass (IDD_CONTROLS_MULTIPLAYER_TAB)
+	ControlsListTabClass (GetRenegadeDialog(RenegadeDialogID::IDD_CONTROLS_MULTIPLAYER_TAB))
 {
 	Add_Function (INPUT_FUNCTION_BEGIN_PUBLIC_MESSAGE,		IDC_HOTKEY1, IDC_HOTKEY13);
 	Add_Function (INPUT_FUNCTION_BEGIN_TEAM_MESSAGE,		IDC_HOTKEY2, IDC_HOTKEY14);

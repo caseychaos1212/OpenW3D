@@ -41,7 +41,7 @@ IMPLEMENT_DYNCREATE(EmitterUserPropPageClass, CPropertyPage)
 //
 //  EmitterUserPropPageClass
 //
-EmitterUserPropPageClass::EmitterUserPropPageClass (EmitterInstanceListClass *pemitter)
+EmitterUserPropPageClass::EmitterUserPropPageClass (EmitterInstanceListClass * /* pemitter */)
 	: m_pEmitterList (NULL),
 	  m_bValid (true),
 	  m_iType (EMITTER_TYPEID_DEFAULT),
@@ -97,7 +97,7 @@ void
 EmitterUserPropPageClass::Initialize (void)
 {
 	if (m_pEmitterList != NULL) {
-		
+
 		// Record the user information from the emitter (if it exists)
 		m_iType			= m_pEmitterList->Get_User_Type ();
 		m_UserString	= m_pEmitterList->Get_User_String ();
@@ -112,7 +112,7 @@ EmitterUserPropPageClass::Initialize (void)
 //  OnInitDialog
 //
 BOOL
-EmitterUserPropPageClass::OnInitDialog (void) 
+EmitterUserPropPageClass::OnInitDialog (void)
 {
 	// Allow the base class to process this message
 	CPropertyPage::OnInitDialog ();
@@ -124,10 +124,10 @@ EmitterUserPropPageClass::OnInitDialog (void)
 
 	// Select the correct entry in the combobox
 	m_TypeCombo.SetCurSel (m_iType);
-		
+
 	// Fill in the user-box
 	SetDlgItemText (IDC_PROGRAMMER_SETTINGS_EDIT, m_UserString);
-	return TRUE;
+	return true;
 }
 
 

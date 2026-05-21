@@ -113,28 +113,28 @@ public:
 	void	Enable_Additive(bool b);
 	void	Enable_Alpha(bool b);
 	void  Enable_Texturing(bool b);
-	
+
 	ShaderClass *			Get_Shader( void ) { return &Shader; }
 	static ShaderClass	Get_Default_Shader( void );
 
 	// Add Quad
-	void	Add_Quad( const Vector2 & v0, const Vector2 & v1, const Vector2 & v2, const Vector2 & v3, const RectClass & uv, unsigned long color = 0xFFFFFFFF  );
-	void	Add_Quad_Backfaced( const Vector2 & v0, const Vector2 & v1, const Vector2 & v2, const Vector2 & v3, const RectClass & uv, unsigned long color = 0xFFFFFFFF  );
-	void	Add_Quad( const RectClass & screen, const RectClass & uv, unsigned long color = 0xFFFFFFFF  );
-	void	Add_Quad( const Vector2 & v0, const Vector2 & v1, const Vector2 & v2, const Vector2 & v3, unsigned long color = 0xFFFFFFFF  );
-	void	Add_Quad( const RectClass & screen, unsigned long color = 0xFFFFFFFF );
+	void	Add_Quad( const Vector2 & v0, const Vector2 & v1, const Vector2 & v2, const Vector2 & v3, const RectClass & uv, unsigned int color = 0xFFFFFFFF  );
+	void	Add_Quad_Backfaced( const Vector2 & v0, const Vector2 & v1, const Vector2 & v2, const Vector2 & v3, const RectClass & uv, unsigned int color = 0xFFFFFFFF  );
+	void	Add_Quad( const RectClass & screen, const RectClass & uv, unsigned int color = 0xFFFFFFFF  );
+	void	Add_Quad( const Vector2 & v0, const Vector2 & v1, const Vector2 & v2, const Vector2 & v3, unsigned int color = 0xFFFFFFFF  );
+	void	Add_Quad( const RectClass & screen, unsigned int color = 0xFFFFFFFF );
 
-	void	Add_Quad_VGradient( const RectClass & screen, unsigned long top_color, unsigned long bottom_color );
-	void	Add_Quad_HGradient( const RectClass & screen, unsigned long left_color, unsigned long right_color );
+	void	Add_Quad_VGradient( const RectClass & screen, unsigned int top_color, unsigned int bottom_color );
+	void	Add_Quad_HGradient( const RectClass & screen, unsigned int left_color, unsigned int right_color );
 
 	// Add Tri
-	void	Add_Tri( const Vector2 & v0, const Vector2 & v1, const Vector2 & v2, const Vector2 & uv0, const Vector2 & uv1, const Vector2 & uv2, unsigned long color = 0xFFFFFFFF  );
+	void	Add_Tri( const Vector2 & v0, const Vector2 & v1, const Vector2 & v2, const Vector2 & uv0, const Vector2 & uv1, const Vector2 & uv2, unsigned int color = 0xFFFFFFFF  );
 
 	// Primitive support
-	void	Add_Line( const Vector2 & a, const Vector2 & b, float width, unsigned long color = 0xFFFFFFFF );
-	void	Add_Line( const Vector2 & a, const Vector2 & b, float width, const RectClass & uv, unsigned long color = 0xFFFFFFFF );
-	void	Add_Outline( const RectClass & rect, float width = 1.0F, unsigned long color = 0xFFFFFFFF );
-	void	Add_Outline( const RectClass & rect, float width, const RectClass & uv, unsigned long color = 0xFFFFFFFF );
+	void	Add_Line( const Vector2 & a, const Vector2 & b, float width, unsigned int color = 0xFFFFFFFF );
+	void	Add_Line( const Vector2 & a, const Vector2 & b, float width, const RectClass & uv, unsigned int color = 0xFFFFFFFF );
+	void	Add_Outline( const RectClass & rect, float width = 1.0F, unsigned int color = 0xFFFFFFFF );
+	void	Add_Outline( const RectClass & rect, float width, const RectClass & uv, unsigned int color = 0xFFFFFFFF );
 	void	Add_Rect( const RectClass & rect, float border_width = 1.0F, uint32 border_color = 0xFF000000, uint32 fill_color = 0xFFFFFFFF);
 
 	void Set_Hidden( bool hide )			{ IsHidden = hide; }
@@ -142,15 +142,15 @@ public:
 	// Z-value support (this is usefull for playing tricks with the z-buffer)
 	void	Set_Z_Value (float z_value)	{ ZValue = z_value; }
 
-	// Move all verts 
+	// Move all verts
 	void	Move( const Vector2 & a );
 
-	// Force all alphas 
+	// Force all alphas
 	void	Force_Alpha( float alpha );
 	void	Force_Color( int color );
 
 	// Color access
-	DynamicVectorClass<unsigned long> &	Get_Color_Array (void)	{ return Colors; }
+	DynamicVectorClass<unsigned int> &	Get_Color_Array (void)	{ return Colors; }
 
 	// statics to access the Screen Resolution in Pixels
 	static void	Set_Screen_Resolution( const RectClass & screen );
@@ -168,8 +168,8 @@ protected:
 	Vector2										PreAllocatedVertices[60];
 	DynamicVectorClass<Vector2>				UVCoordinates;
 	Vector2										PreAllocatedUVCoordinates[60];
-	DynamicVectorClass<unsigned long>		Colors;
-	unsigned long								PreAllocatedColors[60];
+	DynamicVectorClass<unsigned int>		Colors;
+	unsigned int								PreAllocatedColors[60];
 	bool											IsHidden;
 	float											ZValue;
 
@@ -183,9 +183,9 @@ protected:
 	void	Internal_Add_Quad_Vertices( const Vector2 & v0, const Vector2 & v1, const Vector2 & v2, const Vector2 & v3 );
 	void	Internal_Add_Quad_Vertices( const RectClass & screen );
 	void	Internal_Add_Quad_UVs( const RectClass & uv );
-	void	Internal_Add_Quad_Colors( unsigned long color );
-	void	Internal_Add_Quad_VColors( unsigned long color1, unsigned long color2 );
-	void	Internal_Add_Quad_HColors( unsigned long color1, unsigned long color2 );
+	void	Internal_Add_Quad_Colors( unsigned int color );
+	void	Internal_Add_Quad_VColors( unsigned int color1, unsigned int color2 );
+	void	Internal_Add_Quad_HColors( unsigned int color1, unsigned int color2 );
 	void	Internal_Add_Quad_Indicies( int start_vert_index, bool backfaced = false );
 };
 
@@ -205,22 +205,22 @@ public:
 
 	void	Set_Location( const Vector2 & loc )				{ Location = loc; Cursor = loc; }
 	void	Set_Wrapping_Width (float width)					{ WrapWidth = width; }
-	
+
 	// Clipping support
 	void	Set_Clipping_Rect( const RectClass &rect )	{ ClipRect = rect; IsClippedEnabled = true; }
 	bool	Is_Clipping_Enabled( void ) const				{ return IsClippedEnabled; }
 	void	Enable_Clipping( bool onoff )						{ IsClippedEnabled = onoff; }
 
-	void	Draw_Text( const char * text, unsigned long color = 0xFFFFFFFF );
-	void	Draw_Text( const wchar_t * text, unsigned long color = 0xFFFFFFFF );
+	void	Draw_Text( const char * text, unsigned int color = 0xFFFFFFFF );
+	void	Draw_Text( const unichar_t * text, unsigned int color = 0xFFFFFFFF );
 
-	void	Draw_Block( const RectClass & screen, unsigned long color = 0xFFFFFFFF );
+	void	Draw_Block( const RectClass & screen, unsigned int color = 0xFFFFFFFF );
 
 	const RectClass & Get_Draw_Extents( void )			{ return DrawExtents; }
 	const RectClass & Get_Total_Extents( void )			{ return TotalExtents; }
 	const Vector2 & Get_Cursor( void )						{ return Cursor; }
 
-	Vector2	Get_Text_Extents( const wchar_t * text );
+	Vector2	Get_Text_Extents( const unichar_t * text );
 
 private:
 	Font3DInstanceClass* Font;
@@ -233,7 +233,7 @@ private:
 	RectClass				ClipRect;
 	bool						IsClippedEnabled;
 
-	void	Draw_Char( wchar_t ch, unsigned long color );
+	void	Draw_Char( unichar_t ch, unsigned int color );
 };
 
 #endif	// RENDER2D_H

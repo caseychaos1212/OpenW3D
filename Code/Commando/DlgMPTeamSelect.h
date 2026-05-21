@@ -75,7 +75,7 @@ class DlgMPTeamSelect :
 
 		void On_Init_Dialog(void) override;
 		void On_Frame_Update(void) override;
-		void On_Command(int ctrlID, int message, DWORD param) override;
+		void On_Command(int ctrlID, int message, unsigned int param) override;
 		void On_Last_Menu_Ending(void) override;
 
 		void InitSideChoice(int sidePref);
@@ -85,7 +85,7 @@ class DlgMPTeamSelect :
 		void RequestWOLGameInfo(void);
 
 		void ShowTimeRemaining(float remainingSecond);
-		bool FindPlayerInListCtrl(const wchar_t* name, ListCtrlClass*& outList, int& outIndex);
+		bool FindPlayerInListCtrl(const unichar_t* name, ListCtrlClass*& outList, int& outIndex);
 
 		void HandleNotification(WWOnline::ChannelEvent&) override;
 		void HandleNotification(WWOnline::UserEvent&) override;

@@ -156,10 +156,10 @@ cScTextObj::Init
 			//
 			cPlayer *p_sender = cPlayerManager::Find_Player (SenderId);
 			if (p_sender != NULL && p_sender->Is_Team_Player () && COMBAT_STAR != NULL) {
-				
+
 				//
 				//	Is the player on the same team as the local player?
-				//                         
+				//
 				if (p_sender->Get_Player_Type() == COMBAT_STAR->Get_Player_Type()) {
 					allow_act = true;
 				}
@@ -285,14 +285,14 @@ cScTextObj::Act(void)
 			WideStringClass formatted_text;
 			if (Type == TEXT_MESSAGE_PRIVATE)
 			{
-				formatted_text.Format(L"%s (%s %s): ",
-					sender_name,
+				formatted_text.Format(U_CHAR("%s (%s %s): "),
+					sender_name.Peek_Buffer(),
 					TRANSLATION(IDS_MP_TO),
-					recipient_name);
+					recipient_name.Peek_Buffer());
 			}
 			else
 			{
-				formatted_text.Format(L"%s: ", sender_name);
+				formatted_text.Format(U_CHAR("%s: "), sender_name.Peek_Buffer());
 			}
 
 			//
@@ -301,19 +301,19 @@ cScTextObj::Act(void)
 			/*
 			WWASSERT(Get_Text_Display() != NULL);
 			Get_Text_Display()->Print(formatted_text, sender_color);
-			formatted_text.Format(L"%s\n", Text);
+			formatted_text.Format(U_CHAR("%s\n"), Text);
 			Get_Text_Display()->Print(formatted_text, text_color);
 			*/
 
 			/*
 			WideStringClass message;
-			message.Format(L"%s\n", Text);
+			message.Format(U_CHAR("%s\n"), Text);
 			formatted_text += message;
 			CombatManager::Get_Message_Window ()->Add_Message (formatted_text, text_color);
 			*/
 
 			bool do_popup = IsHostAdminMessage && cNetwork::I_Am_Client();
-			if (do_popup && cNetwork::I_Am_Server() && Type == TEXT_MESSAGE_PRIVATE && 
+			if (do_popup && cNetwork::I_Am_Server() && Type == TEXT_MESSAGE_PRIVATE &&
 				RecipientId != cNetwork::Get_My_Id())
 			{
 				do_popup = false;
@@ -323,7 +323,7 @@ cScTextObj::Act(void)
 				DlgMsgBox::DoDialog(TRANSLATE(IDS_MENU_ADMIN_MESSAGE), Text);
 			} else {
 				WideStringClass message;
-				message.Format(L"%s\n", Text);
+				message.Format(U_CHAR("%s\n"), Text.Peek_Buffer());
 				formatted_text += message;
 				if (CombatManager::Get_Message_Window() != NULL) {
 					CombatManager::Get_Message_Window()->Add_Message(formatted_text, text_color);
@@ -340,7 +340,7 @@ cScTextObj::Act(void)
 								formatted_text.Convert_To(tempstr);
 								teamstr += tempstr;
 								ConsoleBox.Log_To_Disk(teamstr.Peek_Buffer());
-							}	
+							}
 						}
 					}
 				}

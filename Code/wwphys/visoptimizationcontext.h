@@ -56,7 +56,7 @@ class DynamicAABTreeCullClass;
 ** nodes.  It also performs merging of both sector and object ids.
 */
 class VisOptimizationContextClass
-{	
+{
 public:
 
 	VisOptimizationContextClass(PhysicsSceneClass * scene,VisOptProgressClass & stats);
@@ -98,8 +98,8 @@ protected:
 		~PVSInfoStruct(void);
 		const PVSInfoStruct & operator = (const PVSInfoStruct & that);
 
-		bool operator == (const PVSInfoStruct & that)				{ return false; }
-		bool operator != (const PVSInfoStruct & that)				{ return true; }
+		bool operator == (const PVSInfoStruct & )				{ return false; }
+		bool operator != (const PVSInfoStruct & )				{ return true; }
 
 		VisTableClass *		Table;
 		bool						UnUsed;

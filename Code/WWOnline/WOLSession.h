@@ -64,7 +64,7 @@ class WaitCondition;
 namespace WWOnline {
 
 // The version of WOLAPI this product was build with.
-#define WOLAPI_BUILD_VERSION MAKELONG(19,1) 
+#define WOLAPI_BUILD_VERSION MAKELONG(19,1)
 
 class ChatObserver;
 class NetUtilObserver;
@@ -202,17 +202,17 @@ class Session :
 		bool RequestChannelList(int channelType, bool autoPing);
 
 		// Look for a channel with the specified name in the current channel list.
-		RefPtr<ChannelData> FindChannel(const wchar_t* name);
+		RefPtr<ChannelData> FindChannel(const unichar_t* name);
 		RefPtr<ChannelData> FindChannel(const char* name);
 
 		// Create a new channel
-		RefPtr<WaitCondition> CreateChannel(const wchar_t* channelName, const wchar_t* password, int type);
-		RefPtr<WaitCondition> CreateChannel(const RefPtr<ChannelData>&, const wchar_t* password);
+		RefPtr<WaitCondition> CreateChannel(const unichar_t* channelName, const unichar_t* password, int type);
+		RefPtr<WaitCondition> CreateChannel(const RefPtr<ChannelData>&, const unichar_t* password);
 
 		// Join a channel
-		RefPtr<WaitCondition> JoinChannel(const RefPtr<ChannelData>& channel, const wchar_t* password);
-		RefPtr<WaitCondition> JoinChannel(const wchar_t* name, const wchar_t* password, int type);
-		bool RequestChannelJoin(const RefPtr<ChannelData>& channel, const wchar_t* password);
+		RefPtr<WaitCondition> JoinChannel(const RefPtr<ChannelData>& channel, const unichar_t* password);
+		RefPtr<WaitCondition> JoinChannel(const unichar_t* name, const unichar_t* password, int type);
+		bool RequestChannelJoin(const RefPtr<ChannelData>& channel, const unichar_t* password);
 
 		// Leave the current channel.
 		RefPtr<WaitCondition> LeaveChannel(void);
@@ -242,7 +242,7 @@ class Session :
 		const ChannelList& GetChatChannelList(void)
 			{return mChatChannels;}
 
-		RefPtr<ChannelData> FindChatChannel(const wchar_t* name);
+		RefPtr<ChannelData> FindChatChannel(const unichar_t* name);
 		RefPtr<ChannelData> FindChatChannel(const char* name);
 
 		// Retrieve new game channel list
@@ -255,7 +255,7 @@ class Session :
 		const ChannelList& GetGameChannelList(void)
 			{return mGameChannels;}
 
-		RefPtr<ChannelData> FindGameChannel(const wchar_t* name);
+		RefPtr<ChannelData> FindGameChannel(const unichar_t* name);
 		RefPtr<ChannelData> FindGameChannel(const char* name);
 
 		//-------------------------------------------------------------------------
@@ -270,7 +270,7 @@ class Session :
 			{return mUsers;}
 
 		// Find specified user
-		RefPtr<UserData> FindUser(const wchar_t* userName);
+		RefPtr<UserData> FindUser(const unichar_t* userName);
 
 		// Obtain current user
 		RefPtr<UserData> GetCurrentUser(void) const
@@ -278,7 +278,7 @@ class Session :
 
 		// Test is specified user is the current one.
 		bool IsCurrentUser(const RefPtr<UserData>&) const;
-		bool IsCurrentUser(const wchar_t* username) const;
+		bool IsCurrentUser(const unichar_t* username) const;
 
 		// Change the locale for the user currently logged in.
 		bool ChangeCurrentUserLocale(WOL::Locale locale);
@@ -288,41 +288,41 @@ class Session :
 
 		// Kick a user from the current channel. Kicking is only allowed for
 		// channel owners.
-		bool KickUser(const wchar_t* username);
+		bool KickUser(const unichar_t* username);
 
 		// Ban / unban a user from the current channel. Banning is only allowed for
 		// channel owners.
-		bool BanUser(const wchar_t* username, bool banned);
+		bool BanUser(const unichar_t* username, bool banned);
 
 		// Send a page to a user.
-		bool PageUser(const wchar_t* userName, const wchar_t* message);
+		bool PageUser(const unichar_t* userName, const unichar_t* message);
 
 		// Request a users online location
-		unsigned long GetAutoRequestFlags(void) const
+		unsigned int GetAutoRequestFlags(void) const
 			{return mAutoRequestFlags;}
 
-		void SetAutoRequestFlags(unsigned long flags)
+		void SetAutoRequestFlags(unsigned int flags)
 			{mAutoRequestFlags = flags;}
 
-		void RequestUserDetails(const RefPtr<UserData>& user, unsigned long requestFlags);
+		void RequestUserDetails(const RefPtr<UserData>& user, unsigned int requestFlags);
 
-		void RequestLocateUser(const wchar_t* userName);
+		void RequestLocateUser(const unichar_t* userName);
 		void RequestLocateUser(const RefPtr<UserData>& user);
 
 		// Request users locale
-		void RequestUserLocale(const wchar_t* userName);
+		void RequestUserLocale(const unichar_t* userName);
 
 		// Request information about a squad by Squad ID
-		void RequestSquadInfoByID(unsigned long squadID);
+		void RequestSquadInfoByID(unsigned int squadID);
 
 		// Request information about a squad by member name
-		void RequestSquadInfoByMemberName(const wchar_t* memberName);
+		void RequestSquadInfoByMemberName(const unichar_t* memberName);
 
 		// Request users team information
-		void RequestTeamInfo(const wchar_t* userName);
+		void RequestTeamInfo(const unichar_t* userName);
 
 		// Request users ladder information
-		void RequestLadderInfo(const wchar_t* name, unsigned long type);
+		void RequestLadderInfo(const unichar_t* name, unsigned int type);
 
 		//-------------------------------------------------------------------------
 		// Buddy Methods
@@ -333,12 +333,12 @@ class Session :
 			{return mBuddies;}
 
 		// Find specified buddy
-		RefPtr<UserData> FindBuddy(const wchar_t* buddyName)
+		RefPtr<UserData> FindBuddy(const unichar_t* buddyName)
 			{return FindUserInList(buddyName, mBuddies);}
 
 		bool RequestBuddyList(void);
-		bool AddBuddy(const wchar_t* buddyName);
-		bool RemoveBuddy(const wchar_t* buddyName);
+		bool AddBuddy(const unichar_t* buddyName);
+		bool RemoveBuddy(const unichar_t* buddyName);
 
 		//-------------------------------------------------------------------------
 		// Chatting Methods
@@ -349,18 +349,18 @@ class Session :
 		bool SetBadLanguageFilter(bool enabled);
 
 		bool SendPublicMessage(const char* message);
-		bool SendPublicMessage(const wchar_t* message);
+		bool SendPublicMessage(const unichar_t* message);
 		bool SendPublicAction(const char* action);
-		bool SendPublicAction(const wchar_t* action);
+		bool SendPublicAction(const unichar_t* action);
 
-		bool SendPrivateMessage(const wchar_t* username, const wchar_t* message);
+		bool SendPrivateMessage(const unichar_t* username, const unichar_t* message);
 		bool SendPrivateMessage(const UserList& users, const char* message);
-		bool SendPrivateMessage(const UserList& users, const wchar_t* message);
+		bool SendPrivateMessage(const UserList& users, const unichar_t* message);
 		bool SendPrivateAction(const UserList& users, const char* action);
-		bool SendPrivateAction(const UserList& users, const wchar_t* action);
+		bool SendPrivateAction(const UserList& users, const unichar_t* action);
 
 		bool SendPublicGameOptions(const char* options);
-		bool SendPrivateGameOptions(const wchar_t* user, const char* options);
+		bool SendPrivateGameOptions(const unichar_t* user, const char* options);
 		bool SendPrivateGameOptions(const UserList& users, const char* options);
 
 		//-------------------------------------------------------------------------
@@ -374,7 +374,7 @@ class Session :
 		unsigned int GetPendingPingCount(void) const
 			{return mPingsPending;}
 
-		bool SendGameResults(unsigned char* packet, unsigned long length);
+		bool SendGameResults(unsigned char* packet, unsigned int length);
 
 		bool RequestUserIP(char *user_name);
 
@@ -443,10 +443,10 @@ class Session :
 
 		void AutoRequestUserDetails(const RefPtr<UserData>& user);
 
-		RefPtr<UserData> GetUserOrBuddy(const wchar_t*);
+		RefPtr<UserData> GetUserOrBuddy(const unichar_t*);
 
 		const CComPtr<WOL::IIGROptions>& GetIGRObject(void);
-		
+
 	private:
 		void ClearServers(void);
 
@@ -459,11 +459,11 @@ class Session :
 
 		CComPtr<WOL::IChat> mChat;
 		CComPtr<WOL::IChatEvent> mChatEvents;
-		unsigned long mChatCookie;
+		DWORD mChatCookie;
 
 		CComPtr<WOL::INetUtil> mNetUtil;
 		CComPtr<WOL::INetUtilEvent> mNetUtilEvents;
-		unsigned long mNetUtilCookie;
+		DWORD mNetUtilCookie;
 
 		CComPtr<WOL::IIGROptions> mIGRObject;
 
@@ -513,7 +513,7 @@ class Session :
 
 		UserList mBuddies;
 
-		unsigned long mAutoRequestFlags;
+		unsigned int mAutoRequestFlags;
 
       // Squad Request queues
 		typedef std::vector<WideStringClass> SquadRequestColl;
@@ -528,7 +528,7 @@ class Session :
 
 		typedef std::list<WideStringClass> LadderRequestList;
 		LadderRequestList mLadderRequests;
-		unsigned long mLadderPending;
+		unsigned int mLadderPending;
 
 		// Misc.
 		WideStringClass mMessageOfTheDay;
@@ -537,7 +537,7 @@ class Session :
 		unsigned int mPingsPending;
 		int mPingEnable;
 
-		unsigned long mLastUserDataRequestTime;
+		unsigned int mLastUserDataRequestTime;
 		static RefPtr<Session> _mInstance;
 	};
 
@@ -557,7 +557,7 @@ class ChatAdvisement :
 		const ChatAdvisement& operator=(const ChatAdvisement&);
 
 		CComPtr<WOL::IChat> mChat;
-		unsigned long mChatCookie;
+		DWORD mChatCookie;
 	};
 
 } // using namespace WWOnline

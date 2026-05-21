@@ -79,7 +79,7 @@ enum
 ///////////////////////////////////////////////////////////////////////
 TDBObjClass::TDBObjClass (void)	:
 	ID (0),
-	SoundID (-1),
+	SoundID (uint32(-1)),
 	CategoryID (CATEGORY_DEFAULT)
 {
 	return ;
@@ -93,7 +93,7 @@ TDBObjClass::TDBObjClass (void)	:
 ///////////////////////////////////////////////////////////////////////
 TDBObjClass::TDBObjClass (const TDBObjClass &src)	:
 	ID (0),
-	SoundID (-1),
+	SoundID (uint32(-1)),
 	CategoryID (CATEGORY_DEFAULT)
 {
 	(*this) = src;
@@ -117,7 +117,7 @@ TDBObjClass::~TDBObjClass (void)
 //	operator=
 //
 /////////////////////////////////////////////////////////////////
-const TDBObjClass &	
+const TDBObjClass &
 TDBObjClass::operator= (const TDBObjClass &src)
 {
 	TranslatedStrings	= src.TranslatedStrings;
@@ -154,7 +154,7 @@ TDBObjClass::Save (ChunkSaveClass &csave)
 {
 	csave.Begin_Chunk (CHUNKID_BASE_CLASS);
 		PersistClass::Save (csave);
-	csave.End_Chunk ();	
+	csave.End_Chunk ();
 
 	csave.Begin_Chunk (CHUNKID_VARIABLES);
 		Save_Variables (csave);
@@ -169,7 +169,7 @@ TDBObjClass::Save (ChunkSaveClass &csave)
 	//	Are we saving all the translations or just the current one?
 	//
 	if (TranslateDBClass::Is_Single_Language_Export_Enabled ()) {
-		
+
 		//
 		//	If we don't have the requested language, save the english
 		//
@@ -177,7 +177,7 @@ TDBObjClass::Save (ChunkSaveClass &csave)
 		if (lang_id >= TranslatedStrings.Count ()) {
 			lang_id = TranslateDBClass::LANGID_ENGLISH;
 		}
-		
+
 		//
 		//	Save the string
 		//
@@ -185,7 +185,7 @@ TDBObjClass::Save (ChunkSaveClass &csave)
 		WRITE_WIDESTRING_CHUNK (csave, CHUNKID_TRANSLATED_STRING, string);
 
 	} else {
-	
+
 		//
 		//	Write each translated string to its own chunk
 		//
@@ -207,7 +207,7 @@ TDBObjClass::Save (ChunkSaveClass &csave)
 bool
 TDBObjClass::Load (ChunkLoadClass &cload)
 {
-	while (cload.Open_Chunk ()) {		
+	while (cload.Open_Chunk ()) {
 		switch (cload.Cur_Chunk_ID ()) {
 
 			READ_WWSTRING_CHUNK (cload, CHUNKID_ENGLISH_STRING, EnglishString);
@@ -226,11 +226,11 @@ TDBObjClass::Load (ChunkLoadClass &cload)
 				TranslatedStrings.Add (string);
 			}
 			break;
-			
+
 			case CHUNKID_BASE_CLASS:
 				PersistClass::Load (cload);
 				break;
-			
+
 			case CHUNKID_VARIABLES:
 				Load_Variables (cload);
 				break;
@@ -250,15 +250,15 @@ TDBObjClass::Load (ChunkLoadClass &cload)
 /////////////////////////////////////////////////////////////////
 void
 TDBObjClass::Save_Variables (ChunkSaveClass &csave)
-{	
+{
 	//
 	//	Save each variable to its own micro chunk
 	//
 	WRITE_MICRO_CHUNK					(csave, VARID_ID,					ID);
-	WRITE_MICRO_CHUNK					(csave, VARID_SOUND_ID,			SoundID);	
+	WRITE_MICRO_CHUNK					(csave, VARID_SOUND_ID,			SoundID);
 	WRITE_MICRO_CHUNK					(csave, VARID_CATEGORY_ID,		CategoryID);
 	WRITE_MICRO_CHUNK_WWSTRING		(csave, VARID_ID_DESC,			IDDesc);
-	WRITE_MICRO_CHUNK_WWSTRING		(csave, VARID_ANIMATION_NAME,	AnimationName);	
+	WRITE_MICRO_CHUNK_WWSTRING		(csave, VARID_ANIMATION_NAME,	AnimationName);
 	return ;
 }
 
@@ -270,11 +270,11 @@ TDBObjClass::Save_Variables (ChunkSaveClass &csave)
 /////////////////////////////////////////////////////////////////
 void
 TDBObjClass::Load_Variables (ChunkLoadClass &cload)
-{	
+{
 	while (cload.Open_Micro_Chunk ()) {
-		switch (cload.Cur_Micro_Chunk_ID ()) {			
+		switch (cload.Cur_Micro_Chunk_ID ()) {
 			READ_MICRO_CHUNK					(cload, VARID_ID,					ID);
-			READ_MICRO_CHUNK					(cload, VARID_SOUND_ID,			SoundID);	
+			READ_MICRO_CHUNK					(cload, VARID_SOUND_ID,			SoundID);
 			READ_MICRO_CHUNK					(cload, VARID_CATEGORY_ID,		CategoryID);
 			READ_MICRO_CHUNK_WWSTRING		(cload, VARID_ID_DESC,			IDDesc);
 			READ_MICRO_CHUNK_WWSTRING		(cload, VARID_ENGLISH_STRING,	EnglishString);
@@ -318,7 +318,7 @@ TDBObjClass::Set_English_String (const char *string)
 	// we can index into the english string
 	//
 	while (TranslatedStrings.Count () <= TranslateDBClass::LANGID_ENGLISH) {
-		TranslatedStrings.Add (WideStringClass (L""));
+		TranslatedStrings.Add (WideStringClass (U_CHAR("")));
 	}
 
 	TranslatedStrings[TranslateDBClass::LANGID_ENGLISH].Convert_From (string);
@@ -392,14 +392,14 @@ TDBObjClass::Get_String (uint32 lang_id)
 //
 /////////////////////////////////////////////////////////////////
 void
-TDBObjClass::Set_String (uint32 lang_id, const wchar_t *string)
+TDBObjClass::Set_String (uint32 lang_id, const unichar_t *string)
 {
 	//
 	//	Grow the translated strings array until we have enough
 	// to cover the requested language
 	//
 	while ((uint32)TranslatedStrings.Count () <= lang_id) {
-		TranslatedStrings.Add (WideStringClass (L""));
+		TranslatedStrings.Add (WideStringClass (U_CHAR("")));
 	}
 
 	//
@@ -434,6 +434,6 @@ TDBObjClass::Contains_Translation (uint32 lang_id)
 	if (TranslatedStrings.Count () > (int)lang_id) {
 		retval = (TranslatedStrings[lang_id].Get_Length () > 0);
 	}
-	
+
 	return retval;
 }

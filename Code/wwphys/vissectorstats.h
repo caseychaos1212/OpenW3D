@@ -53,7 +53,7 @@ class VisTableClass;
 /**
 ** VisSectorStatsClass
 ** This object is used to compute some statistics about the given vis sector.  For example,
-** it stores how many polygons are in the vis-set from anywhere in the given sector.  
+** it stores how many polygons are in the vis-set from anywhere in the given sector.
 */
 class VisSectorStatsClass
 {
@@ -78,8 +78,8 @@ public:
 	//
 	// For use with DynamicVectorClass
 	//
-	bool operator== (const VisSectorStatsClass &src)	{ return false; }
-	bool operator!= (const VisSectorStatsClass &src)	{ return true; }
+	bool operator== (const VisSectorStatsClass &/* src*/)	{ return false; }
+	bool operator!= (const VisSectorStatsClass &/* src*/)	{ return true; }
 
 protected:
 

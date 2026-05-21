@@ -42,7 +42,7 @@
 #include "FormClass.H"
 #include "Dllmain.H"
 
-// hard-coded resource id which VC special cases for MFC... >:-) 
+// hard-coded resource id which VC special cases for MFC... >:-)
 #define RT_DLGINIT  MAKEINTRESOURCE(240)
 
 
@@ -66,7 +66,7 @@ FormClass::Create_Form
 )
 {
 	// call PreCreateWindow to get prefered extended style
-	CREATESTRUCT cs = { 0 };		
+	CREATESTRUCT cs = { 0 };
 	cs.style = WS_CHILD;
 
 	m_hWnd = ::CreateDialogParam(	AppInstance,
@@ -109,18 +109,18 @@ FormClass::fnFormProc
 	UINT message,
 	WPARAM wparam,
 	LPARAM lparam
-) 
+)
 {
 	FormClass *pform = (FormClass *)::GetProp (dlg_wnd, "FORMCLASS");
 
-	if (message == WM_INITDIALOG) {	
+	if (message == WM_INITDIALOG) {
 		pform = (FormClass *)lparam;
 		::SetProp (dlg_wnd, "FORMCLASS", (HANDLE)pform);
 	} else if (message == WM_DESTROY) {
 		::RemoveProp (dlg_wnd, "FORMCLASS");
 	}
 
-	BOOL retval = FALSE;
+	BOOL retval = false;
 	if (pform) {
 		retval = pform->Dialog_Proc (dlg_wnd, message, wparam, lparam);
 	}
@@ -158,7 +158,7 @@ BOOL FormClass::ExecuteDlgInit(LPCTSTR lpszResourceName)
 			// load it
 			hResource = LoadResource(hInst, hDlgInit);
 			if (hResource == NULL)
-				return FALSE;
+				return false;
 			// lock it
 			lpResource = LockResource(hResource);
 			assert(lpResource != NULL);
@@ -194,7 +194,7 @@ BOOL FormClass::ExecuteDlgInit(LPCTSTR lpszResourceName)
  *=============================================================================================*/
 BOOL FormClass::ExecuteDlgInit(LPVOID lpResource)
 {
-	BOOL bSuccess = TRUE;
+	BOOL bSuccess = true;
 	if (lpResource != NULL)
 	{
 		UNALIGNED WORD* lpnRes = (WORD*)lpResource;
@@ -222,7 +222,7 @@ BOOL FormClass::ExecuteDlgInit(LPVOID lpResource)
 			{
 				// List/Combobox returns -1 for error
 				if (::SendDlgItemMessageA(m_hWnd, nIDC, nMsg, 0, (LONG)lpnRes) == -1)
-					bSuccess = FALSE;
+					bSuccess = false;
 			}
 
 			// skip past data

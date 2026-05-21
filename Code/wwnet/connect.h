@@ -88,7 +88,8 @@ typedef REFUSAL_CODE (*Application_Acceptance_Handler)(cPacket & packet);
 typedef void (*Server_Packet_Handler)(cPacket & packet, int rhost_id);
 typedef void (*Client_Packet_Handler)(cPacket & packet);
 
-extern char * Addr_As_String(sockaddr_in *addr);
+extern const char* Addr_As_String(const sockaddr_in* addr);
+extern char* Addr_As_String(sockaddr_in* addr);
 
 //-----------------------------------------------------------------------------
 //
@@ -198,7 +199,7 @@ class cConnection
 		double MaxAcceptablePacketlossPc;
 		cNetStats CombinedStats;
 		cNetStats AveragedStats;
-      unsigned long ThisFrameTimeMs; // to avoid excess timeGetTime clls
+      unsigned int ThisFrameTimeMs; // to avoid excess timeGetTime clls
       bool IsServer; // for C/S specific-code
       bool IsDedicatedServer; // for C/S specific-code
       static BOOL IsFlowControlEnabled;
@@ -222,8 +223,8 @@ class cConnection
 		static UINT			TotalCompressedBytesSent;
 		static UINT			TotalUncompressedBytesSent;
 		cMsgStatList *		PStatList;
-		unsigned long		ExtraTimeoutTime;
-		unsigned long		ExtraTimeoutTimeStarted;
+		unsigned int		ExtraTimeoutTime;
+		unsigned int		ExtraTimeoutTimeStarted;
 		bool					CanProcess;
 
 		Accept_Handler								AcceptHandler;
@@ -242,9 +243,9 @@ class cConnection
 		static int LatencyAddLow;
 		static int LatencyAddHigh;
 		static int CurrentLatencyAdd;
-		static unsigned long LastLatencyChange;
+		static unsigned int LastLatencyChange;
 		DynamicVectorClass<cPacket*>			LaggedPackets;
-		DynamicVectorClass<unsigned long>	LaggedPacketTimes;
+		DynamicVectorClass<unsigned int>	LaggedPacketTimes;
 		DynamicVectorClass<int>					LaggedPacketRetCodes;
 #endif //WWDEBUG
 

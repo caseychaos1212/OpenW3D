@@ -81,7 +81,7 @@ CBackgroundObjectDialog::OnInitDialog (void)
 {
     // Allow the base class to process this message
 	CDialog::OnInitDialog ();
-	
+
     // Center the dialog around the data tree view instead
     // of the direct center of the screen
     ::CenterDialogAroundTreeView (m_hWnd);
@@ -98,7 +98,7 @@ CBackgroundObjectDialog::OnInitDialog (void)
     {
         // Loop through all the assets in the manager
         for (pObjEnum->First ();
-             pObjEnum->Is_Done () == FALSE;
+             pObjEnum->Is_Done () == false;
              pObjEnum->Next ())
         {
             LPCTSTR pszItemName = pObjEnum->Current_Item_Name ();
@@ -123,7 +123,7 @@ CBackgroundObjectDialog::OnInitDialog (void)
     {
         // Get the name of the current background object
         CString stringCurrObject = pCDoc->GetBackgroundObjectName ();
-        
+
         LV_FINDINFO findInfo = { 0 };
         findInfo.flags = LVFI_STRING;
         findInfo.psz = (LPCTSTR)stringCurrObject;
@@ -142,12 +142,12 @@ CBackgroundObjectDialog::OnInitDialog (void)
             m_heirarchyListCtrl.SetItemState (0, LVNI_SELECTED, LVNI_SELECTED);
             SetDlgItemText (IDC_CURR_OBJ, m_heirarchyListCtrl.GetItemText (0, 0));
         }
-    }    
+    }
 
     // Size the columns so they are large enough to display their contents
     m_heirarchyListCtrl.SetColumnWidth (0, LVSCW_AUTOSIZE);
     //m_heirarchyListCtrl.SetColumnWidth (1, LVSCW_AUTOSIZE_USEHEADER);
-	return TRUE;
+	return true;
 }
 
 /////////////////////////////////////////////////////////////
@@ -216,7 +216,7 @@ CBackgroundObjectDialog::OnItemChangedHierarchyList
             SetDlgItemText (IDC_CURR_OBJ, m_heirarchyListCtrl.GetItemText (pNMListView->iItem, 0));
         }
     }
-	
+
 	*pResult = 0;
     return ;
 }
@@ -226,7 +226,7 @@ CBackgroundObjectDialog::OnItemChangedHierarchyList
 //  OnClear
 //
 void
-CBackgroundObjectDialog::OnClear (void) 
+CBackgroundObjectDialog::OnClear (void)
 {
     // Get the current selection (if any)
     int iIndex = m_heirarchyListCtrl.GetNextItem (-1, LVNI_ALL | LVNI_SELECTED);

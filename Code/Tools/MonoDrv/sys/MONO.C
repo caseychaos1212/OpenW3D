@@ -176,9 +176,9 @@ typedef struct MonoGlobals
 typedef struct _MONO_RESOURCE
 {
     PHYSICAL_ADDRESS  PhysicalAddress;
-    unsigned long             Length;
-    unsigned long             AddressSpace;
-    unsigned long             RangeSharable;
+    unsigned int             Length;
+    unsigned int             AddressSpace;
+    unsigned int             RangeSharable;
 }   MONO_RESOURCE, *PMONO_RESOURCE;
 
 
@@ -198,7 +198,7 @@ MonoGlobals * GlobalDeviceExtension = NULL;
 // MonoDbgPrint.
 //
 
-unsigned long MonoDbgLevel = 3;
+unsigned int MonoDbgLevel = 3;
 
 
 
@@ -242,18 +242,18 @@ typedef struct CellType {
 
 NTSTATUS MonoDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp);
 void MonoUnload(PDRIVER_OBJECT DriverObject);
-BOOLEAN pMonoReportResourceUsage(PDRIVER_OBJECT DriverObject, PMONO_RESOURCE MonoResources, unsigned long NumberOfResources);
+BOOLEAN pMonoReportResourceUsage(PDRIVER_OBJECT DriverObject, PMONO_RESOURCE MonoResources, unsigned int NumberOfResources);
 //NTSTATUS MapMemMapTheMemory(PDEVICE_OBJECT DeviceObject,PVOID IoBuffer, ULONG OutputBufferLength);
 
-void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS PhysicalAddress, unsigned long AddressSpace, unsigned long NumberOfBytes);
+void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS PhysicalAddress, unsigned int AddressSpace, unsigned int NumberOfBytes);
 void Mono_Set_View_Pos(MonoGlobals * device, int pos);
 NTSTATUS Mono_Detect_MGA_Adapter(void);
 void * Mono_Fetch_Ptr(PDEVICE_OBJECT DeviceObject);
 void Mono_Printf(BuffControl * control, char const * DbgMessage, ...);
 void Mono_Clear_Screen(BuffControl * control);
-void Mono_Print_Raw(BuffControl * control, unsigned char * string, unsigned long length);
+void Mono_Print_Raw(BuffControl * control, unsigned char * string, unsigned int length);
 void Mono_Scroll(BuffControl * control);
-void Mono_Print(BuffControl * control, unsigned char * string, unsigned long length);
+void Mono_Print(BuffControl * control, unsigned char * string, unsigned int length);
 void Mono_Bring_To_Top(MonoGlobals * device, int index);
 void Mono_Pan(BuffControl * control);
 void Display_Signon_Banner(BuffControl * control);
@@ -287,7 +287,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 	NTSTATUS               ntStatus;
 	UNICODE_STRING         deviceNameUnicodeString;
 	MonoGlobals * deviceExtension;
-	BOOLEAN                symbolicLinkCreated = FALSE;
+	BOOLEAN                symbolicLinkCreated = false;
 	UNICODE_STRING         deviceLinkUnicodeString;
 	int j;
 
@@ -322,7 +322,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 	// implement a more robust synchronization scheme than the event
 	// mechanism we utilize below.
 	//
-	ntStatus = IoCreateDevice(DriverObject, sizeof(MonoGlobals), &deviceNameUnicodeString, FILE_DEVICE_MONO, 0, FALSE, &deviceObject);
+	ntStatus = IoCreateDevice(DriverObject, sizeof(MonoGlobals), &deviceNameUnicodeString, FILE_DEVICE_MONO, 0, false, &deviceObject);
 
 	if (NT_SUCCESS(ntStatus)) {
 
@@ -334,7 +334,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 		// Initialize the dispatch event object. This allows us to
 		// synchronize access to the h/w registers...
 		//
-		KeInitializeEvent(&deviceExtension->SyncEvent, SynchronizationEvent, TRUE);
+		KeInitializeEvent(&deviceExtension->SyncEvent, SynchronizationEvent, true);
 
 		//
 		// Map all the required resources, save the addresses
@@ -371,7 +371,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 		ntStatus = IoCreateSymbolicLink(&deviceLinkUnicodeString, &deviceNameUnicodeString);
 		if (!NT_SUCCESS(ntStatus)) {
 		} else {
-			symbolicLinkCreated = TRUE;
+			symbolicLinkCreated = true;
 		}
 
 		//
@@ -398,7 +398,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 			deviceExtension->Control[j].YPos = 0;
 			deviceExtension->Control[j].Attribute = 0x07;
 			deviceExtension->Control[j].LockPtr = NULL;
-			deviceExtension->Control[j].Allocated = FALSE;
+			deviceExtension->Control[j].Allocated = false;
 		}
 
 		/*
@@ -454,9 +454,9 @@ NTSTATUS MonoDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	PIO_STACK_LOCATION irpStack;
 	MonoGlobals *  deviceExtension;
 	void * ioBuffer;
-	unsigned long inputBufferLength;
-	unsigned long outputBufferLength;
-	unsigned long ioControlCode;
+	unsigned int inputBufferLength;
+	unsigned int outputBufferLength;
+	unsigned int ioControlCode;
 	NTSTATUS ntStatus;
 	FILE_OBJECT * fileobject = NULL;
 	BuffControl * control = NULL;
@@ -484,7 +484,7 @@ NTSTATUS MonoDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	*/
 	fileobject = irpStack->FileObject;
 	if (fileobject != NULL)  {
-		currentindex = (long)fileobject->FsContext;
+		currentindex = (int)fileobject->FsContext;
 	}
 
 	/*
@@ -498,7 +498,7 @@ NTSTATUS MonoDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	** Synchronize execution of the dispatch routine by acquiring the device
 	** event object. This ensures all request are serialized.
 	*/
-	KeWaitForSingleObject(&deviceExtension->SyncEvent, Executive, KernelMode, FALSE, NULL);
+	KeWaitForSingleObject(&deviceExtension->SyncEvent, Executive, KernelMode, false, NULL);
 
 	/*
 	**	Get a working pointer to the display page.
@@ -550,7 +550,7 @@ NTSTATUS MonoDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 					newcon->XPos = 0;
 					newcon->YPos = 0;
 					newcon->Attribute = 0x07;
-					newcon->Allocated = TRUE;
+					newcon->Allocated = true;
 
 					Mono_Bring_To_Top(deviceExtension, avail);
 					fileobject->FsContext = (void*)avail;
@@ -564,7 +564,7 @@ NTSTATUS MonoDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		*/
 		case IRP_MJ_CLOSE:
 			if (currentindex != -1) {
-				deviceExtension->Control[currentindex].Allocated = FALSE;
+				deviceExtension->Control[currentindex].Allocated = false;
 				fileobject->FsContext = NULL;
 			}
 			break;
@@ -658,7 +658,7 @@ NTSTATUS MonoDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		Mono_Update_Cursor(deviceExtension);
 	}
 
-	KeSetEvent(&deviceExtension->SyncEvent, 0, FALSE);
+	KeSetEvent(&deviceExtension->SyncEvent, 0, false);
 
 	ntStatus = Irp->IoStatus.Status;
 
@@ -779,7 +779,7 @@ NTSTATUS Mono_Detect_MGA_Adapter(void)
  * HISTORY:                                                                                    *
  *   01/05/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
-void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS address, unsigned long space, unsigned long length)
+void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS address, unsigned int space, unsigned int length)
 {
 	PHYSICAL_ADDRESS translatedAddress;
 	void * usable_ptr = NULL;
@@ -794,7 +794,7 @@ void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS address, unsigned long space, unsig
 		**	MmMapIoSpace is required. This is usually required for port addresses.
 		*/
 		if (space == 0) {
-			usable_ptr = MmMapIoSpace(translatedAddress, length, FALSE);
+			usable_ptr = MmMapIoSpace(translatedAddress, length, false);
 		} else {
 			usable_ptr = (void *)translatedAddress.LowPart;
 		}
@@ -815,7 +815,7 @@ void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS address, unsigned long space, unsig
 //       (not safe to do, but the easiest for this simple example); or, by
 //       editing the source file(s) of the appropriate miniport driver
 //       such that the VIDEO_ACCESS_RANGE.RangeSharable element is set to
-//       TRUE, and rebuilding the driver.
+//       true, and rebuilding the driver.
 //
 //       A real driver should *always* report it's resources.
 //
@@ -837,16 +837,16 @@ Arguments:
 
 Return Value:
 
-    TRUE if resources successfully report (and no conflicts),
-    FALSE otherwise.
+    true if resources successfully report (and no conflicts),
+    false otherwise.
 
 --*/
-BOOLEAN pMonoReportResourceUsage(PDRIVER_OBJECT DriverObject, PMONO_RESOURCE MonoResources, unsigned long NumberOfResources)
+BOOLEAN pMonoReportResourceUsage(PDRIVER_OBJECT DriverObject, PMONO_RESOURCE MonoResources, unsigned int NumberOfResources)
 {
-	unsigned long                           sizeOfResourceList = 0;
+	unsigned int                           sizeOfResourceList = 0;
 	PCM_RESOURCE_LIST               resourceList       = NULL;
 	PCM_PARTIAL_RESOURCE_DESCRIPTOR partial;
-	unsigned long                           i;
+	unsigned int                           i;
 	UNICODE_STRING                  className;
 	BOOLEAN                         conflictDetected;
 
@@ -860,7 +860,7 @@ BOOLEAN pMonoReportResourceUsage(PDRIVER_OBJECT DriverObject, PMONO_RESOURCE Mon
 		resourceList = ExAllocatePool(PagedPool, sizeOfResourceList);
 
 		if (!resourceList) {
-			return FALSE;
+			return false;
 		}
 
 		RtlZeroMemory(resourceList, sizeOfResourceList);
@@ -908,19 +908,19 @@ BOOLEAN pMonoReportResourceUsage(PDRIVER_OBJECT DriverObject, PMONO_RESOURCE Mon
 
 	RtlInitUnicodeString(&className, L"LOADED MONO DRIVER RESOURCES");
 
-	IoReportResourceUsage(&className, DriverObject, resourceList, sizeOfResourceList, NULL, NULL, 0, FALSE, &conflictDetected);
+	IoReportResourceUsage(&className, DriverObject, resourceList, sizeOfResourceList, NULL, NULL, 0, false, &conflictDetected);
 
 	if (resourceList) {
 		ExFreePool(resourceList);
 
 		if (conflictDetected)  {
-			return FALSE;
+			return false;
 		} else {
-			return TRUE;
+			return true;
 		}
 	}
 
-	return TRUE;
+	return true;
 }
 
 
@@ -956,7 +956,7 @@ void Mono_Update_Cursor(MonoGlobals * device)
  * HISTORY:                                                                                    *
  *   01/04/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
-void Mono_Print(BuffControl * control, unsigned char * string, unsigned long length)
+void Mono_Print(BuffControl * control, unsigned char * string, unsigned int length)
 {
 	if (control != NULL)  {
 		int x,y;
@@ -1171,12 +1171,12 @@ void Mono_Pan(BuffControl * control)
  * HISTORY:                                                                                    *
  *   01/04/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
-void Mono_Print_Raw(BuffControl * control, unsigned char * string, unsigned long length)
+void Mono_Print_Raw(BuffControl * control, unsigned char * string, unsigned int length)
 {
 	if (control != NULL)  {
 		unsigned short * vidmem;
 		int x,y;
-		unsigned long i;
+		unsigned int i;
 
 		vidmem = control->Buffer;
 		x = control->XPos;

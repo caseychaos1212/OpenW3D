@@ -16,28 +16,31 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Combat/diaglog.cpp                           $* 
- *                                                                                             * 
- *                      $Author:: Patrick                                                     $* 
- *                                                                                             * 
- *                     $Modtime:: 1/02/02 3:35p                                               $* 
- *                                                                                             * 
- *                    $Revision:: 5                                                           $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Combat/diaglog.cpp                           $*
+ *                                                                                             *
+ *                      $Author:: Patrick                                                     $*
+ *                                                                                             *
+ *                     $Modtime:: 1/02/02 3:35p                                               $*
+ *                                                                                             *
+ *                    $Revision:: 5                                                           $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "diaglog.h"
 #include "ffactory.h"
 #include "wwfile.h"
 #include "timemgr.h"
+
+#include <cassert>
+#include <limits>
 
 #include <wtypes.h>	// for SYSTEMTIME
 
@@ -100,8 +103,10 @@ void	DiagLogClass::Log_Timed( const char * type, const char * format, ... )
 
 		StringClass line;
 		float time = TimeManager::Get_Total_Seconds();
-		line.Format( "%s; %1.2f; %s%c%c", type, time, data, 0x0D, 0x0A );
-		_DiagLogFile->Write( line, ::strlen( line ) );
+		line.Format("%s; %1.2f; %s%c%c", type, time, data.Peek_Buffer(), 0x0D, 0x0A);
+		const size_t length = ::strlen(line);
+		assert(length <= static_cast<size_t>(std::numeric_limits<int>::max()));
+		_DiagLogFile->Write(line, static_cast<int>(length));
 	}
 }
 

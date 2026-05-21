@@ -36,7 +36,6 @@
 
 #include "specialbuilds.h"
 #include "dlgcncteaminfo.h"
-#include "resource.h"
 #include "listctrl.h"
 #include "imagectrl.h"
 #include "playertype.h"
@@ -58,6 +57,7 @@
 #include "translatedb.h"
 #include "wolgmode.h"
 #include <WWOnline/WOLUser.h>
+#include "gamespyadmin.h"
 #include "string_ids.h"
 #include "mousemgr.h"
 #include "directinput.h"
@@ -74,6 +74,17 @@
 #include "GameSpyBanList.h"
 #include <gamespy/pt/pt.h>
 #include <gamespy/gcdkey/gcdkeys.h>
+#include <atomic>
+#include <chrono>
+#include <cstdio>
+#include <memory>
+#include <thread>
+
+#ifdef _WIN32
+#ifdef snprintf
+#undef snprintf
+#endif
+#endif
 
 CGameSpyQnR GameSpyQnR;
 
@@ -131,10 +142,10 @@ void c_basic_callback(char *outbuf, int maxlen, void *userdata)
 /***********
 A simple game object. Consists of some data and a main loop function.
 ***********/
-CGameSpyQnR::CGameSpyQnR(void) : m_GSInit(FALSE), m_GSEnabled(FALSE)
+CGameSpyQnR::CGameSpyQnR(void) : m_GSInit(false), m_GSEnabled(false)
 {
 	// Secret keys removed per Security review requirements. LFeenanEA - 27th January 2025
-	
+
 	//set the secret key, in a semi-obfuscated manner
 	// tY1S8q = FULL , LsEwS3 = DEMO
 
@@ -149,7 +160,7 @@ CGameSpyQnR::CGameSpyQnR(void) : m_GSInit(FALSE), m_GSEnabled(FALSE)
 	secret_key[6] = '1'; if (secret_key[2])
 	secret_key[5] = '2';  if (secret_key[5])
 	secret_key[4] = '3';
-#else 
+#else
 	secret_key[5] = 'R';  if (secret_key[5])
 	secret_key[4] = 'E';  if (secret_key[4])
 	secret_key[6] = 'M'; if (secret_key[4])
@@ -162,6 +173,7 @@ CGameSpyQnR::CGameSpyQnR(void) : m_GSInit(FALSE), m_GSEnabled(FALSE)
 	secret_key[3] = '3';
 #endif
 
+	m_Offline = FALSE;
 }
 
 CGameSpyQnR::~CGameSpyQnR()
@@ -171,7 +183,7 @@ CGameSpyQnR::~CGameSpyQnR()
 
 void CGameSpyQnR::LaunchArcade(void) {
 	const char *akey = "Software\\GameSpy\\GameSpy Arcade";
-	BOOL launched = FALSE;
+	BOOL launched = false;
 	HKEY key = NULL;
 	int result = 0;
 
@@ -193,7 +205,8 @@ void CGameSpyQnR::LaunchArcade(void) {
 				(LPBYTE)value.Get_Buffer(data_size), &data_size);
 		}
 		if (!value.Is_Empty()) {
-			if (value[value.Get_Length()-1] == '\\') {
+			const size_t length = value.Get_Length();
+			if (value[static_cast<int>(length - 1)] == '\\') {
 				value += "Aphex.exe";
 			} else {
 				value += "\\Aphex.exe";
@@ -204,7 +217,7 @@ void CGameSpyQnR::LaunchArcade(void) {
 				StringClass params("+svc ");
 				params += gamename;
 				if (((uintptr_t)ShellExecuteA (NULL, "open", value, params, NULL, SW_SHOW)) > 32) {
-					launched = TRUE;
+					launched = true;
 				}
 			}
 		}
@@ -228,7 +241,7 @@ void CGameSpyQnR::Shutdown(void) {
 	if (m_GSInit) {
 		/*
 		We don't really need to set the mode to exiting here, since we immediately
-		send the statechanged heartbeat and kill off the query sockets 
+		send the statechanged heartbeat and kill off the query sockets
 		gamemode = "exiting";*/
 		ConsoleBox.Print("Shutting down GameSpy Q&R\n");
 		qr_send_exiting(query_reporting_rec);
@@ -242,13 +255,15 @@ void CGameSpyQnR::Init(void) {
 
 #ifndef BETACLIENT
 
-	if (m_GSEnabled && !m_GSInit && The_Game() && The_Game()->Get_Game_Type() == cGameData::GAME_TYPE_CNC) {
-	
-		ConsoleBox.Print("Initializing GameSpy Q&R\n");
+		m_Offline = FALSE;
 
-		BOOL test = FALSE;
+		if (m_GSEnabled && !m_GSInit && The_Game() && The_Game()->Get_Game_Type() == cGameData::GAME_TYPE_CNC) {
+
+			ConsoleBox.Print("Initializing GameSpy Q&R\n");
+
+			BOOL test = false;
 		// Init the GameSpy QnR engine
-		extern ULONG g_ip_override;
+		extern unsigned int g_ip_override;
 		char ipstr[32];
 		char *ip = ipstr;
 
@@ -262,24 +277,35 @@ void CGameSpyQnR::Init(void) {
 			strcpy(ip, cNetUtil::Address_To_String(g_ip_override));
 		}
 
+		static bool warned_no_masters = false;
+
 		if (!get_master_count()) {
-			GameSpyQnR.Parse_HeartBeat_List(Get_Default_HeartBeat_List());
+			GameSpyQnR.Parse_HeartBeat_List(Get_Default_HeartBeat_List(), false);
+		}
+		if (!get_master_count() && !warned_no_masters) {
+			ConsoleBox.Print("GameSpy master servers unavailable; continuing without heartbeats.\n");
+			warned_no_masters = true;
+			m_Offline = TRUE;
+		} else if (get_master_count()) {
+			m_Offline = FALSE;
 		}
 		test = qr_init(&query_reporting_rec, ip, cUserOptions::GameSpyQueryPort.Get(),
-			gamename, secret_key, c_basic_callback, c_info_callback, c_rules_callback, 
+			gamename, secret_key, c_basic_callback, c_info_callback, c_rules_callback,
 			c_players_callback, this);
 		WWASSERT(!test);
-		gcd_init_qr(query_reporting_rec, cdkey_id);
+		if (!m_Offline) {
+			gcd_init_qr(query_reporting_rec, cdkey_id);
+		}
 
 		StartTime = time(NULL);
-		m_GSInit = TRUE;
+		m_GSInit = true;
 	}
 #endif
 }
 
 /*******
  DoGameStuff
-Simulate whatever else a game server does 
+Simulate whatever else a game server does
 ********/
 void CGameSpyQnR::DoGameStuff(void)
 {
@@ -306,7 +332,7 @@ void CGameSpyQnR::Think()
 		GameSpyBanList.Think();
 		ttime = TIMEGETTIME();
 	}
-	
+
 #ifndef BETACLIENT
 //	DoGameStuff();
 	if (m_GSInit && m_GSEnabled && GameInitMgrClass::Is_LAN_Initialized() &&
@@ -319,7 +345,7 @@ void CGameSpyQnR::Think()
 
 /*************
 basic_callback
-sends a (sample) response to the basic query 
+sends a (sample) response to the basic query
 includes the following keys:
 \gamename\
 \gamever\
@@ -352,7 +378,7 @@ void CGameSpyQnR::basic_callback(char *outbuf, int maxlen)
 
 /************
 info_callback
-Sends a (sample) response to the info query 
+Sends a (sample) response to the info query
 including the following keys:
 \hostname\
 \hostport\
@@ -436,7 +462,7 @@ void CGameSpyQnR::info_callback(char *outbuf, int maxlen)
 rules_callback
 Sends a response to the rules query. You may
 need to add custom fields for your game in here. Some are provided
-as an example 
+as an example
 The following rules are included:
 \timelimit\
 \fraglimit\
@@ -472,7 +498,7 @@ void CGameSpyQnR::rules_callback(char *outbuf, int maxlen)
 //			GetVersionInfo(filename, &version);
 //			int ver = version.dwFileVersionMS;
 //
-//			b.Format("%s %s V%d.%3.3d(%s-%d)", "Win-X86", bname, (ver&0xffff0000)>>16, ver&0xffff, 
+//			b.Format("%s %s V%d.%3.3d(%s-%d)", "Win-X86", bname, (ver&0xffff0000)>>16, ver&0xffff,
 //				BuildInfoClass::Get_Builder_Initials(), BuildInfoClass::Get_Build_Number());
 //		}
 //		if (!Append_InfoKey_Pair(outbuf, maxlen, "Version", b)) break;
@@ -499,7 +525,7 @@ void CGameSpyQnR::rules_callback(char *outbuf, int maxlen)
 //		if (!Append_InfoKey_Pair(outbuf, maxlen, "RadarMode", value)) break;
 		value.Format("%d", The_Game()->As_Cnc()->Get_Starting_Credits());
 		if (!Append_InfoKey_Pair(outbuf, maxlen, "SC", value)) break;
-		
+
 //		cTeam * p_team;
 //		for (SLNode<cTeam> * objnode = cTeamManager::Get_Team_Object_List()->Head()
 //				; objnode != NULL; objnode = objnode->Next()) {
@@ -524,7 +550,7 @@ void CGameSpyQnR::rules_callback(char *outbuf, int maxlen)
 
 		break;
 
-	}
+}
 
 #ifdef WWDEBUG
 	StringClass tstr(true);
@@ -535,7 +561,65 @@ void CGameSpyQnR::rules_callback(char *outbuf, int maxlen)
 
 }
 
-BOOL CGameSpyQnR::Parse_HeartBeat_List(const char *list) {
+namespace {
+bool Resolve_Master_With_Timeout(const char *host, WORD port, sockaddr_in &out_addr, std::chrono::milliseconds timeout) {
+	// Fast path for dotted-quad literals so we never touch DNS.
+	unsigned long numeric = inet_addr(host);
+	if (numeric != INADDR_NONE) {
+		out_addr = {};
+		out_addr.sin_family = AF_INET;
+		out_addr.sin_addr.s_addr = numeric;
+		out_addr.sin_port = htons(port);
+		return true;
+	}
+
+	struct ResolveState {
+		std::atomic<bool> done{false};
+		bool resolved{false};
+		sockaddr_in addr{};
+	};
+	auto state = std::make_shared<ResolveState>();
+
+	std::thread resolver([state, host, port]() {
+		addrinfo hints{};
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
+		char port_buf[8] = {};
+		std::snprintf(port_buf, sizeof(port_buf), "%u", static_cast<unsigned>(port));
+
+		addrinfo *info = nullptr;
+		if (::getaddrinfo(host, port_buf, &hints, &info) == 0 && info != nullptr) {
+			state->addr = *reinterpret_cast<sockaddr_in *>(info->ai_addr);
+			state->resolved = true;
+		}
+		if (info) {
+			::freeaddrinfo(info);
+		}
+		state->done.store(true, std::memory_order_release);
+	});
+
+	const auto deadline = std::chrono::steady_clock::now() + timeout;
+	while (!state->done.load(std::memory_order_acquire) && std::chrono::steady_clock::now() < deadline) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+
+	if (!state->done.load(std::memory_order_acquire)) {
+		resolver.detach(); // DNS is still in flight; carry on without blocking.
+		return false;
+	}
+
+	resolver.join();
+	if (state->resolved) {
+		state->addr.sin_port = htons(port);
+		out_addr = state->addr;
+		return true;
+	}
+	return false;
+}
+} // anonymous namespace
+
+BOOL CGameSpyQnR::Parse_HeartBeat_List(const char *list, bool log_on_error) {
 
 	BOOL master_added = false;
 
@@ -562,23 +646,23 @@ BOOL CGameSpyQnR::Parse_HeartBeat_List(const char *list) {
 		}
 		// skip white space
 		while (*t == ' ' || *t == '\t') t++;
-		// process the address
-		if (*t && get_sockaddrin(t, port, &taddr, NULL)) {
+		// process the address with a bounded DNS lookup to avoid hanging the server when offline
+		if (*t && Resolve_Master_With_Timeout(t, port, taddr, std::chrono::milliseconds(1000))) {
 			add_master(&taddr);
 			master_added = true;
+		} else if (*t && log_on_error) {
+			ConsoleBox.Print("Skipping HeartBeat master '%s' (unresolved)\n", t);
 		}
 		t = q;
 	}
 
 	delete [] str;
 
-	if (!master_added) {
+	if (!master_added && log_on_error) {
 		ConsoleBox.Print("Error processing HeartBeat List: <%s>\n", list);
-		ConsoleBox.Print("Assigning default HeartBeat List\n");
-		return false;
 	}
 
-	return true;
+	return master_added;
 }
 
 BOOL CGameSpyQnR::Append_InfoKey_Pair(char *outbuf, int maxlen, const char *key, const char *value) {
@@ -587,9 +671,12 @@ BOOL CGameSpyQnR::Append_InfoKey_Pair(char *outbuf, int maxlen, const char *key,
 	WWASSERT(outbuf);
 	WWASSERT(key);
 
-	int clen = strlen(outbuf);
+	const size_t clen = ::strlen(outbuf);
+	const size_t required = clen + ::strlen(key) + ::strlen(value) + 3;
 
-	if (clen + strlen(key) + strlen(value) + 3 > (unsigned int)maxlen) return FALSE;
+	if (required > static_cast<size_t>(maxlen)) {
+		return FALSE;
+	}
 
 	char *s = new char[strlen(value)+1];
 	strcpy(s, value);
@@ -602,7 +689,7 @@ BOOL CGameSpyQnR::Append_InfoKey_Pair(char *outbuf, int maxlen, const char *key,
 	sprintf(&outbuf[clen], "\\%s\\%s", key, t);
 	delete [] s;
 
-	return TRUE;
+	return true;
 }
 
 BOOL CGameSpyQnR::Append_InfoKey_Pair(char *outbuf, int maxlen, const char *key, const WideStringClass &value) {
@@ -619,10 +706,10 @@ BOOL CGameSpyQnR::Append_InfoKey_Pair(char *outbuf, int maxlen, const char *key,
 
 /***************
 players_callback
-sends the players and their information. 
+sends the players and their information.
 Note that \ characters are not stripped out of player names. If
 your game allows players or team names with the \ character, you will need
-to strip or change it here. 
+to strip or change it here.
 The following keys are included for each player:
 \player_N\
 \frags_N\
@@ -631,114 +718,12 @@ The following keys are included for each player:
 \ping_N\
 \team_N\
 ***************/
-void CGameSpyQnR::players_callback(char *outbuf, int maxlen)
+void CGameSpyQnR::players_callback(char *outbuf, int /* maxlen */)
 {
 
 	// Send the minimum for now to reduce Bandwidth usage.
 	outbuf[0] = 0;
-	return;
-
-
-
-	int pindex = 0;
-
-	WWDEBUG_SAY(("-->GS_QnR -- Players callback\n"));
-	WWASSERT(!CombatManager::Is_Loading_Level());
-
-	if (!maxlen || !outbuf) return;
-
-	outbuf[0] = 0;
-
-	for (SLNode<cPlayer> *player_node = cPlayerManager::Get_Player_Object_List ()->Head ();
-			player_node != NULL; 
-			player_node = player_node->Next ()) {
-
-		cPlayer *player = player_node->Data ();
-		WWASSERT (player != NULL);
-
-		if (player->Get_Is_Active().Is_False()) {
-//		if (player->Get_Is_Active().Is_False() || !player->Is_Human()) {
-			continue;
-		}
-
-		StringClass keyval(true);
-		StringClass value(true);
-
-		// Set the Player's Name [Team]
-		value = player->Get_Name();
-		if (player->Get_Player_Type() == PLAYERTYPE_NOD) {
-			value += " [NOD]";
-		} else if (player->Get_Player_Type() == PLAYERTYPE_GDI) {
-			value += " [GDI]";
-		}
-
-		keyval.Format("player_%d", pindex);
-		if (!Append_InfoKey_Pair(outbuf, maxlen, keyval.Peek_Buffer(), value)) break;
-
-		// Set the Player's Score
-		keyval.Format("frags_%d", pindex);
-		value.Format("%.0f", player->Get_Score());
-		if (!Append_InfoKey_Pair(outbuf, maxlen, keyval.Peek_Buffer(), value)) break;
-
-		// Set the Player's Credits
-//		keyval.Format("credits_%d", pindex);
-//		value.Format("%.0f", player->Get_Money());
-//		if (!Append_InfoKey_Pair(outbuf, maxlen, keyval.Peek_Buffer(), value)) break;
-
-		// Set the Player's Ping to Server
-		keyval.Format("ping_%d", pindex);
-		value.Format("%d", player->Get_Ping());
-		if (!Append_InfoKey_Pair(outbuf, maxlen, keyval.Peek_Buffer(), value)) break;
-
-		// Set the Player's Kills
-//		keyval.Format("kills_%d", pindex);
-//		value.Format("%d", player->Get_Kills());
-//		if (!Append_InfoKey_Pair(outbuf, maxlen, keyval.Peek_Buffer(), value)) break;
-
-		// Set the Player's Deaths
-//		keyval.Format("deaths_%d", pindex);
-//		value.Format("%d", player->Get_Deaths());
-//		if (!Append_InfoKey_Pair(outbuf, maxlen, keyval.Peek_Buffer(), value)) break;
-
-/*		SmartGameObj *game_obj = player->Get_GameObj ();
-		if (game_obj != NULL && game_obj->As_SoldierGameObj () != NULL) {
-
-			// Set the Player's Class (ie: Technician,Sakura,Havok)
-			keyval.Format("class_%d", pindex);
-			if (!Append_InfoKey_Pair(outbuf, maxlen, keyval.Peek_Buffer(), 
-				WideStringClass(TRANSLATE(game_obj->Get_Translated_Name_ID())) )) break;
-			
-			SoldierGameObj *soldier = game_obj->As_SoldierGameObj();
-			VehicleGameObj *vehicle = soldier->Get_Vehicle ();
-
-			// If they're in a vehicle set the vehicle name
-			keyval.Format("vehicle_%d", pindex);
-			if (vehicle != NULL) {
-				if (!Append_InfoKey_Pair(outbuf, maxlen, keyval.Peek_Buffer(), 
-					WideStringClass(TRANSLATE(vehicle->Get_Translated_Name_ID())) )) break;
-			} else {
-				if (!Append_InfoKey_Pair(outbuf, maxlen, keyval.Peek_Buffer(), "None")) break;
-			}
-		} else {
-			// If there's no gameobj then set vehicle/class to unknown
-			keyval.Format("class_%d", pindex);
-			if (!Append_InfoKey_Pair(outbuf, maxlen, keyval.Peek_Buffer(), "Unknown")) break;
-			keyval.Format("vehicle_%d", pindex);
-			if (!Append_InfoKey_Pair(outbuf, maxlen, keyval.Peek_Buffer(), "Unknown")) break;
-		} */
-
-		pindex++;
-
-	}
-
-#ifdef WWDEBUG
-	StringClass tstr(true);
-	tstr.Format("GS_QnR -- Players callback, sent: %s\n",outbuf);
-	OutputDebugStringA(tstr.Peek_Buffer());
-#endif
-
-	WWDEBUG_SAY(("<--GS_QnR -- Players callback\n"));
-	return;
+	// Early return in original code made rest of this function a no op.
 }
 /************
 We'll actually start up two completely seperate "game servers"
@@ -750,8 +735,8 @@ int main(int argc, char* argv[])
 {
 	CGameSpyQnR mygame1("Test Game Server 1"), mygame2("Test Game Server 2");
 
-	srand( GetTickCount() );
-	
+	srand( TIMEGETTIME() );
+
 	printf("Press any key to quit\n");
 	while (!_kbhit())
 	{

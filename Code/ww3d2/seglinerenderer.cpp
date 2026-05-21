@@ -138,16 +138,16 @@ void SegLineRendererClass::Init(const W3dEmitterLinePropertiesStruct & props)
 	Set_End_Caps(props.Flags & W3D_ELINE_END_CAPS);
 
 	int texture_mode = ((props.Flags & W3D_ELINE_TEXTURE_MAP_MODE_MASK) >> W3D_ELINE_TEXTURE_MAP_MODE_OFFSET);
-	switch (texture_mode) 
+	switch (texture_mode)
 	{
 	case W3D_ELINE_UNIFORM_WIDTH_TEXTURE_MAP:
 		Set_Texture_Mapping_Mode(UNIFORM_WIDTH_TEXTURE_MAP);
 		break;
 	case W3D_ELINE_UNIFORM_LENGTH_TEXTURE_MAP:
-		Set_Texture_Mapping_Mode(UNIFORM_LENGTH_TEXTURE_MAP);		
+		Set_Texture_Mapping_Mode(UNIFORM_LENGTH_TEXTURE_MAP);
 		break;
 	case W3D_ELINE_TILED_TEXTURE_MAP:
-		Set_Texture_Mapping_Mode(TILED_TEXTURE_MAP);		
+		Set_Texture_Mapping_Mode(TILED_TEXTURE_MAP);
 		break;
 	};
 
@@ -161,8 +161,8 @@ void SegLineRendererClass::Init(const W3dEmitterLinePropertiesStruct & props)
 
 
 void SegLineRendererClass::Set_Texture(TextureClass *texture)
-{ 
-	REF_PTR_SET(Texture,texture); 
+{
+	REF_PTR_SET(Texture,texture);
 }
 
 TextureClass * SegLineRendererClass::Get_Texture(void) const
@@ -198,8 +198,8 @@ void SegLineRendererClass::Reset_Line(void)
 
 
 void SegLineRendererClass::Render
-(	
-	RenderInfoClass & rinfo,
+(
+	RenderInfoClass & /* rinfo */,
 	const Matrix3D & transform,
 	unsigned int num_points,
 	Vector3 * points,
@@ -210,10 +210,10 @@ void SegLineRendererClass::Render
 	DX8Wrapper::Get_Transform(D3DTS_VIEW,view);
 
 	Matrix4 identity(true);
-	DX8Wrapper::Set_Transform(D3DTS_WORLD,identity);	
-	DX8Wrapper::Set_Transform(D3DTS_VIEW,identity);	
+	DX8Wrapper::Set_Transform(D3DTS_WORLD,identity);
+	DX8Wrapper::Set_Transform(D3DTS_VIEW,identity);
 
-	/* 
+	/*
 	** Handle texture UV offset animation (done once for entire line).
 	*/
 	unsigned int delta = WW3D::Get_Sync_Time() - LastUsedSyncTime;
@@ -223,7 +223,7 @@ void SegLineRendererClass::Render
 	// ensure offsets are in [0, 1] range:
 	uv_offset.X = uv_offset.X - floor(uv_offset.X);
 	uv_offset.Y = uv_offset.Y - floor(uv_offset.Y);
-	
+
 	// Update state
 	CurrentUVOffset = uv_offset;
 	LastUsedSyncTime = WW3D::Get_Sync_Time();
@@ -323,7 +323,7 @@ void SegLineRendererClass::Render
 		subdivision_util(point_cnt, xformed_pts, base_tex_v, &sub_point_cnt, xformed_subdiv_pts, subdiv_tex_v);
 
 		// Start using subdivided points from now on
-		Vector3 *points = xformed_subdiv_pts;
+		Vector3 *local_points = xformed_subdiv_pts;
 		float *tex_v = subdiv_tex_v;
 		point_cnt = sub_point_cnt;
 
@@ -352,7 +352,7 @@ void SegLineRendererClass::Render
 		};
 
 		bool switch_edges = false;
-		
+
 		// We have dummy segments for "before the first point" and "after the last point" - in these
 		// segments the top and bottom edge are the same - they are a perpendicular plane defined by
 		// the endpoint vertices. This is so we can merge intersections properly for the first and
@@ -391,8 +391,8 @@ void SegLineRendererClass::Render
 
 		for (sidx = 1; sidx < point_cnt; sidx++) {	// #segments = #points - 1 (+ 2 dummy segments)
 
-			Vector3 &curr_point = points[sidx - 1];
-			Vector3 &next_point = points[sidx];
+			Vector3 &curr_point = local_points[sidx - 1];
+			Vector3 &next_point = local_points[sidx];
 
 			// We temporarily store the segment direction in the segment's StartPlane (since it is
 			// used to calculate the StartPlane later).
@@ -429,7 +429,7 @@ void SegLineRendererClass::Render
 			if (sidx > 1) {
 
 				Vector3 prev_plane;
-				Vector3::Cross_Product(points[sidx - 2], curr_point, &prev_plane);
+				Vector3::Cross_Product(local_points[sidx - 2], curr_point, &prev_plane);
 				prev_plane.Normalize();
 
 				Vector3 curr_plane;
@@ -488,13 +488,13 @@ void SegLineRendererClass::Render
 		// Initialize first point "intersection" record.
 		intersection[1][TOP_EDGE].PointCount = 1;
 		intersection[1][TOP_EDGE].NextSegmentID = 1;
-		intersection[1][TOP_EDGE].Point = points[0];
+		intersection[1][TOP_EDGE].Point = local_points[0];
 		intersection[1][TOP_EDGE].TexV = tex_v[0];
 		intersection[1][TOP_EDGE].Fold = true;
 		intersection[1][TOP_EDGE].Parallel = false;
 		intersection[1][BOTTOM_EDGE].PointCount = 1;
 		intersection[1][BOTTOM_EDGE].NextSegmentID = 1;
-		intersection[1][BOTTOM_EDGE].Point = points[0];
+		intersection[1][BOTTOM_EDGE].Point = local_points[0];
 		intersection[1][BOTTOM_EDGE].TexV = tex_v[0];
 		intersection[1][BOTTOM_EDGE].Fold = true;
 		intersection[1][BOTTOM_EDGE].Parallel = false;
@@ -505,7 +505,7 @@ void SegLineRendererClass::Render
 		Vector3 top;
 		Vector3 bottom;
 
-		Vector3 &first_point = points[0];
+		Vector3 &first_point = local_points[0];
 		Vector3 *first_plane = &(segment[1].EdgePlane[0]);
 		top = first_point - first_plane[TOP_EDGE] * Vector3::Dot_Product(first_plane[TOP_EDGE], first_point);
 		top.Normalize();
@@ -513,8 +513,8 @@ void SegLineRendererClass::Render
 		bottom = first_point - first_plane[BOTTOM_EDGE] * Vector3::Dot_Product(first_plane[BOTTOM_EDGE], first_point);
 		bottom.Normalize();
 		intersection[1][BOTTOM_EDGE].Direction = bottom;
-		
-		Vector3 segdir = points[1] - points[0];
+
+		Vector3 segdir = local_points[1] - local_points[0];
 		segdir.Normalize();	// Is this needed? Probably not - remove later when all works
 		Vector3 start_pl;
 		Vector3::Cross_Product(top, bottom, &start_pl);
@@ -534,13 +534,13 @@ void SegLineRendererClass::Render
 
 		intersection[last_isec][TOP_EDGE].PointCount = 1;
 		intersection[last_isec][TOP_EDGE].NextSegmentID = numsegs + 1; // Last dummy segment
-		intersection[last_isec][TOP_EDGE].Point = points[point_cnt - 1];
+		intersection[last_isec][TOP_EDGE].Point = local_points[point_cnt - 1];
 		intersection[last_isec][TOP_EDGE].TexV = tex_v[point_cnt - 1];
 		intersection[last_isec][TOP_EDGE].Fold = true;
 		intersection[last_isec][TOP_EDGE].Parallel = false;
 		intersection[last_isec][BOTTOM_EDGE].PointCount = 1;
 		intersection[last_isec][BOTTOM_EDGE].NextSegmentID = numsegs + 1;// Last dummy segment
-		intersection[last_isec][BOTTOM_EDGE].Point = points[point_cnt - 1];
+		intersection[last_isec][BOTTOM_EDGE].Point = local_points[point_cnt - 1];
 		intersection[last_isec][BOTTOM_EDGE].TexV = tex_v[point_cnt - 1];
 		intersection[last_isec][BOTTOM_EDGE].Fold = true;
 		intersection[last_isec][BOTTOM_EDGE].Parallel = false;
@@ -548,7 +548,7 @@ void SegLineRendererClass::Render
 		// Find closest point to last top/bottom segment edge plane, and convert to direction vector
 		// and dummy segment edge vector
 
-		Vector3 &last_point = points[point_cnt - 1];
+		Vector3 &last_point = local_points[point_cnt - 1];
 		Vector3 *last_plane = &(segment[numsegs].EdgePlane[0]);
 		top = last_point - last_plane[TOP_EDGE] * Vector3::Dot_Product(last_plane[TOP_EDGE], last_point);
 		top.Normalize();
@@ -556,8 +556,8 @@ void SegLineRendererClass::Render
 		bottom = last_point - last_plane[BOTTOM_EDGE] * Vector3::Dot_Product(last_plane[BOTTOM_EDGE], last_point);
 		bottom.Normalize();
 		intersection[last_isec][BOTTOM_EDGE].Direction = bottom;
-		
-		segdir = points[point_cnt - 1] - points[point_cnt - 2];
+
+		segdir = local_points[point_cnt - 1] - local_points[point_cnt - 2];
 		segdir.Normalize();	// Is this needed? Probably not - remove later when all works
 		Vector3::Cross_Product(top, bottom, &start_pl);
 		start_pl.Normalize();
@@ -584,7 +584,7 @@ void SegLineRendererClass::Render
 		for (iidx = 2; iidx < num_intersections[TOP_EDGE]; iidx++) {
 
 			// Relevant midpoint:
-			Vector3 &midpoint = points[iidx - 1];
+			Vector3 &midpoint = local_points[iidx - 1];
 			float mid_tex_v = tex_v[iidx - 1];
 
 			// Initialize misc. fields
@@ -699,7 +699,7 @@ void SegLineRendererClass::Render
 			// The merges will be repeated in multiple passes until none are performed. The reason
 			// for this is that one merge may cause the need for another merge elsewhere.
 			bool merged = true;
-			
+
 			while (merged) {
 
 				merged = false;
@@ -886,10 +886,10 @@ void SegLineRendererClass::Render
 		*/
 
 		// Configure vertex array and setup renderer.
-		unsigned int vnum = num_intersections[TOP_EDGE] + num_intersections[BOTTOM_EDGE];		
-		VertexFormatXYZDUV1 *vArray=new VertexFormatXYZDUV1[vnum];		
+		unsigned int vnum = num_intersections[TOP_EDGE] + num_intersections[BOTTOM_EDGE];
+		VertexFormatXYZDUV1 *vArray=new VertexFormatXYZDUV1[vnum];
 		TriIndex v_index_array[MAX_SEGLINE_POLY_BUFFER_SIZE];
-		
+
 		// Vertex and triangle indices
 		unsigned int vidx = 0;
 		unsigned int tidx = 0;
@@ -898,9 +898,9 @@ void SegLineRendererClass::Render
 
 		// "Prime the pump" with two vertices (pick nearest point on each direction line):
 		Vector3 &top_dir = intersection[1][TOP_EDGE].Direction;
-		top = top_dir * Vector3::Dot_Product(points[0], top_dir);
+		top = top_dir * Vector3::Dot_Product(local_points[0], top_dir);
 		Vector3 &bottom_dir = intersection[1][BOTTOM_EDGE].Direction;
-		bottom = bottom_dir * Vector3::Dot_Product(points[0], bottom_dir);
+		bottom = bottom_dir * Vector3::Dot_Product(local_points[0], bottom_dir);
 		vArray[vidx].x = top.X;
 		vArray[vidx].y = top.Y;
 		vArray[vidx].z = top.Z;
@@ -913,7 +913,7 @@ void SegLineRendererClass::Render
 		vArray[vidx].u1 = u_values[1] + uv_offset.X;
 		vArray[vidx].v1 = intersection[1][BOTTOM_EDGE].TexV + uv_offset.Y;
 		vidx++;
-		
+
 		unsigned int last_top_vidx = 0;
 		unsigned int last_bottom_vidx = 1;
 
@@ -956,9 +956,9 @@ void SegLineRendererClass::Render
 
 				// Generate two vertices for next point by picking nearest point on each direction line
 				Vector3 &top_dir = intersection[top_int_idx][TOP_EDGE].Direction;
-				top = top_dir * Vector3::Dot_Product(points[pidx], top_dir);
+				top = top_dir * Vector3::Dot_Product(local_points[pidx], top_dir);
 				Vector3 &bottom_dir = intersection[bottom_int_idx][BOTTOM_EDGE].Direction;
-				bottom = bottom_dir * Vector3::Dot_Product(points[pidx], bottom_dir);
+				bottom = bottom_dir * Vector3::Dot_Product(local_points[pidx], bottom_dir);
 
 				vArray[vidx].x = top.X;
 				vArray[vidx].y = top.Y;
@@ -992,13 +992,13 @@ void SegLineRendererClass::Render
 
 					// Generate bottom vertex by picking nearest point on bottom direction line
 					Vector3 &bottom_dir = intersection[bottom_int_idx][BOTTOM_EDGE].Direction;
-					bottom = bottom_dir * Vector3::Dot_Product(points[pidx], bottom_dir);
+					bottom = bottom_dir * Vector3::Dot_Product(local_points[pidx], bottom_dir);
 
 					vArray[vidx].x = bottom.X;
 					vArray[vidx].y = bottom.Y;
 					vArray[vidx].z = bottom.Z;
 					vArray[vidx].u1 = u_values[1] + uv_offset.X;
-					vArray[vidx].v1 = intersection[bottom_int_idx][BOTTOM_EDGE].TexV + uv_offset.Y;					
+					vArray[vidx].v1 = intersection[bottom_int_idx][BOTTOM_EDGE].TexV + uv_offset.Y;
 					vidx++;
 				} else {
 
@@ -1021,7 +1021,7 @@ void SegLineRendererClass::Render
 
 					// Generate top vertex by picking nearest point on top direction line
 					Vector3 &top_dir = intersection[top_int_idx][TOP_EDGE].Direction;
-					top = top_dir * Vector3::Dot_Product(points[pidx], top_dir);
+					top = top_dir * Vector3::Dot_Product(local_points[pidx], top_dir);
 					vArray[vidx].x = top.X;
 					vArray[vidx].y = top.Y;
 					vArray[vidx].z = top.Z;
@@ -1047,13 +1047,13 @@ void SegLineRendererClass::Render
 				assert(pidx == point_cnt - 1);
 				break;
 			}
-		}		
+		}
 
 		/*
 		** Set color, opacity, vertex flags:
 		*/
-		
-		// If color is not white or opacity not 100%, enable gradient in shader and in renderer - otherwise disable.		
+
+		// If color is not white or opacity not 100%, enable gradient in shader and in renderer - otherwise disable.
 		unsigned int rgba;
 		rgba=DX8Wrapper::Convert_Color(Color,Opacity);
 		bool rgba_all=(rgba==0xFFFFFFFF);
@@ -1064,10 +1064,10 @@ void SegLineRendererClass::Render
 		ShaderClass shader = Shader;
 		shader.Set_Cull_Mode(ShaderClass::CULL_MODE_DISABLE);
 
-		VertexMaterialClass *mat;		
+		VertexMaterialClass *mat;
 
 		if (!rgba_all) {
-			shader.Set_Primary_Gradient(ShaderClass::GRADIENT_MODULATE);			
+			shader.Set_Primary_Gradient(ShaderClass::GRADIENT_MODULATE);
 			for (vidx = 0; vidx < vnum; vidx++)	vArray[vidx].diffuse=rgba;
 			mat=VertexMaterialClass::Get_Preset(VertexMaterialClass::PRELIT_DIFFUSE);
 		} else {
@@ -1077,7 +1077,7 @@ void SegLineRendererClass::Render
 
 		// If Texture is non-NULL enable texturing in shader - otherwise disable.
 		if (Texture) {
-			shader.Set_Texturing(ShaderClass::TEXTURING_ENABLE);			
+			shader.Set_Texturing(ShaderClass::TEXTURING_ENABLE);
 		} else {
 			shader.Set_Texturing(ShaderClass::TEXTURING_DISABLE);
 		}
@@ -1085,15 +1085,15 @@ void SegLineRendererClass::Render
 
 		/*
 		** Render
-		*/		
-		
+		*/
+
 		DynamicVBAccessClass Verts((sorting?BUFFER_TYPE_DYNAMIC_SORTING:BUFFER_TYPE_DYNAMIC_DX8),dynamic_fvf_type,vnum);
 		// Copy in the data to the  VB
 		{
 			DynamicVBAccessClass::WriteLockClass Lock(&Verts);
 			unsigned int i;
-			unsigned char *vb=(unsigned char*)Lock.Get_Formatted_Vertex_Array();			
-			const FVFInfoClass& fvfinfo=Verts.FVF_Info();			
+			unsigned char *vb=(unsigned char*)Lock.Get_Formatted_Vertex_Array();
+			const FVFInfoClass& fvfinfo=Verts.FVF_Info();
 
 			for (i=0; i<vnum; i++)
 			{
@@ -1103,11 +1103,11 @@ void SegLineRendererClass::Render
 				((Vector3*)(vb+fvfinfo.Get_Location_Offset()))->Z=vArray[i].z;
 				*(unsigned int*)(vb+fvfinfo.Get_Diffuse_Offset())=vArray[i].diffuse;
 				((Vector2*)(vb+fvfinfo.Get_Tex_Offset(0)))->U=vArray[i].u1;
-				((Vector2*)(vb+fvfinfo.Get_Tex_Offset(0)))->V=vArray[i].v1;				
-				vb+=fvfinfo.Get_FVF_Size();				
-			}			
+				((Vector2*)(vb+fvfinfo.Get_Tex_Offset(0)))->V=vArray[i].v1;
+				vb+=fvfinfo.Get_FVF_Size();
+			}
 		} // copy
-		
+
 		DynamicIBAccessClass ib_access((sorting?BUFFER_TYPE_DYNAMIC_SORTING:BUFFER_TYPE_DYNAMIC_DX8),tidx*3);
 		{
 			unsigned int i;
@@ -1121,19 +1121,19 @@ void SegLineRendererClass::Render
 				*inds++=v_index_array[i].K;
 			}
 		}
-		
+
 		DX8Wrapper::Set_Index_Buffer(ib_access,0);
-		DX8Wrapper::Set_Vertex_Buffer(Verts);				
-		DX8Wrapper::Set_Material(mat);		
+		DX8Wrapper::Set_Vertex_Buffer(Verts);
+		DX8Wrapper::Set_Material(mat);
 		DX8Wrapper::Set_Texture(0,Texture);
 		DX8Wrapper::Set_Shader(shader);
 
-		if (sorting) {	
+		if (sorting) {
 			SortingRendererClass::Insert_Triangles(obj_sphere,0,tidx,0,vnum);
 		} else {
 			DX8Wrapper::Draw_Triangles(0,tidx,0,vnum);
 		}
-		
+
 		REF_PTR_RELEASE(mat);
 		delete [] vArray;
 

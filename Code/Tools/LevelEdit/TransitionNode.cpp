@@ -97,7 +97,7 @@ TransitionNodeClass::TransitionNodeClass (const TransitionNodeClass &src)
 //
 //////////////////////////////////////////////////////////////////////////////
 TransitionNodeClass::~TransitionNodeClass (void)
-{	
+{
 	Remove_From_Scene ();
 	MEMBER_RELEASE (m_PhysObj);
 
@@ -136,7 +136,7 @@ TransitionNodeClass::Initialize (void)
 
 		// Create the new physics object
 		m_PhysObj = new DecorationPhysClass;
-		
+
 		//
 		// Configure the physics object with information about
 		// its new render object and collision data.
@@ -144,7 +144,7 @@ TransitionNodeClass::Initialize (void)
 		m_PhysObj->Set_Model_By_Name ("TRANSBOX");
 		m_PhysObj->Set_Transform (Matrix3D(1));
 		m_PhysObj->Set_Collision_Group (EDITOR_COLLISION_GROUP);
-		m_PhysObj->Peek_Model ()->Set_User_Data ((PVOID)&m_HitTestInfo, FALSE);
+		m_PhysObj->Peek_Model ()->Set_User_Data ((PVOID)&m_HitTestInfo, false);
 		::Set_Model_Collision_Type (m_PhysObj->Peek_Model (), COLLISION_TYPE_6);
 		Set_Transform (m_Transform);
 
@@ -168,7 +168,7 @@ TransitionNodeClass::Initialize (void)
 ////////////////////////////////////////////////////////////////
 const PersistFactoryClass &
 TransitionNodeClass::Get_Factory (void) const
-{	
+{
 	return _TransitionNodePersistFactory;
 }
 
@@ -196,7 +196,7 @@ TransitionNodeClass::Pre_Export (void)
 {
 	//
 	//	Remove ourselves from the 'system' so we don't get accidentally
-	// saved during the export. 
+	// saved during the export.
 	//
 	Add_Ref ();
 	if (m_PhysObj != NULL && m_IsInScene) {

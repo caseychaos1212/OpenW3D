@@ -75,23 +75,23 @@ public:
 	//	Inherited
 	//
 	void		On_Init_Dialog (void) override;
-	void		On_Command (int ctrl_id, int message_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int message_id, unsigned int param) override;
 	void		On_SliderCtrl_Pos_Changed (SliderCtrlClass *slider_ctrl, int ctrl_id, int new_pos) override;
 	bool		On_Apply (void) override;
-	
+
 protected:
-	
+
 	///////////////////////////////////////////////////////////////////
 	//	Protected methods
-	///////////////////////////////////////////////////////////////////	
+	///////////////////////////////////////////////////////////////////
 	void		Build_Expert_Window_List (void);
 	void		Display_Expert_Settings (bool onoff);
 	void		Setup_Controls (void);
 	void		Load_Values (void);
 	void		Determine_Performance_Setting (void);
 	void		Update_Expert_Controls (int level);
-	void		Get_Settings (DynamicVectorClass<int> &settings);	
-	
+	void		Get_Settings (DynamicVectorClass<int> &settings);
+
 	///////////////////////////////////////////////////////////////////
 	//	Protected member data
 	///////////////////////////////////////////////////////////////////

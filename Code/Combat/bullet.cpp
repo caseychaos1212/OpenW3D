@@ -397,9 +397,9 @@ CollisionReactionType BulletDataClass::Bullet_Collision_Occurred( const Collisio
 			// Check for damage to a DamageableStaticPhys object
 			// For now I'm using the persist factory chunk-ID for RTTI... If a better solution
 			// turns up we should change this.
-			if (	event.OtherObj->Get_Factory().Chunk_ID() == PHYSICS_CHUNKID_DAMAGEABLESTATICPHYS 
-//					&& CombatManager::I_Am_Server() 
-				) 
+			if (	event.OtherObj->Get_Factory().Chunk_ID() == PHYSICS_CHUNKID_DAMAGEABLESTATICPHYS
+//					&& CombatManager::I_Am_Server()
+				)
 			{
 				DamageableStaticPhysClass * damphys = (DamageableStaticPhysClass *)event.OtherObj;
 				OffenseObjectClass offense( AmmoDefinition->Damage, (int)AmmoDefinition->Warhead, Get_Owner() );
@@ -484,7 +484,7 @@ private:
 	GameObjReference				TargetObject;
 	float								TrackingErrorTimer;
 	Vector3							TrackingError;
-	long								ModelNameCRC;
+	int								ModelNameCRC;
 
 	BulletClass( void );
 
@@ -553,7 +553,7 @@ void BulletClass::Init( const BulletDataClass & data, float progress_time, const
 
 		// If no name is given, lets create the NULL render obj
 		if ( model == NULL ) {
-			Debug_Say(( "Bullet Not Found \"%s\" \n", BulletData.AmmoDefinition->ModelName ));
+			Debug_Say(( "Bullet Not Found \"%s\" \n", BulletData.AmmoDefinition->ModelName.Peek_Buffer() ));
 			model = WW3DAssetManager::Get_Instance ()->Create_Render_Obj( "NULL" );
 
 		}
@@ -562,7 +562,7 @@ void BulletClass::Init( const BulletDataClass & data, float progress_time, const
 
 		if (model) {
 			if ( BulletData.AmmoDefinition->ModelName.Compare_No_Case( model->Get_Name() ) != 0 ) {
-				Debug_Say(( "Possible bullet twiddler!!  %s %s\n", BulletData.AmmoDefinition->ModelName, model->Get_Name() ));
+				Debug_Say(( "Possible bullet twiddler!!  %s %s\n", BulletData.AmmoDefinition->ModelName.Peek_Buffer(), model->Get_Name() ));
 			}
 //			ModelNameCRC = CRC_Stringi( model->Get_Name() );
 			ModelNameCRC = CRC_Stringi( BulletData.AmmoDefinition->ModelName );
@@ -748,7 +748,7 @@ CollisionReactionType BulletClass::Collision_Occurred( const CollisionEventClass
 	return result;
 }
 
-ExpirationReactionType	BulletClass::Object_Expired(PhysClass * observed_obj)
+ExpirationReactionType	BulletClass::Object_Expired(PhysClass * /* observed_obj */)
 {
 	// Copy the data from the Projectile
 	Projectile->Get_Velocity( &BulletData.Velocity );
@@ -844,7 +844,7 @@ void	BulletClass::Think( void )
 /*
 ** Instant Bullet Code
 */
-void	Simulate_Instant_Bullet( BulletDataClass & data, float progress_time )
+void	Simulate_Instant_Bullet( BulletDataClass & data, float /* progress_time */ )
 {
 	WWPROFILE("Simulate_Instant_Bullet");
 //	WWASSERT(data.Position.Is_Valid());
@@ -998,7 +998,7 @@ void	BulletManager::Create_Bullet( const AmmoDefinitionClass * def, const Vector
 
 	BulletDataClass data( def, owner, position, velocity );
 
-#if BULLET_SPEED_CHEAT 
+#if BULLET_SPEED_CHEAT
 	if ( (float)def->Velocity >= _INSTANT_BULLET_THRESHHOLD/3 ) {
 #else
 	if ( (float)def->Velocity >= _INSTANT_BULLET_THRESHHOLD ) {
@@ -1011,7 +1011,7 @@ void	BulletManager::Create_Bullet( const AmmoDefinitionClass * def, const Vector
 	BulletClass * bullet = NULL;
 
 	// Find a bullet
-	long crc = CRC_Stringi( def->ModelName );
+	int crc = CRC_Stringi( def->ModelName );
 	MultiListIterator<BulletClass> it( &DeadBulletList );;
 	while ( !it.Is_Done() && bullet == NULL ) {
 		BulletClass * test_bullet = it.Peek_Obj();

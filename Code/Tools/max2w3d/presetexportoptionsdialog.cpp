@@ -124,7 +124,7 @@ PresetExportOptionsDialogClass::Real_Message_Proc
 	//
 	//	Allow the instance to handle the call
 	//
-	BOOL retval = FALSE;
+	BOOL retval = false;
 	if (dialog_obj != NULL) {
 		retval = dialog_obj->Message_Proc (message, wparam, lparam);
 	}
@@ -170,7 +170,7 @@ PresetExportOptionsDialogClass::Settings_Pane_Message_Proc
 	//
 	//	Allow the instance to handle the call
 	//
-	BOOL retval = FALSE;
+	BOOL retval = false;
 	if (dialog_obj != NULL) {
 		retval = dialog_obj->Pane_Message_Proc (message, wparam, lparam);
 	}
@@ -199,14 +199,14 @@ PresetExportOptionsDialogClass::Pane_Message_Proc
 	LPARAM	lparam
 )
 {
-	BOOL retval = FALSE;
+	BOOL retval = false;
 
 	switch (message)
 	{
 		case WM_CUSTEDIT_ENTER:
-			
+
 			switch (wparam)
-			{				
+			{
 				case IDC_RANGE_LOW_EDIT:
 				{
 					//
@@ -246,17 +246,17 @@ PresetExportOptionsDialogClass::Pane_Message_Proc
 
 						Update_Controls ();
 					}
-				}	
+				}
 				break;
 			}
-			
+
 			break;
 
 		case CC_SPINNER_BUTTONUP:
 		{
 			ISpinnerControl *spin_ctrl = (ISpinnerControl *)lparam;
 			if (spin_ctrl != NULL) {
-			
+
 				switch (LOWORD (wparam))
 				{
 					//
@@ -289,7 +289,7 @@ PresetExportOptionsDialogClass::Pane_Message_Proc
 
 						Update_Controls ();
 						break;
-				}				
+				}
 			}
 		}
 		break;
@@ -302,29 +302,29 @@ PresetExportOptionsDialogClass::Pane_Message_Proc
 			switch (LOWORD (wparam))
 			{
 				case IDC_EXPORT_MESH_SMOOTH_CHECK:
-					Options->SmoothBetweenMeshes = (SendMessage (control_wnd, BM_GETCHECK, 0, 0L) == 1); 
+					Options->SmoothBetweenMeshes = (SendMessage (control_wnd, BM_GETCHECK, 0, 0L) == 1);
 					break;
 
 				case IDC_EXPORT_MESH_AABTREES:
-					Options->DisableExportAABTrees = (SendMessage (control_wnd, BM_GETCHECK, 0, 0L) != 1); 
+					Options->DisableExportAABTrees = (SendMessage (control_wnd, BM_GETCHECK, 0, 0L) != 1);
 					break;
 
 #if 0
 				case IDC_EXPORT_MESH_OPTIMIZE:
-					Options->EnableOptimizeMeshData = (SendMessage (control_wnd, BM_GETCHECK, 0, 0L) == 1); 
+					Options->EnableOptimizeMeshData = (SendMessage (control_wnd, BM_GETCHECK, 0, 0L) == 1);
 					break;
 #endif
 
 				case IDC_USE_SKELETON_CHECK:
-					Options->LoadHierarchy = (SendMessage (control_wnd, BM_GETCHECK, 0, 0L) == 1); 
+					Options->LoadHierarchy = (SendMessage (control_wnd, BM_GETCHECK, 0, 0L) == 1);
 					break;
 
 				case IDC_COMPRESS_ANIMATION_CHECK:
-					Options->CompressAnimation = (SendMessage (control_wnd, BM_GETCHECK, 0, 0L) == 1); 
+					Options->CompressAnimation = (SendMessage (control_wnd, BM_GETCHECK, 0, 0L) == 1);
 					break;
 
 				case IDC_WHT_BROWSE_BUTTON:
-				{					
+				{
 					OPENFILENAME ofn		= { sizeof (OPENFILENAME), 0 };
 					ofn.lpstrFilter		= BROWSE_FILTER;
 					ofn.nMaxFile			= _MAX_PATH;
@@ -342,7 +342,7 @@ PresetExportOptionsDialogClass::Pane_Message_Proc
 						//
 						Create_Relative_Path (Options->RelativeHierarchyFilename,
 														W3dExportClass::CurrentExportPath,
-														ofn.lpstrFile);						
+														ofn.lpstrFile);
 					}
 				}
 				break;
@@ -387,7 +387,7 @@ PresetExportOptionsDialogClass::Message_Proc
 	LPARAM	lparam
 )
 {
-	BOOL retval = FALSE;
+	BOOL retval = false;
 
 	switch (message)
 	{
@@ -414,7 +414,7 @@ PresetExportOptionsDialogClass::Message_Proc
 			Initialize_Controls ();
 			Update_Controls ();
 			Determine_Preset_Type ();
-			retval = TRUE;
+			retval = true;
 		}
 		break;
 
@@ -435,7 +435,7 @@ PresetExportOptionsDialogClass::Message_Proc
 BOOL
 PresetExportOptionsDialogClass::On_Command (WPARAM wparam, LPARAM lparam)
 {
-	BOOL retval = FALSE;
+	BOOL retval = false;
 
 	switch (LOWORD (wparam))
 	{
@@ -487,7 +487,7 @@ void
 PresetExportOptionsDialogClass::Show_Settings_Pane (int pane_id)
 {
 	if (pane_id != CurrentPane) {
-		
+
 		//
 		//	Show the new pane and hide the old pane
 		//
@@ -528,7 +528,7 @@ PresetExportOptionsDialogClass::Create_Settings_Panes (void)
 	PaneWnds[PANE_MESH] = ::CreateDialogParam (AppInstance, MAKEINTRESOURCE (IDD_EXPORT_PANE_MESH),
 																Wnd, Settings_Pane_Message_Proc, (LPARAM)this);
 
-	
+
 	//
 	//	Get the position and size of the group box the settings panes will be
 	// displayed inside
@@ -548,7 +548,7 @@ PresetExportOptionsDialogClass::Create_Settings_Panes (void)
 
 		//
 		//	Get the size of this pane
-		//	
+		//
 		RECT rect = { 0 };
 		::GetWindowRect (pane_wnd, &rect);
 
@@ -580,7 +580,7 @@ PresetExportOptionsDialogClass::Destroy_Settings_Panes (void)
 		::DestroyWindow (PaneWnds[index]);
 		PaneWnds[index] = NULL;
 	}
-		
+
 	return ;
 }
 
@@ -604,33 +604,33 @@ PresetExportOptionsDialogClass::Determine_Preset_Type (void)
 		//	Select the terrain UI
 		//
 		Show_Settings_Pane (PANE_TERRAIN);
-		SendDlgItemMessage (Wnd, IDC_TERRAIN_RADIO, BM_SETCHECK, (WPARAM)TRUE, 0L);
+		SendDlgItemMessage (Wnd, IDC_TERRAIN_RADIO, BM_SETCHECK, (WPARAM)true, 0L);
 
 	} else if (Options->ExportGeometry == false) {
 
 		if (Options->ExportAnimation == false) {
-			
+
 			//
 			//	Select the skeleton UI
 			//
 			Show_Settings_Pane (PANE_SKELETON);
-			SendDlgItemMessage (Wnd, IDC_SKELETON_RADIO, BM_SETCHECK, (WPARAM)TRUE, 0L);
+			SendDlgItemMessage (Wnd, IDC_SKELETON_RADIO, BM_SETCHECK, (WPARAM)true, 0L);
 		} else {
 
 			//
 			//	Select the anim UI
 			//
 			Show_Settings_Pane (PANE_ANIM);
-			SendDlgItemMessage (Wnd, IDC_ANIM_RADIO, BM_SETCHECK, (WPARAM)TRUE, 0L);
+			SendDlgItemMessage (Wnd, IDC_ANIM_RADIO, BM_SETCHECK, (WPARAM)true, 0L);
 		}
-	
+
 	} else if (Options->ExportHierarchy == false && Options->LoadHierarchy == false) {
 
 		//
 		//	Select the mesh UI
 		//
 		Show_Settings_Pane (PANE_MESH);
-		SendDlgItemMessage (Wnd, IDC_MESH_RADIO, BM_SETCHECK, (WPARAM)TRUE, 0L);
+		SendDlgItemMessage (Wnd, IDC_MESH_RADIO, BM_SETCHECK, (WPARAM)true, 0L);
 
 	} else if (Options->ExportAnimation == false) {
 
@@ -638,7 +638,7 @@ PresetExportOptionsDialogClass::Determine_Preset_Type (void)
 		//	Select the HLOD UI
 		//
 		Show_Settings_Pane (PANE_HLOD);
-		SendDlgItemMessage (Wnd, IDC_HLOD_RADIO, BM_SETCHECK, (WPARAM)TRUE, 0L);
+		SendDlgItemMessage (Wnd, IDC_HLOD_RADIO, BM_SETCHECK, (WPARAM)true, 0L);
 
 	} else {
 
@@ -646,7 +646,7 @@ PresetExportOptionsDialogClass::Determine_Preset_Type (void)
 		//	Select the HLOD anim UI
 		//
 		Show_Settings_Pane (PANE_ANIM_HLOD);
-		SendDlgItemMessage (Wnd, IDC_ANIM_HLOD_RADIO, BM_SETCHECK, (WPARAM)TRUE, 0L);	
+		SendDlgItemMessage (Wnd, IDC_ANIM_HLOD_RADIO, BM_SETCHECK, (WPARAM)true, 0L);
 	}
 
 	return ;
@@ -673,7 +673,7 @@ PresetExportOptionsDialogClass::Initialize_Controls (void)
 	int startframe		= MaxInterface->GetAnimRange ().Start () / ticksperframe;
 	int endframe		= MaxInterface->GetAnimRange ().End () / ticksperframe;
 
-	// 
+	//
 	// Clamp the real options the same way the displayed values are clamped
 	//
 	if (startframe > Options->StartFrame) {
@@ -754,7 +754,7 @@ PresetExportOptionsDialogClass::Update_Controls (void)
 			//
 			// Honor the relative path if it is present
 			//
-			if (Options->RelativeHierarchyFilename[0] != 0) {			
+			if (Options->RelativeHierarchyFilename[0] != 0) {
 				SetWindowText (skeleten_browse_btn, Options->RelativeHierarchyFilename);
 				::Create_Full_Path (Options->HierarchyFilename,
 											W3dExportClass::CurrentExportPath,
@@ -791,8 +791,8 @@ PresetExportOptionsDialogClass::Update_Controls (void)
 			//
 			//	Update the spin controls
 			//
-			low_spin->SetValue (Options->StartFrame, FALSE);
-			high_spin->SetValue (Options->EndFrame, FALSE);
+			low_spin->SetValue (Options->StartFrame, false);
+			high_spin->SetValue (Options->EndFrame, false);
 		}
 	}
 
@@ -812,7 +812,7 @@ PresetExportOptionsDialogClass::Save_Settings (void)
 	//	Force settings that certain preset types need
 	//
 	if (::IsDlgButtonChecked (Wnd, IDC_TERRAIN_RADIO)) {
-		
+
 		//
 		//	Force some settings for the "Renegade Terrain" preset
 		//
@@ -837,7 +837,7 @@ PresetExportOptionsDialogClass::Save_Settings (void)
 		Options->ReduceAnimation			= false;
 		Options->EnableTerrainMode			= false;
 		Options->EnableOptimizeMeshData	= false;
-		Options->DisableExportAABTrees	= true;		
+		Options->DisableExportAABTrees	= true;
 		Options->SmoothBetweenMeshes		= false;
 		Options->EnableTerrainMode			= false;
 	} else if (::IsDlgButtonChecked (Wnd, IDC_MESH_RADIO)) {
@@ -885,7 +885,7 @@ PresetExportOptionsDialogClass::Save_Settings (void)
 		Options->ExportGeometry				= false;
 		Options->EnableTerrainMode			= false;
 		Options->EnableOptimizeMeshData	= false;
-		Options->DisableExportAABTrees	= true;		
+		Options->DisableExportAABTrees	= true;
 		Options->SmoothBetweenMeshes		= false;
 	}
 
@@ -900,7 +900,7 @@ PresetExportOptionsDialogClass::Save_Settings (void)
 	if (::memcmp (Options, &OrigOptions, sizeof (OrigOptions)) != 0) {
 		SetSaveRequiredFlag (true);
 	}
-		
+
 	return ;
 }
 

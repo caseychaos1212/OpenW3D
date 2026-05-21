@@ -46,10 +46,10 @@
 //	ChildDialogClass
 //
 ////////////////////////////////////////////////////////////////
-ChildDialogClass::ChildDialogClass (int res_id)	:
+ChildDialogClass::ChildDialogClass (const DialogResource *dialog_resource)	:
 	ParentDialog (NULL),
-	DialogBaseClass (res_id)
-{	
+	DialogBaseClass (dialog_resource)
+{
 	return ;
 }
 
@@ -60,7 +60,7 @@ ChildDialogClass::ChildDialogClass (int res_id)	:
 //
 ////////////////////////////////////////////////////////////////
 ChildDialogClass::~ChildDialogClass (void)
-{	
+{
 	return ;
 }
 

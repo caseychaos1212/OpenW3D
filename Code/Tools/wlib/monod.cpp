@@ -21,7 +21,7 @@
 MonoD::MonoD(void)
 {
 #ifdef _WIN32
-  unsigned long retval;
+  unsigned int retval;
   handle = CreateFile("\\\\.\\MONO", GENERIC_READ|GENERIC_WRITE, 0, NULL,
                         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -44,14 +44,14 @@ MonoD::~MonoD()
 int MonoD::print(const char *str, int len)
 {
   #ifdef _WIN32
-    unsigned long retval;
+    unsigned int retval;
     WriteFile(handle, str, len, &retval, NULL);
     ////DeviceIoControl(handle, (DWORD)IOCTL_MONO_PRINT_RAW, (void *)str, len, NULL, 0,
     ////                 &retval,0);
     return(len);
   #else
     for (int i=0; i<len; i++)
-      fprintf(stderr,"%c",str[i]); 
+      fprintf(stderr,"%c",str[i]);
     return(len);
   #endif
 }

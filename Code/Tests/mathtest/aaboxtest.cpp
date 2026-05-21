@@ -43,22 +43,23 @@
 #include "wwmath.h"
 #include "colmath.h"
 #include "p_timer.h"
+#include <cinttypes>
 #include <stdio.h>
 
 
-class AABoxTriTestClass 
+class AABoxTriTestClass
 {
 public:
 	AABoxClass		Box;
 	Vector3			BoxMove;
-	Vector3			V0;		
+	Vector3			V0;
 	Vector3			V1;
 	Vector3			V2;
 	Vector3			N;
 	TriClass			Tri;
 	float				Fraction;
 	bool				StartBad;
-	
+
 	AABoxTriTestClass
 	(
 		const Vector3 c,					// center of box
@@ -68,7 +69,7 @@ public:
 		const Vector3 v1,					// v1 of triangle
 		const Vector3 v2,					// v2 of triangle
 		float frac,							// expected fraction
-		bool sol								// expected start solid 
+		bool sol								// expected start solid
 	)
 	{
 		BoxMove = m;
@@ -109,7 +110,7 @@ AABoxTriTestClass Test0
 
 AABoxTriTestClass Test1
 (
-	Vector3(3,0,0),			
+	Vector3(3,0,0),
 	Vector3(1,2,1),
 	Vector3(0,-2,0),
 	Vector3(1,-3,0),
@@ -139,7 +140,7 @@ AABoxTriTestClass Test3
 	Vector3(-4,-4,-1),		// into a polygon in y-z plane
 	Vector3(-2,-4,5),
 	Vector3(0,-4,1),
-	0.0f,						
+	0.0f,
 	false
 );
 
@@ -182,28 +183,28 @@ AABoxTriTestClass Test6
 AABoxTriTestClass Test7
 (
 	Vector3(0,0,0),			// This is a case where the box starts out intersecting
-	Vector3(5,5,5),	
+	Vector3(5,5,5),
 	Vector3(4,4,0),
 	Vector3(1,4,-1),
 	Vector3(2,4,5),
 	Vector3(5,4,0),
-	0.0f,					
+	0.0f,
 	true
 );
 
 AABoxTriTestClass Test8
 (
-	Vector3(-2.5,2,0),	
+	Vector3(-2.5,2,0),
 	Vector3(1.5,1,1),
 	Vector3(3,0,0),
 	Vector3(1,2,0),
 	Vector3(3,4,5),
 	Vector3(4,5,-1),
-	0.66666667f,					
+	0.66666667f,
 	true
 );
 
-AABoxTriTestClass * AABoxTriTestCases[] = 
+AABoxTriTestClass * AABoxTriTestCases[] =
 {
 	&Test0,
 	&Test1,
@@ -227,7 +228,7 @@ void Test_AABoxes(void)
 	*/
 	CastResultStruct result;
 	int numtests = sizeof(AABoxTriTestCases)/sizeof(AABoxTriTestClass *);
-	unsigned cycles;
+	uint64_t cycles;
 
 	// prime the cache
 	AABoxTriTestClass * testcase = AABoxTriTestCases[4];
@@ -245,7 +246,7 @@ void Test_AABoxes(void)
 	int num_repetitions = 50;
 	for (int repeat = 0; repeat < num_repetitions; repeat++) {
 		for (i=0; i<numtests; i++) {
-			
+
 			testcase = AABoxTriTestCases[i];
 
 			result.Fraction = 1.0;
@@ -255,10 +256,10 @@ void Test_AABoxes(void)
 			cycles = Get_CPU_Clock();
 			CollisionMath::Collide(testcase->Box,testcase->BoxMove,testcase->Tri,&result);
 			cycles = Get_CPU_Clock() - cycles;
-		
-			printf("AABox -> Tri cycles: %d\n",cycles);
+
+			printf("AABox -> Tri cycles: %" PRIu64 "\n",cycles);
 			cycle_counts[i] += cycles;
-			
+
 			if ((WWMath::Fabs(testcase->Fraction - result.Fraction) > WWMATH_EPSILON) ||
 				 (testcase->StartBad != result.StartBad))
 			{
@@ -287,7 +288,7 @@ void Test_AABoxes(void)
 	v0.Set(0,1,0);
 	v1.Set(-1,-1,0);
 	v2.Set(1,1,0);
-	
+
 	testtri.V[0] = &v0;
 	testtri.V[1] = &v1;
 	testtri.V[2] = &v2;

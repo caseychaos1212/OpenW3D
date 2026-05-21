@@ -984,7 +984,7 @@ void VehicleGameObj::Import_Frequent(BitStreamClass & packet)
 				packet.Get(vel.Y, BITPACK_VEHICLE_VELOCITY);
 				packet.Get(vel.Z, BITPACK_VEHICLE_VELOCITY);
 #endif
-				
+
 				packet.Get(ang_vel.X, BITPACK_VEHICLE_ANGULAR_VELOCITY);
 				packet.Get(ang_vel.Y, BITPACK_VEHICLE_ANGULAR_VELOCITY);
 				packet.Get(ang_vel.Z, BITPACK_VEHICLE_ANGULAR_VELOCITY);
@@ -2253,12 +2253,12 @@ void	VehicleGameObj::Update_Damage_Meshes( void )
 				show_damage25 = true;
 			}
 
-			static const char *	DAMAGE25_BONE_NAME		= "DAMAGE25";
-			static const char *	DAMAGE50_BONE_NAME		= "DAMAGE50";
-			static const char *	DAMAGE75_BONE_NAME		= "DAMAGE75";
-			static int				DAMAGE25_BONE_NAME_LEN	= ::strlen( DAMAGE25_BONE_NAME );
-			static int				DAMAGE50_BONE_NAME_LEN	= ::strlen( DAMAGE50_BONE_NAME );
-			static int				DAMAGE75_BONE_NAME_LEN	= ::strlen( DAMAGE75_BONE_NAME );
+			static const char	DAMAGE25_BONE_NAME[]	= "DAMAGE25";
+			static const char	DAMAGE50_BONE_NAME[]	= "DAMAGE50";
+			static const char	DAMAGE75_BONE_NAME[]	= "DAMAGE75";
+			static constexpr size_t	DAMAGE25_BONE_NAME_LEN	= sizeof( DAMAGE25_BONE_NAME ) - 1;
+			static constexpr size_t	DAMAGE50_BONE_NAME_LEN	= sizeof( DAMAGE50_BONE_NAME ) - 1;
+			static constexpr size_t	DAMAGE75_BONE_NAME_LEN	= sizeof( DAMAGE75_BONE_NAME ) - 1;
 
 			//
 			//	Loop over all the bones in the model, showing and hiding any that represent
@@ -2326,7 +2326,7 @@ Matrix3D VehicleGameObj::Get_Look_Transform(void)
 	return SmartGameObj::Get_Look_Transform();
 }
 
-const wchar_t *	VehicleGameObj::Get_Vehicle_Name( void )
+const unichar_t *	VehicleGameObj::Get_Vehicle_Name( void )
 {
 	if ( Get_Definition().VehicleNameID != 0 ) {
 		return TranslateDBClass::Get_String( Get_Definition().VehicleNameID );

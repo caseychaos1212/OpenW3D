@@ -36,7 +36,7 @@
 
 #include "dlginternetoptions.h"
 #include "string_ids.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "shortcutbarctrl.h"
 #include "translatedb.h"
 
@@ -94,7 +94,7 @@ InternetOptionsMenuClass::On_Init_Dialog (void)
 		bar->Add_Button (IDC_MP_SHORTCUT_ACCOUNT, entry_text);
 
 		entry_text = TRANSLATE (IDS_MP_SHORTCUT_NET_STATUS);
-		bar->Add_Button (IDC_MP_SHORTCUT_NET_STATUS, entry_text);		
+		bar->Add_Button (IDC_MP_SHORTCUT_NET_STATUS, entry_text);
 	}
 
 	MenuDialogClass::On_Init_Dialog ();
@@ -108,7 +108,7 @@ InternetOptionsMenuClass::On_Init_Dialog (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-InternetOptionsMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+InternetOptionsMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	MenuDialogClass::On_Command (ctrl_id, message_id, param);
 	return ;

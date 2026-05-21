@@ -38,10 +38,12 @@
 #include <WWOnline/WOLUser.h>
 #include <WWOnline/WOLChannel.h>
 #include <WWOnline/PingProfile.h>
+#include <algorithm>
 #include <wwlib/realcrc.h>
 #include "modpackagemgr.h"
 #include <cstdio>
 #include <algorithm>
+#include <cinttypes>
 
 using namespace WWOnline;
 
@@ -164,10 +166,10 @@ void WOLGameInfo::Reset(void)
 	mMinPlayers = 0;
 	mMaxPlayers = 0;
 	mNumPlayers = 0;
-		
+
 	mClanID1 = 0;
 	mClanID2 = 0;
-		
+
 	mIsMod = false;
 	mIsLaddered = false;
 	mIsPassworded = false;
@@ -181,7 +183,7 @@ void WOLGameInfo::Reset(void)
 	mIsRepairBuildings = false;
 	mIsDriverGunner = false;
 	mSpawnWeapons = false;
-		
+
 	mPingTime = -1;
 	}
 
@@ -214,11 +216,11 @@ void WOLGameInfo::ImportFromGame(const cGameData& theGame)
 
 	strncpy(mMapName, theGame.Get_Map_Name(), MAX_TEXT_LENGTH);
 	mMapName[MAX_TEXT_LENGTH - 1] = 0;
-	
+
 	strncpy(mModName, theGame.Get_Mod_Name(), MAX_TEXT_LENGTH);
 	mModName[MAX_TEXT_LENGTH - 1] = 0;
 
-	wcstombs(mTitle, theGame.Get_Game_Title(), MAX_TEXT_LENGTH);
+	u_wstomb(mTitle, theGame.Get_Game_Title(), MAX_TEXT_LENGTH);
 	mTitle[MAX_TEXT_LENGTH - 1] = 0;
 
 	mMinPlayers = theGame.Get_Min_Players();
@@ -228,8 +230,8 @@ void WOLGameInfo::ImportFromGame(const cGameData& theGame)
 	mClanID1 = theGame.Get_Clan(0);
 	mClanID2 = theGame.Get_Clan(1);
 
-	const wchar_t* password = theGame.Get_Password();
-	mIsPassworded = ((password != NULL) && (wcslen(password) > 0));
+	const unichar_t* password = theGame.Get_Password();
+	mIsPassworded = ((password != NULL) && (u_strlen(password) > 0));
 	mIsLaddered   = theGame.IsLaddered.Get();
 	mIsQuickmatch = theGame.Is_QuickMatch_Server();
 	mIsDedicated  = theGame.IsDedicated.Get();
@@ -276,13 +278,13 @@ void WOLGameInfo::ImportFromChannel(const RefPtr<ChannelData>& channel)
 		mIsDataValid = false;
 		return;
 		}
-					
+
 	//ST - Test code
-	//if (channel->GetName() != WideStringClass(L"ladtest07")) {
+	//if (channel->GetName() != WideStringClass(U_CHAR("ladtest07"))) {
 	//	mIsDataValid = false;
 	//	return;
 	//}
-		
+
 
 	const char* exInfo = channel->GetExtraInfo();
 
@@ -297,16 +299,16 @@ void WOLGameInfo::ImportFromChannel(const RefPtr<ChannelData>& channel)
 	mIsDataValid = true;
 
 	// Extract ExInfo settings
-	unsigned long fileCRC = 0;
-	unsigned long version = 0;
-	unsigned long clanID1 = 0;
-	unsigned long clanID2 = 0;
+	uint32_t fileCRC = 0;
+	uint32_t version = 0;
+	uint32_t clanID1 = 0;
+	uint32_t clanID2 = 0;
 	unsigned char gameType = 0;
 	unsigned char gameFlags1 = 0;
 	unsigned char gameFlags2 = 0;
 	unsigned char modMapIndex = 0;
 
-	int count = sscanf(exInfo, "%08lX%08lX%08lX%08lX%c%c%c%c", &version, &fileCRC,
+	int count = sscanf(exInfo, "%08" SCNx32 "%08" SCNx32 "%08" SCNx32 "%08" SCNx32 "%c%c%c%c", &version, &fileCRC,
 			&clanID1, &clanID2, &gameType, &gameFlags1, &gameFlags2, &modMapIndex);
 
 	// There should be 8 parameters in the exinfo
@@ -345,7 +347,7 @@ void WOLGameInfo::ImportFromChannel(const RefPtr<ChannelData>& channel)
 	mSpawnWeapons      = ((gameFlags2 & 0x04) == 0x04);
 	mIsRepairBuildings = ((gameFlags2 & 0x02) == 0x02);
 	mIsDriverGunner    = ((gameFlags2 & 0x01) == 0x01);
-	
+
 	// Find the mod and map names from their CRC
 	StringClass mapName(0, true);
 	mapName = "<Unknown>";
@@ -494,7 +496,7 @@ void WOLGameInfo::ExportToChannel(const RefPtr<ChannelData>& channel)
 
 		// The file CRC is either the map name or the mod name depending on if
 		// the mod flag is set.
-		unsigned long fileCRC = 0;
+		unsigned int fileCRC = 0;
 		unsigned char modMapIndex = 0;
 
 		if (mIsMod)
@@ -521,28 +523,28 @@ void WOLGameInfo::ExportToChannel(const RefPtr<ChannelData>& channel)
 		//-------------------------------------------------------------------------
 		// Encode topic
 		//-------------------------------------------------------------------------
-		unsigned int titleLength = std::min<unsigned int>(strlen(mTitle), 32);
-		titleLength += 0x20;
+		const size_t titleLength = std::min(::strlen(mTitle), static_cast<size_t>(32));
+		const unsigned int encodedTitleLength = static_cast<unsigned int>(titleLength + 0x20);
 
 		// WARNING: The channels topic field has a maximum size of 80 bytes.
 		// Ping profile and quickmatch settings are encoded in the topic in
 		// addition to the the game title. The combined maximum of ALL these
 		// entries MUST NEVER exceed 80 bytes.
 		char topic[81];
-		sprintf(topic, "%c%.32s", titleLength, mTitle);
-		
+		sprintf(topic, "%c%.32s", encodedTitleLength, mTitle);
+
 		//
 		// Only using 61 max right now. Room for a map name maybe? ST - 10/31/2002 2:55PM
 		//
-		unsigned int mapLength = std::min<unsigned int>(strlen(mMapName), 16);
-		mapLength += 0x20;
+		const size_t mapLength = std::min(::strlen(mMapName), static_cast<size_t>(16));
+		const unsigned int encodedMapLength = static_cast<unsigned int>(mapLength + 0x20);
 
 		// WARNING: The channels topic field has a maximum size of 80 bytes.
 		// Ping profile and quickmatch settings are encoded in the topic in
 		// addition to the the game title. The combined maximum of ALL these
 		// entries MUST NEVER exceed 80 bytes.
 		char mapinfo[81];
-		sprintf(mapinfo, "%c%.16s", mapLength, mMapName);
+		sprintf(mapinfo, "%c%.16s", encodedMapLength, mMapName);
 		strcat(topic, mapinfo);
 
 		// Add our ping profile
@@ -570,7 +572,7 @@ void WOLGameInfo::ExportToChannel(const RefPtr<ChannelData>& channel)
 bool WOLGameInfo::IsValidGameChannel(const RefPtr<ChannelData>& channel)
 	{
 	WOLGameInfo gameInfo(channel);
-	return (gameInfo.IsDataValid() && (gameInfo.mVersion == (unsigned long)cNetwork::Get_Exe_Key()));
+	return (gameInfo.IsDataValid() && (gameInfo.mVersion == cNetwork::Get_Exe_Key()));
 	}
 
 
@@ -590,7 +592,7 @@ bool WOLGameInfo::IsValidGameChannel(const RefPtr<ChannelData>& channel)
 *
 ******************************************************************************/
 
-bool WOLGameInfo::IsClanCompeting(unsigned long clanID) const
+bool WOLGameInfo::IsClanCompeting(unsigned int clanID) const
 	{
 	return (mIsClanGame && (clanID != 0) && ((clanID == mClanID1) || (clanID == mClanID2)));
 	}
@@ -641,14 +643,14 @@ bool WOLGameInfo::CanUserJoin(const RefPtr<UserData>& user)
 		return false;
 		}
 
-	if (mVersion != (unsigned long)cNetwork::Get_Exe_Key())
+	if (mVersion != cNetwork::Get_Exe_Key())
 		{
 		return false;
 		}
 
 	if (mIsClanGame)
 		{
-		unsigned long userClanID = user->GetSquadID();
+		unsigned int userClanID = user->GetSquadID();
 		return ((0 != userClanID) && (IsClanGameOpen() || IsClanCompeting(userClanID)));
 		}
 

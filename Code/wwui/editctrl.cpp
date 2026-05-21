@@ -44,6 +44,7 @@
 #include "dialogmgr.h"
 #include "stylemgr.h"
 #include "dialogbase.h"
+#include <limits>
 #include <algorithm>
 
 
@@ -69,15 +70,15 @@ EditCtrlClass::EditCtrlClass (void)	:
 #ifdef SHOW_IME_TYPING
 	, mShowIMETypingText(false)
 #endif
-{	
+{
 	//
 	//	Set the font for the text renderers
 	//
 	StyleMgrClass::Assign_Font (&TextRenderer, StyleMgrClass::FONT_CONTROLS);
 	StyleMgrClass::Configure_Renderer (&ControlRenderer);
-	
+
 	StyleMgrClass::Configure_Renderer (&CaretRenderer);
-	StyleMgrClass::Configure_Renderer (&HilightRenderer);	
+	StyleMgrClass::Configure_Renderer (&HilightRenderer);
 
 	mIME = DialogMgrClass::Get_IME();
 }
@@ -107,7 +108,7 @@ void
 EditCtrlClass::Create_Text_Renderers (void)
 {
 	HilightRenderer.Reset ();
-	HilightRenderer.Set_Coordinate_Range (Render2DClass::Get_Screen_Resolution());		
+	HilightRenderer.Set_Coordinate_Range (Render2DClass::Get_Screen_Resolution());
 	StyleMgrClass::Configure_Hilighter (&HilightRenderer);
 
 	//
@@ -119,7 +120,7 @@ EditCtrlClass::Create_Text_Renderers (void)
 	//
 	//	Index into the text buffer
 	//
-	const wchar_t* text = display_string.Peek_Buffer();
+	const unichar_t* text = display_string.Peek_Buffer();
 
 	if (ScrollPos >= 0 && ScrollPos < display_string.Get_Length()) {
 		text += ScrollPos;
@@ -146,7 +147,7 @@ EditCtrlClass::Create_Text_Renderers (void)
 
 	// Draw the composition markers
 	if (mIME && mInComposition) {
-		const wchar_t* compString = mIME->GetCompositionString();
+		const unichar_t* compString = mIME->GetCompositionString();
 		Vector2 compSize = TextRenderer.Get_Text_Extents(compString);
 
 		if (compSize.X > 0.0f) {
@@ -158,12 +159,12 @@ EditCtrlClass::Create_Text_Renderers (void)
 			Vector2 stopPos(startPos);
 			stopPos.X += compSize.X;
 
-			unsigned long underlineColor = StyleMgrClass::Get_Disabled_Line_Color();
+			unsigned int underlineColor = StyleMgrClass::Get_Disabled_Line_Color();
 			ControlRenderer.Add_Line(startPos, stopPos, 1.0f, underlineColor);
 
 			// Hilight the conversion target
-			unsigned long start = 0;
-			unsigned long end = 0;
+			unsigned int start = 0;
+			unsigned int end = 0;
 			mIME->GetTargetClause(start, end);
 
 			if (end > 0) {
@@ -261,7 +262,7 @@ EditCtrlClass::Update_Client_Rect (void)
 	//
 	//	Determine what one character spacing would be
 	//
-	float char_width = TextRenderer.Get_Text_Extents (L"I").X;
+	float char_width = TextRenderer.Get_Text_Extents (U_CHAR("I")).X;
 
 	//
 	//	Shrink the client area
@@ -324,26 +325,27 @@ EditCtrlClass::Render (void)
 void EditCtrlClass::Get_Display_Text(WideStringClass &text)
 {
 	// Resize to accomodate entire string
-	int length = Title.Get_Length();
+	size_t length = Title.Get_Length();
 
 	if (mIME && mInComposition) {
-		const wchar_t* compString = mIME->GetCompositionString();
+		const unichar_t* compString = mIME->GetCompositionString();
 
 		if (compString) {
-			length += wcslen(compString);
+			length += ::u_strlen(compString);
 		}
 	}
-
-	text.Get_Buffer(length);
+	WWASSERT(length <= static_cast<size_t>(std::numeric_limits<int>::max()));
+		const int buffer_length = static_cast<int>(length);
+		text.Get_Buffer(buffer_length);
 
 	// If password then replace text with astrisks
 	if ((Style & ES_PASSWORD) != 0) {
-		int len = Title.Get_Length();
-		wchar_t* buffer = text.Peek_Buffer();
+		int len = static_cast<int>(Title.Get_Length());
+		unichar_t* buffer = text.Peek_Buffer();
 		int index;
 
 		for (index = 0; index < len; ++index) {
-			buffer[index] = L'*';
+			buffer[index] = U_CHAR('*');
 		}
 
 		buffer[index] = 0;
@@ -353,11 +355,11 @@ void EditCtrlClass::Get_Display_Text(WideStringClass &text)
 
 	// Insert IME composition at cursor position
 	if (mIME && mInComposition) {
-		const wchar_t* compString = mIME->GetCompositionString();
+		const unichar_t* compString = mIME->GetCompositionString();
 
 		if (compString) {
-			WideStringClass temp(length, true);
-			temp = (text.Peek_Buffer() + CaretPos);
+			WideStringClass temp(buffer_length, true);
+				temp = (text.Peek_Buffer() + CaretPos);
 
 			text.Erase(CaretPos, (text.Get_Length() - CaretPos));
 			text += compString;
@@ -381,7 +383,7 @@ EditCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
 	Set_Capture ();
 
 	if (HasFocus) {
-		
+
 		//
 		//	Update the caret position
 		//
@@ -396,7 +398,7 @@ EditCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
 		Set_Dirty ();
 		WasButtonPressedOnMe = true;
 	}
-	
+
 	return ;
 }
 
@@ -407,7 +409,7 @@ EditCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-EditCtrlClass::On_LButton_Up (const Vector2 &mouse_pos)
+EditCtrlClass::On_LButton_Up (const Vector2 &/* mouse_pos */)
 {
 	if (mInComposition) {
 		return;
@@ -507,7 +509,7 @@ EditCtrlClass::Create_Caret_Renderer (void)
 	WideStringClass temp_copy(0, true);
 	Get_Display_Text(temp_copy);
 
-	wchar_t *text = temp_copy.Peek_Buffer();
+	unichar_t *text = temp_copy.Peek_Buffer();
 	int caretPos = Get_Caret_Pos();
 	text[caretPos] = 0;
 	text = &text[ScrollPos];
@@ -551,8 +553,8 @@ EditCtrlClass::Character_From_Pos (const Vector2 &mouse_pos)
 	//
 	//	Index into the buffer
 	//
-	const wchar_t *text		= display_text.Peek_Buffer () + ScrollPos;	
-	int char_index			= display_text.Get_Length ();
+	const unichar_t *text		= display_text.Peek_Buffer () + ScrollPos;
+	int char_index			= static_cast<int>(display_text.Get_Length ());
 
 	float x_pos				= mouse_pos.X - ClientRect.Left;
 	float curr_x_pos		= 0;
@@ -561,15 +563,15 @@ EditCtrlClass::Character_From_Pos (const Vector2 &mouse_pos)
 	//	Loop over all the characters in the remainder of the string until
 	// we've moved past the x-position we we're looking for.
 	//
-	int count = ::wcslen (text);	
+	int count = static_cast<int>(::u_strlen (text));
 	for (int index = 0; index < count; index ++) {
-		
+
 		//
 		//	Get the width of the character
 		//
-		wchar_t char_string[2] = { text[index], 0 };
+		unichar_t char_string[2] = { text[index], 0 };
 		float char_width = TextRenderer.Get_Text_Extents (char_string).X;
-		
+
 		//
 		//	Did we move past the position we were looking for?
 		//
@@ -609,7 +611,7 @@ EditCtrlClass::Pos_From_Character (int char_index)
 	//
 	WideStringClass temp_copy(0, true);
 	Get_Display_Text (temp_copy);
-	wchar_t *text						= temp_copy.Peek_Buffer ();
+	unichar_t *text						= temp_copy.Peek_Buffer ();
 	text[char_index]				= 0;
 	text								= &text[ScrollPos];
 	float width						= TextRenderer.Get_Text_Extents (text).X;
@@ -692,7 +694,7 @@ EditCtrlClass::On_Kill_Focus (DialogControlClass *focus)
 //	On_Key_Down
 //
 ////////////////////////////////////////////////////////////////
-bool 
+bool
 EditCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
 {
 	bool handled = false;
@@ -724,7 +726,7 @@ EditCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
 			if (HilightStartPos >= 0) {
 				changed = Delete_Selection ();
 			} else if (CaretPos > 0) {
-				
+
 				//
 				//	Delete the previous character
 				//
@@ -733,7 +735,7 @@ EditCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
 
 				assert(NumChars > 0);
 				NumChars--;
-				
+
 				changed = true;
 			}
 			update_hilight = false;
@@ -743,20 +745,20 @@ EditCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
 			if (HilightStartPos >= 0) {
 				changed = Delete_Selection ();
 			} else if (CaretPos < Title.Get_Length ()) {
-				
+
 				//
 				//	Delete the next character
 				//
 				Title.Erase (CaretPos, 1);
 				assert(NumChars > 0);
 				NumChars--;
-				
+
 				changed = true;
 			}
 			update_hilight = false;
 			break;
 
-		case VK_HOME:			
+		case VK_HOME:
 			Set_Caret_Pos (0);
 			break;
 
@@ -777,7 +779,7 @@ EditCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
 			break;
 
 		case VK_RIGHT:
-			
+
 			//
 			//	Should snap the caret to words, or just increment it?
 			//
@@ -819,7 +821,7 @@ EditCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
 		Update_Hilight (CaretPos, old_caret);
 
 	} else if (handled) {
-		
+
 		//
 		//	Reset the hilight position
 		//
@@ -842,7 +844,7 @@ EditCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
 }
 
 
-void EditCtrlClass::On_Unicode_Char(wchar_t unicode)
+void EditCtrlClass::On_Unicode_Char(unichar_t unicode)
 {
 	if (unicode >= 32) {
 		//	Delete the old selection
@@ -857,7 +859,7 @@ void EditCtrlClass::On_Unicode_Char(wchar_t unicode)
 			new_title += unicode;
 			new_title += Title.Peek_Buffer () + CaretPos;
 			Title = new_title;
-		
+
 			//	Move the caret to the end of the text the user just typed
 			Set_Caret_Pos (CaretPos + 1);
 
@@ -866,7 +868,7 @@ void EditCtrlClass::On_Unicode_Char(wchar_t unicode)
 			//
 			HilightStartPos	= -1;
 			HilightAnchorPos	= -1;
-		
+
 			ADVISE_NOTIFY(On_EditCtrl_Change(this, Get_ID()));
 
 			//	Force a repaint
@@ -876,9 +878,9 @@ void EditCtrlClass::On_Unicode_Char(wchar_t unicode)
 }
 
 
-void EditCtrlClass::Insert_String(const wchar_t* string)
+void EditCtrlClass::Insert_String(const unichar_t* string)
 {
-	int count = wcslen(string);
+	int count = static_cast<int>(::u_strlen(string));
 
 	if (count > 0) {
 		//	Delete the old selection
@@ -963,7 +965,7 @@ void
 EditCtrlClass::On_Create (void)
 {
 	//TextColor.Set (0.35F, 1.0F, 0.35F);
-	//Set_Text (L"This is a test...");	
+	//Set_Text (U_CHAR("This is a test..."));
 	return ;
 }
 
@@ -979,8 +981,8 @@ EditCtrlClass::Set_Caret_Pos (int new_pos)
 	//
 	//	Remove the hilight
 	//
-	HilightStartPos = -1;	
-	
+	HilightStartPos = -1;
+
 	//
 	//	Did the caret position change?
 	//
@@ -997,7 +999,7 @@ EditCtrlClass::Set_Caret_Pos (int new_pos)
 		//	Handle scrolling
 		//
 		Update_Scroll_Pos ();
-		
+
 		//
 		//	Force a repaint
 		//
@@ -1031,35 +1033,35 @@ EditCtrlClass::Update_Hilight (int new_pos, int anchor_pos)
 int
 EditCtrlClass::Find_Word_Start (int pos, int increment)
 {
-	int count = Title.Get_Length ();	
+	int count = Title.Get_Length ();
 
 	//
 	//	Determine what the extreme end posiiton should be
 	//
 	int extreme	= pos + increment * 1000;
-	int retval	= 0;	
+	int retval	= 0;
 	if (extreme > count) {
 		retval = count;
 	}
-	
+
 	//
 	//	Loop over all the  characters until we've found the word break
-	//	
+	//
 	for (int index = pos + increment; index < count && index >= 0; index += increment) {
-		
+
 		//
 		//	Is this a space character?
 		//
-		bool is_space	= (Title[index] == L' ');
+		bool is_space	= (Title[index] == U_CHAR(' '));
 
 		//
 		//	If we've already found the word break and this is the
 		// start of a new word, then return its index to the caller
 		//
-		if (!is_space && ((index == 0) || (Title[index - 1] == L' '))) {
+		if (!is_space && ((index == 0) || (Title[index - 1] == U_CHAR(' ')))) {
 			retval = index;
-			break;			
-		}		
+			break;
+		}
 	}
 
 	return retval;
@@ -1095,7 +1097,7 @@ EditCtrlClass::Update_Scroll_Pos (void)
 		//
 		WideStringClass temp_string(0, true);
 		Get_Display_Text(temp_string);
-		wchar_t *text = temp_string.Peek_Buffer();
+		unichar_t *text = temp_string.Peek_Buffer();
 		text[caretPos] = 0;
 
 		//
@@ -1109,12 +1111,12 @@ EditCtrlClass::Update_Scroll_Pos (void)
 				ScrollPos = index + 2;
 				break;
 			}
-		} 
+		}
 	}
-	
+
 	//
 	//	Adjust the scroll range to stay within our boundaries
-	//	
+	//
 	ScrollPos = std::min (ScrollPos, Title.Get_Length () - 1);
 	ScrollPos = std::max (ScrollPos, 0);
 
@@ -1137,7 +1139,9 @@ EditCtrlClass::Update_Scroll_Pos (void)
 int
 EditCtrlClass::Get_Int (void)
 {
-	return _wtoi (Get_Text ());
+	int retval;
+	u_sscanf_u(Get_Text (), U_CHAR("%d"), &retval);
+	return retval;
 }
 
 
@@ -1150,7 +1154,7 @@ void
 EditCtrlClass::Set_Int (int value)
 {
 	WideStringClass text(64, true);
-	text.Format (L"%d", value);
+	text.Format (U_CHAR("%d"), value);
 	Set_Text (text);
 	return ;
 }
@@ -1162,9 +1166,9 @@ EditCtrlClass::Set_Int (int value)
 //
 ////////////////////////////////////////////////////////////////
 void
-EditCtrlClass::Set_Text (const wchar_t *title)
+EditCtrlClass::Set_Text (const unichar_t *title)
 {
-	int count = wcslen(title);
+	int count = static_cast<int>(::u_strlen(title));
 
 	// If the string is too long then truncate it so that it will fit.
 	if (count > TextLimit) {
@@ -1313,7 +1317,7 @@ bool EditCtrlClass::IsIMEAllowed(void) const
 
 void EditCtrlClass::Set_IME_Typing_Text_Pos(void)
 {
-	Vector2 charExtent = TextRenderer.Get_Text_Extents(L"W");
+	Vector2 charExtent = TextRenderer.Get_Text_Extents(U_CHAR("W"));
 	int caretPos = Get_Caret_Pos();
 
 	Vector2 pos;
@@ -1336,15 +1340,15 @@ void EditCtrlClass::Set_IME_Typing_Text_Pos(void)
 *
 ******************************************************************************/
 
-void EditCtrlClass::Show_IME_Typing_Text(const wchar_t* text)
+void EditCtrlClass::Show_IME_Typing_Text(const unichar_t* text)
 {
-	mShowIMETypingText = (text && wcslen(text) > 0);
+	mShowIMETypingText = (text && u_strlen(text) > 0);
 
 	if (mShowIMETypingText) {
 		Set_IME_Typing_Text_Pos();
 		mIMETypingTip.Set_Text(text);
 	} else {
-		mIMETypingTip.Set_Text(L"");
+		mIMETypingTip.Set_Text(U_CHAR(""));
 	}
 }
 
@@ -1364,7 +1368,7 @@ void EditCtrlClass::Show_IME_Typing_Text(const wchar_t* text)
 void EditCtrlClass::Hide_IME_Typing_Text(void)
 {
 	mShowIMETypingText = false;
-	mIMETypingTip.Set_Text(L"");
+	mIMETypingTip.Set_Text(U_CHAR(""));
 }
 #endif
 
@@ -1387,8 +1391,8 @@ void EditCtrlClass::PositionCandidateList(void)
 		//-------------------------------------------------------------------------
 		// Position the candidate window under the edit control
 		//-------------------------------------------------------------------------
-		unsigned long start = 0;
-		unsigned long end = 0;
+		unsigned int start = 0;
+		unsigned int end = 0;
 		mIME->GetTargetClause(start, end);
 		int caretPos = CaretPos + start;
 

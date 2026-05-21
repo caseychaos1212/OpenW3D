@@ -426,7 +426,13 @@ public:
 //			Debug_Say(( "Parse %s\n", read ));
 			StringClass desc = read;
 			while ( desc.Get_Length() && desc[0] <= ' ' ) desc.Erase( 0, 1 );
-			while ( desc.Get_Length() && desc[desc.Get_Length()-1]<=' ' ) desc.Erase(desc.Get_Length()-1, 1 );
+				while (desc.Get_Length()) {
+					const size_t tail_index = desc.Get_Length() - 1;
+					if (desc[static_cast<int>(tail_index)] > ' ') {
+						break;
+					}
+					desc.Erase(static_cast<int>(tail_index), 1);
+				}
 
 			// Parse Big Translated Text
 			if ( ::strnicmp( "Text2", desc, 5 ) == 0 ) {
@@ -619,7 +625,7 @@ void CombatGameModeClass::Load_Level( void )
 	WWMEMLOG(MEM_GAMEDATA);
 	Debug_Say(("CombatGameModeClass::Load_Level\n"));
 
-	ConsoleBox.Print("Loading level %s\n", The_Game()->Get_Map_Name());
+	ConsoleBox.Print("Loading level %s\n", The_Game()->Get_Map_Name().Peek_Buffer());
 
 	CombatManager::Set_Load_Progress(0);
 	LoadingScreenClass loading_screen;	// Try moving this to very start of loading
@@ -679,7 +685,7 @@ void CombatGameModeClass::Load_Level( void )
 	preload_assets = cDevOptions::PreloadAssets.Get();
 #endif
 
-	DIAG_LOG(( "LOAD", "%s", map_name ));
+	DIAG_LOG(( "LOAD", "%s", map_name.Peek_Buffer() ));
 
 	NetworkObjectMgrClass::Set_Is_Level_Loading (true);
 
@@ -697,7 +703,7 @@ void CombatGameModeClass::Load_Level( void )
 	}
 	WWLOG_INTERMEDIATE("Threaded level load");
 
-	GenericDataSafeClass::Set_Preferred_Thread(GetCurrentThreadId());
+	GenericDataSafeClass::Set_Preferred_Thread(ThreadClass::Get_Current_Thread_ID());
 	TextureLoader::Continue_Texture_Load();
 	WWLOG_INTERMEDIATE("TextureLoader::Continue_Texture_Load()");
 
@@ -1140,10 +1146,11 @@ void CombatGameModeClass::Core_Restart(void)
 
 		new_name = CombatManager::Get_Last_LSD_Name();
 
-		// convert .LSD to .MIX
-		if ( new_name.Get_Length() > 4 &&
-			::stricmp( &new_name[new_name.Get_Length() - 4], ".LSD" ) == 0 ) {
-			new_name.Erase( new_name.Get_Length() - 4, 4 );
+			// convert .LSD to .MIX
+			const size_t name_length = new_name.Get_Length();
+			if ( name_length > 4 &&
+				::stricmp( &new_name[static_cast<int>(name_length - 4)], ".LSD" ) == 0 ) {
+				new_name.Erase( static_cast<int>(name_length - 4), 4 );
 			new_name += ".MIX";
 		}
 
@@ -1209,7 +1216,7 @@ void CombatGameModeClass::Load_Registry_Keys(void)
 
 		//TSS
 		DefaultToFirstPerson = registry->Get_Int( "DefaultToFirstPerson", DefaultToFirstPerson );
-		CombatManager::Set_First_Person_Default(DefaultToFirstPerson == TRUE);
+		CombatManager::Set_First_Person_Default(DefaultToFirstPerson != 0);
 	}
 	delete registry;
 }
@@ -1517,8 +1524,8 @@ void	CombatGameModeClass::Quick_Save( void )
 		saveA = registry->Get_Bool( "QuicksaveA", saveA );
 	}
 
-#define	SAVEGAME_NAME_A	"save\\quicksaveA.sav"
-#define	SAVEGAME_NAME_B	"save\\quicksaveB.sav"
+#define	SAVEGAME_NAME_A	"save/quicksaveA.sav"
+#define	SAVEGAME_NAME_B	"save/quicksaveB.sav"
 
 	// Check for a missing file
    if ( !cMiscUtil::File_Exists(SAVEGAME_NAME_B) ) {

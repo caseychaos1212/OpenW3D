@@ -117,9 +117,9 @@ class	cGameData :
 
 		static cGameData * Create_Game_Of_Type(GameTypeEnum game_type);
 
-		void				Set_Game_Title(const wchar_t *title)		{ GameTitle = title; }
-		void				Set_Motd(const wchar_t * motd);
-		void				Set_Password(const wchar_t *password)		{ Password = password;}
+		void				Set_Game_Title(const unichar_t *title)		{ GameTitle = title; }
+		void				Set_Motd(const unichar_t * motd);
+		void				Set_Password(const unichar_t *password)		{ Password = password;}
 		void				Set_Map_Name(const StringClass & map_name);
 		void				Set_Mod_Name(const StringClass & mod_name);
 		void				Set_Map_Cycle(int map, const StringClass & map_name);
@@ -128,26 +128,26 @@ class	cGameData :
 		bool				Set_Time_Limit_Minutes(int time_limit_minutes);
 		void				Set_Radar_Mode(RadarModeEnum mode);
 		void				Set_Intermission_Time_Seconds(int time);
-		void				Set_Version_Number(int version_number) {VersionNumber = version_number;}
+		void				Set_Version_Number(uint32_t version_number) {VersionNumber = version_number;}
 		bool				Set_Current_Players(int current_players);
-		void				Set_Ip_Address(ULONG ip_address);
+		void				Set_Ip_Address(unsigned int ip_address);
 		void				Set_Port(int port);
 
 		void				Set_QuickMatch_Server(bool isServer)	{IsQuickMatchServer.Set(isServer);}
 		bool				Is_QuickMatch_Server(void) const			{return IsQuickMatchServer.Get();}
 
-		void Set_Clan(int slot, unsigned long clanID);
-		unsigned long Get_Clan(int slot) const;
+		void Set_Clan(int slot, unsigned int clanID);
+		unsigned int Get_Clan(int slot) const;
 
 		void Clear_Clans(void);
 		int Find_Free_Clan_Slot(void) const;
 
-		bool Is_Clan_Competing(unsigned long clanID) const;
+		bool Is_Clan_Competing(unsigned int clanID) const;
 		bool Is_Clan_Game_Open(void) const;
 
-		const wchar_t *	Get_Game_Title(void)					const	{return GameTitle;}
-		const wchar_t *	Get_Motd(void)							const	{return Motd;}
-		const wchar_t *	Get_Password(void)					const	{return Password;}
+		const unichar_t *	Get_Game_Title(void)					const	{return GameTitle;}
+		const unichar_t *	Get_Motd(void)							const	{return Motd;}
+		const unichar_t *	Get_Password(void)					const	{return Password;}
 		const StringClass& Get_Mod_Name()					const	{return ModName;}
 		const StringClass& Get_Map_Name()					const	{return MapName;}
 		const StringClass& Get_Map_Cycle(int map);
@@ -156,13 +156,13 @@ class	cGameData :
 		int				Get_Max_Players(void)				const	{return MaxPlayers;}
 		int				Get_Time_Limit_Minutes(void)		const {return TimeLimitMinutes;}
 		int				Get_Intermission_Time_Seconds(void) const {return IntermissionTimeSeconds;}
-		int				Get_Version_Number(void)			const {return VersionNumber;}
+		uint32_t			Get_Version_Number(void)			const {return VersionNumber;}
 		int				Get_Current_Players(void)			const	{return CurrentPlayers;}
-		ULONG				Get_Ip_Address(void)					const	{return IpAddress;}
+		unsigned int				Get_Ip_Address(void)					const	{return IpAddress;}
 		int				Get_Port(void)							const	{return Port;}
 		RadarModeEnum	Get_Radar_Mode(void)					const	{return RadarMode;}
 
-		virtual const wchar_t* Get_Game_Name(void)			const	= 0;
+		virtual const unichar_t* Get_Game_Name(void)			const	= 0;
 		virtual GameTypeEnum	Get_Game_Type(void)			const	= 0;
 		const char *	Get_Game_Type_Name(void) const;
 		virtual int		Choose_Player_Type(cPlayer* player, int team_choice, bool is_grunt);
@@ -233,7 +233,7 @@ class	cGameData :
 		void				Set_Intermission_Time_Remaining(float time) {IntermissionTimeRemaining = time;}
 		float				Get_Maximum_World_Distance(void) {return MaximumWorldDistance;}
 		void				Set_Maximum_World_Distance(float distance);
-		unsigned long	Get_Frame_Count(void) const {return FrameCount;}
+		unsigned int	Get_Frame_Count(void) const {return FrameCount;}
 		LPSYSTEMTIME	Get_Game_Start_Time(void) {return &GameStartTime;}
 		int				Get_Duration_Seconds(void);
 		void				Set_Min_Qualifying_Time_Minutes(int minutes);
@@ -283,8 +283,8 @@ class	cGameData :
 		void				Set_Win_Type(WinTypeEnum type);
 		WinTypeEnum		Get_Win_Type(void) const							{return WinType;}
 
-		void				Set_Game_Duration_S(DWORD seconds);
-		DWORD				Get_Game_Duration_S(void) const					{return GameDurationS;}
+		void				Set_Game_Duration_S(unsigned int seconds);
+		unsigned int				Get_Game_Duration_S(void) const					{return GameDurationS;}
 
 		virtual	void	Get_Description(WideStringClass & description);
 
@@ -328,7 +328,7 @@ class	cGameData :
 	private:
 		cGameData(const cGameData& rhs);					// Disallow copy
 		bool Has_Config_File_Changed(void);
-		unsigned long Get_Config_File_Mod_Time(void);
+		unsigned int Get_Config_File_Mod_Time(void);
 
 		static const int	MAX_TIME_LIMIT;
 
@@ -358,14 +358,14 @@ class	cGameData :
 		int					MaxPlayers;
 		int					TimeLimitMinutes;
 		int					IntermissionTimeSeconds;
-		int					VersionNumber; // for now use exe byte size
+		uint32_t				VersionNumber; // for now use exe byte size
 		bool					DoExeVersionsMatch;
 		bool					DoStringVersionsMatch;
-		ULONG					IpAddress; // hosting address
+		unsigned int					IpAddress; // hosting address
 		int					Port;
 		StringClass			IniFilename;
 		RadarModeEnum		RadarMode;
-		unsigned long		LastServerConfigModTime;
+		unsigned int		LastServerConfigModTime;
 
 		//
 		// Dynamic data about game state
@@ -380,16 +380,16 @@ class	cGameData :
 		WinTypeEnum			WinType;
 
 		SYSTEMTIME			GameStartTime;
-		DWORD					GameStartTimeMs;
-		unsigned long		FrameCount;
+		unsigned int					GameStartTimeMs;
+		unsigned int		FrameCount;
 		WideStringClass	MvpName;
 		int					MvpCount;
-		DWORD					GameDurationS;
+		unsigned int					GameDurationS;
 
 		cBoolean				IsQuickMatchServer;
 		//bool					ServerIsGameplayPermitted;
 
-		unsigned long mClanSlots[MAX_CLAN_SLOTS];
+		unsigned int mClanSlots[MAX_CLAN_SLOTS];
 };
 
 extern cGameData *						PTheGameData;

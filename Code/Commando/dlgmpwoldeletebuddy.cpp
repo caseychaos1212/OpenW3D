@@ -36,6 +36,7 @@
 
 
 #include "dlgmpwoldeletebuddy.h"
+#include "renegadedialog.h"
 #include "WOLBuddyMgr.h"
 
 
@@ -45,7 +46,7 @@
 //
 ////////////////////////////////////////////////////////////////
 MPWolDeleteBuddyPopupClass::MPWolDeleteBuddyPopupClass (void)	:
-	PopupDialogClass (IDD_MP_WOL_DELETE_BUDDY)
+	PopupDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_DELETE_BUDDY))
 {
 	return ;
 }
@@ -71,15 +72,15 @@ MPWolDeleteBuddyPopupClass::On_Init_Dialog (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-MPWolDeleteBuddyPopupClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MPWolDeleteBuddyPopupClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
 		case IDC_DELETE_BUTTON:
-		{	
+		{
 			//
 			//	Simply delete the user from our list
-			//		
+			//
 			if (UserName.Is_Empty () == false) {
 				WOLBuddyMgr* buddyMgr = WOLBuddyMgr::GetInstance(false);
 

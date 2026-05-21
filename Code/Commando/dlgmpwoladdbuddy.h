@@ -43,7 +43,6 @@
 
 
 #include "popupdialog.h"
-#include "resource.h"
 #include "wwstring.h"
 
 class WOLBuddyMgr;
@@ -56,23 +55,23 @@ class WOLBuddyMgr;
 class MPWolAddBuddyPopupClass : public PopupDialogClass
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	MPWolAddBuddyPopupClass (void);
 	~MPWolAddBuddyPopupClass();
 
 	//
 	//	Content control
 	//
-	void		Set_Default_User_Name (const wchar_t* user_name)	{ DefaultUserName = user_name; }
+	void		Set_Default_User_Name (const unichar_t* user_name)	{ DefaultUserName = user_name; }
 
 protected:
 
 	void		On_Init_Dialog (void) override;
 	void		On_Activate (bool onoff) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 	void		Add_Buddy (void);
 
 	void On_EditCtrl_Change(EditCtrlClass* edit, int id) override;

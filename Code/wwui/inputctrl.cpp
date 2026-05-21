@@ -62,7 +62,7 @@ InputCtrlClass::InputCtrlClass (void)	:
 	//	Set the font for the text renderers
 	//
 	StyleMgrClass::Assign_Font (&TextRenderer, StyleMgrClass::FONT_CONTROLS);
-	StyleMgrClass::Configure_Renderer (&ControlRenderer);	
+	StyleMgrClass::Configure_Renderer (&ControlRenderer);
 	return ;
 }
 
@@ -87,7 +87,7 @@ void
 InputCtrlClass::Create_Text_Renderers (void)
 {
 	HilightRenderer.Reset ();
-	HilightRenderer.Set_Coordinate_Range (Render2DClass::Get_Screen_Resolution());		
+	HilightRenderer.Set_Coordinate_Range (Render2DClass::Get_Screen_Resolution());
 	StyleMgrClass::Configure_Hilighter (&HilightRenderer);
 
 	//
@@ -160,7 +160,7 @@ InputCtrlClass::Create_Control_Renderers (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-InputCtrlClass::On_Set_Cursor (const Vector2 &mouse_pos)
+InputCtrlClass::On_Set_Cursor (const Vector2 &/* mouse_pos */)
 {
 	//
 	//	Change the mouse cursor
@@ -197,7 +197,7 @@ void
 InputCtrlClass::Render (void)
 {
 	if (PendingKeyID != -1) {
-		
+
 		//
 		//	Use the pending key
 		//
@@ -211,7 +211,7 @@ InputCtrlClass::Render (void)
 	//
 	//	Recreate the renderers (if necessary)
 	//
-	if (IsDirty) {		
+	if (IsDirty) {
 		Create_Control_Renderers ();
 		Create_Text_Renderers ();
 	}
@@ -234,7 +234,7 @@ InputCtrlClass::Render (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-InputCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
+InputCtrlClass::On_LButton_Down (const Vector2 &/* mouse_pos */)
 {
 	if (HasFocus && DialogMgrClass::Get_Time () > MouseIgnoreTime) {
 		On_New_Key (VK_LBUTTON);
@@ -250,7 +250,7 @@ InputCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-InputCtrlClass::On_RButton_Down (const Vector2 &mouse_pos)
+InputCtrlClass::On_RButton_Down (const Vector2 &/* mouse_pos */)
 {
 	if (HasFocus) {
 		On_New_Key (VK_RBUTTON);
@@ -266,7 +266,7 @@ InputCtrlClass::On_RButton_Down (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-InputCtrlClass::On_MButton_Down (const Vector2 &mouse_pos)
+InputCtrlClass::On_MButton_Down (const Vector2 &/* mouse_pos */)
 {
 	if (HasFocus) {
 		On_New_Key (VK_MBUTTON);
@@ -281,7 +281,7 @@ InputCtrlClass::On_MButton_Down (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-InputCtrlClass::On_LButton_Up (const Vector2 &mouse_pos)
+InputCtrlClass::On_LButton_Up (const Vector2 &/* mouse_pos */)
 {
 	return ;
 }
@@ -337,7 +337,7 @@ InputCtrlClass::On_New_Key (int vkey_id)
 		//	Get information about this key from the parent
 		//
 		if (Parent->On_InputCtrl_Get_Key_Info (this, Get_ID (), vkey_id, key_name, &game_key_id)) {
-			
+
 			//
 			//	Display this information in the control
 			//
@@ -370,7 +370,7 @@ InputCtrlClass::Set_Key_Assignment (int game_key_id, const WideStringClass &key_
 //
 ////////////////////////////////////////////////////////////////
 bool
-InputCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
+InputCtrlClass::On_Key_Down (uint32 key_id, uint32 /* key_data */)
 {
 	PendingKeyID = key_id;
 	return false;
@@ -385,7 +385,7 @@ InputCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
 void
 InputCtrlClass::On_Create (void)
 {
-	Title = L"";
+	Title = U_CHAR("");
 	return ;
 }
 

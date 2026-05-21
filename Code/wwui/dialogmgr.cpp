@@ -915,7 +915,7 @@ DialogMgrClass::Set_Focus (DialogControlClass *control)
 DialogBaseClass* DialogMgrClass::Find_Dialog(int dialogID)
 {
 	for (int index = 0; index < DialogList.Count(); ++index) {
-		if (DialogList[index]->Get_Dlg_ID() == dialogID) {
+		if (DialogList[index]->Get_Dlg_Resource()->id == dialogID) {
 			return DialogList[index];
 		}
 	}
@@ -953,7 +953,7 @@ DialogMgrClass::Rollback (DialogBaseClass *dialog)
 }
 
 
-void DialogMgrClass::Show_IME_Message(const wchar_t* message, uint32 duration)
+void DialogMgrClass::Show_IME_Message(const unichar_t* message, uint32 duration)
 {
 	if (mIMEMessage == NULL) {
 		mIMEMessage = new ToolTipClass;

@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgpreviewoptions.h"
+#include "renegadedialog.h"
 #include "listctrl.h"
 
 
@@ -44,7 +45,7 @@
 //
 ////////////////////////////////////////////////////////////////
 PreviewOptionsMenuClass::PreviewOptionsMenuClass (void)	:
-	MenuDialogClass (IDD_OPTIONS_PREVIEW)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_OPTIONS_PREVIEW))
 {
 	return ;
 }
@@ -67,7 +68,7 @@ PreviewOptionsMenuClass::On_Init_Dialog (void)
 		//
 		//	Configure the list control
 		//
-		list_ctrl->Add_Column (L"Preview Title", 1.0F, Vector3 (1, 1, 1));
+		list_ctrl->Add_Column (U_CHAR("Preview Title"), 1.0F, Vector3 (1, 1, 1));
 	}
 
 
@@ -82,7 +83,7 @@ PreviewOptionsMenuClass::On_Init_Dialog (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-PreviewOptionsMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+PreviewOptionsMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	MenuDialogClass::On_Command (ctrl_id, message_id, param);
 	return ;

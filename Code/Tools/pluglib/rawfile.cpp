@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Command & Conquer                                            * 
- *                                                                                             * 
- *                     $Archive:: /VSS_Sync/wwlib/rawfile.cpp                                 $* 
- *                                                                                             * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Command & Conquer                                            *
+ *                                                                                             *
+ *                     $Archive:: /VSS_Sync/wwlib/rawfile.cpp                                 $*
+ *                                                                                             *
  *                      $Author:: Vss_sync                                                    $*
- *                                                                                             * 
+ *                                                                                             *
  *                     $Modtime:: 8/29/01 10:24p                                              $*
- *                                                                                             * 
+ *                                                                                             *
  *                    $Revision:: 12                                                          $*
  *                                                                                             *
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  *   RawFileClass::Bias -- Bias a file with a specific starting position and length.           *
  *   RawFileClass::Close -- Perform a closure of the file.                                     *
  *   RawFileClass::Create -- Creates an empty file.                                            *
@@ -222,7 +222,7 @@ void RawFileClass::Error(int, int, char const * )
  * HISTORY:                                                                                    *
  *   10/18/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-int RawFileClass::Transfer_Block_Size(void) 
+int RawFileClass::Transfer_Block_Size(void)
 {
 	return (int)((unsigned)UINT_MAX)-16L;
 }
@@ -554,7 +554,7 @@ bool RawFileClass::Is_Available(int forced)
 	*/
 	int closeok;
 	#ifdef _UNIX
-		closeok=((fclose(Handle)==0)?TRUE:FALSE);
+		closeok=((fclose(Handle)==0)?true:false);
 	#else
 		closeok=CloseHandle(Handle);
 	#endif
@@ -595,7 +595,7 @@ void RawFileClass::Close(void)
 		*/
 		int closeok;
 		#ifdef _UNIX
-			closeok=(fclose(Handle)==0)?TRUE:FALSE;	
+			closeok=(fclose(Handle)==0)?true:false;
 		#else
 			closeok=CloseHandle(Handle);
 		#endif
@@ -636,7 +636,7 @@ void RawFileClass::Close(void)
  *=============================================================================================*/
 int RawFileClass::Read(void * buffer, int size)
 {
-	long	bytesread = 0;			// Running count of the number of bytes read into the buffer.
+	int	bytesread = 0;			// Running count of the number of bytes read into the buffer.
 	int	opened = false;		// Was the file opened by this routine?
 
 	/*
@@ -663,21 +663,21 @@ int RawFileClass::Read(void * buffer, int size)
 		size = size < remainder ? size : remainder;
 	}
 
-	long total = 0;
+	int total = 0;
 	while (size > 0) {
 		bytesread = 0;
 
-		int readok=TRUE;
+		int readok=true;
 
 		#ifdef _UNIX
-			readok=TRUE;
+			readok=true;
 			bytesread=fread(buffer,1,size,Handle);
 			if ((bytesread == 0)&&( ! feof(Handle)))
 				readok=ferror(Handle);
 		#else
-			readok=ReadFile(Handle, buffer, size, &(unsigned long&)bytesread, NULL);
+			readok=ReadFile(Handle, buffer, size, &(unsigned int&)bytesread, NULL);
 		#endif
-			
+
 
 		if (! readok) {
 			size -= bytesread;
@@ -720,7 +720,7 @@ int RawFileClass::Read(void * buffer, int size)
  *=============================================================================================*/
 int RawFileClass::Write(void const * buffer, int size)
 {
-	long	byteswritten = 0;
+	int	byteswritten = 0;
 	int	opened = false;		// Was the file manually opened?
 
 	/*
@@ -735,13 +735,13 @@ int RawFileClass::Write(void const * buffer, int size)
 		opened = true;
 	}
 
-   int writeok=TRUE;
+   int writeok=true;
    #ifdef _UNIX
 		byteswritten = fwrite(buffer, 1, size, Handle);
 		if (byteswritten != size)
-			writeok = FALSE;
+			writeok = false;
 	#else
-		writeok=WriteFile(Handle, buffer, size, &(unsigned long&)byteswritten, NULL);
+		writeok=WriteFile(Handle, buffer, size, &(unsigned int&)byteswritten, NULL);
 	#endif
 
 	if (! writeok) {
@@ -824,7 +824,7 @@ int RawFileClass::Seek(int pos, int dir)
 		/*
 		**	Perform the modified raw seek into the file.
 		*/
-		long newpos = Raw_Seek(pos, dir) - BiasStart;
+		int newpos = Raw_Seek(pos, dir) - BiasStart;
 
 		/*
 		**	Perform a final double check to make sure the file position fits with the bias range.
@@ -880,13 +880,13 @@ int RawFileClass::Size(void)
 
       #ifdef _UNIX
 			fpos_t curpos,startpos,endpos;
-			fgetpos(Handle,&curpos);	
+			fgetpos(Handle,&curpos);
 
 			fseek(Handle,0,SEEK_SET);
-			fgetpos(Handle,&startpos);	
+			fgetpos(Handle,&startpos);
 
 			fseek(Handle,0,SEEK_END);
-			fgetpos(Handle,&endpos);	
+			fgetpos(Handle,&endpos);
 
 			size=endpos-startpos;
 			fsetpos(Handle,&curpos);
@@ -1010,7 +1010,7 @@ int RawFileClass::Delete(void)
 
 		int deleteok;
 		#ifdef _UNIX
-			deleteok=(unlink(Filename)==0)?TRUE:FALSE;
+			deleteok=(unlink(Filename)==0)?true:false;
 		#else
 			deleteok=DeleteFile(Filename);
 		#endif
@@ -1036,8 +1036,8 @@ int RawFileClass::Delete(void)
  *                                                                                             *
  * INPUT:   none                                                                               *
  *                                                                                             *
- * OUTPUT:  Returns with the file date and time as a long.                                     *
- *          Use the YEAR(long), MONTH(),....                                                   *
+ * OUTPUT:  Returns with the file date and time as a int.                                     *
+ *          Use the YEAR(int), MONTH(),....                                                   *
  *                                                                                             *
  * WARNINGS:   none                                                                            *
  *                                                                                             *
@@ -1045,7 +1045,7 @@ int RawFileClass::Delete(void)
  *   11/14/1995 DRD : Created.                                                                 *
  *   07/13/1996 JLB : Handles win32 method.                                                    *
  *=============================================================================================*/
-unsigned long RawFileClass::Get_Date_Time(void)
+unsigned int RawFileClass::Get_Date_Time(void)
 {
 #ifdef _UNIX
 	struct stat statbuf;
@@ -1070,7 +1070,7 @@ unsigned long RawFileClass::Get_Date_Time(void)
  *                                                                                             *
  *    Use this routine to set the date and time of the file.                                   *
  *                                                                                             *
- * INPUT:   the file date and time as a long                                                   *
+ * INPUT:   the file date and time as a int                                                   *
  *                                                                                             *
  * OUTPUT:  successful or not if the file date and time was changed.                           *
  *                                                                                             *
@@ -1080,7 +1080,7 @@ unsigned long RawFileClass::Get_Date_Time(void)
  *   11/14/1995 DRD : Created.                                                                 *
  *   07/13/1996 JLB : Handles win 32 method                                                    *
  *=============================================================================================*/
-bool RawFileClass::Set_Date_Time(unsigned long datetime)
+bool RawFileClass::Set_Date_Time(unsigned int datetime)
 {
 #ifdef _UNIX
 	assert(0);
@@ -1219,10 +1219,10 @@ int RawFileClass::Raw_Seek(int pos, int dir)
  * HISTORY:                                                                                    *
  *   06/10/1999 PDS : Created.                                                                 *
  *=============================================================================================*/
-void RawFileClass::Attach (void *handle, int rights)
+void RawFileClass::Attach (HANDLE_TYPE handle, int rights)
 {
 	Reset ();
-	
+
 	Rights = rights;
 	BiasStart = 0;
 	BiasLength = -1;
@@ -1257,6 +1257,6 @@ void RawFileClass::Detach (void)
 	Date = 0;
 	Time = 0;
 	Allocated = false;
-	Handle = NULL_HANDLE;	
+	Handle = NULL_HANDLE;
 }
 

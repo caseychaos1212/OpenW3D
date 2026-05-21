@@ -35,6 +35,7 @@
 ******************************************************************************/
 
 #include "DlgPasswordPrompt.h"
+#include "renegadedialog.h"
 #include <wwui/editctrl.h>
 
 /******************************************************************************
@@ -54,7 +55,7 @@
 ******************************************************************************/
 
 bool DlgPasswordPrompt::DoDialog(Signaler<DlgPasswordPrompt>* target)
-	{	
+	{
 	DlgPasswordPrompt* dialog = new DlgPasswordPrompt;
 
 	if (dialog)
@@ -90,7 +91,7 @@ bool DlgPasswordPrompt::DoDialog(Signaler<DlgPasswordPrompt>* target)
 ******************************************************************************/
 
 DlgPasswordPrompt::DlgPasswordPrompt() :
-		PopupDialogClass(IDD_MP_JOIN_PASSWORD)
+		PopupDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MP_JOIN_PASSWORD))
 	{
 	WWDEBUG_SAY(("DlgPasswordPrompt Instantiated\n"));
 	}
@@ -134,7 +135,7 @@ DlgPasswordPrompt::~DlgPasswordPrompt()
 *
 ******************************************************************************/
 
-const wchar_t* DlgPasswordPrompt::GetPassword(void) const
+const unichar_t* DlgPasswordPrompt::GetPassword(void) const
 	{
 	return Get_Dlg_Item_Text(IDC_PASSWORD_EDIT);
 	}
@@ -190,7 +191,7 @@ void DlgPasswordPrompt::On_Init_Dialog(void)
 *
 ******************************************************************************/
 
-void DlgPasswordPrompt::On_Command(int ctrlID, int message, DWORD param)
+void DlgPasswordPrompt::On_Command(int ctrlID, int message, unsigned int param)
 	{
 	if (IDC_JOIN_GAME_BUTTON == ctrlID)
 		{
@@ -223,8 +224,8 @@ void DlgPasswordPrompt::On_EditCtrl_Change(EditCtrlClass* edit, int id)
 	{
 	if (IDC_PASSWORD_EDIT == id)
 		{
-		const wchar_t* text = edit->Get_Text();
-		bool enableJoin = (text && (wcslen(text) > 0));
+		const unichar_t* text = edit->Get_Text();
+		bool enableJoin = (text && (u_strlen(text) > 0));
 		Enable_Dlg_Item(IDC_JOIN_GAME_BUTTON, enableJoin);
 		}
 	}
@@ -247,7 +248,7 @@ void DlgPasswordPrompt::On_EditCtrl_Change(EditCtrlClass* edit, int id)
 *
 ******************************************************************************/
 
-void DlgPasswordPrompt::On_EditCtrl_Enter_Pressed(EditCtrlClass* edit, int id)
+void DlgPasswordPrompt::On_EditCtrl_Enter_Pressed(EditCtrlClass* /* edit */, int id)
 	{
 	if ((IDC_PASSWORD_EDIT == id) && Is_Dlg_Item_Enabled(IDC_JOIN_GAME_BUTTON))
 		{

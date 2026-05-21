@@ -64,7 +64,7 @@ class TextureClass;
 ////////////////////////////////////////////////////////////////
 //	Typedefs
 ////////////////////////////////////////////////////////////////
-typedef int (CALLBACK *LISTCTRL_SORT_CALLBACK) (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param);
+typedef int (*LISTCTRL_SORT_CALLBACK) (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param);
 
 
 ////////////////////////////////////////////////////////////////
@@ -111,24 +111,24 @@ public:
 	//
 	void				Auto_Size_Columns (float col_spacing = 2.0F);
 	void				Auto_Size_Columns_Include_Contents (float col_spacing = 2.0F);
-	void				Add_Column (const wchar_t *column_name, float width, const Vector3 &color);
+	void				Add_Column (const unichar_t *column_name, float width, const Vector3 &color);
 	void				Set_Column_Color (int col_index, const Vector3 &color);
 	bool				Remove_Column (int col_index);
 	void				Delete_All_Columns (void);
 	int				Get_Column_Count(void) const;
-	
+
 	//
 	//	Content control
 	//
-	int Find_Entry(int col_index, const wchar_t* text);
-	int				Insert_Entry (int index, const wchar_t *text);
-	bool				Set_Entry_Text (int index, int col_index, const wchar_t *text);
+	int Find_Entry(int col_index, const unichar_t* text);
+	int				Insert_Entry (int index, const unichar_t *text);
+	bool				Set_Entry_Text (int index, int col_index, const unichar_t *text);
 	bool				Set_Entry_Int (int index, int col_index, int value);
 	bool				Set_Entry_Color (int index, int col_index, const Vector3 &color);
 	bool				Set_Entry_Data (int index, int col_index, uintptr_t user_data);
 	bool				Select_Entry (int index, bool onoff);
 	uintptr_t			Get_Entry_Data (int index, int col_index);
-	const wchar_t *	Get_Entry_Text (int index, int col_index);
+	const unichar_t *	Get_Entry_Text (int index, int col_index);
 	bool				Is_Entry_Selected (int index);
 	bool				Delete_Entry (int index);
 	void				Delete_All_Entries (void);
@@ -212,10 +212,10 @@ protected:
 	void				Scroll_Page (int direction);
 	int				Find_End_Of_Page (void);
 	int				Find_Top_Of_Page (int bottom_index);
-	
+
 	void				Render_Entry (const RectClass &rect, int col_index, int row_index);
 
-	static int CALLBACK	Default_Sort_Callback (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param);
+	static int 	Default_Sort_Callback (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param);
 
 
 	////////////////////////////////////////////////////////////////
@@ -239,7 +239,7 @@ protected:
 	////////////////////////////////////////////////////////////////
 	Render2DClass				HilightRenderer;
 	Render2DClass				ControlRenderer;
-	Render2DClass				UnderlineRenderer;	
+	Render2DClass				UnderlineRenderer;
 	Render2DSentenceClass	HeaderRenderer;
 	Render2DSentenceClass	TextRenderer;
 	ListIconMgrClass			IconMgr;
@@ -255,14 +255,14 @@ protected:
 	bool							IsMultipleSelection;
 	int							SortColumn;
 	SORT_TYPE					SortType;
-									
+
 	float							PulsePercent;
 	float							PulseDirection;
 	float							MinRowHeight;
-									
+
 	RectClass					TextRect;
 	RectClass					HeaderRect;
-									
+
 	COL_LIST						ColList;
 	ROW_LIST						RowInfoList;
 };
@@ -276,16 +276,16 @@ protected:
 class ListEntryClass
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
 	////////////////////////////////////////////////////////////////
 	ListEntryClass (void) :
-		Name (L""),
+		Name (U_CHAR("")),
 		Color (1, 1, 1),
 		UserData (0)	{}
 
-	ListEntryClass (const wchar_t *name) :
+	ListEntryClass (const unichar_t *name) :
 		Name (name),
 		Color (1, 1, 1),
 		UserData (0)	{}
@@ -295,12 +295,12 @@ public:
 	////////////////////////////////////////////////////////////////
 	//	Public methods
 	////////////////////////////////////////////////////////////////
-	
+
 	//
 	//	Name access
 	//
-	const wchar_t *		Get_Name (void) const			{ return Name; }
-	void					Set_Name (const wchar_t *name)	{ Name = name; }
+	const unichar_t *		Get_Name (void) const			{ return Name; }
+	void					Set_Name (const unichar_t *name)	{ Name = name; }
 
 	//
 	//	Color access
@@ -342,7 +342,7 @@ private:
 class ListColumnClass
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
 	////////////////////////////////////////////////////////////////
@@ -354,19 +354,19 @@ public:
 	////////////////////////////////////////////////////////////////
 	//	Public operators
 	////////////////////////////////////////////////////////////////
-	bool					operator== (const ListColumnClass &src) const	{ return false; }
-	bool					operator!= (const ListColumnClass &src) const	{ return true; }
+	bool					operator== (const ListColumnClass &/* src*/) const	{ return false; }
+	bool					operator!= (const ListColumnClass &/* src*/) const	{ return true; }
 
 
 	////////////////////////////////////////////////////////////////
 	//	Public methods
 	////////////////////////////////////////////////////////////////
-	
+
 	//
 	//	Name access
 	//
-	const wchar_t *		Get_Name (void) const			{ return Header.Get_Name (); }
-	void					Set_Name (const wchar_t *name)	{ Header.Set_Name (name); }
+	const unichar_t *		Get_Name (void) const			{ return Header.Get_Name (); }
+	void					Set_Name (const unichar_t *name)	{ Header.Set_Name (name); }
 
 	//
 	//	Width access
@@ -385,14 +385,14 @@ public:
 	//
 	void					Move_Entry (int old_index, int new_index);
 	void					Swap_Entries (int index1, int index2);
-	int					Insert_Entry (int index, const wchar_t *entry_name);
+	int					Insert_Entry (int index, const unichar_t *entry_name);
 	int					Get_Entry_Count (void) const								{ return EntryList.Count (); }
 	bool					Delete_Entry (int index);
 	void					Delete_All_Entries (void);
-	
-	void					Set_Entry_Text (int index, const wchar_t *text)		{ EntryList[index]->Set_Name (text); }
-	const wchar_t *		Get_Entry_Text (int index) const							{ return EntryList[index]->Get_Name (); }	
-	
+
+	void					Set_Entry_Text (int index, const unichar_t *text)		{ EntryList[index]->Set_Name (text); }
+	const unichar_t *		Get_Entry_Text (int index) const							{ return EntryList[index]->Get_Name (); }
+
 	void					Set_Entry_Color (int index, const Vector3 &color)	{ EntryList[index]->Set_Color (color); }
 	const Vector3 &	Get_Entry_Color (int index) const						{ return EntryList[index]->Get_Color (); }
 
@@ -414,7 +414,7 @@ private:
 	////////////////////////////////////////////////////////////////
 	//	Private methods
 	////////////////////////////////////////////////////////////////
-	void					Free_Data (void);	
+	void					Free_Data (void);
 
 	////////////////////////////////////////////////////////////////
 	//	Private data types
@@ -438,7 +438,7 @@ private:
 class ListRowClass
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
 	////////////////////////////////////////////////////////////////
@@ -451,14 +451,14 @@ public:
 	////////////////////////////////////////////////////////////////
 	//	Public operators
 	////////////////////////////////////////////////////////////////
-	bool					operator== (const ListRowClass &src) const	{ return false; }
-	bool					operator!= (const ListRowClass &src) const	{ return true; }
+	bool					operator== (const ListRowClass &/* src*/) const	{ return false; }
+	bool					operator!= (const ListRowClass &/* src*/) const	{ return true; }
 
 
 	////////////////////////////////////////////////////////////////
 	//	Public methods
 	////////////////////////////////////////////////////////////////
-	
+
 	//
 	//	Height access
 	//

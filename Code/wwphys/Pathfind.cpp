@@ -140,7 +140,7 @@ PathfindClass::PathfindClass (void)
 //
 ///////////////////////////////////////////////////////////////////////////
 PathfindClass::~PathfindClass (void)
-{		
+{
 	Reset_Sectors ();
 	Reset_Portals ();
 	Reset_Waypaths ();
@@ -167,7 +167,7 @@ PathfindClass::Add_Sector (PathfindSectorClass *sector, bool add_to_tree)
 	WWASSERT (sector != NULL);
 	if (sector != NULL) {
 		sector->Add_Ref ();
-		
+
 		//
 		//	Add this sector to the culling system (if needs be)
 		//
@@ -233,7 +233,7 @@ PathfindClass::Add_Waypath_Portal (PathfindWaypathPortalClass *portal)
 	//
 	portal->Add_Ref ();
 	m_WaypathPortalList.Add (portal);
-	
+
 	//
 	//	Assign the portal a unique ID
 	//
@@ -266,7 +266,7 @@ PathfindClass::Add_Temporary_Portal
 	int retval = 0;
 
 	if (sector_from != NULL && sector_to != NULL) {
-		
+
 		//
 		//	Check to see if there is already a portal between the two sectors
 		//
@@ -298,7 +298,7 @@ PathfindClass::Add_Temporary_Portal
 			new_portal->Set_Action_Type (PathClass::ACTION_LEAP);
 			new_portal->Set_Destination (dest_pos);
 			new_portal->Set_ID (_NextTempPortalID ++);
-				
+
 			//
 			//	Add this portal to the housekeeping list
 			//
@@ -315,13 +315,13 @@ PathfindClass::Add_Temporary_Portal
 			//	Have we reached the maximum number of temporary portals?
 			//
 			if (m_TemporaryPortalList.Count () > MAX_TEMP_PORTALS) {
-				
+
 				//
 				//	Remove the first temp portal in the list
 				//
 				PathfindActionPortalClass *old_portal = (PathfindActionPortalClass *)m_TemporaryPortalList[0];
 				if (old_portal != NULL) {
-					
+
 					//
 					//	Remove the portal from which ever sectors reference it
 					//
@@ -355,7 +355,7 @@ PathfindClass::Save (ChunkSaveClass &csave)
 	WWMEMLOG(MEM_PATHFIND);
 
 	csave.Begin_Chunk (CHUNKID_DATABASE);
-	
+
 		//
 		//	Save the sectors and portals
 		//
@@ -388,7 +388,7 @@ PathfindClass::Save_Portals (ChunkSaveClass &csave)
 
 	int count = m_PortalList.Count ();
 	int index;
-	for (index = 0; index < count && retval; index ++) {		
+	for (index = 0; index < count && retval; index ++) {
 		PathfindPortalClass *portal = m_PortalList[index];
 
 		//
@@ -411,7 +411,7 @@ PathfindClass::Save_Portals (ChunkSaveClass &csave)
 	//	Now save the waypath portals
 	//
 	count = m_WaypathPortalList.Count ();
-	for (index = 0; index < count && retval; index ++) {		
+	for (index = 0; index < count && retval; index ++) {
 		PathfindPortalClass *portal = m_WaypathPortalList[index];
 
 		//
@@ -454,9 +454,9 @@ PathfindClass::Load (ChunkLoadClass &cload)
 	//
 	//	Read all the chunks...
 	//
-	while (retval && cload.Open_Chunk ()) {		
+	while (retval && cload.Open_Chunk ()) {
 		switch (cload.Cur_Chunk_ID ()) {
-			
+
 			case CHUNKID_HEIGHTDB:
 				retval &= HeightDBClass::Load (cload);
 				break;
@@ -485,7 +485,7 @@ PathfindClass::Load (ChunkLoadClass &cload)
 				retval &= Load_Portal (cload, portal);
 			}
 			break;
-			
+
 			default:
 			{
 				//
@@ -494,12 +494,12 @@ PathfindClass::Load (ChunkLoadClass &cload)
 				PersistFactoryClass *factory = SaveLoadSystemClass::Find_Persist_Factory (cload.Cur_Chunk_ID ());
 				if (factory != NULL) {
 					PersistClass *object = factory->Load (cload);
-					
+
 					//
 					//	Were we successful?
 					//
 					if (object != NULL) {
-						
+
 						//
 						//	If this is a waypath, then register it with the system
 						//
@@ -540,7 +540,7 @@ PathfindClass::Save_Sector
 	bool retval = true;
 
 	csave.Begin_Chunk (CHUNKID_SECTOR);
-		
+
 		//
 		//	Write this sector out to its own chunk
 		//
@@ -551,7 +551,7 @@ PathfindClass::Save_Sector
 		} else {
 			csave.Begin_Chunk (CHUNKID_SECTOR_OBJECT);
 		}
-		
+
 			retval &= sector->Save (csave);
 		csave.End_Chunk ();
 
@@ -584,9 +584,9 @@ PathfindClass::Load_Sector (ChunkLoadClass &cload)
 	//
 	//	Read all the chunks...
 	//
-	while (cload.Open_Chunk ()) {		
+	while (cload.Open_Chunk ()) {
 		switch (cload.Cur_Chunk_ID ()) {
-			
+
 			case CHUNKID_SECTOR_OBJECT:
 				sector = new PathfindSectorClass;
 				retval &= sector->Load (cload);
@@ -605,10 +605,10 @@ PathfindClass::Load_Sector (ChunkLoadClass &cload)
 			case CHUNKID_SECTOR_LINKAGE:
 				WWASSERT (sector != NULL);
 				if (sector != NULL) {
-					
+
 					//
 					//	Read the linkage information from the chunk
-					//					
+					//
 					m_SectorTree.Load_Object_Linkage (cload, sector);
 
 					//
@@ -616,7 +616,7 @@ PathfindClass::Load_Sector (ChunkLoadClass &cload)
 					//
 					Add_Sector (sector, false);
 
-				}				
+				}
 				break;
 
 			default:
@@ -706,12 +706,12 @@ static inline bool Clip_Point (Vector3 *point, const AABoxClass &box)
 	bool retval = (point->X != temp_point.X);
 	retval		|= (point->Y != temp_point.Y);
 	retval		|= (point->Z != temp_point.Z);
-	
+
 	//
 	//	Pass the new point back to the caller
 	//
 	(*point) = temp_point;
-	
+
 	return retval;
 }
 
@@ -742,19 +742,19 @@ PathfindClass::Collect_Sectors
 	for (	sector = m_SectorTree.Get_First_Collected_Object ();
 			sector != NULL;
 			sector = m_SectorTree.Get_Next_Collected_Object (sector))
-	{		
+	{
 		if (sector != exclude_sector) {
 
 			//
 			//	Ignore sectors that are 0 size
 			//
-			const AABoxClass &box = sector->Get_Bounding_Box ();
-			if (box.Extent.X != 0 && box.Extent.Y != 0 && box.Extent.Z != 0) {
+			const AABoxClass &bbox = sector->Get_Bounding_Box ();
+			if (bbox.Extent.X != 0 && bbox.Extent.Y != 0 && bbox.Extent.Z != 0) {
 				list.Add (sector);
 			}
 		}
-	}	
-		
+	}
+
 	return ;
 }
 
@@ -791,7 +791,7 @@ PathfindClass::Find_Sector
 	for (	sector = m_SectorTree.Get_First_Collected_Object ();
 			sector != NULL;
 			sector = m_SectorTree.Get_Next_Collected_Object (sector))
-	{				
+	{
 		if (sector != exclude_sector) {
 
 			//
@@ -812,12 +812,12 @@ PathfindClass::Find_Sector
 				float dist = (clipped_pos - position).Length ();
 				if (dist < closest) {
 					closest			= dist;
-					closest_sector	= sector;				
+					closest_sector	= sector;
 				}
 			}
 		}
-	}	
-		
+	}
+
 	//
 	//	Return the first (and hopefully only) sector
 	//
@@ -841,7 +841,7 @@ PathfindClass::Reset_Sectors (void)
 	//
 	for (int index = 0; index < m_SectorList.Count (); index ++) {
 		PathfindSectorClass *sector = m_SectorList[index];
-		
+
 		//
 		//	Remove this sector from the culling system (if necessary)
 		//
@@ -923,7 +923,7 @@ PathfindClass::Display_Sectors (bool onoff)
 	m_SectorDisplayWidgets.Reset_Debug_Widget_List ();
 
 	if (onoff) {
-		
+
 		//
 		//	Add boxes to our debug widget system to represent the sectors
 		//
@@ -982,7 +982,7 @@ PathfindClass::Display_Portals (bool onoff)
 			//	Add a box to the system
 			//
 			m_PortalDisplayWidgets.Add_Debug_AABox (bounding_box, color);
-		}		
+		}
 	}
 
 	m_PortalsDisplayed = onoff;
@@ -1018,11 +1018,11 @@ PathfindClass::Remove_Waypath (WaypathClass *waypath)
 	bool retval = false;
 
 	if (waypath != NULL) {
-		
+
 		int index = m_WaypathList.Count ();
 		while (index -- && (retval == false)) {
 			WaypathClass *curr_waypath = m_WaypathList[index];
-			
+
 			//
 			//	If this is the waypath we are looking for
 			// then remove it from the list and release our
@@ -1033,7 +1033,7 @@ PathfindClass::Remove_Waypath (WaypathClass *waypath)
 				m_WaypathList.Delete (index);
 				retval = true;
 			}
-		}		
+		}
 	}
 
 	return retval;
@@ -1057,27 +1057,27 @@ PathfindClass::Find_Waypath (int id) const
 	int index = m_WaypathList.Count ();
 	while (index -- && (waypath == NULL)) {
 		WaypathClass *curr_waypath = m_WaypathList[index];
-		
+
 		//
 		//	Is this the waypath we are looking for?
 		//
 		if (curr_waypath->Get_ID () == id) {
 			waypath = curr_waypath;
 		}
-	}		
+	}
 
 	return waypath;
 }
 
 ///////////////////////////////////////////////////////////////////////////
 //
-//	Count_Waypaths_Starting_In_Box 
+//	Count_Waypaths_Starting_In_Box
 //
 ///////////////////////////////////////////////////////////////////////////
 int PathfindClass::Count_Waypaths_Starting_In_Box (const AABoxClass & box)
 {
 	//
-	//	Loop over all the paths in our list counting the ones whose 
+	//	Loop over all the paths in our list counting the ones whose
 	// start points are contained inside the given box.
 	//
 	int count = 0;
@@ -1092,7 +1092,7 @@ int PathfindClass::Count_Waypaths_Starting_In_Box (const AABoxClass & box)
 
 ///////////////////////////////////////////////////////////////////////////
 //
-//	Get_Waypath_Starting_In_Box 
+//	Get_Waypath_Starting_In_Box
 //
 ///////////////////////////////////////////////////////////////////////////
 WaypathClass * PathfindClass::Get_Waypath_Starting_In_Box (const AABoxClass & box,int i)
@@ -1105,7 +1105,7 @@ WaypathClass * PathfindClass::Get_Waypath_Starting_In_Box (const AABoxClass & bo
 	int count = i;
 	for (int index=0; index<m_WaypathList.Count(); index++) {
 		WaypathClass *curr_waypath = m_WaypathList[index];
-		
+
 		if (CollisionMath::Overlap_Test(box,curr_waypath->Get_Point(0)->Get_Position()) == CollisionMath::INSIDE) {
 			if (count == 0) {
 				path = curr_waypath;
@@ -1115,7 +1115,7 @@ WaypathClass * PathfindClass::Get_Waypath_Starting_In_Box (const AABoxClass & bo
 			}
 		}
 	}
-	
+
 	if (path != NULL) {
 		path->Add_Ref();
 	}
@@ -1136,8 +1136,8 @@ PathfindClass::Reset_Waypaths (void)
 	int index = m_WaypathList.Count ();
 	while (index --) {
 		WaypathClass *waypath = m_WaypathList[index];
-		REF_PTR_RELEASE (waypath);	
-	}		
+		REF_PTR_RELEASE (waypath);
+	}
 
 	//
 	//	Remove all the waypaths from our list
@@ -1183,7 +1183,7 @@ PathfindClass::Save_Waypaths (ChunkSaveClass &csave)
 				waypoint->Get_Factory ().Save (csave, waypoint);
 			csave.End_Chunk ();
 		}
-	}		
+	}
 
 	return true;
 }
@@ -1237,9 +1237,9 @@ PathfindClass::Load_Culling_System (ChunkLoadClass &cload)
 	//
 	//	Read all the chunks...
 	//
-	while (cload.Open_Chunk ()) {		
+	while (cload.Open_Chunk ()) {
 		switch (cload.Cur_Chunk_ID ()) {
-			
+
 			case CHUNKID_SECTOR_CULL_TREE:
 				m_SectorTree.Load (cload);
 				break;
@@ -1283,14 +1283,14 @@ PathfindPortalClass *
 PathfindClass::Peek_Portal (int portal_index)
 {
 	PathfindPortalClass *portal = NULL;
-	
+
 	if (portal_index >= TEMP_PORTAL_ID_START) {
 
 		//
 		//	Try to find the portal in our temporary portal list
 		//
 		for (int index = 0; index < m_TemporaryPortalList.Count (); index ++) {
-			
+
 			//
 			//	Is this the portal we are looking for?
 			//
@@ -1300,8 +1300,8 @@ PathfindClass::Peek_Portal (int portal_index)
 			}
 		}
 
-	} else if (portal_index >= WAYPATH_PORTAL_ID_START) {				
-		
+	} else if (portal_index >= WAYPATH_PORTAL_ID_START) {
+
 		//
 		//	Look for the portal in our waypath portal list
 		//
@@ -1322,7 +1322,7 @@ PathfindClass::Peek_Portal (int portal_index)
 //////////////////////////////////////////////////////////////////////////////////
 float
 PathfindClass::Get_Height_Value (const Vector3 &pos)
-{	
+{
 	return HeightDBClass::Get_Height (pos);
 }
 
@@ -1341,7 +1341,7 @@ PathfindClass::Find_Random_Spot
 	float				max_dist,
 	Vector3 *		dest
 )
-{	
+{
 	bool retval = false;
 
 	//
@@ -1367,17 +1367,17 @@ PathfindClass::Find_Random_Spot
 		// the distance requirements to our list
 		//
 		for (int index = 0; index < start_sector->Get_Portal_Count (); index ++) {
-			PathfindPortalClass *portal		= start_sector->Peek_Portal (index);		
+			PathfindPortalClass *portal		= start_sector->Peek_Portal (index);
 			PathfindSectorClass *dest_sector	= portal->Peek_Dest_Sector (start_sector);
 			if (dest_sector != NULL) {
 				const AABoxClass &bounding_box = dest_sector->Get_Bounding_Box ();
-				
+
 				//
 				//	Find a "close" point to the box from the starting position
 				//
 				Vector3 closest_pt = center;
 				Clip_Point (&closest_pt, bounding_box);
-				
+
 				//
 				//	Is this box within the maximum acceptable distance?
 				//
@@ -1472,7 +1472,7 @@ PathfindClass::Free_Waypath_Sectors_And_Portals (void)
 	//
 	for (index = 0; index < m_SectorList.Count (); index ++) {
 		PathfindSectorClass *sector = m_SectorList[index];
-		
+
 		//
 		//	Is this sector a waypath sector?
 		//
@@ -1490,7 +1490,7 @@ PathfindClass::Free_Waypath_Sectors_And_Portals (void)
 	//
 	//	Reset the portal list
 	//
-	m_WaypathPortalList.Delete_All ();	
+	m_WaypathPortalList.Delete_All ();
 	return ;
 }
 
@@ -1511,7 +1511,7 @@ PathfindClass::Generate_Waypath_Sectors_And_Portals (void)
 	//
 	//	Loop over all the waypaths in the system
 	//
-	for (int index = 0; index < m_WaypathList.Count (); index ++) {		
+	for (int index = 0; index < m_WaypathList.Count (); index ++) {
 		WaypathClass *waypath = m_WaypathList[index];
 
 		//
@@ -1538,7 +1538,7 @@ PathfindClass::Generate_Waypath_Sector_And_Portals (WaypathClass *waypath)
 
 	//
 	//	Get information about this waypath
-	//		
+	//
 	int waypoint_count	= waypath->Get_Point_Count ();
 	int waypath_id			= waypath->Get_ID ();
 
@@ -1549,12 +1549,12 @@ PathfindClass::Generate_Waypath_Sector_And_Portals (WaypathClass *waypath)
 	PathfindWaypathSectorClass *new_sector = new PathfindWaypathSectorClass;
 	new_sector->Set_Waypath_ID (waypath_id);
 	new_sector->Set_Bounding_Box (AABoxClass (Vector3 (0, 0, 0), Vector3 (0, 0, 0)));
-	
+
 	//
 	//	Register this new sector with the pathfind system
 	//
-	Add_Sector (new_sector, false);		
-	
+	Add_Sector (new_sector, false);
+
 	//
 	//	Add a portal around each waypoint in the path
 	//
@@ -1583,7 +1583,7 @@ PathfindClass::Generate_Waypath_Sector_And_Portals (WaypathClass *waypath)
 	Add_Intersection_Portals_To_List (portal_list, waypath, new_sector);
 
 	if (portal_list.Count () > 0) {
-		
+
 		//
 		//	Now sort the portals based on occurance within the path
 		//
@@ -1595,7 +1595,7 @@ PathfindClass::Generate_Waypath_Sector_And_Portals (WaypathClass *waypath)
 		//
 		for (int portal_index = 0; portal_index < portal_list.Count (); portal_index ++) {
 			PathfindWaypathPortalClass *curr_portal = portal_list[portal_index];
-			
+
 			//
 			//	Register the portal
 			//
@@ -1615,7 +1615,7 @@ PathfindClass::Generate_Waypath_Sector_And_Portals (WaypathClass *waypath)
 			if (dest_sector1 != NULL) {
 				dest_sector1->Add_Portal (portal_id);
 			}
-		
+
 			if (dest_sector2 != NULL) {
 				dest_sector2->Add_Portal (portal_id);
 			}
@@ -1626,7 +1626,7 @@ PathfindClass::Generate_Waypath_Sector_And_Portals (WaypathClass *waypath)
 			REF_PTR_RELEASE (curr_portal);
 		}
 	}
-	
+
 	//
 	//	Now release our hold on the sector we just created
 	//
@@ -1670,7 +1670,7 @@ PathfindClass::Add_Intersection_Portals_To_List
 		extent.Y = std::max (WWMath::Fabs (extent.Y), 1.0F);
 		extent.Z = std::max (WWMath::Fabs (extent.Z), 1.0F);
 		AABoxClass bounding_box (center, extent);
-		
+
 		//
 		//	Find all the pathfind sectors in this bounding box
 		//
@@ -1679,8 +1679,8 @@ PathfindClass::Add_Intersection_Portals_To_List
 
 		//
 		//	Loop over all the sectors that this line segment could possibly intersect
-		//			
-		PathfindSectorClass *sector = NULL;			
+		//
+		PathfindSectorClass *sector = NULL;
 		for (	sector = m_SectorTree.Peek_First_Collected_Object ();
 				sector != NULL;
 				sector = m_SectorTree.Peek_Next_Collected_Object (sector))
@@ -1701,7 +1701,7 @@ PathfindClass::Add_Intersection_Portals_To_List
 						waypoint_index, portal_pos, percent);
 			}
 		}
-	}					
+	}
 
 	return ;
 }
@@ -1715,7 +1715,7 @@ PathfindClass::Add_Intersection_Portals_To_List
 void
 Add_New_Portal_To_List
 (
-	DynamicVectorClass<PathfindWaypathPortalClass *> &	portal_list,	
+	DynamicVectorClass<PathfindWaypathPortalClass *> &	portal_list,
 	PathfindSectorClass *										dest_sector1,
 	PathfindSectorClass *										dest_sector2,
 	int																waypath_id,
@@ -1738,9 +1738,9 @@ Add_New_Portal_To_List
 	//	Allcoate and configure a new portal
 	//
 	PathfindWaypathPortalClass *new_portal = new PathfindWaypathPortalClass;
-	new_portal->Set_Waypath_Pos (waypath_pos);				
+	new_portal->Set_Waypath_Pos (waypath_pos);
 	new_portal->Set_Bounding_Box (AABoxClass (portal_pos, portal_extent));
-	
+
 	if (dest_sector1 != NULL) {
 		new_portal->Add_Dest_Sector (dest_sector1);
 	}
@@ -1820,7 +1820,7 @@ Find_Intersection_Point
 	//	Loop over all the "t" values we've calculated
 	//
 	(*percent) = 2.0F;
-	for (int index = 0; index < 6; index ++) {		
+	for (int index = 0; index < 6; index ++) {
 
 		//
 		// Is this "t" value the smallest in-range value we've
@@ -1868,7 +1868,7 @@ fnCompareWaypathPortalsCallback
    WWASSERT (elem1 != NULL);
    WWASSERT (elem2 != NULL);
    PathfindWaypathPortalClass *portal1 = *((PathfindWaypathPortalClass **)elem1);
-   PathfindWaypathPortalClass *portal2 = *((PathfindWaypathPortalClass **)elem2);	
+   PathfindWaypathPortalClass *portal2 = *((PathfindWaypathPortalClass **)elem2);
 
 	const WaypathPositionClass &pos1 = portal1->Get_Waypath_Pos ();
 	const WaypathPositionClass &pos2 = portal2->Get_Waypath_Pos ();
@@ -1882,7 +1882,7 @@ fnCompareWaypathPortalsCallback
 	} else if (pos1.Get_Waypoint_Index () > pos2.Get_Waypoint_Index ()) {
 		result = 1;
 	} else {
-		
+
 		//
 		//	If the portals lie on the same segment, then sort by their
 		// position along the segment
@@ -1915,11 +1915,11 @@ PathfindClass::Find_Portals
 	//
 	//	Loop over all the portals
 	//
-	for (int index = 0; index < m_PortalList.Count (); index ++) {		
+	for (int index = 0; index < m_PortalList.Count (); index ++) {
 		PathfindPortalClass *portal					= m_PortalList[index];
 		PathfindActionPortalClass *action_portal	= portal->As_PathfindActionPortalClass ();
 		if (action_portals_only == false || (action_portal != NULL && portal->Get_Action_Type () != PathClass::ACTION_NONE)) {
-			
+
 			//
 			//	Get the bounding box for the portal
 			//
@@ -1933,7 +1933,7 @@ PathfindClass::Find_Portals
 			Vector3 intersection_pt (0, 0, 0);
 			if (::Find_Intersection_Point (box, p0, p1, &percent1, &intersection_pt)) {
 				bool is_valid = true;
-				
+
 				//
 				//	If this is an action portal request, we need to ensure that the
 				// line segment passes through to the exit portal
@@ -1948,17 +1948,17 @@ PathfindClass::Find_Portals
 						//
 						PathfindPortalClass *exit_portal = action_portal->Get_Exit_Portal ();
 						if (exit_portal != NULL) {
-							
+
 							//
 							//	Does the line segment pass through to the exit portal?
-							//						
+							//
 							AABoxClass exit_box;
 							exit_portal->Get_Bounding_Box (exit_box);
 							if (::Find_Intersection_Point (exit_box, p0, p1,
 										&percent1, &intersection_pt))
 							{
 								float dist1 = (box.Center - p0).Length2 ();
-								float dist2 = (exit_box.Center - p0).Length2 ();							
+								float dist2 = (exit_box.Center - p0).Length2 ();
 								if (dist1 < dist2) {
 									is_valid = true;
 								}
@@ -1966,7 +1966,7 @@ PathfindClass::Find_Portals
 						}
 					}
 				}
-				
+
 				//
 				//	Add the portal to the list
 				//

@@ -142,7 +142,7 @@ UnitCoordinationZoneMgr::Detect_Elevator_Zones (void)
 	//
 	//	Loop over all the static anim objects in the world
 	//
-	for (iterator.First (); iterator.Is_Done () == false; iterator.Next ()) {	
+	for (iterator.First (); iterator.Is_Done () == false; iterator.Next ()) {
 		StaticAnimPhysClass *phys_obj = (StaticAnimPhysClass *)iterator.Peek_Obj ();
 		if (phys_obj != NULL && phys_obj->As_ElevatorPhysClass () != NULL) {
 

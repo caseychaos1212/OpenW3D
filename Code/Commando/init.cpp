@@ -61,6 +61,7 @@
 #include "msgloop.h"
 #include "resource.h"
 #include "miscutil.h"
+#include "pathutil.h"
 #include "cnetwork.h"
 #include "mathutil.h"
 #include "win.h"
@@ -111,6 +112,7 @@
 #include "gamespyadmin.h"
 #include "shutdown.h"
 #include "specialbuilds.h"
+#include "wwdialog.h"
 #include <cstdio>
 
 extern const char *VALUE_NAME_TEXTURE_FILTER_MODE;
@@ -135,10 +137,10 @@ extern const char *VALUE_NAME_TEXTURE_FILTER_MODE;
 /*
 ** This defines the subdirectory where the game will load all data from
 */
-const char *	DATA_SUBDIRECTORY			= "DATA\\";
-const char *	SAVE_SUBDIRECTORY			= "DATA\\SAVE\\";
-const char *	CONFIG_SUBDIRECTORY		= "DATA\\CONFIG\\";
-const char *	MOVIES_SUBDIRECTORY		= "DATA\\MOVIES\\";
+const char *	DATA_SUBDIRECTORY			= "DATA/";
+const char *	SAVE_SUBDIRECTORY			= "DATA/SAVE/";
+const char *	CONFIG_SUBDIRECTORY		= "DATA/CONFIG/";
+const char *	MOVIES_SUBDIRECTORY		= "DATA/MOVIES/";
 
 
 #define	STRINGS_FILENAME					"STRINGS.TDB"
@@ -364,7 +366,7 @@ void Commando_Assert_Handler(const char * message)
 /*
 **
 */
-void __stdcall AudioTextCallback(AudibleSoundClass *sound_obj, const StringClass &text, uint32 user_param)
+void AudioTextCallback(AudibleSoundClass * /* sound_obj */, const StringClass &text, uint32 /* user_param */)
 {
 	Vector3 red = Vector3( 1, 0.5f, 0.5f );
 	StringClass str;
@@ -435,27 +437,27 @@ void	Construct_Directory_Structure(void)
 	StringClass data_dir(path,true);
 	data_dir += "data";
 
-	StringClass save_dir(data_dir + "\\save",true);
-	StringClass config_dir(data_dir + "\\config",true);
+	StringClass save_dir(data_dir +  "/save",true);
+	StringClass config_dir(data_dir +  "/config",true);
 
 	//
 	//	Create the data directory if necessary
 	//
-	if (GetFileAttributesA (data_dir) == 0xFFFFFFFF) {
+	if (!cPathUtil::PathExists (data_dir)) {
 		::CreateDirectoryA (data_dir, NULL);
 	}
 
 	//
 	//	Create the save directory if necessary
 	//
-	if (GetFileAttributesA (save_dir) == 0xFFFFFFFF) {
+	if (!cPathUtil::PathExists (save_dir)) {
 		::CreateDirectoryA (save_dir, NULL);
 	}
 
 	//
 	//	Create the config directory if necessary
 	//
-	if (GetFileAttributesA (config_dir) == 0xFFFFFFFF) {
+	if (!cPathUtil::PathExists (config_dir)) {
 		::CreateDirectoryA (config_dir, NULL);
 	}
 
@@ -465,7 +467,7 @@ void	Construct_Directory_Structure(void)
 
 static bool Verify_Log_Directory(const StringClass& folder)
 {
-	if (GetFileAttributesA(folder)!=0xffffffff) return true;
+	if (cPathUtil::PathExists(folder)) return true;
 	//HANDLE file;
 	//file = CreateFileA(folder, 0, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	//if (file!=INVALID_HANDLE_VALUE) {
@@ -486,12 +488,12 @@ static bool Create_Log_File_Name(const StringClass& folder, StringClass& filenam
 {
 	StringClass original(filename);
 	if (!use_numbering) {
-		filename.Format("%s\\%s",folder,original);
+		filename.Format("%s/%s",folder.Peek_Buffer(),original.Peek_Buffer());
 		return true;
 	}
 	for (int i=0;i<999;++i) {
 		HANDLE file;
-		filename.Format("%s\\%3.3d%s",folder,i,original);
+		filename.Format("%s/%3.3d%s",folder.Peek_Buffer(),i,original.Peek_Buffer());
 		file = CreateFileA(filename, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (file!=INVALID_HANDLE_VALUE) {
 			CloseHandle(file);
@@ -534,7 +536,7 @@ public:
 	CopyThreadClass()
 		:
 		Version(0),
-		ThreadClass("LogCopyThread", &Exception_Handler) {}
+		ThreadClass("LogCopyThread") {}
 
 	void Thread_Function() override
 	{
@@ -547,12 +549,12 @@ public:
 		RegistryClass reg(APPLICATION_SUB_KEY_NAME_DEBUG);
 		char path[MAX_PATH];
 		reg.Get_String("LogPath", path, sizeof(path), "\\\\tanya\\game\\projects\\renegade\\_error_logs");
-		strcat(path, "\\");
+		strcat(path, "/");
 
 		StringClass folder_name(0,true);
 		folder_name.Format("%s%d.%d",path,Version>>16,Version&0xffff);
 		if (!Verify_Log_Directory(folder_name)) return;
-		folder_name+="\\";
+		folder_name+="/";
 		folder_name+=computer_name;
 		if (!Verify_Log_Directory(folder_name)) return;
 
@@ -613,12 +615,35 @@ bool RestartNeeded = true;
  * HISTORY:                                                                                    *
  *   12/3/2001 11:26PM ST : Created                                                            *
  *=============================================================================================*/
-void Get_Version_Number(unsigned long *major, unsigned long *minor)
-{
-	// Version info removed per Legal review requirements. LFeenanEA - 8th February 2025
-	
-	unsigned long version_major = 0;
-	unsigned long version_minor = 0;
+void Get_Version_Number(unsigned int * major, unsigned int * minor) {
+	unsigned int file_minor = 0;
+	unsigned int file_major = 1;
+	char filename[MAX_PATH];
+
+	GetModuleFileNameA(nullptr, filename, sizeof(filename));
+	DWORD dwHandle;
+	DWORD version_info_size = GetFileVersionInfoSizeA(filename, &dwHandle);
+	if (version_info_size == 0) {
+		return;
+	}
+	char *version_info_buffer = new char[version_info_size];
+	if (GetFileVersionInfoA(filename, 0, version_info_size, version_info_buffer)) {
+		VS_FIXEDFILEINFO * vs_fixed_file_info = nullptr;
+		UINT len = 0;
+		if (VerQueryValueA(version_info_buffer, "\\", reinterpret_cast<void **>(&vs_fixed_file_info), &len)) {
+			file_major = vs_fixed_file_info->dwFileVersionMS;
+			file_minor = vs_fixed_file_info->dwFileVersionLS;
+		}
+	}
+	delete[] version_info_buffer;
+
+	DebugManager::Set_Version_Number(file_major);
+	if (major != nullptr) {
+		*major = file_major;
+	}
+	if (minor != nullptr) {
+		*minor = file_minor;
+	}
 }
 
 
@@ -630,7 +655,7 @@ void Get_Version_Number(unsigned long *major, unsigned long *minor)
 #define	LAST_CHAR	'z'
 
 #include "realcrc.h"
-int	CRC_Next( unsigned char ** p, int length ) 
+int	CRC_Next( unsigned char ** p, int length )
 {
 	int ret = 0;
 	if ( length == -1 ) {
@@ -648,7 +673,7 @@ int	CRC_Next( unsigned char ** p, int length )
 
 }
 
-void CRC_Check( void ) 
+void CRC_Check( void )
 {
 	Debug_Say(( "CRC_Check\n" ));
 	int count = 0;
@@ -659,7 +684,7 @@ void CRC_Check( void )
 	int start = timeGetTime();
 
 	unsigned char string[MAX_STRING+1];
-	for ( int length = 1; length <= MAX_STRING; length++ ) 
+	for ( int length = 1; length <= MAX_STRING; length++ )
 	{
 		unsigned char * p = &string[length-1];
 		string[length] = 0;
@@ -699,7 +724,7 @@ bool Game_Init(void)
 	RegistryClass registry( APPLICATION_SUB_KEY_NAME_DEBUG );
 	if ( registry.Is_Valid() ) {
 		registry.Set_Int( VALUE_NAME_GAME_INITIALIZATION_IN_PROGRESS, 1 );
-		unsigned crash_version=registry.Get_Int( VALUE_NAME_APPLICATION_CRASH_VERSION, 0 );
+		[[maybe_unused]] unsigned crash_version=registry.Get_Int( VALUE_NAME_APPLICATION_CRASH_VERSION, 0 );
 #ifdef WWDEBUG
 		if (crash_version) Copy_Logs(crash_version);
 #endif // WWDEBUG
@@ -746,9 +771,9 @@ bool Game_Init(void)
 	//	Search for all mix files in the data directory
 	//
 	WIN32_FIND_DATAA find_info	= { 0 };
-	BOOL keep_going				= TRUE;
+	BOOL keep_going				= true;
 	HANDLE file_find				= NULL;
-	for (file_find = ::FindFirstFileA ("data\\*.mix", &find_info);
+	for (file_find = ::FindFirstFileA ("data/*.mix", &find_info);
 		 (file_find != INVALID_HANDLE_VALUE) && keep_going;
 		  keep_going = ::FindNextFileA (file_find, &find_info))
 	{
@@ -783,18 +808,10 @@ bool Game_Init(void)
 		FreeRandom.Get_Int();
 	}
 
-	// Thumbnail manager pre init will ensure that thumbnail database
-	// is up-to-date.
-	bool show_thumbnail_pre_init_dialog = true;
-#ifdef WWDEBUG
-	show_thumbnail_pre_init_dialog = cDevOptions::ShowThumbnailPreInitDialog.Get();
-#endif // WWDEBUG
-//	ThumbnailManagerClass::Pre_Init(show_thumbnail_pre_init_dialog);
-
 	//
 	// Create an instance of the sound library
 	//
-	new WWAudioClass(ConsoleBox.Is_Exclusive());
+	WWAudioClass::Create_Instance(ConsoleBox.Is_Exclusive());
 	WWAudioClass::Get_Instance()->Initialize( APPLICATION_SUB_KEY_NAME_SOUND );
 	WWAudioClass::Get_Instance()->Set_File_Factory( &AudioFileFactory );
 	// Install text callback
@@ -938,10 +955,9 @@ bool Game_Init(void)
 	// table version
 	//
 	if (TranslateDBClass::Get_Version_Number () != STRINGS_VER) {
-		MessageBoxA( 0,
+		::Show_Message_Box(MESSAGEBOX_BUTTONS_OK | MESSAGEBOX_SEVERITY_WARNING,
 			"This build of Renegade is out of sync with the strings database (strings.tdb).  Strings will be incorrect and may cause the game to crash.",
-			"Version Error",
-			MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND  );
+			"Version Error");
 	}
 
 	//

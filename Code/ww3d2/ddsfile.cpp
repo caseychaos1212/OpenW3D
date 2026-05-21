@@ -42,12 +42,13 @@ DDSFileClass::DDSFileClass(const char* name,unsigned reduction_factor)
 {
 	strncpy(Name,name,sizeof(Name));
 	// The name could be given in .tga or .dds format, so ensure we're opening .dds...
-	int len=strlen(Name);
+	size_t len = strlen(Name);
+	WWASSERT(len >= 3);
 	Name[len-3]='d';
 	Name[len-2]='d';
 	Name[len-1]='s';
 
-	file_auto_ptr file(_TheFileFactory,Name);	
+	file_auto_ptr file(_TheFileFactory,Name);
 	if (!file->Is_Available()) {
 		return;
 	}
@@ -124,7 +125,7 @@ DDSFileClass::~DDSFileClass()
 
 unsigned DDSFileClass::Get_Width(unsigned level) const
 {
-	WWASSERT(level<MipLevels); 
+	WWASSERT(level<MipLevels);
 	unsigned width=Width>>level;
 	if (width<4) width=4;
 	return width;
@@ -132,7 +133,7 @@ unsigned DDSFileClass::Get_Width(unsigned level) const
 
 unsigned DDSFileClass::Get_Height(unsigned level) const
 {
-	WWASSERT(level<MipLevels); 
+	WWASSERT(level<MipLevels);
 	unsigned height=Height>>level;
 	if (height<4) height=4;
 	return height;
@@ -140,13 +141,13 @@ unsigned DDSFileClass::Get_Height(unsigned level) const
 
 const unsigned char* DDSFileClass::Get_Memory_Pointer(unsigned level) const
 {
-	WWASSERT(level<MipLevels); 
+	WWASSERT(level<MipLevels);
 	return DDSMemory+LevelOffsets[level];
 }
 
 unsigned DDSFileClass::Get_Level_Size(unsigned level) const
 {
-	WWASSERT(level<MipLevels); 
+	WWASSERT(level<MipLevels);
 	return LevelSizes[level];
 }
 
@@ -175,7 +176,7 @@ bool DDSFileClass::Load()
 	if (DDSMemory) return false;
 	if (!LevelSizes || !LevelOffsets) return false;
 
-	file_auto_ptr file(_TheFileFactory,Name);	
+	file_auto_ptr file(_TheFileFactory,Name);
 	if (!file->Is_Available()) {
 		return false;
 	}
@@ -195,14 +196,14 @@ bool DDSFileClass::Load()
 	}
 
 	// Skip the header and info block and possible unused mip levels
-	unsigned seek_size=file->Seek(SurfaceDesc.Size+4+skipped_offset);
+	[[maybe_unused]] unsigned seek_size=file->Seek(SurfaceDesc.Size+4+skipped_offset);
 	WWASSERT(seek_size==(SurfaceDesc.Size+4+skipped_offset));
 
 	if (size) {
 		// Allocate memory for the data excluding the headers
 		DDSMemory=new unsigned char[size];
 		// Read data
-		unsigned read_size=file->Read(DDSMemory,size);
+		[[maybe_unused]] unsigned read_size=file->Read(DDSMemory,size);
 		// Verify we got all the data
 		WWASSERT(read_size==size);
 	}
@@ -252,10 +253,10 @@ void DDSFileClass::Copy_Level_To_Surface(unsigned level,IDirect3DSurface9* d3d_s
 
 void DDSFileClass::Copy_Level_To_Surface(
 	unsigned level,
-	WW3DFormat dest_format, 
-	unsigned dest_width, 
-	unsigned dest_height, 
-	unsigned char* dest_surface, 
+	WW3DFormat dest_format,
+	unsigned dest_width,
+	unsigned dest_height,
+	unsigned char* dest_surface,
 	unsigned dest_pitch)
 {
 	WWASSERT(DDSMemory);
@@ -428,10 +429,10 @@ unsigned DDSFileClass::Get_Pixel(unsigned level,unsigned x,unsigned y) const
 			}
 			WWASSERT(alpha_index<8);
 
-			// 8-alpha or 6-alpha block?    
+			// 8-alpha or 6-alpha block?
 			unsigned alpha_value=0;
-			if (alpha0>alpha1) {    
-				// 8-alpha block:  derive the other six alphas.    
+			if (alpha0>alpha1) {
+				// 8-alpha block:  derive the other six alphas.
 				// Bit code 000 = alpha_0, 001 = alpha_1, others are interpolated.
 				switch (alpha_index) {
 				case 0: alpha_value=alpha0; break;
@@ -441,11 +442,11 @@ unsigned DDSFileClass::Get_Pixel(unsigned level,unsigned x,unsigned y) const
 				case 4: alpha_value=(4*alpha0+3*alpha1+3) / 7; break;    // bit code 100
 				case 5: alpha_value=(3*alpha0+4*alpha1+3) / 7; break;    // bit code 101
 				case 6: alpha_value=(2*alpha0+5*alpha1+3) / 7; break;    // bit code 110
-				case 7: alpha_value=(1*alpha0+6*alpha1+3) / 7; break;    // bit code 111  
+				case 7: alpha_value=(1*alpha0+6*alpha1+3) / 7; break;    // bit code 111
 				}
-			}    
-			else {  
-				// 6-alpha block.    
+			}
+			else {
+				// 6-alpha block.
 				// Bit code 000 = alpha_0, 001 = alpha_1, others are interpolated.
 				switch (alpha_index) {
 				case 0: alpha_value=alpha0; break;
@@ -581,14 +582,14 @@ bool DDSFileClass::Get_4x4_Block(
 			alphas[0]=alpha_block[0];
 			alphas[1]=alpha_block[1];
 
-			// 8-alpha or 6-alpha block?    
-			if (alphas[0]>alphas[1]) {    
+			// 8-alpha or 6-alpha block?
+			if (alphas[0]>alphas[1]) {
 				alphas[2]=(6*alphas[0]+1*alphas[1]+3) / 7;   // bit code 010
 				alphas[3]=(5*alphas[0]+2*alphas[1]+3) / 7;   // bit code 011
 				alphas[4]=(4*alphas[0]+3*alphas[1]+3) / 7;   // bit code 100
 				alphas[5]=(3*alphas[0]+4*alphas[1]+3) / 7;   // bit code 101
 				alphas[6]=(2*alphas[0]+5*alphas[1]+3) / 7;   // bit code 110
-				alphas[7]=(1*alphas[0]+6*alphas[1]+3) / 7;   // bit code 111  
+				alphas[7]=(1*alphas[0]+6*alphas[1]+3) / 7;   // bit code 111
 			}
 			else {
 				alphas[2]=(4*alphas[0]+1*alphas[1]+2) / 5;   // Bit code 010

@@ -23,7 +23,7 @@ Project Name: Carpenter  (The RedAlert ladder creator)
 File Name   : configfile.cpp
 Author      : Neal Kettler
 Start Date  : June 9, 1997
-Last Update : June 17, 1997  
+Last Update : June 17, 1997
 
 
 This class will read in a config file and store the key value pairs for
@@ -73,21 +73,21 @@ bit8 ConfigFile::readFile(FILE *in)
     key=cptr;
     key.truncate('=');
     key.removeSpaces();  // No spaces allowed in the key
-    key.toUpper();       // make key all caps 
+    key.toUpper();       // make key all caps
     cptr=Eat_Spaces(strchr(cptr,'=')+1); // Jump to after the '='
     value=cptr;
     value.truncate('\r');
     value.truncate('\n');
     dictionary.add(key,value);
-  } 
-  return(TRUE);
+  }
+  return(true);
 }
 
 // Get a config entry as a string
 bit8 ConfigFile::getString(Wstring &key,Wstring &value)
 {
   return(dictionary.getValue(key,value));
-} 
+}
 
 // Get a config entry as a string
 bit8 ConfigFile::getString(char *key,Wstring &value)
@@ -95,17 +95,17 @@ bit8 ConfigFile::getString(char *key,Wstring &value)
   Wstring sKey;
   sKey.set(key);
   return(getString(sKey,value));
-}   
+}
 
 // Get a config entry as an integer
 bit8 ConfigFile::getInt(Wstring &key,sint32 &value)
 {
   Wstring svalue;
   bit8 retval=dictionary.getValue(key,svalue);
-  if (retval==FALSE)
-    return(FALSE);
+  if (retval==false)
+    return(false);
   value=atol(svalue.get());
-  return(TRUE);
+  return(true);
 }
 
 // Get a config entry as an integer
@@ -114,7 +114,7 @@ bit8 ConfigFile::getInt(char *key,sint32 &value)
   Wstring sKey;
   sKey.set(key);
   return(getInt(sKey,value));
-}    
+}
 
 
 
@@ -123,12 +123,12 @@ bit8 ConfigFile::getInt(Wstring &key,sint16 &value)
 {
   Wstring svalue;
   bit8 retval=dictionary.getValue(key,svalue);
-  if (retval==FALSE)
-    return(FALSE);
+  if (retval==false)
+    return(false);
   value=atoi(svalue.get());
-  return(TRUE);
+  return(true);
 }
- 
+
 // Get a config entry as an integer
 bit8 ConfigFile::getInt(char *key,sint16 &value)
 {
@@ -154,7 +154,7 @@ static uint32 Wstring_Hash(Wstring &string)
     retval=(retval<<8)^(retval>>24);  // ROL 8
   }
   return(retval);
-}         
+}
 
 static char *Eat_Spaces(char *string)
 {

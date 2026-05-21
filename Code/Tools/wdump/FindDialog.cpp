@@ -65,24 +65,24 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // FindDialog message handlers
 
-BOOL FindDialog::OnInitDialog() 
+BOOL FindDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	((CEdit*) GetDlgItem (IDC_FIND_STRING))->SetLimitText (MAX_FIND_STRING_LENGTH);
 	GetDlgItem (IDC_FIND_STRING)->SetWindowText (_FindString);
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return true;  // return true unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return false
 }
 
 
-void FindDialog::OnChangeFindString() 
+void FindDialog::OnChangeFindString()
 {
 	GetDlgItem (IDC_FIND_STRING)->GetWindowText (_FindString, MAX_FIND_STRING_LENGTH);
 }
 
-void FindDialog::OnUpdateFindString() 
+void FindDialog::OnUpdateFindString()
 {
-	GetDlgItem (IDOK)->EnableWindow (GetDlgItem (IDC_FIND_STRING)->GetWindowTextLength() > 0);	
+	GetDlgItem (IDOK)->EnableWindow (GetDlgItem (IDC_FIND_STRING)->GetWindowTextLength() > 0);
 }

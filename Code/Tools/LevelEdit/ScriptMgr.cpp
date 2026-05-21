@@ -36,6 +36,7 @@
 
 
 #include "StdAfx.h"
+#include "pathutil.h"
 #include "scriptmgr.h"
 #include "scriptevents.H"
 #include "EditScript.h"
@@ -97,7 +98,7 @@ ScriptMgrClass::Initialize (void)
 	// Find all files that match this wildcard
 	//
 	/*WIN32_FIND_DATA find_info = { 0 };
-	BOOL keep_going = TRUE;
+	BOOL keep_going = true;
 	for (HANDLE file_find = ::FindFirstFile (search_path, &find_info);
 		  (file_find != INVALID_HANDLE_VALUE) && keep_going;
 		  keep_going = ::FindNextFile (file_find, &find_info))
@@ -108,10 +109,10 @@ ScriptMgrClass::Initialize (void)
 		//
 		//CString dll_name = ::Make_Path (scripts_path, Get_Filename_From_Path (find_info.cFileName));
 		CString dll_name = ::Make_Path (scripts_path, filename);
-		if (::GetFileAttributes (dll_name) != 0xFFFFFFFF) {
+		if (cPathUtil::PathExists (dll_name)) {
 			HMODULE module_handle = ::LoadLibrary (dll_name);
 			if (module_handle != NULL) {
-				
+
 				// Lookup the function pointer we need to call to determine
 				// a filename list
 				LPFN_GET_SCRIPT_COUNT pfn_get_script_count		= (LPFN_GET_SCRIPT_COUNT)::GetProcAddress (module_handle, LPSTR_GET_SCRIPT_COUNT);
@@ -125,14 +126,14 @@ ScriptMgrClass::Initialize (void)
 					 (pfn_get_param_desc != NULL))
 				{
 					int count = (*pfn_get_script_count) ();
-					
+
 					//
 					// Loop through all the scripts in the list and add their names
 					// to our list
 					//
 					for (int index = 0; index < count; index ++) {
 						EditScriptClass *script = new EditScriptClass;
-						
+
 						//
 						// Pass the script name, and the script params onto our object
 						//
@@ -154,7 +155,7 @@ ScriptMgrClass::Initialize (void)
 	if (file_find != INVALID_HANDLE_VALUE) {
 		::FindClose (file_find);
 	}*/
-	
+
 	return ;
 }
 
@@ -189,7 +190,7 @@ ScriptMgrClass::Find_Script (LPCTSTR name)
 
 	for (int index = 0; (index < _ScriptList.Count ()) && (script == NULL); index++) {
 		EditScriptClass *curr_script = _ScriptList[index];
-		
+
 		//
 		//	Is this the script we are looking for?
 		//

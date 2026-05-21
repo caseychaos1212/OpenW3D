@@ -44,6 +44,7 @@
 #include "ffactory.h"
 #include "WWAudio.h"
 #include <algorithm>
+#include <limits>
 
 
 ////////////////////////////////////////////////////////////////
@@ -71,7 +72,7 @@ static FONT_DESC	DEFAULT_FONTS[StyleMgrClass::FONT_MAX] =
 	{ "Regatta Condensed LET",	20,	false },
 	{ "Arial MT",					9,		true },
 	{ "Arial MT",					12,	true },
-	
+
 	{ "Arial MT",					10,	false },
 	{ "Arial MT",					10,	true },
 
@@ -193,8 +194,8 @@ StyleMgrClass::Initialize_From_INI (const char *filename)
 		const char *FONT_FILE_SECTION	= "Font File List";
 		const char *FONT_NAME_SECTION	= "Font Names";
 
-		const char *FONT_INI_ENTRIES[FONT_MAX] = 
-		{		
+		const char *FONT_INI_ENTRIES[FONT_MAX] =
+		{
 			"FONT_TITLE",
 			"FONT_LG_CONTROLS",
 			"FONT_CONTROLS",
@@ -218,27 +219,27 @@ StyleMgrClass::Initialize_From_INI (const char *filename)
 		int count = ini_file->Entry_Count (FONT_FILE_SECTION);
 		int index;
 		for (index = 0; index < count; index ++) {
-			StringClass	filename (0, true);
-			ini_file->Get_String (filename, FONT_FILE_SECTION, ini_file->Get_Entry (FONT_FILE_SECTION, index));
+			StringClass	font_filename (0, true);
+			ini_file->Get_String (font_filename, FONT_FILE_SECTION, ini_file->Get_Entry (FONT_FILE_SECTION, index));
 
 			//
 			//	Install the font into windows
 			//
-			::AddFontResourceA (filename);
-			FontFileList.Add (filename);
+			::AddFontResourceA (font_filename);
+			FontFileList.Add (font_filename);
 		}
 
 		//
 		//	Read information about each font and load it into the system
 		//
 		for (index = 0; index < FONT_MAX; index ++) {
-			
+
 			//
 			//	Read information about this font
 			//
 			StringClass font_entry;
 			ini_file->Get_String (font_entry, FONT_NAME_SECTION, FONT_INI_ENTRIES[index]);
-			
+
 			//
 			//	Parse the information
 			//
@@ -250,8 +251,8 @@ StyleMgrClass::Initialize_From_INI (const char *filename)
 			//
 			//	Scale the point size to fit this resolution
 			//
-			float point_size = ((float)::atoi (font_size)) * ScaleY;			
-			
+			float point_size = ((float)::atoi (font_size)) * ScaleY;
+
 			//
 			//	Remove bold from "small" fonts if they're scaled down
 			//
@@ -381,7 +382,7 @@ StyleMgrClass::Assign_Font (Render2DSentenceClass *renderer, FONT_STYLE style)
 /*void
 StyleMgrClass::Render_Text
 (
-	const wchar_t *			text,
+	const unichar_t *			text,
 	Render2DTextClass *	renderer,
 	int						x_pos,
 	int						y_pos,
@@ -436,7 +437,7 @@ StyleMgrClass::Render_Text
 void
 StyleMgrClass::Render_Title_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	const RectClass &			rect
 )
@@ -456,7 +457,7 @@ StyleMgrClass::Render_Title_Text
 	//
 	int x_pos = int(rect.Left + (rect.Width () / 2) - (text_extent.X / 2));
 	int y_pos = int(rect.Top + (rect.Height () / 2) - (text_extent.Y / 2));
-	
+
 	//
 	//	Build the textures for the text we'll be drawing
 	//
@@ -478,7 +479,7 @@ StyleMgrClass::Render_Title_Text
 	//	Draw the text
 	//
 	renderer->Set_Location (Vector2 (x_pos, y_pos));
-	renderer->Draw_Sentence (TitleColor);		
+	renderer->Draw_Sentence (TitleColor);
 	return ;
 }
 
@@ -491,9 +492,9 @@ StyleMgrClass::Render_Title_Text
 void
 StyleMgrClass::Render_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
-	const RectClass &			rect,	
+	const RectClass &			rect,
 	bool							do_shadow,
 	bool							do_clip,
 	JUSTIFICATION				justify,
@@ -524,11 +525,11 @@ StyleMgrClass::Render_Text
 void
 StyleMgrClass::Render_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	uint32						text_color,
 	uint32						shadow_color,
-	const RectClass &			rect,	
+	const RectClass &			rect,
 	bool							do_shadow,
 	bool							do_clip,
 	JUSTIFICATION				justify,
@@ -560,7 +561,7 @@ StyleMgrClass::Render_Text
 	//	Handle other justifications
 	//
 	if (justify == RIGHT_JUSTIFY) {
-		
+
 		//
 		//	Caclulate right justification
 		//
@@ -603,11 +604,11 @@ StyleMgrClass::Render_Text
 /*void
 StyleMgrClass::Render_Text
 (
-	const wchar_t *			text,
+	const unichar_t *			text,
 	Render2DTextClass *	renderer,
 	uint32					text_color,
 	uint32					shadow_color,
-	const RectClass &		rect,	
+	const RectClass &		rect,
 	bool						do_shadow,
 	bool						do_clip,
 	JUSTIFICATION			justify
@@ -635,7 +636,7 @@ StyleMgrClass::Render_Text
 	//	Handle other justifications
 	//
 	if (justify == RIGHT_JUSTIFY) {
-		
+
 		//
 		//	Caclulate right justification
 		//
@@ -674,11 +675,11 @@ StyleMgrClass::Render_Text
 /*void
 StyleMgrClass::Render_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	uint32						text_color,
 	uint32						shadow_color,
-	const RectClass &			rect,	
+	const RectClass &			rect,
 	bool							do_shadow,
 	bool							do_clip,
 	JUSTIFICATION				justify
@@ -706,7 +707,7 @@ StyleMgrClass::Render_Text
 	//	Handle other justifications
 	//
 	if (justify == RIGHT_JUSTIFY) {
-		
+
 		//
 		//	Caclulate right justification
 		//
@@ -748,12 +749,12 @@ StyleMgrClass::Render_Text
 void
 StyleMgrClass::Render_Wrapped_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	const RectClass &			rect,
 	bool							do_shadow,
 	bool							do_vcenter,
-	bool							is_enabled	
+	bool							is_enabled
 )
 {
 	//
@@ -782,7 +783,7 @@ StyleMgrClass::Render_Wrapped_Text
 void
 StyleMgrClass::Render_Wrapped_Text_Ex
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	const RectClass &			rect,
 	bool							do_shadow,
@@ -819,10 +820,10 @@ StyleMgrClass::Render_Wrapped_Text_Ex
 void
 StyleMgrClass::Render_Wrapped_Text_Ex
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	uint32						text_color,
-	uint32						shadow_color, 
+	uint32						shadow_color,
 	const RectClass &			rect,
 	bool							do_shadow,
 	bool							do_vcenter,
@@ -858,22 +859,23 @@ StyleMgrClass::Render_Wrapped_Text_Ex
 				dest = src_start;							\
 			} else {											\
 				size_t bytes	= ((char *)src_end - (char *)src_start);	\
-				size_t len		= bytes / sizeof (wchar_t);						\
-				::memcpy (dest.Get_Buffer (len + 1), src_start, bytes);	\
+				size_t len		= bytes / sizeof (unichar_t);						\
+				WWASSERT(len + 1 <= static_cast<size_t>(std::numeric_limits<int>::max())); \
+			::memcpy (dest.Get_Buffer (static_cast<int>(len + 1)), src_start, bytes);	\
 				dest.Peek_Buffer ()[len] = 0;										\
 			}
 
 	//
 	//	Loop over all the lines of text and check for wrapping...
 	//
-	const wchar_t *line_start = renderer->Find_Row_Start (text, 0);
+	const unichar_t *line_start = renderer->Find_Row_Start (text, 0);
 	while (line_start != NULL) {
 
 		//
 		//	Lookup the start of the next line...
 		//
-		const wchar_t *line_end = renderer->Find_Row_Start (line_start, 1);
-		
+		const unichar_t *line_end = renderer->Find_Row_Start (line_start, 1);
+
 		//
 		//	Copy this line of text into the control
 		//
@@ -906,10 +908,10 @@ StyleMgrClass::Render_Wrapped_Text_Ex
 void
 StyleMgrClass::Render_Wrapped_Text
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	uint32						text_color,
-	uint32						shadow_color, 
+	uint32						shadow_color,
 	const RectClass &			rect,
 	bool							do_shadow,
 	bool							do_vcenter
@@ -967,13 +969,13 @@ StyleMgrClass::Configure_Hilighter (Render2DClass *renderer)
 {
 	renderer->Enable_Alpha (false);
 	renderer->Enable_Texturing (false);
-	
+
 	//
 	//	Setup an additive shader
 	//
 	ShaderClass *shader = renderer->Get_Shader ();
 	shader->Set_Dst_Blend_Func (ShaderClass::DSTBLEND_ONE);
-	shader->Set_Src_Blend_Func (ShaderClass::SRCBLEND_ONE);	
+	shader->Set_Src_Blend_Func (ShaderClass::SRCBLEND_ONE);
 	//shader->Set_Primary_Gradient (ShaderClass::GRADIENT_ADD);
 	//shader->Set_Secondary_Gradient (ShaderClass::SECONDARY_GRADIENT_DISABLE);
 	return ;
@@ -1001,7 +1003,7 @@ StyleMgrClass::Render_Hilight (Render2DClass *renderer, const RectClass &rect)
 void
 StyleMgrClass::Render_Glow
 (
-	const wchar_t *				text,
+	const unichar_t *				text,
 	Render2DSentenceClass *	renderer,
 	const RectClass &			rect,
 	int							radius_x,
@@ -1022,13 +1024,13 @@ StyleMgrClass::Render_Glow
 	int y_pos = int(rect.Top + (rect.Height () / 2) - (text_extent.Y / 2));
 
 	if (justify == LEFT_JUSTIFY) {
-		
+
 		//
 		//	Caclulate left justification
 		//
 		x_pos = int(rect.Left + 1);
 	} else if (justify == RIGHT_JUSTIFY) {
-		
+
 		//
 		//	Caclulate right justification
 		//
@@ -1039,17 +1041,16 @@ StyleMgrClass::Render_Glow
 	//	Setup an additive shader
 	//
 	renderer->Make_Additive ();
-	
+
 	//
 	//	Figure out how many passes we should do to get the
 	// desired result
 	//
-	float max_radius	= std::max (radius_x, radius_y);
-	int pass_count		= 4;//max_radius / 3;
+	int pass_count		= 4;
 	//pass_count			= std::min (pass_count, 5);
 	//pass_count			= std::max (pass_count, 3);
 
-	int step_count		= 7;//max_radius;
+	int step_count		= 7;
 	//step_count			= std::min (step_count, 10);
 	//step_count			= std::max (step_count, 4);
 	float angle_inc	= DEG_TO_RADF (360) / step_count;
@@ -1064,13 +1065,13 @@ StyleMgrClass::Render_Glow
 	//	Do four passes to get from the inner radius to the outer radius
 	//
 	for (int pass_index = 0; pass_index < pass_count; pass_index ++) {
-		
+
 		//
 		//	Circle the characters around using the given radius
 		//
 		float angle = 0;
 		for (int index = 0; index < step_count; index ++) {
-			
+
 			float new_x_pos = float(x_pos + (WWMath::Cos(angle) * curr_radiusx));
 			float new_y_pos = float(y_pos + (WWMath::Sin(angle) * curr_radiusy));
 
@@ -1086,7 +1087,7 @@ StyleMgrClass::Render_Glow
 		curr_radiusx += x_inc;
 		curr_radiusy += y_inc;
 	}
-	
+
 	return ;
 }
 

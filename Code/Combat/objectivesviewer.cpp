@@ -68,7 +68,7 @@ static const char *LOWER_RIGHT_BONE_NAME		= "BONE01";
 ObjectivesViewerClass::ObjectivesViewerClass (void) :
 	IsDisplayed (false),
 	TextWindow (NULL)
-{	
+{
 	return ;
 }
 
@@ -142,7 +142,7 @@ ObjectivesViewerClass::Initialize (void)
 	//
 	TextWindow->Set_Heading_Font (HEADER_FONT_NAME);
 	TextWindow->Set_Text_Font (FONT_NAME);
-	
+
 	//
 	//	Configure the columns
 	//
@@ -174,7 +174,7 @@ ObjectivesViewerClass::Update (void)
 	int index;
 	for (index = 0; index < objective_count; index ++){
 		Objective *objective = ObjectiveManager::ObjectiveList[index];
-		
+
 		//
 		//	Filter out hidden objectives (if necessary)
 		//
@@ -184,7 +184,7 @@ ObjectivesViewerClass::Update (void)
 			sorted_list.Add (objective);
 		}
 	}
-	
+
 	objective_count = sorted_list.Count ();
 
 	//
@@ -205,10 +205,10 @@ ObjectivesViewerClass::Update (void)
 	//
 	for (index = 0; index < objective_count; index ++){
 		Objective *objective = sorted_list[index];
-		
-		const wchar_t *text				= TranslateDBClass::Get_String (objective->ShortDescriptionID);
-		const wchar_t *status_text	= objective->Status_To_Name ();
-		
+
+		const unichar_t *text				= TranslateDBClass::Get_String (objective->ShortDescriptionID);
+		const unichar_t *status_text	= objective->Status_To_Name ();
+
 		//
 		//	Insert an item for this objective
 		//
@@ -248,8 +248,8 @@ ObjectivesViewerClass::Display (bool onoff)
 			WWAudioClass::Get_Instance ()->Create_Instant_Sound (sound_id, Matrix3D (1));
 		}
 	}
-	
-	return ;	
+
+	return ;
 }
 
 
@@ -313,7 +313,7 @@ ObjectivesViewerClass::fnCompareObjectivesCallback
    WWASSERT (elem1 != NULL);
    WWASSERT (elem2 != NULL);
    Objective *objective1 = *((Objective **)elem1);
-   Objective *objective2 = *((Objective **)elem2);	
+   Objective *objective2 = *((Objective **)elem2);
 
 	//
 	//	Sort the objectives based on type
@@ -324,13 +324,13 @@ ObjectivesViewerClass::fnCompareObjectivesCallback
 	} else if (objective1->Type > objective2->Type) {
 		result = 1;
 	} else {
-		
+
 		//
 		//	Sort alphabetically if the types are the same
 		//
-		const wchar_t *text1 = TranslateDBClass::Get_String (objective1->ShortDescriptionID);
-		const wchar_t *text2 = TranslateDBClass::Get_String (objective2->ShortDescriptionID);
-		result = ::wcsicmp (text1, text2);
+		const unichar_t *text1 = TranslateDBClass::Get_String (objective1->ShortDescriptionID);
+		const unichar_t *text2 = TranslateDBClass::Get_String (objective2->ShortDescriptionID);
+		result = ::u_strcasecmp (text1, text2, U_COMPARE_CODE_POINT_ORDER);
 	}
 
    return result;

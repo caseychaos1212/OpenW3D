@@ -38,7 +38,7 @@
 #ifndef __UTILS_H
 #define __UTILS_H
 
-#include "mss.h"
+#include <string.h>
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -70,12 +70,10 @@
 /////////////////////////////////////////////////////////////////////////////
 class MMSLockClass
 {
-	public:
-		MMSLockClass (void) { ::AIL_lock (); }
-		~MMSLockClass (void) { ::AIL_unlock (); }
-
-
-	static CRITICAL_SECTION _MSSLockCriticalSection;
+public:
+	// Implementations must be provided by the back end.
+	MMSLockClass (void);
+	~MMSLockClass (void);
 };
 
 
@@ -83,7 +81,7 @@ class MMSLockClass
 //
 //  Get_Filename_From_Path
 //
-__inline const char*
+inline const char*
 Get_Filename_From_Path (const char* path)
 {
 	// Find the last occurance of the directory deliminator

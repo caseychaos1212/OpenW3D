@@ -36,6 +36,7 @@
 #define __WOLGAMEINFO_H__
 
 #include <WWOnline/RefPtr.h>
+#include <cstdint>
 
 class cGameData;
 
@@ -54,11 +55,11 @@ class WOLGameInfo
 		enum {MAX_TEXT_LENGTH = 32};
 
 		WOLGameInfo(void);
-		
+
 		WOLGameInfo(const cGameData& theGame);
-		
+
 		WOLGameInfo(const RefPtr<WWOnline::ChannelData>& channel);
-		
+
 		~WOLGameInfo(void);
 
 		void Reset(void);
@@ -68,14 +69,14 @@ class WOLGameInfo
 
 		bool IsMapValid(void) const
 			{return mIsMapValid;}
-		
+
 		void ImportFromGame(const cGameData& theGame);
 
 		void ImportFromChannel(const RefPtr<WWOnline::ChannelData>& channel);
 
 		void ExportToChannel(const RefPtr<WWOnline::ChannelData>& channel);
 
-		unsigned long Version(void) const
+		uint32_t Version(void) const
 			{return mVersion;};
 
 		unsigned int GameType(void) const
@@ -98,43 +99,43 @@ class WOLGameInfo
 
 		unsigned int NumPlayers(void) const
 			{return mNumPlayers;}
-		
-		unsigned long ClanID1(void) const
+
+		unsigned int ClanID1(void) const
 			{return mClanID1;}
 
-		unsigned long ClanID2(void) const
+		unsigned int ClanID2(void) const
 			{return mClanID2;}
-		
+
 		bool IsLaddered(void) const
 			{return mIsLaddered;}
-		
+
 		bool IsPassworded(void) const
 			{return mIsPassworded;}
-		
+
 		bool IsQuickmatch(void) const
 			{return mIsQuickmatch;}
-		
+
 		bool IsDedicated(void) const
 			{return mIsDedicated;}
-		
+
 		bool IsFriendlyFire(void) const
 			{return mIsFriendlyFire;}
-		
+
 		bool IsFreeWeapons(void) const
 			{return mIsFreeWeapons;}
-		
+
 		bool IsTeamRemix(void) const
 			{return mIsTeamRemix;}
-		
+
 		bool IsTeamChange(void) const
 			{return mIsTeamChange;}
-		
+
 		bool IsClanGame(void) const
 			{return mIsClanGame;}
-		
+
 		bool IsRepairBuildings(void) const
 			{return mIsRepairBuildings;}
-		
+
 		bool IsDriverGunner(void) const
 			{return mIsDriverGunner;}
 
@@ -144,8 +145,8 @@ class WOLGameInfo
 		int PingTime(void) const
 			{return mPingTime;}
 
-		// Is the clan competing in the game.		
-		bool IsClanCompeting(unsigned long clanID) const;
+		// Is the clan competing in the game.
+		bool IsClanCompeting(unsigned int clanID) const;
 
 		bool IsClanGameOpen(void) const;
 
@@ -160,7 +161,7 @@ class WOLGameInfo
 		bool mIsDataValid;
 		bool mIsMapValid;
 
-		unsigned long mVersion;
+		uint32_t mVersion;
 		unsigned int  mGameType;
 
 		char mMapName[MAX_TEXT_LENGTH];
@@ -170,10 +171,10 @@ class WOLGameInfo
 		unsigned int mMinPlayers;
 		unsigned int mMaxPlayers;
 		unsigned int mNumPlayers;
-		
-		unsigned long mClanID1;
-		unsigned long mClanID2;
-		
+
+		unsigned int mClanID1;
+		unsigned int mClanID2;
+
 		bool mIsMod;
 		bool mIsLaddered;
 		bool mIsPassworded;
@@ -187,7 +188,7 @@ class WOLGameInfo
 		bool mIsRepairBuildings;
 		bool mIsDriverGunner;
 		bool mSpawnWeapons;
-		
+
 		int mPingTime;
 	};
 

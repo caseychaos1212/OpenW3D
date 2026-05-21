@@ -43,10 +43,15 @@
 #include "crc.h"
 #include "msgstatlist.h"
 #include "wwprofile.h"
+#ifdef _WIN32
 #include "Commando/nat.h"
 #include "Commando/natter.h"
+#endif
 #include "packetmgr.h"
 #include "BWBalance.h"
+#include <cstdio>
+#include <algorithm>
+#include "socket_wrapper.h"
 #include <cstdio>
 #include <algorithm>
 
@@ -56,7 +61,7 @@
 int cConnection::LatencyAddLow = 0;
 int cConnection::LatencyAddHigh = 0;
 int cConnection::CurrentLatencyAdd = 0;
-unsigned long cConnection::LastLatencyChange = 0;
+unsigned int cConnection::LastLatencyChange = 0;
 
 #endif //WWDEBUG
 
@@ -85,15 +90,42 @@ static const int		INVALID_RHOST_ID			= -1;
  * HISTORY:                                                                                    *
  *   8/31/2001 3:48PM ST : Created                                                             *
  *=============================================================================================*/
-char * Addr_As_String(sockaddr_in *addr)
+
+#if defined(_WIN32) && (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0600)
+#ifndef INET_ADDRSTRLEN
+#define INET_ADDRSTRLEN 16
+#endif
+static const char* inet_ntop(int af, const void* src, char* dst, size_t size) {
+	if (af == AF_INET) {
+		auto a = static_cast<const in_addr*>(src);
+		const char* s = ::inet_ntoa(*a);
+		if (!s) return nullptr;
+		strncpy_s(dst, size, s, _TRUNCATE);
+		return dst;
+		}
+	wwnet::SocketSetLastError(WSAEAFNOSUPPORT);
+	return nullptr;
+}
+#endif
+
+
+const char* Addr_As_String(const sockaddr_in* addr)
 {
-	static char _string[128];
-	sprintf(_string, "%d.%d.%d.%d ; %d", 	(int)(addr->sin_addr.S_un.S_un_b.s_b1),
-														(int)(addr->sin_addr.S_un.S_un_b.s_b2),
-														(int)(addr->sin_addr.S_un.S_un_b.s_b3),
-														(int)(addr->sin_addr.S_un.S_un_b.s_b4),
-														htonl((int)(addr->sin_port)));
-	return(_string);
+	static char out[128];
+	char ip[INET_ADDRSTRLEN] = { 0 };
+	if (!inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip))) {
+		const auto* bytes = reinterpret_cast<const uint8_t*>(&addr->sin_addr);
+		std::snprintf(ip, sizeof(ip), "%u.%u.%u.%u", bytes[0], bytes[1], bytes[2], bytes[3]);
+	}
+
+	const unsigned port = (unsigned)ntohs(addr->sin_port);
+	std::snprintf(out, sizeof(out), "%s ; %u", ip[0] ? ip : "0.0.0.0", port);
+	return out;
+}
+
+char* Addr_As_String(sockaddr_in* addr)
+{
+	return const_cast<char*>(Addr_As_String(static_cast<const sockaddr_in*>(addr)));
 }
 //#endif //WWDEBUG
 
@@ -146,8 +178,8 @@ cConnection::cConnection() :
       //
       // Make socket non-blocking
       //
-      u_long arg = 1L;
-      WSA_CHECK(ioctlsocket(Sock, FIONBIO, (u_long *) &arg));
+	  wwnet::SocketIoctlParam arg = 1L;
+	  WSA_CHECK(wwnet::SocketIoctl(Sock, FIONBIO, &arg));
 
       //
       // Increase the send and rcv buffer sizes a bit
@@ -346,7 +378,9 @@ void cConnection::Init_As_Server(USHORT server_port, int max_players,
       WWASSERT(num_tries < 50 && server_port <= MAX_SERVER_PORT);
 
 		// Tell the firewall code that we started a new local server.
+#ifdef _WIN32
 		WOLNATInterface.Set_Server(true);
+#endif
    }
 
 	InitDone = true;
@@ -375,7 +409,7 @@ bool cConnection::Bind(USHORT port, ULONG addr)
       //
       // Any excuse other than address/port already used, is fatal.
       //
-      if (::WSAGetLastError() != WSAEADDRINUSE) {
+      if (wwnet::SocketGetLastError() != WSAEADDRINUSE) {
 			WSA_ERROR;
       }
       return false;
@@ -443,6 +477,18 @@ bool cConnection::Sender_Id_Tests(cPacket & packet)
    if (!cSinglePlayerData::Is_Single_Player() &&
       !cNetUtil::Is_Same_Address(&(PRHost[sender_id]->Get_Address()),
       &packet.Get_From_Address_Wrapper()->FromAddress)) {
+
+		//
+		// During LAN broadcast discovery we initially seed the server entry with the broadcast address.
+		// Once the server answers with a unicast address, refresh the stored sockaddr so the connection
+		// can proceed instead of dropping the packet.
+		//
+		sockaddr_in& current_addr = PRHost[sender_id]->Get_Address();
+		const sockaddr_in& incoming_addr = packet.Get_From_Address_Wrapper()->FromAddress;
+		if (current_addr.sin_addr.s_addr == INADDR_BROADCAST || current_addr.sin_addr.s_addr == 0) {
+			current_addr = incoming_addr;
+			return true;
+		}
       //
       // This can happen under 2 known conditions:
       // 1. A new player reuses an id and old packets from the previous player
@@ -569,7 +615,7 @@ int cConnection::Single_Player_recvfrom(char * data)
 
    SLNode<cPacket> * objnode = p_packet_list->Head();
    if (objnode == NULL) {
-      WSASetLastError(WSAEWOULDBLOCK);
+      wwnet::SocketSetLastError(WSAEWOULDBLOCK);
       ret_code = SOCKET_ERROR; // no data received
    } else {
 
@@ -606,7 +652,7 @@ bool cConnection::Receive_Packet()
 	// See if there are any old packets with simulated lag whos time has come.
 	//
 	if (LaggedPacketTimes.Count()) {
-		unsigned long time_now = TIMEGETTIME();
+		unsigned int time_now = TIMEGETTIME();
 		for (int p=0 ; p<LaggedPacketTimes.Count() ; p++) {
 			if (LaggedPacketTimes[p] <= time_now) {
 				packet = *LaggedPackets[p];
@@ -651,7 +697,7 @@ bool cConnection::Receive_Packet()
 		if (LatencyAddLow || LatencyAddHigh) {
 			cPacket *new_packet = new cPacket;
 			*new_packet = packet;
-			unsigned long time = TIMEGETTIME();
+			unsigned int time = TIMEGETTIME();
 
 			const int latency_adjust_delay = 1000 * 10;
 			if (time - LastLatencyChange > latency_adjust_delay) {
@@ -673,6 +719,7 @@ bool cConnection::Receive_Packet()
 #endif //WWDEBUG
 	}
 
+#ifdef _WIN32
 	//
 	// Intercept packets intended for the firewall negotiation code.
 	//
@@ -682,6 +729,7 @@ bool cConnection::Receive_Packet()
       WWDEBUG_SAY(("cConnection:: Packet transferred to WOLNAT interface\n"));
 		return(true);
 	};
+#endif
 
 
 	//
@@ -790,10 +838,21 @@ bool cConnection::Receive_Packet()
          }
 
       case PACKETTYPE_ACCEPT_SC: {
-				//WWDEBUG_SAY(("cConnection::Receive_Packet : PACKETTYPE_ACCEPT_SC received\n"));
-				WWDEBUG_SAY(("CONNECT: PACKETTYPE_ACCEPT_SC received\n"));
+			//WWDEBUG_SAY(("cConnection::Receive_Packet : PACKETTYPE_ACCEPT_SC received\n"));
+			WWDEBUG_SAY(("CONNECT: PACKETTYPE_ACCEPT_SC received\n"));
 
             WWASSERT(!IsServer);
+
+			//
+			// On LAN discovery the client initially points the server rhost at the broadcast address.
+			// Refresh the stored address with the endpoint that actually replied so Sender_Id_Tests
+			// does not reject follow-up packets.
+			//
+			if (!cSinglePlayerData::Is_Single_Player() && p_sender_rhost != NULL) {
+				if (!cNetUtil::Is_Same_Address(&(p_sender_rhost->Get_Address()), p_from_address)) {
+					p_sender_rhost->Set_Address(*p_from_address);
+				}
+			}
 
             if (LocalId != ID_UNKNOWN) {
                //
@@ -1160,7 +1219,7 @@ memcpy(last_packet, packet.Get_Data(), last_packet_len);
 			}
 		}
 
-			//unsigned long bytes;
+			//unsigned int bytes;
 			//int result = ioctlsocket(Sock, FIONREAD, &bytes);
 			//if (result == 0 && bytes != 0) {
 			//	WWDEBUG_SAY(("ioctlsocket - bytes left to read = %d\n", bytes));
@@ -1291,10 +1350,10 @@ int cConnection::Low_Level_Receive_Wrapper(cPacket & packet)
 		ret_code = bytes;
 
 #if (0)
-   	int address_size = sizeof(struct sockaddr_in);
-		ret_code = recvfrom(Sock, packet.Get_Data(),
+		socklen_t address_size = sizeof(struct sockaddr_in);
+		ret_code = wwnet::SocketRecvFrom(Sock, packet.Get_Data(),
 			packet.Get_Max_Size(), 0,
-	   	(LPSOCKADDR) &packet.Get_From_Address_Wrapper()->FromAddress, &address_size);
+			(LPSOCKADDR)&packet.Get_From_Address_Wrapper()->FromAddress, &address_size);
 
 		if (ret_code > 0) {
 			//WWDEBUG_SAY(("cConnection: recvfrom %s\n", Addr_As_String((struct sockaddr_in*) &packet.Get_From_Address_Wrapper()->FromAddress)));
@@ -1359,13 +1418,13 @@ void cConnection::Handle_Send_Resource_Failure(int rhost_id)
 		PRHost[rhost_id]->Get_Stats().StatSample[STAT_SendFailureCount]++;
    }
 
-   int orgbuffersize;
-   int newbuffersize;
-   int len;
+	int orgbuffersize;
+	int newbuffersize;
+	socklen_t opt_len;
 
-	len = sizeof(int);
-   WSA_CHECK(::getsockopt(Sock, SOL_SOCKET, SO_SNDBUF,
-      (char *)&orgbuffersize, &len));
+	opt_len = static_cast<socklen_t>(sizeof(orgbuffersize));
+   WSA_CHECK(wwnet::SocketGetSockOpt(Sock, SOL_SOCKET, SO_SNDBUF,
+      reinterpret_cast<char *>(&orgbuffersize), &opt_len));
 
 	static int time_of_last_reset = 0;
 	int time_now = TIMEGETTIME();
@@ -1397,14 +1456,14 @@ void cConnection::Handle_Send_Resource_Failure(int rhost_id)
          // reduce bw out.
          //
 
-			newbuffersize = 4 * orgbuffersize;
-			len = sizeof(int);
-			WSA_CHECK(setsockopt(Sock, SOL_SOCKET, SO_SNDBUF,
-				(char *)&newbuffersize, len));
+				newbuffersize = 4 * orgbuffersize;
+				opt_len = static_cast<socklen_t>(sizeof(newbuffersize));
+				WSA_CHECK(wwnet::SocketSetSockOpt(Sock, SOL_SOCKET, SO_SNDBUF,
+					reinterpret_cast<const char *>(&newbuffersize), opt_len));
 
-			len = sizeof(int);
-			WSA_CHECK(::getsockopt(Sock, SOL_SOCKET, SO_SNDBUF,
-				(char *)&newbuffersize, &len));
+				opt_len = static_cast<socklen_t>(sizeof(newbuffersize));
+				WSA_CHECK(wwnet::SocketGetSockOpt(Sock, SOL_SOCKET, SO_SNDBUF,
+					reinterpret_cast<char *>(&newbuffersize), &opt_len));
 
 			WWDEBUG_SAY(("SO_SNDBUF %d -> %d\n",
 				orgbuffersize, newbuffersize));
@@ -1710,7 +1769,7 @@ void cConnection::Send_Ack(struct sockaddr_in* p_address, int packet_id)
       PRHost[addressee]->Get_Stats().StatSample[STAT_UByteSent] += packet.Get_Compressed_Size_Bytes();
    }
 
-	//unsigned long time = TIMEGETTIME() / 1000;
+	//unsigned int time = TIMEGETTIME() / 1000;
 	//WWDEBUG_SAY(("Sending ack at %d\n", time));
 
    Send_Packet_To_Address(packet, p_address);
@@ -2000,7 +2059,7 @@ void cConnection::Service_Read()
 
 			//broken PRHost[rhost_id]->Set_List_Packet_Size(UNRELIABLE_RCV_LIST, 0);
 
-			unsigned long list_processing_start = TIMEGETTIME();
+			unsigned int list_processing_start = TIMEGETTIME();
 
 	      for (SLNode<cPacket> * objnode = PRHost[rhost_id]->Get_Packet_List(UNRELIABLE_RCV_LIST).Head();
             objnode != NULL; objnode = objnode->Next()) {
@@ -2539,7 +2598,7 @@ bool cConnection::Is_Time_To_Resend_Packet_To_Remote_Host(const cPacket *packet,
 		return(false);
 	}
 
-	unsigned long last_send_time = packet->Get_Send_Time();
+	unsigned int last_send_time = packet->Get_Send_Time();
 	if (last_send_time == cPacket::Get_Default_Send_Time()) {
 		return(true);
 	}
@@ -2570,7 +2629,7 @@ bool cConnection::Is_Time_To_Resend_Packet_To_Remote_Host(const cPacket *packet,
 	//
 	total_timeout = std::min(total_timeout, 3000.0f);
 
-	if (ThisFrameTimeMs - packet->Get_Send_Time() >= (unsigned long)total_timeout) {
+	if (ThisFrameTimeMs - packet->Get_Send_Time() >= (unsigned int)total_timeout) {
 		//WWDEBUG_SAY(("Time to resend packet %d, age = %d, timeout = %d, resend count = %d\n", packet->Get_Id(), (int)(ThisFrameTimeMs - packet->Get_Send_Time()), (int)total_timeout, packet->Get_Resend_Count()));
 		return(true);
 	}
@@ -2594,7 +2653,7 @@ bool cConnection::Is_Packet_Too_Old(const cPacket *packet, cRemoteHost *rhost)
 		return(false);
 	}
 
-	unsigned long timeout = 0;
+	unsigned int timeout = 0;
 
 	if (IsServer) {
 

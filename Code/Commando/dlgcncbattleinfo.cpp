@@ -34,8 +34,8 @@
  * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include "renegadedialog.h"
 #include "dlgcncbattleinfo.h"
-#include "resource.h"
 #include "listctrl.h"
 #include "imagectrl.h"
 #include "playertype.h"
@@ -51,7 +51,6 @@
 #include "building.h"
 #include "damage.h"
 #include "vehicle.h"
-#include "resource.h"
 #include "wolgmode.h"
 #include <WWOnline/WOLUser.h>
 #include "translatedb.h"
@@ -66,7 +65,7 @@
 enum
 {
 	COL_RANK,
-	COL_NAME,	
+	COL_NAME,
 	COL_KD,
 	COL_SCORE
 };
@@ -87,7 +86,7 @@ typedef struct
 
 static const BUILDING_INSTANCE_INFO GDI_BUILDINGS[BUILDING_COUNT] =
 {
-	{ "HUD_C&C_G_GUARDTOW.TGA",	BuildingConstants::TYPE_BASE_DEFENSE },	
+	{ "HUD_C&C_G_GUARDTOW.TGA",	BuildingConstants::TYPE_BASE_DEFENSE },
 	{ "HUD_C&C_G_REFINERY.TGA",	BuildingConstants::TYPE_REFINERY },
 	{ "HUD_C&C_G_POWER.TGA",		BuildingConstants::TYPE_POWER_PLANT },
 	{ "HUD_C&C_G_BARRACKS.TGA",	BuildingConstants::TYPE_SOLDIER_FACTORY },
@@ -96,7 +95,7 @@ static const BUILDING_INSTANCE_INFO GDI_BUILDINGS[BUILDING_COUNT] =
 
 static const BUILDING_INSTANCE_INFO NOD_BUILDINGS[BUILDING_COUNT] =
 {
-	{ "HUD_C&C_OBLISK.TGA",			BuildingConstants::TYPE_BASE_DEFENSE },	
+	{ "HUD_C&C_OBLISK.TGA",			BuildingConstants::TYPE_BASE_DEFENSE },
 	{ "HUD_C&C_N_REFINERY.TGA",	BuildingConstants::TYPE_REFINERY },
 	{ "HUD_C&C_N_POWER.TGA",		BuildingConstants::TYPE_POWER_PLANT },
 	{ "HUD_C&C_N_HANDOF.TGA",		BuildingConstants::TYPE_SOLDIER_FACTORY },
@@ -137,7 +136,7 @@ static const BUILDING_INFO NOD_BUILDING_CTRLS[BUILDING_SLOT_COUNT] =
 //
 ////////////////////////////////////////////////////////////////
 CNCBattleInfoDialogClass::CNCBattleInfoDialogClass (void)	:
-	MenuDialogClass (IDD_CNC_BATTLE_INFO)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_CNC_BATTLE_INFO))
 {
 	return ;
 }
@@ -226,7 +225,7 @@ CNCBattleInfoDialogClass::Configure_Icons (void)
 	BaseControllerClass *base = BaseControllerClass::Find_Base_For_Star ();
 	if (base == NULL) {
 		return ;
-	}	
+	}
 
 	//
 	//	Configure the team icons
@@ -263,12 +262,12 @@ CNCBattleInfoDialogClass::Configure_Icons (void)
 			image_ctrl->Set_Texture (GDI_BUILDINGS[index].texture_name);
 			health_ctrl->Set_Life (life);
 			next_slot ++;
-		}		
+		}
 	}
 
 	//
 	//	Now fill in the harvester
-	//	
+	//
 	VehicleGameObj *gdi_harvester = gdi_base->Get_Harvester_Vehicle ();
 	if (gdi_harvester != NULL) {
 		float life = gdi_harvester->Get_Defense_Object ()->Get_Health () / gdi_harvester->Get_Defense_Object ()->Get_Health_Max ();
@@ -309,7 +308,7 @@ CNCBattleInfoDialogClass::Configure_Icons (void)
 
 	//
 	//	Now fill in the harvester
-	//	
+	//
 	VehicleGameObj *nod_harvester = nod_base->Get_Harvester_Vehicle ();
 	if (nod_harvester != NULL) {
 		float life = nod_harvester->Get_Defense_Object ()->Get_Health () / nod_harvester->Get_Defense_Object ()->Get_Health_Max ();
@@ -343,7 +342,7 @@ CNCBattleInfoDialogClass::Populate_Player_List (ListCtrlClass *list_ctrl, int te
 	//
 	int index = 0;
 	for (	SLNode<cPlayer> *player_node = cPlayerManager::Get_Player_Object_List ()->Head ();
-			player_node != NULL; 
+			player_node != NULL;
 			player_node = player_node->Next ())
 	{
 		cPlayer *player = player_node->Data ();
@@ -360,12 +359,12 @@ CNCBattleInfoDialogClass::Populate_Player_List (ListCtrlClass *list_ctrl, int te
 
 			//
 			//	Make a new entry for this player
-			//			
-			int item_index = list_ctrl->Insert_Entry (index ++, L"");
+			//
+			int item_index = list_ctrl->Insert_Entry (index ++, U_CHAR(""));
 			if (item_index >= 0) {
 				WideStringClass displayName(0, true);
 				Build_Player_Display_Name(player, displayName);
-				list_ctrl->Set_Entry_Text(item_index, COL_NAME, (const wchar_t*)displayName);
+				list_ctrl->Set_Entry_Text(item_index, COL_NAME, (const unichar_t*)displayName);
 
 				list_ctrl->Set_Entry_Int (item_index, COL_RANK,			player->Get_Rung ());
 				list_ctrl->Set_Entry_Int (item_index, COL_SCORE,		player->Get_Score ());
@@ -378,7 +377,7 @@ CNCBattleInfoDialogClass::Populate_Player_List (ListCtrlClass *list_ctrl, int te
 					list_ctrl->Set_Entry_Color (item_index, COL_RANK,		Vector3 (1.0F, 1.0F, 1.0F));
 					list_ctrl->Set_Entry_Color (item_index, COL_NAME,		Vector3 (1.0F, 1.0F, 1.0F));
 					list_ctrl->Set_Entry_Color (item_index, COL_KD,			Vector3 (1.0F, 1.0F, 1.0F));
-					list_ctrl->Set_Entry_Color (item_index, COL_SCORE,		Vector3 (1.0F, 1.0F, 1.0F));					
+					list_ctrl->Set_Entry_Color (item_index, COL_SCORE,		Vector3 (1.0F, 1.0F, 1.0F));
 				}
 
 				//
@@ -387,9 +386,9 @@ CNCBattleInfoDialogClass::Populate_Player_List (ListCtrlClass *list_ctrl, int te
 				WideStringClass number_str;
 				float ktd_ratio = player->Get_Kill_To_Death_Ratio ();
 				if (ktd_ratio >= 0) {
-					number_str.Format(L"%-8.1f", ktd_ratio);
+					number_str.Format(U_CHAR("%-8.1f"), ktd_ratio);
 				} else {
-					number_str.Format(L"%-8s", L"-");
+					number_str.Format(U_CHAR("%-8s"), U_CHAR("-"));
 				}
 
 				list_ctrl->Set_Entry_Text (item_index, COL_KD, number_str);
@@ -416,13 +415,13 @@ CNCBattleInfoDialogClass::Populate_Player_List (ListCtrlClass *list_ctrl, int te
 //	ListSortCallback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 CNCBattleInfoDialogClass::ListSortCallback
 (
 	ListCtrlClass *	list_ctrl,
 	int					item_index1,
 	int					item_index2,
-	uint32				user_param
+	uint32				/* user_param */
 )
 {
 	int rank1 = (int)list_ctrl->Get_Entry_Data (item_index1, COL_RANK);
@@ -470,7 +469,7 @@ void CNCBattleInfoDialogClass::Build_Player_Display_Name(const cPlayer* player, 
 			RefPtr<WWOnline::SquadData> clan = user->GetSquad();
 
 			if (clan.IsValid()) {
-				outName.Format(L"%s [%S]", player->Get_Name(), clan->GetAbbr());
+				outName.Format(U_CHAR("%s [%S]"), player->Get_Name(), clan->GetAbbr());
 				return;
 			}
 		}

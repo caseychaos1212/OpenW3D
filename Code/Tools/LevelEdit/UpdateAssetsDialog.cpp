@@ -105,14 +105,14 @@ UpdateAssetsDialogClass::OnInitDialog (void)
 	//	Force the window on top
 	//
 	BringWindowToTop ();
-	SetForegroundWindow ();	
+	SetForegroundWindow ();
 	SetWindowPos (&wndTopMost, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 
 	// Pass the comments onto the edit control
 	SetDlgItemText (IDC_COMMENTS_EDIT, m_Comments);
 
 	// Check the 'Yes' radio button by default
-	SendDlgItemMessage (IDC_YES_RADIO, BM_SETCHECK, (WPARAM)TRUE);
+	SendDlgItemMessage (IDC_YES_RADIO, BM_SETCHECK, (WPARAM)true);
 
 	//
 	//	Simulate pressing the OK button
@@ -121,7 +121,7 @@ UpdateAssetsDialogClass::OnInitDialog (void)
 		PostMessage (WM_COMMAND, MAKELONG (IDOK, BN_CLICKED), 0L);
 	}
 
-	return TRUE;
+	return true;
 }
 
 
@@ -131,20 +131,20 @@ UpdateAssetsDialogClass::OnInitDialog (void)
 //
 /////////////////////////////////////////////////////////////////////////////
 void
-UpdateAssetsDialogClass::OnOK (void) 
+UpdateAssetsDialogClass::OnOK (void)
 {
 	// Should we update the assets now?
 	if (SendDlgItemMessage (IDC_YES_RADIO, BM_GETCHECK) == 1) {
-		
+
 		//
 		// Put up a dialog while we copy all the assets from VSS
 		//
 		HWND hdlg = Show_VSS_Update_Dialog (m_hWnd);
-		
+
 		if (m_UpdateAll) {
 			::Get_File_Mgr ()->Update_Asset_Tree ();
 		} else {
-			
+
 			//
 			//	Loop over the directory list and only update those directories that
 			// are new...

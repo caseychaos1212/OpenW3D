@@ -36,9 +36,8 @@
 
 
 #include "dlgcontrolsaveload.h"
-#include "resource.h"
 #include "listctrl.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "inputconfigmgr.h"
 #include "string_ids.h"
 #include "translatedb.h"
@@ -59,7 +58,7 @@ enum
 //
 ////////////////////////////////////////////////////////////////
 ControlSaveLoadMenuClass::ControlSaveLoadMenuClass (void)	:
-	MenuDialogClass (IDD_MENU_CONTROL_SAVELOAD)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MENU_CONTROL_SAVELOAD))
 {
 	return ;
 }
@@ -79,15 +78,15 @@ ControlSaveLoadMenuClass::On_Init_Dialog (void)
 		//
 		//	Configure the column
 		//
-		list_ctrl->Add_Column (L"", 1.0F, Vector3 (1, 1, 1));		
-		
+		list_ctrl->Add_Column (U_CHAR(""), 1.0F, Vector3 (1, 1, 1));
+
 		//
 		//	Loop over all the configurations
 		//
 		int count = InputConfigMgrClass::Get_Configuration_Count ();
 		int index;
 		for (index = 0; index < count; index ++) {
-			
+
 			//
 			//	Get information about this configuration
 			//
@@ -120,7 +119,7 @@ ControlSaveLoadMenuClass::On_Init_Dialog (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-ControlSaveLoadMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+ControlSaveLoadMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
@@ -185,7 +184,7 @@ ControlSaveLoadMenuClass::Delete_Config (void)
 				DlgMsgBox::DoDialog (TRANSLATE (IDS_MENU_DELETE_SAVE_TITLE), message, DlgMsgBox::YesNo,
 								this, MBEVENT_DELETE_PROMPT);
 			}
-		}		
+		}
 	}
 
 	return ;
@@ -201,7 +200,7 @@ void
 ControlSaveLoadMenuClass::HandleNotification (DlgMsgBoxEvent &event)
 {
 	if (event.Get_User_Data () == MBEVENT_DELETE_PROMPT) {
-		
+
 		//
 		//	The user has confirmed the delete, so delete the configuration
 		//
@@ -260,13 +259,13 @@ ControlSaveLoadMenuClass::Load_Config (void)
 	//
 	int curr_sel = list_ctrl->Get_Curr_Sel ();
 	if (curr_sel != -1) {
-		
+
 		//
 		//	Get the configuration object associated with this entry
 		//
 		InputConfigClass *config = (InputConfigClass *)list_ctrl->Get_Entry_Data (curr_sel, 0);
 		if (config != NULL) {
-			
+
 			//
 			//	Load this configuration
 			//
@@ -297,13 +296,13 @@ ControlSaveLoadMenuClass::Save_Config (bool prompt)
 	//
 	int curr_sel = list_ctrl->Get_Curr_Sel ();
 	if (curr_sel != -1) {
-		
+
 		//
 		//	Get the configuration object associated with this entry
 		//
 		InputConfigClass *config = (InputConfigClass *)list_ctrl->Get_Entry_Data (curr_sel, 0);
 		if (config != NULL) {
-			
+
 			//
 			//	We can only save custom configurations...
 			//
@@ -312,7 +311,7 @@ ControlSaveLoadMenuClass::Save_Config (bool prompt)
 				//
 				//	Get the new display name for this configuration
 				//
-				const wchar_t *display_name = Get_Dlg_Item_Text (IDC_NAME_EDIT);			
+				const unichar_t *display_name = Get_Dlg_Item_Text (IDC_NAME_EDIT);
 				if (display_name[0] != 0) {
 
 					//
@@ -333,7 +332,7 @@ ControlSaveLoadMenuClass::Save_Config (bool prompt)
 						//
 						config->Set_Display_Name (display_name);
 						list_ctrl->Set_Entry_Text (curr_sel, 0, display_name);
-						
+
 						//
 						//	Save the configuration
 						//
@@ -342,7 +341,7 @@ ControlSaveLoadMenuClass::Save_Config (bool prompt)
 					}
 
 				} else {
-					
+
 					//
 					//	Let the user know they can't save a configuration without a name
 					//
@@ -355,7 +354,7 @@ ControlSaveLoadMenuClass::Save_Config (bool prompt)
 			//
 			//	Get the new display name for this configuration
 			//
-			const wchar_t *display_name = Get_Dlg_Item_Text (IDC_NAME_EDIT);
+			const unichar_t *display_name = Get_Dlg_Item_Text (IDC_NAME_EDIT);
 			if (display_name[0] != 0) {
 
 				//
@@ -387,7 +386,7 @@ void
 ControlSaveLoadMenuClass::On_ListCtrl_Delete_Entry
 (
 	ListCtrlClass *list_ctrl,
-	int				ctrl_id,
+	int				/* ctrl_id */,
 	int				item_index
 )
 {
@@ -454,8 +453,8 @@ void
 ControlSaveLoadMenuClass::On_ListCtrl_Sel_Change
 (
 	ListCtrlClass *	list_ctrl,
-	int					ctrl_id,
-	int					old_index,
+	int					/* ctrl_id */,
+	int					/* old_index */,
 	int					new_index
 )
 {
@@ -466,7 +465,7 @@ ControlSaveLoadMenuClass::On_ListCtrl_Sel_Change
 	//
 	InputConfigClass *config = (InputConfigClass *)list_ctrl->Get_Entry_Data (new_index, 0);
 	if (config != NULL) {
-		
+
 		//
 		//	We want to disable the edit control if the user can't edit this entry
 		//
@@ -483,13 +482,13 @@ ControlSaveLoadMenuClass::On_ListCtrl_Sel_Change
 		//
 		//	Clear the name of the current configuration
 		//
-		Set_Dlg_Item_Text (IDC_NAME_EDIT, L"");
+		Set_Dlg_Item_Text (IDC_NAME_EDIT, U_CHAR(""));
 	}
 
 	//
 	//	Fix the enable state of the edit control
 	//
-	Enable_Dlg_Item (IDC_NAME_EDIT, enable_edit);	
+	Enable_Dlg_Item (IDC_NAME_EDIT, enable_edit);
 	return ;
 }
 
@@ -499,13 +498,13 @@ ControlSaveLoadMenuClass::On_ListCtrl_Sel_Change
 //	ListSortCallback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 ControlSaveLoadMenuClass::ListSortCallback
 (
 	ListCtrlClass *	list_ctrl,
 	int					item_index1,
 	int					item_index2,
-	uint32				user_param
+	uint32				/* user_param */
 )
 {
 	int retval = 0;
@@ -531,12 +530,12 @@ ControlSaveLoadMenuClass::ListSortCallback
 		} else if (config1->Is_Custom () == false && config2->Is_Custom ()) {
 			retval = 1;
 		} else {
-			
+
 			//
 			//	Sort based on the names
 			//
-			retval = ::wcsicmp (config1->Get_Display_Name (), config2->Get_Display_Name ());
-		}	
+			retval = ::u_strcasecmp (config1->Get_Display_Name (), config2->Get_Display_Name (), U_COMPARE_CODE_POINT_ORDER);
+		}
 	}
 
 	return retval;
@@ -549,7 +548,7 @@ ControlSaveLoadMenuClass::ListSortCallback
 //
 ////////////////////////////////////////////////////////////////
 void
-ControlSaveLoadMenuClass::On_EditCtrl_Enter_Pressed (EditCtrlClass *edit_ctrl, int ctrl_id)
+ControlSaveLoadMenuClass::On_EditCtrl_Enter_Pressed (EditCtrlClass * /* edit_ctrl */, int ctrl_id)
 {
 	if (ctrl_id == IDC_NAME_EDIT) {
 		Save_Config (true);

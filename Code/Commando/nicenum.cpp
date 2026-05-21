@@ -20,7 +20,7 @@
 // Filename:     nicenum.cpp
 // Author:       Tom Spencer-Smith
 // Date:         Dec 1999
-// Description:  
+// Description:
 //
 
 #include "nicenum.h"
@@ -36,13 +36,13 @@
 //
 // Class statics
 //
-ULONG		cNicEnum::NicList[];
-USHORT	cNicEnum::NumNics			= 0;
-ULONG		cNicEnum::GSNicList[];	
-USHORT	cNicEnum::NumGSNics		= 0;
+unsigned int		cNicEnum::NicList[];
+unsigned short	cNicEnum::NumNics			= 0;
+unsigned int		cNicEnum::GSNicList[];
+unsigned short	cNicEnum::NumGSNics		= 0;
 
 //----------------------------------------------------------------------------------
-void 
+void
 cNicEnum::Init
 (
 	void
@@ -52,7 +52,7 @@ cNicEnum::Init
 
 	WSADATA wsa_data;
 	int startup_rc = ::WSAStartup(MAKEWORD(1, 1), &wsa_data);
-	if (startup_rc != 0) 
+	if (startup_rc != 0)
 	{
 		WWDEBUG_SAY(("  WSAStartup failed!\n"));
 		return;
@@ -61,21 +61,21 @@ cNicEnum::Init
 	//
 	// Retrieve list of nic's
 	//
-	ULONG local_addresses[MAX_NICS];
-	ULONG num_addresses = Enumerate_Nics(local_addresses, MAX_NICS);
+	unsigned int local_addresses[MAX_NICS];
+	unsigned int num_addresses = Enumerate_Nics(local_addresses, MAX_NICS);
 	WWASSERT(num_addresses <= MAX_NICS);
 
 	WWDEBUG_SAY(("  Found %d NIC(s)\n", num_addresses));
 
-	USHORT index	= 0;
-	USHORT class_1	= 0;
-	USHORT class_2	= 0;
+	unsigned short index	= 0;
+	unsigned short class_1	= 0;
+	unsigned short class_2	= 0;
 
 	//
 	// First, extract the non-internet addressable nicks, ordered on general usage.
 	//
-	ULONG lan_addresses[MAX_NICS];
-	ULONG num_lan_addresses = 0;
+	unsigned int lan_addresses[MAX_NICS];
+	unsigned int num_lan_addresses = 0;
 
 	//
 	// First, scan for 10.*.*.* addresses
@@ -94,11 +94,11 @@ cNicEnum::Init
 	//
 	// Next, scan for 192.168.*.* addresses
 	//
-	for (index = 0; index < num_addresses; index++) 
+	for (index = 0; index < num_addresses; index++)
 	{
 		class_1 = (::ntohl(local_addresses[index]) & 0xff000000) >> 24;
 		class_2 = (::ntohl(local_addresses[index]) & 0x00ff0000) >> 16;
-		
+
 		if (class_1 == 192 && class_2 == 168)
 		{
 			lan_addresses[num_lan_addresses++] = local_addresses[index];
@@ -109,11 +109,11 @@ cNicEnum::Init
 	//
 	// Next, scan for 172.16-31.*.* addresses
 	//
-	for (index = 0; index < num_addresses; index++) 
+	for (index = 0; index < num_addresses; index++)
 	{
 		class_1 = (::ntohl(local_addresses[index]) & 0xff000000) >> 24;
 		class_2 = (::ntohl(local_addresses[index]) & 0x00ff0000) >> 16;
-		
+
 		if (class_1 == 172 && class_2 >= 16 && class_2 <= 31)
 		{
 			lan_addresses[num_lan_addresses++] = local_addresses[index];
@@ -124,11 +124,11 @@ cNicEnum::Init
 	//
 	// Finally, scan for 169.254.*.* addresses (IP autoconfiguration)
 	//
-	for (index = 0; index < num_addresses; index++) 
+	for (index = 0; index < num_addresses; index++)
 	{
 		class_1 = (::ntohl(local_addresses[index]) & 0xff000000) >> 24;
 		class_2 = (::ntohl(local_addresses[index]) & 0x00ff0000) >> 16;
-		
+
 		if (class_1 == 169 && class_2 == 254)
 		{
 			lan_addresses[num_lan_addresses++] = local_addresses[index];
@@ -139,19 +139,19 @@ cNicEnum::Init
 	WWDEBUG_SAY(("  Of which %d are non-internet addressable.\n", num_lan_addresses));
 
 	//
-	// Next, copy the Internet addressable addresses. Weed out localhost and multicast 
+	// Next, copy the Internet addressable addresses. Weed out localhost and multicast
 	// addresses.
 	//
 
-	ULONG internet_addresses[MAX_NICS];
-	ULONG num_internet_addresses = 0;
+	unsigned int internet_addresses[MAX_NICS];
+	unsigned int num_internet_addresses = 0;
 
 	for (index = 0; index < num_addresses; index++)
 	{
 		if (local_addresses[index] != 0)
 		{
 			class_1 = (::ntohl(local_addresses[index]) & 0xff000000) >> 24;
-			
+
 			if (class_1 != 127 && class_1 != 224)
 			{
 				internet_addresses[num_internet_addresses++] = local_addresses[index];
@@ -162,7 +162,7 @@ cNicEnum::Init
 
 	//
 	// Now build the LAN and GameSpy NIC lists. They contain the same entries.
-	// The only difference is that the LAN list puts the non-internet addressable 
+	// The only difference is that the LAN list puts the non-internet addressable
 	// NIC's first, the GameSpy list puts them last.
 	//
 	NumNics			= 0;
@@ -194,9 +194,9 @@ cNicEnum::Init
 	// Initialize or update PreferredLanNic if required.
 	//
 	bool is_nic_valid = false;
-	for (index = 0; index < NumNics; index++) 
+	for (index = 0; index < NumNics; index++)
 	{
-		if ((ULONG) cUserOptions::PreferredLanNic.Get() == NicList[index])
+		if ((unsigned int) cUserOptions::PreferredLanNic.Get() == NicList[index])
 		{
 			is_nic_valid = true;
 			break;
@@ -205,7 +205,7 @@ cNicEnum::Init
 
 	if (!is_nic_valid)
 	{
-		if (NumNics > 0) 
+		if (NumNics > 0)
 		{
 			cUserOptions::PreferredLanNic.Set(NicList[0]);
 		}
@@ -219,9 +219,9 @@ cNicEnum::Init
 	// Initialize or update PreferredGameSpyNic if required.
 	//
 	is_nic_valid = false;
-	for (index = 0; index < NumGSNics; index++) 
+	for (index = 0; index < NumGSNics; index++)
 	{
-		if ((ULONG) cUserOptions::PreferredGameSpyNic.Get() == GSNicList[index])
+		if ((unsigned int) cUserOptions::PreferredGameSpyNic.Get() == GSNicList[index])
 		{
 			is_nic_valid = true;
 			break;
@@ -230,7 +230,7 @@ cNicEnum::Init
 
 	if (!is_nic_valid)
 	{
-		if (NumGSNics > 0) 
+		if (NumGSNics > 0)
 		{
 			cUserOptions::PreferredGameSpyNic.Set(GSNicList[0]);
 		}
@@ -240,24 +240,24 @@ cNicEnum::Init
 		}
 	}
 
-	WWDEBUG_SAY(("  PreferredLanNic is %u (%s)\n", 
-		(ULONG) cUserOptions::PreferredLanNic.Get(), 
+	WWDEBUG_SAY(("  PreferredLanNic is %u (%s)\n",
+		(unsigned int) cUserOptions::PreferredLanNic.Get(),
 		cNetUtil::Address_To_String(cUserOptions::PreferredLanNic.Get())));
 
-	WWDEBUG_SAY(("  PreferredGameSpyNic is %u (%s)\n", 
-		(ULONG) cUserOptions::PreferredGameSpyNic.Get(), 
+	WWDEBUG_SAY(("  PreferredGameSpyNic is %u (%s)\n",
+		(unsigned int) cUserOptions::PreferredGameSpyNic.Get(),
 		cNetUtil::Address_To_String(cUserOptions::PreferredGameSpyNic.Get())));
 
-	int cleanup_rc = ::WSACleanup();
+	[[maybe_unused]] int cleanup_rc = ::WSACleanup();
 	WWASSERT(cleanup_rc != SOCKET_ERROR);
 }
 
 //---------------------------------------------------------------------------
-ULONG 
+unsigned int
 cNicEnum::Enumerate_Nics
 (
-	ULONG *	addresses, 
-	ULONG		max_nics
+	unsigned int *	addresses,
+	unsigned int		max_nics
 )
 {
 	WWASSERT(addresses != NULL);
@@ -269,21 +269,21 @@ cNicEnum::Enumerate_Nics
 	// Get the local hostname
 	//
 	char local_host_name[300];
-	int gethostname_rc = ::gethostname(local_host_name, sizeof(local_host_name));
+	[[maybe_unused]] int gethostname_rc = ::gethostname(local_host_name, sizeof(local_host_name));
 	WWASSERT(gethostname_rc != SOCKET_ERROR);
 
 	//
-	// Resolve hostname for local adapter addresses. 
+	// Resolve hostname for local adapter addresses.
 	// This does a DNS lookup (name resolution)
 	//
 	LPHOSTENT p_hostent = ::gethostbyname(local_host_name);
-	if (p_hostent == NULL) 
+	if (p_hostent == NULL)
 	{
 		DIE;
 	}
 
-	ULONG num_addresses = 0;
-	while (num_addresses < max_nics && p_hostent->h_addr_list[num_addresses] != NULL) 
+	unsigned int num_addresses = 0;
+	while (num_addresses < max_nics && p_hostent->h_addr_list[num_addresses] != NULL)
 	{
 		IN_ADDR in_addr;
 		::memcpy(&in_addr, p_hostent->h_addr_list[num_addresses], sizeof(in_addr));
@@ -325,7 +325,7 @@ cNicEnum::Enumerate_Nics
 
 
 /*
-void 
+void
 cNicEnum::Init
 (
 	void
@@ -335,7 +335,7 @@ cNicEnum::Init
 
 	WSADATA wsa_data;
 	int startup_rc = ::WSAStartup(MAKEWORD(1, 1), &wsa_data);
-	if (startup_rc != 0) 
+	if (startup_rc != 0)
 	{
 		WWDEBUG_SAY(("  WSAStartup failed!\n"));
 		return;
@@ -344,8 +344,8 @@ cNicEnum::Init
 	//
 	// Retrieve list of nic's
 	//
-	ULONG local_addresses[MAX_NICS];
-	ULONG num_addresses = Enumerate_Nics(local_addresses, MAX_NICS);
+	unsigned int local_addresses[MAX_NICS];
+	unsigned int num_addresses = Enumerate_Nics(local_addresses, MAX_NICS);
 	WWASSERT(num_addresses <= MAX_NICS);
 
 	WWDEBUG_SAY(("  Found %d NIC(s)\n", num_addresses));
@@ -359,9 +359,9 @@ cNicEnum::Init
 	// We will order these as above to promote the more common choice.
 	//
 
-	USHORT index	= 0;
-	USHORT class_1	= 0;
-	USHORT class_2	= 0;
+	unsigned short index	= 0;
+	unsigned short class_1	= 0;
+	unsigned short class_2	= 0;
 	NumNics			= 0;
 	NumGSNics 		= 0;
 
@@ -376,7 +376,7 @@ cNicEnum::Init
 	for (index = 0; index < num_addresses; index++)
 	{
 		class_1 = (::ntohl(local_addresses[index]) & 0xff000000) >> 24;
-		
+
 		if (class_1 != 127 && class_1 != 224)
 		{
 			GSNicList[NumGSNics++] = local_addresses[index];
@@ -399,11 +399,11 @@ cNicEnum::Init
 	//
 	// Next, scan for 192.168.*.* addresses
 	//
-	for (index = 0; index < num_addresses; index++) 
+	for (index = 0; index < num_addresses; index++)
 	{
 		class_1 = (::ntohl(local_addresses[index]) & 0xff000000) >> 24;
 		class_2 = (::ntohl(local_addresses[index]) & 0x00ff0000) >> 16;
-		
+
 		if (class_1 == 192 && class_2 == 168)
 		{
 			NicList[NumNics++] = local_addresses[index];
@@ -413,11 +413,11 @@ cNicEnum::Init
 	//
 	// Finally, scan for 172.16-31.*.* addresses
 	//
-	for (index = 0; index < num_addresses; index++) 
+	for (index = 0; index < num_addresses; index++)
 	{
 		class_1 = (::ntohl(local_addresses[index]) & 0xff000000) >> 24;
 		class_2 = (::ntohl(local_addresses[index]) & 0x00ff0000) >> 16;
-		
+
 		if (class_1 == 172 && class_2 >= 16 && class_2 <= 31)
 		{
 			NicList[NumNics++] = local_addresses[index];
@@ -430,9 +430,9 @@ cNicEnum::Init
 	// Initialize or update PreferredLanNic if required.
 	//
 	bool is_nic_valid = false;
-	for (index = 0; index < NumNics; index++) 
+	for (index = 0; index < NumNics; index++)
 	{
-		if ((ULONG) cUserOptions::PreferredLanNic.Get() == NicList[index])
+		if ((unsigned int) cUserOptions::PreferredLanNic.Get() == NicList[index])
 		{
 			is_nic_valid = true;
 			break;
@@ -441,7 +441,7 @@ cNicEnum::Init
 
 	if (!is_nic_valid)
 	{
-		if (NumNics > 0) 
+		if (NumNics > 0)
 		{
 			cUserOptions::PreferredLanNic.Set(NicList[0]);
 		}
@@ -452,9 +452,9 @@ cNicEnum::Init
 	}
 
 	is_nic_valid = false;
-	for (index = 0; index < NumGSNics; index++) 
+	for (index = 0; index < NumGSNics; index++)
 	{
-		if ((ULONG) cUserOptions::PreferredGameSpyNic.Get() == GSNicList[index])
+		if ((unsigned int) cUserOptions::PreferredGameSpyNic.Get() == GSNicList[index])
 		{
 			is_nic_valid = true;
 			break;
@@ -463,7 +463,7 @@ cNicEnum::Init
 
 	if (!is_nic_valid)
 	{
-		if (NumGSNics > 0) 
+		if (NumGSNics > 0)
 		{
 			cUserOptions::PreferredGameSpyNic.Set(GSNicList[0]);
 		}
@@ -473,12 +473,12 @@ cNicEnum::Init
 		}
 	}
 
-	WWDEBUG_SAY(("  PreferredLanNic is %u (%s)\n", 
-		(ULONG) cUserOptions::PreferredLanNic.Get(), 
+	WWDEBUG_SAY(("  PreferredLanNic is %u (%s)\n",
+		(unsigned int) cUserOptions::PreferredLanNic.Get(),
 		cNetUtil::Address_To_String(cUserOptions::PreferredLanNic.Get())));
 
-	WWDEBUG_SAY(("  PreferredGameSpyNic is %u (%s)\n", 
-		(ULONG) cUserOptions::PreferredGameSpyNic.Get(), 
+	WWDEBUG_SAY(("  PreferredGameSpyNic is %u (%s)\n",
+		(unsigned int) cUserOptions::PreferredGameSpyNic.Get(),
 		cNetUtil::Address_To_String(cUserOptions::PreferredGameSpyNic.Get())));
 
 	int cleanup_rc = ::WSACleanup();

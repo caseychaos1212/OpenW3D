@@ -38,21 +38,21 @@ extern	HINSTANCE g_DllInstance; // Handle to this DLL itself.
 //          ***********   F U N C T I O N S  *********************
 
 ///////////////////////////////////////
-UINT CALLBACK W3DPageCallback(HWND hWnd,
+UINT CALLBACK W3DPageCallback(HWND /*hWnd*/,
                 UINT uMessage,
                 LPPROPSHEETPAGE  ppsp){
     switch(uMessage){
         case PSPCB_CREATE:
-            return TRUE;
+            return true;
 
         case PSPCB_RELEASE:{
             if (ppsp->lParam){
                ((LPCSHELLEXT)(ppsp->lParam))->Release();
             }
-            return TRUE; 
+            return true;
 			}
     }
-    return TRUE;
+    return true;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ShowHideControls(HWND hDlg, bool show){
@@ -75,19 +75,18 @@ void GetItemName(ChunkItem *pItem, int id_of_interest, void* pInfo, int sizeof_s
 	//Get all Sibitems for this item
 	POSITION p = pItem->Chunks.GetHeadPosition();
 	while(p != 0) {
-		ChunkItem *subitem = pItem->Chunks.GetNext(p); 
+		ChunkItem *subitem = pItem->Chunks.GetNext(p);
 		GetItemName(subitem, id_of_interest, pInfo, sizeof_struct,found);
 	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-BOOL CALLBACK AnimPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lParam){
-	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLong(hDlg, DWL_USER);
-	UINT iIndex=0;
+INT_PTR CALLBACK AnimPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lParam){
+	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLongPtr(hDlg, DWLP_USER);
 	LPCSHELLEXT lpcs;
 	char buf[MAX_PATH];
     switch (uMessage){
 		case WM_INITDIALOG:{
-            SetWindowLong(hDlg, DWL_USER, lParam);
+            SetWindowLongPtr(hDlg, DWLP_USER, lParam);
             psp = (LPPROPSHEETPAGE)lParam;
             lpcs = (LPCSHELLEXT)psp->lParam;
 				if(!lpcs->m_FileInMemory){
@@ -110,11 +109,11 @@ BOOL CALLBACK AnimPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lPa
 					//So far assuming only one animation per file
 					SetDlgItemText(hDlg, IDC_ANIMNAME, pAnim->Name);
 					SetDlgItemText(hDlg, IDC_HNAME, pAnim->HierarchyName);
-					SetDlgItemInt(hDlg, IDC_NUMFRAMES, pAnim->NumFrames,FALSE);
+					SetDlgItemInt(hDlg, IDC_NUMFRAMES, pAnim->NumFrames,false);
 					//FrameRate
-					sprintf(buf,"%i fps",pAnim->FrameRate,FALSE);
+					sprintf(buf,"%i fps",pAnim->FrameRate);
 					SetDlgItemText(hDlg, IDC_FRAMERATE, buf);
-					//SetDlgItemInt(hDlg, IDC_FRAMERATE, pAnim->FrameRate,FALSE);
+					//SetDlgItemInt(hDlg, IDC_FRAMERATE, pAnim->FrameRate,false);
 					//version
 					sprintf(buf,"%d.%d",W3D_GET_MAJOR_VERSION(pAnim->Version),W3D_GET_MINOR_VERSION(pAnim->Version));
 					SetDlgItemText(hDlg, IDC_ANIMVERSION, buf);
@@ -134,7 +133,7 @@ BOOL CALLBACK AnimPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lPa
 				}
 				if(found_hierarchies){
 					SetDlgItemText(hDlg, IDC_HIERARCHYNAME, pHInfo->Name);
-					SetDlgItemInt(hDlg, IDC_NUMPIVOTS, pHInfo->NumPivots,FALSE);
+					SetDlgItemInt(hDlg, IDC_NUMPIVOTS, pHInfo->NumPivots,false);
 					sprintf(buf,"%d.%d",W3D_GET_MAJOR_VERSION(pHInfo->Version),W3D_GET_MINOR_VERSION(pHInfo->Version));
 					SetDlgItemText(hDlg, IDC_HIERARCHYVERSION, buf);
 					sprintf(buf, "(%.3f, %.3f, %.3f)", pHInfo->Center.X, pHInfo->Center.Y, pHInfo->Center.Z);
@@ -172,19 +171,19 @@ BOOL CALLBACK AnimPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lPa
             }
             break;
         default:
-            return FALSE;
+            return false;
     }
-    return TRUE;
+    return true;
 }
 //=====================================================================================================
 void SetDlgMeshParams(HWND hDlg, W3dMeshHeader3Struct*pInfo){
 	SetDlgItemText(hDlg,IDC_MESHNAME,pInfo->MeshName);
 	SetDlgItemText(hDlg,IDC_CONTAINER,pInfo->ContainerName);
-	SetDlgItemInt(hDlg,IDC_NUM_MATERIALS, pInfo->NumMaterials,FALSE);
+	SetDlgItemInt(hDlg,IDC_NUM_MATERIALS, pInfo->NumMaterials,false);
 
-	SetDlgItemInt(hDlg,IDC_NUM_POLYS, pInfo->NumTris,FALSE);
-	SetDlgItemInt(hDlg,IDC_NUM_VERTICES, pInfo->NumVertices, FALSE);
-	SetDlgItemInt(hDlg,IDC_NUM_MATERIALS, pInfo->NumMaterials,FALSE);
+	SetDlgItemInt(hDlg,IDC_NUM_POLYS, pInfo->NumTris,false);
+	SetDlgItemInt(hDlg,IDC_NUM_VERTICES, pInfo->NumVertices, false);
+	SetDlgItemInt(hDlg,IDC_NUM_MATERIALS, pInfo->NumMaterials,false);
 	char msg[MAX_PATH];
 	sprintf(msg, "%.3f", pInfo->SphRadius);
 	SetDlgItemText(hDlg,IDC_SPHERERADIUS,msg);
@@ -203,14 +202,13 @@ void SetDlgMeshParams(HWND hDlg, W3dMeshHeader3Struct*pInfo){
 	SetDlgItemText(hDlg, IDC_VERSION, msg);
 }
 //==========================================================================================================
-BOOL CALLBACK MeshPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lParam){
-	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLong(hDlg, DWL_USER);
-	UINT iIndex=0;
+INT_PTR CALLBACK MeshPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lParam){
+	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLongPtr(hDlg, DWLP_USER);
 	LPCSHELLEXT lpcs;
 
     switch (uMessage){
 		case WM_INITDIALOG:{
-            SetWindowLong(hDlg, DWL_USER, lParam);
+            SetWindowLongPtr(hDlg, DWLP_USER, lParam);
             psp = (LPPROPSHEETPAGE)lParam;
             lpcs = (LPCSHELLEXT)psp->lParam;
 				if(!lpcs->m_FileInMemory){
@@ -230,7 +228,7 @@ BOOL CALLBACK MeshPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lPa
 					GetItemName(pItem, id_of_interest, (void*)(pInfo),sizeof_struct, lpcs->m_FoundMeshes );
 				}
 				if(lpcs->m_FoundMeshes){
-					SetDlgItemInt(hDlg,IDC_MESHNUMBER, 0,FALSE);
+					SetDlgItemInt(hDlg,IDC_MESHNUMBER, 0,false);
 					//Look for Textures
 					char pTextureInfo[MAX_TEXUTRE_NAME_LEN * MAX_MESH];
 					id_of_interest = W3D_CHUNK_TEXTURE_NAME;
@@ -248,7 +246,7 @@ BOOL CALLBACK MeshPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lPa
 							lpcs->m_Textures[lpcs->m_NumAdded-1].ReleaseBuffer();
 						}
 					}
-					SetDlgItemInt(hDlg,IDC_NUM_MESHES, lpcs->m_FoundMeshes,FALSE);
+					SetDlgItemInt(hDlg,IDC_NUM_MESHES, lpcs->m_FoundMeshes,false);
 					SetDlgMeshParams(hDlg, pInfo);
 					//Set Spin range
 					SendDlgItemMessage(hDlg, IDC_MESHSPIN, UDM_SETRANGE, (WPARAM)0L, (LPARAM)MAKELONG(lpcs->m_FoundMeshes-1,0));
@@ -293,20 +291,19 @@ BOOL CALLBACK MeshPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lPa
 			}
 		break;
 			default:
-		return FALSE;
+		return false;
     }
-    return TRUE;
+    return true;
 }
 
 /////////////////////////////////////////////////////////////
-BOOL CALLBACK PreviewPageDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM lParam){
+INT_PTR CALLBACK PreviewPageDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM lParam){
 
-	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLong(hDlg, DWL_USER);
-    UINT iIndex(0);
+	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLongPtr(hDlg, DWLP_USER);
     LPCSHELLEXT lpcs;
     switch (uMessage){
 		case WM_INITDIALOG:{
-            SetWindowLong(hDlg, DWL_USER, lParam);
+            SetWindowLongPtr(hDlg, DWLP_USER, lParam);
             psp = (LPPROPSHEETPAGE)lParam;
             lpcs = (LPCSHELLEXT)psp->lParam;
 				if(!lpcs->m_FileInMemory){
@@ -344,9 +341,9 @@ BOOL CALLBACK PreviewPageDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM
             }
             break;
         default:
-            return FALSE;
+            return false;
     }
-    return TRUE;
+    return true;
 }
 
 
@@ -360,6 +357,7 @@ STDMETHODIMP CShellExt::AddPages(LPFNADDPROPSHEETPAGE lpfnAddPage,	//Pointer to 
     FORMATETC fmte = {CF_HDROP,(DVTARGETDEVICE FAR *)NULL,DVASPECT_CONTENT,-1, TYMED_HGLOBAL };
     STGMEDIUM medium;
 	HRESULT hres = 0;
+	memset(&medium, 0, sizeof(medium));
 //	char buf[MAX_PATH];
 	if (m_pDataObj){  //Paranoid check, m_pDataObj should have something by now...
        hres = m_pDataObj->GetData(&fmte, &medium);
@@ -422,9 +420,9 @@ STDMETHODIMP CShellExt::AddPages(LPFNADDPROPSHEETPAGE lpfnAddPage,	//Pointer to 
     }
     return NOERROR;
 }
-//  PURPOSE: Called by the shell only for Control Panel property sheet 
-STDMETHODIMP CShellExt::ReplacePage(UINT uPageID,									//ID of page to be replaced
-                                    LPFNADDPROPSHEETPAGE lpfnReplaceWith,  //Pointer to the Shell's Replace function
-                                    LPARAM lParam){									//Passed as second parameter to lpfnReplaceWith
+//  PURPOSE: Called by the shell only for Control Panel property sheet
+STDMETHODIMP CShellExt::ReplacePage(UINT /*uPageID*/,									//ID of page to be replaced
+                                    LPFNADDPROPSHEETPAGE /*lpfnReplaceWith*/,  //Pointer to the Shell's Replace function
+                                    LPARAM /*lParam*/){									//Passed as second parameter to lpfnReplaceWith
     return E_FAIL;//we don't support this function.  It should never be
 }

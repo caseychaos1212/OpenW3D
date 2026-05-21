@@ -72,7 +72,7 @@ const LoginInfoList& LoginInfo::GetList(void)
 	if (_mLoginList.empty())
 		{
 		RefPtr<Session> session = Session::GetInstance(false);
-	
+
 		if (session.IsValid() && session->IsStoreLoginAllowed())
 			{
 			// Four logins allowed per user
@@ -85,7 +85,7 @@ const LoginInfoList& LoginInfo::GetList(void)
 				const char* nickname = NULL;
 				const char* password = NULL;
 				chat->GetNick(index, &nickname, &password);
-		
+
 				if (nickname && (strlen(nickname) > 0))
 					{
 					RefPtr<LoginInfo> login = Create(nickname, password, true);
@@ -104,7 +104,7 @@ const LoginInfoList& LoginInfo::GetList(void)
 				}
 			}
 		}
-	
+
 	return _mLoginList;
 	}
 
@@ -146,14 +146,14 @@ void LoginInfo::ClearList(void)
 *
 ******************************************************************************/
 
-RefPtr<LoginInfo> LoginInfo::Find(const wchar_t* name)
+RefPtr<LoginInfo> LoginInfo::Find(const unichar_t* name)
 	{
 	if (name)
 		{
 		const LoginInfoList& list = GetList();
-		const unsigned int count = list.size();
+		const size_t count = list.size();
 
-		for (unsigned int index = 0; index < count; ++index)
+		for (size_t index = 0; index < count; ++index)
 			{
 			RefPtr<LoginInfo> login = list[index];
 			WWASSERT(login.IsValid());
@@ -197,9 +197,9 @@ RefPtr<LoginInfo> LoginInfo::Find(const char* nickname)
 *
 ******************************************************************************/
 
-RefPtr<LoginInfo> LoginInfo::Create(const wchar_t* nickname, const wchar_t* password, bool isEncrypted)
+RefPtr<LoginInfo> LoginInfo::Create(const unichar_t* nickname, const unichar_t* password, bool isEncrypted)
 	{
-	if (nickname && (wcslen(nickname) > 0))
+	if (nickname && (u_strlen(nickname) > 0))
 		{
 		return new LoginInfo(nickname, password, isEncrypted);
 		}
@@ -243,14 +243,14 @@ RefPtr<LoginInfo> LoginInfo::Create(const char* nickname, const char* password, 
 *
 ******************************************************************************/
 
-LoginInfo::LoginInfo(const wchar_t* nickname, const wchar_t* password, bool isEncrypted) :
+LoginInfo::LoginInfo(const unichar_t* nickname, const unichar_t* password, bool isEncrypted) :
 		mNickname(nickname),
 		mPassword(password),
 		mLocale(WOL::LOC_UNKNOWN),
 		mIsPasswordEncrypted(isEncrypted),
 		mIsStored(false)
 	{
-	WWDEBUG_SAY(("WOL: Instantiating LoginInfo %S\n", (const wchar_t*)mNickname));
+	WWDEBUG_SAY(("WOL: Instantiating LoginInfo %S\n", (const unichar_t*)mNickname));
 
 	if (mNickname.Get_Length() > 9)
 		{
@@ -275,7 +275,7 @@ LoginInfo::LoginInfo(const wchar_t* nickname, const wchar_t* password, bool isEn
 
 LoginInfo::~LoginInfo()
 	{
-	WWDEBUG_SAY(("WOL: Destructing LoginInfo %S\n", (const wchar_t*)mNickname));
+	WWDEBUG_SAY(("WOL: Destructing LoginInfo %S\n", (const unichar_t*)mNickname));
 	}
 
 
@@ -296,7 +296,7 @@ LoginInfo::~LoginInfo()
 *
 ******************************************************************************/
 
-void LoginInfo::SetPassword(const wchar_t* password, bool isEncrypted)
+void LoginInfo::SetPassword(const unichar_t* password, bool isEncrypted)
 	{
 	if (password != NULL)
 		{
@@ -305,7 +305,7 @@ void LoginInfo::SetPassword(const wchar_t* password, bool isEncrypted)
 		}
 	else
 		{
-		mPassword = L"";
+		mPassword = U_CHAR("");
 		mIsPasswordEncrypted = false;
 		}
 	}
@@ -514,14 +514,14 @@ void LoginInfo::Forget(bool purge)
 *
 ******************************************************************************/
 
-int LoginInfo::IndexOf(const wchar_t* nick)
+int LoginInfo::IndexOf(const unichar_t* nick)
 	{
 	RefPtr<Session> session = Session::GetInstance(false);
 
 	if (session.IsValid())
 		{
 		char username[64];
-		wcstombs(username, nick, sizeof(username));
+		u_wstomb(username, nick, sizeof(username));
 
 		const CComPtr<WOL::IChat>& chat = session->GetChatObject();
 
@@ -556,7 +556,7 @@ int LoginInfo::IndexOf(const wchar_t* nick)
 *     NONE
 *
 * RESULT
-*     Index - 
+*     Index -
 *
 ******************************************************************************/
 

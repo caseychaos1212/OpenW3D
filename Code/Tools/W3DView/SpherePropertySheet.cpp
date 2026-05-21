@@ -69,7 +69,7 @@ SpherePropertySheetClass::SpherePropertySheetClass
 	CWnd *							pParentWnd,
 	UINT								iSelectPage
 )
-	:	m_RenderObj (NULL),		
+	:	m_RenderObj (NULL),
 		CPropertySheet(pszCaption, pParentWnd, iSelectPage)
 {
 	MEMBER_ADD (m_RenderObj, sphere);
@@ -133,14 +133,14 @@ SpherePropertySheetClass::WindowProc
 				/*case IDOK:
 				{
 					// If the apply button isn't enabled, then don't do the apply operation.
-					if (::IsWindowEnabled (::GetDlgItem (m_hWnd, ID_APPLY_NOW)) == FALSE) {
+					if (::IsWindowEnabled (::GetDlgItem (m_hWnd, ID_APPLY_NOW)) == false) {
 						break;
 					}
 				}*/
 
 				case IDOK:
 				case ID_APPLY_NOW:
-				{					
+				{
 					// Did the user click the button?
 					if (HIWORD (wParam) == BN_CLICKED) {
 						LRESULT lresult = CPropertySheet::WindowProc (message, wParam, lParam);
@@ -149,11 +149,11 @@ SpherePropertySheetClass::WindowProc
 						if (	m_GeneralPage.Is_Data_Valid () &&
 								m_ColorPage.Is_Data_Valid () &&
 								m_ScalePage.Is_Data_Valid ())
-						{							
+						{
 							// Update the current emitter to match the data
 							Update_Object ();
 						}
-												
+
 						return lresult;
 					}
 				}
@@ -179,12 +179,12 @@ SpherePropertySheetClass::Add_Object_To_Viewer (void)
 {
 	CW3DViewDoc *doc = ::GetCurrentDocument ();
 	if ((doc != NULL) && (m_RenderObj != NULL)) {
-		
+
 		//
 		// Create a new prototype for this object
 		//
 		SpherePrototypeClass *prototype	= new SpherePrototypeClass (m_RenderObj);
-		
+
 		//
 		// Update the asset manager with the new prototype
 		//
@@ -192,7 +192,7 @@ SpherePropertySheetClass::Add_Object_To_Viewer (void)
 			WW3DAssetManager::Get_Instance()->Remove_Prototype (m_LastSavedName);
 		}
 		WW3DAssetManager::Get_Instance()->Add_Prototype (prototype);
-		
+
 		//
 		// Add this object to the data tree
 		//
@@ -261,7 +261,7 @@ SpherePropertySheetClass::Initialize (void)
 
 	//
 	//	Force the pages to be created up front
-	//	
+	//
 	m_GeneralPage.m_psp.dwFlags	|= PSP_PREMATURE;
 	m_ColorPage.m_psp.dwFlags		|= PSP_PREMATURE;
 	m_ScalePage.m_psp.dwFlags		|= PSP_PREMATURE;

@@ -41,6 +41,7 @@
 #include "dialogmgr.h"
 #include "childdialog.h"
 #include "dialogcontrol.h"
+#include "ww3d.h"
 
 
 ////////////////////////////////////////////////////////////////
@@ -56,9 +57,9 @@ DynamicVectorClass<MenuDialogClass *>	MenuDialogClass::MenuStack;
 //	MenuDialogClass
 //
 ////////////////////////////////////////////////////////////////
-MenuDialogClass::MenuDialogClass (int res_id)	:
-	DialogBaseClass (res_id)
-{	
+MenuDialogClass::MenuDialogClass (const DialogResource *dialog_resource)	:
+	DialogBaseClass (dialog_resource)
+{
 	//
 	//	Add ourselves to the global stack of menus
 	//
@@ -97,8 +98,8 @@ MenuDialogClass::~MenuDialogClass (void)
 ////////////////////////////////////////////////////////////////
 void
 MenuDialogClass::Initialize (void)
-{	
-	BackDrop = new MenuBackDropClass;
+{
+	Ensure_BackDrop();
 	return ;
 }
 
@@ -119,6 +120,19 @@ MenuDialogClass::Shutdown (void)
 	return ;
 }
 
+////////////////////////////////////////////////////////////////
+//
+//	Ensure_BackDrop
+//
+////////////////////////////////////////////////////////////////
+void
+MenuDialogClass::Ensure_BackDrop (void)
+{
+	if (BackDrop == NULL && WW3D::Is_Initted()) {
+		BackDrop = new MenuBackDropClass;
+	}
+}
+
 
 ////////////////////////////////////////////////////////////////
 //
@@ -136,7 +150,10 @@ MenuDialogClass::Render (void)
 		//
 		//	Render the background scene first
 		//
-		BackDrop->Render ();
+		Ensure_BackDrop();
+		if (BackDrop != NULL) {
+			BackDrop->Render ();
+		}
 
 		//
 		//	Now, let the dialog subsystem render the controls and
@@ -144,7 +161,7 @@ MenuDialogClass::Render (void)
 		//
 		DialogBaseClass::Render ();
 	}
-	
+
 	return ;
 }
 
@@ -215,7 +232,7 @@ MenuDialogClass::On_Activate (bool onoff)
 //
 ////////////////////////////////////////////////////////////////
 void
-MenuDialogClass::On_Menu_Activate (bool onoff)
+MenuDialogClass::On_Menu_Activate (bool /* onoff */)
 {
 	return ;
 }
@@ -228,7 +245,7 @@ MenuDialogClass::On_Menu_Activate (bool onoff)
 ////////////////////////////////////////////////////////////////
 void
 MenuDialogClass::End_Dialog (void)
-{	
+{
 	//
 	//	Is this the last menu?  If so, send a notification
 	//
@@ -241,9 +258,9 @@ MenuDialogClass::End_Dialog (void)
 			//
 			//	Play the sound effect
 			//
-			StyleMgrClass::Play_Sound (StyleMgrClass::EVENT_MENU_BACK);			
+			StyleMgrClass::Play_Sound (StyleMgrClass::EVENT_MENU_BACK);
 		}
-	} 
+	}
 
 	DialogBaseClass::End_Dialog ();
 	return ;

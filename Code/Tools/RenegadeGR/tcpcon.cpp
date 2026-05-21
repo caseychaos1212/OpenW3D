@@ -27,8 +27,8 @@ TCPCon::TCPCon(SOCKET sock) :
 {
   Socket_=sock;
   isConnected();  // This will set the internal connect status
-  setInputDelay(DEFAULT_TCP_DELAY);  
-  setOutputDelay(DEFAULT_TCP_DELAY);  
+  setInputDelay(DEFAULT_TCP_DELAY);
+  setOutputDelay(DEFAULT_TCP_DELAY);
 }
 
 TCPCon::~TCPCon()
@@ -38,7 +38,7 @@ TCPCon::~TCPCon()
   WriteQueue_.clear();
 
   if ((BufferedWrites_) && (TCPMgrPtr_))
-    TCPMgrPtr_->setBufferedWrites(this, FALSE);
+    TCPMgrPtr_->setBufferedWrites(this, false);
 }
 
 SOCKET TCPCon::getFD(void)
@@ -81,17 +81,17 @@ sint32 TCPCon::write(IN uint8 *msg,uint32 len, sint32 wait_secs)
 
 
 //
-// set buffered status 
+// set buffered status
 //
 void TCPCon::setBufferedWrites(TCPMgr *mgrptr, bit8 enabled)
 {
   if (enabled)
-    BufferedWrites_=TRUE;  
+    BufferedWrites_=true;
   else
   {
     while(WriteQueue_.length())
       pumpWrites();
-    BufferedWrites_=FALSE;
+    BufferedWrites_=false;
   }
   TCPMgrPtr_=mgrptr;
 }
@@ -131,7 +131,7 @@ void TCPCon::pumpWrites(void)
 
 
 //
-// Non-buffered write (PRIVATE METHOD) 
+// Non-buffered write (PRIVATE METHOD)
 //
 // Returns 'n' bytes written, 0 if closed, or -1 for error.
 //
@@ -148,7 +148,7 @@ sint32 TCPCon::normalWrite(IN uint8 *msg,uint32 len, sint32 wait_secs)
   time_t start=time(NULL);
 
   TCPMgr::STATUS status;
- 
+
   while(1)
   {
     retval=send(Socket_,(const char *)(msg+sendCount),(len-sendCount),0);
@@ -156,7 +156,7 @@ sint32 TCPCon::normalWrite(IN uint8 *msg,uint32 len, sint32 wait_secs)
       break;
     if (retval==SOCKET_ERROR)
     {
-      status=TCPMgr::getStatus(); 
+      status=TCPMgr::getStatus();
       if ((status != TCPMgr::INTR) && (status != TCPMgr::WOULDBLOCK) && (status != TCPMgr::INPROGRESS))
       {
         if (sendCount)
@@ -169,8 +169,8 @@ sint32 TCPCon::normalWrite(IN uint8 *msg,uint32 len, sint32 wait_secs)
       sendCount+=retval;
 
     sint32 remaining_wait=wait_secs - (time(NULL)-start);
-    if ((remaining_wait > 0) && (TCPMgr::wait(remaining_wait,0,&Socket_,1,FALSE) > 0))
-      continue;  // I can write now.... 
+    if ((remaining_wait > 0) && (TCPMgr::wait(remaining_wait,0,&Socket_,1,false) > 0))
+      continue;  // I can write now....
 
     if (remaining_wait <= 0)
       break;
@@ -196,9 +196,9 @@ sint32 TCPCon::read(OUT uint8 *msg,uint32 maxlen, sint32 wait_secs)
 
   if (State_==TCPMgr::CLOSED)
     return(0);
- 
+
   TCPMgr::STATUS status;
- 
+
   while(1)
   {
     // Do we even nead to read from the net?
@@ -227,10 +227,10 @@ sint32 TCPCon::read(OUT uint8 *msg,uint32 maxlen, sint32 wait_secs)
       ReadQueue_.getPointer(&cptr,0);
 
 /*******
-      fprintf(stderr,"ReadQueue(%d): '",ReadQueue_.length()); 
+      fprintf(stderr,"ReadQueue(%d): '",ReadQueue_.length());
       for (int i=0; i<ReadQueue_.length(); i++)
         fprintf(stderr,"%c",cptr[i]);
-      fprintf(stderr,"'\n"); 
+      fprintf(stderr,"'\n");
 ********/
 
       int retcount=MIN(ReadQueue_.length(), int(maxlen));
@@ -244,15 +244,15 @@ sint32 TCPCon::read(OUT uint8 *msg,uint32 maxlen, sint32 wait_secs)
     }
     else if (retval==SOCKET_ERROR)
     {
-      status=TCPMgr::getStatus(); 
-      if ((status != TCPMgr::INTR) && (status != TCPMgr::WOULDBLOCK) && 
+      status=TCPMgr::getStatus();
+      if ((status != TCPMgr::INTR) && (status != TCPMgr::WOULDBLOCK) &&
           (status != TCPMgr::INPROGRESS))
         return(-1);
     }
- 
+
     sint32 remaining_wait=wait_secs - (time(NULL)-start);
-    if ((remaining_wait > 0) && (TCPMgr::wait(remaining_wait,0,&Socket_,1,TRUE) > 0))
-      continue;  // I can read now.... 
+    if ((remaining_wait > 0) && (TCPMgr::wait(remaining_wait,0,&Socket_,1,true) > 0))
+      continue;  // I can read now....
 
     if (remaining_wait <= 0)
       break;
@@ -264,7 +264,7 @@ sint32 TCPCon::read(OUT uint8 *msg,uint32 maxlen, sint32 wait_secs)
 bit8 TCPCon::unread(uint8 *data, int length)
 {
   ReadQueue_.addMany(data, 0, length);
-  return(TRUE);
+  return(true);
 }
 
 
@@ -274,16 +274,16 @@ bit8 TCPCon::getRemoteAddr(uint32 *ip, uint16 *port)
 {
   struct sockaddr_in sin;
   int    sinSize=sizeof(sin);
- 
+
   if(getpeername(Socket_,(sockaddr *)&sin,&sinSize)==0)
   {
     if (ip)
       *ip=ntohl(sin.sin_addr.s_addr);
     if (port)
       *port=ntohs(sin.sin_port);
-    return(TRUE);
+    return(true);
   }
-  return(FALSE);
+  return(false);
 }
 
 //
@@ -298,26 +298,26 @@ sint32 TCPCon::printf(const char *format, ...)
   vsprintf(string,format,arg);
   va_end(arg);
   string[4096]=0;
- 
+
   retval=write((IN uint8 *)string,strlen(string), OutputDelay_);
   return(retval);
 }
- 
+
 
 bit8 TCPCon::isConnected(void)
 {
   uint32 remoteIp;
   uint16 remotePort;
 
-  if (getRemoteAddr(&remoteIp,&remotePort)==TRUE)
+  if (getRemoteAddr(&remoteIp,&remotePort)==true)
   {
     State_=TCPMgr::CONNECTED;
-    return(TRUE);
+    return(true);
   }
   else
   {
     State_=TCPMgr::CLOSED;
-    return(FALSE);
+    return(false);
   }
 }
 

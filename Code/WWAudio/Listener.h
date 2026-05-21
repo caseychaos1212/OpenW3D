@@ -75,12 +75,12 @@ class Listener3DClass : public Sound3DClass
 
 		//////////////////////////////////////////////////////////////////////
 		//	Conversion methods
-		//////////////////////////////////////////////////////////////////////		
+		//////////////////////////////////////////////////////////////////////
 		virtual Listener3DClass *	As_Listener3DClass (void) override 	{ return this; }
 
 		//////////////////////////////////////////////////////////////////////
 		//	Initialization methods
-		//////////////////////////////////////////////////////////////////////				
+		//////////////////////////////////////////////////////////////////////
 		virtual void			On_Added_To_Scene (void);
 		virtual void			On_Removed_From_Scene (void);
 
@@ -91,22 +91,22 @@ class Listener3DClass : public Sound3DClass
 		virtual bool			Pause (void) override	{ return false; }
 		virtual bool			Resume (void) override	{ return false; }
 		virtual bool			Stop (bool /*remove*/) override		{ return false; }
-		virtual void			Seek (unsigned long milliseconds) override { }
+		virtual void			Seek (unsigned int /* milliseconds */) override { }
 		virtual SOUND_STATE	Get_State (void) const override	{ return STATE_STOPPED; }
 
 
 		//////////////////////////////////////////////////////////////////////
 		//	Attenuation settings
 		//////////////////////////////////////////////////////////////////////
-		virtual void			Set_Max_Vol_Radius (float radius = 0) override			{ }
+		virtual void			Set_Max_Vol_Radius (float /* radius */ = 0) override			{ }
 		virtual float			Get_Max_Vol_Radius (void) const override					{ return 0; }
-		virtual void			Set_DropOff_Radius (float radius = 1) override			{ }
+		virtual void			Set_DropOff_Radius (float /* radius */ = 1) override			{ }
 		virtual float			Get_DropOff_Radius (void) const override					{ return 0; }
 
 		//////////////////////////////////////////////////////////////////////
 		//	Velocity methods
-		//////////////////////////////////////////////////////////////////////				
-		virtual void			Set_Velocity (const Vector3 &velocity) override { }
+		//////////////////////////////////////////////////////////////////////
+		virtual void			Set_Velocity (const Vector3 &/* velocity */) override { }
 
 
 	protected:
@@ -118,20 +118,18 @@ class Listener3DClass : public Sound3DClass
 		virtual void			Stop_Sample (void)							{ }
 		virtual void			Resume_Sample (void)							{ }
 		virtual void			End_Sample (void)								{ }
-		virtual void			Set_Sample_Volume (S32 volume)			{ }
-		virtual S32				Get_Sample_Volume (void)					{ return 0; }
-		virtual void			Set_Sample_Pan (S32 pan)					{ }
-		virtual S32				Get_Sample_Pan (void)						{ return 64; }
-		virtual void			Set_Sample_Loop_Count (U32 count)		{ }
-		virtual U32				Get_Sample_Loop_Count (void)				{ return 0; }
-		virtual void			Set_Sample_MS_Position (U32 ms)			{ }
-		virtual void			Get_Sample_MS_Position (S32 *len, S32 *pos) { }
-		virtual S32				Get_Sample_Playback_Rate (void)			{ return 0; }
-		virtual void			Set_Sample_Playback_Rate (S32 rate)		{ }
+		virtual void			Set_Sample_Volume (float /* volume */)			{ }
+		virtual float			Get_Sample_Volume (void)					{ return 0.0F; }
+		virtual void			Set_Sample_Pan (float /* pan */)					{ }
+		virtual float			Get_Sample_Pan (void)						{ return 0.5F; }
+		virtual void			Set_Sample_Loop_Count (unsigned /* count */)		{ }
+		virtual unsigned				Get_Sample_Loop_Count (void)				{ return 0; }
+		virtual void			Set_Sample_MS_Position (unsigned /* ms */)			{ }
+		virtual void			Get_Sample_MS_Position (int */* len */, int */* pos */) { }
 
 		//////////////////////////////////////////////////////////////////////
 		//	Handle information
-		//////////////////////////////////////////////////////////////////////				
+		//////////////////////////////////////////////////////////////////////
 		virtual void			Initialize_Miles_Handle (void) override;
 		virtual void			Allocate_Miles_Handle (void) override;
 		virtual void			Free_Miles_Handle (void) override;

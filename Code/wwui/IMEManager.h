@@ -77,7 +77,7 @@ typedef enum
 typedef TypedActionPtr<CompositionAction, IMEManager> CompositionEvent;
 
 class UnicodeType;
-typedef TypedEvent<UnicodeType, wchar_t> UnicodeChar;
+typedef TypedEvent<UnicodeType, unichar_t> UnicodeChar;
 
 class IMEManager :
 		public RefCountClass,
@@ -97,7 +97,7 @@ class IMEManager :
 		void Enable(void);
 		bool IsDisabled(void) const;
 
-		const wchar_t* GetDescription(void) const
+		const unichar_t* GetDescription(void) const
 			{return mIMEDescription;}
 
 		WORD GetLanguageID(void) const
@@ -106,31 +106,31 @@ class IMEManager :
 		UINT GetCodePage(void) const
 			{return mCodePage;}
 
-		const wchar_t* GetResultString(void) const
+		const unichar_t* GetResultString(void) const
 			{return mResultString;}
 
-		const wchar_t* GetCompositionString(void) const
+		const unichar_t* GetCompositionString(void) const
 			{return mCompositionString;}
 
-		long GetCompositionCursorPos(void) const
+		int GetCompositionCursorPos(void) const
 			{return mCompositionCursorPos;}
 
-		const wchar_t* GetReadingString(void) const
+		const unichar_t* GetReadingString(void) const
 			{return mReadingString;}
 
 		#ifdef SHOW_IME_TYPING
-		const wchar_t* GetTypingString(void) const
+		const unichar_t* GetTypingString(void) const
 			{return mTypingString;}
 		#endif
 
-		void GetTargetClause(unsigned long& start, unsigned long& end);
+		void GetTargetClause(unsigned int& start, unsigned int& end);
 
 		bool GetCompositionFont(LPLOGFONT lpFont);
 
 		const IMECandidateCollection GetCandidateColl(void) const
 			{return mCandidateColl;}
 
-		unsigned long GetGuideline(wchar_t* outString, int length);
+		unsigned int GetGuideline(unichar_t* outString, int length);
 
 		bool ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, LRESULT& result);
 
@@ -141,31 +141,31 @@ class IMEManager :
 		bool FinalizeCreate(HWND hwnd);
 
 		LRESULT IMENotify(WPARAM wParam, LPARAM lParam);
-		
+
 		HKL InputLanguageChangeRequest(HKL hkl);
 		void InputLanguageChanged(HKL hkl);
 
 		void ResetComposition(void);
 		void StartComposition(void);
-		void DoComposition(unsigned int dbcsChar, long changeFlag);
+		void DoComposition(unsigned int dbcsChar, int changeFlag);
 		void EndComposition(void);
 
-		bool ReadCompositionString(HIMC imc, unsigned long flag, wchar_t* buffer, int length);
-		long ReadReadingAttr(HIMC imc, unsigned char* attr, int length);
-		long ReadReadingClause(HIMC imc, unsigned long* clause, int length);
-		long ReadCompositionAttr(HIMC imc, unsigned char* attr, int length);
-		long ReadCompositionClause(HIMC imc, unsigned long* clause, int length);
-		long ReadCursorPos(HIMC imc);
+		bool ReadCompositionString(HIMC imc, unsigned int flag, unichar_t* buffer, int length);
+		int ReadReadingAttr(HIMC imc, unsigned char* attr, int length);
+		int ReadReadingClause(HIMC imc, unsigned int* clause, int length);
+		int ReadCompositionAttr(HIMC imc, unsigned char* attr, int length);
+		int ReadCompositionClause(HIMC imc, unsigned int* clause, int length);
+		int ReadCursorPos(HIMC imc);
 
-		void OpenCandidate(unsigned long candList);
-		void ChangeCandidate(unsigned long candList);
-		void CloseCandidate(unsigned long candList);
+		void OpenCandidate(unsigned int candList);
+		void ChangeCandidate(unsigned int candList);
+		void CloseCandidate(unsigned int candList);
 
 		bool IMECharHandler(unsigned short dbcs);
 		bool CharHandler(unsigned short ch);
 
-		long ConvertAttrForUnicode(unsigned char* mbcs, unsigned char* attr);
-		long ConvertClauseForUnicode(unsigned char* mbcs, long length, unsigned long* clause);
+		int ConvertAttrForUnicode(unsigned char* mbcs, unsigned char* attr);
+		int ConvertClauseForUnicode(unsigned char* mbcs, int length, unsigned int* clause);
 
 		DECLARE_NOTIFIER(IMEEvent)
 		DECLARE_NOTIFIER(UnicodeChar)
@@ -182,7 +182,7 @@ class IMEManager :
 		HIMC mHIMC;
 
 		HIMC mDisabledHIMC;
-		unsigned long mDisableCount;
+		unsigned int mDisableCount;
 
 		WORD mLangID;
 		UINT mCodePage;
@@ -196,18 +196,18 @@ class IMEManager :
 		bool mInComposition;
 
 		#ifdef SHOW_IME_TYPING
-		wchar_t mTypingString[IME_MAX_TYPING_LEN];
-		long mTypingCursorPos;
+		unichar_t mTypingString[IME_MAX_TYPING_LEN];
+		int mTypingCursorPos;
 		#endif
-		
-		wchar_t mCompositionString[IME_MAX_STRING_LEN];
+
+		unichar_t mCompositionString[IME_MAX_STRING_LEN];
 		unsigned char mCompositionAttr[IME_MAX_STRING_LEN];
-		unsigned long mCompositionClause[IME_MAX_STRING_LEN / 2];
+		unsigned int mCompositionClause[IME_MAX_STRING_LEN / 2];
 
-		long mCompositionCursorPos;
+		int mCompositionCursorPos;
 
-		wchar_t mReadingString[IME_MAX_STRING_LEN * 2];
-		wchar_t mResultString[IME_MAX_STRING_LEN];
+		unichar_t mReadingString[IME_MAX_STRING_LEN * 2];
+		unichar_t mResultString[IME_MAX_STRING_LEN];
 
 		IMECandidateCollection mCandidateColl;
 	};

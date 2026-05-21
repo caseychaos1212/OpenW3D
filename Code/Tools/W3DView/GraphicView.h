@@ -151,7 +151,7 @@ protected:
 		  void			Load_Default_Dat (void);
 
         void			UpdateDisplay (void);
-        void			RepaintView (BOOL bUpdateAnimation = TRUE, DWORD ticks_to_use = 0);
+        void			RepaintView (BOOL bUpdateAnimation = true, DWORD ticks_to_use = 0);
         void			SetActiveUpdate (BOOL bActive)
 								{ m_bActive = bActive;
 								  if (!m_bActive) { ::SetProp (m_hWnd, "Inactive", (HANDLE)1); }
@@ -235,7 +235,7 @@ protected:
 		  RenderObjClass *	m_pLightMesh;
 		  bool					m_bLightMeshInScene;
 		  Vector3				m_ObjectCenter;
-		  SphereClass			m_ViewedSphere;		  
+		  SphereClass			m_ViewedSphere;
 
         BOOL					m_bMouseDown;
         BOOL					m_bRMouseDown;
@@ -245,7 +245,7 @@ protected:
 		  float					m_CameraDistance;
 		  DWORD					m_ParticleCountUpdate;
 		  BOOL					m_CameraBonePosX;
-        
+
         // Animation data
         DWORD					m_dwLastFrameUpdate;
         float					m_animationSpeed;

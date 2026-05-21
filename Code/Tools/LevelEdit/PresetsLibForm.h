@@ -42,6 +42,7 @@ class DefinitionFactoryClass;
 class DefinitionClass;
 class PresetClass;
 class ParameterClass;
+class FileClass;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -54,8 +55,8 @@ typedef struct _DERIVED_PARAM_INFO
 	DynamicVectorClass<ParameterClass *>	derived_param_list;
 
 	// For DyanmicVectorClass
-	bool operator== (const _DERIVED_PARAM_INFO &) { return false; }
-	bool operator!= (const _DERIVED_PARAM_INFO &) { return true; }
+	bool operator== (const _DERIVED_PARAM_INFO &/* src*/) { return false; }
+	bool operator!= (const _DERIVED_PARAM_INFO &/* src*/) { return true; }
 } DERIVED_PARAM_INFO;
 
 typedef DynamicVectorClass<DERIVED_PARAM_INFO> DERIVED_PARAM_LIST;
@@ -136,15 +137,15 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	
+
 	/////////////////////////////////////////////////////////
 	//	Public methods
 	/////////////////////////////////////////////////////////
-	void								Reload_Presets (void);	
+	void								Reload_Presets (void);
 
 	bool								Save_Temp_Presets (void);
 	bool								Save_Global_Presets (uint32 class_id);
-	
+
 	bool								Save_Presets (LPCTSTR path, uint32 class_id, bool temps_only = false, bool class_id_matters = true);
 	static bool						Old_Load_Presets (void);
 	static bool						Load_Temp_Presets (void);
@@ -168,7 +169,7 @@ public:
 	//
 	void								Add_Preset (PresetClass *preset);
 	void								Sort_Items (uint32 class_id);
-	
+
 protected:
 
 	/////////////////////////////////////////////////////////
@@ -178,8 +179,8 @@ protected:
 	void								Fill_In_Preset_Children (HTREEITEM root_item, uint32 parent_id);
 
 	bool								Save_Presets (uint32 class_id, bool temps_only = false);
-	void								Save_Presets (HANDLE file, uint32 class_id, bool temps_only = false, bool class_id_matters = true);
-	static bool						Load_Presets (uint32 class_id);	
+	void								Save_Presets (FileClass &file_obj, uint32 class_id, bool temps_only = false, bool class_id_matters = true);
+	static bool						Load_Presets (uint32 class_id);
 
 	HTREEITEM						Find_Preset (HTREEITEM root_item, uint32 id);
 	HTREEITEM						Find_Factory (HTREEITEM root_item, uint32 id);

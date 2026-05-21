@@ -64,11 +64,11 @@ class GMaxMtlDlg: public ParamDlg , public IFPMatNav //,public ReferenceMaker
 {
 public:
 	void DestroyDialog();
-	
+
 	////////////////////////////////////////////////////////////////////////
 	// Methods
 	////////////////////////////////////////////////////////////////////////
-	GMaxMtlDlg(HWND hwMtlEdit, IMtlParams *imp, GameMtl *m); 
+	GMaxMtlDlg(HWND hwMtlEdit, IMtlParams *imp, GameMtl *m);
 	~GMaxMtlDlg();
 
 //============================================================================================
@@ -82,13 +82,13 @@ public:
 	Class_ID				ClassID(void);
 	void					SetThing(ReferenceTarget *m);
 	ReferenceTarget*	GetThing(void) { return (ReferenceTarget*)TheMtl; }
-	void					DeleteThis() { delete this;  }	
+	void					DeleteThis() { delete this;  }
 	void					SetTime(TimeValue t);
 	void					ReloadDialog(void);
 	void					ActivateDlg(BOOL onOff);
 
 	void					Invalidate(void);
-	void					Update_Display(void)	{GetCOREInterface()->ForceCompleteRedraw(TRUE);}
+	void					Update_Display(void)	{GetCOREInterface()->ForceCompleteRedraw(true);}
 	void					Reset(GameMtl* mtl);
 	void					Reinitialize(GameMtl* new_mtl, bool update_multimtl = true);
 	void					SetMultimaterial(Mtl* mtl){Game_multi_mtl = mtl; Current_Submtl_Index = 0;}
@@ -149,14 +149,14 @@ protected:
 	HWND					HwndDisplacementMap;
 	HPALETTE				HpalOld;
 
-	GameMtlPassDlg *	PassDialog[MAX_PASSES];	
+	GameMtlPassDlg *	PassDialog[MAX_PASSES];
 
 	////////////////////////////////////////////////////////////////////////
 	// Material dialog interface
 	////////////////////////////////////////////////////////////////////////
 	IMtlParams *		IParams;			// interface to the material editor
 	GameMtl *			TheMtl;			// current mtl being edited.
-	
+
 	////////////////////////////////////////////////////////////////////////
 	// Member variables
 	////////////////////////////////////////////////////////////////////////

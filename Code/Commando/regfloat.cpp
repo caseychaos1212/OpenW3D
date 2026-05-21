@@ -20,7 +20,7 @@
 // Filename:     regfloat.cpp
 // Author:       Tom Spencer-Smith
 // Date:         Dec 1998
-// Description:  
+// Description:
 //
 
 #include "regfloat.h"
@@ -35,7 +35,7 @@
 //
 
 //-----------------------------------------------------------------------------
-cRegistryFloat::cRegistryFloat(LPCSTR registry_location, LPCSTR key_name, float default_value)
+cRegistryFloat::cRegistryFloat(const char *registry_location, const char *key_name, float default_value)
 {
    WWMEMLOG(MEM_GAMEDATA);
 	if (registry_location == NULL) {

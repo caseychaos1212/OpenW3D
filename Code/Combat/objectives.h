@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Combat/objectives.h                          $* 
- *                                                                                             * 
- *                      $Author:: Byon_g                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 12/12/01 11:51a                                             $* 
- *                                                                                             * 
- *                    $Revision:: 21                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Combat/objectives.h                          $*
+ *                                                                                             *
+ *                      $Author:: Byon_g                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 12/12/01 11:51a                                             $*
+ *                                                                                             *
+ *                    $Revision:: 21                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #ifndef	OBJECTIVES_H
@@ -85,8 +85,8 @@ struct	Objective {
 
 	const Vector3 &	Type_To_Color( void );
 	const Vector3 &	Type_To_Base_Color( void );
-	const wchar_t *		Type_To_Name( void );
-	const wchar_t *		Status_To_Name( void );
+	const unichar_t *		Type_To_Name( void );
+	const unichar_t *		Status_To_Name( void );
 	const Vector3 &	Status_To_Color( void );
 
 	int	Radar_Blip_Color_Type( void );
@@ -100,7 +100,7 @@ struct	Objective {
 /*
 **
 */
-class ObjectiveManager 
+class ObjectiveManager
 {
 public:
 	enum {
@@ -150,7 +150,7 @@ public:
 	// HUD interface
 	static	int				Get_Num_HUD_Objectives( void );
 	static	const char *	Get_HUD_Objectives_Pog_Texture_Name( int index );
-	static	const wchar_t *	Get_HUD_Objectives_Message( int index );
+	static	const unichar_t *	Get_HUD_Objectives_Message( int index );
 	static	Vector3			Get_HUD_Objectives_Location( int index );
 	static	float			Get_HUD_Objectives_Age( int index );
 	static	bool			Are_HUD_Objectives_Changed( void )		{ return HUDUpdate; }

@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Combat/weaponmanager.h                       $* 
- *                                                                                             * 
- *                      $Author:: Byon_g                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 1/02/02 3:05p                                               $* 
- *                                                                                             * 
- *                    $Revision:: 64                                                         $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Combat/weaponmanager.h                       $*
+ *                                                                                             *
+ *                      $Author:: Byon_g                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 1/02/02 3:05p                                               $*
+ *                                                                                             *
+ *                    $Revision:: 64                                                         $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #ifndef	WEAPONMANAGER_H
@@ -72,8 +72,8 @@ public:
 
 	DECLARE_EDITABLE( WeaponDefinitionClass, DefinitionClass );
 
-	bool operator == ( const WeaponDefinitionClass & vector) const  { return false; }
-	bool operator != ( const WeaponDefinitionClass & vector) const  { return true; }
+	bool operator == ( const WeaponDefinitionClass & ) const  { return false; }
+	bool operator != ( const WeaponDefinitionClass & ) const  { return true; }
 
 	int				Style;
 	StringClass		Model;
@@ -135,8 +135,8 @@ public:
 
 	DECLARE_EDITABLE( AmmoDefinitionClass, DefinitionClass );
 
-	bool operator == ( const AmmoDefinitionClass & vector) const { return false; }
-	bool operator != ( const AmmoDefinitionClass & vector) const	{ return true; }
+	bool operator == ( const AmmoDefinitionClass & ) const { return false; }
+	bool operator != ( const AmmoDefinitionClass & ) const	{ return true; }
 
 	StringClass		ModelFilename;
 	StringClass		ModelName;

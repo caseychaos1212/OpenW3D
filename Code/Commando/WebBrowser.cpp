@@ -36,11 +36,16 @@
 #include "always.h"
 
 #include "WebBrowser.h"
+
+#if WEBBROWSER_ENABLED
+
 #include <wwlib/WWCOMUtil.h>
 #include <ww3d2/ww3d.h>
+#include <limits>
 #include <WWOnline/WOLLoginInfo.h>
 #include <wwdebug/wwdebug.h>
 #include "win.h"
+#include "wwdialog.h"
 #include "_globals.h"
 #include <cstdio>
 
@@ -97,8 +102,9 @@ bool WebBrowser::InstallPrerequisites(void)
 		if (!success)
 			{
 			WWDEBUG_SAY(("Failed to register WOLBrowser.dll!\n"));
-			::MessageBoxA(NULL, "WOLBrowser.dll not registered!\n\nDefaulting to external browser.",
-					"Renegade Warning!", MB_ICONWARNING|MB_OK);
+			::Show_Message_Box(MESSAGEBOX_BUTTON_OK | MESSAGEBOX_SEVERITY_WARNING,
+					"WOLBrowser.dll not registered!\n\nDefaulting to external browser.",
+					"Renegade Warning!");
 			return false;
 			}
 		}
@@ -110,8 +116,9 @@ bool WebBrowser::InstallPrerequisites(void)
 	if (ERROR_SUCCESS != result)
 		{
 		WWDEBUG_SAY(("URL entry not in the registry\n"));
-		::MessageBoxA(NULL, "Embedded Browser prerequisite error!\n\nURL key not found.",
-				"Renegade Warning!", MB_ICONWARNING|MB_OK);
+		::Show_Message_Box(MESSAGEBOX_BUTTONS_OK | MESSAGEBOX_SEVERITY_WARNING,
+				"Embedded Browser prerequisite error!\n\nURL key not found.",
+				"Renegade Warning!");
 
 		// Attempt to create the key.
 		LONG result = RegCreateKeyExA(HKEY_CURRENT_USER, APPLICATION_SUB_KEY_NAME_URL, 0, NULL,
@@ -120,8 +127,9 @@ bool WebBrowser::InstallPrerequisites(void)
 		if (ERROR_SUCCESS != result)
 			{
 			WWDEBUG_SAY(("Failed to create URL entry in registry\n"));
-			::MessageBoxA(NULL, "Failed to create Embedded Browser URLS\n\nURL key not found.",
-					"Renegade Warning!", MB_ICONWARNING|MB_OK);
+			::Show_Message_Box(MESSAGEBOX_BUTTONS_OK | MESSAGEBOX_SEVERITY_WARNING,
+					"Failed to create Embedded Browser URLS\n\nURL key not found.",
+					"Renegade Warning!");
 			return false;
 			}
 
@@ -170,7 +178,8 @@ bool WebBrowser::InstallPrerequisites(void)
 					WWDEBUG_SAY(("Failed to create URL entry '%s' in registry\n", valueName));
 					char errorMsg[256];
 					sprintf(errorMsg, "Embedded Browser prerequisite error!\n\nURL key '%s'", valueName);
-					::MessageBoxA(NULL, errorMsg, "Renegade Warning!", MB_ICONWARNING|MB_OK);
+					::Show_Message_Box(MESSAGEBOX_BUTTONS_OK | MESSAGEBOX_SEVERITY_WARNING,
+						errorMsg, "Renegade Warning!");
 					break;
 					}
 				}
@@ -388,7 +397,7 @@ bool WebBrowser::FinalizeCreate(HWND window)
 
 			// Initialize browser to cover dialog browser area
 			mWOLBrowser->Startup(window, &webRect);
-			mWOLBrowser->AllowPageCertification(TRUE);
+			mWOLBrowser->AllowPageCertification(true);
 			mWOLBrowser->SetUIFlags(UIFLAG_SCROLLBARS);
 			}
 		}
@@ -581,9 +590,9 @@ bool WebBrowser::RetrieveHTMLPath(char* path, int size)
 		return false;
 		}
 
-	int dirSize = (length + strlen("\\HTML\\"));
+	const size_t dirSize = static_cast<size_t>(length) + ::strlen("\\HTML\\");
 
-	if (dirSize > size)
+	if (dirSize > static_cast<size_t>(size))
 		{
 		return false;
 		}
@@ -747,7 +756,7 @@ STDMETHODIMP WebBrowser::OnBeforeNavigate(const wchar_t* /* url */,
 *
 ******************************************************************************/
 
-STDMETHODIMP WebBrowser::OnDocumentComplete(const wchar_t* url, BOOL isTopFrame)
+STDMETHODIMP WebBrowser::OnDocumentComplete([[maybe_unused]] const wchar_t* url, BOOL isTopFrame)
 	{
 	WWDEBUG_SAY(("WebBrowser: OnDocumentComplete: %S\n", url));
 
@@ -800,7 +809,7 @@ STDMETHODIMP WebBrowser::OnDownloadBegin(void)
 *
 ******************************************************************************/
 
-STDMETHODIMP WebBrowser::OnProgressChange(long /* progress */, long /* progressMax */)
+STDMETHODIMP WebBrowser::OnProgressChange(LONG /* progress */, LONG /* progressMax */)
 	{
 	return S_OK;
 	}
@@ -930,7 +939,7 @@ STDMETHODIMP WebBrowser::OnNewWindow(void)
 ******************************************************************************/
 
 STDMETHODIMP WebBrowser::OnShowMessage(const wchar_t* /* text */, const wchar_t* /* caption */,
-		unsigned long /* type */, long* /* result */)
+		ULONG /* type */, LONG* /* result */)
 	{
 	return S_OK;
 	}
@@ -1011,7 +1020,7 @@ STDMETHODIMP WebBrowser::OnRegisterLogin(const wchar_t* nick , const wchar_t* pa
 	{
 	WWDEBUG_SAY(("WebBrowser: Register WWOnline login: '%S' - '%S'\n", nick, pass));
 
-	RefPtr<WWOnline::LoginInfo> login = WWOnline::LoginInfo::Create(nick, pass, false);
+	RefPtr<WWOnline::LoginInfo> login = WWOnline::LoginInfo::Create(reinterpret_cast<const unichar_t*>(nick), reinterpret_cast<const unichar_t*>(pass), false);
 
 	if (login.IsValid())
 		{
@@ -1075,7 +1084,9 @@ bool WebBrowser::LaunchExternal(const char* url)
 	// Write generic contents
 	const char* contents = "<title>ViewHTML</title>";
 	DWORD written;
-	WriteFile(file, contents, strlen(contents), &written, NULL);
+	const size_t content_length = ::strlen(contents);
+	WWASSERT(content_length <= std::numeric_limits<DWORD>::max());
+	WriteFile(file, contents, static_cast<DWORD>(content_length), &written, NULL);
 	CloseHandle(file);
 
 	// Find the executable that can launch this file
@@ -1101,8 +1112,8 @@ bool WebBrowser::LaunchExternal(const char* url)
 
 	memset(&mProcessInfo, 0, sizeof(mProcessInfo));
 
-	BOOL createSuccess = CreateProcessA(exeName, commandLine, NULL, NULL, FALSE,
-			0, NULL, NULL, &startupInfo, &mProcessInfo);
+	bool createSuccess = CreateProcessA(exeName, commandLine, NULL, NULL, false,
+			0, NULL, NULL, &startupInfo, &mProcessInfo) != 0;
 
 	WWASSERT(createSuccess && "Failed to launch external WebBrowser.");
 
@@ -1111,7 +1122,7 @@ bool WebBrowser::LaunchExternal(const char* url)
 	  WaitForInputIdle(mProcessInfo.hProcess, 5000);
 		}
 
-	return (TRUE == createSuccess);
+	return createSuccess;
 	}
 
 
@@ -1144,10 +1155,12 @@ bool WebBrowser::IsExternalBrowserRunning(void) const
 	BOOL success = GetExitCodeProcess(mProcessInfo.hProcess, &active);
 	WWASSERT_PRINT(success, "GetExitCodeProcess() Failed");
 
-	if (success == FALSE)
+	if (success == false)
 		{
 		Print_Win32Error(GetLastError());
 		}
 
 	return (STILL_ACTIVE == active);
 	}
+
+#endif // WEBBROWSER_ENABLED

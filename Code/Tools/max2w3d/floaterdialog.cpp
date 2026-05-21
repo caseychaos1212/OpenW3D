@@ -70,7 +70,7 @@ BOOL CALLBACK _floater_dialog_proc(HWND hwnd,UINT message,WPARAM wParam,LPARAM l
 	if (floater) {
 		return floater->Dialog_Proc(hwnd,message,wParam,lParam);
 	} else {
-		return FALSE;
+		return false;
 	}
 }
 
@@ -164,16 +164,16 @@ void FloaterDialogClass::Create(Interface * ip, int child_dlg_id, DLGPROC child_
 	/*
 	** Create the dialog box
 	*/
-	Hwnd = CreateDialogParam(	
+	Hwnd = CreateDialogParam(
 										AppInstance,
 										MAKEINTRESOURCE(IDD_W3DUTILITY_FLOATER_DIALOG),
 										::GetCOREInterface()->GetMAXHWnd(),
 										(DLGPROC) _floater_dialog_proc,
-										(LPARAM) this 
+										(LPARAM) this
 									);
-	::GetCOREInterface()->RegisterDlgWnd(Hwnd); 
+	::GetCOREInterface()->RegisterDlgWnd(Hwnd);
 }
-	
+
 
 
 /***********************************************************************************************
@@ -197,7 +197,7 @@ bool FloaterDialogClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wParam,LPARAM
 
 		case WM_INITDIALOG:
 			{
-				HWND childhwnd = CreateDialogParam(	
+				HWND childhwnd = CreateDialogParam(
 													AppInstance,
 													MAKEINTRESOURCE(ChildDialogTemplateID),
 													hWnd,
@@ -208,13 +208,13 @@ bool FloaterDialogClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wParam,LPARAM
 					RECT rect;
 					LONG style = ::GetWindowLong(hWnd,GWL_STYLE);
 					::GetWindowRect(childhwnd,&rect);
-					::AdjustWindowRect(&rect,style,FALSE);
+					::AdjustWindowRect(&rect,style,false);
 					::SetWindowPos(hWnd,NULL,0,0,rect.right - rect.left,rect.bottom - rect.top,SWP_NOZORDER|SWP_NOMOVE);
 					::SetWindowPos(childhwnd,NULL,0,0,0,0,SWP_NOZORDER|SWP_NOSIZE|SWP_SHOWWINDOW);
 				}
 			}
 			return 1;
-		
+
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
 			{
@@ -225,7 +225,7 @@ bool FloaterDialogClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wParam,LPARAM
 			return 1;
 
 		case WM_DESTROY:
-			::GetCOREInterface()->UnRegisterDlgWnd(Hwnd); 
+			::GetCOREInterface()->UnRegisterDlgWnd(Hwnd);
 			Hwnd = NULL;
 			break;
 	}

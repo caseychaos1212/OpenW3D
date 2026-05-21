@@ -36,12 +36,14 @@
 
 
 #include "dlgmpwolpagebuddy.h"
+#include "renegadedialog.h"
 #include "dlgmpwolbuddies.h"
 #include "dlgmpwolpagereply.h"
 #include "dlgmpwolbuddylistpopup.h"
 #include "renegadedialogmgr.h"
 //#include "WOLBuddyMgr.h"
 #include "comboboxctrl.h"
+#include <limits>
 
 
 ////////////////////////////////////////////////////////////////
@@ -50,7 +52,7 @@
 //
 ////////////////////////////////////////////////////////////////
 MPWolPageBuddyPopupClass::MPWolPageBuddyPopupClass (void)	:
-	PopupDialogClass (IDD_MP_WOL_PAGE_BUDDY),
+	PopupDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_PAGE_BUDDY)),
 	mBuddyMgr(NULL)
 {
 	mBuddyMgr = WOLBuddyMgr::GetInstance(false);
@@ -83,7 +85,7 @@ MPWolPageBuddyPopupClass::On_Init_Dialog(void)
 
 		// Get the current buddy list
 		const WWOnline::UserList& list = mBuddyMgr->GetBuddyList();
-		const unsigned int count = list.size();
+		const size_t count = list.size();
 
 		if (count == 0) {
 			Observer<WOLBuddyMgrEvent>::NotifyMe (*mBuddyMgr);
@@ -93,9 +95,9 @@ MPWolPageBuddyPopupClass::On_Init_Dialog(void)
 			ComboBoxCtrlClass* combo_box = (ComboBoxCtrlClass*)Get_Dlg_Item(IDC_BUDDY_NAME_COMBO);
 
 			if (combo_box) {
-			
+
 				// Add each buddy to the combobox
-				for (unsigned int index = 0; index < count; ++index) {
+				for (size_t index = 0; index < count; ++index) {
 					const RefPtr<WWOnline::UserData>& user = list[index];
 
 					// Add this buddy if they are currently online
@@ -127,7 +129,7 @@ MPWolPageBuddyPopupClass::On_Init_Dialog(void)
 //
 ////////////////////////////////////////////////////////////////
 void
-MPWolPageBuddyPopupClass::On_Command(int ctrl_id, int message_id, DWORD param)
+MPWolPageBuddyPopupClass::On_Command(int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id) {
 		case IDC_INVITE_BUDDY_BUTTON: {
@@ -158,7 +160,7 @@ MPWolPageBuddyPopupClass::On_Command(int ctrl_id, int message_id, DWORD param)
 			MPWolBuddiesMenuClass::Display();
 			End_Dialog();
 			break;
-		
+
 		case IDC_PAGE_BUTTON:
 			Send_Page();
 			break;
@@ -184,9 +186,9 @@ MPWolPageBuddyPopupClass::Send_Page(void)
 	if (message.Is_Empty() == false) {
 
 		//	Get the name of the user we'll be paging
-		const wchar_t* username = Get_Dlg_Item_Text(IDC_BUDDY_NAME_COMBO);
+		const unichar_t* username = Get_Dlg_Item_Text(IDC_BUDDY_NAME_COMBO);
 
-		if (wcslen(username) > 0) {
+		if (u_strlen(username) > 0) {
 
 			//	Send the page
 			if (mBuddyMgr) {
@@ -204,7 +206,7 @@ MPWolPageBuddyPopupClass::Send_Page(void)
 //	Set_Buddy_Name
 //
 ////////////////////////////////////////////////////////////////
-void MPWolPageBuddyPopupClass::Set_Buddy_Name(const wchar_t *user_name)
+void MPWolPageBuddyPopupClass::Set_Buddy_Name(const unichar_t *user_name)
 {
 	Set_Dlg_Item_Text(IDC_BUDDY_NAME_COMBO, user_name);
 }
@@ -229,23 +231,23 @@ void MPWolPageBuddyPopupClass::CheckIfCanSendPage(void)
 }
 
 
-void MPWolPageBuddyPopupClass::On_ComboBoxCtrl_Edit_Change(ComboBoxCtrlClass* combo, int id)
+void MPWolPageBuddyPopupClass::On_ComboBoxCtrl_Edit_Change(ComboBoxCtrlClass* /* combo */, int id)
 {
-	if (IDC_BUDDY_NAME_COMBO == id) { 
+	if (IDC_BUDDY_NAME_COMBO == id) {
 		CheckIfCanSendPage();
 	}
 }
 
 
-void MPWolPageBuddyPopupClass::On_EditCtrl_Change(EditCtrlClass* edit, int id)
+void MPWolPageBuddyPopupClass::On_EditCtrl_Change(EditCtrlClass* /* edit */, int id)
 {
-	if (IDC_MESSAGE_EDIT == id) { 
+	if (IDC_MESSAGE_EDIT == id) {
 		CheckIfCanSendPage();
 	}
 }
 
 
-void MPWolPageBuddyPopupClass::On_EditCtrl_Enter_Pressed(EditCtrlClass* edit, int id)
+void MPWolPageBuddyPopupClass::On_EditCtrl_Enter_Pressed(EditCtrlClass* /* edit */, int id)
 {
 	if (IDC_MESSAGE_EDIT == id && Is_Dlg_Item_Enabled(IDC_PAGE_BUTTON)) {
 		Send_Page();
@@ -264,12 +266,12 @@ void MPWolPageBuddyPopupClass::HandleNotification(WOLBuddyMgrEvent &event)
 
 		if (combo_box) {
 			combo_box->Reset_Content();
-		
-			const WWOnline::UserList& buddies = mBuddyMgr->GetBuddyList();
-			const unsigned int count = buddies.size();
 
-			// Add each buddy to the combobox
-			for (unsigned int index = 0; index < count; ++index) {
+		const WWOnline::UserList& buddies = mBuddyMgr->GetBuddyList();
+		const size_t count = buddies.size();
+
+		// Add each buddy to the combobox
+		for (size_t index = 0; index < count; ++index) {
 				const RefPtr<WWOnline::UserData>& user = buddies[index];
 
 				if (user->GetLocation() != WWOnline::USERLOCATION_OFFLINE) {

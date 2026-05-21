@@ -123,7 +123,7 @@ WideStringClass			cGameData::WinText;
 //
 // hack
 //
-ULONG g_ip_override = INADDR_NONE;
+unsigned int g_ip_override = INADDR_NONE;
 
 //------------------------------------------------------------------------------------
 void cGameData::Onetime_Init(void)
@@ -179,9 +179,9 @@ cGameData::cGameData(void)	:
 	TimeLimitMinutes					= 0;
 	RadarMode							= RADAR_ALL;
 	IniFilename							= "";
-	Motd.Format(L"");
+	Motd.Format(U_CHAR(""));
 
-	Set_Password(						L"");
+	Set_Password(						U_CHAR(""));
    //Set_Owner(							"UNOWNED");
    Set_Owner(							cNetInterface::Get_Nickname());
 
@@ -362,7 +362,7 @@ void cGameData::Swap_Team_Sides(void)
 	// Inform the players
 	//
 	//WideStringClass text;
-	//text.Format(L"_TEAMS_SWAPPED_!_");
+	//text.Format(U_CHAR("_TEAMS_SWAPPED_!_"));
 	WideStringClass text = TRANSLATE(IDS_MP_TEAMS_SWAPPED);
 	cScTextObj * p_text_obj = new cScTextObj();
 	p_text_obj->Init(text, TEXT_MESSAGE_PUBLIC, false, HOST_TEXT_SENDER, -1);
@@ -408,7 +408,7 @@ void cGameData::Remix_Team_Sides(void)
 	// Inform the players
 	//
 	//WideStringClass text;
-	//text.Format(L"_TEAMS_REMIXED_!_");
+	//text.Format(U_CHAR("_TEAMS_REMIXED_!_"));
 	WideStringClass text = TRANSLATE(IDS_MP_TEAMS_REMIXED);
 	cScTextObj * p_text_obj = new cScTextObj();
 	p_text_obj->Init(text, TEXT_MESSAGE_PUBLIC, false, HOST_TEXT_SENDER, -1);
@@ -467,7 +467,7 @@ void cGameData::Rebalance_Team_Sides(void)
 		// Inform the players
 		//
 		//WideStringClass text;
-		//text.Format(L"_TEAMS_REBALANCED_!_");
+		//text.Format(U_CHAR("_TEAMS_REBALANCED_!_"));
 		WideStringClass text = TRANSLATE(IDS_MP_TEAMS_REBALANCED);
 		cScTextObj * p_text_obj = new cScTextObj();
 		p_text_obj->Init(text, TEXT_MESSAGE_PUBLIC, false, HOST_TEXT_SENDER, -1);
@@ -492,7 +492,7 @@ void cGameData::Set_Ip_And_Port(void)
 	Set_Ip_Address(local_address.sin_addr.s_addr);
 	*/
 
-	ULONG ip = 0;
+	unsigned int ip = 0;
 	if (cGameSpyAdmin::Get_Is_Server_Gamespy_Listed()) {
 		ip = cUserOptions::PreferredGameSpyNic.Get();
 	} else {
@@ -509,7 +509,7 @@ void cGameData::Set_Ip_And_Port(void)
 	if (GameModeManager::Find("WOL")->Is_Active()) {
 
 		if (g_ip_override == INADDR_NONE || WOLNATInterface.Get_Force_Port() == 0) {
-			unsigned long temp = FirewallHelper.Get_Local_Address();
+			unsigned int temp = FirewallHelper.Get_Local_Address();
 			if (temp) {
 				//ip = temp;
 				ip = ::ntohl(temp);
@@ -562,7 +562,7 @@ void cGameData::Set_Intermission_Time_Seconds(int time)
 }
 
 //-----------------------------------------------------------------------------
-void cGameData::Set_Motd(const wchar_t * motd)
+void cGameData::Set_Motd(const unichar_t * motd)
 {
 	WWASSERT(motd != NULL);
 
@@ -601,7 +601,7 @@ void cGameData::Set_Owner(const WideStringClass & owner)
 }
 
 //-----------------------------------------------------------------------------
-void cGameData::Set_Ip_Address(ULONG ip_address)
+void cGameData::Set_Ip_Address(unsigned int ip_address)
 {
 	IpAddress = ip_address;
 }
@@ -639,7 +639,7 @@ bool cGameData::Is_Map_Valid(char **out_filename)
 }
 
 
-#define PRINT_CONFIG_ERROR	ConsoleBox.Print("File %s - Error:\r\n\t ", Get_Ini_Filename());
+#define PRINT_CONFIG_ERROR	ConsoleBox.Print("File %s - Error:\r\n\t ", Get_Ini_Filename().Peek_Buffer());
 
 //-----------------------------------------------------------------------------
 bool cGameData::Is_Valid_Settings(WideStringClass& outMsg, bool check_as_server)
@@ -755,7 +755,7 @@ bool cGameData::Is_Valid_Settings(WideStringClass& outMsg, bool check_as_server)
 				StringClass map_name = Get_Map_Cycle(i);
 				if (map_name.Get_Length()) {
 					char filename[_MAX_PATH];
-					sprintf(filename, "data\\%s", map_name.Peek_Buffer());
+					sprintf(filename, "data/%s", map_name.Peek_Buffer());
 					RawFileClass file(filename);
 					if (!file.Is_Available()) {
 						PRINT_CONFIG_ERROR;
@@ -841,7 +841,7 @@ void cGameData::Export_Tier_1_Data(cPacket & packet)
 //-----------------------------------------------------------------------------
 void cGameData::Import_Tier_1_Data(cPacket & packet)
 {
-	ULONG ip_address = packet.Get(ip_address);
+	unsigned int ip_address = packet.Get(ip_address);
    Set_Ip_Address(ip_address);
 
 	WideStringClass owner;
@@ -853,6 +853,7 @@ void cGameData::Import_Tier_1_Data(cPacket & packet)
    Set_Game_Title(title);
 
 	int	i_placeholder;
+	uint32_t	u32_placeholder;
 	bool	b_placeholder;
 
    Set_Port(						packet.Get(i_placeholder));
@@ -863,8 +864,8 @@ void cGameData::Import_Tier_1_Data(cPacket & packet)
 	//
 	//	Compare the individual CRC's against our own
 	//
-	DoExeVersionsMatch		= (packet.Get(i_placeholder) == cNetwork::Get_Exe_CRC ());
-	DoStringVersionsMatch	= (packet.Get(i_placeholder) == cNetwork::Get_Strings_CRC ());
+	DoExeVersionsMatch		= (packet.Get(u32_placeholder) == cNetwork::Get_Exe_CRC ());
+	DoStringVersionsMatch	= (packet.Get(u32_placeholder) == cNetwork::Get_Strings_CRC ());
 
 	IsDedicated.Set(				packet.Get(b_placeholder));
 	IsTeamChangingAllowed.Set(	packet.Get(b_placeholder));
@@ -876,8 +877,8 @@ void cGameData::Import_Tier_1_Data(cPacket & packet)
 	//
 	//	Get the CRC of the map and the mod
 	//
-	ULONG map_name_crc =		packet.Get(map_name_crc);
-	ULONG mod_name_crc =		packet.Get(mod_name_crc);
+	unsigned int map_name_crc =		packet.Get(map_name_crc);
+	unsigned int mod_name_crc =		packet.Get(mod_name_crc);
 
 
 	//
@@ -889,8 +890,8 @@ void cGameData::Import_Tier_1_Data(cPacket & packet)
 		Set_Mod_Name (mod_name);
 		Set_Map_Name (map_name);
 	} else {
-		ModName = L"";
-		MapName = L"";
+		ModName = U_CHAR("");
+		MapName = U_CHAR("");
 	}
 
 #endif // MULTIPLAYERDEMO
@@ -1009,7 +1010,7 @@ void cGameData::Load_From_Server_Config(LPCSTR config_file)
 	StringClass full_filename(config_file, true);
 
 	if (p_ini == NULL) {
-      full_filename.Format("data\\%s", config_file);
+      full_filename.Format("data/%s", config_file);
       FILE * file = fopen(full_filename, "w");
 	   fclose(file);
 
@@ -1342,7 +1343,7 @@ int cGameData::Choose_Player_Type(cPlayer* player, int team_choice, bool is_grun
 			int team = Choose_Smallest_Team();
 
 			WWDEBUG_SAY(("CLANS: Bot '%S' assigned to smallest team (%d)\n",
-				(const wchar_t*)player->Get_Name(), team));
+				(const unichar_t*)player->Get_Name(), team));
 
 			return team;
 		}
@@ -1355,20 +1356,17 @@ int cGameData::Choose_Player_Type(cPlayer* player, int team_choice, bool is_grun
 			int team = clanMate->Get_Player_Type();
 
 			WWDEBUG_SAY(("CLANS: Player '%S' assigned to team with clanmates (%d)\n",
-				(const wchar_t*)player->Get_Name(), team));
+				(const unichar_t*)player->Get_Name(), team));
 
 			return team;
 		} else {
 			int team = Choose_Available_Team(team_choice);
 
 			WWDEBUG_SAY(("CLANS: Player '%S' assigned to available team (%d)\n",
-				(const wchar_t*)player->Get_Name(), team));
+				(const unichar_t*)player->Get_Name(), team));
 
 			return team;
 		}
-
-		WWDEBUG_SAY(("CLANS: ERROR - Player not assigned to team\n"));
-		WWASSERT("ERROR: Player not assigned to team");
 	} else {
 		if (PLAYERTYPE_RENEGADE == team_choice || IsTeamChangingAllowed.Is_False()) {
 			return Choose_Smallest_Team();
@@ -1516,7 +1514,7 @@ bool cGameData::Is_Game_Over(void)
 //-----------------------------------------------------------------------------
 bool cGameData::Has_Config_File_Changed(void)
 {
-	unsigned long mod_time = Get_Config_File_Mod_Time();
+	unsigned int mod_time = Get_Config_File_Mod_Time();
 
 	if (LastServerConfigModTime != mod_time) {
 		return(true);
@@ -1527,19 +1525,19 @@ bool cGameData::Has_Config_File_Changed(void)
 
 
 //-----------------------------------------------------------------------------
-unsigned long cGameData::Get_Config_File_Mod_Time(void)
+unsigned int cGameData::Get_Config_File_Mod_Time(void)
 {
 	StringClass full_filename(IniFilename, true);
 	RawFileClass file(full_filename);
 
 	if (!file.Is_Available()) {
-      full_filename.Format("data\\%s", IniFilename);
+      full_filename.Format("data/%s", IniFilename.Peek_Buffer());
 		file.Set_Name(full_filename);
    }
 
 	if (file.Is_Available()) {
 		file.Open();
-		unsigned long mod_time = file.Get_Date_Time();
+		unsigned int mod_time = file.Get_Date_Time();
 		file.Close();
 		return(mod_time);
 	}
@@ -1595,7 +1593,7 @@ void cGameData::Game_Over_Processing(void)
 	//
 	// Compute the game duration
 	//
-	DWORD duration_s = (int)((TIMEGETTIME() - GameStartTimeMs) / 1000.0f);
+	unsigned int duration_s = (int)((TIMEGETTIME() - GameStartTimeMs) / 1000.0f);
 	Set_Game_Duration_S(duration_s);
 
 	//
@@ -1650,14 +1648,14 @@ bool cGameData::Is_Gameplay_Permitted(void)
 	return permitted;
 }
 
-void cGameData::Set_Clan(int slot, unsigned long clanID)
+void cGameData::Set_Clan(int slot, unsigned int clanID)
 {
 	WWASSERT(slot >= 0 && slot < MAX_CLAN_SLOTS);
 	mClanSlots[slot] = clanID;
 }
 
 
-unsigned long cGameData::Get_Clan(int slot) const
+unsigned int cGameData::Get_Clan(int slot) const
 {
 	WWASSERT(slot >= 0 && slot < MAX_CLAN_SLOTS);
 	return mClanSlots[slot];
@@ -1686,7 +1684,7 @@ int cGameData::Find_Free_Clan_Slot(void) const
 }
 
 
-bool cGameData::Is_Clan_Competing(unsigned long clanID) const
+bool cGameData::Is_Clan_Competing(unsigned int clanID) const
 {
 	if (IsClanGame.Is_True() && (clanID != 0)) {
 		for (int slot = 0; slot < MAX_CLAN_SLOTS; ++slot) {
@@ -1714,7 +1712,7 @@ bool cGameData::Is_Clan_Game_Open(void) const
 }
 
 //-----------------------------------------------------------------------------
-cGameData * cGameData::Create_Game_Of_Type(GameTypeEnum game_type)
+cGameData * cGameData::Create_Game_Of_Type([[maybe_unused]] GameTypeEnum game_type)
 {
 	/*
 	cGameData * p_game_data = NULL;
@@ -1747,7 +1745,7 @@ const char* cGameData::Get_Game_Type_Name(GameTypeEnum type)
 const char * cGameData::Get_Game_Type_Name(void) const
 {
 	WideStringClass wide_name;
-	wide_name.Format(L"%s", Get_Game_Name());
+	wide_name.Format(U_CHAR("%s"), Get_Game_Name());
 	StringClass name;
 	wide_name.Convert_To(name);
 
@@ -1946,7 +1944,7 @@ void cGameData::Get_Time_Limit_Text(WideStringClass& text)
    if (IsIntermission.Is_True()) {
 
       text.Format(
-			L"%s: %d",
+			U_CHAR("%s: %d"),
 			TRANSLATION(IDS_MP_NEXTGAME_COUNTDOWN),
 			cMathUtil::Round(Get_Intermission_Time_Remaining()));
 
@@ -1959,9 +1957,9 @@ void cGameData::Get_Time_Limit_Text(WideStringClass& text)
 		cMiscUtil::Seconds_To_Hms(TimeRemainingSeconds, hours, mins, seconds);
 
       WideStringClass time_string(0, true);
-      time_string.Format(L"%02d:%02d:%02d", hours, mins, seconds);
+      time_string.Format(U_CHAR("%02d:%02d:%02d"), hours, mins, seconds);
 
-		text.Format(L"%s: %s", TRANSLATION(IDS_MP_TIME_REMAINING), time_string);
+		text.Format(U_CHAR("%s: %s"), TRANSLATION(IDS_MP_TIME_REMAINING), time_string.Peek_Buffer());
    }
 
 }
@@ -1981,7 +1979,7 @@ void cGameData::Think(void)
 			TimeRemainingSeconds = 0;
 		}
 
-		DWORD duration_s = (int)((TIMEGETTIME() - GameStartTimeMs) / 1000.0f);
+		unsigned int duration_s = (int)((TIMEGETTIME() - GameStartTimeMs) / 1000.0f);
 		Set_Game_Duration_S(duration_s);
 	}
 
@@ -2029,7 +2027,7 @@ void cGameData::On_Game_Begin(void)
 	// Clear the MVP name
 	// Let MVP carry over into next game.
 	//
-	//MvpName.Format(L"");
+	//MvpName.Format(U_CHAR(""));
 	//MvpCount = 0;
 
 	//
@@ -2174,7 +2172,7 @@ cGameData::Rotate_Map(void)
 		}
 	}
 #endif //(0)
-	
+
 	//
 	// Increment it
 	//
@@ -2267,7 +2265,7 @@ void cGameData::Set_Win_Type(WinTypeEnum type)
 }
 
 //------------------------------------------------------------------------------------
-void cGameData::Set_Game_Duration_S(DWORD seconds)
+void cGameData::Set_Game_Duration_S(unsigned int seconds)
 {
 	GameDurationS = seconds;
 }
@@ -2275,8 +2273,8 @@ void cGameData::Set_Game_Duration_S(DWORD seconds)
 //-----------------------------------------------------------------------------
 void cGameData::Get_Description(WideStringClass & description)
 {
-	const WideStringClass delimiter	= L"\t";
-	const WideStringClass newline		= L"\n";
+	const WideStringClass delimiter	= U_CHAR("\t");
+	const WideStringClass newline		= U_CHAR("\n");
 	const WideStringClass yes			= TRANSLATE(IDS_YES);
 	const WideStringClass no			= TRANSLATE(IDS_NO);
 
@@ -2301,7 +2299,7 @@ void cGameData::Get_Description(WideStringClass & description)
 	// Map Name
 	//
 	if (ModName.Is_Empty () == false) {
-		attribute = L"Mod Name:";
+		attribute = U_CHAR("Mod Name:");
 		value = ModName;
 		description += (attribute + delimiter + value + newline);
 	}
@@ -2318,7 +2316,7 @@ void cGameData::Get_Description(WideStringClass & description)
 	//
 	attribute = TRANSLATE(IDS_MENU_TEXT298);
 	if (Is_Time_Limit()) {
-		value.Format(L"%d %s", TimeLimitMinutes, TRANSLATE(IDS_MP_MINUTES));
+		value.Format(U_CHAR("%d %s"), TimeLimitMinutes, TRANSLATE(IDS_MP_MINUTES));
 	} else {
 		value = TRANSLATE(IDS_MP_NONE);
 	}
@@ -2328,7 +2326,7 @@ void cGameData::Get_Description(WideStringClass & description)
 	// Max. Players
 	//
 	attribute = TRANSLATE(IDS_MENU_TEXT294);
-	value.Format(L"%d", MaxPlayers);
+	value.Format(U_CHAR("%d"), MaxPlayers);
 	description += (attribute + delimiter + value + newline);
 
 	//

@@ -70,7 +70,7 @@ ComboBoxCtrlClass::ComboBoxCtrlClass (void)	:
 	StyleMgrClass::Configure_Renderer (&ControlRenderer);
 
 	//
-	//	Configure the hilight renderer 
+	//	Configure the hilight renderer
 	//
 	StyleMgrClass::Configure_Renderer (&HilightRenderer);
 
@@ -270,7 +270,7 @@ ComboBoxCtrlClass::Update_Client_Rect (void)
 	//
 	//	Determine what one character spacing would be
 	//
-	Vector2 char_size = TextRenderer.Get_Text_Extents (L"W");
+	Vector2 char_size = TextRenderer.Get_Text_Extents (U_CHAR("W"));
 
 	float border_width	= char_size.X + 2;
 	float border_height	= 2;
@@ -289,7 +289,7 @@ ComboBoxCtrlClass::Update_Client_Rect (void)
 	//
 	DropDownSize.X = int(ClientRect.Width ());
 	DropDownSize.Y = int(FullRect.Bottom - ClientRect.Bottom);
-	
+
 	//
 	//	Calculate the bounding rectangle for the drop-down control
 	//
@@ -318,7 +318,7 @@ ComboBoxCtrlClass::Update_Client_Rect (void)
 	//	Make the window rect and the client rect the same
 	//
 	Rect = ClientRect;
-	
+
 	//
 	//	Calculate where the button is located
 	//
@@ -363,7 +363,7 @@ ComboBoxCtrlClass::Render (void)
 	//
 	//	Recreate the renderers (if necessary)
 	//
-	if (IsDirty) {		
+	if (IsDirty) {
 		Create_Control_Renderers ();
 		Create_Text_Renderers ();
 	}
@@ -391,7 +391,7 @@ ComboBoxCtrlClass::Render (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-ComboBoxCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
+ComboBoxCtrlClass::On_LButton_Down (const Vector2 &/* mouse_pos */)
 {
 	if (HasFocus) {
 		WasButtonPressedOnMe = true;
@@ -409,7 +409,7 @@ ComboBoxCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-ComboBoxCtrlClass::On_LButton_Up (const Vector2 &mouse_pos)
+ComboBoxCtrlClass::On_LButton_Up (const Vector2 &/* mouse_pos */)
 {
 	//
 	//	Reset our flags
@@ -425,7 +425,7 @@ ComboBoxCtrlClass::On_LButton_Up (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-ComboBoxCtrlClass::On_Mouse_Move (const Vector2 &mouse_pos)
+ComboBoxCtrlClass::On_Mouse_Move (const Vector2 &/* mouse_pos */)
 {
 	return ;
 }
@@ -474,7 +474,7 @@ ComboBoxCtrlClass::On_Kill_Focus (DialogControlClass *focus)
 //
 ////////////////////////////////////////////////////////////////
 bool
-ComboBoxCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
+ComboBoxCtrlClass::On_Key_Down (uint32 key_id, uint32 /* key_data */)
 {
 	bool handled = false;
 	bool is_dirty = true;
@@ -557,7 +557,7 @@ ComboBoxCtrlClass::On_Drop_Down_End (int curr_sel)
 
 	//	Hide the drop down
 	Display_Drop_Down (false);
-	
+
 	//
 	//	If we aren't embedding an edit control, then we
 	//	need to focus after the drop down exits
@@ -603,7 +603,7 @@ ComboBoxCtrlClass::Display_Drop_Down (bool onoff)
 		}
 
 	} else {
-		
+
 		//
 		//	Hide the drop down
 		//
@@ -626,7 +626,7 @@ ComboBoxCtrlClass::Display_Drop_Down (bool onoff)
 void
 ComboBoxCtrlClass::On_Mouse_Wheel (int direction)
 {
-	if (direction < 0) {		
+	if (direction < 0) {
 		Set_Sel (std::max<int>(0, (DropDownCtrl.Get_Curr_Sel () - 1)), true);
 	} else {
 		Set_Sel (DropDownCtrl.Get_Curr_Sel () + 1, true);
@@ -643,7 +643,7 @@ ComboBoxCtrlClass::On_Mouse_Wheel (int direction)
 //
 ////////////////////////////////////////////////////////////////
 int
-ComboBoxCtrlClass::Select_String (const wchar_t* string)
+ComboBoxCtrlClass::Select_String (const unichar_t* string)
 {
 	int index = Find_String (string);
 	if (index >= 0) {
@@ -687,7 +687,7 @@ ComboBoxCtrlClass::Set_Sel (int index, bool notify)
 
 		if (CurrSel != newSel) {
 			Set_Dirty();
-	
+
 			// If this is a dropdown then automatically fill in the edit part with
 			// the new selection string.
 			if ((Style & 0x0F) == CBS_DROPDOWN) {
@@ -696,7 +696,7 @@ ComboBoxCtrlClass::Set_Sel (int index, bool notify)
 					DropDownCtrl.Get_String(newSel, editString);
 					EditControl.Set_Text(editString);
 				} else {
-					EditControl.Set_Text(L"");
+					EditControl.Set_Text(U_CHAR(""));
 				}
 			}
 
@@ -716,7 +716,7 @@ ComboBoxCtrlClass::Set_Sel (int index, bool notify)
 //	Get_Text
 //
 ////////////////////////////////////////////////////////////////
-const wchar_t*
+const unichar_t*
 ComboBoxCtrlClass::Get_Text(void) const
 {
 	if ((Style & 0x0F) == CBS_DROPDOWN) {
@@ -733,7 +733,7 @@ ComboBoxCtrlClass::Get_Text(void) const
 //
 ////////////////////////////////////////////////////////////////
 void
-ComboBoxCtrlClass::Set_Text (const wchar_t *title)
+ComboBoxCtrlClass::Set_Text (const unichar_t *title)
 {
 	if ((Style & 0x0F) == CBS_DROPDOWN) {
 		EditControl.Set_Text (title);
@@ -764,7 +764,7 @@ ComboBoxCtrlClass::On_EditCtrl_Change(EditCtrlClass* edit, int)
 //
 ////////////////////////////////////////////////////////////////
 bool
-ComboBoxCtrlClass::On_EditCtrl_Key_Down (EditCtrlClass *edit, uint32 key_id, uint32 key_data)
+ComboBoxCtrlClass::On_EditCtrl_Key_Down (EditCtrlClass *edit, uint32 key_id, uint32 /* key_data */)
 {
 	if (edit != &EditControl) {
 		return false;

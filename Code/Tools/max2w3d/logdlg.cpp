@@ -17,22 +17,22 @@
 */
 
 /* $Header: /Commando/Code/Tools/max2w3d/logdlg.cpp 5     11/07/00 5:40p Greg_h $ */
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando Tools - W3D export                                  * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Tools/max2w3d/logdlg.cpp                     $* 
- *                                                                                             * 
- *                      $Author:: Greg_h                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 11/07/00 4:24p                                              $* 
- *                                                                                             * 
- *                    $Revision:: 5                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando Tools - W3D export                                  *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Tools/max2w3d/logdlg.cpp                     $*
+ *                                                                                             *
+ *                      $Author:: Greg_h                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 11/07/00 4:24p                                              $*
+ *                                                                                             *
+ *                    $Revision:: 5                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "logdlg.h"
@@ -51,17 +51,17 @@ static BOOL CALLBACK		_logdata_dialog_proc(HWND Hwnd,UINT message,WPARAM wParam,
 static DWORD WINAPI		_logdata_thread_function(LPVOID log_obj_ptr);
 
 
-/*********************************************************************************************** 
- * LogDataDialogClass::LogDataDialogClass -- constructor for the options dialog object         *  
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   02/09/2000 JGA  : Created.                                                                * 
+/***********************************************************************************************
+ * LogDataDialogClass::LogDataDialogClass -- constructor for the options dialog object         *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   02/09/2000 JGA  : Created.                                                                *
  *=============================================================================================*/
 LogDataDialogClass::LogDataDialogClass(HWND parent):
  Hwnd(NULL),
@@ -69,7 +69,7 @@ LogDataDialogClass::LogDataDialogClass(HWND parent):
  buffer_index(0),
  last_buffer_index(0),
  status(0)
-{	
+{
 	ThreadHandle = CreateThread(NULL, 0, _logdata_thread_function, (LPVOID)this, 0, &ThreadID);
 
 	if (ThreadHandle) {
@@ -80,7 +80,7 @@ LogDataDialogClass::LogDataDialogClass(HWND parent):
 }
 
 LogDataDialogClass::~LogDataDialogClass(void)
-{	
+{
 	status = 3;
 	if (::IsWindow(Hwnd)) {
 		SendMessage( Hwnd, WM_CLOSE, 0, 0 );
@@ -88,17 +88,17 @@ LogDataDialogClass::~LogDataDialogClass(void)
 }
 
 
-/*********************************************************************************************** 
- * LogDataDialogClass::printf -- handles doing printfs into the current log window             * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   02/11/2000 JGA  : Created.                                                                 * 
+/***********************************************************************************************
+ * LogDataDialogClass::printf -- handles doing printfs into the current log window             *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   02/11/2000 JGA  : Created.                                                                 *
  *=============================================================================================*/
 void LogDataDialogClass::printf(char *text, ...)
 {
@@ -106,7 +106,7 @@ void LogDataDialogClass::printf(char *text, ...)
 	va_start(arguments, text);
 }	// printf
 
-void LogDataDialogClass::printf(char * text, const va_list & args)
+void LogDataDialogClass::printf(char * text, va_list args)
 {
 	static char string_buffer[256];
 
@@ -115,7 +115,7 @@ void LogDataDialogClass::printf(char * text, const va_list & args)
 	HWND ctrlHwnd = GetDlgItem(Hwnd, IDC_ANIM_LOG_RICHEDIT);
 
 	SendMessage(ctrlHwnd, EM_SETSEL, -1, -1 );
-	SendMessage(ctrlHwnd, EM_REPLACESEL, FALSE, (long)string_buffer);
+	SendMessage(ctrlHwnd, EM_REPLACESEL, false, (int)string_buffer);
 
 	last_buffer_index = buffer_index;
 	buffer_index+=strlen(string_buffer);
@@ -131,17 +131,17 @@ void LogDataDialogClass::printf(char * text, const va_list & args)
 
 }
 
-/*********************************************************************************************** 
- * LogDataDialogClass::rprintf -- replace last printf, with this new printf                    * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   02/14/2000 JGA  : Created.                                                                 * 
+/***********************************************************************************************
+ * LogDataDialogClass::rprintf -- replace last printf, with this new printf                    *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   02/14/2000 JGA  : Created.                                                                 *
  *=============================================================================================*/
 void LogDataDialogClass::rprintf(char *text, ...)
 {
@@ -151,7 +151,7 @@ void LogDataDialogClass::rprintf(char *text, ...)
 	rprintf(text,arguments);
 }
 
-void LogDataDialogClass::rprintf(char *text, const va_list & args)
+void LogDataDialogClass::rprintf(char *text, va_list args)
 {
 	static char string_buffer[256];
 	vsprintf(string_buffer, text, args);
@@ -159,7 +159,7 @@ void LogDataDialogClass::rprintf(char *text, const va_list & args)
 	HWND ctrlHwnd = GetDlgItem(Hwnd, IDC_ANIM_LOG_RICHEDIT);
 
 	SendMessage(ctrlHwnd, EM_SETSEL, last_buffer_index, buffer_index );
-	SendMessage(ctrlHwnd, EM_REPLACESEL, FALSE, (long)string_buffer);
+	SendMessage(ctrlHwnd, EM_REPLACESEL, false, (int)string_buffer);
 
 	buffer_index = strlen(string_buffer) + last_buffer_index;
 
@@ -172,17 +172,17 @@ void LogDataDialogClass::rprintf(char *text, const va_list & args)
 }	// rprintf
 
 
-/*********************************************************************************************** 
- * LogDataDialogClass::updatebar - send message to progress meter                              * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   02/14/2000 JGA  : Created.                                                                 * 
+/***********************************************************************************************
+ * LogDataDialogClass::updatebar - send message to progress meter                              *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   02/14/2000 JGA  : Created.                                                                 *
  *=============================================================================================*/
 void	LogDataDialogClass::updatebar(float position, float total)
 {
@@ -197,21 +197,21 @@ void	LogDataDialogClass::updatebar(float position, float total)
 }	// updatebar
 
 
-/*********************************************************************************************** 
- * LogDataDialogClass::Wait_OK - Give user a chance to review log, then hit ok                 * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   02/14/2000 JGA  : Created.                                                                 * 
+/***********************************************************************************************
+ * LogDataDialogClass::Wait_OK - Give user a chance to review log, then hit ok                 *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   02/14/2000 JGA  : Created.                                                                 *
  *=============================================================================================*/
 void LogDataDialogClass::Wait_OK()
 {
-	::EnableWindow(GetDlgItem(Hwnd,IDOK),TRUE);
+	::EnableWindow(GetDlgItem(Hwnd,IDOK),true);
 	::SetForegroundWindow(Hwnd);
 
 	while (status < 2) {
@@ -222,24 +222,24 @@ void LogDataDialogClass::Wait_OK()
 
 
 
-/*********************************************************************************************** 
- * LogDataDialogClass::Dialog_Proc -- Handles the windows message for the options dialog    * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   07/24/1997 GH  : Created.                                                                 * 
+/***********************************************************************************************
+ * LogDataDialogClass::Dialog_Proc -- Handles the windows message for the options dialog    *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   07/24/1997 GH  : Created.                                                                 *
  *=============================================================================================*/
 bool LogDataDialogClass::Dialog_Proc
 (
 	HWND hwnd,
 	UINT message,
 	WPARAM wParam,
-	LPARAM 
+	LPARAM
 )
 {
 	int code = HIWORD(wParam);
@@ -255,7 +255,7 @@ bool LogDataDialogClass::Dialog_Proc
 		case WM_INITDIALOG:
 
 			Dialog_Init();
-			return TRUE;
+			return true;
 
 
 		/*******************************************************************
@@ -273,14 +273,14 @@ bool LogDataDialogClass::Dialog_Proc
 
 					EndDialog(Hwnd, 1);
 					Hwnd = NULL;
-					return TRUE;
+					return true;
 					break;
 
 			}
 			break;
 
 		//case WM_VSCROLL:
-		//	return TRUE;
+		//	return true;
 		//	break;
 
 		case WM_CLOSE:
@@ -289,13 +289,13 @@ bool LogDataDialogClass::Dialog_Proc
 				EndDialog(Hwnd, 1);
 				Hwnd = NULL;
 			}
-				
-			return TRUE;
+
+			return true;
 			break;
 
 	}
-	return FALSE; 
-   
+	return false;
+
 }	// Dialog_Proc
 
 void LogDataDialogClass::Dialog_Init()
@@ -316,30 +316,30 @@ void LogDataDialogClass::Dialog_Init()
 
 	cx = (((desktop.right - desktop.left) - sx)/2) + desktop.left;
 	cy = (((desktop.bottom - desktop.top) - sy)/2) + desktop.top;
- 
+
 	//SetWindowPos(Hwnd, HWND_TOPMOST, cx, cy, 0, 0, SWP_NOSIZE);
 	SetWindowPos(Hwnd, HWND_TOP, cx, cy, 0, 0, SWP_NOSIZE);
- 
-	EnableWindow(GetDlgItem(Hwnd,IDOK),FALSE);
+
+	EnableWindow(GetDlgItem(Hwnd,IDOK),false);
 
 	status = 1;	// signal init
 
- 
+
 }	// Dialog_Init
 
 
 
-/*********************************************************************************************** 
- * _logdata_dialog_proc -- thunks into the logdata dialog class's windows message handler      * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   02/09/2000 JGA  : Created.                                                                 * 
+/***********************************************************************************************
+ * _logdata_dialog_proc -- thunks into the logdata dialog class's windows message handler      *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   02/09/2000 JGA  : Created.                                                                 *
  *=============================================================================================*/
 BOOL CALLBACK _logdata_dialog_proc
 (
@@ -364,7 +364,7 @@ BOOL CALLBACK _logdata_dialog_proc
 	if (log) {
 		return log->Dialog_Proc(hwnd,message,wParam,lParam);
 	} else {
-		return FALSE;
+		return false;
 	}
 
 } // _logdata_dialog_proc
@@ -378,7 +378,7 @@ DWORD WINAPI _logdata_thread_function(LPVOID log_obj_ptr)
 						 ((LogDataDialogClass*)log_obj_ptr)->ParentHwnd,
                    (DLGPROC) _logdata_dialog_proc,
                    (LPARAM) log_obj_ptr);
- 
+
 
 	// When this exits it should terminate the thread
 	return(0);

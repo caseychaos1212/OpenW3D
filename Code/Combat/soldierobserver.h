@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Combat/soldierobserver.h                     $* 
- *                                                                                             * 
- *                      $Author:: Byon_g                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 11/29/01 11:03a                                             $* 
- *                                                                                             * 
- *                    $Revision:: 44                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Combat/soldierobserver.h                     $*
+ *                                                                                             *
+ *                      $Author:: Byon_g                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 11/29/01 11:03a                                             $*
+ *                                                                                             *
+ *                    $Revision:: 44                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #ifndef	SOLDIEROBSERVER_H
@@ -69,15 +69,15 @@ public:
 	virtual	void	Destroyed( GameObject * obj ) override;
 	virtual	void	Killed( GameObject * obj, GameObject * killer ) override;
 	virtual	void	Damaged( GameObject * obj, GameObject * damager, float amount ) override;
-	virtual	void	Custom( GameObject * obj, int type, uintptr_t param, GameObject * sender ) override;
+	virtual	void	Custom( GameObject * obj, int type, intptr_t param, GameObject * sender ) override;
 	virtual	void	Sound_Heard( GameObject * obj, const CombatSound & sound ) override;
 	virtual	void	Enemy_Seen( GameObject * obj, GameObject * enemy ) override;
 	virtual	void	Action_Complete( GameObject * obj, int action_id, ActionCompleteReason complete_reason ) override;
 	virtual	void	Timer_Expired( GameObject * obj, int timer_id ) override;
-	virtual	void	Animation_Complete( GameObject * obj, const char * animation_name ) override {}
+	virtual	void	Animation_Complete( GameObject * /* obj */, const char * /* animation_name */ ) override {}
 	virtual	void	Poked( GameObject * obj, GameObject * poker ) override;
-	virtual	void	Entered( GameObject * obj, GameObject * enterer ) override {}
-	virtual	void	Exited( GameObject * obj, GameObject * exiter ) override {}
+	virtual	void	Entered( GameObject * /* obj */, GameObject * /* enterer */ ) override {}
+	virtual	void	Exited( GameObject * /* obj */, GameObject * /* exiter */ ) override {}
 
 	// State access
 	void		Reset_Conversation_Timer( void );
@@ -91,14 +91,14 @@ public:
 	void		Get_Information( StringClass & string );
 
 	typedef enum {
-		SOLDIER_AI_RELAXED_IDLE = 0,	
-		SOLDIER_AI_ALERT_IDLE,	
+		SOLDIER_AI_RELAXED_IDLE = 0,
+		SOLDIER_AI_ALERT_IDLE,
 		SOLDIER_AI_FOOTSTEPS_HEARD,
 		SOLDIER_AI_BULLET_HEARD,
 		SOLDIER_AI_GUNSHOT_HEARD,
 		SOLDIER_AI_ENEMY_SEEN,
 		NUM_SOLDIER_AI_STATES,
-		SOLDIER_AI_CONDITIONAL_IDLE = 100,	
+		SOLDIER_AI_CONDITIONAL_IDLE = 100,
 	} SoldierAIStates;
 
 	bool Set_State( SoldierGameObj * soldier, int state, const Vector3& location = Vector3(0,0,0), GameObject* enemy = NULL);

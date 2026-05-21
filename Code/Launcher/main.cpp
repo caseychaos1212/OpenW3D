@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 	bit8 ok = config.readFile(in);
 	fclose(in);
 
-	if (ok == FALSE)
+	if (ok == false)
 	{
 		MessageBoxA(NULL,"File 'launcher.cfg' is corrupt","Error",MB_OK);
 		exit(-1);
@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
 	if (hasSecondEXE)
 	{
 		Wstring timeStr;
-		if (config.getString("FLAG", timeStr)!=FALSE)
+		if (config.getString("FLAG", timeStr)!=false)
 		{
 			cutoffTime = atoi(timeStr.get());
 		}
@@ -516,9 +516,9 @@ bool Get_Restart_Flag(Process &proc, bool &slave)
 
 	if (result == ERROR_SUCCESS) {
 
-		unsigned long type;
-		unsigned long data = 0;
-		unsigned long data_len = sizeof(data);
+		DWORD type;
+		DWORD data = 0;
+		DWORD data_len = sizeof(data);
 
 		if ((RegQueryValueExA(key, APPLICATION_SUB_KEY_NAME_AUTOSTART, NULL, &type, (LPBYTE)&data, &data_len) == ERROR_SUCCESS) && (type == REG_DWORD)) {
 			return((data != 0) ? true : false);

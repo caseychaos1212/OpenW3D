@@ -42,6 +42,7 @@
 #define __DIALOG_BASE_H
 
 
+#include "dialogspec.h"
 #include "vector.h"
 #include "vector3.h"
 #include "rect.h"
@@ -67,15 +68,15 @@ class DialogTransitionClass;
 //	Usefull Macros
 ////////////////////////////////////////////////////////////////
 #define	START_DIALOG(class_name)				\
-	{	class_name *dialog = new class_name;	\
-		dialog->Start_Dialog ();					\
-		REF_PTR_RELEASE (dialog);	}
+	{	class_name *macro_dialog = new class_name;	\
+		macro_dialog->Start_Dialog ();					\
+		REF_PTR_RELEASE (macro_dialog);	}
 
 
 ////////////////////////////////////////////////////////////////
 //	Typedefs
 ////////////////////////////////////////////////////////////////
-typedef bool (CALLBACK *DEFAULT_DLG_CMD_HANDLER) (DialogBaseClass *dialog, int ctrl_id, int mesage_id, DWORD param);
+typedef bool (*DEFAULT_DLG_CMD_HANDLER) (DialogBaseClass *dialog, int ctrl_id, int mesage_id, unsigned int param);
 
 
 class DialogEvent :
@@ -126,7 +127,7 @@ public:
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
 	////////////////////////////////////////////////////////////////
-	DialogBaseClass (int res_id);
+	DialogBaseClass (const DialogResource *dialog_resource);
 	virtual ~DialogBaseClass (void);
 
 	////////////////////////////////////////////////////////////////
@@ -140,7 +141,7 @@ public:
 	virtual PopupDialogClass *	As_PopupDialogClass (void)	{ return NULL; }
 	virtual ChildDialogClass *	As_ChildDialogClass (void)	{ return NULL; }
 
-	int Get_Dlg_ID(void) const {return DialogResID;}
+	const DialogResource * Get_Dlg_Resource(void) const {return DialogResource_;}
 
 	//
 	//	Display methods
@@ -187,8 +188,8 @@ public:
 	//
 	//	Control text access
 	//
-	const wchar_t *			Get_Dlg_Item_Text (int id) const;
-	void						Set_Dlg_Item_Text (int id, const wchar_t *text);
+	const unichar_t *			Get_Dlg_Item_Text (int id) const;
+	void						Set_Dlg_Item_Text (int id, const unichar_t *text);
 
 	int						Get_Dlg_Item_Int (int id) const;
 	void						Set_Dlg_Item_Int (int id, int value);
@@ -212,7 +213,7 @@ public:
 	//	Title access
 	//
 	void						Get_Title (WideStringClass *title)	{ *title = Title; }
-	void						Set_Title (const wchar_t *title)		{ Title = title; }
+	void						Set_Title (const unichar_t *title)		{ Title = title; }
 
 	//
 	//	Activation access
@@ -223,16 +224,16 @@ public:
 	//
 	//	Transition control
 	//
-	virtual DialogTransitionClass *	Get_Transition_In (DialogBaseClass *prev_dlg)	{ return NULL; }
-	virtual DialogTransitionClass *	Get_Transition_Out (DialogBaseClass *next_dlg)	{ return NULL; }
-	
+	virtual DialogTransitionClass *	Get_Transition_In (DialogBaseClass * /* prev_dlg */)	{ return NULL; }
+	virtual DialogTransitionClass *	Get_Transition_Out (DialogBaseClass * /* next_dlg */)	{ return NULL; }
+
 	virtual void			Set_Controls_Hidden (bool onoff)			{ AreControlsHidden = onoff; }
 	virtual bool			Are_Controls_Hidden (void) const			{ return AreControlsHidden; }
 
 	//
 	//	Notifications
 	//
-	virtual void			On_Command (int ctrl_id, int mesage_id, DWORD param);
+	virtual void			On_Command (int ctrl_id, int mesage_id, unsigned int param);
 
 	//
 	//	Default processing support
@@ -246,7 +247,7 @@ protected:
 
 	////////////////////////////////////////////////////////////////
 	//	Protected typedefs
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	typedef DynamicVectorClass<DialogControlClass *> CONTROL_LIST;
 	typedef DynamicVectorClass<ChildDialogClass *> DIALOG_LIST;
 
@@ -274,10 +275,10 @@ protected:
 
 	////////////////////////////////////////////////////////////////
 	//	Protected member data
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	WideStringClass				Title;
 	RectClass						Rect;
-	int								DialogResID;
+	const DialogResource *				DialogResource_;
 	CONTROL_LIST					ControlList;
 	DIALOG_LIST						ChildDialogList;
 	DialogControlClass *			LastFocusControl;

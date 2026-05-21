@@ -75,15 +75,15 @@ void SquadData::Reset(void)
 *     SquadID - ID of squad to search for.
 *
 * RESULT
-*     Squad - Reference to squad 
+*     Squad - Reference to squad
 *
 ******************************************************************************/
 
-RefPtr<SquadData> SquadData::FindByID(unsigned long id)
+RefPtr<SquadData> SquadData::FindByID(unsigned int id)
 	{
-	const unsigned int count = _mSquadColl.size();
+	const size_t count = _mSquadColl.size();
 
-	for (unsigned int index = 0; index < count; ++index)
+	for (size_t index = 0; index < count; ++index)
 		{
 		const RefPtr<SquadData>& squad = _mSquadColl[index];
 		WWASSERT(squad.IsValid());
@@ -110,21 +110,21 @@ RefPtr<SquadData> SquadData::FindByID(unsigned long id)
 *     Abbr - Abbreviation of squad to search for.
 *
 * RESULT
-*     Squad - Reference to squad 
+*     Squad - Reference to squad
 *
 ******************************************************************************/
 
-RefPtr<SquadData> SquadData::FindByAbbr(const wchar_t* abbr)
+RefPtr<SquadData> SquadData::FindByAbbr(const unichar_t* abbr)
 	{
-	if (abbr && (wcslen(abbr) > 0))
+	if (abbr && (u_strlen(abbr) > 0))
 		{
 		char squadAbbr[64];
-		wcstombs(squadAbbr, abbr, sizeof(squadAbbr));
+		u_wstomb(squadAbbr, abbr, sizeof(squadAbbr));
 		squadAbbr[sizeof(squadAbbr) - 1] = 0;
 
-		const unsigned int count = _mSquadColl.size();
+		const size_t count = _mSquadColl.size();
 
-		for (unsigned int index = 0; index < count; ++index)
+		for (size_t index = 0; index < count; ++index)
 			{
 			const RefPtr<SquadData>& squad = _mSquadColl[index];
 			WWASSERT(squad.IsValid());

@@ -17,22 +17,22 @@
 */
 
 /* $Header: /VSS_Sync/wwlib/tagblock.h 6     10/17/00 4:48p Vss_sync $ */
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : WWLib                                                        * 
- *                                                                                             * 
- *                     $Archive:: /VSS_Sync/wwlib/tagblock.h                                  $* 
- *                                                                                             * 
- *                      $Author:: Vss_sync                                                    $* 
- *                                                                                             * 
- *                     $Modtime:: 10/16/00 11:42a                                             $* 
- *                                                                                             * 
- *                    $Revision:: 6                                                           $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : WWLib                                                        *
+ *                                                                                             *
+ *                     $Archive:: /VSS_Sync/wwlib/tagblock.h                                  $*
+ *                                                                                             *
+ *                      $Author:: Vss_sync                                                    $*
+ *                                                                                             *
+ *                     $Modtime:: 10/16/00 11:42a                                             $*
+ *                                                                                             *
+ *                    $Revision:: 6                                                           $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(_MSC_VER)
@@ -45,7 +45,10 @@
 #include "slist.h"
 #include "crc.h"
 #include "rawfile.h"
+#include "wwdebug.h"
 
+#include <algorithm>
+#include <limits>
 #include <string.h>
 
 class TagBlockHandle;
@@ -55,15 +58,15 @@ class TagBlockIndex;
  //////////////////////////////////// Start of TagBlockHandle///////////////////////////////////////
 // 	TagBlockFile: Enables a file to have named (tagged) variable size blocks.  User can
 // then open a block for reading.  User may also create new blocks at the end of the
-// file.  There may only be one block open for writting, unlimited blocks can be open for 
+// file.  There may only be one block open for writting, unlimited blocks can be open for
 // reading.  It can be thought of as a .MIX file that can have files added to it at any time.
 // One problem is it is a Write Once/Read Many solution.
 //
 //		Usage: All user access to a TagBlockFile is done through TagBlockHandle.
 // A TagBlockHandle is created by TagBlockFile::Create_Tag() or Open_Tag().  It is destroyed
 // by either TagBlockFile::Close_Tag() or you can just destroy the handle with delete().
-//	
-//	
+//
+//
 
 class TagBlockFile : protected RawFileClass
 {
@@ -75,8 +78,8 @@ class TagBlockFile : protected RawFileClass
 		// Open up the tag file.  It may or may not exist.
 		TagBlockFile(const char *fname);
 		virtual ~TagBlockFile();
-								
-		// DANGEROUS!!  Resets entire file and makes small															
+
+		// DANGEROUS!!  Resets entire file and makes small
 		virtual void Reset_File();
 
 		// Creation of a Handle so block can be crated/writen/read.
@@ -89,9 +92,9 @@ class TagBlockFile : protected RawFileClass
 
 		int Does_Tag_Exist(const char *tagname)  {
 			return(Find_Block(tagname) != NULL);
-		}						
-		
-		virtual unsigned long Get_Date_Time(void) override {
+		}
+
+		virtual unsigned int Get_Date_Time(void) override {
 			return(FileTime);
 		}
 
@@ -100,9 +103,18 @@ class TagBlockFile : protected RawFileClass
 		static int Calc_Tag_Offset(int blockoffset)  {
 			return(blockoffset + sizeof(BlockHeader));
 		}
-		static int Calc_Data_Offset(int blockoffset, const char *tagname)  {
-			return(Calc_Tag_Offset(blockoffset) + strlen(tagname) + 1);
-			
+		static int Calc_Data_Offset(int blockoffset, const char* tagname) {
+			WWASSERT(tagname != NULL);
+
+			const size_t base_offset = static_cast<size_t>(Calc_Tag_Offset(blockoffset));
+			const size_t tag_length = strlen(tagname);
+			const size_t total_offset = base_offset + tag_length + 1;
+
+			WWASSERT(total_offset <= static_cast<size_t>(std::numeric_limits<int>::max()));
+
+			const size_t clamped_offset = std::min(total_offset, static_cast<size_t>(std::numeric_limits<int>::max()));
+			return static_cast<int>(clamped_offset);
+
 		}
 	protected:
 		///////////////////////////////////////////////////////////////////////////////////////////
@@ -114,13 +126,13 @@ class TagBlockFile : protected RawFileClass
 			MAX_TAG_NAME_SIZE = 1024,
 		};
 
-		// This is the header that is in both the IndexFile and the DataFile.  
+		// This is the header that is in both the IndexFile and the DataFile.
 		// They should be match except for the difference in the Version number as defined by enum.
-		struct FileHeader 
+		struct FileHeader
 		{
 			FileHeader()  {memset(this, 0, sizeof(*this));}
 
-			// Version number to make sure that it we are compatable and also to 
+			// Version number to make sure that it we are compatable and also to
 			// verify that this is the file we think it is.
 			unsigned 		Version;
 
@@ -163,15 +175,15 @@ class TagBlockFile : protected RawFileClass
 		FileHeader 			Header;
 
 		// Only one handle has permission to write to the end of the file if any.
-		// This is a pointer to that handle.  
+		// This is a pointer to that handle.
 		TagBlockHandle		*CreateHandle;
 
 		// To help those stupid programmers from leaving open handles when
 		// this file is closed down.
 		int					NumOpenHandles;
-										  
+
 		// Last time file was written to before we opened it.
-		unsigned long 		FileTime;
+		unsigned int 		FileTime;
 
 		// Keep list of all blocks in file.  This list is sorted by CRC value.
 		// TagBlockIndex is defined in TagBlock.cpp.
@@ -202,8 +214,8 @@ class TagBlockFile : protected RawFileClass
 		void Save_Header()  {
 			Seek(0, SEEK_SET);
 			Write(&Header, sizeof(Header));
-		}		  
-		
+		}
+
 		void Empty_Index_List();
 
 	friend class TagBlockHandle;
@@ -235,7 +247,7 @@ class TagBlockHandle
 		}
 
 		// User must call TagBlockFile::New_Handle() to create a TagBlockHandle object.
-		// User may call this delete to destry handle or 
+		// User may call this delete to destry handle or
 		// he may call TagBlockFile::Close_Tag().
 		~TagBlockHandle();
 

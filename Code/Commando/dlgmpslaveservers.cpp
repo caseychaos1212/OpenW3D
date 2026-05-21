@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "always.h"
+#include "renegadedialog.h"
 #include "dlgmpslaveservers.h"
 #include "menudialog.h"
 #include "_globals.h"
@@ -47,7 +48,7 @@
 
 
 
-unsigned long SlaveServerDialogClass::EnableIDs[MAX_SLAVES] = {
+unsigned int SlaveServerDialogClass::EnableIDs[MAX_SLAVES] = {
 	IDC_SLAVE_ENABLE1,
 	IDC_SLAVE_ENABLE2,
 	IDC_SLAVE_ENABLE3,
@@ -58,7 +59,7 @@ unsigned long SlaveServerDialogClass::EnableIDs[MAX_SLAVES] = {
 };
 
 
-unsigned long SlaveServerDialogClass::NickIDs[MAX_SLAVES] = {
+unsigned int SlaveServerDialogClass::NickIDs[MAX_SLAVES] = {
 	IDC_NICK_EDIT1,
 	IDC_NICK_EDIT2,
 	IDC_NICK_EDIT3,
@@ -68,7 +69,7 @@ unsigned long SlaveServerDialogClass::NickIDs[MAX_SLAVES] = {
 	IDC_NICK_EDIT7
 };
 
-unsigned long SlaveServerDialogClass::PassIDs[MAX_SLAVES] = {
+unsigned int SlaveServerDialogClass::PassIDs[MAX_SLAVES] = {
 	IDC_PASS_EDIT1,
 	IDC_PASS_EDIT2,
 	IDC_PASS_EDIT3,
@@ -79,7 +80,7 @@ unsigned long SlaveServerDialogClass::PassIDs[MAX_SLAVES] = {
 };
 
 
-unsigned long SlaveServerDialogClass::SerialIDs[MAX_SLAVES] = {
+unsigned int SlaveServerDialogClass::SerialIDs[MAX_SLAVES] = {
 	IDC_SERIAL_EDIT1,
 	IDC_SERIAL_EDIT2,
 	IDC_SERIAL_EDIT3,
@@ -91,7 +92,7 @@ unsigned long SlaveServerDialogClass::SerialIDs[MAX_SLAVES] = {
 
 
 
-unsigned long SlaveServerDialogClass::PortIDs[MAX_SLAVES] = {
+unsigned int SlaveServerDialogClass::PortIDs[MAX_SLAVES] = {
 	IDC_PORT_EDIT1,
 	IDC_PORT_EDIT2,
 	IDC_PORT_EDIT3,
@@ -103,7 +104,7 @@ unsigned long SlaveServerDialogClass::PortIDs[MAX_SLAVES] = {
 
 
 
-unsigned long SlaveServerDialogClass::SettingsButtons[MAX_SLAVES] = {
+unsigned int SlaveServerDialogClass::SettingsButtons[MAX_SLAVES] = {
 	IDC_SLAVE1_SETTINGS,
 	IDC_SLAVE2_SETTINGS,
 	IDC_SLAVE3_SETTINGS,
@@ -128,7 +129,7 @@ SlaveServerDialogClass *SlaveServerDialogClass::Instance = NULL;
 //
 ////////////////////////////////////////////////////////////////
 SlaveServerDialogClass::SlaveServerDialogClass(void) :
-	MenuDialogClass(IDD_MP_WOL_SLAVESERVER)
+	MenuDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_SLAVESERVER))
 {
 	Instance = this;
 }
@@ -182,7 +183,7 @@ SlaveServerDialogClass::On_Init_Dialog (void)
 		Set_Dlg_Item_Text(SerialIDs[i], tempser.Peek_Buffer());
 
 		char temp[32];
-		_itoa((unsigned long)port, temp, 10);
+		_itoa((unsigned int)port, temp, 10);
 		WideStringClass tempport(temp, true);
 		Set_Dlg_Item_Text(PortIDs[i], tempport.Peek_Buffer());
 
@@ -195,7 +196,7 @@ SlaveServerDialogClass::On_Init_Dialog (void)
 
 
 void
-SlaveServerDialogClass::On_Command (int ctrl_id, int message_id, DWORD param)
+SlaveServerDialogClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id) {
 		case IDC_MENU_BACK_BUTTON:
@@ -227,7 +228,7 @@ SlaveServerDialogClass::On_Command (int ctrl_id, int message_id, DWORD param)
 				WideStringClass tempport(Get_Dlg_Item_Text(PortIDs[i]));
 				StringClass newport;
 				tempport.Convert_To(newport);
-				unsigned long port = atoi(newport.Peek_Buffer());
+				unsigned int port = atoi(newport.Peek_Buffer());
 				if (port > 0xffff) {
 					port = 0xffff;
 				}
@@ -299,7 +300,7 @@ void SlaveServerDialogClass::Set_Slave_Button(int slavenum)
 	WideStringClass description;
 	char file_name[MAX_PATH];
 
-	sprintf(file_name, "data\\%s", ServerSettingsFileNames[slavenum]);
+	sprintf(file_name, "data/%s", ServerSettingsFileNames[slavenum]);
 	RawFileClass file(file_name);
 
 	if (file.Is_Available()) {
@@ -307,7 +308,7 @@ void SlaveServerDialogClass::Set_Slave_Button(int slavenum)
 		INIClass *ini = Get_INI(ServerSettingsFileNames[slavenum]);
 
 		if (ini) {
-			description = ini->Get_Wide_String(description, "Settings", "wConfigName", L"");
+			description = ini->Get_Wide_String(description, "Settings", "wConfigName", U_CHAR(""));
 			int size = description.Get_Length();
 			if (size == 0) {
 				size = ini->Get_String("Settings", "bConfigName", "", char_description, sizeof(char_description));

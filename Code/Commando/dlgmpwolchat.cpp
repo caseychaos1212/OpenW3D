@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgmpwolchat.h"
+#include "renegadedialog.h"
 #include "renegadedialogmgr.h"
 #include "wollocalemgr.h"
 #include "DlgMessageBox.h"
@@ -49,6 +50,7 @@
 #include <ww3d2/render2d.h>
 #include "string_ids.h"
 #include <wwtranslatedb/translatedb.h>
+#include <limits>
 
 using namespace WWOnline;
 
@@ -72,7 +74,7 @@ MPWolChatMenuClass* MPWolChatMenuClass::_TheInstance = NULL;
 //
 ////////////////////////////////////////////////////////////////
 MPWolChatMenuClass::MPWolChatMenuClass (void)	:
-	MenuDialogClass (IDD_MP_WOL_CHAT),
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_CHAT)),
 	mChatMgr(NULL),
 	mLobbyListChanged(false),
 	mLobbyChanged(false),
@@ -126,10 +128,10 @@ void MPWolChatMenuClass::On_Init_Dialog(void)
 		list_ctrl->Set_Wants_Focus(false);
 
 		// Lobby name column
-		list_ctrl->Add_Column(L"", 0.8F, Vector3 (1, 1, 1));
+		list_ctrl->Add_Column(U_CHAR(""), 0.8F, Vector3 (1, 1, 1));
 
 		// Lobby user count column
-		list_ctrl->Add_Column(L"", 0.2F, Vector3 (1, 1, 1));
+		list_ctrl->Add_Column(U_CHAR(""), 0.2F, Vector3 (1, 1, 1));
 	}
 
 	//	Configure the user list ctrl
@@ -141,20 +143,20 @@ void MPWolChatMenuClass::On_Init_Dialog(void)
 		list_ctrl->Set_Wants_Focus(false);
 
 		// User flags column
-		list_ctrl->Add_Column(L"", .15F, Vector3 (1, 1, 1));
+		list_ctrl->Add_Column(U_CHAR(""), .15F, Vector3 (1, 1, 1));
 
 		// Username column
-		list_ctrl->Add_Column(L"", .50F, Vector3 (1, 1, 1));
+		list_ctrl->Add_Column(U_CHAR(""), .50F, Vector3 (1, 1, 1));
 
 		// User clan column
-		list_ctrl->Add_Column(L"", .35F, Vector3 (1, 1, 1));
+		list_ctrl->Add_Column(U_CHAR(""), .35F, Vector3 (1, 1, 1));
 	}
 
 	//	Configure the message list ctrl
 	list_ctrl = (ListCtrlClass *)Get_Dlg_Item (IDC_MESSAGE_LIST_CTRL);
 
 	if (list_ctrl) {
-		list_ctrl->Add_Column (L"", 1.0F, Vector3 (1, 1, 1));
+		list_ctrl->Add_Column (U_CHAR(""), 1.0F, Vector3 (1, 1, 1));
 		list_ctrl->Allow_Selection(false);
 		list_ctrl->Set_Wants_Focus(false);
 	}
@@ -184,7 +186,7 @@ void MPWolChatMenuClass::On_Init_Dialog(void)
 //	On_Command
 //
 ////////////////////////////////////////////////////////////////
-void MPWolChatMenuClass::On_Command(int ctrl_id, int message_id, DWORD param)
+void MPWolChatMenuClass::On_Command(int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id) {
 		case IDC_MENU_BACK_BUTTON:
@@ -259,7 +261,7 @@ void MPWolChatMenuClass::On_Frame_Update(void)
 	if (mUserOutListChanged) {
 		Remove_Users();
 	}
-	
+
 	//	Do we need to update the message list?
 	if (mMessageListChanged) {
 		Refresh_Message_List();
@@ -298,7 +300,7 @@ void MPWolChatMenuClass::Refresh_Lobby_List(void)
 			End_Dialog();
 			return;
 		}
-		
+
 		LobbyList::const_iterator iter = lobbyList.begin();
 
 		while (iter != lobbyList.end()) {
@@ -341,7 +343,7 @@ void MPWolChatMenuClass::UpdateLobbyUserCount(ListCtrlClass* list, int listIndex
 
 		if (channel) {
 			WideStringClass countText(0, true);
-			countText.Format(L"(%u)", channel->GetCurrentUsers());
+			countText.Format(U_CHAR("(%u)"), channel->GetCurrentUsers());
 			list->Set_Entry_Text(listIndex, 1, countText);
 		}
 	}
@@ -404,16 +406,17 @@ void MPWolChatMenuClass::Add_Users(void)
 	if (list) {
 		// Loop over all the users
 		const UserList& userList = mChatMgr->GetUserInList();
-		const unsigned int count = userList.size();
+		const size_t count = userList.size();
+		WWASSERT(count <= static_cast<size_t>(std::numeric_limits<int>::max()));
 
-		for (unsigned int index = 0; index < count; ++index) {
+		for (size_t index = 0; index < count; ++index) {
 			const RefPtr<UserData>& user = userList[index];
 
 			// Add the user to the list control
 			int itemIndex = list->Find_Entry(1, user->GetName());
 
 			if (itemIndex == -1) {
-				itemIndex = list->Insert_Entry(list->Get_Entry_Count(), L"");
+				itemIndex = list->Insert_Entry(list->Get_Entry_Count(), U_CHAR(""));
 			}
 
 			if (itemIndex != -1) {
@@ -445,9 +448,9 @@ void MPWolChatMenuClass::Remove_Users(void)
 	if (list) {
 		// Loop over all the users
 		const UserList& userList = mChatMgr->GetUserOutList();
-		const unsigned int count = userList.size();
+		const size_t count = userList.size();
 
-		for (unsigned int index = 0; index < count; ++index) {
+		for (size_t index = 0; index < count; ++index) {
 			const RefPtr<UserData>& user = userList[index];
 			WWASSERT(user.IsValid() && "Invalid user in userlist from WOLChatMgr");
 
@@ -485,22 +488,23 @@ void MPWolChatMenuClass::Refresh_Message_List(void)
 		const ChatMessageList& messageList = mChatMgr->GetMessageList();
 
 		//	Loop over all the messages
-		int count = messageList.size();
+		const size_t count = messageList.size();
+		WWASSERT(count <= static_cast<size_t>(std::numeric_limits<int>::max()));
 
-		for (int index = 0; index < count; index ++) {
+		for (size_t index = 0; index < count; index ++) {
 			const ChatMessage& message = messageList[index];
-		
+
 			// Build the string
 			WideStringClass text(255, true);
 
 			const WideStringClass& sender = message.GetSendersName();
-			const wchar_t* msg = message.GetMessage();
+			const unichar_t* msg = message.GetMessage();
 
 			if (sender.Is_Empty() == false) {
 				if (message.IsAction()) {
-					text.Format(L"%s %s", (const wchar_t*)sender, msg);
+					text.Format(U_CHAR("%s %s"), (const unichar_t*)sender, msg);
 				} else {
-					text.Format(L"%s: %s", (const wchar_t*)sender, msg);
+					text.Format(U_CHAR("%s: %s"), (const unichar_t*)sender, msg);
 				}
 
 				msg = text;
@@ -508,7 +512,8 @@ void MPWolChatMenuClass::Refresh_Message_List(void)
 
 			//	Add the message to the list control
 			int entryCount = list->Get_Entry_Count();
-			int itemIndex = list->Insert_Entry(entryCount + index, msg);
+			WWASSERT(index <= static_cast<size_t>(std::numeric_limits<int>::max() - entryCount));
+			int itemIndex = list->Insert_Entry(entryCount + static_cast<int>(index), msg);
 
 			if (itemIndex != -1) {
 				//	Now, color the message as necessary
@@ -543,7 +548,7 @@ void MPWolChatMenuClass::Refresh_Message_List(void)
 //	Add_Message
 //
 ////////////////////////////////////////////////////////////////
-void MPWolChatMenuClass::Add_Message(const wchar_t* text)
+void MPWolChatMenuClass::Add_Message(const unichar_t* text)
 {
 	ListCtrlClass* list = (ListCtrlClass*)Get_Dlg_Item(IDC_MESSAGE_LIST_CTRL);
 
@@ -586,7 +591,7 @@ void MPWolChatMenuClass::Set_Focus_To_Chat_Edit_Ctrl(void)
 //	On_ListCtrl_Sel_Change
 //
 ////////////////////////////////////////////////////////////////
-void MPWolChatMenuClass::On_ListCtrl_Sel_Change(ListCtrlClass* list, int id, int oldSel, int newSel)
+void MPWolChatMenuClass::On_ListCtrl_Sel_Change(ListCtrlClass* list, int id, int /* oldSel */, int newSel)
 {
 	if (IDC_LOBBY_LIST_CTRL == id) {
 		if (newSel >= 0) {
@@ -614,7 +619,7 @@ void MPWolChatMenuClass::On_ListCtrl_Mouse_Over(ListCtrlClass* list, int id, int
 		WideStringClass userinfo(0, true);
 
 		if (index >= 0) {
-			const wchar_t* name = list->Get_Entry_Text(index, 1);
+			const unichar_t* name = list->Get_Entry_Text(index, 1);
 			userinfo += name;
 
 			const RefPtr<UserData> user =	mChatMgr->FindUser(name);
@@ -624,11 +629,11 @@ void MPWolChatMenuClass::On_ListCtrl_Mouse_Over(ListCtrlClass* list, int id, int
 
 				if (clan.IsValid())
 					{
-					userinfo += L" : ";
+					userinfo += U_CHAR(" : ");
 					userinfo += clan->GetName();
 					}
 
-				userinfo += L" : ";
+				userinfo += U_CHAR(" : ");
 				userinfo += WolLocaleMgrClass::Get_Locale_String(user->GetLocale());
 			}
 		}
@@ -643,7 +648,7 @@ void MPWolChatMenuClass::On_ListCtrl_Mouse_Over(ListCtrlClass* list, int id, int
 //	On_EditCtrl_Enter_Pressed
 //
 ////////////////////////////////////////////////////////////////
-void MPWolChatMenuClass::On_EditCtrl_Enter_Pressed(EditCtrlClass* edit_ctrl, int ctrl_id)
+void MPWolChatMenuClass::On_EditCtrl_Enter_Pressed(EditCtrlClass* /* edit_ctrl */, int ctrl_id)
 {
 	if (IDC_CHAT_EDIT == ctrl_id) {
 		Send_Message(false);
@@ -705,9 +710,9 @@ void MPWolChatMenuClass::Send_Message(bool is_emot)
 	if (list_ctrl && (list_ctrl->Get_First_Selected() >= 0)) {
 		UserList users;
 		int index = list_ctrl->Get_First_Selected();
-		
+
 		while (index != -1) {
-			const wchar_t* name = list_ctrl->Get_Entry_Text(index, 1);
+			const unichar_t* name = list_ctrl->Get_Entry_Text(index, 1);
 			const RefPtr<UserData> user = mChatMgr->FindUser(name);
 
 			if (user.IsValid()) {
@@ -723,7 +728,7 @@ void MPWolChatMenuClass::Send_Message(bool is_emot)
 	}
 
 	// Clear the edit control
-	Set_Dlg_Item_Text(IDC_CHAT_EDIT, L"");
+	Set_Dlg_Item_Text(IDC_CHAT_EDIT, U_CHAR(""));
 }
 
 
@@ -742,7 +747,7 @@ void MPWolChatMenuClass::Toggle_Squelch(void)
 		int index = list->Get_First_Selected();
 
 		while (index != -1) {
-			const wchar_t* userName = list->Get_Entry_Text(index, 1);
+			const unichar_t* userName = list->Get_Entry_Text(index, 1);
 			const RefPtr<UserData>& user = mChatMgr->FindUser(userName);
 
 			// If the user is valid and it is not a channel owner and it is
@@ -792,10 +797,10 @@ void MPWolChatMenuClass::Update_User_Status(ListCtrlClass* list, int index, cons
 
 	if (clan.IsValid()) {
 		WideStringClass clanAbbr(0, true);
-		clanAbbr.Format(L"[%S]", clan->GetAbbr());
+		clanAbbr.Format(U_CHAR("[%S]"), clan->GetAbbr());
 		list->Set_Entry_Text(index, 2, clanAbbr);
 	} else {
-		list->Set_Entry_Text(index, 2, L"");
+		list->Set_Entry_Text(index, 2, U_CHAR(""));
 	}
 }
 
@@ -834,7 +839,7 @@ void MPWolChatMenuClass::DoDialog(const RefPtr<ChannelData>& channel)
 	//	Create the dialog if necessary, otherwise simply bring it to the front
 	if (_TheInstance == NULL) {
 		MPWolChatMenuClass* dialog = new MPWolChatMenuClass;
-		
+
 		if (dialog) {
 			dialog->Start_Dialog();
 			dialog->Release_Ref();
@@ -881,7 +886,7 @@ void MPWolChatMenuClass::HandleNotification(WOLChatMgrEvent& event)
 		case UserOutListChanged:
 			mUserOutListChanged = true;
 			break;
-		
+
 		case MessageListChanged:
 			mMessageListChanged = true;
 			break;

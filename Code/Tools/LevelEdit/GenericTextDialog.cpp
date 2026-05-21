@@ -91,7 +91,7 @@ GenericTextDialogClass::OnInitDialog (void)
 	//	Load the icon
 	//
 	HICON icon = NULL;
-	if (m_IconID == 0) {		
+	if (m_IconID == 0) {
 		icon = ::LoadIcon (NULL, IDI_INFORMATION);
 	} else {
 		icon = ::LoadIcon (::AfxGetResourceHandle (), MAKEINTRESOURCE (m_IconID));
@@ -104,5 +104,5 @@ GenericTextDialogClass::OnInitDialog (void)
 		SendDlgItemMessage (IDC_GENERIC_ICON, STM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)icon);
 	}
 
-	return TRUE;
+	return true;
 }

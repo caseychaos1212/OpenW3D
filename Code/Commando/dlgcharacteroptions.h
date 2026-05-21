@@ -43,7 +43,6 @@
 
 
 #include "menudialog.h"
-#include "resource.h"
 
 
 ////////////////////////////////////////////////////////////////
@@ -54,22 +53,22 @@
 class CharacterOptionsMenuClass : public MenuDialogClass
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	CharacterOptionsMenuClass (void);
 	~CharacterOptionsMenuClass (void);
 
 	////////////////////////////////////////////////////////////////
 	//	Public methods
 	////////////////////////////////////////////////////////////////
-	
+
 	//
 	//	Inherited
 	//
 	void		On_Init_Dialog (void) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 	void		On_ComboBoxCtrl_Sel_Change (ComboBoxCtrlClass *combo_ctrl, int ctrl_id, int old_sel, int new_sel) override;
 
 private:
@@ -78,9 +77,9 @@ private:
 	//	Private methods
 	////////////////////////////////////////////////////////////////
 	void		Fill_Character_Combobox (void);
-	
+
 	void		On_Character_Selected (int index);
-	
+
 	void		Display_Model (const char *model_name);
 	void		Display_Default_Model (int definition_id);
 

@@ -45,7 +45,7 @@ IMPLEMENT_DYNCREATE(EmitterGeneralPropPageClass, CPropertyPage)
 //
 //  EmitterGeneralPropPageClass
 //
-EmitterGeneralPropPageClass::EmitterGeneralPropPageClass (EmitterInstanceListClass *pemitter)
+EmitterGeneralPropPageClass::EmitterGeneralPropPageClass (EmitterInstanceListClass * /* pemitter */)
 	: m_pEmitterList (NULL),
 	  m_Parent (NULL),
 	  m_bValid (true),
@@ -111,10 +111,10 @@ EmitterGeneralPropPageClass::Initialize (void)
 		// Get the emitter's texture
 		//
 		m_TextureFilename = m_pEmitterList->Get_Texture_Filename ();
-		
+
 		m_Lifetime		= m_pEmitterList->Get_Lifetime ();
 		m_EmitterName	= m_pEmitterList->Get_Name ();
-		m_pEmitterList->Get_Shader (m_Shader);		
+		m_pEmitterList->Get_Shader (m_Shader);
 	}
 
 	return ;
@@ -156,7 +156,7 @@ EmitterGeneralPropPageClass::Add_Shader_To_Combo
 //  OnInitDialog
 //
 BOOL
-EmitterGeneralPropPageClass::OnInitDialog (void) 
+EmitterGeneralPropPageClass::OnInitDialog (void)
 {
 	// Allow the base class to process this message
 	CPropertyPage::OnInitDialog ();
@@ -173,7 +173,7 @@ EmitterGeneralPropPageClass::OnInitDialog (void)
 	Add_Shader_To_Combo (ShaderClass::_PresetOpaqueSpriteShader, "Opaque");
 
 	//
-	// Fill the edit controls with the default values	
+	// Fill the edit controls with the default values
 	//
 	SetDlgItemText (IDC_NAME_EDIT, m_EmitterName);
 	SetDlgItemText (IDC_FILENAME_EDIT, m_TextureFilename);
@@ -185,7 +185,7 @@ EmitterGeneralPropPageClass::OnInitDialog (void)
 	if (m_Lifetime > 100) {
 		m_Lifetime = 0;
 	}
-	::Initialize_Spinner (m_LifetimeSpin, m_Lifetime, 0, 1000);	
+	::Initialize_Spinner (m_LifetimeSpin, m_Lifetime, 0, 1000);
 
 	OnParticleLifetimeCheck ();
 
@@ -194,7 +194,7 @@ EmitterGeneralPropPageClass::OnInitDialog (void)
 	//
 	m_RenderModeCombo.SetCurSel(m_pEmitterList->Get_Render_Mode());
 
-	return TRUE;
+	return true;
 }
 
 
@@ -225,7 +225,7 @@ EmitterGeneralPropPageClass::OnApply (void)
 	}
 
 	// Check to make sure the user entered a valid name for the emitter.
-	BOOL retval = FALSE;
+	BOOL retval = false;
 	if (m_EmitterName.GetLength () == 0) {
 		::MessageBox (m_hWnd, "Invalid emitter name.  Please enter a new name.", "Invalid settings", MB_ICONEXCLAMATION | MB_OK);
 		m_bValid = false;
@@ -244,8 +244,8 @@ EmitterGeneralPropPageClass::OnApply (void)
 		retval = CPropertyPage::OnApply ();
 		m_bValid = true;
 	}
-	
-	// Return the TRUE/FALSE result code
+
+	// Return the true/false result code
 	return retval;
 }
 
@@ -255,9 +255,9 @@ EmitterGeneralPropPageClass::OnApply (void)
 //  OnBrowseButton
 //
 void
-EmitterGeneralPropPageClass::OnBrowseButton (void) 
+EmitterGeneralPropPageClass::OnBrowseButton (void)
 {
-	CFileDialog openFileDialog (TRUE,
+	CFileDialog openFileDialog (true,
 										 ".tga",
 										 NULL,
 										 OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER,
@@ -270,7 +270,7 @@ EmitterGeneralPropPageClass::OnBrowseButton (void)
 		SetModified ();
 	}
 
-	return ;	
+	return ;
 }
 
 
@@ -315,7 +315,7 @@ EmitterGeneralPropPageClass::OnNotify
 	//
 	NMHDR *pheader = (NMHDR *)lParam;
 	if ((pheader != NULL) && (pheader->code == UDN_DELTAPOS)) {
-		LPNMUPDOWN pupdown = (LPNMUPDOWN)lParam;		
+		LPNMUPDOWN pupdown = (LPNMUPDOWN)lParam;
 		::Update_Spinner_Buddy (pheader->hwndFrom, pupdown->iDelta);
 	}
 
@@ -329,7 +329,7 @@ EmitterGeneralPropPageClass::OnNotify
 //  OnChangeParticleLifetimeEdit
 //
 void
-EmitterGeneralPropPageClass::OnChangeParticleLifetimeEdit (void) 
+EmitterGeneralPropPageClass::OnChangeParticleLifetimeEdit (void)
 {
 	SetModified ();
 	return ;

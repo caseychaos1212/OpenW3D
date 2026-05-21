@@ -7,7 +7,7 @@ target_compile_features(wwcommon INTERFACE cxx_std_20)
 target_compile_definitions(wwcommon INTERFACE
     NOMINMAX
     WIN32_LEAN_AND_MEAN
-    _WIN32_WINNT=0x501
+    _WIN32_WINNT=0x0601
     DIRECTINPUT_VERSION=0x800
     _CRT_NONSTDC_NO_WARNINGS
     _CRT_SECURE_NO_WARNINGS
@@ -48,7 +48,6 @@ target_include_directories(wwcommon INTERFACE
 )
 
 target_link_libraries(wwcommon INTERFACE
-    milesstub
     gamespy
 )
 
@@ -60,12 +59,23 @@ if(TARGET ffmpeg)
     target_link_libraries(wwcommon INTERFACE ffmpeg)
 endif()
 
+if(TARGET icu)
+    target_include_directories(wwcommon INTERFACE
+        wwlib/icu
+    )
+    target_link_libraries(wwcommon INTERFACE icu)
+else()
+    target_include_directories(wwcommon INTERFACE
+        wwlib/wchar
+    )
+endif()
+
 # Module static libraries
+add_subdirectory(WWAudio)
 add_subdirectory(BinkMovie)
 add_subdirectory(Combat)
 add_subdirectory(SControl)
 add_subdirectory(ww3d2)
-add_subdirectory(WWAudio)
 add_subdirectory(wwbitpack)
 add_subdirectory(wwdebug)
 add_subdirectory(wwlib)
@@ -84,6 +94,6 @@ add_subdirectory(Launcher)
 add_subdirectory(Scripts)
 add_subdirectory(Commando)
 
-if (REN_BUILD_TOOLS)
+if (W3D_TOOLS)
     add_subdirectory(Tools)
 endif()

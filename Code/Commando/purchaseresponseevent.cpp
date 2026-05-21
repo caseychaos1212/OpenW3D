@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Commando/purchaseresponseevent.cpp               $* 
- *                                                                                             * 
- *                      $Author:: Tom_s                                                       $* 
- *                                                                                             * 
- *                     $Modtime:: 12/20/01 2:57p                                              $* 
- *                                                                                             * 
- *                    $Revision:: 10                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Commando/purchaseresponseevent.cpp               $*
+ *                                                                                             *
+ *                      $Author:: Tom_s                                                       $*
+ *                                                                                             *
+ *                     $Modtime:: 12/20/01 2:57p                                              $*
+ *                                                                                             *
+ *                    $Revision:: 10                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "purchaseresponseevent.h"
@@ -102,26 +102,26 @@ cPurchaseResponseEvent::Act(void)
 	WideStringClass wide_string;
 
 	if ( ResponseId == VendorClass::PERR_SUCCESS ) {
-		wide_string.Format( L"%s\n", TRANSLATION(IDS_MP_CNC_PURCHASE_GRANTED) );
+		wide_string.Format( U_CHAR("%s\n"), TRANSLATION(IDS_MP_CNC_PURCHASE_GRANTED) );
 		//
 		// Play a custom SFX for feedback
 		//
 		WWASSERT(WWAudioClass::Get_Instance() != NULL);
 		WWAudioClass::Get_Instance()->Create_Instant_Sound("Purchase_Granted", Matrix3D(1));
 	} else if ( ResponseId == VendorClass::PERR_NO_FUNDS ) {
-		wide_string.Format( L"%s\n", TRANSLATION(IDS_MP_CNC_INSUFFICIENT_FUNDS) );
+		wide_string.Format( U_CHAR("%s\n"), TRANSLATION(IDS_MP_CNC_INSUFFICIENT_FUNDS) );
 	} else if ( ResponseId == VendorClass::PERR_NO_FACTORY ) {
-		wide_string.Format( L"%s\n", TRANSLATION(IDS_MP_CNC_FACTORY_UNAVAILABLE) );
+		wide_string.Format( U_CHAR("%s\n"), TRANSLATION(IDS_MP_CNC_FACTORY_UNAVAILABLE) );
 	} else if ( ResponseId == VendorClass::PERR_OPERATION_PENDING ) {
-		wide_string.Format( L"%s\n", TRANSLATION(IDS_MP_CNC_TRANSACTION_PENDING) );
-	} else if ( ResponseId == VendorClass::PERR_NOT_IN_STOCK ) {			
-		wide_string.Format( L"%s\n", TRANSLATION(IDS_MP_CNC_NOT_IN_STOCK) );
+		wide_string.Format( U_CHAR("%s\n"), TRANSLATION(IDS_MP_CNC_TRANSACTION_PENDING) );
+	} else if ( ResponseId == VendorClass::PERR_NOT_IN_STOCK ) {
+		wide_string.Format( U_CHAR("%s\n"), TRANSLATION(IDS_MP_CNC_NOT_IN_STOCK) );
 	}
 
 	//
 	//	Display the message...
 	//
-	CombatManager::Get_Message_Window ()->Add_Message (wide_string, Vector3 (0.7F, 0.7F, 0.7F));		
+	CombatManager::Get_Message_Window ()->Add_Message (wide_string, Vector3 (0.7F, 0.7F, 0.7F));
 	Set_Delete_Pending();
 }
 

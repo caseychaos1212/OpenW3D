@@ -51,7 +51,7 @@ class ChunkSaveClass;
 
 
 /*
-** W3dMapClass.  
+** W3dMapClass.
 ** This class simply ties together the map info and the map filename
 */
 class W3dMapClass
@@ -60,7 +60,7 @@ public:
 	W3dMapClass(void) : Filename(NULL), AnimInfo(NULL) {};
 	W3dMapClass(const W3dMapClass & that);
 	~W3dMapClass(void);
-	
+
 	W3dMapClass & operator = (const W3dMapClass & that);
 
 	void Reset(void);
@@ -74,7 +74,7 @@ public:
 
 
 /*
-** W3dMaterialClass. 
+** W3dMaterialClass.
 ** This class ties together w3d structures for up to 'MAX_PASSES' material passes.
 ** It is typically plugged into the next class (W3dMaterialDescClass) so that
 ** duplicate members can detected and shared.
@@ -123,13 +123,13 @@ public:
 	bool								Is_Multi_Pass_Transparent(void) const;
 
 protected:
-	
-	void								Free(void);	
-	
+
+	void								Free(void);
+
 	unsigned int					SurfaceType;
 	int								SortLevel;
-	int								PassCount;	
-	
+	int								PassCount;
+
 	W3dShaderStruct				Shaders[MAX_PASSES];
 	W3dVertexMaterialStruct *	Materials[MAX_PASSES];
 	char *							MapperArgs[MAX_PASSES][MAX_STAGES];
@@ -159,17 +159,17 @@ public:
 
 	W3dMaterialDescClass(void);
 	~W3dMaterialDescClass(void);
-	
+
 	void								Reset(void);
 
 	/*
-	** Interface for adding a material description.  The material will be assigned 
-	** an index based on the order at which they are added.  Add your materials in 
-	** order, then use their indices to find the remapped vertex materials, textures, 
+	** Interface for adding a material description.  The material will be assigned
+	** an index based on the order at which they are added.  Add your materials in
+	** order, then use their indices to find the remapped vertex materials, textures,
 	** and shaders...
 	*/
 	ErrorType						Add_Material(const W3dMaterialClass & mat,const char * name = NULL);
-	
+
 	/*
 	** Global Information.  These methods give access to all of the unique vertex materials,
 	** shaders, and textures being used.
@@ -215,10 +215,10 @@ private:
 	int								Add_Vertex_Material(W3dVertexMaterialStruct * vmat,const char *mapper_args0,const char *mapper_args1,int pass,const char * name);
 	int								Add_Shader(const W3dShaderStruct & shader,int pass);
 	int								Add_Texture(W3dMapClass * map,int pass,int stage);
-	unsigned long					Compute_Crc(const W3dVertexMaterialStruct & vmat,const char *mapper_args0,const char *mapper_args1);
-	unsigned long					Compute_Crc(const W3dShaderStruct & shader);
-	unsigned long					Compute_Crc(const W3dMapClass & map);
-	unsigned long					Add_String_To_Crc(const char *str, unsigned long crc);
+	unsigned int					Compute_Crc(const W3dVertexMaterialStruct & vmat,const char *mapper_args0,const char *mapper_args1);
+	unsigned int					Compute_Crc(const W3dShaderStruct & shader);
+	unsigned int					Compute_Crc(const W3dMapClass & map);
+	unsigned int					Add_String_To_Crc(const char *str, unsigned int crc);
 
 	/*
 	** MaterialRemapClass
@@ -243,7 +243,7 @@ private:
 
 	/*
 	** VertMatClass
-	** This class encapsulates a vertex material structure and makes it extendable for 
+	** This class encapsulates a vertex material structure and makes it extendable for
 	** any purposes needed by the plugin code.  For example, the pass index is stored
 	** so that we can prevent "welding" of vertex materials in different passes (since
 	** this may not be desireable...)
@@ -282,7 +282,7 @@ private:
 		W3dShaderStruct				Shader;
 		int								Crc;
 	};
-	
+
 	/*
 	** TexClass
 	** Simply here to allow extra info to be stored with each texture, as needed by this
@@ -298,7 +298,7 @@ private:
 		W3dMapClass						Map;
 		int								Crc;
 	};
-	
+
 	int																PassCount;
 	int																SortLevel;
 	DynamicVectorClass < MaterialRemapClass >				MaterialRemaps;

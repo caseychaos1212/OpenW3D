@@ -88,78 +88,78 @@ bit8 Wtime::ParseDate(char *in)
   struct tm t;
   char *ptr=in;
   while ((!isgraph(*ptr))&&(*ptr!=0)) ptr++;  // skip to start of string
-  if (*ptr==0) return(FALSE);
+  if (*ptr==0) return(false);
   t.tm_wday=-1;
   for (i=0; i<7; i++)  // parse day of week
     if (strncmp(ptr,DAYS[i],strlen(DAYS[i]))==0)
       t.tm_wday=i;
   if (t.tm_wday==-1)
-    return(FALSE);
+    return(false);
   while ((!isdigit(*ptr))&&(*ptr!=0)) ptr++;  // skip to day of month
-  if (*ptr==0) return(FALSE);
+  if (*ptr==0) return(false);
   t.tm_mday=atoi(ptr);
   while ((!isalpha(*ptr))&&(*ptr!=0)) ptr++;  // skip to month
-  if (*ptr==0) return(FALSE);
+  if (*ptr==0) return(false);
   t.tm_mon=-1;
   for (i=0; i<12; i++)  // match month
     if (strncmp(ptr,MONTHS[i],strlen(MONTHS[i]))==0) t.tm_mon=i;
-  if (t.tm_mon==-1) return(FALSE);
+  if (t.tm_mon==-1) return(false);
   while ((!isdigit(*ptr))&&(*ptr!=0)) ptr++;
-  if (*ptr==0) return(FALSE);
+  if (*ptr==0) return(false);
   t.tm_year=atoi(ptr);
   if (t.tm_year<70)  // if they specify a 2 digit year, we'll be nice
     t.tm_year+=2000;
   else if (t.tm_year<100)
     t.tm_year+=1900;
   if (t.tm_year>2200)  // I doubt my code will be around for another 203 years
-    return(FALSE);
+    return(false);
   while ((isdigit(*ptr))&&(*ptr!=0)) ptr++;  // skip to end of year
-  if (*ptr==0) return(FALSE);
+  if (*ptr==0) return(false);
 
   while ((!isgraph(*ptr))&&(*ptr!=0)) ptr++;  // skip to start of time
-  if (*ptr==0) return(FALSE);
+  if (*ptr==0) return(false);
 
   t.tm_hour=atoi(ptr);
   while ((*ptr!=':')&&(*ptr!=0)) ptr++;
   ptr++; // skip past colon
-  if (*ptr==0) return(FALSE);
+  if (*ptr==0) return(false);
   t.tm_min=atoi(ptr);
   while ((*ptr!=':')&&(*ptr!=0)) ptr++;
   ptr++; // skip past colon
-  if (*ptr==0) return(FALSE);
+  if (*ptr==0) return(false);
   t.tm_sec=atoi(ptr);
   t.tm_year%=100;   // 1996 is stored as 96, not 1996
   t.tm_isdst=-1;    // daylight savings info isn't available
 
   sec=(uint32)(mktime(&t));
   if ((sint32)sec==-1)
-    return(FALSE);
+    return(false);
 
 
   // The next part of the time is OPTIONAL (+minutes)
 
-  // first skip past the seconds 
+  // first skip past the seconds
   while ((isdigit(*ptr))&&(*ptr!=0)) ptr++;
-  if (*ptr==0) return(TRUE);
+  if (*ptr==0) return(true);
 
-  // skip past any spaces 
+  // skip past any spaces
   while ((isspace(*ptr))&&(*ptr!=0)) ptr++;
   if (*ptr!='+')
   {
     //printf("\nNOPE ptr was '%s'\n",ptr);
-    return(TRUE);
+    return(true);
   }
   ptr++;
   if (*ptr==0)
   {
     //printf("\nPTR WAS 0\n");
-    return(TRUE);
+    return(true);
   }
- 
+
   minOffset=atol(ptr);
   //printf("\n\nAdding %d minutes!\n\n",minOffset);
   sec+=minOffset*60;  // add the minutes as seconds
-  return(TRUE);
+  return(true);
 }
 
 
@@ -184,7 +184,7 @@ bit8 Wtime::FormatTime(char *out, char *format)
       if (lastWasH==1) lastWasH=2;
       sprintf(out+strlen(out),"%c",*ptr);
       ptr+=1;
-    } 
+    }
     else if (strncmp(ptr,"\"",1)==0)
     {
       break;
@@ -278,7 +278,7 @@ bit8 Wtime::FormatTime(char *out, char *format)
     {
       sprintf(out+strlen(out),"%ld",((GetMonth()-1)/4)+1);  // GetQuarter
       ptr+=1;
-    } 
+    }
     else if (strncmp(ptr,"yyyy",4)==0)
     {
       sprintf(out+strlen(out),"%ld",GetYear());
@@ -288,7 +288,7 @@ bit8 Wtime::FormatTime(char *out, char *format)
     {
       sprintf(out+strlen(out),"%02ld",GetYear()%100);
       ptr+=2;
-    } 
+    }
     else if (strncmp(ptr,"y",1)==0)
     {
       sprintf(out+strlen(out),"%ld",GetYDay());
@@ -337,7 +337,7 @@ bit8 Wtime::FormatTime(char *out, char *format)
    else  // an unknown char, move to next
      ptr++;
   }
-  return(TRUE);
+  return(true);
 }
 
 
@@ -449,7 +449,7 @@ uint32 Wtime::GetHour(void) const
   #else
   tptr=localtime((time_t *)&sec);
   #endif
- 
+
   return(tptr->tm_hour);
 }
 uint32 Wtime::GetMDay(void) const
@@ -499,7 +499,7 @@ uint32 Wtime::GetYWeek(void) const
   //phase holds the first weekday of the year.  If (Jan 1 = Sun) phase = 0
   sint32 phase=((wday-yday)%7);
   if (phase<0) phase+=7;
-  yweek=((yday+phase-1)/7)+1; 
+  yweek=((yday+phase-1)/7)+1;
   return(yweek);
 }
 uint32 Wtime::GetMonth(void) const
@@ -556,60 +556,60 @@ int   Wtime::Compare(const Wtime &other) const
   else
     return(-1);
 }
-  
+
 
 bit8 Wtime::operator == ( const Wtime &other ) const
 {
   bit8 retval=Compare(other);
   if (retval==0)
-    return(TRUE);
+    return(true);
   else
-    return(FALSE);
+    return(false);
 }
 
 bit8 Wtime::operator != ( const Wtime &other ) const
 {
   bit8 retval=Compare(other);
   if (retval==0)
-    return(FALSE);
+    return(false);
   else
-    return(TRUE);
+    return(true);
 }
 
 bit8 Wtime::operator < ( const Wtime &other ) const
 {
   int retval=Compare(other);
   if (retval==-1)
-    return(TRUE);
+    return(true);
   else
-    return(FALSE);
+    return(false);
 }
 
 bit8 Wtime::operator > ( const Wtime &other ) const
 {
   int retval=Compare(other);
   if (retval==1)
-    return(TRUE);
+    return(true);
   else
-    return(FALSE);
+    return(false);
 }
 
 bit8 Wtime::operator <= ( const Wtime &other ) const
 {
   int retval=Compare(other);
   if ((retval==-1)||(retval==0))
-    return(TRUE);
+    return(true);
   else
-    return(FALSE);
+    return(false);
 }
 
 bit8 Wtime::operator >= ( const Wtime &other ) const
 {
   int retval=Compare(other);
   if ((retval==1)||(retval==0))
-    return(TRUE);
+    return(true);
   else
-    return(FALSE);
+    return(false);
 }
 
 
@@ -730,7 +730,7 @@ Wtime &Wtime::operator -= (const Wtime &other)
   sint32 temp;
   if (Compare(other)==-1)
   {
-    sec=0;                  // can't handle negative time 
+    sec=0;                  // can't handle negative time
     usec=0;
     return *this;
   }

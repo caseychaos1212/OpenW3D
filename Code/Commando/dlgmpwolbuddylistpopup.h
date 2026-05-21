@@ -43,7 +43,6 @@
 
 
 #include "popupdialog.h"
-#include "resource.h"
 
 
 ////////////////////////////////////////////////////////////////
@@ -60,23 +59,23 @@ class MPWolPageBuddyPopupClass;
 class MPWolBuddyListPopupClass : public PopupDialogClass
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	MPWolBuddyListPopupClass (void);
 
 	////////////////////////////////////////////////////////////////
 	//	Public methods
 	////////////////////////////////////////////////////////////////
 	void		On_Init_Dialog (void) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 	void		On_ListCtrl_DblClk (ListCtrlClass *list_ctrl, int ctrl_id, int item_index) override;
 
 	//
 	//	Accessors
 	//
-	const wchar_t *	Get_Selection (void)	{ return SelectedUserName; }
+	const unichar_t *	Get_Selection (void)	{ return SelectedUserName; }
 	void				Set_Observer (MPWolPageBuddyPopupClass *observer)	{ Observer = observer; }
 
 protected:

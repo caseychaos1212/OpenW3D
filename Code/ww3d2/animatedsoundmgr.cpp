@@ -47,6 +47,7 @@
 #include "AudibleSound.h"
 #include "htree.h"
 #include "hanim.h"
+#include "systimer.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -69,7 +70,7 @@ Get_INI (const char *filename)
 	//
 	FileClass *file = _TheFileFactory->Get_File (filename);
 	if (file) {
-		
+
 		//
 		//	Create the INI object
 		//
@@ -103,7 +104,7 @@ Build_List_From_String
 		 (delimiter != NULL) &&
 		 (string_list != NULL))
 	{
-		int delim_len = ::strlen (delimiter);
+		size_t delim_len = ::strlen (delimiter);
 
 		//
 		// Determine how many entries there will be in the list
@@ -113,7 +114,7 @@ Build_List_From_String
 			  (entry != NULL) && (entry[1] != 0);
 			  entry = ::strstr (entry, delimiter))
 		{
-			
+
 			//
 			// Move past the current delimiter (if necessary)
 			//
@@ -124,14 +125,14 @@ Build_List_From_String
 			// Increment the count of entries
 			count ++;
 		}
-	
+
 		if (count > 0) {
 
 			//
 			// Allocate enough StringClass objects to hold all the strings in the list
 			//
 			(*string_list) = new StringClass[count];
-		
+
 			//
 			// Parse the string and pull out its entries.
 			//
@@ -140,7 +141,7 @@ Build_List_From_String
 				  (entry != NULL) && (entry[1] != 0);
 				  entry = ::strstr (entry, delimiter))
 			{
-				
+
 				//
 				// Move past the current delimiter (if necessary)
 				//
@@ -152,7 +153,7 @@ Build_List_From_String
 				// Copy this entry into its own string
 				//
 				StringClass entry_string = entry;
-				char *delim_start = (char *)::strstr (entry_string, delimiter);				
+				char *delim_start = (char *)::strstr (entry_string, delimiter);
 				if (delim_start != NULL) {
 					delim_start[0] = 0;
 				}
@@ -170,7 +171,7 @@ Build_List_From_String
 			(*string_list) = new StringClass[count];
 			(*string_list)[0] = buffer;
 		}
-				
+
 	}
 
 	//
@@ -196,7 +197,7 @@ AnimatedSoundMgrClass::Initialize (const char *ini_filename)
 	}
 
 	const char *DEFAULT_INI_FILENAME	= "w3danimsound.ini";
-	
+
 	//
 	//	Determine which filename to use
 	//
@@ -223,7 +224,7 @@ AnimatedSoundMgrClass::Initialize (const char *ini_filename)
 			//	Get the animation name from the section name
 			//
 			StringClass animation_name = section->Section;
-			::strupr (animation_name.Peek_Buffer ());
+            animation_name.To_Upper();
 
 			//
 			//	Allocate a sound list
@@ -246,7 +247,7 @@ AnimatedSoundMgrClass::Initialize (const char *ini_filename)
 				//
 				//	Extract the parameters from the section
 				//
-				int len = value.Get_Length ();					
+				size_t len = value.Get_Length ();
 				StringClass definition_name (len + 1, true);
 				int frame_start = 0;
 
@@ -280,7 +281,7 @@ AnimatedSoundMgrClass::Initialize (const char *ini_filename)
 			}
 
 			if (sound_list->Count () != 0) {
-				
+
 				//
 				//	Add this sound list to our hash-table and vector-array
 				//
@@ -354,7 +355,7 @@ AnimatedSoundMgrClass::Find_Sound_List (HAnimClass *anim)
 	//
 	//	Make the name uppercase
 	//
-	::strupr (full_name.Peek_Buffer ());
+    full_name.To_Upper();
 
 	//
 	//	Lookup the sound list for this animation
@@ -389,8 +390,8 @@ AnimatedSoundMgrClass::Trigger_Sound
 	//
 	ANIM_SOUND_LIST *sound_list = Find_Sound_List (anim);
 	if (sound_list != NULL) {
-		
-		for (int index = 0; index < sound_list->Count (); index ++) {			
+
+		for (int index = 0; index < sound_list->Count (); index ++) {
 			int frame = (*sound_list)[index].Frame;
 
 			//
@@ -402,13 +403,13 @@ AnimatedSoundMgrClass::Trigger_Sound
 				//	Don't trigger the sound if its skipped to far past...
 				//
 				if (WWMath::Fabs (new_frame - old_frame) < 3.0F) {
-					
+
 					//
 					//	Play the sound
 					//
 					int def_id = (*sound_list)[index].SoundDefinitionID;
 					WWAudioClass::Get_Instance ()->Create_Instant_Sound (def_id, tm);
-					WWDEBUG_SAY (("Triggering Sound %d\n", GetTickCount ()));
+					WWDEBUG_SAY (("Triggering Sound %d\n", TIMEGETTIME ()));
 					retval = frame;
 				}
 			}

@@ -36,12 +36,13 @@
 
 
 #include "dlgmpwoladdignoreentry.h"
+#include "renegadedialog.h"
 #include "WOLBuddyMgr.h"
 #include <wwui/editctrl.h>
 #include <wwdebug/wwdebug.h>
 
 
-bool MPWolAddIgnoreEntry::DoDialog(const wchar_t* defaultUser)
+bool MPWolAddIgnoreEntry::DoDialog(const unichar_t* defaultUser)
 {
 	MPWolAddIgnoreEntry* dialog = new MPWolAddIgnoreEntry(defaultUser);
 
@@ -59,8 +60,8 @@ bool MPWolAddIgnoreEntry::DoDialog(const wchar_t* defaultUser)
 //	MPWolAddIgnoreEntryPopupClass
 //
 ////////////////////////////////////////////////////////////////
-MPWolAddIgnoreEntry::MPWolAddIgnoreEntry(const wchar_t* defaultUser) :
-		PopupDialogClass(IDD_MP_WOL_ADD_IGNORE_ENTRY),
+MPWolAddIgnoreEntry::MPWolAddIgnoreEntry(const unichar_t* defaultUser) :
+		PopupDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_ADD_IGNORE_ENTRY)),
 		mDefaultUser(defaultUser)
 {
 	WWDEBUG_SAY(("MPWolAddIgnoreEntry Instantiated\n"));
@@ -97,7 +98,7 @@ void MPWolAddIgnoreEntry::On_Init_Dialog(void)
 //	On_Command
 //
 ////////////////////////////////////////////////////////////////
-void MPWolAddIgnoreEntry::On_Command (int ctrl_id, int message_id, DWORD param)
+void MPWolAddIgnoreEntry::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id) {
 		case IDC_ADD_BUTTON:
@@ -120,7 +121,7 @@ void MPWolAddIgnoreEntry::Add_Ignore_Entry (void)
 	WOLBuddyMgr* buddyMgr = WOLBuddyMgr::GetInstance(false);
 
 	if (buddyMgr) {
-		const wchar_t* name = Get_Dlg_Item_Text(IDC_IGNORE_USER_EDIT);
+		const unichar_t* name = Get_Dlg_Item_Text(IDC_IGNORE_USER_EDIT);
 		buddyMgr->AddIgnore(name);
 		buddyMgr->Release_Ref();
 	}
@@ -144,7 +145,7 @@ void MPWolAddIgnoreEntry::On_EditCtrl_Change(EditCtrlClass* edit, int id)
 }
 
 
-void MPWolAddIgnoreEntry::On_EditCtrl_Enter_Pressed(EditCtrlClass* edit, int id)
+void MPWolAddIgnoreEntry::On_EditCtrl_Enter_Pressed(EditCtrlClass* /* edit */, int id)
 {
 	if (IDC_IGNORE_USER_EDIT == id) {
 		Add_Ignore_Entry();

@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Combat/animcontrol.h                         $* 
- *                                                                                             * 
- *                      $Author:: Byon_g                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 1/04/02 10:33a                                              $* 
- *                                                                                             * 
- *                    $Revision:: 36                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Combat/animcontrol.h                         $*
+ *                                                                                             *
+ *                      $Author:: Byon_g                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 1/04/02 10:33a                                              $*
+ *                                                                                             *
+ *                    $Revision:: 36                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #ifndef	ANIMCONTROL_H
@@ -71,8 +71,8 @@ struct AnimationDataRecord {
 	float			Frame;
 	float			Weight;
 
-	bool operator == (AnimationDataRecord const & rec) const	{ return false; }
-	bool operator != (AnimationDataRecord const & rec) const	{ return true; }
+	bool operator == (AnimationDataRecord const & ) const	{ return false; }
+	bool operator != (AnimationDataRecord const & ) const	{ return true; }
 };
 
 typedef	DynamicVectorClass<AnimationDataRecord>	AnimationDataList;

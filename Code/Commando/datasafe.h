@@ -157,6 +157,7 @@
 //#include "mmsys.h"
 //#endif	//MMSYS_H
 #include "systimer.h"
+#include "thread.h"
 
 /*
 ** Use Renegade assert.
@@ -233,8 +234,8 @@
 #define safe_int int
 #define safe_unsigned_int unsigned int
 
-#define safe_long long
-#define safe_unsigned_long unsigned long
+#define safe_long int
+#define safe_unsigned_long unsigned int
 
 #define safe_float float
 
@@ -380,7 +381,7 @@ class DataSafeEntryClass
 		/*
 		** Size of data.
 		*/
-		unsigned long Size;
+		unsigned int Size;
 
 		/*
 		** Is this a slop (fake, to allow swapping with only 1 real entry) entry?
@@ -472,7 +473,7 @@ class DataSafeEntryTypeClass
 		/*
 		** A unique number used to match and assign type IDs. This can come from anywhere as long as it's different for every type.
 		*/
-		unsigned long TypeCode;
+		unsigned int TypeCode;
 
 		/*
 		** This is the user friendly ID that is stored along with entries in the data safe and returned in the handle that's
@@ -568,8 +569,8 @@ class GenericDataSafeClass
 		*/
 		static void Shuffle(bool forced = false);
 		static void Swap_Entries(DataSafeEntryClass *first, DataSafeEntryClass *second, int type);
-		static void Encrypt(void *data, int size, unsigned long key = SimpleKey, bool do_checksum = true);
-		static void Decrypt(void *data, int size, unsigned long key = SimpleKey, bool do_checksum = true);
+		static void Encrypt(void *data, int size, unsigned int key = SimpleKey, bool do_checksum = true);
+		static void Decrypt(void *data, int size, unsigned int key = SimpleKey, bool do_checksum = true);
 		static void Mem_Copy_Encrypt(void *dest, void *src, int size, bool do_checksum);
 		static void Mem_Copy_Decrypt(void *dest, void *src, int size, bool do_checksum);
 		static __forceinline void Security_Check(void);
@@ -630,10 +631,10 @@ class GenericDataSafeClass
 			public:
 				__forceinline ThreadLockClass(void) {
 #ifdef WWDEBUG
-					if (GenericDataSafeClass::PreferredThread != GetCurrentThreadId()) {
-						WWDEBUG_SAY(("DATASAFE.H - PreferredThread = %08X, GetCurrentThreadId() == %08X\n", GenericDataSafeClass::PreferredThread, GetCurrentThreadId()));
+					if (GenericDataSafeClass::PreferredThread != ThreadClass::Get_Current_Thread_ID()) {
+						WWDEBUG_SAY(("DATASAFE.H - PreferredThread = %08X, GetCurrentThreadId() == %08X\n", GenericDataSafeClass::PreferredThread, ThreadClass::Get_Current_Thread_ID()));
 					}
-					ds_assert(GenericDataSafeClass::PreferredThread == GetCurrentThreadId());
+					ds_assert(GenericDataSafeClass::PreferredThread == ThreadClass::Get_Current_Thread_ID());
 #endif //WWDEBUG
 				};
 		};
@@ -653,12 +654,12 @@ class GenericDataSafeClass
 		/*
 		** Simple key value used for xoring.
 		*/
-		static unsigned long SimpleKey;
+		static unsigned int SimpleKey;
 
 		/*
 		** Key used for encrypting handles.
 		*/
-		static unsigned long HandleKey;
+		static unsigned int HandleKey;
 
 		/*
 		** Number of valid entries in the Safe list.
@@ -675,17 +676,17 @@ class GenericDataSafeClass
 		/*
 		** Integrity check.
 		*/
-		static unsigned long Checksum;
+		static unsigned int Checksum;
 
 		/*
 		** Shuffle delay.
 		*/
-		static unsigned long ShuffleDelay;
+		static unsigned int ShuffleDelay;
 
 		/*
 		** Security check delay.
 		*/
-		static unsigned long SecurityCheckDelay;
+		static unsigned int SecurityCheckDelay;
 
 		/*
 		** List of types that are stored in the data safe.
@@ -716,7 +717,7 @@ class GenericDataSafeClass
 		** Statistics - debug only.
 		*/
 #ifdef WWDEBUG
-		static unsigned long LastDump;
+		static unsigned int LastDump;
 		static int NumSwaps;
 		static int NumFetches;
 		static int SlopCount;
@@ -752,7 +753,7 @@ class DataSafeClass : public GenericDataSafeClass
 			if (ptr) {
 				void *temp = (void*)ptr;
 				if (temp >= &ReturnList[0][0] && temp < &ReturnList[MAX_OBJECT_COPIES][0]) {
-					if (((unsigned long) temp - (unsigned long)(&ReturnList[0][0])) % sizeof(T) == 0) {
+					if (((uintptr_t) temp - (uintptr_t)(&ReturnList[0][0])) % sizeof(T) == 0) {
 						return(true);
 					}
 				}
@@ -782,7 +783,7 @@ class DataSafeClass : public GenericDataSafeClass
 		/*
 		** Type identification.
 		*/
-		static int Get_Type_ID(unsigned long type_code, int size);
+		static int Get_Type_ID(unsigned int type_code, int size);
 		static uintptr_t Get_Type_Code(void);
 
 		/*
@@ -872,8 +873,6 @@ class SafeDataClass
 
 		inline operator int(void) const;
 		inline operator unsigned int(void) const;
-		inline operator long(void) const;
-		inline operator unsigned long(void) const;
 		inline operator float(void) const;
 		inline operator double(void) const;
 
@@ -1073,7 +1072,7 @@ __forceinline void GenericDataSafeClass::Security_Check(void)
 	/*
 	** Only check the time every n calls.
 	*/
-	static unsigned long _calls = 0;
+	static unsigned int _calls = 0;
 	_calls++;
 	if (_calls < DATASAFE_TIME_CHECK_CALLS) {
 		return;
@@ -1103,7 +1102,7 @@ __forceinline void GenericDataSafeClass::Security_Check(void)
 	** Since we are going through the whole safe here, we might as well make a note of where slop
 	** needs to be added or removed and count how many total slop entries we have.
 	*/
-	unsigned long time = TIMEGETTIME();
+	unsigned int time = TIMEGETTIME();
 	if (time < SecurityCheckDelay || (time | SecurityCheckDelay) == 0 || (time - SecurityCheckDelay) > SECURITY_CHECK_TIME) {
 
 #ifdef WWDEBUG
@@ -1119,7 +1118,7 @@ __forceinline void GenericDataSafeClass::Security_Check(void)
 			_checking = true;
 			//WWDEBUG_SAY(("Data Safe: Performing security check\n"));
 			SecurityCheckDelay = time;
-			unsigned long checkey = ~SimpleKey;
+			unsigned int checkey = ~SimpleKey;
 
 			/*
 			** Loop through every list.
@@ -1132,7 +1131,7 @@ __forceinline void GenericDataSafeClass::Security_Check(void)
 					** Dereference stuff - make sure the list makes sense.
 					*/
 					DataSafeEntryClass *entry_ptr = Safe[i]->SafeList;
-					unsigned long *data = NULL;
+					unsigned int *data = NULL;
 					ds_assert(entry_ptr != NULL);
 					int data_size = entry_ptr->Size;
 					ds_assert((data_size & 3) == 0);
@@ -1160,7 +1159,7 @@ __forceinline void GenericDataSafeClass::Security_Check(void)
 							/*
 							** Add in the data.
 							*/
-							data = (unsigned long *) (((char*)entry_ptr) + sizeof(*entry_ptr));
+							data = (unsigned int *) (((char*)entry_ptr) + sizeof(*entry_ptr));
 							for (int z=0 ; z<data_size ; z++) {
 								checkey ^= *data++;
 							}
@@ -1376,15 +1375,7 @@ uintptr_t DataSafeClass<T>::Get_Type_Code(void)
 	*/
 	static uintptr_t instruction_pointer;
 	instruction_pointer = 0;
-#if defined(_MSC_VER) && defined(_M_IX86)
-	__asm {
-here:
-		lea	eax,here
-		mov	[instruction_pointer],eax
-	};
-#else
 	instruction_pointer = reinterpret_cast<uintptr_t>(DataSafeClass<T>::Get_Type_Code);
-#endif
 
 	ds_assert(instruction_pointer != 0);
 
@@ -1411,7 +1402,7 @@ here:
  *   6/27/2001 12:44PM ST : Created                                                            *
  *=============================================================================================*/
 template <class T>
-int DataSafeClass<T>::Get_Type_ID(unsigned long type_code, int size)
+int DataSafeClass<T>::Get_Type_ID(unsigned int type_code, int size)
 {
 	int id = 0;
 
@@ -1963,10 +1954,7 @@ inline T &SafeDataClass<T>::operator = (T const &data)
 	** If we have a valid handle, then set the data into the data safe.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Set(Handle, (T*) &data);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Set(Handle, (T*) &data);
 		ds_assert(ok);
 #ifdef WWDEBUG
 		DebugData = data;
@@ -2020,10 +2008,7 @@ inline T &SafeDataClass<T>::operator = (SafeDataClass<T> &safedata)
 		ds_assert(other_value != NULL);
 
 		if (other_value) {
-#ifdef WWDEBUG
-			bool ok =
-#endif //WWDEBUG
-				DataSafeClass<T>::Set(Handle, (T*) other_value);
+			[[maybe_unused]] bool ok = DataSafeClass<T>::Set(Handle, (T*) other_value);
 			ds_assert(ok);
 #ifdef WWDEBUG
 			DebugData = *other_value;
@@ -2067,10 +2052,7 @@ inline bool SafeDataClass<T>::operator == (T const &data)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2121,10 +2103,7 @@ inline bool SafeDataClass<T>::operator == (SafeDataClass<T> &safedata)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2177,10 +2156,7 @@ inline bool SafeDataClass<T>::operator != (T const &data)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2229,10 +2205,7 @@ inline bool SafeDataClass<T>::operator != (SafeDataClass<T> &safedata)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2285,10 +2258,7 @@ inline bool SafeDataClass<T>::operator > (T const &data)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2339,10 +2309,7 @@ inline bool SafeDataClass<T>::operator > (SafeDataClass<T> &safedata)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2397,10 +2364,7 @@ inline bool SafeDataClass<T>::operator >= (T const &data)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2451,10 +2415,7 @@ inline bool SafeDataClass<T>::operator >= (SafeDataClass<T> &safedata)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2508,10 +2469,7 @@ inline bool SafeDataClass<T>::operator < (T const &data)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2562,10 +2520,7 @@ inline bool SafeDataClass<T>::operator < (SafeDataClass<T> &safedata)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2622,10 +2577,7 @@ inline bool SafeDataClass<T>::operator <= (T const &data)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2676,10 +2628,7 @@ inline bool SafeDataClass<T>::operator <= (SafeDataClass<T> &safedata)
 	** If we have a valid handle, then check the value against the supplied data.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2740,10 +2689,7 @@ inline T &SafeDataClass<T>::operator + (T const &value)
 	** If we have a valid handle, then get the current value and apply the change
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2795,10 +2741,7 @@ inline T &SafeDataClass<T>::operator + (SafeDataClass<T> &safevalue)
 	** If we have a valid handle, then get the data for this handle from the data safe.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -2867,20 +2810,14 @@ inline T &SafeDataClass<T>::operator += (T const &value)
 	** If we have a valid handle, then get the current value and apply the change
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
 		if (data_ptr) {
 			*data_ptr = *data_ptr + value;
 
-#ifdef WWDEBUG
-			bool ok =
-#endif //WWDEBUG
-				DataSafeClass<T>::Set(Handle, data_ptr);
+			ok = DataSafeClass<T>::Set(Handle, data_ptr);
 			ds_assert(ok);
 #ifdef WWDEBUG
 			DebugData = *data_ptr;
@@ -2931,10 +2868,7 @@ inline T &SafeDataClass<T>::operator += (SafeDataClass<T> &safevalue)
 	** If we have a valid handle, then get the data for this handle from the data safe.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -3009,10 +2943,7 @@ inline T &SafeDataClass<T>::operator - (T const &value)
 	** If we have a valid handle, then get the current value and apply the change
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -3064,10 +2995,7 @@ inline T &SafeDataClass<T>::operator - (SafeDataClass<T> &safevalue)
 	** If we have a valid handle, then get the data for this handle from the data safe.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -3136,20 +3064,14 @@ inline T &SafeDataClass<T>::operator -= (T const &value)
 	** If we have a valid handle, then get the current value and apply the change
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
 		if (data_ptr) {
 			*data_ptr = *data_ptr - value;
 
-#ifdef WWDEBUG
-			bool ok =
-#endif //WWDEBUG
-				DataSafeClass<T>::Set(Handle, data_ptr);
+			ok = DataSafeClass<T>::Set(Handle, data_ptr);
 			ds_assert(ok);
 #ifdef WWDEBUG
 			DebugData = *data_ptr;
@@ -3200,10 +3122,7 @@ inline T &SafeDataClass<T>::operator -= (SafeDataClass<T> &safevalue)
 	** If we have a valid handle, then get the data for this handle from the data safe.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -3282,10 +3201,7 @@ inline T &SafeDataClass<T>::operator * (T const &value)
 	** If we have a valid handle, then get the current value and apply the change
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -3337,10 +3253,7 @@ inline T &SafeDataClass<T>::operator * (SafeDataClass<T> &safevalue)
 	** If we have a valid handle, then get the data for this handle from the data safe.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -3409,20 +3322,14 @@ inline T &SafeDataClass<T>::operator *= (T const &value)
 	** If we have a valid handle, then get the current value and apply the change
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
 		if (data_ptr) {
 			*data_ptr = *data_ptr * value;
 
-#ifdef WWDEBUG
-			bool ok =
-#endif //WWDEBUG
-				DataSafeClass<T>::Set(Handle, data_ptr);
+			ok = DataSafeClass<T>::Set(Handle, data_ptr);
 			ds_assert(ok);
 #ifdef WWDEBUG
 			DebugData = *data_ptr;
@@ -3473,10 +3380,7 @@ inline T &SafeDataClass<T>::operator *= (SafeDataClass<T> &safevalue)
 	** If we have a valid handle, then get the data for this handle from the data safe.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -3550,10 +3454,7 @@ inline T &SafeDataClass<T>::operator / (T const &value)
 	** If we have a valid handle, then get the current value and apply the change
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -3605,10 +3506,7 @@ inline T &SafeDataClass<T>::operator / (SafeDataClass<T> &safevalue)
 	** If we have a valid handle, then get the data for this handle from the data safe.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -3679,20 +3577,14 @@ inline T &SafeDataClass<T>::operator /= (T const &value)
 	** If we have a valid handle, then get the current value and apply the change
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
 		if (data_ptr) {
 			*data_ptr = *data_ptr / value;
 
-#ifdef WWDEBUG
-			bool ok =
-#endif //WWDEBUG
-				DataSafeClass<T>::Set(Handle, data_ptr);
+			ok = DataSafeClass<T>::Set(Handle, data_ptr);
 			ds_assert(ok);
 #ifdef WWDEBUG
 			DebugData = *data_ptr;
@@ -3743,10 +3635,7 @@ inline T &SafeDataClass<T>::operator /= (SafeDataClass<T> &safevalue)
 	** If we have a valid handle, then get the data for this handle from the data safe.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
@@ -3761,10 +3650,7 @@ inline T &SafeDataClass<T>::operator /= (SafeDataClass<T> &safevalue)
 			if (other_value) {
 				ds_assert(*other_value != 0);
 				*data_ptr = *data_ptr / *other_value;
-#ifdef WWDEBUG
-				ok =
-#endif //WWDEBUG
-					DataSafeClass<T>::Set(Handle, data_ptr);
+				ok = DataSafeClass<T>::Set(Handle, data_ptr);
 				ds_assert(ok);
 #ifdef WWDEBUG
 				DebugData = *data_ptr;
@@ -3818,20 +3704,14 @@ inline T &SafeDataClass<T>::operator ++ (void)
 	** If we have a valid handle, then get the current value and apply the change
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
 		if (data_ptr) {
 			(*data_ptr)++;
 
-#ifdef WWDEBUG
-			ok =
-#endif //WWDEBUG
-				DataSafeClass<T>::Set(Handle, data_ptr);
+			ok = DataSafeClass<T>::Set(Handle, data_ptr);
 			ds_assert(ok);
 #ifdef WWDEBUG
 			DebugData = *data_ptr;
@@ -3881,20 +3761,14 @@ inline T &SafeDataClass<T>::operator -- (void)
 	** If we have a valid handle, then get the current value and apply the change
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		ds_assert(data_ptr);
 
 		if (data_ptr) {
 			(*data_ptr)--;
 
-#ifdef WWDEBUG
-			ok =
-#endif //WWDEBUG
-				DataSafeClass<T>::Set(Handle, data_ptr);
+			ok = DataSafeClass<T>::Set(Handle, data_ptr);
 			ds_assert(ok);
 #ifdef WWDEBUG
 			DebugData = *data_ptr;
@@ -3991,10 +3865,7 @@ inline T &SafeDataClass<T>::operator () (void) const
 	** handle.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		if (data_ptr) {
 			return(*data_ptr);
@@ -4039,7 +3910,7 @@ inline SafeDataClass<T>::operator int (void) const
 	** Check that T is safe to return as an int
 	*/
 	T x = 0;
-	int y = (T)x;
+	[[maybe_unused]] int y = (T)x;
 	ds_assert(x == y);
 #endif	//WWDEBUG
 
@@ -4048,10 +3919,7 @@ inline SafeDataClass<T>::operator int (void) const
 	** handle.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		if (data_ptr) {
 			return(*((int*)data_ptr));
@@ -4093,7 +3961,7 @@ inline SafeDataClass<T>::operator unsigned int (void) const
 	** Check that T is safe to return as an unsigned int
 	*/
 	T x = 0;
-	unsigned int y = (T)x;
+	[[maybe_unused]] unsigned int y = (T)x;
 	ds_assert(x == y);
 #endif	//WWDEBUG
 
@@ -4102,10 +3970,7 @@ inline SafeDataClass<T>::operator unsigned int (void) const
 	** handle.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		if (data_ptr) {
 			return(*((unsigned int*)data_ptr));
@@ -4116,115 +3981,6 @@ inline SafeDataClass<T>::operator unsigned int (void) const
 	** Error case. Need to return some valid value.
 	*/
 	static unsigned int oh_dear;
-	return(oh_dear);
-}
-
-
-
-/***********************************************************************************************
- * SafeDataClass::operator long -- Return the data for this class as a long                    *
- *                                                                                             *
- *                                                                                             *
- *                                                                                             *
- * INPUT:    Nothing                                                                           *
- *                                                                                             *
- * OUTPUT:   Data cast to long                                                                 *
- *                                                                                             *
- * WARNINGS: None                                                                              *
- *                                                                                             *
- * HISTORY:                                                                                    *
- *   7/6/2001 11:47AM ST : Created                                                             *
- *=============================================================================================*/
-template <class T>
-inline SafeDataClass<T>::operator long (void) const
-{
-	ds_assert(sizeof(T) == sizeof(long));
-
-	T *data_ptr = NULL;
-
-#ifdef WWDEBUG
-	/*
-	** Check that T is safe to return as a long
-	*/
-	T x = 0;
-	long y = (T)x;
-	ds_assert(x == y);
-#endif	//WWDEBUG
-
-	/*
-	** If the handle we have is valid then use it to get a pointer to a temporary copy of the data safe contents for this
-	** handle.
-	*/
-	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
-		ds_assert(ok);
-		if (data_ptr) {
-			return(*((long*)data_ptr));
-		}
-	}
-
-	/*
-	** Error case. Need to return some valid value.
-	*/
-	static long oh_dear;
-	return(oh_dear);
-}
-
-
-
-
-/***********************************************************************************************
- * SafeDataClass::operator int -- Return the data for this class as an unsigned long           *
- *                                                                                             *
- *                                                                                             *
- *                                                                                             *
- * INPUT:    Nothing                                                                           *
- *                                                                                             *
- * OUTPUT:   Data cast to unsigned long                                                        *
- *                                                                                             *
- * WARNINGS: None                                                                              *
- *                                                                                             *
- * HISTORY:                                                                                    *
- *   7/6/2001 11:47AM ST : Created                                                             *
- *=============================================================================================*/
-template <class T>
-inline SafeDataClass<T>::operator unsigned long (void) const
-{
-	ds_assert(sizeof(T) == sizeof(unsigned long));
-
-	T *data_ptr = NULL;
-
-#ifdef WWDEBUG
-	/*
-	** Check that T is safe to return as an unsigned long
-	*/
-	T x = 0;
-	unsigned long y = (T)x;
-	ds_assert(x == y);
-#endif	//WWDEBUG
-
-	/*
-	** If the handle we have is valid then use it to get a pointer to a temporary copy of the data safe contents for this
-	** handle.
-	*/
-	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
-		ds_assert(ok);
-		if (data_ptr) {
-			return(*((unsigned long*)data_ptr));
-		}
-	}
-
-	/*
-	** Error case. Need to return some valid value.
-	*/
-	static unsigned long oh_dear;
 	return(oh_dear);
 }
 
@@ -4256,7 +4012,7 @@ inline SafeDataClass<T>::operator float (void) const
 	** Check that T is safe to return as a float
 	*/
 	T x = 0;
-	float y = (T)x;
+	[[maybe_unused]] float y = (T)x;
 	ds_assert(x == y);
 #endif	//WWDEBUG
 
@@ -4265,10 +4021,7 @@ inline SafeDataClass<T>::operator float (void) const
 	** handle.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		if (data_ptr) {
 			return(*((float*)data_ptr));
@@ -4310,7 +4063,7 @@ inline SafeDataClass<T>::operator double (void) const
 	** Check that T is safe to return as a double
 	*/
 	T x = 0;
-	double y = (T)x;
+	[[maybe_unused]] double y = (T)x;
 	ds_assert(x == y);
 #endif	//WWDEBUG
 
@@ -4319,10 +4072,7 @@ inline SafeDataClass<T>::operator double (void) const
 	** handle.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		if (data_ptr) {
 			return(*((double*)data_ptr));
@@ -4368,10 +4118,7 @@ inline T *SafeDataClass<T>::Get_Ptr(void) const
 	** handle.
 	*/
 	if (Handle.Is_Valid()) {
-#ifdef WWDEBUG
-		bool ok =
-#endif //WWDEBUG
-			DataSafeClass<T>::Get(Handle, data_ptr);
+		[[maybe_unused]] bool ok = DataSafeClass<T>::Get(Handle, data_ptr);
 		ds_assert(ok);
 		if (data_ptr) {
 			return(data_ptr);

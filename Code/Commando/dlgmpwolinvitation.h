@@ -42,7 +42,6 @@
 #define __DLG_MP_WOL_INVITATION_H
 
 #include "popupdialog.h"
-#include "resource.h"
 #include <WWOnline/WOLUser.h>
 
 class WOLBuddyMgr;
@@ -55,11 +54,11 @@ class WOLBuddyMgr;
 class MPWolInvitationPopupClass : public PopupDialogClass
 {
 public:
-	MPWolInvitationPopupClass(const RefPtr<WWOnline::UserData>&, const wchar_t*);
+	MPWolInvitationPopupClass(const RefPtr<WWOnline::UserData>&, const unichar_t*);
 	~MPWolInvitationPopupClass();
 
 	void On_Init_Dialog(void) override;
-	void On_Command(int ctrl_id, int mesage_id, DWORD param) override;
+	void On_Command(int ctrl_id, int mesage_id, unsigned int param) override;
 
 protected:
 	RefPtr<WWOnline::UserData> mHost;

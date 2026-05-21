@@ -73,7 +73,7 @@ public:
 	//
 	//	Content control
 	//
-	void				Set_Text (const wchar_t *text);
+	void				Set_Text (const unichar_t *text);
 	void				Set_Position (const Vector2 &pos);
 
 private:
@@ -90,7 +90,7 @@ private:
 	//	Private member data
 	////////////////////////////////////////////////////////////////
 	Render2DSentenceClass 	TextRenderer;
-	Render2DClass			BackgroundRenderer;	
+	Render2DClass			BackgroundRenderer;
 	WideStringClass		Text;
 	RectClass				Rect;
 

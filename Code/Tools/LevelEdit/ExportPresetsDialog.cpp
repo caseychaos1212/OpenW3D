@@ -88,8 +88,8 @@ ExportPresetsDialogClass::OnInitDialog (void)
 	//
 	m_TreeCtrl.SetImageList (::Get_Global_Image_List (), TVSIL_NORMAL);
 	Fill_Tree ();
-	
-	return TRUE;
+
+	return true;
 }
 
 
@@ -101,7 +101,7 @@ ExportPresetsDialogClass::OnInitDialog (void)
 void
 ExportPresetsDialogClass::OnBrowse (void)
 {
-	CFileDialog dialog (FALSE, ".txt", "presets.txt",
+	CFileDialog dialog (false, ".txt", "presets.txt",
 		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER,
 		"Text Files (*.txt)|*.txt||", ::AfxGetMainWnd ());
 
@@ -121,7 +121,7 @@ ExportPresetsDialogClass::OnBrowse (void)
 			SetDlgItemText (IDC_FILENAME_EDIT, path);
 		}
 	}
-	
+
 	return ;
 }
 
@@ -164,7 +164,7 @@ ExportPresetsDialogClass::OnOK (void)
 			CDialog::OnOK ();
 		}
 	}
-	
+
 	return ;
 }
 
@@ -184,18 +184,18 @@ ExportPresetsDialogClass::Fill_Tree (void)
 
 		//
 		//	Add this factory to the tree
-		//		
-		HTREEITEM tree_item = m_TreeCtrl.InsertItem (PRESET_CATEGORIES[index].name, FOLDER_ICON, FOLDER_ICON);		
-				
+		//
+		HTREEITEM tree_item = m_TreeCtrl.InsertItem (PRESET_CATEGORIES[index].name, FOLDER_ICON, FOLDER_ICON);
+
 		//
 		//	Is there a factory to create this class of defintion?
 		//
 		DefinitionFactoryClass *factory = DefinitionFactoryMgrClass::Find_Factory (PRESET_CATEGORIES[index].clsid);
 		if (factory == NULL) {
-			
+
 			//
 			//	Find all the sub-factories
-			//			
+			//
 			for (	factory = DefinitionFactoryMgrClass::Get_First (PRESET_CATEGORIES[index].clsid);
 					factory != NULL;
 					factory = DefinitionFactoryMgrClass::Get_Next (factory, PRESET_CATEGORIES[index].clsid))
@@ -204,7 +204,6 @@ ExportPresetsDialogClass::Fill_Tree (void)
 				//	Add this sub-factory to the tree
 				//
 				if (factory->Is_Displayed ()) {
-					LPCTSTR name = factory->Get_Name ();
 					HTREEITEM child_item = m_TreeCtrl.InsertItem (factory->Get_Name (), FOLDER_ICON, FOLDER_ICON, tree_item);
 					m_TreeCtrl.SetItemData (child_item, (DWORD)factory->Get_Class_ID ());
 				}

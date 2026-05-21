@@ -44,21 +44,22 @@
 #include "cnetwork.h"
 #include "translatedb.h"
 #include "string_ids.h"
+#include <cinttypes>
 
 
 using namespace WWOnline;
 
-typedef void (*QMDispatchFunc)(WOLQuickMatch*, const wchar_t*);
+typedef void (*QMDispatchFunc)(WOLQuickMatch*, const unichar_t*);
 
 struct QMResponseDispatch
 	{
-	const wchar_t* Token;
+	const unichar_t* Token;
 	QMDispatchFunc Dispatch;
 	};
 
 
-#define QUICKMATCH_CHANNELNAME L"lob_39_0"
-#define QUICKMATCH_BOTNAME L"matchbot"
+#define QUICKMATCH_CHANNELNAME U_CHAR("lob_39_0")
+#define QUICKMATCH_BOTNAME U_CHAR("matchbot")
 
 /******************************************************************************
 *
@@ -214,7 +215,7 @@ RefPtr<WaitCondition> WOLQuickMatch::ConnectClient(void)
 		// Join the matching channel
 		RefPtr<Product> product = Product::Current();
 		WWASSERT(product.IsValid() && "WOLProduct not initialized.");
-		const wchar_t* password = product->GetChannelPassword();
+		const unichar_t* password = product->GetChannelPassword();
 
 		RefPtr<WaitCondition> joinWait = mWOLSession->JoinChannel(QUICKMATCH_CHANNELNAME, password, 0);
 		connectWait->Add(joinWait);
@@ -264,7 +265,7 @@ RefPtr<WaitCondition> WOLQuickMatch::Disconnect(void)
 			}
 		}
 
-	return NULL;	
+	return NULL;
 	}
 
 
@@ -286,7 +287,7 @@ RefPtr<WaitCondition> WOLQuickMatch::Disconnect(void)
 
 bool WOLQuickMatch::SendClientInfo(void)
 	{
-	unsigned long ver = cNetwork::Get_Exe_Key();
+	uint32_t ver = cNetwork::Get_Exe_Key();
 
 	// Get CPU speed
 	int speed = CPUDetectClass::Get_Processor_Speed();
@@ -294,7 +295,7 @@ bool WOLQuickMatch::SendClientInfo(void)
 	// Get amount of physical memory
 	MEMORYSTATUS memStatus;
 	GlobalMemoryStatus(&memStatus);
-	unsigned long memory = (memStatus.dwTotalPhys / 1048576);
+	unsigned int memory = (memStatus.dwTotalPhys / 1048576);
 
 	//-------------------------------------------------------------------------
 	// Gather pings
@@ -329,11 +330,11 @@ bool WOLQuickMatch::SendClientInfo(void)
 	// Generate client information message
 	//-------------------------------------------------------------------------
 	WideStringClass clientMsg(256, true);
-	clientMsg.Format(L"CINFO VER=%lu CPU=%lu MEM=%lu TPOINTS=%ld PLAYED=%lu PINGS=%S",
+	clientMsg.Format(U_CHAR("CINFO VER=%" PRIu32 " CPU=%lu MEM=%lu TPOINTS=%ld PLAYED=%lu PINGS=%S"),
 		ver, speed, memory, tpoints, played, pseudoPings);
 
-	WWDEBUG_SAY(("WOLQuickMatch: '%S'\n", (const wchar_t*)clientMsg));
-	return mWOLSession->SendPrivateMessage(QUICKMATCH_BOTNAME, (const wchar_t*)clientMsg);
+	WWDEBUG_SAY(("WOLQuickMatch: '%S'\n", (const unichar_t*)clientMsg));
+	return mWOLSession->SendPrivateMessage(QUICKMATCH_BOTNAME, (const unichar_t*)clientMsg);
 	}
 
 
@@ -363,8 +364,8 @@ void WOLQuickMatch::SendServerInfo(const char* exInfo, const char* topic)
 		// The SINFO message sent to the matching bot is assembled in such
 		// a way as to imitate the IRC topic string that WOLAPI produces.
 		WideStringClass botMsg(0, true);
-		botMsg.Format(L"SINFO %S%S", exInfo, topic);
-		WWDEBUG_SAY(("WOLQuickMatch: '%S'\n", (const wchar_t*)botMsg));
+		botMsg.Format(U_CHAR("SINFO %S%S"), exInfo, topic);
+		WWDEBUG_SAY(("WOLQuickMatch: '%S'\n", (const unichar_t*)botMsg));
 
 		mWOLSession->SendPrivateMessage(QUICKMATCH_BOTNAME, botMsg);
 		}
@@ -385,7 +386,7 @@ void WOLQuickMatch::SendServerInfo(const char* exInfo, const char* topic)
 *
 ******************************************************************************/
 
-void WOLQuickMatch::SendStatus(const wchar_t* statusMsg)
+void WOLQuickMatch::SendStatus(const unichar_t* statusMsg)
 	{
 	WWDEBUG_SAY(("WOLQuickMatch: Status '%S'\n", statusMsg));
 
@@ -412,31 +413,31 @@ void WOLQuickMatch::SendStatus(const wchar_t* statusMsg)
 *
 ******************************************************************************/
 
-void WOLQuickMatch::ParseResponse(const wchar_t* message)
+void WOLQuickMatch::ParseResponse(const unichar_t* message)
 	{
 	if (message)
 		{
 		static QMResponseDispatch _dispatch[] =
 			{
-			{L"INFO ", WOLQuickMatch::ProcessInfo},
-			{L"ERROR ", WOLQuickMatch::ProcessError},
-			{L"START ", WOLQuickMatch::ProcessStart},
+			{U_CHAR("INFO "), WOLQuickMatch::ProcessInfo},
+			{U_CHAR("ERROR "), WOLQuickMatch::ProcessError},
+			{U_CHAR("START "), WOLQuickMatch::ProcessStart},
 			{NULL, WOLQuickMatch::ProcessUnknown}
 			};
 
 		int index = 0;
-		const wchar_t* token = _dispatch[index].Token;
+		const unichar_t* token = _dispatch[index].Token;
 
 		while (token)
 			{
 			// Find the first occurance of the token in the message
-			const wchar_t* cmd = wcsstr(message, token);
+			const unichar_t* cmd = u_strstr(message, token);
 
 			// If the token was found and it is at the start of the message
 			// then return the type of message this is.
 			if (cmd && cmd == message)
 				{
-				const wchar_t* data = (message + wcslen(token));
+				const unichar_t* data = (message + u_strlen(token));
 				_dispatch[index].Dispatch(this, data);
 				}
 
@@ -456,14 +457,14 @@ void WOLQuickMatch::ParseResponse(const wchar_t* message)
 *     Process information messages.
 *
 * INPUTS
-*     Message - 
+*     Message -
 *
 * RESULT
 *     NONE
 *
 ******************************************************************************/
 
-void WOLQuickMatch::ProcessInfo(WOLQuickMatch* quickmatch, const wchar_t* data)
+void WOLQuickMatch::ProcessInfo(WOLQuickMatch* quickmatch, const unichar_t* data)
 	{
 	WideStringClass msg(255, true);
 	msg = data;
@@ -489,7 +490,7 @@ void WOLQuickMatch::ProcessInfo(WOLQuickMatch* quickmatch, const wchar_t* data)
 *
 ******************************************************************************/
 
-void WOLQuickMatch::ProcessError(WOLQuickMatch* quickmatch, const wchar_t* data)
+void WOLQuickMatch::ProcessError(WOLQuickMatch* quickmatch, const unichar_t* data)
 	{
 	WideStringClass msg(255, true);
 	msg = data;
@@ -515,7 +516,7 @@ void WOLQuickMatch::ProcessError(WOLQuickMatch* quickmatch, const wchar_t* data)
 *
 ******************************************************************************/
 
-void WOLQuickMatch::ProcessStart(WOLQuickMatch* quickmatch, const wchar_t* data)
+void WOLQuickMatch::ProcessStart(WOLQuickMatch* quickmatch, const unichar_t* data)
 	{
 	// Send message indicating successful match
 	WideStringClass msg(255, true);
@@ -547,7 +548,7 @@ void WOLQuickMatch::ProcessStart(WOLQuickMatch* quickmatch, const wchar_t* data)
 *
 ******************************************************************************/
 
-void WOLQuickMatch::ProcessUnknown(WOLQuickMatch* quickmatch, const wchar_t* data)
+void WOLQuickMatch::ProcessUnknown(WOLQuickMatch* quickmatch, const unichar_t* data)
 	{
 	WideStringClass msg(255, true);
 	msg = data;
@@ -575,7 +576,7 @@ void WOLQuickMatch::ProcessUnknown(WOLQuickMatch* quickmatch, const wchar_t* dat
 
 void WOLQuickMatch::HandleNotification(ServerError& error)
 	{
-	const wchar_t* errorMsg = error.GetDescription();
+	const unichar_t* errorMsg = error.GetDescription();
 	WWDEBUG_SAY(("WOLQuickMatch: ERROR - ServerError '%S'\n", errorMsg));
 	QuickMatchEvent status(QuickMatchEvent::QMERROR, errorMsg);
 	NotifyObservers(status);
@@ -604,7 +605,7 @@ void WOLQuickMatch::HandleNotification(ChatMessage& message)
 
 	if (sender.Compare_No_Case(QUICKMATCH_BOTNAME) == 0)
 		{
-		WWDEBUG_SAY(("WOLQuickMatch: BotMsg - '%S'\n", message.GetMessage()));
+		WWDEBUG_SAY(("WOLQuickMatch: BotMsg - '%S'\n", message.GetMessage().Peek_Buffer()));
 		ParseResponse(message.GetMessage());
 		}
 	}

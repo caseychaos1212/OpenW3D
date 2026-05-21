@@ -44,7 +44,7 @@ class DlgDownload :
 		public PopupDialogClass
 	{
 	public:
-		static bool DoDialog(const wchar_t* title, const WWOnline::DownloadList& files, bool quiet = false);
+		static bool DoDialog(const unichar_t* title, const WWOnline::DownloadList& files, bool quiet = false);
 
 	protected:
 		DlgDownload();
@@ -57,7 +57,7 @@ class DlgDownload :
 		bool FinalizeCreate(const WWOnline::DownloadList& files);
 
 		void On_Init_Dialog(void) override;
-		void On_Command(int ctrl, int message, DWORD param) override;
+		void On_Command(int ctrl, int message, unsigned int param) override;
 		void On_Periodic(void) override;
 
 		void UpdateProgress(WWOnline::DownloadEvent& event);
@@ -66,7 +66,7 @@ class DlgDownload :
 	private:
 		RefPtr<WWOnline::DownloadWait> mWait;
 
-		unsigned long mStartTime;
+		unsigned int mStartTime;
 		bool mDownloading;
 		static bool mQuietMode;
 	};

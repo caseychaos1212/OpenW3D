@@ -53,13 +53,13 @@
 
 /**
 ** VertexSolveClass
-** This class does the job of generated a vertex solve for a mesh.  
+** This class does the job of generated a vertex solve for a mesh.
 */
 class VertexSolveClass
 {
 public:
 	VertexSolveClass(void) {}
-	
+
 	void Light_Mesh(LightSolveContextClass & context,MeshClass * mesh, NonRefPhysListClass & lights);
 	void Light_Terrain(LightSolveContextClass & context,RenegadeTerrainPatchClass * patch, NonRefPhysListClass & lights);
 
@@ -119,24 +119,24 @@ void VertexSolveClass::Light_Mesh(LightSolveContextClass & context,MeshClass * m
 	** - for each pass
 	**		- for each vertex material
 	**			- if this material has any emissive component, leave the vmtl alone
-	**			- else, point the emissive source to the new light solve color array, 
+	**			- else, point the emissive source to the new light solve color array,
 	**			  make the diffuse and ambient use the material settings.
 	*/
-	unsigned * dcg = NULL; 
+	unsigned * dcg = NULL;
 	for (int pi=0; pi<model->Get_Pass_Count(); pi++) {
 		if (model->Get_DCG_Array(pi) != NULL) {
 			dcg = model->Get_DCG_Array(pi);
 		}
 	}
-	
+
 	for (vi=0; vi<model->Get_Vertex_Count(); vi++) {
 
 		bool use_array = false;
 		for (int pi=0; pi<model->Get_Pass_Count(); pi++) {
 			VertexMaterialClass * pass_mtl = model->Peek_Material(vi,pi);
-			if (	(pass_mtl != NULL) && 
-					(dcg != NULL) && 
-					(pass_mtl->Get_Diffuse_Color_Source() == VertexMaterialClass::COLOR1) ) 
+			if (	(pass_mtl != NULL) &&
+					(dcg != NULL) &&
+					(pass_mtl->Get_Diffuse_Color_Source() == VertexMaterialClass::COLOR1) )
 			{
 				use_array = true;
 			}
@@ -184,7 +184,7 @@ void VertexSolveClass::Light_Mesh(LightSolveContextClass & context,MeshClass * m
 		AmbientSolve[vi].Y = scene_ambient.Y;
 		AmbientSolve[vi].Z = scene_ambient.Z;
 		AmbientSolve[vi].W = 1.0f;
-		
+
 		DiffuseSolve[vi].X = 0.0f;
 		DiffuseSolve[vi].Y = 0.0f;
 		DiffuseSolve[vi].Z = 0.0f;
@@ -202,7 +202,7 @@ void VertexSolveClass::Light_Mesh(LightSolveContextClass & context,MeshClass * m
 		*/
 		NonRefPhysListIterator it(&lights);
 		while (!it.Is_Done()) {
-			
+
 			LightPhysClass * light = it.Peek_Obj()->As_LightPhysClass();
 			if ((light) && (light->Peek_Model()) && (light->Peek_Model()->Class_ID() == RenderObjClass::CLASSID_LIGHT)) {
 
@@ -288,7 +288,7 @@ void VertexSolveClass::Light_Terrain(LightSolveContextClass & context,RenegadeTe
 		AmbientSolve[vi].Y = scene_ambient.Y;
 		AmbientSolve[vi].Z = scene_ambient.Z;
 		AmbientSolve[vi].W = 1.0f;
-		
+
 		DiffuseSolve[vi].X = 0.0f;
 		DiffuseSolve[vi].Y = 0.0f;
 		DiffuseSolve[vi].Z = 0.0f;
@@ -306,7 +306,7 @@ void VertexSolveClass::Light_Terrain(LightSolveContextClass & context,RenegadeTe
 		*/
 		NonRefPhysListIterator it(&lights);
 		while (!it.Is_Done()) {
-			
+
 			LightPhysClass * light = it.Peek_Obj()->As_LightPhysClass();
 			if ((light) && (light->Peek_Model()) && (light->Peek_Model()->Class_ID() == RenderObjClass::CLASSID_LIGHT)) {
 
@@ -357,9 +357,9 @@ void VertexSolveClass::Light_Terrain(LightSolveContextClass & context,RenegadeTe
 
 
 void VertexSolveClass::Add_Light_To_Vertex(LightSolveContextClass & context,int vi,LightClass * light_obj)
-{				
+{
 	if (light_obj->Is_Within_Attenuation_Radius(Position[vi])) {
-	
+
 		// cast ray...
 		bool is_occluded = false;
 
@@ -428,7 +428,7 @@ void VertexSolveClass::Grow_Arrays(int vcount)
 /*
   Global Solve:
   - start with StaticObjList
-  - pass list to cull function 
+  - pass list to cull function
   - cull function gens new list with objects that will not be lit removed
   - pass to solve function which accepts a list
   - iterate list, pass each to solve function for an object
@@ -505,7 +505,7 @@ void LightSolveClass::Compute_Solve(LightSolveContextClass & context,RefPhysList
 		it.Next();
 	}
 	context.Get_Progress().Set_Object_Count(count);
-	
+
 	/*
 	** Generate a light solve for each static object
 	*/
@@ -571,7 +571,7 @@ void LightSolveClass::Compute_Solve(LightSolveContextClass & context,RenderObjCl
 	if (obj->Class_ID() == RenderObjClass::CLASSID_MESH) {
 		MeshClass * mesh = (MeshClass*)obj;
 		WWDEBUG_SAY(("Generating Solve for Mesh: %s\r\n",mesh->Get_Name()));
-		TheVertexSolver.Light_Mesh(context,mesh,light_list);		
+		TheVertexSolver.Light_Mesh(context,mesh,light_list);
 	} else if (obj->Class_ID() == RenderObjClass::CLASSID_RENEGADE_TERRAIN) {
 		TheVertexSolver.Light_Terrain(context,(RenegadeTerrainPatchClass *)obj,light_list);
 	}
@@ -606,7 +606,7 @@ bool LightSolveClass::Does_Model_Get_Static_Light_Solve(RenderObjClass * model)
 				}
 				REF_PTR_RELEASE(sub_obj);
 			}
-		}	
+		}
 
 		if (any_sub_objs_visible == false) {
 			return false;

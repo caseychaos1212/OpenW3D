@@ -42,7 +42,6 @@
 #define __DLG_MP_WOL_ADD_IGNORE_ENTRY_H
 
 #include "popupdialog.h"
-#include "resource.h"
 #include "wwstring.h"
 
 class EditCtrlClass;
@@ -51,10 +50,10 @@ class MPWolAddIgnoreEntry :
 		public PopupDialogClass
 	{
 	public:
-		static bool DoDialog(const wchar_t* defaultUser);
+		static bool DoDialog(const unichar_t* defaultUser);
 
 	protected:
-		MPWolAddIgnoreEntry(const wchar_t* defaultUser);
+		MPWolAddIgnoreEntry(const unichar_t* defaultUser);
 		~MPWolAddIgnoreEntry();
 
 		// Prevent copy and assignment
@@ -62,7 +61,7 @@ class MPWolAddIgnoreEntry :
 		const MPWolAddIgnoreEntry& operator=(const MPWolAddIgnoreEntry&);
 
 		void On_Init_Dialog (void) override;
-		void On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+		void On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 
 		void Add_Ignore_Entry (void);
 

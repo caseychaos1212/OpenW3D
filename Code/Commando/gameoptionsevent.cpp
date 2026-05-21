@@ -46,8 +46,7 @@
 #include "dialogbase.h"
 #include "dialogmgr.h"
 #include "DlgMPConnect.h"
-#include "dialogresource.h"
-#include "resource.h"
+#include "renegadedialog.h"
 #include "apppackettypes.h"
 #include "modpackagemgr.h"
 #include "specialbuilds.h"
@@ -88,7 +87,7 @@ cGameOptionsEvent::Act(void)
 	The_Game()->Set_Hosted_Game_Number(HostedGameNumber);
 
 	if (!IS_SOLOPLAY) {
-		DialogBaseClass* dialog = DialogMgrClass::Find_Dialog(IDD_MULTIPLAY_CONNECTING);
+		DialogBaseClass* dialog = DialogMgrClass::Find_Dialog((int)RenegadeDialogID::IDD_MULTIPLAY_CONNECTING);
 
 		if (dialog != NULL) {
 	 		((DlgMPConnect*)dialog)->Connected(The_Game());
@@ -151,8 +150,8 @@ cGameOptionsEvent::Import_Creation(BitStreamClass & packet)
 	//
 	// TSS103001...n.b. need test that Find_Map_Name succeeds...
 	//
-	ULONG mod_name_crc = packet.Get(mod_name_crc);
-	ULONG map_name_crc = packet.Get(map_name_crc);
+	unsigned int mod_name_crc = packet.Get(mod_name_crc);
+	unsigned int map_name_crc = packet.Get(map_name_crc);
 
 	// Find the mod and map names from their CRC
 	StringClass mod_name(0, true);
@@ -163,14 +162,14 @@ cGameOptionsEvent::Import_Creation(BitStreamClass & packet)
 
 	if (!IS_SOLOPLAY) {
 		if (!The_Game()->Is_Map_Valid()) {
-			DialogBaseClass* dialog = DialogMgrClass::Find_Dialog(IDD_MULTIPLAY_CONNECTING);
+			DialogBaseClass* dialog = DialogMgrClass::Find_Dialog((int)RenegadeDialogID::IDD_MULTIPLAY_CONNECTING);
 
 			if (dialog != NULL) {
 	 			((DlgMPConnect*)dialog)->Failed_To_Connect();
 				act = false;
 			}
 			WideStringClass tval;
-			tval.Format(L"%s  %s", TRANSLATE(IDS_MP_CONNECTION_REFUSED_BY_APPLICATION), 
+			tval.Format(U_CHAR("%s  %s"), TRANSLATE(IDS_MP_CONNECTION_REFUSED_BY_APPLICATION),
 				TRANSLATE(IDS_MENU_MISSING_MAP));
 			DlgMPConnectionRefused::DoDialog(tval, false);
 		}

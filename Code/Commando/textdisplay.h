@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Commando/textdisplay.h                       $* 
- *                                                                                             * 
- *                      $Author:: Jani_p                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 9/27/01 9:41a                                               $* 
- *                                                                                             * 
- *                    $Revision:: 29                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Commando/textdisplay.h                       $*
+ *                                                                                             *
+ *                      $Author:: Jani_p                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 9/27/01 9:41a                                               $*
+ *                                                                                             *
+ *                    $Revision:: 29                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #ifndef	TEXTDISPLAY_H
@@ -64,6 +64,7 @@
 #ifndef VECTOR4_H
 	#include "vector4.h"
 #endif
+#include "vector.h"
 
 class	Font3DInstanceClass;
 class	Render2DTextClass;
@@ -83,13 +84,13 @@ public:
 class	TextDisplayLine {
 
 public:
-	TextDisplayLine( const WideStringClass & text, unsigned long color );
+	TextDisplayLine( const WideStringClass & text, unsigned int color );
 
 	float	Update_Time( float seconds )	{ Time += seconds; return Time; }
 	int	Get_Line_Count( void )			{ return LineCount; }
 
 	WideStringClass	Text;
-	unsigned long		Color;
+	unsigned int		Color;
 	float					Time;
 	int					LineCount;
 };
@@ -131,18 +132,18 @@ public:
 
 	void		Set_Input_Text( const char * text )
 	{
-		TextChanged|=InputText!=text; 
-		InputText = text; 
+		TextChanged|=InputText!=text;
+		InputText = text;
 	}
 	void		Set_Help_Text( const char * text )
 	{
-		TextChanged|=HelpText!=text; 
-		HelpText = text; 
+		TextChanged|=HelpText!=text;
+		HelpText = text;
 	}
 	void		Set_Verbose_Help_Text( const char * text )
 	{
-		VerboseTextChanged|=VerboseHelpText!=text; 
-		VerboseHelpText = text; 
+		VerboseTextChanged|=VerboseHelpText!=text;
+		VerboseHelpText = text;
 	}
 	void		Display_Vis_Warning( bool on )					{ DisplayVisWarning = on; }
 
@@ -153,7 +154,7 @@ private:
 	Render2DTextClass	*		VerboseDisplay;
 	Render2DTextClass	*		StatisticsDisplay;
 	DynamicVectorClass<WideStringClass> RendererLines;
-	DynamicVectorClass<unsigned long> RendererColors;
+	DynamicVectorClass<unsigned int> RendererColors;
 	float							DisplayY;
 
 	SList<TextDisplayLine>	ScrollLines;
@@ -186,7 +187,7 @@ public:
 	static	void	Render( Render2DTextClass * renderer );
 	static	void	Set_Display( const char * title );
 	static	bool	Is_Current_Display( const char* title); // Returns true if "title" is currently active
-	static	void	Set_Stat( const char * title, const char * text, unsigned long color = 0xffffffff, const Vector2& location = Vector2( 0, -240 ) );
+	static	void	Set_Stat( const char * title, const char * text, unsigned int color = 0xffffffff, const Vector2& location = Vector2( 0, -240 ) );
 };
 
 #endif

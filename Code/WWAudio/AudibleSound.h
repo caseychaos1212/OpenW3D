@@ -41,8 +41,6 @@
 #ifndef __SOUNDOBJ_H
 #define __SOUNDOBJ_H
 
-#include "mss.h"
-
 //#include <malloc.h>
 #include "vector3.h"
 #include "matrix3d.h"
@@ -105,6 +103,8 @@ class AudibleSoundClass : public SoundSceneObjClass
 		//	Friend classes
 		//////////////////////////////////////////////////////////////////////
 		friend class WWAudioClass;
+		friend class MilesAudioClass;
+		friend class OpenALAudioClass;
 
 		//////////////////////////////////////////////////////////////////////
 		//	Public data types
@@ -162,14 +162,14 @@ class AudibleSoundClass : public SoundSceneObjClass
 		virtual bool				Pause (void);
 		virtual bool				Resume (void);
 		virtual bool				Stop (bool remove_from_playlist = true);
-		virtual void				Seek (unsigned long milliseconds);
+		virtual void				Seek (unsigned int milliseconds);
 		virtual SOUND_STATE		Get_State (void) const	{ return m_State; }
 
 		virtual void				Fade_Out (int time_in_ms);
 		virtual void				Fade_In (int time_in_ms);
 
 		// The timestamp represents when the sound started playing
-		virtual unsigned long	Get_Timestamp (void) const { return m_Timestamp; }
+		virtual unsigned int	Get_Timestamp (void) const { return m_Timestamp; }
 
 		//////////////////////////////////////////////////////////////////////
 		//	Virtual channel support
@@ -223,9 +223,6 @@ class AudibleSoundClass : public SoundSceneObjClass
 		//////////////////////////////////////////////////////////////////////
 		//	Playback rate control
 		//////////////////////////////////////////////////////////////////////
-		virtual int					Get_Playback_Rate (void);
-		virtual void				Set_Playback_Rate (int rate_in_hz);
-		
 		virtual float				Get_Pitch_Factor (void)						{ return m_PitchFactor; }
 		virtual void				Set_Pitch_Factor (float factor);
 
@@ -238,10 +235,10 @@ class AudibleSoundClass : public SoundSceneObjClass
 		// can either be set as a normalized value from 0 to 1 or a millisecond
 		// offset from the start of the sound.
 		//
-		virtual unsigned long	Get_Duration (void) const								{ return m_Length; }
-		virtual unsigned long	Get_Play_Position (void) const						{ return m_CurrentPosition; }
+		virtual unsigned int	Get_Duration (void) const								{ return m_Length; }
+		virtual unsigned int	Get_Play_Position (void) const						{ return m_CurrentPosition; }
 		virtual void				Set_Play_Position (float position)					{ Seek (position * m_Length); }
-		virtual void				Set_Play_Position (unsigned long milliseconds)	{ Seek (milliseconds); }
+		virtual void				Set_Play_Position (unsigned int milliseconds)	{ Seek (milliseconds); }
 
 		virtual void				Set_Start_Offset (float offset)						{ m_StartOffset = offset; }
 		virtual float				Get_Start_Offset (void) const							{ return m_StartOffset; }
@@ -319,7 +316,6 @@ class AudibleSoundClass : public SoundSceneObjClass
 		//	Handle information
 		//////////////////////////////////////////////////////////////////////
 		virtual SoundHandleClass *	Get_Miles_Handle (void) const			{ return m_SoundHandle; }
-		virtual void				Set_Miles_Handle (MILES_HANDLE handle = INVALID_MILES_HANDLE);
 		virtual void				Free_Miles_Handle (void);
 		virtual void				Initialize_Miles_Handle (void);
 		virtual void				Allocate_Miles_Handle (void);
@@ -356,7 +352,7 @@ class AudibleSoundClass : public SoundSceneObjClass
 		//	Protected member data
 		//////////////////////////////////////////////////////////////////////
 		SoundHandleClass *	m_SoundHandle;
-		unsigned long			m_Timestamp;
+		unsigned int			m_Timestamp;
 		SOUND_STATE				m_State;
 		SOUND_TYPE				m_Type;
 		FADE_TYPE				m_FadeType;
@@ -377,8 +373,8 @@ class AudibleSoundClass : public SoundSceneObjClass
 		int						m_LoopsLeft;
 
 		// Offset and length information (in milliseconds)
-		unsigned long			m_Length;
-		unsigned long			m_CurrentPosition;
+		unsigned int			m_Length;
+		unsigned int			m_CurrentPosition;
 		float						m_StartOffset;
 		float						m_PitchFactor;
 
@@ -444,17 +440,17 @@ public:
 	virtual float								Get_Volume (void) const				{ return m_Volume; }
 	virtual float								Get_Volume_Randomizer (void) const	{ return m_VolumeRandomizer; }
 	virtual float								Get_Start_Offset (void) const		{ return m_StartOffset; }
-	virtual float								Get_Pitch_Factor (void) const		{ return m_PitchFactor; }	
-	virtual float								Get_Pitch_Factor_Randomizer (void) const	{ return m_PitchFactorRandomizer; }	
+	virtual float								Get_Pitch_Factor (void) const		{ return m_PitchFactor; }
+	virtual float								Get_Pitch_Factor_Randomizer (void) const	{ return m_PitchFactorRandomizer; }
 	virtual int									Get_Virtual_Channel (void) const	{ return m_VirtualChannel; }
 
 	virtual void								Set_Volume (float volume)				{ m_Volume = volume; }
-	virtual void								Set_Volume_Randomizer (float value)	{ m_VolumeRandomizer = value; }	
+	virtual void								Set_Volume_Randomizer (float value)	{ m_VolumeRandomizer = value; }
 	virtual void								Set_Max_Vol_Radius (float radius)	{ m_MaxVolRadius = radius; }
 	virtual void								Set_DropOff_Radius (float radius)	{ m_DropOffRadius = radius; }
 	virtual void								Set_Start_Offset (float offset)		{ m_StartOffset = offset; }
 	virtual void								Set_Pitch_Factor (float factor)		{ m_PitchFactor = factor; }
-	virtual void								Set_Pitch_Factor_Randomizer (float value)	{ m_PitchFactorRandomizer = value; }	
+	virtual void								Set_Pitch_Factor_Randomizer (float value)	{ m_PitchFactorRandomizer = value; }
 	virtual void								Set_Virtual_Channel (int channel)	{ m_VirtualChannel = channel; }
 
 	// Logical sound creation

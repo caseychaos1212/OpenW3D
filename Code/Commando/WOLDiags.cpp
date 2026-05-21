@@ -41,7 +41,7 @@ using namespace WWOnline;
 
 void ShowWOLVersion(const RefPtr<Session>& session)
 	{
-	unsigned long ver = 0;
+	unsigned int ver = 0;
 	session->GetChatObject()->GetVersion(&ver);
 	ConsoleFunctionClass::Print("WOLAPI V%u.%u\n", (ver >> 16), (ver & 0xFFFF));
 	}
@@ -98,7 +98,7 @@ const char* WOLConsoleFunctionClass::Get_Help(void)
 
 void WOLConsoleFunctionClass::Activate(const char* input)
 	{
-	static Dispatch _dispatch[] = 
+	static Dispatch _dispatch[] =
 		{
 		{"pings", ShowPingServers},
 		{"server", ShowServer},

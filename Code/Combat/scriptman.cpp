@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Combat/scripts.cpp                           $* 
- *                                                                                             * 
- *                      $Author:: Greg_h                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 7/09/02 9:19a                                               $* 
- *                                                                                             * 
- *                    $Revision:: 53                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Combat/scripts.cpp                           $*
+ *                                                                                             *
+ *                      $Author:: Greg_h                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 7/09/02 9:19a                                               $*
+ *                                                                                             *
+ *                    $Revision:: 53                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "scriptman.h"
@@ -51,10 +51,10 @@ ScriptCommands* EngineCommands = NULL;
 
 #if 1
 #define	SCRIPT_PROFILE_START( x )	WWProfileManager::Profile_Start( "Scripts" );
-#define	SCRIPT_PROFILE_STOP( x )	WWProfileManager::Profile_Stop( ); 
+#define	SCRIPT_PROFILE_STOP( x )	WWProfileManager::Profile_Stop( );
 #else
 #define	SCRIPT_PROFILE_START( x )
-#define	SCRIPT_PROFILE_STOP( x ) 
+#define	SCRIPT_PROFILE_STOP( x )
 #endif
 
 /*
@@ -109,7 +109,7 @@ void ScriptManager::Shutdown(void)
 
 		assert(ScriptDestroyFunct != NULL);
 		ScriptDestroyFunct(script);
-		
+
 		ActiveScriptList.Delete(0);
 	}
 
@@ -182,18 +182,25 @@ void ScriptManager::Load_Scripts(const char* dll_filename)
 			RawFileClass unpacked_scripts(_TMP_SCRIPTS_DLL_FILENAME);
 
 			if (unpacked_scripts.Create()) {
-		
+
 				unpacked_scripts.Open(FileClass::WRITE);
 
 				// Copy the dll from the PKG (mix) file into our temporary _scripts directory
 				static char buffer[16000];
-				int scripts_size = scripts_dll->Size();
-				int cur_pos = 0;
+				size_t scripts_size = scripts_dll->Size();
+				size_t cur_pos = 0;
 				while (cur_pos < scripts_size) {
-					int read_count = WWMath::Min(scripts_size - cur_pos,sizeof(buffer));
-					scripts_dll->Read(buffer,read_count);
-					unpacked_scripts.Write(buffer,read_count);
-					cur_pos += read_count;
+					size_t remaining = scripts_size - cur_pos;
+					size_t requested = remaining;
+					if (requested > sizeof(buffer)) {
+						requested = sizeof(buffer);
+					}
+					int read_count = scripts_dll->Read(buffer, static_cast<int>(requested));
+					if (read_count <= 0) {
+						break;
+					}
+					unpacked_scripts.Write(buffer, read_count);
+					cur_pos += static_cast<size_t>(read_count);
 				}
 
 
@@ -234,7 +241,7 @@ void ScriptManager::Load_Scripts(const char* dll_filename)
 	}
 
 	// Initialize request script destroy function
-	LPFN_SET_REQUEST_DESTROY_FUNC set_request_destroy_func = 
+	LPFN_SET_REQUEST_DESTROY_FUNC set_request_destroy_func =
 		(LPFN_SET_REQUEST_DESTROY_FUNC)GetProcAddress(hDLL, LPSTR_SET_REQUEST_DESTROY_FUNC);
 	assert(set_request_destroy_func != NULL);
 
@@ -405,7 +412,7 @@ bool	ScriptManager::Load( ChunkLoadClass & cload )
 					WWASSERT( script == NULL );
 					script = Create_Script( name );
 					if ( script == NULL ) {
-						Debug_Say(( "Script %s not found \n", name ));
+						Debug_Say(( "Script %s not found \n", name.Peek_Buffer() ));
 					}
 
 					// A Missing script is not fatal
@@ -470,4 +477,4 @@ bool	ScriptManager::Load( ChunkLoadClass & cload )
 }
 
 
- 
+

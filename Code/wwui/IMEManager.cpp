@@ -181,7 +181,7 @@ bool IMEManager::FinalizeCreate(HWND hwnd)
 
 	// Create new input context for the specified window.
 	mHIMC = ImmCreateContext();
-	
+
 	if (mHIMC == NULL)
 		{
 		return false;
@@ -226,7 +226,7 @@ void IMEManager::Activate(void)
 
 		if (!open)
 			{
-			ImmSetOpenStatus(imc, TRUE);
+			ImmSetOpenStatus(imc, true);
 
 			IMEEvent action(IME_ACTIVATED, this);
 			NotifyObservers(action);
@@ -264,7 +264,7 @@ void IMEManager::Deactivate(void)
 
 		if (open)
 			{
-			ImmSetOpenStatus(imc, FALSE);
+			ImmSetOpenStatus(imc, false);
 
 			IMEEvent action(IME_DEACTIVATED, this);
 			NotifyObservers(action);
@@ -441,7 +441,7 @@ bool IMEManager::ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		// Input language has changed.
 		case WM_INPUTLANGCHANGE:
 			InputLanguageChanged((HKL)lParam);
-			outResult = TRUE;
+			outResult = true;
 			handled = false;
 			break;
 
@@ -493,7 +493,7 @@ bool IMEManager::ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 			if (handled)
 				{
-				outResult = TRUE;
+				outResult = true;
 				}
 			break;
 
@@ -502,7 +502,7 @@ bool IMEManager::ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 			if (handled)
 				{
-				outResult = TRUE;
+				outResult = true;
 				}
 			break;
 
@@ -538,7 +538,7 @@ bool IMEManager::ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 					{
 					if (mTypingCursorPos < IME_MAX_TYPING_LEN)
 						{
-						mTypingString[mTypingCursorPos] = (wchar_t)virtualKey;
+						mTypingString[mTypingCursorPos] = (unichar_t)virtualKey;
 						++mTypingCursorPos;
 						mTypingString[mTypingCursorPos] = 0;
 						typingChanged = true;
@@ -664,7 +664,7 @@ LRESULT IMEManager::IMENotify(WPARAM wParam, LPARAM lParam)
 					{
 					WWDEBUG_SAY(("IMEManager: ConversionMode - "));
 
-					static struct convmodestruct {long flag; const char* ondesc; const char* offdesc;} _convModes[] = 
+					static struct convmodestruct {int flag; const char* ondesc; const char* offdesc;} _convModes[] =
 						{
 						{IME_CMODE_CHARCODE, "CharCode:On", "CharCode:Off"},
 						{IME_CMODE_EUDC, " EUDC:On", " EUDC:Off"},
@@ -724,7 +724,7 @@ LRESULT IMEManager::IMENotify(WPARAM wParam, LPARAM lParam)
 					{
 					WWDEBUG_SAY(("IMEManager: SentenceMode - "));
 
-					static struct smodestruct {long flag; const char* ondesc; const char* offdesc;} _sModes[] = 
+					static struct smodestruct {int flag; const char* ondesc; const char* offdesc;} _sModes[] =
 						{
 						{IME_SMODE_AUTOMATIC, "Automatic:On", "Automatic:Off"},
 						{IME_SMODE_NONE, " SentenceInfo:Off", " SentenceInfo:On"},
@@ -792,8 +792,8 @@ LRESULT IMEManager::IMENotify(WPARAM wParam, LPARAM lParam)
 		default:
 			break;
 		}
-	
-	return TRUE;
+
+	return true;
 	}
 
 
@@ -892,9 +892,9 @@ void IMEManager::InputLanguageChanged(HKL hkl)
 		{
 		UINT descSize = ImmGetDescriptionW(hkl, NULL, 0);
 		++descSize;
-		wchar_t* descPtr = mIMEDescription.Get_Buffer(descSize);
+		unichar_t* descPtr = mIMEDescription.Get_Buffer(descSize);
 
-		ImmGetDescriptionW(hkl, descPtr, descSize);
+		ImmGetDescriptionW(hkl, reinterpret_cast<wchar_t *>(descPtr), descSize);
 		}
 	else
 		{
@@ -911,7 +911,7 @@ void IMEManager::InputLanguageChanged(HKL hkl)
 	#if(0)
 	mHilite = true;
 
-	static const wchar_t _TradChImeName[] = {0x6CE8,0x97F3,0x8F38,0x5165,0x6CD5,0x0020,0x0034,0x002E,0x0031,0x0020,0x7248,0x0000};
+	static const unichar_t _TradChImeName[] = {0x6CE8,0x97F3,0x8F38,0x5165,0x6CD5,0x0020,0x0034,0x002E,0x0031,0x0020,0x7248,0x0000};
 
 	if (mIMEDescription.Compare(_TradChImeName) == 0)
 		{
@@ -920,7 +920,7 @@ void IMEManager::InputLanguageChanged(HKL hkl)
 	#endif
 
 	WWDEBUG_SAY(("IMEManager: Language Changed - LangID = %04X, CodePage = %d, Description: '%S'\n",
-			mLangID, mCodePage, mIMEDescription));
+			mLangID, mCodePage, mIMEDescription.Peek_Buffer()));
 
 	WWDEBUG_SAY(("IMEManager: Properties - %s%s%s%s%s\n",
 			mIMEProperties & IME_PROP_AT_CARET ? "At Caret" : "",
@@ -1004,13 +1004,13 @@ void IMEManager::StartComposition(void)
 *
 ******************************************************************************/
 
-void IMEManager::DoComposition(unsigned int dbcs, long compFlags)
+void IMEManager::DoComposition(unsigned int /* dbcs */, int compFlags)
 	{
 	WWDEBUG_SAY(("IMEManager: DoComposition\n"));
 
 #if(0)
 	#ifdef _DEBUG
-	static struct flagstruct {long flag; const char* desc;} _gcsFlags[] = 
+	static struct flagstruct {int flag; const char* desc;} _gcsFlags[] =
 		{
 		{GCS_COMPATTR, "GCS_COMPATTR"},
 		{GCS_COMPCLAUSE, " GCS_COMPCLAUSE"},
@@ -1081,7 +1081,7 @@ void IMEManager::DoComposition(unsigned int dbcs, long compFlags)
 				{
 				if (ReadCompositionString(imc, GCS_COMPREADSTR, mReadingString, sizeof(mReadingString)))
 					{
-					WWDEBUG_SAY(("Reading string '%S'\n", (const wchar_t*)mReadingString));
+					WWDEBUG_SAY(("Reading string '%S'\n", (const unichar_t*)mReadingString));
 					action = COMPOSITION_CHANGE;
 					}
 				}
@@ -1090,15 +1090,15 @@ void IMEManager::DoComposition(unsigned int dbcs, long compFlags)
 			if (compFlags & GCS_COMPREADATTR)
 				{
 				unsigned char attr[IME_MAX_STRING_LEN * 2];
-				long size = ReadReadingAttr(imc, attr, sizeof(attr));
+				int size = ReadReadingAttr(imc, attr, sizeof(attr));
 
 				WWDEBUG_SAY(("ReadAttr: "));
-				
-				for (long index = 0; index < size; ++index)
+
+				for (int index = 0; index < size; ++index)
 					{
 					WWDEBUG_SAY(("%01x", (int)attr[index]));
 					}
-				
+
 				WWDEBUG_SAY(("\n"));
 				}
 #endif
@@ -1108,23 +1108,23 @@ void IMEManager::DoComposition(unsigned int dbcs, long compFlags)
 				{
 				if (ReadCompositionString(imc, GCS_COMPSTR, mCompositionString, sizeof(mCompositionString)))
 					{
-					WWDEBUG_SAY(("Composition string '%S'\n", (const wchar_t*)mCompositionString));
+					WWDEBUG_SAY(("Composition string '%S'\n", (const unichar_t*)mCompositionString));
 					action = COMPOSITION_CHANGE;
 					}
 				}
 
 			if (compFlags & GCS_COMPATTR)
 				{
-				long size = ReadCompositionAttr(imc, mCompositionAttr, sizeof(mCompositionAttr));
+				[[maybe_unused]] int size = ReadCompositionAttr(imc, mCompositionAttr, sizeof(mCompositionAttr));
 
 #ifdef WWDEBUG
 				WWDEBUG_SAY(("CompAttr: "));
 
-				for (long index = 0; index < size; ++index)
+				for (int index = 0; index < size; ++index)
 					{
 					WWDEBUG_SAY(("%01x", (int)mCompositionAttr[index]));
 					}
-				
+
 				WWDEBUG_SAY(("\n"));
 #endif
 				}
@@ -1132,11 +1132,11 @@ void IMEManager::DoComposition(unsigned int dbcs, long compFlags)
 			if (compFlags & GCS_COMPCLAUSE)
 				{
 				mCompositionClause[0] = 0;
-				long size = ReadCompositionClause(imc, mCompositionClause, sizeof(mCompositionClause));
+				[[maybe_unused]] int size = ReadCompositionClause(imc, mCompositionClause, sizeof(mCompositionClause));
 
 #ifdef WWDEBUG
 				WWDEBUG_SAY(("CompClause: "));
-				const int count = (size / sizeof(unsigned long));
+				const int count = (size / sizeof(unsigned int));
 
 				for (int index = 0; index < count; ++index)
 					{
@@ -1209,7 +1209,7 @@ void IMEManager::EndComposition(void)
 *
 ******************************************************************************/
 
-bool IMEManager::ReadCompositionString(HIMC imc, unsigned long flag, wchar_t* buffer, int length)
+bool IMEManager::ReadCompositionString(HIMC imc, unsigned int flag, unichar_t* buffer, int length)
 	{
 	if (mUseUnicode)
 		{
@@ -1220,9 +1220,9 @@ bool IMEManager::ReadCompositionString(HIMC imc, unsigned long flag, wchar_t* bu
 			buffer[0] = 0;
 			return false;
 			}
-		
+
 		// Terminate string
-		buffer[(size / sizeof(wchar_t))] = 0;
+		buffer[(size / sizeof(unichar_t))] = 0;
 		}
 	else
 		{
@@ -1240,7 +1240,7 @@ bool IMEManager::ReadCompositionString(HIMC imc, unsigned long flag, wchar_t* bu
 		string[size] = 0;
 
 		// Convert to Unicode
-		MultiByteToWideChar(mCodePage, 0, (const char*)string, -1, buffer, (length / sizeof(wchar_t)));
+		MultiByteToWideChar(mCodePage, 0, (const char*)string, -1, reinterpret_cast<wchar_t *>(buffer), (length / sizeof(unichar_t)));
 		}
 
 	return true;
@@ -1260,12 +1260,12 @@ bool IMEManager::ReadCompositionString(HIMC imc, unsigned long flag, wchar_t* bu
 *
 ******************************************************************************/
 
-long IMEManager::ReadReadingAttr(HIMC imc, unsigned char* attr, int length)
+int IMEManager::ReadReadingAttr(HIMC imc, unsigned char* attr, int length)
 	{
 	if (mUseUnicode)
 		{
 		LONG size = ImmGetCompositionStringW(imc, GCS_COMPREADATTR, attr, length);
-		return (size / sizeof(wchar_t));
+		return (size / sizeof(unichar_t));
 		}
 
 	// Read the string as multibyte ANSI
@@ -1279,7 +1279,7 @@ long IMEManager::ReadReadingAttr(HIMC imc, unsigned char* attr, int length)
 
 	// Terminate the string
 	string[size] = 0;
-		
+
 	LONG attrSize = ImmGetCompositionString(imc, GCS_COMPREADATTR, attr, length);
 	WWASSERT(size == attrSize);
 
@@ -1305,12 +1305,12 @@ long IMEManager::ReadReadingAttr(HIMC imc, unsigned char* attr, int length)
 *
 ******************************************************************************/
 
-long IMEManager::ReadReadingClause(HIMC imc, unsigned long* clause, int length)
+int IMEManager::ReadReadingClause(HIMC imc, unsigned int* clause, int length)
 	{
 	if (mUseUnicode)
 		{
 		LONG size = ImmGetCompositionStringW(imc, GCS_COMPREADCLAUSE, clause, length);
-		return (size / sizeof(wchar_t));
+		return (size / sizeof(unichar_t));
 		}
 
 	// Read the string as multibyte ANSI
@@ -1331,7 +1331,7 @@ long IMEManager::ReadReadingClause(HIMC imc, unsigned long* clause, int length)
 		{
 		return 0;
 		}
-	
+
 	return ConvertClauseForUnicode(string, size, clause);
 	}
 
@@ -1349,7 +1349,7 @@ long IMEManager::ReadReadingClause(HIMC imc, unsigned long* clause, int length)
 *
 ******************************************************************************/
 
-long IMEManager::ReadCompositionAttr(HIMC imc, unsigned char* attr, int length)
+int IMEManager::ReadCompositionAttr(HIMC imc, unsigned char* attr, int length)
 	{
 	if (mUseUnicode)
 		{
@@ -1367,7 +1367,7 @@ long IMEManager::ReadCompositionAttr(HIMC imc, unsigned char* attr, int length)
 
 	// Terminate the string
 	string[size] = 0;
-		
+
 	LONG attrSize = ImmGetCompositionString(imc, GCS_COMPATTR, attr, length);
 	WWASSERT(size == attrSize);
 
@@ -1393,7 +1393,7 @@ long IMEManager::ReadCompositionAttr(HIMC imc, unsigned char* attr, int length)
 *
 ******************************************************************************/
 
-long IMEManager::ReadCompositionClause(HIMC imc, unsigned long* clause, int length)
+int IMEManager::ReadCompositionClause(HIMC imc, unsigned int* clause, int length)
 	{
 	if (mUseUnicode)
 		{
@@ -1418,7 +1418,7 @@ long IMEManager::ReadCompositionClause(HIMC imc, unsigned long* clause, int leng
 		{
 		return 0;
 		}
-	
+
 	return ConvertClauseForUnicode(string, size, clause);
 	}
 
@@ -1437,11 +1437,11 @@ long IMEManager::ReadCompositionClause(HIMC imc, unsigned long* clause, int leng
 *
 ******************************************************************************/
 
-long IMEManager::ReadCursorPos(HIMC imc)
+int IMEManager::ReadCursorPos(HIMC imc)
 	{
 	if (mUseUnicode)
 		{
-		long cursorPos = ImmGetCompositionStringW(imc, GCS_CURSORPOS, NULL, 0);
+		int cursorPos = ImmGetCompositionStringW(imc, GCS_CURSORPOS, NULL, 0);
 		return (cursorPos & 0x0000FFFF);
 		}
 
@@ -1456,11 +1456,11 @@ long IMEManager::ReadCursorPos(HIMC imc)
 
 	string[size] = 0;
 
-	long cursorPos = ImmGetCompositionString(imc, GCS_CURSORPOS, NULL, 0);
+	int cursorPos = ImmGetCompositionString(imc, GCS_CURSORPOS, NULL, 0);
 	cursorPos = (cursorPos & 0x0000FFFF);
 
 	// Convert multibyte character position in unicode position.
-	return _mbsnccnt((unsigned char*)string, cursorPos);
+	return static_cast<long>(_mbsnccnt(reinterpret_cast<const unsigned char*>(string), cursorPos));
 	}
 
 
@@ -1479,14 +1479,14 @@ long IMEManager::ReadCursorPos(HIMC imc)
 *
 ******************************************************************************/
 
-void IMEManager::GetTargetClause(unsigned long& start, unsigned long& end)
+void IMEManager::GetTargetClause(unsigned int& start, unsigned int& end)
 	{
 	int index = 0;
-	const unsigned long compLength = wcslen(mCompositionString);
+	const size_t compLength = ::u_strlen(mCompositionString);
 
 	while (mCompositionClause[index] < compLength)
 		{
-		unsigned long offset = mCompositionClause[index];
+		unsigned int offset = mCompositionClause[index];
 
 		if (ATTR_TARGET_CONVERTED == mCompositionAttr[offset])
 			{
@@ -1518,7 +1518,7 @@ void IMEManager::GetTargetClause(unsigned long& start, unsigned long& end)
 
 bool IMEManager::GetCompositionFont(LPLOGFONT lpFont)
 	{
-	BOOL success = FALSE;
+	BOOL success = false;
 	HIMC imc = ImmGetContext(mHWND);
 
 	if (imc)
@@ -1527,7 +1527,7 @@ bool IMEManager::GetCompositionFont(LPLOGFONT lpFont)
 		ImmReleaseContext(mHWND, imc);
 		}
 
-	return (success == TRUE);
+	return (success != 0);
 	}
 
 
@@ -1544,7 +1544,7 @@ bool IMEManager::GetCompositionFont(LPLOGFONT lpFont)
 *
 ******************************************************************************/
 
-void IMEManager::OpenCandidate(unsigned long candList)
+void IMEManager::OpenCandidate(unsigned int candList)
 	{
 	WWDEBUG_SAY(("IMEManager: OpenCandidate\n"));
 
@@ -1579,7 +1579,7 @@ void IMEManager::OpenCandidate(unsigned long candList)
 *
 ******************************************************************************/
 
-void IMEManager::ChangeCandidate(unsigned long candList)
+void IMEManager::ChangeCandidate(unsigned int candList)
 	{
 	WWDEBUG_SAY(("IMEManager: ChangeCandidate\n"));
 
@@ -1595,7 +1595,7 @@ void IMEManager::ChangeCandidate(unsigned long candList)
 		}
 	}
 
-	
+
 /******************************************************************************
 *
 * NAME
@@ -1609,7 +1609,7 @@ void IMEManager::ChangeCandidate(unsigned long candList)
 *
 ******************************************************************************/
 
-void IMEManager::CloseCandidate(unsigned long candList)
+void IMEManager::CloseCandidate(unsigned int candList)
 	{
 	WWDEBUG_SAY(("IMEManager: CloseCandidate\n"));
 
@@ -1639,9 +1639,9 @@ void IMEManager::CloseCandidate(unsigned long candList)
 *
 ******************************************************************************/
 
-unsigned long IMEManager::GetGuideline(wchar_t* outString, int length)
+unsigned int IMEManager::GetGuideline(unichar_t* outString, int length)
 	{
-	unsigned long level = GL_LEVEL_NOGUIDELINE;
+	unsigned int level = GL_LEVEL_NOGUIDELINE;
 
 	HIMC imc = ImmGetContext(mHWND);
 
@@ -1653,9 +1653,9 @@ unsigned long IMEManager::GetGuideline(wchar_t* outString, int length)
 			{
 			if (mUseUnicode)
 				{
-				DWORD size = ImmGetGuideLineW(imc, GGL_STRING, outString, (length * sizeof(wchar_t)));
+				DWORD size = ImmGetGuideLineW(imc, GGL_STRING, reinterpret_cast<wchar_t *>(outString), (length * sizeof(unichar_t)));
 				WWASSERT(size <= (DWORD)length);
-				outString[size / sizeof(wchar_t)] = 0;
+				outString[size / sizeof(unichar_t)] = 0;
 				}
 			else
 				{
@@ -1663,7 +1663,7 @@ unsigned long IMEManager::GetGuideline(wchar_t* outString, int length)
 				DWORD size = ImmGetGuideLineA(imc, GGL_STRING, temp, sizeof(temp));
 				temp[size] = 0;
 
-				MultiByteToWideChar(mCodePage, 0, temp, -1, outString, length);
+				MultiByteToWideChar(mCodePage, 0, temp, -1, reinterpret_cast<wchar_t *>(outString), length);
 				outString[length] = 0;
 				}
 			}
@@ -1691,7 +1691,7 @@ unsigned long IMEManager::GetGuideline(wchar_t* outString, int length)
 
 bool IMEManager::IMECharHandler(unsigned short dbcs)
 	{
-	unsigned long mbcs = dbcs;
+	unsigned int mbcs = dbcs;
 
 	// If this char has a lead byte then it is double byte. Swap the bytes
 	// for generate string order
@@ -1701,8 +1701,8 @@ bool IMEManager::IMECharHandler(unsigned short dbcs)
 		}
 
 	// Convert char to unicode
-	wchar_t unicode = 0;
-	MultiByteToWideChar(mCodePage, 0, (const char*)&mbcs, -1, &unicode, 1);
+	unichar_t unicode = 0;
+	MultiByteToWideChar(mCodePage, 0, (const char*)&mbcs, -1, reinterpret_cast<wchar_t *>(&unicode), 1);
 
 	UnicodeChar event(unicode);
 	NotifyObservers(event);
@@ -1752,9 +1752,9 @@ bool IMEManager::CharHandler(unsigned short ch)
 		}
 
 	// Convert char to unicode.
-	unsigned long dbcs = (unsigned long)(((unsigned)msg.wParam << 8) | ch);
-	wchar_t unicode = 0;
-	MultiByteToWideChar(mCodePage, 0, (const char*)&dbcs, 2, &unicode, 1);
+	unsigned int dbcs = (unsigned int)(((unsigned)msg.wParam << 8) | ch);
+	unichar_t unicode = 0;
+	MultiByteToWideChar(mCodePage, 0, (const char*)&dbcs, 2, reinterpret_cast<wchar_t *>(&unicode), 1);
 
 	UnicodeChar event(unicode);
 	NotifyObservers(event);
@@ -1776,7 +1776,7 @@ bool IMEManager::CharHandler(unsigned short ch)
 *
 ******************************************************************************/
 
-long IMEManager::ConvertAttrForUnicode(unsigned char* mbcs, unsigned char* attr)
+int IMEManager::ConvertAttrForUnicode(unsigned char* mbcs, unsigned char* attr)
 	{
 	// Scale the attributes for unicode string length
 	unsigned char* mbsPtr = mbcs;
@@ -1806,19 +1806,19 @@ long IMEManager::ConvertAttrForUnicode(unsigned char* mbcs, unsigned char* attr)
 *
 ******************************************************************************/
 
-long IMEManager::ConvertClauseForUnicode(unsigned char* mbcs, long length, unsigned long* clause)
+int IMEManager::ConvertClauseForUnicode(unsigned char* mbcs, int length, unsigned int* clause)
 	{
 	//---------------------------------------------------------------------------
 	// Scale the clause offsets for unicode string
 	//---------------------------------------------------------------------------
 	unsigned char* mbsPtr = mbcs;
-	unsigned long offset = 0;
+	unsigned int offset = 0;
 
 	// The first clause is always zero so there is no need to adjust it.
 	int index = 1;
 
 	// The clause is terminated with the size of the string
-	while (clause[index] < (unsigned long)length)
+	while (clause[index] < (unsigned int)length)
 		{
 		// Count the number of characters in this clause
 		unsigned char* mbsStop = (mbcs + clause[index]);
@@ -1834,7 +1834,7 @@ long IMEManager::ConvertClauseForUnicode(unsigned char* mbcs, long length, unsig
 		}
 
 	// Terminate the unicode adjusted clause with the string length
-	clause[index] = _mbslen(mbcs);
+	clause[index] = static_cast<unsigned long>(_mbslen(mbcs));
 	++index;
 
 	return (&clause[index] - clause);

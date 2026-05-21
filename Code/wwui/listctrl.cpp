@@ -280,7 +280,7 @@ ListCtrlClass::Create_Text_Renderers (void)
 
 					UnderlineRenderer.Add_Line (Vector2 (tri_x_pos, tri_y_pos - tri_half_size),
 												Vector2 (tri_x_pos - tri_half_size, tri_y_pos + tri_half_size), 1.0F, color);
-					
+
 				} else {
 
 					UnderlineRenderer.Add_Line (Vector2 (tri_x_pos - tri_half_size, tri_y_pos - tri_half_size),
@@ -335,7 +335,7 @@ ListCtrlClass::Create_Text_Renderers (void)
 			//
 			//	Determine how wide this column is
 			//
-			float col_width = (ColList[index]->Get_Width () * HeaderRect.Width ());		
+			float col_width = (ColList[index]->Get_Width () * HeaderRect.Width ());
 			if (index == ColList.Count () - 1) {
 				col_width = TextRect.Right - x_pos;
 			}
@@ -394,8 +394,8 @@ ListCtrlClass::Render_Entry (const RectClass &clip_rect, int col_index, int row_
 	//	Render the icons
 	//
 	int icon_count = ColList[col_index]->Get_Icon_Count (row_index);
-	for (int index = 0; index < icon_count; index ++) {		
-		
+	for (int index = 0; index < icon_count; index ++) {
+
 		//
 		//	Render this icon
 		//
@@ -411,9 +411,9 @@ ListCtrlClass::Render_Entry (const RectClass &clip_rect, int col_index, int row_
 	//
 	//	Get the text
 	//
-	const wchar_t *text = ColList[col_index]->Get_Entry_Text (row_index);
+	const unichar_t *text = ColList[col_index]->Get_Entry_Text (row_index);
 	int text_color		= VRGB_TO_INT32 (ColList[col_index]->Get_Entry_Color (row_index));
-				
+
 	//
 	//	Render the text
 	//
@@ -430,7 +430,7 @@ ListCtrlClass::Render_Entry (const RectClass &clip_rect, int col_index, int row_
 //
 ////////////////////////////////////////////////////////////////
 void
-ListCtrlClass::On_Set_Cursor (const Vector2 &mouse_pos)
+ListCtrlClass::On_Set_Cursor (const Vector2 &/* mouse_pos */)
 {
 	if (IsSelectionAllowed) {
 		//
@@ -453,7 +453,7 @@ ListCtrlClass::Set_Sort_Designator (int col_index, SORT_TYPE type)
 {
 	SortColumn	= col_index;
 	SortType		= type;
-	
+
 	Set_Dirty ();
 	return ;
 }
@@ -485,7 +485,7 @@ ListCtrlClass::Sort_Alphabetically (int col_index, SORT_TYPE type)
 //	Default_Sort_Callback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 ListCtrlClass::Default_Sort_Callback (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param)
 {
 	//
@@ -493,20 +493,14 @@ ListCtrlClass::Default_Sort_Callback (ListCtrlClass *list_ctrl, int item_index1,
 	//
 	int	sort_col_index = LOWORD (user_param);
 	SORT_TYPE sort_type = (SORT_TYPE)HIWORD (user_param);
-		
+
 	//
 	//	Sort by name
 	//
-	const wchar_t *name1 = list_ctrl->Get_Entry_Text (item_index1, sort_col_index);
-	const wchar_t *name2 = list_ctrl->Get_Entry_Text (item_index2, sort_col_index);
+	const unichar_t *name1 = list_ctrl->Get_Entry_Text (item_index1, sort_col_index);
+	const unichar_t *name2 = list_ctrl->Get_Entry_Text (item_index2, sort_col_index);
 
-	int retval = ::CompareStringW (LOCALE_USER_DEFAULT, NORM_IGNORECASE, name1, -1, name2, -1);
-
-	if (retval == 0) {
-		retval = wcsicmp(name1, name2);
-	} else {
-		retval -= 2;
-	}
+	int retval = u_strcasecmp(name1, name2, U_COMPARE_CODE_POINT_ORDER);
 
 	//
 	//	Invert the return value if we are sorting descendingly
@@ -527,7 +521,7 @@ ListCtrlClass::Default_Sort_Callback (ListCtrlClass *list_ctrl, int item_index1,
 void
 ListCtrlClass::Update_Client_Rect (void)
 {
-	Vector2 header_size = HeaderRenderer.Get_Text_Extents (L"W");
+	Vector2 header_size = HeaderRenderer.Get_Text_Extents (U_CHAR("W"));
 
 	//
 	//	Set the client area
@@ -572,7 +566,7 @@ ListCtrlClass::Update_Client_Rect (void)
 	//
 	//	Size the scroll bar
 	//
-	ScrollBarCtrl.Set_Window_Rect (scroll_rect);	
+	ScrollBarCtrl.Set_Window_Rect (scroll_rect);
 
 	Set_Dirty ();
 	return ;
@@ -588,7 +582,7 @@ int
 ListCtrlClass::Find_Top_Of_Page (int bottom_index)
 {
 	int retval	= 0;
-	//int count	= RowInfoList.Count ();	
+	//int count	= RowInfoList.Count ();
 	float y_pos	= TextRect.Bottom;
 
 	//
@@ -606,7 +600,7 @@ ListCtrlClass::Find_Top_Of_Page (int bottom_index)
 			break;
 		}
 	}
-	
+
 	return retval;
 }
 
@@ -638,7 +632,7 @@ ListCtrlClass::Find_End_Of_Page (void)
 			break;
 		}
 	}
-	
+
 	return retval;
 }
 
@@ -655,7 +649,7 @@ ListCtrlClass::Find_Last_Page_Top_Entry (void)
 
 	float y_pos	= TextRect.Bottom;
 	int count	= RowInfoList.Count ();
-	
+
 	//
 	//	Scan backwards from the bottom entry until we've
 	// found one that extends off the top of the page.
@@ -667,7 +661,7 @@ ListCtrlClass::Find_Last_Page_Top_Entry (void)
 			break;
 		}
 	}
-	
+
 	return retval;
 }
 
@@ -786,7 +780,7 @@ ListCtrlClass::Render (void)
 
 	//
 	//	Render the background and text
-	//	
+	//
 	IconMgr.Render_Icons ();
 	TextRenderer.Render ();
 	HilightRenderer.Render ();
@@ -814,7 +808,7 @@ ListCtrlClass::Get_First_Selected (void) const
 	//
 	int entry_count = Get_Entry_Count ();
 	for (int index = 0; index < entry_count; index ++) {
-		
+
 		//
 		//	Is this entry selected?
 		//
@@ -843,7 +837,7 @@ ListCtrlClass::Get_Next_Selected (int index) const
 	//
 	int entry_count = Get_Entry_Count ();
 	for (index ++; index < entry_count; index ++) {
-		
+
 		//
 		//	Is this entry selected?
 		//
@@ -966,7 +960,7 @@ ListCtrlClass::On_LButton_Down (const Vector2 &mouse_pos)
 //
 ////////////////////////////////////////////////////////////////
 void
-ListCtrlClass::On_LButton_Up (const Vector2 &mouse_pos)
+ListCtrlClass::On_LButton_Up (const Vector2 &/* mouse_pos */)
 {
 	return ;
 }
@@ -1022,7 +1016,7 @@ ListCtrlClass::On_Kill_Focus (DialogControlClass *focus)
 //
 ////////////////////////////////////////////////////////////////
 bool
-ListCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
+ListCtrlClass::On_Key_Down (uint32 key_id, uint32 /* key_data */)
 {
 	bool handled = true;
 
@@ -1052,7 +1046,7 @@ ListCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
 
 			//
 			//	If we are at the end of the page, then
-			// scroll one page, otherwise snap to the 
+			// scroll one page, otherwise snap to the
 			// end of the page
 			//
 			if (CurrSel == end_of_page) {
@@ -1413,7 +1407,7 @@ ListCtrlClass::Reset_Icons (int index, int col_index)
 //
 ////////////////////////////////////////////////////////////////
 void
-ListCtrlClass::Add_Column (const wchar_t *column_name, float width, const Vector3 &color)
+ListCtrlClass::Add_Column (const unichar_t *column_name, float width, const Vector3 &color)
 {
 	//
 	//	Create a new column and add it to the list
@@ -1577,7 +1571,7 @@ ListCtrlClass::Delete_Entry (int index)
 //	Find_Entry
 //
 ////////////////////////////////////////////////////////////////
-int ListCtrlClass::Find_Entry(int col_index, const wchar_t* text)
+int ListCtrlClass::Find_Entry(int col_index, const unichar_t* text)
 {
 	int count = ColList.Count();
 
@@ -1586,9 +1580,9 @@ int ListCtrlClass::Find_Entry(int col_index, const wchar_t* text)
 		count = list->Get_Entry_Count();
 
 		for (int index = 0; index < count; index++) {
-			const wchar_t* entryText = list->Get_Entry_Text(index);
+			const unichar_t* entryText = list->Get_Entry_Text(index);
 
-			if (wcscmp(entryText, text) == 0) {
+			if (u_strcmp(entryText, text) == 0) {
 				return index;
 			}
 		}
@@ -1604,7 +1598,7 @@ int ListCtrlClass::Find_Entry(int col_index, const wchar_t* text)
 //
 ////////////////////////////////////////////////////////////////
 int
-ListCtrlClass::Insert_Entry (int index, const wchar_t *text)
+ListCtrlClass::Insert_Entry (int index, const unichar_t *text)
 {
 	if (ColList.Count () <= 0) {
 		return -1;
@@ -1632,7 +1626,7 @@ ListCtrlClass::Insert_Entry (int index, const wchar_t *text)
 	float green	=  ((color & 0x0000FF00) >> 8) / 256.0F;
 	float blue	=  ((color & 0x000000FF)) / 256.0F;
 	Vector3 new_color (red, green, blue);
-	
+
 	ColList[0]->Set_Entry_Color (index, new_color);
 
 	//
@@ -1640,7 +1634,7 @@ ListCtrlClass::Insert_Entry (int index, const wchar_t *text)
 	//
 	for (int col_index = 1; col_index < ColList.Count (); col_index ++) {
 		ListColumnClass *column = ColList[col_index];
-		column->Insert_Entry (index, L"");		
+		column->Insert_Entry (index, U_CHAR(""));
 		column->Set_Entry_Color (index, new_color);
 	}
 
@@ -1667,7 +1661,7 @@ void
 ListCtrlClass::Update_Row_Height (int row_index)
 {
 	int border_height		= (ROW_SPACING * StyleMgrClass::Get_Y_Scale ());
-	float height			= (TextRenderer.Get_Text_Extents (L"W").Y + border_height);
+	float height			= (TextRenderer.Get_Text_Extents (U_CHAR("W")).Y + border_height);
 
 	//
 	//	Render each column in this row
@@ -1678,7 +1672,7 @@ ListCtrlClass::Update_Row_Height (int row_index)
 		//
 		//	Determine how wide this column is
 		//
-		float col_width = (ColList[index]->Get_Width () * HeaderRect.Width ());		
+		float col_width = (ColList[index]->Get_Width () * HeaderRect.Width ());
 		if (index == ColList.Count () - 1) {
 			col_width = TextRect.Right - x_pos;
 		}
@@ -1687,11 +1681,11 @@ ListCtrlClass::Update_Row_Height (int row_index)
 		//	Set the wrapping width
 		//
 		TextRenderer.Set_Wrapping_Width (col_width);
-		
+
 		//
 		//	Calculate the height of this text
 		//
-		const wchar_t *text = ColList[index]->Get_Entry_Text (row_index);
+		const unichar_t *text = ColList[index]->Get_Entry_Text (row_index);
 		Vector2 extents = TextRenderer.Get_Formatted_Text_Extents (text);
 		height = std::max (height, extents.Y + border_height);
 
@@ -1706,7 +1700,7 @@ ListCtrlClass::Update_Row_Height (int row_index)
 	//
 	float min_height	= MinRowHeight * StyleMgrClass::Get_Y_Scale ();
 	height				= std::max (min_height, height);
-	
+
 	//
 	//	Store the row height
 	//
@@ -1789,7 +1783,7 @@ ListCtrlClass::Is_Entry_Selected (int index)
 {
 	bool retval = false;
 	if (index >= 0 && index < Get_Entry_Count ()) {
-		
+
 		//
 		//	Get the selection state of the row
 		//
@@ -1807,7 +1801,7 @@ ListCtrlClass::Is_Entry_Selected (int index)
 //
 ////////////////////////////////////////////////////////////////
 bool
-ListCtrlClass::Set_Entry_Text (int index, int col_index, const wchar_t *text)
+ListCtrlClass::Set_Entry_Text (int index, int col_index, const unichar_t *text)
 {
 	if (col_index < 0 || col_index >= ColList.Count ()) {
 		return false;
@@ -1848,7 +1842,7 @@ ListCtrlClass::Set_Entry_Int (int index, int col_index, int value)
 	//	Convert the integer to a string
 	//
 	WideStringClass number_str;
-	number_str.Format (L"%d", value);
+	number_str.Format (U_CHAR("%d"), value);
 
 	//
 	//	Change the text entry in this cell
@@ -1922,7 +1916,7 @@ ListCtrlClass::Get_Entry_Data (int index, int col_index)
 //	Get_Entry_Text
 //
 ////////////////////////////////////////////////////////////////
-const wchar_t *
+const unichar_t *
 ListCtrlClass::Get_Entry_Text (int index, int col_index)
 {
 	//
@@ -2248,7 +2242,7 @@ ListCtrlClass::Entry_From_Pos (const Vector2 &mouse_pos)
 		//
 		//	Stop searching if we've moved off the page
 		//
-		if (mouse_pos.Y >= TextRect.Bottom) {			
+		if (mouse_pos.Y >= TextRect.Bottom) {
 			break;
 		}
 	}
@@ -2264,7 +2258,7 @@ ListCtrlClass::Entry_From_Pos (const Vector2 &mouse_pos)
 ////////////////////////////////////////////////////////////////
 void
 ListCtrlClass::Scroll_Page (int direction)
-{	
+{
 	int count		= RowInfoList.Count ();
 	float height	= TextRect.Height ();
 
@@ -2278,7 +2272,7 @@ ListCtrlClass::Scroll_Page (int direction)
 	for (	index = ScrollPos;
 			index >= 0 && index < count;
 			index += direction)
-	{		
+	{
 		//
 		//	Decrement the remaining distance
 		//
@@ -2303,7 +2297,7 @@ ListCtrlClass::Scroll_Page (int direction)
 	if (index < 0 && found == false) {
 		ScrollPos = 0;
 		ScrollBarCtrl.Set_Pos (ScrollPos, false);
-		Set_Dirty ();		
+		Set_Dirty ();
 	}
 
 	return ;
@@ -2316,7 +2310,7 @@ ListCtrlClass::Scroll_Page (int direction)
 //
 ////////////////////////////////////////////////////////////////
 void
-ListCtrlClass::On_VScroll_Page (ScrollBarCtrlClass *scrollbar, int ctrl_id, int direction)
+ListCtrlClass::On_VScroll_Page (ScrollBarCtrlClass * /* scrollbar */, int /* ctrl_id */, int direction)
 {
 	Scroll_Page (direction);
 	return ;
@@ -2407,7 +2401,7 @@ ListColumnClass::Reset_Contents (void)
 //
 ////////////////////////////////////////////////////////////////
 int
-ListColumnClass::Insert_Entry (int index, const wchar_t *entry_name)
+ListColumnClass::Insert_Entry (int index, const unichar_t *entry_name)
 {
 	ListEntryClass *entry = new ListEntryClass (entry_name);
 
@@ -2462,7 +2456,7 @@ ListColumnClass::Delete_All_Entries (void)
 		delete EntryList[index];
 	}
 
-	EntryList.Delete_All ();	
+	EntryList.Delete_All ();
 	return ;
 }
 

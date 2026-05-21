@@ -53,7 +53,7 @@ class GameStartEvent
 		const UserList& GetPlayers(void) const
 			{return mPlayers;}
 
-		const unsigned long GetGameID(void) const
+		const unsigned int GetGameID(void) const
 			{return mGameID;}
 
 		bool IsSuccess(void) const
@@ -66,7 +66,7 @@ class GameStartEvent
 				mGameID(0)
 			{}
 
-		GameStartEvent(const RefPtr<ChannelData>& channel, const UserList& users, unsigned long gameID);
+		GameStartEvent(const RefPtr<ChannelData>& channel, const UserList& users, unsigned int gameID);
 		~GameStartEvent()
 			{}
 
@@ -78,7 +78,7 @@ class GameStartEvent
 		HRESULT mResult;
 		RefPtr<ChannelData> mChannel;
 		UserList mPlayers;
-		unsigned long mGameID;
+		unsigned int mGameID;
 	};
 
 
@@ -100,7 +100,7 @@ class GameStartWait :
 		const GameStartWait& operator=(const GameStartWait&);
 
 		void HandleNotification(GameStartEvent&) override;
-		void EndWait(WaitResult result, const wchar_t* endText) override;
+		void EndWait(WaitResult result, const unichar_t* endText) override;
 
 		void (*mTimeoutCallback)(void);
 		NativeWOLUserList mPlayers;

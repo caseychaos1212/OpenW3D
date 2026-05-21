@@ -59,7 +59,7 @@ namespace WWOnline {
 *
 ******************************************************************************/
 
-GameStartEvent::GameStartEvent(const RefPtr<ChannelData>& channel, const UserList& users, unsigned long gameID) :
+GameStartEvent::GameStartEvent(const RefPtr<ChannelData>& channel, const UserList& users, unsigned int gameID) :
 		mResult(S_OK),
 		mChannel(channel),
 		mGameID(gameID)
@@ -124,7 +124,7 @@ RefPtr<GameStartWait> GameStartWait::Create(const UserList& players, void(*timeo
 *     Constructor
 *
 * INPUTS
-*     Players - 
+*     Players -
 *
 * RESULT
 *     NONE
@@ -158,7 +158,7 @@ GameStartWait::GameStartWait(const UserList& players, void(*timeout_callback)(vo
 
 GameStartWait::~GameStartWait()
 	{
-	WWDEBUG_SAY(("WOL: GameStartWait End %S\n", mEndText));
+	WWDEBUG_SAY(("WOL: GameStartWait End %S\n", mEndText.Peek_Buffer()));
 	}
 
 
@@ -240,13 +240,13 @@ void GameStartWait::HandleNotification(GameStartEvent& start)
 //
 // Override base class to check for timeout
 //
-void GameStartWait::EndWait(WaitResult result, const wchar_t* endText)
+void GameStartWait::EndWait(WaitResult result, const unichar_t* endText)
 	{
 	WWDEBUG_SAY(("GameStartWait::EndWait\n"));
 
 	if (result == TimeOut && mTimeoutCallback) {
 		mTimeoutCallback();
-	}	
+	}
 
 	SingleWait::EndWait(result, endText);
 }

@@ -21,21 +21,117 @@
 #include "dx8wrapper.h"
 #include "subtitlemanager.h"
 #include "wwdebug.h"
+#ifdef W3D_HAS_OPENAL
+#include "WWAudio.h"
+#endif
 #include <chrono>
+#include <cstring>
 #include <d3d9types.h>
 
 extern "C" {
 	#include <libavcodec/avcodec.h>
 	#include <libswscale/swscale.h>
 }
+#ifdef W3D_HAS_OPENAL
+#include <AL/alext.h>
+#endif
 
-void FFMpegMovieClass::On_Frame(AVFrame *frame, int stream_idx, int stream_type)
+#ifdef W3D_HAS_OPENAL
+static ALenum Get_AL_Format(unsigned channels, unsigned bits)
+{
+	if (channels == 1 && bits == 8) {
+		return AL_FORMAT_MONO8;
+	}
+
+	if (channels == 1 && bits == 16){
+		return AL_FORMAT_MONO16;
+	}
+
+	if (channels == 1 && bits == 32) {
+		return AL_FORMAT_MONO_FLOAT32;
+	}
+
+	if (channels == 2 && bits == 8) {
+		return AL_FORMAT_STEREO8;
+	}
+
+	if (channels == 2 && bits == 16) {
+		return AL_FORMAT_STEREO16;
+	}
+
+	if (channels == 2 && bits == 32) {
+		return AL_FORMAT_STEREO_FLOAT32;
+	}
+
+	WWDEBUG_SAY(("Unknown OpenAL format: %u channels, %u bits per sample", channels, bits));
+	return AL_FORMAT_MONO8;
+}
+#endif
+
+void FFMpegMovieClass::On_Frame(AVFrame *frame, int /* stream_idx */, int stream_type)
 {
 	if (stream_type == AVMEDIA_TYPE_VIDEO) {
 		av_frame_free(&CurrentFrame);
 		CurrentFrame = av_frame_clone(frame);
 		GotFrame = true;
 	}
+#ifdef W3D_HAS_OPENAL
+	else if (stream_type == AVMEDIA_TYPE_AUDIO && ALSource != ALuint(-1)) {
+		bool cinematic_sound_on = true;
+		float cinematic_volume = 1.0F;
+		WWAudioClass *audio = WWAudioClass::Get_Instance();
+		if (audio != nullptr) {
+			cinematic_sound_on = audio->Is_Cinematic_Sound_On();
+			cinematic_volume = cinematic_sound_on ? audio->Get_Cinematic_Volume() : 0.0F;
+		}
+		alSourcef(ALSource, AL_GAIN, cinematic_volume);
+
+		ALint processed = 0;
+		alGetSourcei(ALSource, AL_BUFFERS_PROCESSED, &processed);
+		while (processed > 0) {
+			ALuint buffer = 0;
+			alSourceUnqueueBuffers(ALSource, 1, &buffer);
+			--processed;
+		}
+
+		if (!cinematic_sound_on) {
+			return;
+		}
+
+		ALint num_queued = 0;
+		alGetSourcei(ALSource, AL_BUFFERS_QUEUED, &num_queued);
+		if (num_queued >= BINK_AL_BUFFER_COUNT) {
+			WWDEBUG_SAY(("Having too many buffers already queued: %i", num_queued));
+			return;
+		}
+
+		std::vector<uint8_t> data;
+		unsigned int rate = 0;
+		unsigned int channels = 0;
+		unsigned int bits = 0;
+		if (!FFmpeg_Convert_Audio_Frame_To_PCM16(frame, data, rate, channels, bits)) {
+			return;
+		}
+
+		alBufferData(ALBuffers[ALBufferIndex], Get_AL_Format(channels, bits), data.data(), static_cast<ALsizei>(data.size()), rate);
+		if (alGetError() != AL_NO_ERROR) {
+			return;
+		}
+
+		alSourceQueueBuffers(ALSource, 1, &ALBuffers[ALBufferIndex]);
+		if (alGetError() != AL_NO_ERROR) {
+			return;
+		}
+
+		ALBufferIndex = (ALBufferIndex + 1) % BINK_AL_BUFFER_COUNT;
+
+		ALint state = AL_STOPPED;
+		alGetSourcei(ALSource, AL_SOURCE_STATE, &state);
+		if (state != AL_PLAYING) {
+			alSourcePlay(ALSource);
+		}
+	}
+#endif
 }
 
 FFMpegMovieClass::FFMpegMovieClass(const char *filename, const char *subtitlename, FontCharsClass *font) :
@@ -44,6 +140,11 @@ FFMpegMovieClass::FFMpegMovieClass(const char *filename, const char *subtitlenam
 	Bink(new FFmpegFile(filename)),
 	CurrentFrame(nullptr),
 	ScalingContext(nullptr),
+#ifdef W3D_HAS_OPENAL
+	ALSource(ALuint(-1)),
+	ALBuffers{ 0 },
+	ALBufferIndex(0),
+#endif
 	StartTime(0),
 	GotFrame(false),
 	FrameChanged(true),
@@ -63,6 +164,25 @@ FFMpegMovieClass::FFMpegMovieClass(const char *filename, const char *subtitlenam
 	Bink->Set_Frame_Callback(On_Frame);
 	Bink->Set_User_Data(this);
 
+#ifdef W3D_HAS_OPENAL
+	if (Bink->Has_Audio()) {
+		alGenBuffers(BINK_AL_BUFFER_COUNT, ALBuffers);
+		if (alGetError() != AL_NO_ERROR) {
+			std::memset(ALBuffers, 0, sizeof(ALBuffers));
+			ALSource = ALuint(-1);
+		} else {
+			alGenSources(1, &ALSource);
+			if (alGetError() != AL_NO_ERROR) {
+				alDeleteBuffers(BINK_AL_BUFFER_COUNT, ALBuffers);
+				std::memset(ALBuffers, 0, sizeof(ALBuffers));
+				ALSource = ALuint(-1);
+			} else if (WWAudioClass::Get_Instance() != nullptr) {
+				alSourcef(ALSource, AL_GAIN, WWAudioClass::Get_Instance()->Get_Cinematic_Volume());
+			}
+		}
+	}
+#endif
+
 	bool good = true;
 	// Decode until we have our first video frame
 	while (good && GotFrame == false) {
@@ -77,7 +197,7 @@ FFMpegMovieClass::FFMpegMovieClass(const char *filename, const char *subtitlenam
 	}
 
 	unsigned poweroftwoheight = 1;
-	
+
 	while (poweroftwoheight < static_cast<unsigned>(Bink->Get_Height())) {
 		poweroftwoheight <<= 1;
 	}
@@ -85,7 +205,7 @@ FFMpegMovieClass::FFMpegMovieClass(const char *filename, const char *subtitlenam
 	if (poweroftwowidth > dx8caps.MaxTextureWidth) {
 		poweroftwowidth = dx8caps.MaxTextureWidth;
 	}
-	
+
 	if (poweroftwoheight > dx8caps.MaxTextureHeight) {
 		poweroftwoheight = dx8caps.MaxTextureHeight;
 	}
@@ -102,7 +222,7 @@ FFMpegMovieClass::FFMpegMovieClass(const char *filename, const char *subtitlenam
 
 	TextureInfos.resize(TextureCount);
 	unsigned cnt = 0;
-	
+
 	for (y = 0; y < Bink->Get_Height(); y += max_height-1) {
 		for (x = 0; x < Bink->Get_Width(); x += max_width-1) {
 			TextureInfos[cnt].Texture = new TextureClass(
@@ -144,6 +264,13 @@ FFMpegMovieClass::FFMpegMovieClass(const char *filename, const char *subtitlenam
 	// Calculate the time per frame of video
 	unsigned rate = Bink->Get_Frame_Time();
 	TicksPerFrame = (60 / rate);
+
+#ifdef W3D_HAS_OPENAL
+	if (ALSource != ALuint(-1)) {
+		alSourcePlay(ALSource);
+	}
+#endif
+
 	StartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
 	if (subtitlename && font) {
@@ -162,6 +289,22 @@ FFMpegMovieClass::~FFMpegMovieClass()
 			REF_PTR_RELEASE(TextureInfos[t].Texture);
 		}
 	}
+	
+#ifdef W3D_HAS_OPENAL
+	if (ALSource != ALuint(-1)) {
+		alSourceStop(ALSource);
+		ALint queued = 0;
+		alGetSourcei(ALSource, AL_BUFFERS_QUEUED, &queued);
+		while (queued > 0) {
+			ALuint buffer = 0;
+			alSourceUnqueueBuffers(ALSource, 1, &buffer);
+			--queued;
+		}
+		alSourcei(ALSource, AL_BUFFER, AL_NONE);
+		alDeleteSources(1, &ALSource);
+		alDeleteBuffers(BINK_AL_BUFFER_COUNT, ALBuffers);
+	}
+#endif
 }
 
 void FFMpegMovieClass::Update()
@@ -176,17 +319,13 @@ void FFMpegMovieClass::Update()
 	}
 }
 
-void FFMpegMovieClass::Render() 
+void FFMpegMovieClass::Render()
 {
 	if (Bink == nullptr) {
 		return;
 	}
 
 	if (CurrentFrame == nullptr) {
-		return;
-	}
-
-	if (CurrentFrame->data == nullptr) {
 		return;
 	}
 
@@ -249,12 +388,12 @@ void FFMpegMovieClass::Render()
 				rect.right = w;
 				rect.bottom = h;
 				DX8_ErrorCode(d3d_texture->LockRect(0,&locked_rect,&rect,0));
-				
+
 				int dst_strides[] = { locked_rect.Pitch };
 				uint8_t *dst_data[] = { static_cast<uint8_t *>(locked_rect.pBits) };
 				[[maybe_unused]] int result =
 					sws_scale(ScalingContext, CurrentFrame->data, CurrentFrame->linesize, 0, h, dst_data, dst_strides);
-				
+
 				WWASSERT_PRINT(result > 0, ("Failed to scale frame"));
 				DX8_ErrorCode(d3d_texture->UnlockRect(0));
 			}
@@ -286,7 +425,7 @@ void FFMpegMovieClass::Render()
 }
 
 bool FFMpegMovieClass::Is_Complete()
-{ 
+{
 	if (Bink == nullptr) {
 		return true;
 	}

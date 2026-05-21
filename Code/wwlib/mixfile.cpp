@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/wwlib/mixfile.cpp                            $* 
- *                                                                                             * 
- *                      $Author:: Patrick                                                     $* 
- *                                                                                             * 
- *                     $Modtime:: 9/12/01 7:39p                                               $* 
- *                                                                                             * 
- *                    $Revision:: 4                                                           $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/wwlib/mixfile.cpp                            $*
+ *                                                                                             *
+ *                      $Author:: Patrick                                                     $*
+ *                                                                                             *
+ *                     $Modtime:: 9/12/01 7:39p                                               $*
+ *                                                                                             *
+ *                    $Revision:: 4                                                           $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "mixfile.h"
@@ -40,6 +40,7 @@
 #include "wwfile.h"
 #include "realcrc.h"
 #include "rawfile.h"
+#include "pathutil.h"
 #include "win.h"
 #include "bittype.h"
 
@@ -49,21 +50,21 @@
 typedef struct
 {
 	char	signature[4];
-	long	header_offset;
-	long	names_offset;
+	int	header_offset;
+	int	names_offset;
 
 } MIXFILE_HEADER;
 
 typedef struct
 {
-	long	file_count;
+	int	file_count;
 
 } MIXFILE_DATA_HEADER;
 
 
 /*
 **
-*/					
+*/
 MixFileFactoryClass::MixFileFactoryClass( const char * mix_filename, FileFactoryClass * factory )	:
 	FileCount (0),
 	NamesOffset (0),
@@ -109,7 +110,7 @@ MixFileFactoryClass::MixFileFactoryClass( const char * mix_filename, FileFactory
 			file->Seek( header.header_offset, SEEK_SET );
 			IsValid = ( file->Read( &FileCount, sizeof( FileCount ) ) == sizeof( FileCount ) );
 		}
-		
+
 		//
 		//	Read the array of data headers
 		//
@@ -125,10 +126,10 @@ MixFileFactoryClass::MixFileFactoryClass( const char * mix_filename, FileFactory
 		if ( IsValid ) {
 			BaseOffset	= 0;
 			NamesOffset	= header.names_offset;
-			WWDEBUG_SAY(( "MixFileFactory( %s ) loaded successfully  %d files\n", MixFilename, FileInfo.Length() ));
+			WWDEBUG_SAY(( "MixFileFactory( %s ) loaded successfully  %d files\n", MixFilename.Peek_Buffer(), FileInfo.Length() ));
 		} else {
 			FileInfo.Resize(0);
-		}	
+		}
 
 		factory->Return_File( file );
 
@@ -161,7 +162,7 @@ bool	MixFileFactoryClass::Build_Filename_List (DynamicVectorClass<StringClass> &
 		//
 		file->Seek (NamesOffset, SEEK_SET);
 		retval = true;
-		
+
 		//
 		//	Read the count of files
 		//
@@ -174,19 +175,19 @@ bool	MixFileFactoryClass::Build_Filename_List (DynamicVectorClass<StringClass> &
 			bool keep_going = true;
 			for (int index = 0; index < file_count && keep_going; index ++) {
 				keep_going = false;
-				
+
 				//
 				//	Get the length of the filename
 				//
 				uint8 name_len = 0;
 				if (file->Read( &name_len, sizeof( name_len ) ) == sizeof( name_len )) {
-					
+
 					//
 					//	Read the filename
 					//
 					StringClass filename;
 					if (file->Read( filename.Get_Buffer( name_len ), name_len ) == name_len ) {
-						
+
 						//
 						//	Add the filename to our list
 						//
@@ -216,7 +217,7 @@ FileClass * MixFileFactoryClass::Get_File( char const *filename )
 	RawFileClass *file = NULL;
 
 	//	Create the key block that will be used to binary search for the file.
-	unsigned long crc = CRC_Stringi( filename );
+	unsigned int crc = CRC_Stringi( filename );
 
 	//	Binary search for the file in this mixfile. If it is found, then create the file
 	FileInfoStruct * info = NULL;
@@ -235,7 +236,7 @@ FileClass * MixFileFactoryClass::Get_File( char const *filename )
 		   base = tryptr + 1;
 			stride -= pivot + 1;
 		}
-	}		
+	}
 
 	if ( info != NULL) {
 //		WWDEBUG_SAY(( "MixFileFactoryClass::Get_File( %s ) FOUND\n", filename ));
@@ -370,7 +371,7 @@ MixFileFactoryClass::Flush_Changes (void)
 	//
 	//	Reset the lists
 	//
-	IsModified = false;	
+	IsModified = false;
 	PendingAddFileList.Delete_All ();
 	return ;
 }
@@ -386,13 +387,13 @@ MixFileFactoryClass::Get_Temp_Filename (const char *path, StringClass &full_path
 
 	StringClass temp_path	= path;
 	temp_path					+= "_tmpmix";
-	
+
 	//
 	//	Try to find a unique temp filename
 	//
 	for (int index = 0; index < 20; index ++) {
 		full_path.Format ("%s%.2d.dat", (const char *)temp_path, index + 1);
-		if (GetFileAttributesA (full_path) == 0xFFFFFFFF) {
+		if (!cPathUtil::PathExists (full_path)) {
 			retval = true;
 			break;
 		}
@@ -415,16 +416,16 @@ MixFileCreator::MixFileCreator( const char * filename )
 	if ( MixFile != NULL ) {
 		MixFile->Open( FileClass::WRITE );
 		MixFile->Write( "MIX1", 4 );
-		long	header_offset = 0;
+		int	header_offset = 0;
 		MixFile->Write( &header_offset, sizeof( header_offset ) );
-		long	names_offset = 0;
+		int	names_offset = 0;
 		MixFile->Write( &names_offset, sizeof( names_offset ) );
-		long	unused = 0;
+		int	unused = 0;
 		MixFile->Write( &unused, sizeof( unused ) );
 	}
 }
 
-int MixFileCreator::File_Info_Compare(const void * a, const void * b) 
+int MixFileCreator::File_Info_Compare(const void * a, const void * b)
 {
 	unsigned int CRCA = ((FileInfoStruct*)a)->CRC;
 	unsigned int CRCB = ((FileInfoStruct*)b)->CRC;
@@ -469,11 +470,11 @@ MixFileCreator::~MixFileCreator( void )
 		// Save file info
 		for ( i = 0; i < num_files; i++ ) {
 			const char * filename = FileInfo[i].Filename;
-			int size = FileInfo[i].Filename.Get_Length()+1;
+			size_t size = FileInfo[i].Filename.Get_Length()+1;
 			WWASSERT( size < 255 );
-			unsigned char csize = size;
+			unsigned char csize = static_cast<unsigned char>(size);
 			MixFile->Write( &csize, 1 );
-			MixFile->Write( filename, size );
+			MixFile->Write(filename, static_cast<int>(size));
 		}
 
 		// ---------------------------------------
@@ -596,12 +597,12 @@ void	MixFileCreator::Add_File( const char * filename, FileClass *file )
 */
 void	Add_Files( const char * dir, MixFileCreator & mix )
 {
-	BOOL bcontinue = TRUE;
+	BOOL bcontinue = true;
 	HANDLE hfile_find;
 	WIN32_FIND_DATAA find_info = {0};
 	StringClass path;
-	path.Format( "data\\makemix\\%s*.*", dir );
-	WWDEBUG_SAY(( "Adding files from %s\n", path ));
+	path.Format( "data/makemix/%s*.*", dir );
+	WWDEBUG_SAY(( "Adding files from %s\n", path.Peek_Buffer() ));
 
 	for (hfile_find = ::FindFirstFileA( path, &find_info);
 		 (hfile_find != INVALID_HANDLE_VALUE) && bcontinue;
@@ -609,14 +610,14 @@ void	Add_Files( const char * dir, MixFileCreator & mix )
 		if ( find_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) {
 			if ( find_info.cFileName[0] != '.' ) {
 				StringClass	path;
-				path.Format( "%s%s\\", dir, find_info.cFileName );
+				path.Format( "%s%s/", dir, find_info.cFileName );
 				Add_Files( path, mix );
 			}
 		} else {
 			StringClass name;
 			name.Format( "%s%s", dir, find_info.cFileName );
 			StringClass	source;
-			source.Format( "makemix\\%s", name );
+			source.Format( "makemix/%s", name.Peek_Buffer() );
 			mix.Add_File( source, name );
 //			WWDEBUG_SAY(( "Adding file from %s %s\n", source, name ));
 		}
@@ -625,7 +626,7 @@ void	Add_Files( const char * dir, MixFileCreator & mix )
 
 void	Setup_Mix_File( void )
 {
-	_SimpleFileFactory.Set_Sub_Directory( "DATA\\" );
+	_SimpleFileFactory.Set_Sub_Directory( "DATA/" );
 //	_SimpleFileFactory.Set_Strip_Path( true );
 
 	WWDEBUG_SAY(( "Mix File Create .....\n" ));

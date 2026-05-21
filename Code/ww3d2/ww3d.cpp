@@ -185,9 +185,9 @@ bool														WW3D::PauseRecord;
 bool														WW3D::RecordNextFrame;
 
 int														WW3D::FrameCount = 0;
-long														WW3D::UserStat0 = 0;
-long														WW3D::UserStat1 = 0;
-long														WW3D::UserStat2 = 0;
+int														WW3D::UserStat0 = 0;
+int														WW3D::UserStat1 = 0;
+int														WW3D::UserStat2 = 0;
 
 float														WW3D::DefaultNativeScreenSize = 1.0f;
 
@@ -256,7 +256,7 @@ void WW3D::Set_NPatches_Level(unsigned level)
  * HISTORY:                                                                                    *
  *   3/24/98    GTH : Created.                                                                 *
  *=============================================================================================*/
-WW3DErrorType WW3D::Init(void *hwnd, char *defaultpal, bool lite)
+WW3DErrorType WW3D::Init(void *hwnd, char * /*defaultpal*/, bool lite)
 {
 	assert(IsInitted == false);
 	WWDEBUG_SAY(("WW3D::Init hwnd = %p\n",hwnd));
@@ -274,7 +274,7 @@ WW3DErrorType WW3D::Init(void *hwnd, char *defaultpal, bool lite)
 	WWDEBUG_SAY(("Allocate Debug Resources\n"));
 	Allocate_Debug_Resources();
 
- 	MMRESULT r=timeBeginPeriod(1);
+ 	[[maybe_unused]] MMRESULT r=timeBeginPeriod(1);
 	WWASSERT(r==TIMERR_NOERROR);
 
 	/*
@@ -1152,7 +1152,7 @@ void WW3D::Sync(unsigned int sync_time)
  * HISTORY:                                                                                    *
  *   5/07/98    NH : Created.                                                                  *
  *=============================================================================================*/
-void WW3D::Set_Ext_Swap_Interval(long swap)
+void WW3D::Set_Ext_Swap_Interval(int swap)
 {
 	DX8Wrapper::Set_Swap_Interval(swap);
 }
@@ -1170,7 +1170,7 @@ void WW3D::Set_Ext_Swap_Interval(long swap)
  * HISTORY:                                                                                    *
  *   5/07/98    NH : Created.                                                                  *
  *=============================================================================================*/
-long WW3D::Get_Ext_Swap_Interval(void)
+int WW3D::Get_Ext_Swap_Interval(void)
 {
 	return DX8Wrapper::Get_Swap_Interval();
 }

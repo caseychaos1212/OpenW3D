@@ -108,7 +108,7 @@ void ProjectorManagerClass::Init(const ProjectorManagerDefClass & def,RenderObjC
 	}
 
 	if (def.IsEnabled) {
-		
+
 		/*
 		** Create the projector
 		*/
@@ -162,7 +162,7 @@ void ProjectorManagerClass::Init(const ProjectorManagerDefClass & def,RenderObjC
 		** If it is not animated, add it as a static projector (for more efficient culling)
 		*/
 		if (Projector != NULL) {
-			
+
 			/*
 			** Find the bone
 			*/
@@ -173,7 +173,7 @@ void ProjectorManagerClass::Init(const ProjectorManagerDefClass & def,RenderObjC
 			Projector->Set_Transform(model->Get_Bone_Transform(ProjectorBoneIndex));
 
 			Set_Flag(IS_ANIMATED,(def.IsAnimated) && (ProjectorBoneIndex != 0));
-			
+
 			if (Get_Flag(IS_ANIMATED)) {
 				if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
 					world->Add_Dynamic_Texture_Projector(Projector);
@@ -204,10 +204,10 @@ void ProjectorManagerClass::Update_From_Model(RenderObjClass * model)
 **
 ********************************************************************************************/
 
-enum 
+enum
 {
 	PROJECTORMANAGERDEF_CHUNK_VARIABLES							= 0x01110004,
-	
+
 	PROJECTORMANAGERDEF_VARIABLE_ISENABLED						= 0x00,
 	PROJECTORMANAGERDEF_VARIABLE_ISPERSPECTIVE,
 	PROJECTORMANAGERDEF_VARIABLE_ISADDITIVE,
@@ -300,7 +300,7 @@ bool ProjectorManagerDefClass::Load(ChunkLoadClass &cload)
 						READ_MICRO_CHUNK_WWSTRING(cload,PROJECTORMANAGERDEF_VARIABLE_BONENAME,BoneName);
 						READ_MICRO_CHUNK(cload,PROJECTORMANAGERDEF_VARIABLE_INTENSITY,Intensity);
 					}
-					cload.Close_Micro_Chunk();	
+					cload.Close_Micro_Chunk();
 				}
 				break;
 

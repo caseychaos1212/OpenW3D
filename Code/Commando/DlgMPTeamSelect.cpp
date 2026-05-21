@@ -35,6 +35,7 @@
 ******************************************************************************/
 
 #include "DlgMPTeamSelect.h"
+#include "renegadedialog.h"
 #include "wolgmode.h"
 #include "gamedata.h"
 #include "WOLGameInfo.h"
@@ -46,7 +47,6 @@
 #include <wwui/listctrl.h>
 #include <wwui/comboboxctrl.h>
 #include <wwui/imagectrl.h>
-#include "resource.h"
 #include "string_ids.h"
 #include <wwtranslatedb/translatedb.h>
 #include "modpackagemgr.h"
@@ -79,7 +79,7 @@ typedef void (*GameOptionsDispatchFunc)(DlgMPTeamSelect&, const char*);
 #define PARSE_STRING(s, d, v) {v = strtok(s, d);}
 
 
-static int CALLBACK ListSortCallback(ListCtrlClass* list, int index1, int index2, uint32 param)
+static int ListSortCallback(ListCtrlClass* list, int index1, int index2, uint32 /* param */)
 	{
 	int rank1 = (int)list->Get_Entry_Data(index1, COL_RANK);
 	int rank2 = (int)list->Get_Entry_Data(index2, COL_RANK);
@@ -137,7 +137,7 @@ void DlgMPTeamSelect::DoDialog(Signaler<MPChooseTeamSignal>& target)
 ******************************************************************************/
 
 DlgMPTeamSelect::DlgMPTeamSelect(void) :
-		MenuDialogClass(IDD_MP_TEAM_SELECT),
+		MenuDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MP_TEAM_SELECT)),
 		mWOLGame(true),
 		mCanChoose(true),
 		mTimeRemaining(0.0f)
@@ -297,7 +297,7 @@ void DlgMPTeamSelect::On_Init_Dialog(void)
 #endif
 
 		list->Add_Column(TRANSLATE (IDS_MENU_KD_RATIO),   0.15F, Vector3(1, 1, 1));
-		list->Add_Column(TRANSLATE (IDS_MENU_SCORE), 0.20F, Vector3(1, 1, 1));		
+		list->Add_Column(TRANSLATE (IDS_MENU_SCORE), 0.20F, Vector3(1, 1, 1));
 		}
 
 	int sidePref = -1;
@@ -309,16 +309,16 @@ void DlgMPTeamSelect::On_Init_Dialog(void)
 			{
 			const RefPtr<LoginInfo>& login = mWOLSession->GetCurrentLogin();
 			WWASSERT(login.IsValid());
-		
+
 			LoginProfile* profile = LoginProfile::Get(login->GetNickname());
-	
+
 			if (profile)
 				{
 				sidePref = profile->GetSidePreference();
 				profile->Release_Ref();
 				}
 			}
-	
+
 		// The start button is disabled until we hear from the host.
 		Enable_Dlg_Item(IDC_STARTGAME, false);
 
@@ -393,7 +393,7 @@ void DlgMPTeamSelect::On_Frame_Update(void)
 *
 ******************************************************************************/
 
-void DlgMPTeamSelect::On_Command(int ctrlID, int message, DWORD param)
+void DlgMPTeamSelect::On_Command(int ctrlID, int message, unsigned int param)
 	{
 	switch (ctrlID)
 		{
@@ -485,7 +485,7 @@ void DlgMPTeamSelect::InitSideChoice(int sidePref)
 * DESCRIPTION
 *
 * INPUTS
-*     Side - 
+*     Side -
 *
 * RESULT
 *     NONE
@@ -508,7 +508,7 @@ void DlgMPTeamSelect::SelectSideChoice(int side)
 * DESCRIPTION
 *
 * INPUTS
-*     Side - 
+*     Side -
 *
 * RESULT
 *     NONE
@@ -586,11 +586,11 @@ void DlgMPTeamSelect::ShowTimeRemaining(float remainingSeconds)
 	cMiscUtil::Seconds_To_Hms(remainingSeconds, hours, mins, seconds);
 
 	WideStringClass timeString(0, true);
-	timeString.Format(L"%02d:%02d:%02d", hours, mins, seconds);
-	
+	timeString.Format(U_CHAR("%02d:%02d:%02d"), hours, mins, seconds);
+
 	WideStringClass text(0, true);
-	text.Format(L"%s: %s", TRANSLATION(IDS_MP_TIME_REMAINING), (const wchar_t*)timeString);
-	Set_Dlg_Item_Text(IDC_TIME_REMAINING_TEXT, (const wchar_t*)text);
+	text.Format(U_CHAR("%s: %s"), TRANSLATION(IDS_MP_TIME_REMAINING), (const unichar_t*)timeString);
+	Set_Dlg_Item_Text(IDC_TIME_REMAINING_TEXT, (const unichar_t*)text);
 	}
 
 
@@ -612,7 +612,7 @@ void DlgMPTeamSelect::ShowTimeRemaining(float remainingSeconds)
 *
 ******************************************************************************/
 
-bool DlgMPTeamSelect::FindPlayerInListCtrl(const wchar_t* name, ListCtrlClass*& outList, int& outIndex)
+bool DlgMPTeamSelect::FindPlayerInListCtrl(const unichar_t* name, ListCtrlClass*& outList, int& outIndex)
 	{
 	// Check in GDI player list
 	ListCtrlClass* list = (ListCtrlClass*)Get_Dlg_Item(IDC_GDI_LIST_CTRL);
@@ -657,7 +657,7 @@ bool DlgMPTeamSelect::FindPlayerInListCtrl(const wchar_t* name, ListCtrlClass*& 
 *     Handle channel events that occur while the user is deceiding on the team.
 *
 * INPUTS
-*     ChannelEvent - 
+*     ChannelEvent -
 *
 * RESULT
 *     NONE
@@ -760,7 +760,7 @@ void DlgMPTeamSelect::HandleNotification(UserEvent& userEvent)
 *     Handle game options messages that come in from the server.
 *
 * INPUTS
-*     GameOpts - 
+*     GameOpts -
 *
 * RESULT
 *     NONE
@@ -842,12 +842,12 @@ void DlgMPTeamSelect::ProcessWOLGameInfo(DlgMPTeamSelect& dialog, const char* da
 		strncpy(info, data, 255);
 
 		// Get players name
-		unsigned long mapCRC = 0;
+		unsigned int mapCRC = 0;
 		PARSE_HEXDWORD(info, " ", mapCRC);
 
 		StringClass mapname(64, true);
 		ModPackageMgrClass::Find_Filename_From_CRC ("*.mix", mapCRC, &mapname);
-		
+
 		WideStringClass text(255, true);
 		text.Format(TRANSLATE (IDS_MENU_MAP_NAME_FORMAT), (const char*)mapname);
 		dialog.Set_Dlg_Item_Text(IDC_MAPNAME_TEXT, text);
@@ -979,10 +979,10 @@ void DlgMPTeamSelect::ProcessWOLPlayerInfo(DlgMPTeamSelect& dialog, const char* 
 			playerName = name;
 
 			int itemIndex = list->Find_Entry(COL_NAME, playerName);
-			
+
 			if (itemIndex == -1)
 				{
-				itemIndex = list->Insert_Entry(list->Get_Entry_Count(), L"");
+				itemIndex = list->Insert_Entry(list->Get_Entry_Count(), U_CHAR(""));
 				}
 
 			if (itemIndex != -1)
@@ -1006,8 +1006,8 @@ void DlgMPTeamSelect::ProcessWOLPlayerInfo(DlgMPTeamSelect& dialog, const char* 
 						}
 					}
 #endif
-				
-				text.Format(L"%d/%d", kills, deaths);
+
+				text.Format(U_CHAR("%d/%d"), kills, deaths);
 				list->Set_Entry_Text(itemIndex, COL_KD, text);
 
 				list->Set_Entry_Int(itemIndex, COL_RANK, rung);
@@ -1099,14 +1099,14 @@ void DlgMPTeamSelect::AddLANPlayerInfo(cPlayer* player)
 	{
 	WWASSERT(player != NULL);
 	RemoveLANPlayerInfo(player);
-	
+
 	int playerType = player->Get_Player_Type();
 	int listID = ((playerType == PLAYERTYPE_GDI) ? IDC_GDI_LIST_CTRL : IDC_NOD_LIST_CTRL);
 
 	ListCtrlClass* list = (ListCtrlClass*)Get_Dlg_Item(listID);
 	WWASSERT(list != NULL);
 
-	int itemIndex = list->Insert_Entry(list->Get_Entry_Count(), L"");
+	int itemIndex = list->Insert_Entry(list->Get_Entry_Count(), U_CHAR(""));
 
 	if (itemIndex >= 0)
 		{
@@ -1115,7 +1115,7 @@ void DlgMPTeamSelect::AddLANPlayerInfo(cPlayer* player)
 		list->Set_Entry_Int(itemIndex, COL_SCORE, player->Get_Score());
 
 		WideStringClass text(0, true);
-		text.Format(L"%d/%d", player->Get_Kills(), player->Get_Deaths());
+		text.Format(U_CHAR("%d/%d"), player->Get_Kills(), player->Get_Deaths());
 		list->Set_Entry_Text(itemIndex, COL_KD, text);
 
 		// If this is the player client the mark there name with a star

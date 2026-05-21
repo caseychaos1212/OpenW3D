@@ -45,8 +45,9 @@
 #include "ww3d.h"
 #include "Utils.h"
 #include "filemgr.h"
+#include "pathutil.h"
 #include "rawfile.h"
-#include "rcfile.h"
+#include "wrcfile.h"
 #include "filelocations.h"
 #include "editorbuild.h"
 #include "assetdatabase.h"
@@ -80,7 +81,7 @@ EditorAssetMgrClass::Reload_File (const char *filename)
 {
 	// Param OK?
 	ASSERT (filename != NULL);
-	if (filename != NULL) {		
+	if (filename != NULL) {
 		CString extension = ::strrchr (filename, '.');
 
 		// Is this a W3D file?
@@ -137,7 +138,7 @@ EditorAssetMgrClass::Determine_Real_Location
 	//
 	if (Is_Full_Path (path)) {
 		::lstrcpy (full_path, path);
-	} else {		
+	} else {
 
 		//
 		//	Make a full path out of the filename
@@ -147,19 +148,19 @@ EditorAssetMgrClass::Determine_Real_Location
 		//
 		//	If the file doesn't exist here, then try the search paths
 		//
-		if (::GetFileAttributes (test_path) == 0xFFFFFFFF) {
-		
+		if (!::cPathUtil::PathExists (test_path)) {
+
 			//
 			//	Try to find the file in our search path list
 			//
 			DynamicVectorClass<StringClass> &path_list = EditorFileFactoryClass::Get_Search_Path ();
 			for (int index = 0; index < path_list.Count (); index ++) {
-				
+
 				//
 				//	Does the file exist in this directoy?
 				//
 				StringClass full_path = static_cast<const char *>(Make_Path (path_list[index], path));
-				if (::GetFileAttributes (full_path) != 0xFFFFFFFF) {
+				if (cPathUtil::PathExists (full_path)) {
 					test_path = full_path;
 					break;
 				}
@@ -172,8 +173,8 @@ EditorAssetMgrClass::Determine_Real_Location
 	//
 	// Find out if the file lives in the directory
 	//
-	if (Is_File_Here (full_path, true) == false) {			
-		
+	if (Is_File_Here (full_path, true) == false) {
+
 		//
 		// Hmmm... not here, try up a directory level
 		//
@@ -185,7 +186,7 @@ EditorAssetMgrClass::Determine_Real_Location
 		//	Does the file live in the parent directory?
 		//
 		if (Is_File_Here (parent_dir, true) == false) {
-			
+
 			//
 			//	Is this a texture file?
 			//
@@ -199,13 +200,13 @@ EditorAssetMgrClass::Determine_Real_Location
 				CString texture_path = ::Make_Path (GLOBAL_TEXTURE_PATH, filename);
 				if (Is_File_Here (texture_path, false)) {
 					real_location = texture_path;
-					retval = true;					
+					retval = true;
 				}
 
 #endif //!PUBLIC_EDITOR_VER
 
 			} else if (::strnicmp ("h_a_", filename, 4) == 0) {
-				
+
 				//
 				//	We are 'assuming' this is a human animation file, so
 				// try to find it in the human animation directory.
@@ -213,7 +214,7 @@ EditorAssetMgrClass::Determine_Real_Location
 				CString anim_path  = ::Make_Path (CHAR_ANIMS_PATH, filename);
 				if (Is_File_Here (anim_path, true)) {
 					real_location = anim_path;
-					retval = true;					
+					retval = true;
 				}
 			}
 
@@ -228,7 +229,7 @@ EditorAssetMgrClass::Determine_Real_Location
 	}
 
 #ifdef PUBLIC_EDITOR_VER
-	
+
 	//
 	//	If the file does not exist locally, then use the one from the mix file
 	//
@@ -310,7 +311,7 @@ EditorAssetMgrClass::Get_HAnim (const char * name)
 	HAnimClass *panim = HAnimManager.Get_Anim(name);
 
 	if (WW3D_Load_On_Demand && panim == NULL) {	// If we didn't find it, try to load on demand
-		
+
 		char filename[ MAX_PATH ];
 		const char *animname = strchr( name, '.');
 		if (animname != NULL) {
@@ -354,7 +355,7 @@ EditorAssetMgrClass::Get_HTree (const char * name)
 	HTreeClass *phtree = HTreeManager.Get_Tree(name);
 
 	if (WW3D_Load_On_Demand && phtree == NULL) {	// If we didn't find it, try to load on demand
-		
+
 		char filename[ MAX_PATH ];
 		sprintf( filename, "%s.W3D", name);
 
@@ -486,7 +487,7 @@ EditorAssetMgrClass::Load_Resource_Texture (const char *filename)
 	//	Open the resource texture and create the
 	// real file.
 	//
-	ResourceFileClass res_texture (NULL, filename);
+	WinResourceFileClass res_texture (filename);
 	RawFileClass texture_file (texture_filename);
 	if (texture_file.Create () == 1) {
 		texture_file.Open (FileClass::WRITE);
@@ -526,13 +527,13 @@ EditorAssetMgrClass::Load_Resource_Texture (const char *filename)
 ////////////////////////////////////////////////////////////////////////
 bool
 EditorAssetMgrClass::Load_3D_Assets (const char *path)
-{	
-	bool retval = true;	
-	
+{
+	bool retval = true;
+
 	//
 	//	Check to see if the asset is already in the asset manager
 	//
-	CString filename				= ::Get_Filename_From_Path (path); 
+	CString filename				= ::Get_Filename_From_Path (path);
 	CString asset_name			= ::Asset_Name_From_Filename (filename);
 	PrototypeClass *prototype	= Find_Prototype (asset_name);
 
@@ -540,11 +541,11 @@ EditorAssetMgrClass::Load_3D_Assets (const char *path)
 	//	Load the asset fresh if necessary
 	//
 	if (prototype == NULL) {
-		CString full_path	= ::Get_File_Mgr ()->Make_Full_Path (path);		
+		CString full_path	= ::Get_File_Mgr ()->Make_Full_Path (path);
 		retval = false;
 
 #ifdef PUBLIC_EDITOR_VER
-	
+
 		//
 		//	If the file exists locally, or its coming from the mix file
 		// then load it.
@@ -585,7 +586,7 @@ EditorFileFactoryClass::Get_File (char const *filename)
 	//	If the filename contains a relative path, then
 	// turn it into an absolute path.
 	//
-	if (::Is_Path (filename)) {		
+	if (::Is_Path (filename)) {
 		path = ::Get_File_Mgr ()->Make_Full_Path (filename);
 	} else {
 
@@ -598,18 +599,18 @@ EditorFileFactoryClass::Get_File (char const *filename)
 		//
 		//	If the file doesn't exist here, then try the search paths
 		//
-		if (::GetFileAttributes (path) == 0xFFFFFFFF) {
-		
+		if (!cPathUtil::PathExists (path)) {
+
 			//
 			//	Try to find the file in our search path list
 			//
 			for (int index = 0; index < SearchPathList.Count (); index ++) {
-				
+
 				//
 				//	Does the file exist in this directoy?
 				//
 				StringClass full_path = static_cast<const char *>(Make_Path (SearchPathList[index], filename));
-				if (::GetFileAttributes (full_path) != 0xFFFFFFFF) {
+				if (cPathUtil::PathExists (full_path)) {
 					path = full_path;
 					break;
 				}

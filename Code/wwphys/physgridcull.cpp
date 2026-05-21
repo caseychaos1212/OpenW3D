@@ -65,7 +65,7 @@ const float		MIN_PHYSGRID_CELL_DIMENSION = 60.0f;
 /*
 ** Persist save/load system
 */
-enum 
+enum
 {
 	PHYSGRID_CHUNK_VARIABLES				= 0x00770001,	// variables wrapper, contains micro-chunks
 	PHYSGRID_CHUNK_PARENT_CLASS			= 0x00770104	// wraps the parent class's save data
@@ -91,7 +91,7 @@ PhysGridCullClass::~PhysGridCullClass(void)
 void PhysGridCullClass::Re_Partition(const Vector3 & min,const Vector3 & max,float objdim)
 {
 	/*
-	** I want very coarse culling for this grid so force some of the constants.  
+	** I want very coarse culling for this grid so force some of the constants.
 	*/
 	TerminationCellCount = MAX_PHYSGRID_CELLS;
 	MinCellSize.Set(MIN_PHYSGRID_CELL_DIMENSION,MIN_PHYSGRID_CELL_DIMENSION,MIN_PHYSGRID_CELL_DIMENSION);
@@ -109,9 +109,9 @@ void PhysGridCullClass::Collect_Visible_Objects(const FrustumClass & frustum,Vis
 	Collect_Visible_Objects(frustum,pvs);
 
 	PhysClass * obj;
-	for (	obj = Get_First_Collected_Object(); 
-			obj != NULL; 
-			obj = Get_Next_Collected_Object(obj)) 
+	for (	obj = Get_First_Collected_Object();
+			obj != NULL;
+			obj = Get_Next_Collected_Object(obj))
 	{
 		visobjlist.Add(obj);
 	}
@@ -123,19 +123,19 @@ void PhysGridCullClass::Collect_Visible_Objects(const FrustumClass & frustum,Vis
 		Collect_Objects(frustum);
 		return;
 	}
-	
+
 	/*
 	** Collect all objects in the frustum that are in visible grid cells.
 	*/
 	VolumeStruct vol;
 	init_volume(frustum,&vol);
-	
+
 	if (!vol.Is_Empty()) {
 
-		int delta_x = vol.Max[0] - vol.Min[0];		
+		int delta_x = vol.Max[0] - vol.Min[0];
 		int i,j,k;
 		int address = map_indices_to_address(vol.Min[0],vol.Min[1],vol.Min[2]);
-		
+
 		for (k=vol.Min[2]; k<vol.Max[2]; k++) {
 			for (j=vol.Min[1]; j<vol.Max[1]; j++) {
 				for (i=vol.Min[0]; i<vol.Max[0]; i++) {
@@ -149,13 +149,13 @@ void PhysGridCullClass::Collect_Visible_Objects(const FrustumClass & frustum,Vis
 			address = map_indices_to_address(vol.Min[0],vol.Min[1],k+1);
 		}
 	}
-	
+
 	/*
 	** Collect the objects in the no-grid-list
 	*/
 	collect_objects_in_leaf(frustum,NoGridList);
 }
-	
+
 
 inline void PhysGridCullClass::collect_visible_objects_in_leaf
 (
@@ -166,30 +166,30 @@ inline void PhysGridCullClass::collect_visible_objects_in_leaf
 {
 	CullableClass * head = Cells[address];
 	if (head != NULL) {
-	
+
 		/*
 		** Add all visible objects to the collection
 		*/
 		GridListIterator it(head);
-		
+
 		for (; !it.Is_Done(); it.Next()) {
 			PhysClass * obj = (PhysClass *)it.Peek_Obj();
 			if (	(pvs.Get_Bit(obj->Get_Vis_Object_ID()) != 0) &&
-					(CollisionMath::Overlap_Test(frustum,obj->Get_Cull_Box()) != CollisionMath::OUTSIDE) ) 
+					(CollisionMath::Overlap_Test(frustum,obj->Get_Cull_Box()) != CollisionMath::OUTSIDE) )
 			{
 				Add_To_Collection(obj);
 			}
 		}
 	}
 }
-	
+
 
 bool PhysGridCullClass::Cast_Ray(PhysRayCollisionTestClass & raytest)
 {
 #if NEW_CAST_FUNCTIONS
 
 	Reset_Collection();
-	
+
 	AABoxClass bounds;
 	bounds.Init(raytest.Ray);
 	Collect_Objects(bounds);
@@ -212,11 +212,11 @@ bool PhysGridCullClass::Cast_Ray(PhysRayCollisionTestClass & raytest)
 		}
 
 		obj = Get_Next_Collected_Object(obj);
-	} 
+	}
 	return res;
 
-#else 	
-	
+#else
+
 	bool res = false;
 
 	PhysicsWorldClass * world = Scene;
@@ -253,7 +253,7 @@ bool PhysGridCullClass::cast_ray_recursive
 (
 	PhysRayCollisionTestClass &						raytest,
 	const GridCullSystemClass::VolumeStruct &		vol
-) 
+)
 {
 	if (Scene == NULL) {
 		return false;
@@ -271,22 +271,22 @@ bool PhysGridCullClass::cast_ray_recursive
 	// otherwise, divide this box and recurse.
 	bool res = false;
 	if (vol.Is_Leaf()) {
-		
+
 		PhysClass * head = (PhysClass*)Cells[map_indices_to_address(vol.Min[0],vol.Min[1],vol.Min[2])];
-		
+
 		for (GridListIterator it(head); !it.Is_Done(); it.Next()) {
-				
+
 			PhysClass * obj = (PhysClass*)it.Peek_Obj();
 
-			if (	
-					Scene->Do_Groups_Collide(obj->Get_Collision_Group(),raytest.CollisionGroup) && 
-					!obj->Is_Ignore_Me()	
-				) 
+			if (
+					Scene->Do_Groups_Collide(obj->Get_Collision_Group(),raytest.CollisionGroup) &&
+					!obj->Is_Ignore_Me()
+				)
 			{
 				res |= obj->Cast_Ray(raytest);
 			}
 		}
-	
+
 		return res;
 	}
 
@@ -296,7 +296,7 @@ bool PhysGridCullClass::cast_ray_recursive
 
 	res |= cast_ray_recursive(raytest,vol0);
 	res |= cast_ray_recursive(raytest,vol1);
-	
+
 	return res;
 }
 
@@ -329,10 +329,10 @@ bool PhysGridCullClass::Cast_AABox(PhysAABoxCollisionTestClass & boxtest)
 		}
 
 		obj = Get_Next_Collected_Object(obj);
-	} 
+	}
 	return res;
 
-#else 	
+#else
 
 	bool res = false;
 
@@ -387,22 +387,22 @@ bool PhysGridCullClass::cast_aabox_recursive
 	// otherwise, divide this box and recurse.
 	bool res = false;
 	if (vol.Is_Leaf()) {
-		
+
 		PhysClass * head = (PhysClass*)Cells[map_indices_to_address(vol.Min[0],vol.Min[1],vol.Min[2])];
-		
+
 		for (GridListIterator it(head); !it.Is_Done(); it.Next()) {
-				
+
 			PhysClass * obj = (PhysClass*)it.Peek_Obj();
 
-			if (	
-					Scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
-					!obj->Is_Ignore_Me()	
-				) 
+			if (
+					Scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) &&
+					!obj->Is_Ignore_Me()
+				)
 			{
 				res |= obj->Cast_AABox(boxtest);
 			}
 		}
-	
+
 		return res;
 	}
 
@@ -412,7 +412,7 @@ bool PhysGridCullClass::cast_aabox_recursive
 
 	res |= cast_aabox_recursive(boxtest,vol0);
 	res |= cast_aabox_recursive(boxtest,vol1);
-	
+
 	return res;
 }
 
@@ -421,7 +421,7 @@ bool PhysGridCullClass::Cast_OBBox(PhysOBBoxCollisionTestClass & boxtest)
 #if NEW_CAST_FUNCTIONS
 
 	Reset_Collection();
-	
+
 	AABoxClass bounds;
 	bounds.Init_Min_Max(boxtest.SweepMin,boxtest.SweepMax);
 	Collect_Objects(bounds);
@@ -444,10 +444,10 @@ bool PhysGridCullClass::Cast_OBBox(PhysOBBoxCollisionTestClass & boxtest)
 		}
 
 		obj = Get_Next_Collected_Object(obj);
-	} 
+	}
 	return res;
 
-#else 	
+#else
 
 	bool res = false;
 
@@ -502,22 +502,22 @@ bool PhysGridCullClass::cast_obbox_recursive
 	// otherwise, divide this box and recurse.
 	bool res = false;
 	if (vol.Is_Leaf()) {
-		
+
 		PhysClass * head = (PhysClass*)Cells[map_indices_to_address(vol.Min[0],vol.Min[1],vol.Min[2])];
-		
+
 		for (GridListIterator it(head); !it.Is_Done(); it.Next()) {
-				
+
 			PhysClass * obj = (PhysClass*)it.Peek_Obj();
 
-			if (	
-					Scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
-					!obj->Is_Ignore_Me()	
-				) 
+			if (
+					Scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) &&
+					!obj->Is_Ignore_Me()
+				)
 			{
 				res |= obj->Cast_OBBox(boxtest);
 			}
 		}
-	
+
 		return res;
 	}
 
@@ -527,7 +527,7 @@ bool PhysGridCullClass::cast_obbox_recursive
 
 	res |= cast_obbox_recursive(boxtest,vol0);
 	res |= cast_obbox_recursive(boxtest,vol1);
-	
+
 	return res;
 }
 
@@ -539,16 +539,16 @@ bool PhysGridCullClass::Intersection_Test(PhysAABoxIntersectionTestClass & boxte
 	bool res = false;
 	PhysClass * obj = Get_First_Collected_Object();
 	while (obj) {
-		if (	
-				Scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
-				!obj->Is_Ignore_Me()	
-			) 
+		if (
+				Scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) &&
+				!obj->Is_Ignore_Me()
+			)
 		{
 			res |= obj->Intersection_Test(boxtest);
 		}
 
 		obj = Get_Next_Collected_Object(obj);
-	} 
+	}
 	return res;
 }
 
@@ -560,16 +560,16 @@ bool PhysGridCullClass::Intersection_Test(PhysOBBoxIntersectionTestClass & boxte
 	bool res = false;
 	PhysClass * obj = Get_First_Collected_Object();
 	while (obj) {
-		if (	
-				Scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
-				!obj->Is_Ignore_Me()	
-			) 
+		if (
+				Scene->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) &&
+				!obj->Is_Ignore_Me()
+			)
 		{
 			res |= obj->Intersection_Test(boxtest);
 		}
 
 		obj = Get_Next_Collected_Object(obj);
-	} 
+	}
 	return res;
 }
 
@@ -581,22 +581,22 @@ bool PhysGridCullClass::Intersection_Test(PhysMeshIntersectionTestClass & meshte
 	bool res = false;
 	PhysClass * obj = Get_First_Collected_Object();
 	while (obj) {
-		if (	
-				Scene->Do_Groups_Collide(obj->Get_Collision_Group(),meshtest.CollisionGroup) && 
-				!obj->Is_Ignore_Me()	
-			) 
+		if (
+				Scene->Do_Groups_Collide(obj->Get_Collision_Group(),meshtest.CollisionGroup) &&
+				!obj->Is_Ignore_Me()
+			)
 		{
 			res |= obj->Intersection_Test(meshtest);
 		}
 
 		obj = Get_Next_Collected_Object(obj);
-	} 
+	}
 	return res;
 }
 
 void PhysGridCullClass::Load_Static_Data(ChunkLoadClass & cload)
 {
-	while(cload.Open_Chunk()) 
+	while(cload.Open_Chunk())
 	{
 		switch(cload.Cur_Chunk_ID()) {
 /* (gth) no variables for now...
@@ -614,7 +614,7 @@ void PhysGridCullClass::Load_Static_Data(ChunkLoadClass & cload)
 	}
 }
 
-void PhysGridCullClass::Load_Static_Variables(ChunkLoadClass & cload)
+void PhysGridCullClass::Load_Static_Variables(ChunkLoadClass & /* cload */)
 {
 /* (gth) no variables for now...
 	uint32 version;
@@ -622,7 +622,7 @@ void PhysGridCullClass::Load_Static_Variables(ChunkLoadClass & cload)
 
 		switch(cload.Cur_Micro_Chunk_ID()) {
 		}
-		
+
 		cload.Close_Micro_Chunk();
 	}
 */
@@ -640,7 +640,7 @@ void PhysGridCullClass::Save_Static_Data(ChunkSaveClass & csave)
 	csave.End_Chunk();
 }
 
-void PhysGridCullClass::Save_Static_Variables(ChunkSaveClass & csave)
+void PhysGridCullClass::Save_Static_Variables(ChunkSaveClass & /* csave */)
 {
 /* (gth) no variables for now...
 	uint32 version = PHYSGRID_CURRENT_VERSION;

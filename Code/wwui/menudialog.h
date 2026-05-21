@@ -43,6 +43,7 @@
 
 
 #include "dialogbase.h"
+#include "dialogspec.h"
 #include "wwstring.h"
 
 
@@ -64,7 +65,7 @@ public:
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
 	////////////////////////////////////////////////////////////////
-	MenuDialogClass (int res_id);
+	MenuDialogClass (const DialogResource *dialog_resource);
 	virtual ~MenuDialogClass (void);
 
 	////////////////////////////////////////////////////////////////
@@ -76,6 +77,7 @@ public:
 	//
 	static void						Initialize (void);
 	static void						Shutdown (void);
+	static void						Ensure_BackDrop (void);
 
 	//
 	//	RTTI
@@ -85,7 +87,7 @@ public:
 	//
 	//	Configuration methods
 	//
-	static MenuBackDropClass *	Get_BackDrop (void)		{ return BackDrop; }
+	static MenuBackDropClass *	Get_BackDrop (void)		{ Ensure_BackDrop(); return BackDrop; }
 	static MenuBackDropClass *	Replace_BackDrop (MenuBackDropClass *backdrop);
 
 	//
@@ -120,7 +122,7 @@ protected:
 
 	////////////////////////////////////////////////////////////////
 	//	Protected member data
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	static MenuDialogClass *								ActiveMenu;
 	static MenuBackDropClass *								BackDrop;
 	static DynamicVectorClass<MenuDialogClass *>		MenuStack;
@@ -128,4 +130,3 @@ protected:
 
 
 #endif //__MENU_DIALOG_H
-

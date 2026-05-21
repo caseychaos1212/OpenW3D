@@ -394,7 +394,7 @@ void	CombatManager::Pre_Load_Level( bool render_available )
 	ScreenFadeManager::Enable_Letterbox( 0, 0 );
 	ScreenFadeManager::Set_Screen_Overlay_Opacity( 0, 0 );
 
-	HUDInfo::Set_HUD_Help_Text( L"" );	// Clear text
+	HUDInfo::Set_HUD_Help_Text( U_CHAR("") );	// Clear text
 }
 
 bool	_preload_assets;
@@ -403,7 +403,7 @@ StringClass	_load_map_name;
 static class LoadThreadClass : public ThreadClass
 {
 public:
-	LoadThreadClass(const char *thread_name = "Game loader thread") : ThreadClass(thread_name, &Exception_Handler) {}
+	LoadThreadClass(const char *thread_name = "Game loader thread") : ThreadClass(thread_name) {}
 
 	void Thread_Function() override {
 
@@ -415,7 +415,7 @@ public:
 
 		#ifndef PARAM_EDITING_ON
 			// Tell the datasafe to expect calls from this thread now.
-			GenericDataSafeClass::Set_Preferred_Thread(GetCurrentThreadId());
+			GenericDataSafeClass::Set_Preferred_Thread(ThreadClass::Get_Current_Thread_ID());
 		#endif // PARAM_EDITING_ON
 
 		CombatManager::Inc_Load_Progress();
@@ -489,6 +489,7 @@ void	CombatManager::Load_Level_Threaded( const char * map_name, bool preload_ass
 	_load_map_name = map_name;
 
 	WWASSERT(!thread.Is_Running());
+	thread.Stop();
 	thread.Execute();
 }
 

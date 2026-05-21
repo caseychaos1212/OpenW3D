@@ -72,7 +72,7 @@ public:
 	~ChunkImageClass(void);
 
 	void									Load(ChunkLoadClass & cload);
-	void									Add_Child(ChunkImageClass * child);	
+	void									Add_Child(ChunkImageClass * child);
 
 	uint32								Get_ID(void) const								{ return ID; }
 	uint32								Get_Length(void) const							{ return Length; }
@@ -91,8 +91,8 @@ protected:
 	ChunkImageClass *					Child;
 	ChunkImageClass *					Sibling;
 	unsigned char *					Data;
-	unsigned long						ID;
-	unsigned long						Length;
+	unsigned int						ID;
+	unsigned int						Length;
 
 	friend class ChunkFileImageClass;
 };

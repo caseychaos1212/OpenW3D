@@ -82,14 +82,14 @@ END_MESSAGE_MAP()
 // OnInitDialog
 //
 BOOL
-GotoGroupDialogClass::OnInitDialog (void) 
+GotoGroupDialogClass::OnInitDialog (void)
 {
 	// Allow the base class to process this message
 	CDialog::OnInitDialog ();
-	
-	// Fill the 'group list' combobox with a complete list of all the group in the level.	
-	::Fill_Group_Combo (::GetDlgItem (m_hWnd, IDC_OBJECT_LIST), m_pGroup);	
-	return TRUE;
+
+	// Fill the 'group list' combobox with a complete list of all the group in the level.
+	::Fill_Group_Combo (::GetDlgItem (m_hWnd, IDC_OBJECT_LIST), m_pGroup);
+	return true;
 }
 
 
@@ -108,7 +108,7 @@ GotoGroupDialogClass::OnOK (void)
 			::Get_Camera_Mgr ()->Goto_Group (pgroup);
 		}
 	}
-	
+
 	// Allow the base class to process this message
 	CDialog::OnOK ();
 	return ;
@@ -155,7 +155,7 @@ void
 GotoGroupDialogClass::OnSelChangeGroupList (void)
 {
 	// Enable the OK button
-	::EnableWindow (::GetDlgItem (m_hWnd, IDOK), TRUE);
+	::EnableWindow (::GetDlgItem (m_hWnd, IDOK), true);
 	return ;
 }
 

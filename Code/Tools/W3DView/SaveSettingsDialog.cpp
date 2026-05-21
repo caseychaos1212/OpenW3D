@@ -83,13 +83,13 @@ CSaveSettingsDialog::OnInitDialog (void)
     CDialog::OnInitDialog ();
 
     // Check everything by default
-    SendDlgItemMessage (IDC_LIGHTING_CHECKBOX, BM_SETCHECK, (WPARAM)TRUE);
-    SendDlgItemMessage (IDC_BACKGROUND_CHECKBOX, BM_SETCHECK, (WPARAM)TRUE);
-    SendDlgItemMessage (IDC_CAMERA_CHECKBOX, BM_SETCHECK, (WPARAM)TRUE);
-	
+    SendDlgItemMessage (IDC_LIGHTING_CHECKBOX, BM_SETCHECK, (WPARAM)true);
+    SendDlgItemMessage (IDC_BACKGROUND_CHECKBOX, BM_SETCHECK, (WPARAM)true);
+    SendDlgItemMessage (IDC_CAMERA_CHECKBOX, BM_SETCHECK, (WPARAM)true);
+
 	// Put the default filename into the edit control
     SetDlgItemText (IDC_FILENAME_EDIT, "Default.dat");
-    return TRUE;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -97,7 +97,7 @@ CSaveSettingsDialog::OnInitDialog (void)
 //  OnBrowseButton
 //
 void
-CSaveSettingsDialog::OnBrowseButton (void) 
+CSaveSettingsDialog::OnBrowseButton (void)
 {
 	 TCHAR szFileName[MAX_PATH];
 	 ::GetModuleFileName (NULL, szFileName, sizeof (szFileName));
@@ -106,14 +106,14 @@ CSaveSettingsDialog::OnBrowseButton (void)
 	 {
 			::SetCurrentDirectory (pszPath);
 		  pszPath[0] = 0;
-	 }	 
+	 }
 
 
     // Get the current filename
     CString stringCurrentFile;
     GetDlgItemText (IDC_FILENAME_EDIT, stringCurrentFile);
-    
-    CFileDialog saveFileDialog (FALSE,
+
+    CFileDialog saveFileDialog (false,
                                 ".dat",
                                 stringCurrentFile,
                                 OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER,
@@ -126,7 +126,7 @@ CSaveSettingsDialog::OnBrowseButton (void)
         // Put the path into the filename edit control
         SetDlgItemText (IDC_FILENAME_EDIT, saveFileDialog.GetPathName ());
     }
-        
+
     return ;
 }
 
@@ -135,7 +135,7 @@ CSaveSettingsDialog::OnBrowseButton (void)
 //  OnUpdateFilenameEdit
 //
 void
-CSaveSettingsDialog::OnUpdateFilenameEdit (void) 
+CSaveSettingsDialog::OnUpdateFilenameEdit (void)
 {
     // Set the enabled state of the OK button
     // based on the values of the control
@@ -151,7 +151,7 @@ void
 CSaveSettingsDialog::OnOK (void)
 {
     // Assume we want to allow the base class to process this message
-    BOOL bAllowDefaultProcessing = TRUE;
+    BOOL bAllowDefaultProcessing = true;
 
     // Get a pointer to the doc so we can get at the current scene
     // pointer.
@@ -165,7 +165,7 @@ CSaveSettingsDialog::OnOK (void)
         {
             dwSettingsMask |= SAVE_SETTINGS_LIGHT;
         }
-        
+
         // Did the user want to save the background?
         if (SendDlgItemMessage (IDC_BACKGROUND_CHECKBOX, BM_GETCHECK))
         {
@@ -185,8 +185,8 @@ CSaveSettingsDialog::OnOK (void)
         // Save the settings to the selected file
         bAllowDefaultProcessing = pCDoc->SaveSettings (stringCurrentFile,
                                                        dwSettingsMask);
-    }        
-    
+    }
+
 	if (bAllowDefaultProcessing)
     {
         // Allow the base class to process this message
@@ -205,7 +205,7 @@ CSaveSettingsDialog::OnCommand
 (
     WPARAM wParam,
     LPARAM lParam
-) 
+)
 {
     // Did the user check/uncheck one of the checkboxes?
     if ((HIWORD (wParam) == BN_CLICKED) &&
@@ -240,14 +240,14 @@ CSaveSettingsDialog::FixOKEnableState (void)
         (::GetWindowTextLength (::GetDlgItem (m_hWnd, IDC_FILENAME_EDIT)) > 0))
     {
         // Enable the OK button
-        ::EnableWindow (::GetDlgItem (m_hWnd, IDOK), TRUE);
+        ::EnableWindow (::GetDlgItem (m_hWnd, IDOK), true);
     }
     else
     {
         // Disable the OK button
-        ::EnableWindow (::GetDlgItem (m_hWnd, IDOK), FALSE);
+        ::EnableWindow (::GetDlgItem (m_hWnd, IDOK), false);
     }
-    
+
     return ;
 }
 

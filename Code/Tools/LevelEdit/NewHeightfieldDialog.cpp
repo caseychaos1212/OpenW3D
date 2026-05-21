@@ -82,13 +82,13 @@ NewHeightfieldDialogClass::OnOK (void)
 	//
 	CString bmp_filename;
 	GetDlgItemText (IDC_BMP_FILENAME_EDIT, bmp_filename);
-	if (bmp_filename.GetLength () >= 0 && ::GetFileAttributes (bmp_filename) != 0xFFFFFFFF) {		
+	if (bmp_filename.GetLength () >= 0 && ::GetFileAttributes (bmp_filename) != 0xFFFFFFFF) {
 
 		//
 		//	Create the initial heightfield from these values
 		//
 		float scale = ::GetDlgItemFloat (m_hWnd, IDC_HEIGHT_SCALE_EDIT, false);
-		HeightfieldMgrClass::Create_Heightfield (bmp_filename, width, height, density, scale);		
+		HeightfieldMgrClass::Create_Heightfield (bmp_filename, width, height, density, scale);
 
 	} else {
 
@@ -109,10 +109,10 @@ NewHeightfieldDialogClass::OnOK (void)
 //
 /////////////////////////////////////////////////////////////////////////////
 BOOL
-NewHeightfieldDialogClass::OnInitDialog (void) 
+NewHeightfieldDialogClass::OnInitDialog (void)
 {
 	CDialog::OnInitDialog ();
-	
+
 	//
 	//	Generate a name for this heightfield
 	//
@@ -128,7 +128,7 @@ NewHeightfieldDialogClass::OnInitDialog (void)
 	::SetDlgItemFloat (m_hWnd, IDC_DENSITY_EDIT, 2.0F);
 	::SetDlgItemFloat (m_hWnd, IDC_HEIGHT_SCALE_EDIT, 75.0F);
 
-	return TRUE;
+	return true;
 }
 
 
@@ -146,7 +146,7 @@ NewHeightfieldDialogClass::OnBrowse (void)
 	CString filename;
 	GetDlgItemText (IDC_BMP_FILENAME_EDIT, filename);
 
-	CFileDialog dialog (TRUE, ".bmp", filename,
+	CFileDialog dialog (true, ".bmp", filename,
 		OFN_HIDEREADONLY | OFN_EXPLORER,
 		"Windows Bitmap Files (*.bmp)|*.bmp||", ::AfxGetMainWnd ());
 

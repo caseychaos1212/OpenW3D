@@ -56,7 +56,7 @@ FormToolbarClass::FormToolbarClass (void)
 	: m_pCForm (NULL)
 {
     m_minSize.cx = 100;
-    m_minSize.cy = 100;    
+    m_minSize.cy = 100;
     return ;
 }
 
@@ -91,7 +91,7 @@ FormToolbarClass::Create
 	ASSERT (pCFormClass);
 	m_pCForm = pCFormClass;
 
-	// Allow the base class to process this message	
+	// Allow the base class to process this message
 	RECT rect = { 0 };
 	BOOL retval = CWnd::Create (NULL, pszWindowName, WS_CHILD | WS_VISIBLE, rect, pCParentWnd, uiID);
 	if (retval) {
@@ -115,7 +115,7 @@ FormToolbarClass::Create
 		EnableDocking (CBRS_ALIGN_RIGHT | CBRS_ALIGN_LEFT);
 	}
 
-	// Return the TRUE/FALSE result code
+	// Return the true/false result code
 	return retval;
 }
 
@@ -132,10 +132,10 @@ FormToolbarClass::OnSize
 	int cy
 )
 {
-	// Allow the base class to process this message	
+	// Allow the base class to process this message
 	CControlBar::OnSize(nType, cx, cy);
 
-	if (m_pCForm && (cx > 0) && (cy > 0)) {		
+	if (m_pCForm && (cx > 0) && (cy > 0)) {
 		// Get the bounding rectangle
 		CRect rect;
 		GetClientRect (rect);
@@ -149,7 +149,7 @@ FormToolbarClass::OnSize
 										SWP_NOZORDER | SWP_NOMOVE);
 	}
 
-	return ;	
+	return ;
 }
 
 //////////////////////////////////////////////////////////////
@@ -157,7 +157,7 @@ FormToolbarClass::OnSize
 //  OnEraseBkgnd
 //
 BOOL
-FormToolbarClass::OnEraseBkgnd (CDC* pDC) 
+FormToolbarClass::OnEraseBkgnd (CDC* pDC)
 {
 	// Get the bounding rectangle
 	RECT rect;
@@ -166,6 +166,6 @@ FormToolbarClass::OnEraseBkgnd (CDC* pDC)
 	// Paint the background light gray
 	::FillRect (*pDC, &rect, (HBRUSH)(COLOR_3DFACE + 1));
 
-	// Allow the base class to process this message	
+	// Allow the base class to process this message
 	return CControlBar::OnEraseBkgnd(pDC);
 }

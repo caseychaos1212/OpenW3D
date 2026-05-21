@@ -163,7 +163,7 @@ void cLanChat::Init_Lan_Protocol_And_Socket(void)
 		cNetUtil::Close_Socket(Socket);
 	}
 
-   bool succeeded = cNetUtil::Create_Bound_Socket(Socket, LAN_PORT, LocalAddress);
+	[[maybe_unused]] bool succeeded = cNetUtil::Create_Bound_Socket(Socket, LAN_PORT, LocalAddress);
 	WWASSERT(succeeded);
 }
 
@@ -238,7 +238,7 @@ void cLanChat::Process_Position_Broadcast(cPacket & packet)
 
       packet.Flush();
 
-		WWDEBUG_SAY(("*** LAN NICKNAME COLLISION (%s) ***\n", sender));
+		WWDEBUG_SAY(("*** LAN NICKNAME COLLISION (%s) ***\n", sender.Peek_Buffer()));
 
 		DlgMpChangeLanNickname::DoDialog();
 

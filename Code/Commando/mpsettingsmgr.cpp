@@ -119,8 +119,8 @@ MPSettingsMgrClass::Load_Settings (void)
 		RegistryClass skuReg(APPLICATION_SUB_KEY_NAME, false);
 
 		if (skuReg.Is_Valid()) {
-			unsigned long sku = skuReg.Get_Int("SKU", RENEGADE_BASE_SKU);
-			unsigned long lang = (sku & 0xFF);
+			unsigned int sku = skuReg.Get_Int("SKU", RENEGADE_BASE_SKU);
+			unsigned int lang = (sku & 0xFF);
 
 			// If this is not an Asian language region then use the Western defaults
 			if ((WWOnline::LANGCODE_JAPANESE != lang) && (WWOnline::LANGCODE_KOREAN != lang)
@@ -366,7 +366,7 @@ bool
 MPSettingsMgrClass::Are_Alternate_Skins_Unlocked (void)
 {
 	if (AreSkinsUnlocked == false) {
-		
+
 		//
 		//	Do we have a valid WOL session to query?
 		//
@@ -379,7 +379,7 @@ MPSettingsMgrClass::Are_Alternate_Skins_Unlocked (void)
 			//
 			AreSkinsUnlocked = wol_session->IsCurrUserInsider ();
 			if (AreSkinsUnlocked == false) {
-				
+
 				//
 				//	First, build a time structure representing when the skins are unlocked for everybody
 				//
@@ -400,7 +400,7 @@ MPSettingsMgrClass::Are_Alternate_Skins_Unlocked (void)
 			// this information in the registry.
 			//
 			if (AreSkinsUnlocked) {
-				
+
 				//
 				//	Save this setting in the registry
 				//
@@ -427,7 +427,7 @@ MPSettingsMgrClass::Are_Alternate_Skins_Unlocked (void)
 			time_t curr_time;
 			AreSkinsUnlocked = (::time (&curr_time) >= expire_time);
 		}
-	}	
+	}
 
 	return AreSkinsUnlocked;
 }

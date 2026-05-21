@@ -114,7 +114,7 @@ AnimationCompressionSettingsDialogClass::Real_Message_Proc
 	//
 	//	Allow the instance to handle the call
 	//
-	BOOL retval = FALSE;
+	BOOL retval = false;
 	if (dialog_obj != NULL) {
 		retval = dialog_obj->Message_Proc (message, wparam, lparam);
 	}
@@ -143,7 +143,7 @@ AnimationCompressionSettingsDialogClass::Message_Proc
 	LPARAM	lparam
 )
 {
-	BOOL retval = FALSE;
+	BOOL retval = false;
 
 	switch (message)
 	{
@@ -162,7 +162,7 @@ AnimationCompressionSettingsDialogClass::Message_Proc
 									parent_rect.left + (width / 2) - ((rect.right - rect.left) / 2),
 									parent_rect.top + (height / 2) - ((rect.bottom - rect.top) / 2),
 									0, 0, SWP_NOZORDER | SWP_NOSIZE);
-			
+
 			//
 			//	Initialize the dialog controls
 			//
@@ -217,7 +217,7 @@ AnimationCompressionSettingsDialogClass::Initialize_Controls (void)
 	HWND flavor_combo = ::GetDlgItem (Wnd, IDC_COMPRESS_ANIMATION_FLAVOR_COMBO);
 	ComboBox_AddString (flavor_combo, "TimeCoded");
 	ComboBox_AddString (flavor_combo, "Adaptive Delta");
-	
+
 	//
 	//	Bounds check the parameters
 	//

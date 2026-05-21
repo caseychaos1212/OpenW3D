@@ -17,22 +17,22 @@
 */
 
 /* $Header: /Commando/Code/Tools/max2w3d/w3dutil.cpp 48    4/03/02 9:38a Moumine_ballo $ */
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando Tools - W3D export                                  * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Tools/max2w3d/w3dutil.cpp                    $* 
- *                                                                                             * 
- *                      $Author:: Moumine_ballo                                               $* 
- *                                                                                             * 
- *                     $Modtime:: 3/18/02 3:35p                                               $* 
- *                                                                                             * 
- *                    $Revision:: 48                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando Tools - W3D export                                  *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Tools/max2w3d/w3dutil.cpp                    $*
+ *                                                                                             *
+ *                      $Author:: Moumine_ballo                                               $*
+ *                                                                                             *
+ *                     $Modtime:: 3/18/02 3:35p                                               $*
+ *                                                                                             *
+ *                    $Revision:: 48                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 
@@ -104,7 +104,7 @@ void MaterialReferenceMaker::SetReference (int i, RefTargetHandle rtarg)
 
 RefResult MaterialReferenceMaker::NotifyRefChanged(Interval changeInt,RefTargetHandle hTarget,PartID& partID, RefMessage message)
 {
-	return (REF_SUCCEED); 
+	return (REF_SUCCEED);
 }
 
 int MaterialReferenceMaker::ReferenceCount;
@@ -150,7 +150,7 @@ private:
 ** the W3D export options for the currently selected nodes
 **
 **********************************************************************************************/
-class W3DUtilityClass : public UtilityObj 
+class W3DUtilityClass : public UtilityObj
 {
 public:
 
@@ -169,9 +169,9 @@ public:
 	void Select_Projectile(void);
 	void Select_Vis(void);
 	void CSRemoveNonUniformScale(void);
-	
+
 public:
-	
+
 	Interface *							InterfacePtr;
 	FloaterDialogClass				SettingsFloater;
 	HWND									SettingsPanelHWND;
@@ -181,7 +181,7 @@ public:
 	GenNamesDialogClass::OptionsStruct			NameOptions;
 	GenMtlNamesDialogClass::OptionsStruct		MtlNameOptions;
 	GenLodExtensionDialogClass::OptionsStruct	LodExtensionOptions;
-	
+
 	int											WorkingNameIndex;
 
 	enum {
@@ -291,7 +291,7 @@ public:
 	void		generate_material_names(Mtl * mtl);
 	void		generate_lod_extensions(void);
 	void		generate_lod_ext(INode * node);
-	
+
 	void		create_floater(void);
 
 	void		export_with_standard_materials();
@@ -312,12 +312,12 @@ static W3DUtilityClass TheW3DUtility;
 ** W3DUtilityClassDesc - Class Descriptor for the W3D Utility
 **
 **********************************************************************************************/
-class W3DUtilityClassDesc:public ClassDesc 
+class W3DUtilityClassDesc:public ClassDesc
 {
 public:
 
 	int 				IsPublic()								{ return 1; }
-	void *			Create(BOOL loading = FALSE)		{ return &TheW3DUtility; }
+	void *			Create(BOOL loading = false)		{ return &TheW3DUtility; }
 	const TCHAR *	ClassName()								{ return Get_String(IDS_W3D_UTILITY_CLASS_NAME); }
 	SClass_ID		SuperClassID()							{ return UTILITY_CLASS_ID; }
 	Class_ID			ClassID()								{ return W3DUtilityClassID; }
@@ -326,9 +326,9 @@ public:
 
 static W3DUtilityClassDesc W3DUtilityDesc;
 
-ClassDesc * Get_W3D_Utility_Desc(void) 
-{ 
-	return &W3DUtilityDesc; 
+ClassDesc * Get_W3D_Utility_Desc(void)
+{
+	return &W3DUtilityDesc;
 }
 
 /**********************************************************************************************
@@ -338,7 +338,7 @@ ClassDesc * Get_W3D_Utility_Desc(void)
 **********************************************************************************************/
 W3DUtilityClass::W3DUtilityClass(void)
 {
-	InterfacePtr = NULL;	
+	InterfacePtr = NULL;
 	SettingsPanelHWND = NULL;
 	ToolsPanelHWND = NULL;
 	UpdateSpinnerValue = true;
@@ -348,7 +348,7 @@ W3DUtilityClass::~W3DUtilityClass(void)
 {
 }
 
-void W3DUtilityClass::BeginEditParams(Interface *ip,IUtil *iu) 
+void W3DUtilityClass::BeginEditParams(Interface *ip,IUtil *iu)
 {
 	InterfacePtr = ip;
 	SettingsPanelHWND = InterfacePtr->AddRollupPage(
@@ -378,20 +378,20 @@ void W3DUtilityClass::BeginEditParams(Interface *ip,IUtil *iu)
 
 //	TheRCMenu.Bind(TheW3DUtility.InterfacePtr,&TheW3DUtility);
 //	RightClickMenuManager *rcm = ip->GetRightClickMenuManager();
-//	if (TheRCMenu.Installed!=TRUE) { 
+//	if (TheRCMenu.Installed!=true) {
 //		rcm->Register(&TheRCMenu);
 //	}
 
 	SettingsFormClass::Update_All_Instances();
 }
-	
-void W3DUtilityClass::EndEditParams(Interface *ip,IUtil *iu) 
+
+void W3DUtilityClass::EndEditParams(Interface *ip,IUtil *iu)
 {
 	InterfacePtr = NULL;
 
 	ip->DeleteRollupPage(SettingsPanelHWND);
 	ip->DeleteRollupPage(ToolsPanelHWND);
-	
+
 	SettingsPanelHWND = NULL;
 	ToolsPanelHWND = NULL;
 }
@@ -431,7 +431,7 @@ void W3DUtilityClass::eval_node_states(INodeListClass * list,NodeStatesStruct * 
 	ns->CollisionVis = 0;
 	ns->CollisionCamera = 0;
 	ns->CollisionVehicle = 0;
-	
+
 	ns->GeometryCameraAligned = false;
 	ns->GeometryCameraOriented = false;
 	ns->GeometryNormal = false;
@@ -473,7 +473,7 @@ void W3DUtilityClass::eval_node_states(INodeListClass * list,NodeStatesStruct * 
 	** evaluate each node
 	*/
 	for (unsigned int ni=0; ni<list->Num_Nodes(); ni++) {
-		
+
 		W3DAppData2Struct * wdata = get_app_data_2((*list)[ni]);
 		assert(wdata);
 
@@ -487,7 +487,7 @@ void W3DUtilityClass::eval_node_states(INodeListClass * list,NodeStatesStruct * 
 		ns->GeometryShatterable += (wdata->Is_Shatterable_Enabled() ? 1 : 0);
 		ns->GeometryNPatch +=		(wdata->Is_NPatchable_Enabled() ? 1 : 0);
 		ns->CollisionPhysical +=	(wdata->Is_Physical_Collision_Enabled() ? 1 : 0);
-		ns->CollisionProjectile +=	(wdata->Is_Projectile_Collision_Enabled() ? 1 : 0);				
+		ns->CollisionProjectile +=	(wdata->Is_Projectile_Collision_Enabled() ? 1 : 0);
 		ns->CollisionVis +=			(wdata->Is_Vis_Collision_Enabled() ? 1 : 0);
 		ns->CollisionCamera +=		(wdata->Is_Camera_Collision_Enabled() ? 1 : 0);
 		ns->CollisionVehicle +=		(wdata->Is_Vehicle_Collision_Enabled() ? 1 : 0);
@@ -519,7 +519,7 @@ void W3DUtilityClass::eval_node_states(INodeListClass * list,NodeStatesStruct * 
 		if (strcmp(ns->DazzleType,dazzledata->DazzleType) != 0) {
 			strcpy(ns->DazzleType,"DEFAULT");
 		}
-	}	
+	}
 
 	// If any of the counters are zero, that means none of the objects had that
 	// bit set.  If any of them are equal to the number of objects, then they
@@ -821,7 +821,7 @@ void W3DUtilityClass::export_with_standard_materials()
 
 	// Count the no. of references to game materials.
 	MaterialReferenceMaker::ReferenceCount = convert_materials (GAME_REFERENCE_COUNT, NULL);
-	
+
 	MaterialReferenceMaker *gamenodematerials = NULL;
 
 	if (MaterialReferenceMaker::ReferenceCount > 0) {
@@ -847,7 +847,7 @@ void W3DUtilityClass::export_with_standard_materials()
 int W3DUtilityClass::convert_materials (MaterialConversionEnum conversion, MaterialReferenceMaker *gamenodematerials)
 {
 	int gamenodematerialindex = 0;
-	
+
 	INode *rootnode = InterfacePtr->GetRootNode();
 	if (rootnode != NULL) {
 
@@ -860,10 +860,10 @@ int W3DUtilityClass::convert_materials (MaterialConversionEnum conversion, Mater
 
 				// Is this a non-null material?
 				if (nodemtl != NULL) {
-					
+
 					// Is this not a multi-material?
 					if (!nodemtl->IsMultiMtl()) {
-						
+
 						switch (conversion) {
 
 							case GAME_REFERENCE_COUNT:
@@ -873,9 +873,9 @@ int W3DUtilityClass::convert_materials (MaterialConversionEnum conversion, Mater
 								break;
 
 							case GAME_TO_STANDARD:
-   								
+
 								if (nodemtl->ClassID() == GameMaterialClassID) {
-									
+
 									// Make a reference to the game material to ensure that it is not deleted by the system.
 									gamenodematerials [gamenodematerialindex].MakeRefByID (FOREVER, gamenodematerialindex, nodemtl);
 
@@ -887,7 +887,7 @@ int W3DUtilityClass::convert_materials (MaterialConversionEnum conversion, Mater
 
 								} else {
 									gamenodematerials [gamenodematerialindex].MaterialPtr = NULL;
-								}	
+								}
 								break;
 
 							case STANDARD_TO_GAME:
@@ -908,12 +908,12 @@ int W3DUtilityClass::convert_materials (MaterialConversionEnum conversion, Mater
 						for (int materialindex = 0; materialindex < nodemtl->NumSubMtls(); materialindex++) {
 
 							Mtl *submaterial = nodemtl->GetSubMtl (materialindex);
-							
+
 							// Is this a non-null submaterial?
 							if (submaterial != NULL) {
-							
+
 								switch (conversion) {
-									
+
 									case GAME_REFERENCE_COUNT:
 										if (submaterial->ClassID() == GameMaterialClassID) {
 											assert (((GameMtl*) submaterial)->Substitute_Material() == NULL);
@@ -921,21 +921,21 @@ int W3DUtilityClass::convert_materials (MaterialConversionEnum conversion, Mater
 										break;
 
 									case GAME_TO_STANDARD:
-								
+
 										if (submaterial->ClassID() == GameMaterialClassID) {
-									
+
 											// Make a reference to the game material to ensure that it is not deleted by the system.
 											gamenodematerials [gamenodematerialindex].MakeRefByID (FOREVER, gamenodematerialindex, submaterial);
-										
+
 											// Does this material already have an equivalent standard material?
 											if (((GameMtl*) submaterial)->Substitute_Material() == NULL) {
  												((GameMtl*) submaterial)->Set_Substitute_Material (new_standard_material ((GameMtl*) submaterial));
 											}
 											nodemtl->SetSubMtl (materialindex, ((GameMtl*) submaterial)->Substitute_Material());
-										
+
 										} else {
 											gamenodematerials [gamenodematerialindex].MaterialPtr = NULL;
-										}	
+										}
 										break;
 
 									case STANDARD_TO_GAME:
@@ -986,7 +986,7 @@ StdMat *W3DUtilityClass::new_standard_material (GameMtl *gamemtl)
 	stdmtl->SetSelfIllum ((emissive.r + emissive.g + emissive.b) / 3.0f, 0);
 
 	return (stdmtl);
-}   
+}
 
 void W3DUtilityClass::Select_Hierarchy(void)
 {
@@ -1049,8 +1049,8 @@ void W3DUtilityClass::Select_Vis(void)
 void W3DUtilityClass::descend_tree(INode * node,int func)
 {
 	if (!node) return;
-	
-	switch (func) 
+
+	switch (func)
 	{
 	case HIDE:
 		hide_node(node);
@@ -1107,13 +1107,13 @@ void W3DUtilityClass::descend_tree(INode * node,int func)
 	}
 }
 
-void W3DUtilityClass::hide_node(INode * node) 
+void W3DUtilityClass::hide_node(INode * node)
 {
-	if (!node->IsHidden()) node->Hide(TRUE);
+	if (!node->IsHidden()) node->Hide(true);
 	InterfacePtr->NodeInvalidateRect(node);
 }
 
-void W3DUtilityClass::select_geometry_node(INode * node) 
+void W3DUtilityClass::select_geometry_node(INode * node)
 {
 	if (Is_Geometry(node) && !node->IsHidden()) {
 		InterfacePtr->SelectNode(node,0);
@@ -1129,21 +1129,21 @@ void W3DUtilityClass::cs_remove_nu_scale(INode * node){
 		if( clsid == BIPSLAVE_CONTROL_CLASS_ID || clsid == FOOTPRINT_CLASS_ID || clsid == BIPBODY_CONTROL_CLASS_ID){
 			IBipedExport* ibipExport = (IBipedExport*) ctrl->GetInterface(I_BIPINTERFACE);
 			assert(ibipExport);
-			ibipExport->RemoveNonUniformScale(TRUE);
+			ibipExport->RemoveNonUniformScale(true);
 		}
 #endif
 	}
 }
 //End Moumine
 //============================================================================================
-void W3DUtilityClass::select_hierarchy_node(INode * node) 
+void W3DUtilityClass::select_hierarchy_node(INode * node)
 {
 	if (Is_Bone(node) && !node->IsHidden()) {
 		InterfacePtr->SelectNode(node,0);
 	}
 }
 
-void W3DUtilityClass::select_alpha_node(INode * node) 
+void W3DUtilityClass::select_alpha_node(INode * node)
 {
 	if (node->IsHidden() || !Is_Geometry(node)) {
 		return;
@@ -1157,21 +1157,21 @@ void W3DUtilityClass::select_alpha_node(INode * node)
 	}
 }
 
-void W3DUtilityClass::select_physical_node(INode * node) 
+void W3DUtilityClass::select_physical_node(INode * node)
 {
 	if (!node->IsHidden() && Is_Geometry(node) && Is_Physical_Collision(node)) {
 		InterfacePtr->SelectNode(node,0);
 	}
 }
 
-void W3DUtilityClass::select_projectile_node(INode * node) 
+void W3DUtilityClass::select_projectile_node(INode * node)
 {
 	if (!node->IsHidden() && Is_Geometry(node) && Is_Projectile_Collision(node)) {
 		InterfacePtr->SelectNode(node,0);
 	}
 }
 
-void W3DUtilityClass::select_vis_node(INode * node) 
+void W3DUtilityClass::select_vis_node(INode * node)
 {
 	if (!node->IsHidden() && Is_Geometry(node) && Is_Vis_Collision(node)) {
 		InterfacePtr->SelectNode(node,0);
@@ -1226,10 +1226,10 @@ bool W3DUtilityClass::is_alpha_mesh(INode * node,Mtl * nodemtl)
 			return is_alpha_material(nodemtl);
 
 		} else {
-			
+
 			int sub_mtl_count = nodemtl->NumSubMtls();
 			bool * sub_mtl_flags = new bool[sub_mtl_count];
-			
+
 			// Initialize each sub-material flag to false (indicates that the material is un-used)
 			for (mat_index=0; mat_index<sub_mtl_count; mat_index++) {
 				sub_mtl_flags[mat_index] = false;
@@ -1284,10 +1284,10 @@ void W3DUtilityClass::generate_node_name(INode * node)
 	}
 
 	if (NameOptions.AssignCollisionBits) {
-		
+
 		W3DAppData2Struct * wdata = W3DAppData2Struct::Get_App_Data(node);
 		assert(wdata);
-		
+
 		wdata->Enable_Physical_Collision(NameOptions.PhysicalCollision);
 		wdata->Enable_Projectile_Collision(NameOptions.ProjectileCollision);
 		wdata->Enable_Vis_Collision(NameOptions.VisCollision);
@@ -1339,8 +1339,8 @@ W3DAppData0Struct * W3DUtilityClass::get_app_data_0(INode * node)
 	*/
 	if (appdata) {
 		wdata = (W3DAppData0Struct *)(appdata->data);
-	} 
-	
+	}
+
 	return wdata;
 }
 
@@ -1387,21 +1387,21 @@ static BOOL CALLBACK _w3d_utility_cstools_dlg_proc(HWND hWnd, UINT msg, WPARAM w
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:
 		case WM_MOUSEMOVE:
-			TheW3DUtility.InterfacePtr->RollupMouseMessage(hWnd,msg,wParam,lParam); 
+			TheW3DUtility.InterfacePtr->RollupMouseMessage(hWnd,msg,wParam,lParam);
 			break;
-		case WM_COMMAND:{				
+		case WM_COMMAND:{
 			switch (LOWORD(wParam)){
 				case IDC_REMOVE_NONUNIFORM:{
 					TheW3DUtility.CSRemoveNonUniformScale();
 					break;
 				}
 			}
-			return TRUE;
+			return true;
 		}
 		default:
-			return FALSE;
+			return false;
 	}
-	return FALSE;
+	return false;
 }
 
 //End Moumine
@@ -1419,11 +1419,11 @@ static BOOL CALLBACK _w3d_utility_tools_dlg_proc(HWND hWnd, UINT msg, WPARAM wPa
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:
 		case WM_MOUSEMOVE:
-			TheW3DUtility.InterfacePtr->RollupMouseMessage(hWnd,msg,wParam,lParam); 
+			TheW3DUtility.InterfacePtr->RollupMouseMessage(hWnd,msg,wParam,lParam);
 			break;
 
 		case WM_COMMAND:
-		{				
+		{
 			switch (LOWORD(wParam))
 			{
 				/*
@@ -1476,13 +1476,13 @@ static BOOL CALLBACK _w3d_utility_tools_dlg_proc(HWND hWnd, UINT msg, WPARAM wPa
 					TheW3DUtility.create_floater();
 					break;
 			}
-			return TRUE;
+			return true;
 		}
 
 		default:
-			return FALSE;
+			return false;
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -1491,7 +1491,7 @@ static BOOL CALLBACK _w3d_utility_tools_dlg_proc(HWND hWnd, UINT msg, WPARAM wPa
 **
 ** SettingsFormClass Implementation
 ** NOTE: When you use the _settings_form_dlg_proc, a SettingsFormClass will automatically
-** be allocated and attached to the dialog.  You can cause all of the active forms to 
+** be allocated and attached to the dialog.  You can cause all of the active forms to
 ** refresh their status by calling Update_All_Instances.  The forms will be destroyed when
 ** the window is destroyed.
 **
@@ -1509,7 +1509,7 @@ BOOL CALLBACK _settings_form_dlg_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	if (form) {
 		return form->Dialog_Proc(hWnd,msg,wParam,lParam);
 	} else {
-		return FALSE;
+		return false;
 	}
 }
 
@@ -1547,10 +1547,10 @@ SettingsFormClass::~SettingsFormClass(void)
 	if (ActiveList == this) {
 		ActiveList = Next;
 	} else {
-		
+
 		SettingsFormClass * prev = ActiveList;
 		SettingsFormClass * cur = ActiveList->Next;
-	
+
 		while ((cur != this) && (cur != NULL)) {
 			cur = cur->Next;
 			prev = prev->Next;
@@ -1609,7 +1609,7 @@ void SettingsFormClass::Init(void)
 	strcpy(last_slash,DAZZLE_SETTINGS_FILENAME);
 
 	char * dazzle_types_buffer = new char[DAZZLE_SECTION_BUFFERSIZE];	// max size of a section for Win95
-	
+
 	::GetPrivateProfileSection( DAZZLE_TYPES_SECTION, dazzle_types_buffer, DAZZLE_SECTION_BUFFERSIZE, dllpath);
 
 	// Now we need to handle each string in the section buffer; skipping the 'key=' and adding
@@ -1666,18 +1666,18 @@ bool SettingsFormClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wParam,LPARAM 
 			break;
 
 		case WM_COMMAND:
-		{				
+		{
 			/*
 			** handle the tri-state checkboxes.
 			** MAKE SURE YOU PUT ANY NEW CHECKBOX ID's IN HERE!!!
 			*/
 			int control_id = LOWORD(wParam);
-			if (	(control_id == IDC_HIERARCHY_CHECK) || 
+			if (	(control_id == IDC_HIERARCHY_CHECK) ||
 					(control_id == IDC_GEOMETRY_CHECK) ||
 					(control_id == IDC_GEOMETRY_HIDE) ||
 					(control_id == IDC_GEOMETRY_TWO_SIDED) ||
 					(control_id == IDC_GEOMETRY_ZNORMALS) ||
-					(control_id == IDC_GEOMETRY_VERTEX_ALPHA) || 
+					(control_id == IDC_GEOMETRY_VERTEX_ALPHA) ||
 					(control_id == IDC_GEOMETRY_CAST_SHADOW) ||
 					(control_id == IDC_GEOMETRY_SHATTERABLE) ||
 					(control_id == IDC_GEOMETRY_NPATCH) ||
@@ -1702,14 +1702,14 @@ bool SettingsFormClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wParam,LPARAM 
 				** Tri-State Checkboxes, make sure that the ID of all checkboxes is present
 				** in the 'if' statement above!
 				*/
-				case IDC_HIERARCHY_CHECK: 
+				case IDC_HIERARCHY_CHECK:
 					W3DUtilityClass::set_hierarchy_in_all_selected(&node_list,check == BST_CHECKED);
 					break;
 
-				case IDC_GEOMETRY_CHECK: 
+				case IDC_GEOMETRY_CHECK:
 					W3DUtilityClass::set_geometry_in_all_selected(&node_list,check == BST_CHECKED);
 					break;
-				
+
 				case IDC_GEOMETRY_HIDE:
 					W3DUtilityClass::enable_hidden_in_all_selected(&node_list,check == BST_CHECKED);
 					break;
@@ -1717,7 +1717,7 @@ bool SettingsFormClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wParam,LPARAM 
 				case IDC_GEOMETRY_TWO_SIDED:
 					W3DUtilityClass::enable_two_sided_in_all_selected(&node_list,check == BST_CHECKED);
 					break;
-				
+
 				case IDC_GEOMETRY_ZNORMALS:
 					W3DUtilityClass::enable_znormals_in_all_selected(&node_list,check == BST_CHECKED);
 					break;
@@ -1733,12 +1733,12 @@ bool SettingsFormClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wParam,LPARAM 
 				case IDC_GEOMETRY_SHATTERABLE:
 					W3DUtilityClass::enable_shatterable_in_all_selected(&node_list,check == BST_CHECKED);
 					break;
-				
+
 				case IDC_GEOMETRY_NPATCH:
 					W3DUtilityClass::enable_npatches_in_all_selected(&node_list,check == BST_CHECKED);
 					break;
 
-				case IDC_COLLISION_PHYSICAL: 
+				case IDC_COLLISION_PHYSICAL:
 					W3DUtilityClass::enable_physical_collision_in_all_selected(&node_list,check == BST_CHECKED);
 					break;
 
@@ -1764,15 +1764,15 @@ bool SettingsFormClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wParam,LPARAM 
 				case IDC_GEOMETRY_NORMAL:
 					W3DUtilityClass::set_geometry_type_in_all_selected(&node_list,W3DAppData2Struct::GEO_TYPE_NORMAL_MESH);
 					break;
-				
+
 				case IDC_GEOMETRY_CAMERA_ALIGNED:
 					W3DUtilityClass::set_geometry_type_in_all_selected(&node_list,W3DAppData2Struct::GEO_TYPE_CAMERA_ALIGNED);
 					break;
-				
+
 				case IDC_GEOMETRY_CAMERA_ORIENTED:
 					W3DUtilityClass::set_geometry_type_in_all_selected(&node_list,W3DAppData2Struct::GEO_TYPE_CAMERA_ORIENTED);
 					break;
-				
+
 				case IDC_GEOMETRY_NULL:
 					W3DUtilityClass::set_geometry_type_in_all_selected(&node_list,W3DAppData2Struct::GEO_TYPE_NULL);
 					break;
@@ -1802,7 +1802,7 @@ bool SettingsFormClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wParam,LPARAM 
 
 						HWND dazzle_combo = GetDlgItem(hWnd,IDC_DAZZLE_COMBO);
 						if (dazzle_combo != NULL) {
-		
+
 							char dazzle_type[128];
 							int cursel = ::SendMessage(dazzle_combo,CB_GETCURSEL,0,0);
 							int len = ::SendMessage(dazzle_combo,CB_GETLBTEXTLEN,cursel,0);
@@ -1815,7 +1815,7 @@ bool SettingsFormClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wParam,LPARAM 
 					break;
 
 			}
-			return TRUE;
+			return true;
 		}
 
 		/*
@@ -1855,9 +1855,9 @@ bool SettingsFormClass::Dialog_Proc(HWND hWnd,UINT message,WPARAM wParam,LPARAM 
 
 
 		default:
-			return FALSE;
+			return false;
 	}
-	return TRUE;
+	return true;
 }
 
 void SettingsFormClass::Selection_Changed(void)
@@ -1872,19 +1872,19 @@ void SettingsFormClass::Selection_Changed(void)
 void SettingsFormClass::Update_Controls(INodeListClass * node_list)
 {
 	/*
-	** Update name of currently selected object 
+	** Update name of currently selected object
 	** "Multiple" if more than one, "None" if no selected objs...
 	*/
 	ICustEdit * edit_ctrl = GetICustEdit(GetDlgItem(Hwnd,IDC_OBJ_NAME));
 	if (edit_ctrl != NULL) {
 		if (node_list->Num_Nodes() == 0) {
-			edit_ctrl->Enable(FALSE);
+			edit_ctrl->Enable(false);
 			edit_ctrl->SetText(Get_String(IDS_NO_OBJECT));
 		} else if (node_list->Num_Nodes() == 1) {
-			edit_ctrl->Enable(TRUE);
+			edit_ctrl->Enable(true);
 			edit_ctrl->SetText((*node_list)[0]->GetName());
 		} else {
-			edit_ctrl->Enable(FALSE);
+			edit_ctrl->Enable(false);
 			edit_ctrl->SetText(Get_String(IDS_MULTIPLE_OBJECTS));
 		}
 
@@ -1902,59 +1902,59 @@ void SettingsFormClass::Update_Controls(INodeListClass * node_list)
 	/*
 	** Enable hierarchy and geometry checks since they are always available
 	*/
-	EnableWindow(GetDlgItem(Hwnd,IDC_HIERARCHY_CHECK),TRUE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CHECK),TRUE);
+	EnableWindow(GetDlgItem(Hwnd,IDC_HIERARCHY_CHECK),true);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CHECK),true);
 
 	/*
 	** Enable/Disable the geometry controls
 	*/
 	if (ns.ExportGeometry == 1) {
 
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ALIGNED),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ORIENTED),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NORMAL),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NULL),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AABOX),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_OBBOX),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AGGREGATE),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_DAZZLE),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_HIDE),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_TWO_SIDED),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_ZNORMALS),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_VERTEX_ALPHA),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAST_SHADOW),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_SHATTERABLE),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NPATCH),TRUE);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ALIGNED),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ORIENTED),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NORMAL),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NULL),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AABOX),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_OBBOX),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AGGREGATE),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_DAZZLE),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_HIDE),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_TWO_SIDED),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_ZNORMALS),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_VERTEX_ALPHA),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAST_SHADOW),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_SHATTERABLE),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NPATCH),true);
 
-		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PHYSICAL),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PROJECTILE),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VIS),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_CAMERA),TRUE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VEHICLE),TRUE);
+		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PHYSICAL),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PROJECTILE),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VIS),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_CAMERA),true);
+		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VEHICLE),true);
 
 	} else {
 
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ALIGNED),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ORIENTED),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NORMAL),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NULL),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AABOX),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_OBBOX),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AGGREGATE),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_DAZZLE),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_HIDE),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_TWO_SIDED),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_ZNORMALS),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_VERTEX_ALPHA),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAST_SHADOW),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_SHATTERABLE),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NPATCH),FALSE);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ALIGNED),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ORIENTED),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NORMAL),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NULL),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AABOX),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_OBBOX),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AGGREGATE),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_DAZZLE),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_HIDE),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_TWO_SIDED),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_ZNORMALS),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_VERTEX_ALPHA),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAST_SHADOW),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_SHATTERABLE),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NPATCH),false);
 
-		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PHYSICAL),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PROJECTILE),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VIS),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_CAMERA),FALSE);
-		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VEHICLE),FALSE);
+		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PHYSICAL),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PROJECTILE),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VIS),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_CAMERA),false);
+		EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VEHICLE),false);
 	}
 
 	/*
@@ -1988,13 +1988,13 @@ void SettingsFormClass::Update_Controls(INodeListClass * node_list)
 		if (ns.DamageRegion != MAX_DAMAGE_REGIONS)
 		{
 			// Show the damage region in the spinner.
-			RegionSpin->SetIndeterminate(FALSE);
-			RegionSpin->SetValue(ns.DamageRegion, FALSE);
+			RegionSpin->SetIndeterminate(false);
+			RegionSpin->SetValue(ns.DamageRegion, false);
 		}
 		else
 		{
 			// The selected objects aren't all in the same region.
-			RegionSpin->SetIndeterminate(TRUE);
+			RegionSpin->SetIndeterminate(true);
 		}
 
 		spinner_enable = true;
@@ -2003,8 +2003,8 @@ void SettingsFormClass::Update_Controls(INodeListClass * node_list)
 	EnableWindow(GetDlgItem(Hwnd,IDC_DAMREG_INDEX_SPIN),spinner_enable);
 
 	/*
-	** The dazzle combo box should only be enabled if 
-	** Export Geometry, and geometry type dazzle is set for all 
+	** The dazzle combo box should only be enabled if
+	** Export Geometry, and geometry type dazzle is set for all
 	** selected nodes.
 	*/
 	bool dazzle_combo_enable = false;
@@ -2038,41 +2038,41 @@ void SettingsFormClass::Update_Controls(INodeListClass * node_list)
 
 void SettingsFormClass::Disable_Controls(void)
 {
-	EnableWindow(GetDlgItem(Hwnd,IDC_OBJ_NAME),FALSE);
+	EnableWindow(GetDlgItem(Hwnd,IDC_OBJ_NAME),false);
 
-	EnableWindow(GetDlgItem(Hwnd,IDC_HIERARCHY_CHECK),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CHECK),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_DAMREG_INDEX_EDIT),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_DAMREG_INDEX_SPIN),FALSE);
-	
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NORMAL),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ALIGNED),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ORIENTED),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AABOX),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_OBBOX),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NULL),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AGGREGATE),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_DAZZLE),FALSE);
+	EnableWindow(GetDlgItem(Hwnd,IDC_HIERARCHY_CHECK),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CHECK),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_DAMREG_INDEX_EDIT),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_DAMREG_INDEX_SPIN),false);
 
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_HIDE),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_TWO_SIDED),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_ZNORMALS),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_VERTEX_ALPHA),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAST_SHADOW),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_SHATTERABLE),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NPATCH),FALSE);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NORMAL),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ALIGNED),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAMERA_ORIENTED),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AABOX),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_OBBOX),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NULL),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_AGGREGATE),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_DAZZLE),false);
 
-	EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PHYSICAL),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PROJECTILE),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VIS),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_CAMERA),FALSE);
-	EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VEHICLE),FALSE);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_HIDE),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_TWO_SIDED),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_ZNORMALS),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_VERTEX_ALPHA),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_CAST_SHADOW),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_SHATTERABLE),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_GEOMETRY_NPATCH),false);
 
-	EnableWindow(GetDlgItem(Hwnd,IDC_DAZZLE_COMBO),FALSE);
+	EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PHYSICAL),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_PROJECTILE),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VIS),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_CAMERA),false);
+	EnableWindow(GetDlgItem(Hwnd,IDC_COLLISION_VEHICLE),false);
+
+	EnableWindow(GetDlgItem(Hwnd,IDC_DAZZLE_COMBO),false);
 
 	CheckDlgButton(Hwnd,IDC_HIERARCHY_CHECK,BST_UNCHECKED);
 	CheckDlgButton(Hwnd,IDC_GEOMETRY_CHECK,BST_UNCHECKED);
-	
+
 	CheckDlgButton(Hwnd,IDC_GEOMETRY_CAMERA_ALIGNED,BST_UNCHECKED);
 	CheckDlgButton(Hwnd,IDC_GEOMETRY_CAMERA_ORIENTED,BST_UNCHECKED);
 	CheckDlgButton(Hwnd,IDC_GEOMETRY_NORMAL,BST_UNCHECKED);

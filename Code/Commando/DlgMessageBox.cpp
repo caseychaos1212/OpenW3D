@@ -34,8 +34,8 @@
 *
 ******************************************************************************/
 
+#include "renegadedialog.h"
 #include "DlgMessageBox.h"
-#include "resource.h"
 #include <wwtranslatedb/translatedb.h>
 #include "wwdebug.h"
 
@@ -61,9 +61,9 @@ int DlgMsgBox::CurrentCount	= 0;
 *
 ******************************************************************************/
 
-bool DlgMsgBox::DoDialog(const wchar_t* title, const wchar_t* text,
-		DlgMsgBox::Type type, Observer<DlgMsgBoxEvent>* observer, unsigned long user_data)
-	{	
+bool DlgMsgBox::DoDialog(const unichar_t* title, const unichar_t* text,
+		DlgMsgBox::Type type, Observer<DlgMsgBoxEvent>* observer, unsigned int user_data)
+	{
 	DlgMsgBox* popup = new DlgMsgBox;
 
 	if (popup)
@@ -105,10 +105,10 @@ bool DlgMsgBox::DoDialog(const wchar_t* title, const wchar_t* text,
 ******************************************************************************/
 
 bool DlgMsgBox::DoDialog(int titleID, int textID,
-		DlgMsgBox::Type type, Observer<DlgMsgBoxEvent>* observer, unsigned long user_data)
+		DlgMsgBox::Type type, Observer<DlgMsgBoxEvent>* observer, unsigned int user_data)
 	{
-	const wchar_t* title = TranslateDBClass::Get_String(titleID);
-	const wchar_t* text = TranslateDBClass::Get_String(textID);
+	const unichar_t* title = TranslateDBClass::Get_String(titleID);
+	const unichar_t* text = TranslateDBClass::Get_String(textID);
 	return DoDialog(title, text, type, observer, user_data);
 	}
 
@@ -131,7 +131,7 @@ bool DlgMsgBox::DoDialog(int titleID, int textID,
 
 DlgMsgBox::DlgMsgBox() :
 		mUserData(0),
-		PopupDialogClass(IDD_MESSAGEBOX_OK)
+		PopupDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MESSAGEBOX_OK))
 	{
 		CurrentCount++;
 	}
@@ -176,13 +176,14 @@ DlgMsgBox::~DlgMsgBox()
 
 void DlgMsgBox::SetResourceType(DlgMsgBox::Type type)
 	{
-	static UINT _types[] =
-		{
-		IDD_MESSAGEBOX_OK,
-		IDD_MESSAGEBOX_YESNO
-		};
-
-	DialogResID = _types[type];
+	switch (type) {
+		case DlgMsgBox::Type::Okay:
+			DialogResource_ = GetRenegadeDialog(RenegadeDialogID::IDD_MESSAGEBOX_OK);
+			break;
+		case DlgMsgBox::Type::YesNo:
+			DialogResource_ = GetRenegadeDialog(RenegadeDialogID::IDD_MESSAGEBOX_YESNO);
+			break;
+	}
 	}
 
 
@@ -230,17 +231,17 @@ void DlgMsgBox::End_Dialog(void)
 *
 ******************************************************************************/
 
-void DlgMsgBox::On_Command(int ctrl, int message, DWORD param)
+void DlgMsgBox::On_Command(int ctrl, int message, unsigned int param)
 	{
 	switch (ctrl)
 		{
 		case IDOK:
 			{
 			Add_Ref();
-			
+
 			DlgMsgBoxEvent event(DlgMsgBoxEvent::Okay, this, mUserData);
 			NotifyObservers(event);
-			
+
 			Release_Ref();
 			End_Dialog();
 			}
@@ -249,10 +250,10 @@ void DlgMsgBox::On_Command(int ctrl, int message, DWORD param)
 		case IDYES:
 			{
 			Add_Ref();
-			
+
 			DlgMsgBoxEvent event(DlgMsgBoxEvent::Yes, this, mUserData);
 			NotifyObservers(event);
-			
+
 			Release_Ref();
 			End_Dialog();
 			}
@@ -261,7 +262,7 @@ void DlgMsgBox::On_Command(int ctrl, int message, DWORD param)
 		case IDNO:
 			{
 			Add_Ref();
-			
+
 			DlgMsgBoxEvent event(DlgMsgBoxEvent::No, this, mUserData);
 			NotifyObservers(event);
 

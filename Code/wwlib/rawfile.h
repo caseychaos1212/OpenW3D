@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Command & Conquer                                            * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/wwlib/rawfile.h                              $* 
- *                                                                                             * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Command & Conquer                                            *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/wwlib/rawfile.h                              $*
+ *                                                                                             *
  *                      $Author:: Jani_p                                                      $*
- *                                                                                             * 
+ *                                                                                             *
  *                     $Modtime:: 11/25/01 11:52a                                             $*
- *                                                                                             * 
+ *                                                                                             *
  *                    $Revision:: 10                                                          $*
  *                                                                                             *
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  *   RawFileClass::File_Name -- Returns with the filename associate with the file object.      *
  *   RawFileClass::RawFileClass -- Default constructor for a file object.                      *
  *   RawFileClass::~RawFileClass -- Default deconstructor for a file object.                   *
@@ -47,16 +47,6 @@
 //#include	<errno.h>
 
 // #include	"win.h"
-
-#ifdef _UNIX
-#include <stdio.h>
-#include "osdep.h"
-  #define	NULL_HANDLE	 	NULL	
-  #define	HANDLE_TYPE		FILE*	
-#else
-  #define	NULL_HANDLE		INVALID_HANDLE_VALUE
-  #define	HANDLE_TYPE		HANDLE
-#endif
 
 #include	"wwfile.h"
 #include "wwstring.h"
@@ -108,14 +98,14 @@ class RawFileClass : public FileClass
 		virtual int Size(void) override;
 		virtual int Write(void const *buffer, int size) override;
 		virtual void Close(void) override;
-		virtual unsigned long Get_Date_Time(void) override;
-		virtual bool Set_Date_Time(unsigned long datetime) override;
+		virtual unsigned int Get_Date_Time(void) override;
+		virtual bool Set_Date_Time(unsigned int datetime) override;
 		virtual void Error(int error, int canretry = false, char const * filename=NULL) override;
 		virtual void Bias(int start, int length=-1) override;
-		virtual void * Get_File_Handle(void) override { return Handle;  }
+		virtual HANDLE_TYPE Get_File_Handle(void) override { return Handle;  }
 
-		virtual void	Attach (void *handle, int rights=READ);
-		virtual void	Detach (void);		
+		virtual void	Attach (HANDLE_TYPE handle, int rights=READ);
+		virtual void	Detach (void);
 
 		/*
 		**	These bias values enable a sub-portion of a file to appear as if it
@@ -141,11 +131,7 @@ class RawFileClass : public FileClass
 		/*
 		**	This is the low level DOS handle. A -1 indicates an empty condition.
 		*/
-		#ifdef _UNIX
-			FILE*  Handle;
-		#else
-			void * Handle;
-		#endif
+		HANDLE_TYPE Handle;
 
 		StringClass Filename;
 

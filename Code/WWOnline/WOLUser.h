@@ -70,7 +70,7 @@ class UserData :
 	public:
 		// Create new User
 		static RefPtr<UserData> Create(const WOL::User&);
-		static RefPtr<UserData> Create(const wchar_t*);
+		static RefPtr<UserData> Create(const unichar_t*);
 
 		// Get WOL::User data
 		WOL::User& GetData(void)
@@ -116,7 +116,7 @@ class UserData :
 		void SetChannel(const RefPtr<ChannelData>& channel);
 
 		// Get user's clan ID
-		unsigned long GetSquadID(void) const
+		unsigned int GetSquadID(void) const
 			{return mData.squadID;}
 
 		// Get access user's Clan data (This is shared with all other users in the same clan)
@@ -158,7 +158,7 @@ class UserData :
 		void SetLadderFromType(const RefPtr<LadderData>& ladder, LadderType ladderType);
 		RefPtr<LadderData> GetLadderFromType(LadderType ladderType);
 
-		unsigned long mKickTimer;
+		unsigned int mKickTimer;
 
 	private:
 		UserData(const WOL::User&);
@@ -269,8 +269,8 @@ class UserIPEvent :
 	};
 
 
-RefPtr<UserData> FindUserInList(const wchar_t* name, const UserList& list);
-RefPtr<UserData> RemoveUserInList(const wchar_t* name, UserList& list);
+RefPtr<UserData> FindUserInList(const unichar_t* name, const UserList& list);
+RefPtr<UserData> RemoveUserInList(const unichar_t* name, UserList& list);
 
 } // namespace WWOnline
 

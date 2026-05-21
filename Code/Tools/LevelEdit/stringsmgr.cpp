@@ -78,7 +78,7 @@ StringsMgrClass::Create_Database_If_Necessary (void)
 {
 	FileMgrClass *file_mgr			= ::Get_File_Mgr ();
 	AssetDatabaseClass &asset_db	= file_mgr->Get_Database_Interface ();
-	
+
 	//
 	//	Determine where the file should exist locally
 	//
@@ -88,20 +88,20 @@ StringsMgrClass::Create_Database_If_Necessary (void)
 	//	Check to see if the file exists in VSS
 	//
 	if (asset_db.Does_File_Exist (filename) == false) {
-		
+
 		//
 		//	Save a copy of the database to disk and add it to VSS
 		//
 		Save_Translation_Database ();
 		asset_db.Add_File (filename);
 	} else {
-		
+
 		//
 		//	The file exists in VSS, so update our local copy
 		//
 		Get_Latest_Version ();
 	}
-	
+
 	return ;
 }
 
@@ -131,19 +131,16 @@ StringsMgrClass::Save_Translation_Database (const char *full_path)
 	//
 	//	Create the file
 	//
-	HANDLE file = ::CreateFile (full_path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS,
-							0L, NULL);
+	RawFileClass file_obj(full_path);
+	file_obj.Open(FileClass::WRITE);
 
-	ASSERT (file != INVALID_HANDLE_VALUE);
-	if (file != INVALID_HANDLE_VALUE) {
-
-		RawFileClass file_obj;
-		file_obj.Attach (file);
+	ASSERT (file_obj.Is_Open());
+	if (file_obj.Is_Open()) {
 		ChunkSaveClass chunk_save (&file_obj);
 
 		//
 		//	Save the translation database subsystem
-		//		
+		//
 		SaveLoadSystemClass::Save (chunk_save, _TheTranslateDB);
 	}
 
@@ -164,14 +161,12 @@ StringsMgrClass::Load_Translation_Database (void)
 	//
 	//	Open the file
 	//
-	HANDLE file = ::CreateFile (filename, GENERIC_READ, FILE_SHARE_READ, NULL,
-							OPEN_EXISTING, 0L, NULL);
+	RawFileClass file_obj(filename);
+	
+	ASSERT (file_obj.Is_Available());
+	if (file_obj.Is_Available()) {
 
-	ASSERT (file != INVALID_HANDLE_VALUE);
-	if (file != INVALID_HANDLE_VALUE) {
-
-		RawFileClass file_obj;
-		file_obj.Attach (file);
+		file_obj.Open(FileClass::READ);
 		ChunkLoadClass chunk_load (&file_obj);
 
 		//
@@ -191,8 +186,8 @@ StringsMgrClass::Load_Translation_Database (void)
 /////////////////////////////////////////////////////////////////////////
 void
 StringsMgrClass::Import_Strings (void)
-{	
-	CFileDialog dialog (TRUE, ".txt", "strings.txt",
+{
+	CFileDialog dialog (true, ".txt", "strings.txt",
 		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER,
 		"Text Files (*.txt)|*.txt||", ::AfxGetMainWnd ());
 
@@ -201,7 +196,7 @@ StringsMgrClass::Import_Strings (void)
 	//
 	// Ask the user what file they want to load
 	//
-	if (dialog.DoModal () == IDOK) {		
+	if (dialog.DoModal () == IDOK) {
 		if (Check_Out ()) {
 
 			//
@@ -209,9 +204,9 @@ StringsMgrClass::Import_Strings (void)
 			//
 			TranslateDBClass::Import_Strings (dialog.GetPathName ());
 			Save_Translation_Database ();
-			Check_In ();			
+			Check_In ();
 		}
-	}	
+	}
 
 	return ;
 }
@@ -224,15 +219,15 @@ StringsMgrClass::Import_Strings (void)
 /////////////////////////////////////////////////////////////////////////
 void
 StringsMgrClass::Import_IDs (void)
-{	
-	CFileDialog dialog (TRUE, ".h", "string_ids.h",
+{
+	CFileDialog dialog (true, ".h", "string_ids.h",
 		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER,
 		"C Header Files (*.h)|*.h||", ::AfxGetMainWnd ());
 
 	//
 	// Ask the user what file they want to load
 	//
-	if (dialog.DoModal () == IDOK) {		
+	if (dialog.DoModal () == IDOK) {
 		if (Check_Out ()) {
 
 			//
@@ -240,9 +235,9 @@ StringsMgrClass::Import_IDs (void)
 			//
 			TranslateDBClass::Import_C_Header (dialog.GetPathName ());
 			Save_Translation_Database ();
-			Check_In ();			
+			Check_In ();
 		}
-	}	
+	}
 
 	return ;
 }
@@ -255,8 +250,8 @@ StringsMgrClass::Import_IDs (void)
 /////////////////////////////////////////////////////////////////////////
 void
 StringsMgrClass::Export_IDs (void)
-{	
-	CFileDialog dialog (FALSE, ".h", "string_ids.h",
+{
+	CFileDialog dialog (false, ".h", "string_ids.h",
 		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER,
 		"C Header Files (*.h)|*.h||", ::AfxGetMainWnd ());
 
@@ -275,7 +270,7 @@ StringsMgrClass::Export_IDs (void)
 		} else {
 			TranslateDBClass::Export_C_Header (path);
 		}
-	}	
+	}
 
 	return ;
 }
@@ -291,12 +286,12 @@ StringsMgrClass::Get_Latest_Version (void)
 {
 	FileMgrClass *file_mgr			= ::Get_File_Mgr ();
 	AssetDatabaseClass &asset_db	= file_mgr->Get_Database_Interface ();
-	
+
 	//
 	//	Determine where the file should exist locally
 	//
 	CString filename = ::Get_File_Mgr ()->Make_Full_Path (STRINGS_DB_PATH);
-	
+
 	//
 	//	Ask VSS to get the latest version of the file for us
 	//
@@ -314,12 +309,12 @@ StringsMgrClass::Check_Out (void)
 {
 	FileMgrClass *file_mgr			= ::Get_File_Mgr ();
 	AssetDatabaseClass &asset_db	= file_mgr->Get_Database_Interface ();
-	
+
 	//
 	//	Determine where the file should exist locally
 	//
 	CString filename = ::Get_File_Mgr ()->Make_Full_Path (STRINGS_DB_PATH);
-	
+
 	//
 	//	Ask VSS to check out the file to us
 	//
@@ -337,12 +332,12 @@ StringsMgrClass::Check_In (void)
 {
 	FileMgrClass *file_mgr			= ::Get_File_Mgr ();
 	AssetDatabaseClass &asset_db	= file_mgr->Get_Database_Interface ();
-	
+
 	//
 	//	Determine where the file should exist locally
 	//
 	CString filename = ::Get_File_Mgr ()->Make_Full_Path (STRINGS_DB_PATH);
-	
+
 	//
 	//	Ask VSS to check in the file for us
 	//
@@ -397,7 +392,7 @@ StringsMgrClass::Edit_Database (HWND parent_wnd)
 		//	Reload the database
 		//
 		StringsMgrClass::Load_Translation_Database ();
-		
+
 		//
 		//	Show a dialog to the user so then can edit the strings
 		//
@@ -463,7 +458,7 @@ StringsMgrClass::Export_For_Translation (const char *filename, uint32 lang_id)
 	for (int index = 0; index < count; index ++) {
 		TDBObjClass *object = TranslateDBClass::Get_Object (index);
 		if (object != NULL && object->As_StringTwiddlerClass () == NULL) {
-			
+
 			//
 			//	Get the data for this string that we want to export
 			//
@@ -491,7 +486,7 @@ StringsMgrClass::Export_For_Translation (const char *filename, uint32 lang_id)
 			//
 			WideStringClass category_name;
 			TDBCategoryClass *category	= TranslateDBClass::Find_Category (category_id);
-			if (category != NULL) {				
+			if (category != NULL) {
 				category_name.Convert_From (category->Get_Name ());
 			}
 
@@ -513,7 +508,7 @@ StringsMgrClass::Export_For_Translation (const char *filename, uint32 lang_id)
 			//
 			ExcelClass::Set_String (index + 1, COL_CATEGORY_NAME,		category_name);
 			ExcelClass::Set_String (index + 1, COL_STRING_ID,			wide_string_id);
-			ExcelClass::Set_String (index + 1, COL_SOUND_FILENAME,	wide_sound_filename);			
+			ExcelClass::Set_String (index + 1, COL_SOUND_FILENAME,	wide_sound_filename);
 			ExcelClass::Set_String (index + 1, COL_ENGLISH_TEXT,		wide_string);
 			ExcelClass::Set_String (index + 1, COL_SOUND_PRESET_NAME,wide_sound_preset_name);
 
@@ -573,7 +568,7 @@ StringsMgrClass::Import_From_Translation (const char *filename, uint32 lang_id)
 		WideStringClass string;
 		WideStringClass preset_name;
 		ExcelClass::Get_String (index + 1, COL_CATEGORY_NAME,		category_name);
-		ExcelClass::Get_String (index + 1, COL_STRING_ID,			string_id);		
+		ExcelClass::Get_String (index + 1, COL_STRING_ID,			string_id);
 		ExcelClass::Get_String (index + 1, COL_ENGLISH_TEXT,		english_string);
 		ExcelClass::Get_String (index + 1, COL_TRANSLATED_TEXT,	string);
 		ExcelClass::Get_String (index + 1, COL_SOUND_PRESET_NAME,preset_name);
@@ -591,7 +586,7 @@ StringsMgrClass::Import_From_Translation (const char *filename, uint32 lang_id)
 		if (string_id.Is_Empty ()) {
 			keep_going = false;
 		} else {
-			
+
 			StringClass ascii_string_id;
 			string_id.Convert_To (ascii_string_id);
 
@@ -684,11 +679,11 @@ StringsMgrClass::Convert_Newline_To_Chars (WideStringClass &string)
 	//	Copy characters between the strings
 	//
 	for (int index = 0; index < count; index ++) {
-		
-		if (string[index] == L'\n') {
-			retval += L"\\n";
-		} else if (string[index] == L'\t') {
-			retval += L"\\t";
+
+		if (string[index] == U_CHAR('\n')) {
+			retval += U_CHAR("\\n");
+		} else if (string[index] == U_CHAR('\t')) {
+			retval += U_CHAR("\\t");
 		} else {
 			retval += string[index];
 		}
@@ -708,7 +703,7 @@ void
 StringsMgrClass::Convert_Chars_To_Newline (WideStringClass &string)
 {
 	WideStringClass retval;
-	
+
 	//
 	//	Take a guess as to how large to make the final string
 	//
@@ -718,12 +713,12 @@ StringsMgrClass::Convert_Chars_To_Newline (WideStringClass &string)
 	//	Copy characters between the strings
 	//
 	for (int index = 0; index < count; index ++) {
-		
-		if (index + 1 < count && string[index] == L'\\' && string[index + 1] == L'n') {
-			retval += L'\n';
+
+		if (index + 1 < count && string[index] == U_CHAR('\\') && string[index + 1] == U_CHAR('n')) {
+			retval += U_CHAR('\n');
 			index ++;
-		} else if (index + 1 < count && string[index] == L'\\' && string[index + 1] == L't') {
-			retval += L'\t';
+		} else if (index + 1 < count && string[index] == U_CHAR('\\') && string[index + 1] == U_CHAR('t')) {
+			retval += U_CHAR('\t');
 			index ++;
 		} else {
 			retval += string[index];
@@ -758,19 +753,19 @@ StringsMgrClass::Apply_Characteristics
 		//
 		//	Check to see if the english string is commented out
 		///
-		const wchar_t *buffer = english_string;			
-		if (buffer[0] == L'/' && buffer[1] == L'/') {
-			
+		const wchar_t *buffer = english_string;
+		if (buffer[0] == U_CHAR('/') && buffer[1] == U_CHAR('/')) {
+
 			//
 			//	Do we need to comment out the translated string as well?
 			//
 			const wchar_t *trans_buffer = translated_string;
-			if (trans_buffer[0] != L'/' || trans_buffer[1] != L'/') {
-				
+			if (trans_buffer[0] != U_CHAR('/') || trans_buffer[1] != U_CHAR('/')) {
+
 				//
 				//	Prepend the forward slashes
 				//
-				WideStringClass temp_string = L"//";
+				WideStringClass temp_string = U_CHAR("//");
 				temp_string += translated_string;
 				translated_string = temp_string;
 				trans_len = translated_string.Get_Length ();
@@ -782,11 +777,11 @@ StringsMgrClass::Apply_Characteristics
 	//	Concatenate a '\n' onto the end of the translated string, if
 	// there's one at the end of the english string
 	//
-	const wchar_t *buffer = english_string;
-	if (buffer[english_len - 1] == L'\n') {
-		const wchar_t *trans_buffer = translated_string;
-		if (trans_buffer[trans_len - 1] != L'\n') {
-			translated_string += L"\n";
+	const unichar_t *buffer = english_string;
+	if (buffer[english_len - 1] == U_CHAR('\n')) {
+		const unichar_t *trans_buffer = translated_string;
+		if (trans_buffer[trans_len - 1] != U_CHAR('\n')) {
+			translated_string += U_CHAR("\n");
 		}
 	}
 

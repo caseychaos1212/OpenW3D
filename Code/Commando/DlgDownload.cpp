@@ -34,10 +34,10 @@
 *
 ******************************************************************************/
 
+#include "renegadedialog.h"
 #include "DlgDownload.h"
 #include "DlgMessageBox.h"
 #include "DlgRestart.h"
-#include "resource.h"
 #include <wwui/ProgressCtrl.h>
 #include "string_ids.h"
 #include <wwtranslatedb/translatedb.h>
@@ -49,8 +49,8 @@
 
 using namespace WWOnline;
 
-static void PrintableSize(unsigned long size, WideStringClass& printable);
-static void PrintableTime(unsigned long seconds, WideStringClass& printable);
+static void PrintableSize(unsigned int size, WideStringClass& printable);
+static void PrintableTime(unsigned int seconds, WideStringClass& printable);
 
 bool DlgDownload::mQuietMode = false;
 
@@ -72,7 +72,7 @@ bool DlgDownload::mQuietMode = false;
 *
 ******************************************************************************/
 
-bool DlgDownload::DoDialog(const wchar_t* title, const DownloadList& files, bool quiet)
+bool DlgDownload::DoDialog(const unichar_t* title, const DownloadList& files, bool quiet)
 	{
 	if (!files.empty())
 		{
@@ -114,7 +114,7 @@ bool DlgDownload::DoDialog(const wchar_t* title, const DownloadList& files, bool
 ******************************************************************************/
 
 DlgDownload::DlgDownload() :
-		PopupDialogClass(IDD_WOL_DOWNLOAD),
+		PopupDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_WOL_DOWNLOAD)),
 		mDownloading(false)
 	{
 	WWDEBUG_SAY(("DlgDownload: Instantiated\n"));
@@ -219,7 +219,7 @@ void DlgDownload::On_Init_Dialog(void)
 *
 ******************************************************************************/
 
-void DlgDownload::On_Command(int ctrl, int message, DWORD param)
+void DlgDownload::On_Command(int ctrl, int message, unsigned int param)
 	{
 	if (ctrl == IDCANCEL)
 		{
@@ -322,8 +322,8 @@ void DlgDownload::UpdateProgress(DownloadEvent& event)
 					}
 
 				// Calculate the transfer rate
-				unsigned long transferRate = read;
-				unsigned long elapsedTime = ((TIMEGETTIME() - mStartTime) / 1000);
+				unsigned int transferRate = read;
+				unsigned int elapsedTime = ((TIMEGETTIME() - mStartTime) / 1000);
 				if (elapsedTime > 0)
 					{
 					transferRate = (read / elapsedTime);
@@ -355,8 +355,8 @@ void DlgDownload::UpdateProgress(DownloadEvent& event)
 				//-----------------------------------------------------------------------
 
 				// Calculate the transfer rate
-				unsigned long transferRate = read;
-				unsigned long elapsedTime = ((TIMEGETTIME() - mStartTime) / 1000);
+				unsigned int transferRate = read;
+				unsigned int elapsedTime = ((TIMEGETTIME() - mStartTime) / 1000);
 
 				if (elapsedTime > 0)
 					{
@@ -368,11 +368,11 @@ void DlgDownload::UpdateProgress(DownloadEvent& event)
 				PrintableSize(transferRate, sizetext);
 
 				WideStringClass text(0, true);
-				text.Format(TRANSLATE(IDS_MENU_TRANSFER_RATE_PER_SEC), (const wchar_t*)sizetext);
+				text.Format(TRANSLATE(IDS_MENU_TRANSFER_RATE_PER_SEC), (const unichar_t*)sizetext);
 				Set_Dlg_Item_Text(IDC_TRANSFERTEXT, text);
 
 				// Calculate estimated time based on the current transfer rate.
-				unsigned long estimatedTime = 0;
+				unsigned int estimatedTime = 0;
 
 				if (transferRate > 0)
 					{
@@ -389,7 +389,7 @@ void DlgDownload::UpdateProgress(DownloadEvent& event)
 				PrintableSize(size, sizetext);
 
 				text.Format(TRANSLATE(IDS_MENU_TRANSFER_TIME_LEFT),
-					(const wchar_t*)timetext, (const wchar_t*)readtext, (const wchar_t*)sizetext);
+					(const unichar_t*)timetext, (const unichar_t*)readtext, (const unichar_t*)sizetext);
 
 				Set_Dlg_Item_Text(IDC_PROGRESSTEXT, text);
 				}
@@ -471,7 +471,7 @@ void DlgDownload::HandleCallback(DownloadEvent& event, void *userdata)
 *
 ******************************************************************************/
 
-void PrintableSize(unsigned long size, WideStringClass& printable)
+void PrintableSize(unsigned int size, WideStringClass& printable)
 	{
 	float value = ((float)size / (float)(1024 * 1024));
 
@@ -509,10 +509,10 @@ void PrintableSize(unsigned long size, WideStringClass& printable)
 *
 ******************************************************************************/
 
-void PrintableTime(unsigned long time, WideStringClass& printable)
+void PrintableTime(unsigned int time, WideStringClass& printable)
 	{
-	unsigned long minutes = (time / 60);
-	unsigned long seconds = (time % 60);
+	unsigned int minutes = (time / 60);
+	unsigned int seconds = (time % 60);
 
 	if (minutes > 0)
 		{
@@ -520,7 +520,7 @@ void PrintableTime(unsigned long time, WideStringClass& printable)
 		}
 	else
 		{
-		seconds = std::max<unsigned long>(seconds, 1);
+		seconds = std::max<unsigned int>(seconds, 1);
 		printable.Format(TRANSLATE(IDS_MENU_TRANSFER_SEC_FORMAT), seconds);
 		}
 	}

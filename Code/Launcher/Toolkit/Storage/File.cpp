@@ -567,7 +567,7 @@ File::EFileError File::Load(void*& outBuffer, UInt32& outSize)
 	if (IsOpen() == false)
 		{
 		result = Open(GetRights());
-		
+
 		if (result != FileError_None)
 			{
 			return result;
@@ -599,7 +599,7 @@ File::EFileError File::Load(void*& outBuffer, UInt32& outSize)
 			// Fill the buffer with the file contents
 			while (size > 0)
 				{
-				unsigned long bytesRead = 0;
+				DWORD bytesRead = 0;
 
 				// Read in some bytes.
 				if (ReadFile(mHandle, outBuffer, size, &bytesRead, NULL) == 0)
@@ -615,7 +615,7 @@ File::EFileError File::Load(void*& outBuffer, UInt32& outSize)
 					}
 
 				size -= bytesRead;
-				
+
 				if (bytesRead == 0)
 					{
 					break;
@@ -684,7 +684,7 @@ File::EFileError File::Save(const void* buffer, UInt32 size)
 		SetMarker(0, EStreamFrom::FromStart);
 
 		// Write the data to the file.
-		unsigned long bytesWritten = 0;
+		DWORD bytesWritten = 0;
 
 		if (WriteFile(mHandle, buffer, size, &bytesWritten, NULL) == 0)
 			{
@@ -729,7 +729,7 @@ File::EFileError File::Save(const void* buffer, UInt32 size)
 bool File::OnFileError(EFileError error, bool)
 	{
 	#ifdef _DEBUG
-	const char* _errorNames[] = 
+	const char* _errorNames[] =
 		{
 		"FileError_None",
 		"FileError_FNF",
@@ -748,7 +748,7 @@ bool File::OnFileError(EFileError error, bool)
 	return false;
 	}
 
-	
+
 /******************************************************************************
 *
 * NAME
@@ -860,7 +860,7 @@ UInt32 File::GetMarker(void)
 *
 * INPUTS
 *     Offset - Offset to adjust marker by
-*     From   - 
+*     From   -
 *
 * RESULT
 *     NONE
@@ -876,7 +876,7 @@ void File::SetMarker(Int32 offset, EStreamFrom from)
 		}
 	else
 		{
-		unsigned long dir;
+		unsigned int dir;
 
 		switch (from)
 			{
@@ -970,7 +970,7 @@ UInt32 File::GetBytes(void* ptr, UInt32 bytes)
 
 	while (bytesToRead > 0)
 		{
-		unsigned long read;
+		DWORD read;
 
 		if (ReadFile(mHandle, ptr, bytesToRead, &read, NULL) == 0)
 			{
@@ -1039,7 +1039,7 @@ UInt32 File::PutBytes(const void* ptr, UInt32 bytes)
 
 	while (bytesToWrite > 0)
 		{
-		unsigned long written;
+		DWORD written;
 
 		if (WriteFile(mHandle, ptr, bytes, &written, NULL) == 0)
 			{
@@ -1084,7 +1084,7 @@ UInt32 File::PeekBytes(void* ptr, UInt32 bytes)
 
 	// Get bytes
 	UInt32 bytesPeeked = GetBytes(ptr, bytes);
-	
+
 	// Restore previous position
 	SetMarker(pos, Stream::FromStart);
 

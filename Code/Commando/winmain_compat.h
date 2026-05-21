@@ -49,7 +49,7 @@ static char **CommandLineToArgvU(LPCWSTR lpCmdLine, int *pNumArgs)
 
 			cur_arg_u_len = argv_w[i] != NULL ? conv_len : conv_len + 1;
 			cur_arg_u += cur_arg_u_len;
-			lpCmdLine_len -= cur_arg_u_len;
+			lpCmdLine_len -= static_cast<int>(cur_arg_u_len);
 		}
 
 		argv_u[i] = NULL;
@@ -60,7 +60,7 @@ static char **CommandLineToArgvU(LPCWSTR lpCmdLine, int *pNumArgs)
 	return argv_u;
 }
 
-int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int __stdcall WinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPSTR /* lpCmdLine */, int /* nCmdShow */)
 {
 	// Get args as UTF-8
 	int argc;

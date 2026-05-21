@@ -34,6 +34,7 @@
 ******************************************************************************/
 
 #include "dlgmpchangelannickname.h"
+#include "renegadedialog.h"
 #include <wwui/editctrl.h>
 #include "netinterface.h"
 #include "dlgmplangamelist.h"
@@ -42,7 +43,7 @@ int	DlgMpChangeLanNickname::DialogCount	= 0;
 
 //-----------------------------------------------------------------------------
 bool DlgMpChangeLanNickname::DoDialog(void)
-{	
+{
 	DlgMpChangeLanNickname* dialog = NULL;
 
 	if (DialogCount == 0) {
@@ -60,7 +61,7 @@ bool DlgMpChangeLanNickname::DoDialog(void)
 
 //-----------------------------------------------------------------------------
 DlgMpChangeLanNickname::DlgMpChangeLanNickname() :
-	PopupDialogClass(IDD_MP_CHANGE_LAN_NICKNAME)
+	PopupDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MP_CHANGE_LAN_NICKNAME))
 {
 	WWDEBUG_SAY(("DlgMpChangeLanNickname Instantiated\n"));
 
@@ -93,12 +94,12 @@ void DlgMpChangeLanNickname::On_Init_Dialog(void)
 }
 
 //-----------------------------------------------------------------------------
-void DlgMpChangeLanNickname::On_Command(int ctrlID, int message, DWORD param)
+void DlgMpChangeLanNickname::On_Command(int ctrlID, int message, unsigned int param)
 {
 	if (IDOK == ctrlID)
 	{
 		WideStringClass nickname = Get_Dlg_Item_Text (IDC_NICKNAME_EDIT);
-		cNetInterface::Set_Nickname (nickname);	
+		cNetInterface::Set_Nickname (nickname);
 
 		MPLanGameListMenuClass::Set_Update_Nickname();
 
@@ -113,14 +114,14 @@ void DlgMpChangeLanNickname::On_EditCtrl_Change(EditCtrlClass* edit, int id)
 {
 	if (IDC_NICKNAME_EDIT == id)
 	{
-		const wchar_t* text = edit->Get_Text();
-		bool enableok = (text && (wcslen(text) > 0));
+		const unichar_t* text = edit->Get_Text();
+		bool enableok = (text && (u_strlen(text) > 0));
 		Enable_Dlg_Item(IDOK, enableok);
 	}
 }
 
 //-----------------------------------------------------------------------------
-void DlgMpChangeLanNickname::On_EditCtrl_Enter_Pressed(EditCtrlClass* edit, int id)
+void DlgMpChangeLanNickname::On_EditCtrl_Enter_Pressed(EditCtrlClass* /* edit */, int id)
 {
 	if ((IDC_NICKNAME_EDIT == id) && Is_Dlg_Item_Enabled(IDOK))
 	{

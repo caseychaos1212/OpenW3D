@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgmpwolmain.h"
+#include "renegadedialog.h"
 #include "shortcutbarctrl.h"
 #include "renegadedialogmgr.h"
 #include "translatedb.h"
@@ -64,7 +65,7 @@ MPWolMainMenuClass *	MPWolMainMenuClass::_TheInstance	= NULL;
 MPWolMainMenuClass::MPWolMainMenuClass (void)	:
 	IsSidebarHelpPending (true),
 	mPendingCmd(-1),
-	MenuDialogClass (IDD_MP_WOL_MAIN)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_MAIN))
 {
 	_TheInstance = this;
 	return ;
@@ -142,19 +143,19 @@ bool MPWolMainMenuClass::CheckWOLVersion(void)
 	const LONG minVersion = MAKELONG(19,1);
 	const LONG minBuild = MAKELONG(0,3);
 
-	unsigned long wolVersion = 0;
-	unsigned long wolBuild = 0;
+	unsigned int wolVersion = 0;
+	unsigned int wolBuild = 0;
 	wolSession->GetChatObject()->GetVersion(&wolVersion);
 
 	WideStringClass wolText(255, true);
 
 	if (BandwidthCheckerClass::Get_Reported_Upstream_Bandwidth()) {
 		WideStringClass conn(BandwidthCheckerClass::Get_Bandwidth_As_String(), true);
-		wolText.Format(TRANSLATE(IDS_MENU_CONNECTION_SPEED_FORMAT), conn);
+		wolText.Format(TRANSLATE(IDS_MENU_CONNECTION_SPEED_FORMAT), conn.Peek_Buffer());
 	}
 
 	WideStringClass string(0, true);
-	string.Format(L"WOLAPI V%u.%u", HIWORD(wolVersion), LOWORD(wolVersion));
+	string.Format(U_CHAR("WOLAPI V%u.%u"), HIWORD(wolVersion), LOWORD(wolVersion));
 	wolText += string;
 
 	char buildString[32] = {0};
@@ -163,7 +164,7 @@ bool MPWolMainMenuClass::CheckWOLVersion(void)
 
 	if (SUCCEEDED(hr)) {
 		wolBuild = atol(buildString);
-		string.Format(L".%u", HIWORD(wolBuild));
+		string.Format(U_CHAR(".%u"), HIWORD(wolBuild));
 		wolText += string;
 	}
 
@@ -213,7 +214,7 @@ MPWolMainMenuClass::On_Frame_Update (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-MPWolMainMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MPWolMainMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
@@ -341,7 +342,7 @@ MPWolMainMenuClass::Update_Login_Profile(void)
 
 	LoginProfile* profile = LoginProfile::Get(lastlogin);
 	ShowProfileRanking(this, profile);
-	
+
 	if (profile) {
 		profile->Release_Ref();
 	}

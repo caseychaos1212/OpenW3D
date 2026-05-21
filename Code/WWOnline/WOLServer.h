@@ -24,7 +24,7 @@
 * DESCRIPTION
 *     These classes encapsulate a Westwood Online Server.
 *
-*     This is a base class. Derived classes include (but not necessarily limited to) 
+*     This is a base class. Derived classes include (but not necessarily limited to)
 *     ChatServer, GameResultsServer, LadderServer, and WDTServer.
 *
 *     Server primarily repackages the WOL Server struct
@@ -226,7 +226,7 @@ class PingServerData :
 class ServerError
 	{
 	public:
-		ServerError(int code, const char* description, unsigned long data = 0) :
+		ServerError(int code, const char* description, unsigned int data = 0) :
 				mCode(code),
 				mDescription(description),
 				mData(data)
@@ -235,7 +235,7 @@ class ServerError
 		inline int GetErrorCode(void)
 			{return mCode;}
 
-		inline const wchar_t* GetDescription(void) const
+		inline const unichar_t* GetDescription(void) const
 	 		{return WOLSTRING(mDescription);}
 
 		inline unsigned int GetData(void) const
@@ -247,7 +247,7 @@ class ServerError
 
 		int mCode;
 		StringClass mDescription;
-		unsigned long mData;
+		unsigned int mData;
 	};
 
 } // namespace WWOnline

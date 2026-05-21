@@ -35,14 +35,13 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgcncwinscreen.h"
-#include "resource.h"
 #include "rendobj.h"
 #include "pscene.h"
 #include "combat.h"
 #include "gamedata.h"
 #include "playertype.h"
 #include "assetmgr.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "menubackdrop.h"
 #include "listctrl.h"
 #include "gamemode.h"
@@ -86,7 +85,7 @@ CNCWinScreenMenuClass::CNCWinScreenMenuClass (void)	:
 	HeaderModel (NULL),
 	UpdateTimer (UpdateIntervalS),
 	ShowLadderPoints(false),
-	MenuDialogClass (IDD_CNC_WINSCREEN)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_CNC_WINSCREEN))
 {
 	//
 	//	Configure the blackout renderer
@@ -229,10 +228,10 @@ CNCWinScreenMenuClass::On_Init_Dialog (void)
 	//	Display the MVP's name and num times consecutive as MVP
 	//
 	WideStringClass mvp_text;
-	mvp_text.Format (TRANSLATE (IDS_MENU_MVP_FORMAT), (const wchar_t *)The_Game ()->Get_Mvp_Name ());
+	mvp_text.Format (TRANSLATE (IDS_MENU_MVP_FORMAT), (const unichar_t *)The_Game ()->Get_Mvp_Name ());
 	if (!The_Game()->Get_Mvp_Name().Is_Empty() && The_Game()->Get_Mvp_Count() > 1) {
 		WideStringClass consecutives_text;
-		consecutives_text.Format(L" * %d", The_Game()->Get_Mvp_Count());
+		consecutives_text.Format(U_CHAR(" * %d"), The_Game()->Get_Mvp_Count());
 		mvp_text += consecutives_text;
 	}
 	Set_Dlg_Item_Text (IDC_MVP_TEXT, mvp_text);
@@ -294,7 +293,7 @@ CNCWinScreenMenuClass::On_Init_Dialog (void)
 	// Set the text that shows the next map to be played.
 	//
 	if (The_Game()->Is_Map_Cycle_Over()) {
-		Set_Dlg_Item_Text (IDC_MENU_TEXT_NEXT_MAP, L"");
+		Set_Dlg_Item_Text (IDC_MENU_TEXT_NEXT_MAP, U_CHAR(""));
 	} else {
 		WideStringClass map_info(TRANSLATE(IDS_MENU_NEXT_MAP), true);
 
@@ -307,7 +306,7 @@ CNCWinScreenMenuClass::On_Init_Dialog (void)
 		//
 		// Strip off the .mix if present.
 		//
-		strupr(map_name);
+        openw3d::string_to_upper(map_name);
 		char *dot = strstr(map_name, ".MIX");
 		strcpy(map_name, The_Game()->Get_Map_Name());
 		if (dot) {
@@ -419,7 +418,7 @@ CNCWinScreenMenuClass::Render (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-CNCWinScreenMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+CNCWinScreenMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
@@ -564,7 +563,7 @@ CNCWinScreenMenuClass::Populate_Player_Lists (int team_id, int list_ctrl1_id)
 		//
 		//	Make a new entry for this player
 		//
-		int item_index = list_ctrl->Insert_Entry (index, L"");
+		int item_index = list_ctrl->Insert_Entry (index, U_CHAR(""));
 		if (item_index >= 0) {
 
 			//
@@ -572,7 +571,7 @@ CNCWinScreenMenuClass::Populate_Player_Lists (int team_id, int list_ctrl1_id)
 			//
 			WideStringClass displayName(0, true);
 			Build_Player_Display_Name(player, displayName);
-			list_ctrl->Set_Entry_Text (item_index, COL_NAME,		(const wchar_t*)displayName);
+			list_ctrl->Set_Entry_Text (item_index, COL_NAME,		(const unichar_t*)displayName);
 
 			//
 			//	Fill in information about the player
@@ -661,7 +660,7 @@ CNCWinScreenMenuClass::Build_Player_Display_Name (const cPlayer *player, WideStr
 			RefPtr<WWOnline::SquadData> clan = user->GetSquad();
 
 			if (clan.IsValid()) {
-				outName.Format(L"%s [%S]", player->Get_Name(), clan->GetAbbr());
+				outName.Format(U_CHAR("%s [%S]"), player->Get_Name(), clan->GetAbbr());
 				return;
 			}
 		}

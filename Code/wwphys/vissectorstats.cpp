@@ -78,7 +78,7 @@ static void Count_Textures(RenderObjClass * obj)
 		Count_Textures(subobj);
 		REF_PTR_RELEASE(subobj);
 	}
-	
+
 	/*
 	** Count the textures for this object
 	*/
@@ -95,7 +95,7 @@ static void Count_Textures(RenderObjClass * obj)
 **
 ** VisSectorStatsClass Implementation
 **
-*********************************************************************************************/			
+*********************************************************************************************/
 
 
 /***********************************************************************************************

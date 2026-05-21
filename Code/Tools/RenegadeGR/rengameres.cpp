@@ -66,17 +66,17 @@ void RenegadeGameRes::setMapName(const char* val)
 	if( _map_name != NULL ) delete[] _map_name;
 
 	if( val == NULL ) return;
-	
+
 	_map_name = new char[strlen(val)+1];
 	strcpy(_map_name, val);
 }
 
 
-void RenegadeGameRes::addPlayer(const char* login, double score, long unsigned int clan_id,
-								long unsigned int duration, long unsigned int ip, 
-								long unsigned int deaths, long unsigned int kills, 
-								long unsigned int selfkills, long unsigned int damagepoints)
-{	
+void RenegadeGameRes::addPlayer(const char* login, double score, unsigned int clan_id,
+								unsigned int duration, unsigned int ip,
+								unsigned int deaths, unsigned int kills,
+								unsigned int selfkills, unsigned int damagepoints)
+{
 	char** newstr = _addToArr(_logins, login);
 	delete[] _logins;
 	_logins = newstr;
@@ -86,11 +86,11 @@ void RenegadeGameRes::addPlayer(const char* login, double score, long unsigned i
 	// we take the maximum value for a 4-byte int and multiply it
 	// by the jscore floating value.  We now have a scale of the same
 	// accuracy as a 4-byte float.
-	
+
 	// Expecting a score X such that -0.5 <= X <= 0.5
 	score += 0.5;	// So that it can be stored unsigned
-	long unsigned int convscore = (long unsigned int)(score * GR_SCORE_SCALE);
-	long unsigned int* newlui = _addToArr(_scores, convscore);
+	unsigned int convscore = (unsigned int)(score * GR_SCORE_SCALE);
+	unsigned int* newlui = _addToArr(_scores, convscore);
 	delete[] _scores;
 	_scores = newlui;
 
@@ -134,7 +134,7 @@ int RenegadeGameRes::sendResults()
 	// Build the packet
 	PacketClass rawPacket;
 	rawPacket.Add_Field(GR_GAME_ID, _game_id);
-	rawPacket.Add_Field(GR_PLAYER_COUNT, (long)_player_count);
+	rawPacket.Add_Field(GR_PLAYER_COUNT, (int)_player_count);
 	rawPacket.Add_Field(GR_CLAN_GAME, _clan_game);
 	rawPacket.Add_Field(GR_DURATION, _duration);
 	rawPacket.Add_Field(GR_MAP_NAME, _map_name);
@@ -144,8 +144,8 @@ int RenegadeGameRes::sendResults()
 	rawPacket.Add_Field(GR_START_TIME, _start_time);
 	rawPacket.Add_Field(GR_TOURNAMENT, _tournament);
 
-	
-	for (int i = 0 ; i < _player_count; i++) 
+
+	for (int i = 0 ; i < _player_count; i++)
   	{
     	GR_LOGINS[3] = (char)('0' + (char)i);
     	rawPacket.Add_Field(GR_LOGINS, (char *)((const char*)_logins[i]));
@@ -179,7 +179,7 @@ int RenegadeGameRes::sendResults()
 	void* encPacket = PrepareEncryptedPacket((unsigned char*)outPacket, &packetsize);
 	bit8 result = 0;
 	sint32 sendlen = 0;
-	
+
 
 	// If the _host member is not set, then this method is being called in-game
 	// and wants to use the WOLAPI methods to send game results.  Otherwise it
@@ -190,12 +190,12 @@ int RenegadeGameRes::sendResults()
 	TCPCon*	tcpCon;
 	uint32 handle = -1;
 	result = tcpMgr.connect(_host, _port, &handle);
-	if( result == FALSE )
+	if( result == false )
 		sendlen = GR_ERROR_BIND_FAILED;
 	else
 	{
 		result = tcpMgr.getOutgoingConnection(&tcpCon, handle, 5);
-		if( result == FALSE )
+		if( result == false )
 			sendlen = GR_ERROR_CONNECT_FAILED;
 		else
 		{
@@ -266,16 +266,16 @@ char** RenegadeGameRes::_addToArr(char** arr, const char* item)
 | Takes a pointer to an array and a new item, constructs a new array and returns	|
 | a pointer to it.																	|
 `----------------------------------------------------------------------------------*/
-long unsigned int* RenegadeGameRes::_addToArr(long unsigned int* arr, long unsigned int item)
+unsigned int* RenegadeGameRes::_addToArr(unsigned int* arr, unsigned int item)
 {
-	long unsigned int* newarr = NULL;
+	unsigned int* newarr = NULL;
 
 
 	if( arr == NULL )
 	{
 		// Make a new array
 		assert( _myplayercount == 0 );
-		newarr = new long unsigned int[1];		
+		newarr = new unsigned int[1];
 		// Add the new item
 		newarr[0] = item;
 	}
@@ -283,7 +283,7 @@ long unsigned int* RenegadeGameRes::_addToArr(long unsigned int* arr, long unsig
 	{
 		// Make a new array and copy all the old stuff over
 		assert( _myplayercount > 0 );
-		newarr = new long unsigned int[_myplayercount+1];
+		newarr = new unsigned int[_myplayercount+1];
 		for(int i = 0; i < _myplayercount; i++)
 			newarr[i] = arr[i];
 		// Add the new item

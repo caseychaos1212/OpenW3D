@@ -1023,7 +1023,7 @@ SoundSceneClass::Initialize (void)
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 bool
-SoundSceneClass::Is_Sound_In_Scene (AudibleSoundClass *sound_obj, bool all)
+SoundSceneClass::Is_Sound_In_Scene (AudibleSoundClass *sound_obj, bool /* all */)
 {
 	bool retval = false;
 
@@ -1207,7 +1207,7 @@ SoundSceneClass::Load_Static (ChunkLoadClass &cload)
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 bool
-SoundSceneClass::Save_Dynamic (ChunkSaveClass &csave)
+SoundSceneClass::Save_Dynamic (ChunkSaveClass &/* csave */)
 {
 	return true;
 }
@@ -1219,7 +1219,7 @@ SoundSceneClass::Save_Dynamic (ChunkSaveClass &csave)
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 bool
-SoundSceneClass::Load_Dynamic (ChunkLoadClass &cload)
+SoundSceneClass::Load_Dynamic (ChunkLoadClass &/* cload */)
 {
 	return true;
 }
@@ -1263,7 +1263,7 @@ SoundSceneClass::Flush_Scene (void)
 	for (temp_single_iterator.First (); !temp_single_iterator.Is_Done (); temp_single_iterator.Next ()) {
 		LogicalSoundClass *logical_sound = temp_single_iterator.Peek_Obj ();
 		temp_single_logical.Add (logical_sound);
-	}	
+	}
 
 	//
 	//	Remove all the static sounds from the scene

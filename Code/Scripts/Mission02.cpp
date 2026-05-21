@@ -101,7 +101,7 @@ DECLARE_SCRIPT(M02_Objective_Controller, "")
 	// Param 2 = Fail this objective (Failed)
 	// Param 3 = Convoy truck special - counting
 
-	void Custom(GameObject * obj, int type, uintptr_t param, GameObject * sender) override
+	void Custom(GameObject * obj, int type, intptr_t param, GameObject * /*sender*/) override
 	{
 		if (type > 199)
 		{
@@ -340,7 +340,7 @@ DECLARE_SCRIPT(M02_Objective_Controller, "")
 		}
 	}
 
-	void Add_An_Objective(GameObject * obj, int id)
+	void Add_An_Objective(GameObject * /*obj*/, int id)
 	{
 		Vector3 objective_pos;
 		objective_pos = Objective_Radar_Locations [(id - 202)];
@@ -527,7 +527,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 		SAVE_VARIABLE (gave_secure_warning, 4);
 	}
 
-	void Created(GameObject *obj) override
+	void Created(GameObject * /*obj*/) override
 	{
 		gave_secure_warning = false;
 		mendoza_id = 0;
@@ -535,7 +535,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 		enemies_defeated = false;
 	}
 
-	void Entered(GameObject *obj, GameObject *enterer) override
+	void Entered(GameObject *obj, GameObject * /*enterer*/) override
 	{
 		// Send customs to activate the appropriate objectives
 
@@ -599,7 +599,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 					// Call GDI Rocket Soldiers
 
 					Call_GDI_Soldiers(0);
-					
+
 					// Call the Nod Apache
 
 					Create_Apache(0);
@@ -628,7 +628,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 					Commands->Send_Custom_Event(obj, object, 209, 0, 0.0f);
 
 					// Turn on A01
-					
+
 					Commands->Send_Custom_Event(obj, object, 104, 1, 0.0f);
 
 					// Create A01 Nod Buggy for Player
@@ -639,7 +639,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 					// Tell the GDI Rocket Soldiers for A00 to go to the tower.
 
 					Vector3 obj_position = Commands->Get_Position (obj);
-					Commands->Create_Logical_Sound (obj, 1100, obj_position, 1000.0f);	
+					Commands->Create_Logical_Sound (obj, 1100, obj_position, 1000.0f);
 
 					// Tell A23 units to go to home points.
 
@@ -674,7 +674,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 
 					Commands->Send_Custom_Event(obj, object, 105, 1, 0.0f);
 					Commands->Send_Custom_Event(obj, object, 104, 2, 0.0f);
-					
+
 					// Tell A01 units to go to home points.
 
 					Vector3 obj_position = Commands->Get_Position (obj);
@@ -826,7 +826,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 					// Default shut off for A11, Power Plant spawns.
 
 					Commands->Send_Custom_Event(obj, object, 105, 11, 0.0f);
-					
+
 					// Tell A11 units to go to home points.
 
 					Vector3 obj_position = Commands->Get_Position (obj);
@@ -863,7 +863,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 						Commands->Mission_Complete (true);
 
 						//Turn off A21
-						
+
 						Commands->Send_Custom_Event(obj, object, 105, 21, 0.0f);
 					}
 					break;
@@ -911,7 +911,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 
 					// Tell the GDI Rocket Soldiers for A02 to go to the house.
 
-					Commands->Create_Logical_Sound (obj, 1102, obj_position, 1000.0f);	
+					Commands->Create_Logical_Sound (obj, 1102, obj_position, 1000.0f);
 
 					// Wake up A04 units
 
@@ -1201,7 +1201,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 					Commands->Send_Custom_Event(obj, object, 104, 24, 0.0f);
 
 					// Turn on objective - SAM Site
-					
+
 					Commands->Send_Custom_Event(obj, object, 214, 0, 0.0f);
 
 					dual_zone = 400502;
@@ -1226,7 +1226,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 					Commands->Send_Custom_Event(obj, Commands->Find_Object(400510), 0, 0, 0.0f);
 
 					// Turn on objective - SAM Site
-					
+
 					Commands->Send_Custom_Event(obj, object, 214, 0, 0.0f);
 
 					dual_zone = 400501;
@@ -1337,7 +1337,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 					// Shut off the Obelisk warning.
 
 					GameObject * obelisk = Commands->Find_Object(1153845);
-					
+
 					if (obelisk)
 					{
 						Commands->Send_Custom_Event (obj, obelisk, 1, 0, 0.0f);
@@ -1792,7 +1792,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 	{
 		enemies_defeated = true;
 		Vector3 obj_position = Commands->Get_Position (obj);
-		Commands->Create_Logical_Sound (obj, 1000, obj_position, 70.0f);	
+		Commands->Create_Logical_Sound (obj, 1000, obj_position, 70.0f);
 		Commands->Start_Timer(obj, this, 1.0f, timer_id);
 	}
 
@@ -1931,7 +1931,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 				Commands->Send_Custom_Event(obj, object, type, 1, 0.0f);
 				enemies_defeated = false;
 				Commands->Destroy_Object(obj);
-				
+
 				if (type == 207)
 				{
 					// Check if the commando needs a new vehicle.
@@ -1962,9 +1962,9 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 		}
 	}
 
-	void Custom(GameObject * obj, int type, uintptr_t param, GameObject * sender) override
+	void Custom(GameObject * /*obj*/, int type, intptr_t param, GameObject * /*sender*/) override
 	{
-		// Custom received from living units in an area. 
+		// Custom received from living units in an area.
 
 		if ((type == 100) && (param == 1))
 		{
@@ -2079,7 +2079,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 		}
 	}
 
-	void Create_Light_Tank (int area_id)
+	void Create_Light_Tank (int /*area_id*/)
 	{
 		Vector3 create_pos = Vector3(465.645f, 715.86f, -14.935f);
 		float facing = -10.0f;
@@ -2093,7 +2093,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 		}
 	}
 
-	void Create_Sakura (int area_id)
+	void Create_Sakura (int /*area_id*/)
 	{
 		GameObject *helipad = Commands->Find_Object(474463);
 
@@ -2108,7 +2108,7 @@ DECLARE_SCRIPT(M02_Objective_Zone, "")
 				const char* sakura_params = "2";
 
 				GameObject * sakura = Commands->Create_Object("Nod_Apache", create_pos);
-				
+
 				if (sakura)
 				{
 					Commands->Set_Facing(sakura, facing);
@@ -2314,7 +2314,7 @@ DECLARE_SCRIPT (M02_Respawn_Controller, "")
 		Commands->Start_Timer(obj, this, 3.0f, 2);
 	}
 
-	void Call_GDI_HummVee (int area_id)
+	void Call_GDI_HummVee (int /*area_id*/)
 	{
 		Vector3 drop_loc = Vector3(-87.2f,-13.1f,-40.1f);
 		float facing = 102.9f;
@@ -2327,7 +2327,7 @@ DECLARE_SCRIPT (M02_Respawn_Controller, "")
 		}
 	}
 
-	void Call_GDI_PowerUp (int area_id)
+	void Call_GDI_PowerUp (int /*area_id*/)
 	{
 		Vector3 drop_loc = Vector3(511.3f,680.3f,-21.2f);
 		float facing = 146.6f;
@@ -3131,7 +3131,7 @@ DECLARE_SCRIPT (M02_Respawn_Controller, "")
 		}
 	}
 
-	void Custom (GameObject *obj, int type, uintptr_t param, GameObject *sender) override
+	void Custom (GameObject *obj, int type, intptr_t param, GameObject *sender) override
 	{
 		if (type == 101)
 		{
@@ -3178,7 +3178,7 @@ DECLARE_SCRIPT (M02_Respawn_Controller, "")
 		else if (type == 107)
 		{
 			// A Heli_01 spawner type is attempting to reset itself.
-			
+
 			area_spawn_heli_drop_01_active[param] = false;
 		}
 		else if (type == 108)
@@ -3254,7 +3254,7 @@ DECLARE_SCRIPT (M02_Respawn_Controller, "")
 	// Another object then sends a custom to check for new vehicle creation. If the flag for
 	// creating a new vehicle for this area is active, it is reset and the vehicle is delivered.
 
-	void Replacement_Vehicle (GameObject *obj, int area_id)
+	void Replacement_Vehicle (GameObject * /*obj*/, int area_id)
 	{
 		Vector3 drop_loc = Vector3(0.0f,0.0f,0.0f);
 		float facing = 0.0f;
@@ -3399,11 +3399,11 @@ DECLARE_SCRIPT (M02_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 
 		// Set the unit's home point, save the value.
 
-		Vector3 my_home_point = Commands->Get_Position(obj);
-		Commands->Set_Innate_Soldier_Home_Location(obj, my_home_point, 20.0f);
+		Vector3 this_home_point = Commands->Get_Position(obj);
+		Commands->Set_Innate_Soldier_Home_Location(obj, this_home_point, 20.0f);
 
 		// Turn hibernation off for a moment.
-		
+
 		Commands->Enable_Hibernation (obj, 0);
 
 		// Start the timer to register with the controller.
@@ -3422,7 +3422,7 @@ DECLARE_SCRIPT (M02_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 
 			Commands->Grant_Key (obj, 1, true);
 
-			GameObject *starobj = Commands->Get_A_Star (my_home_point);
+			GameObject *starobj = Commands->Get_A_Star (this_home_point);
 
 			if (starobj)
 			{
@@ -3443,7 +3443,7 @@ DECLARE_SCRIPT (M02_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 		}
 	}
 
-	void Enemy_Seen (GameObject * obj, GameObject * enemy) override
+	void Enemy_Seen (GameObject * /*obj*/, GameObject * /*enemy*/) override
 	{
 		enemy_seen = true;
 	}
@@ -3499,7 +3499,7 @@ DECLARE_SCRIPT (M02_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 				if (officer)
 				{
 					// Unit is a preplaced officer. Register as an officer and hibernate.
-				
+
 					Commands->Set_Innate_Take_Cover_Probability (obj, 100.0f);
 					Commands->Send_Custom_Event(obj, object, 106, param, 0.0f);
 					Commands->Enable_Hibernation (obj, 1);
@@ -3550,7 +3550,7 @@ DECLARE_SCRIPT (M02_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 			{
 				Vector3 starloc = Commands->Get_Position(star_obj);
 				float distance = Commands->Get_Distance (myloc, starloc);
-				
+
 				if (distance > 70.0f)
 				{
 					bool visibility = Commands->Is_Object_Visible(star_obj, obj);
@@ -3573,7 +3573,7 @@ DECLARE_SCRIPT (M02_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 		else if (timer_id == 3)
 		{
 			// Force movement code to prevent irregular activity.
-		
+
 			Force_Move (obj);
 			Commands->Start_Timer(obj, this, 15.0f, 3);
 		}
@@ -3673,7 +3673,7 @@ DECLARE_SCRIPT (M02_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 			if (!enemy_seen)
 			{
 				// Time to move the chem-warrior. Pick a new location.
-				
+
 				Vector3 newloc;
 				int rndnum = (Get_Int_Random(0.0f,1.0f) * 5);
 				switch (rndnum)
@@ -3754,7 +3754,7 @@ DECLARE_SCRIPT (M02_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 		}
 	}
 
-	void Killed (GameObject *obj, GameObject *killer) override
+	void Killed (GameObject *obj, GameObject * /*killer*/) override
 	{
 		// Tell the respawn controller I am dead.
 
@@ -3773,13 +3773,13 @@ DECLARE_SCRIPT (M02_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 			if (officer)
 			{
 				// If a Medium Tank is needed for A03, drop it.
-					
+
 				Commands->Send_Custom_Event (obj, object, 111, 2, 0.0f);
 			}
 		}
 	}
 
-	void Custom (GameObject *obj, int type, uintptr_t param, GameObject *sender) override
+	void Custom (GameObject *obj, int type, intptr_t param, GameObject *sender) override
 	{
 		int specific_id = Commands->Get_ID (obj);
 		if (specific_id == 400276)
@@ -3792,7 +3792,7 @@ DECLARE_SCRIPT (M02_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 			Commands->Innate_Enable (obj);
 
 			// If the unit is a preplaced minigunner, forced movement code is activated for this unit.
-			
+
 			int preplaced = Get_Int_Parameter("Pre_Placed");
 
 			if (preplaced == 2)
@@ -3870,7 +3870,7 @@ DECLARE_SCRIPT (M02_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 		}
 	}
 
-	void Damaged( GameObject * obj, GameObject *damager, float amount) override
+	void Damaged( GameObject * obj, GameObject *damager, float /*amount*/) override
 	{
 		if (!initial_damage && damager == NULL)
 		{
@@ -3885,12 +3885,12 @@ DECLARE_SCRIPT(M02_Obelisk, "")
 {
 	bool info_given;
 
-	void Created(GameObject*obj) override
+	void Created(GameObject* /*obj*/) override
 	{
 		info_given = false;
 	}
 
-	void Damaged(GameObject * obj, GameObject * damager, float amount) override
+	void Damaged(GameObject * obj, GameObject * damager, float /*amount*/) override
 	{
 		if (Commands->Get_Building_Power (obj))
 		{
@@ -3910,7 +3910,7 @@ DECLARE_SCRIPT(M02_Obelisk, "")
 				Commands->Set_Health (obj, maxhealth);
 
 				// Announce the returned health as an engineer repairing internally.
-				
+
 				if ((!info_given) && (damager == STAR))
 				{
 					info_given = true;
@@ -3924,7 +3924,7 @@ DECLARE_SCRIPT(M02_Obelisk, "")
 		}
 	}
 
-	void Killed(GameObject * obj, GameObject * killer) override
+	void Killed(GameObject * obj, GameObject * /*killer*/) override
 	{
 		if (Commands->Get_Building_Power (obj))
 		{
@@ -3947,7 +3947,7 @@ DECLARE_SCRIPT(M02_Obelisk, "")
 		}
 	}
 
-	void Custom (GameObject *obj, int type, uintptr_t param, GameObject *sender) override
+	void Custom (GameObject * /*obj*/, int type, intptr_t /*param*/, GameObject * /*sender*/) override
 	{
 		if (type == 1)
 		{
@@ -3961,12 +3961,12 @@ DECLARE_SCRIPT (M02_Power_Plant, "")
 {
 	bool info_given;
 
-	void Created(GameObject*obj) override
+	void Created(GameObject* /*obj*/) override
 	{
 		info_given = false;
 	}
 
-	void Damaged(GameObject * obj, GameObject * damager, float amount) override
+	void Damaged(GameObject * obj, GameObject * damager, float /*amount*/) override
 	{
 		// Check if the engineer is alive
 
@@ -3997,7 +3997,7 @@ DECLARE_SCRIPT (M02_Power_Plant, "")
 		}
 	}
 
-	void Killed(GameObject * obj, GameObject * killer) override
+	void Killed(GameObject * obj, GameObject * /*killer*/) override
 	{
 		GameObject * object = Commands->Find_Object(M02_OBJCONTROLLER);
 
@@ -4008,7 +4008,7 @@ DECLARE_SCRIPT (M02_Power_Plant, "")
 		}
 
 		GameObject * obelisk = Commands->Find_Object(1153845);
-		
+
 		if (obelisk)
 		{
 			Commands->Set_Building_Power(obelisk, false);
@@ -4033,7 +4033,7 @@ DECLARE_SCRIPT (M02_Power_Plant, "")
 		}
 	}
 
-	void Custom (GameObject *obj, int type, uintptr_t param, GameObject *sender) override
+	void Custom (GameObject * /*obj*/, int type, intptr_t /*param*/, GameObject * /*sender*/) override
 	{
 		if (type == 1)
 		{
@@ -4052,12 +4052,12 @@ DECLARE_SCRIPT (M02_Dam_MCT, "")
 		SAVE_VARIABLE (destroyed, 1);
 	}
 
-	void Created (GameObject * obj) override
+	void Created (GameObject * /*obj*/) override
 	{
 		destroyed = false;
 	}
 
-	void Damaged (GameObject * obj, GameObject * damager, float amount) override
+	void Damaged (GameObject * obj, GameObject * /*damager*/, float /*amount*/) override
 	{
 		float health = Commands->Get_Health(obj);
 		if (health < 1.0f)
@@ -4081,7 +4081,7 @@ DECLARE_SCRIPT (M02_Dam_MCT, "")
 
 DECLARE_SCRIPT (M02_Helipad, "")
 {
-	void Killed(GameObject *obj, GameObject *killer) override
+	void Killed(GameObject *obj, GameObject * /*killer*/) override
 	{
 		GameObject * object = Commands->Find_Object(M02_OBJCONTROLLER);
 
@@ -4095,7 +4095,7 @@ DECLARE_SCRIPT (M02_Helipad, "")
 
 DECLARE_SCRIPT (M02_Destroy_Objective, "Objective_ID:int")
 {
-	void Killed(GameObject *obj, GameObject *killer) override
+	void Killed(GameObject *obj, GameObject * /*killer*/) override
 	{
 		int objective_id;
 		objective_id = Get_Int_Parameter ("Objective_ID");
@@ -4147,7 +4147,7 @@ DECLARE_SCRIPT (M02_Destroy_Objective, "Objective_ID:int")
 		}
 	}
 
-	void Damaged(GameObject *obj, GameObject *damager, float amount) override
+	void Damaged(GameObject *obj, GameObject * /*damager*/, float /*amount*/) override
 	{
 		int objective_id;
 		objective_id = Get_Int_Parameter ("Objective_ID");
@@ -4165,7 +4165,7 @@ DECLARE_SCRIPT (M02_Destroy_Objective, "Objective_ID:int")
 
 DECLARE_SCRIPT (M02_Nod_Convoy_Truck, "")
 {
-	void Killed(GameObject *obj, GameObject *killer) override
+	void Killed(GameObject *obj, GameObject * /*killer*/) override
 	{
 		GameObject * object = Commands->Find_Object(M02_OBJCONTROLLER);
 
@@ -4211,7 +4211,7 @@ DECLARE_SCRIPT (M02_GDI_Soldier, "Area_ID:int, Soldier_Type=0:int")
 		shout_count = 0;
 
 		// Special case checks for preplaced soldiers.
-		
+
 		int area_id = Get_Int_Parameter("Area_ID");
 
 		if (area_id == 1)
@@ -4241,7 +4241,7 @@ DECLARE_SCRIPT (M02_GDI_Soldier, "Area_ID:int, Soldier_Type=0:int")
 				// GDI soldiers in A09 Dam Top rush the Obelisk and die.
 
 				GameObject * obelisk = Commands->Find_Object(1153845);
-				
+
 				if (obelisk)
 				{
 					bool power = Commands->Get_Building_Power (obelisk);
@@ -4320,7 +4320,7 @@ DECLARE_SCRIPT (M02_GDI_Soldier, "Area_ID:int, Soldier_Type=0:int")
 		}
 	}
 
-	void Poked (GameObject * obj, GameObject * poker) override
+	void Poked (GameObject * obj, GameObject * /*poker*/) override
 	{
 		int soldier_type = Get_Int_Parameter ("Soldier_Type");
 		if ((soldier_type == 2) && (!said_message))
@@ -4364,7 +4364,7 @@ DECLARE_SCRIPT (M02_GDI_Soldier, "Area_ID:int, Soldier_Type=0:int")
 		}
 	}
 
-	void Custom (GameObject *obj, int type, uintptr_t param, GameObject *sender) override
+	void Custom (GameObject *obj, int type, intptr_t param, GameObject * /*sender*/) override
 	{
 		if ((type == 0) && (param == 0))
 		{
@@ -4374,7 +4374,7 @@ DECLARE_SCRIPT (M02_GDI_Soldier, "Area_ID:int, Soldier_Type=0:int")
 		}
 	}
 
-	void Killed (GameObject * obj, GameObject * killer) override
+	void Killed (GameObject * obj, GameObject * /*killer*/) override
 	{
 		int area_id = Get_Int_Parameter("Area_ID");
 		if (area_id == 0)
@@ -4452,7 +4452,7 @@ DECLARE_SCRIPT (M02_Stationary_Vehicle,"Area_ID:int")
 		}
 	}
 
-	void Killed (GameObject * obj, GameObject * killer) override
+	void Killed (GameObject * obj, GameObject * /*killer*/) override
 	{
 		int area_id = Get_Int_Parameter ("Area_ID");
 		int my_id = Commands->Get_ID (obj);
@@ -4511,7 +4511,7 @@ DECLARE_SCRIPT (M02_Stationary_Vehicle,"Area_ID:int")
 		}
 	}
 
-	void Custom (GameObject *obj, int type, uintptr_t param, GameObject *sender) override
+	void Custom (GameObject *obj, int type, intptr_t param, GameObject * /*sender*/) override
 	{
 		if ((type == 0) && (param == 0))
 		{
@@ -4550,7 +4550,7 @@ DECLARE_SCRIPT (M02_Nod_Apache, "Area_ID:int")
 		float timer_len = 1.0f;
 
 		//First waypath means area for looping Apaches, it is set when timer expires, and then uses real IDs.
-		
+
 		switch (area_id)
 		{
 		case (0):
@@ -4850,7 +4850,7 @@ DECLARE_SCRIPT (M02_Player_Vehicle, "Area_ID:int")
 		}
 	}
 
-	void Custom(GameObject * obj, int type, uintptr_t param, GameObject * sender) override
+	void Custom(GameObject * obj, int type, intptr_t /*param*/, GameObject * /*sender*/) override
 	{
 		if (type == CUSTOM_EVENT_VEHICLE_ENTERED)
 		{
@@ -4965,14 +4965,14 @@ DECLARE_SCRIPT (M02_Nod_Sakura, "Area_ID:int")
 
 DECLARE_SCRIPT (M02_Approach_Vehicle, "Area_ID:int")
 {
-	void Custom(GameObject * obj, int type, uintptr_t param, GameObject * sender) override
+	void Custom(GameObject * obj, int type, intptr_t param, GameObject * /*sender*/) override
 	{
 		if ((type == 0) && (param == 0))
 		{
 			Commands->Enable_Engine (obj, true);
 
 			// Unit is being activated. Determine waypath and follow it.
-			
+
 			int area_id = Get_Int_Parameter("Area_ID");
 			ActionParamsStruct params;
 			params.Set_Basic(this, 100, 0);
@@ -5001,7 +5001,7 @@ DECLARE_SCRIPT (M02_Approach_Vehicle, "Area_ID:int")
 		}
 	}
 
-	void Timer_Expired(GameObject * obj, int timer_id) override
+	void Timer_Expired(GameObject * obj, int /*timer_id*/) override
 	{
 		Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", NULL);
 	}
@@ -5037,7 +5037,7 @@ DECLARE_SCRIPT (M02_Destroy_Vehicle, "")
 		}
 	}
 
-	void Damaged (GameObject* obj, GameObject* damager, float amount) override
+	void Damaged (GameObject* obj, GameObject* damager, float /*amount*/) override
 	{
 		if (damager != STAR)
 		{
@@ -5091,7 +5091,7 @@ DECLARE_SCRIPT (M02_Mendoza, "")
 		Commands->Start_Timer (obj, this, 2.0f, 1);
 	}
 
-	void Damaged (GameObject * obj, GameObject * damager, float amount) override
+	void Damaged (GameObject * obj, GameObject * /*damager*/, float /*amount*/) override
 	{
 		Commands->Set_Health (obj, start_health);
 		last_armor -= 2.0f;
@@ -5110,7 +5110,7 @@ DECLARE_SCRIPT (M02_Mendoza, "")
 		}
 	}
 
-	void Action_Complete (GameObject * obj, int action_id, ActionCompleteReason complete_reason) override
+	void Action_Complete (GameObject * obj, int action_id, ActionCompleteReason /*complete_reason*/) override
 	{
 		if (action_id == 1)
 		{
@@ -5250,7 +5250,7 @@ DECLARE_SCRIPT (M02_Nod_Jet, "")
 		Commands->Action_Goto(obj, params);
 	}
 
-	void Action_Complete (GameObject * obj, int action_id, ActionCompleteReason complete_reason) override
+	void Action_Complete (GameObject * obj, int action_id, ActionCompleteReason /*complete_reason*/) override
 	{
 		if (action_id == 1)
 		{
@@ -5274,7 +5274,7 @@ DECLARE_SCRIPT (M02_Nod_Jet_Waypath, "")
 		Commands->Action_Goto(obj, params);
 	}
 
-	void Action_Complete (GameObject * obj, int action_id, ActionCompleteReason complete_reason) override
+	void Action_Complete (GameObject * obj, int action_id, ActionCompleteReason /*complete_reason*/) override
 	{
 		if (action_id == 1)
 		{
@@ -5296,7 +5296,7 @@ DECLARE_SCRIPT (M02_GDI_Helicopter, "")
 		Commands->Action_Goto(obj, params);
 	}
 
-	void Action_Complete (GameObject * obj, int action_id, ActionCompleteReason complete_reason) override
+	void Action_Complete (GameObject * obj, int action_id, ActionCompleteReason /*complete_reason*/) override
 	{
 		if (action_id == 1)
 		{
@@ -5319,9 +5319,9 @@ DECLARE_SCRIPT (M02_Commando_Start, "")
 
 DECLARE_SCRIPT (M02_Data_Disk, "Disk_ID:int")
 {
-	void Custom (GameObject * obj, int type, uintptr_t param, GameObject * sender) override
+	void Custom (GameObject * /*obj*/, int type, intptr_t /*param*/, GameObject * /*sender*/) override
 	{
-		if (type == CUSTOM_EVENT_POWERUP_GRANTED) 
+		if (type == CUSTOM_EVENT_POWERUP_GRANTED)
 		{
 			int id = Get_Int_Parameter ("Disk_ID");
 			Vector3 reveal_loc = Vector3 (0,0,0);
@@ -5356,9 +5356,9 @@ DECLARE_SCRIPT (M02_Data_Disk, "Disk_ID:int")
 
 DECLARE_SCRIPT (M02_Encyclopedia_Reveal, "Disk_ID:int")
 {
-	void Custom (GameObject * obj, int type, uintptr_t param, GameObject * sender) override
+	void Custom (GameObject * /*obj*/, int type, intptr_t /*param*/, GameObject * /*sender*/) override
 	{
-		if (type == CUSTOM_EVENT_POWERUP_GRANTED) 
+		if (type == CUSTOM_EVENT_POWERUP_GRANTED)
 		{
 			int id = Get_Int_Parameter ("Disk_ID");
 			switch (id)

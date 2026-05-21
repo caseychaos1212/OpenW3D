@@ -118,9 +118,9 @@ static BOOL CALLBACK BlenderDlgProc
 	switch (msg)
 	{
 	case WM_INITDIALOG:
-		the_blender.Init(hWnd);			
+		the_blender.Init(hWnd);
 		break;
-	
+
 	case WM_DESTROY:
 		the_blender.Destroy(hWnd);
 		break;
@@ -143,9 +143,9 @@ static BOOL CALLBACK BlenderDlgProc
 		break;
 
 	default:
-		return FALSE;
+		return false;
 	}
-	return TRUE; 
+	return true;
 }
 
 //----------------------------------------------------------------------------
@@ -155,7 +155,7 @@ static BOOL CALLBACK BlenderDlgProc
 Blender_Class::Blender_Class()
 {
 	iu = NULL;
-	ip = NULL;	
+	ip = NULL;
 	hPanel = NULL;
 
 	first_frame = 0;
@@ -168,7 +168,7 @@ Blender_Class::Blender_Class()
 // Blender_Class::BeginEditParams
 //----------------------------------------------------------------------------
 
-void Blender_Class::BeginEditParams(Interface *ip,IUtil *iu) 
+void Blender_Class::BeginEditParams(Interface *ip,IUtil *iu)
 {
 	this->iu = iu;
 	this->ip = ip;
@@ -181,12 +181,12 @@ void Blender_Class::BeginEditParams(Interface *ip,IUtil *iu)
 		0
 	);
 }
-	
+
 //----------------------------------------------------------------------------
 // Blender_Class::EndEditParams
 //----------------------------------------------------------------------------
 
-void Blender_Class::EndEditParams ( Interface *ip, IUtil *iu ) 
+void Blender_Class::EndEditParams ( Interface *ip, IUtil *iu )
 {
 	this->iu = NULL;
 	this->ip = NULL;
@@ -202,11 +202,11 @@ void Blender_Class::SelectionSetChanged ( Interface * ip, IUtil * iu )
 {
 	if ( ip->GetSelNodeCount () == 0 )
 	{
-		EnableWindow ( GetDlgItem ( hPanel, ID_APPLY ), FALSE );
+		EnableWindow ( GetDlgItem ( hPanel, ID_APPLY ), false );
 	}
 	else
 	{
-		EnableWindow ( GetDlgItem ( hPanel, ID_APPLY ), TRUE );
+		EnableWindow ( GetDlgItem ( hPanel, ID_APPLY ), true );
 	}
 }
 
@@ -218,11 +218,11 @@ void Blender_Class::Init ( HWND hWnd )
 {
 	if ( ip->GetSelNodeCount () == 0 )
 	{
-		EnableWindow ( GetDlgItem ( hWnd, ID_APPLY ), FALSE );
+		EnableWindow ( GetDlgItem ( hWnd, ID_APPLY ), false );
 	}
 	else
 	{
-		EnableWindow ( GetDlgItem ( hWnd, ID_APPLY ), TRUE );
+		EnableWindow ( GetDlgItem ( hWnd, ID_APPLY ), true );
 	}
 
 	int ticks_per_frame = GetTicksPerFrame ();
@@ -303,10 +303,10 @@ void Blender_Class::Get_Active_Time_Range ()
 	int start_frame   = ip->GetAnimRange ().Start () / ticks_per_frame;
 	int end_frame     = ip->GetAnimRange ().End () / ticks_per_frame;
 
-	first_frame_spin->SetValue ( start_frame, FALSE );
-	last_frame_spin->SetValue  ( end_frame,   FALSE );
-	first_match_spin->SetValue ( start_frame, FALSE );
-	last_match_spin->SetValue  ( start_frame, FALSE );
+	first_frame_spin->SetValue ( start_frame, false );
+	last_frame_spin->SetValue  ( end_frame,   false );
+	first_match_spin->SetValue ( start_frame, false );
+	last_match_spin->SetValue  ( start_frame, false );
 }
 
 //----------------------------------------------------------------------------
@@ -328,7 +328,7 @@ void Blender_Class::Blend_Keys ()
 
 	float t_scale = 1.0f / (float) (end_time - start_time);
 
-	BOOL bad_controller_found = FALSE;
+	BOOL bad_controller_found = false;
 
 	theHold.Begin ();
 
@@ -372,7 +372,7 @@ void Blender_Class::Blend_Keys ()
 					inode->GetName (), c->ClassID ().PartA () );
 				MessageBox ( GetActiveWindow (), m, "Debug", MB_OK );
 #endif
-				bad_controller_found = TRUE;
+				bad_controller_found = true;
 			}
 			else
 			{
@@ -474,7 +474,7 @@ void Blender_Class::Blend_Keys ()
 		{
 			if ( c->ClassID () != Class_ID (TCBINTERP_POSITION_CLASS_ID, 0) )
 			{
-				bad_controller_found = TRUE;
+				bad_controller_found = true;
 			}
 			else
 			{
@@ -641,10 +641,10 @@ BOOL Blender_Class::Is_Root ( INode * node )
 	for ( int i = 0; i < number_of_nodes; ++ i )
 	{
 		if ( ip->GetSelNode ( i ) == node )
-			return FALSE;
+			return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
 //----------------------------------------------------------------------------

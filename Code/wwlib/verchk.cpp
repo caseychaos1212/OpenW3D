@@ -36,10 +36,14 @@
 
 
 #include "verchk.h"
-#include <windows.h>
-#include <winnt.h>
 #include "rawfile.h"
 #include "ffactory.h"
+#if defined(OPENW3D_WIN32)
+#include <windows.h>
+#elif defined(OPENW3D_SDL3)
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
 
 
 /******************************************************************************
@@ -63,8 +67,8 @@ bool GetVersionInfo(char* filename, VS_FIXEDFILEINFO* fileInfo) {
 	// Get the version information for this file
 	//
 	bool verok = true;
-	unsigned long dummy_var = 0;
-	unsigned long version_size = ::GetFileVersionInfoSizeA (filename, &dummy_var);
+	DWORD dummy_var = 0;
+	DWORD version_size = ::GetFileVersionInfoSizeA (filename, &dummy_var);
 	if (version_size > 0) {
 		//
 		// Get the file version block
@@ -89,25 +93,25 @@ bool GetVersionInfo(char* filename, VS_FIXEDFILEINFO* fileInfo) {
 }
 
 
-bool GetFileCreationTime(char* filename, FILETIME* createTime)
+bool GetFileCreationTime(const char* filename, FileCreationTime* createTime)
 	{
 	if (filename && createTime)
 		{
-		createTime->dwLowDateTime = 0;
-		createTime->dwHighDateTime = 0;
+		memset(createTime, 0, sizeof(*createTime));
 		FileClass* file = _TheFileFactory->Get_File(filename);
 
 		if (file && file->Open())
 			{
-			HANDLE handle = file->Get_File_Handle();
-
-			if (handle != INVALID_HANDLE_VALUE)
-				{
-				if (GetFileTime(handle, NULL, NULL, createTime))
-					{
-					return true;
-					}
-				}
+			unsigned int dateTime = file->Get_Date_Time();
+			unsigned int fatDate = dateTime >> 16;
+			unsigned int fatTime = dateTime & 0xffff;
+			createTime->year = 1980 + (fatDate >> 9);
+			createTime->month = (fatDate >> 5) & 0xf;
+			createTime->day = fatDate & 0x1f;
+			createTime->hour = fatTime >> 11;
+			createTime->minute = (fatTime >> 5) & 0x3f;
+			createTime->second = 2 * (fatTime & 0x1f);
+			return true;
 			}
 		}
 
@@ -131,19 +135,19 @@ Get_Image_File_Header (const char *filename, IMAGE_FILE_HEADER *file_header)
 	FileClass *file=_TheFileFactory->Get_File(filename);
 
 	if (file && file->Open ()) {
-		
+
 		//
 		//	Read the dos header (all PE exectuable files begin with this)
 		//
 		IMAGE_DOS_HEADER dos_header;
 		if (file->Read (&dos_header, sizeof (dos_header)) == sizeof (dos_header)) {
-			
+
 			//
 			//	Determine the index where the image header resides
 			//
 			int file_header_offset = dos_header.e_lfanew + sizeof (DWORD);
 			file->Seek (file_header_offset, SEEK_SET);
-			
+
 			//
 			//	Read the image header from the file
 			//
@@ -176,7 +180,7 @@ Get_Image_File_Header (HINSTANCE app_instance, IMAGE_FILE_HEADER *file_header)
 	//
 	IMAGE_DOS_HEADER *dos_header = (IMAGE_DOS_HEADER *)app_instance;
 	if (dos_header != NULL) {
-		
+
 		//
 		//	Determine the offset where the image header resides
 		//
@@ -187,10 +191,10 @@ Get_Image_File_Header (HINSTANCE app_instance, IMAGE_FILE_HEADER *file_header)
 		//
 		::memcpy (	file_header,
 						(((char *)dos_header) + image_header_offset),
-						sizeof (IMAGE_FILE_HEADER));		
+						sizeof (IMAGE_FILE_HEADER));
 		retval = true;
 	}
-	
+
 
 	return retval;
 }
@@ -217,7 +221,7 @@ Compare_EXE_Version (HINSTANCE app_instance, const char *filename)
 	//	Get the image header for both executables
 	//
 	IMAGE_FILE_HEADER header1 = { 0 };
-	IMAGE_FILE_HEADER header2 = { 0 };	
+	IMAGE_FILE_HEADER header2 = { 0 };
 	if	(	::Get_Image_File_Header (app_instance, &header1) &&
 			::Get_Image_File_Header (filename, &header2))
 	{

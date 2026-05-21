@@ -74,7 +74,7 @@ enum
 class DialogMgrClass
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public methods
 	////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ public:
 	static IME::IMEManager* Get_IME(void)
 		{return Input->GetIME();}
 
-	static void Show_IME_Message(const wchar_t* message, uint32 duration);
+	static void Show_IME_Message(const unichar_t* message, uint32 duration);
 
 	//
 	//	Keyboard Input
@@ -117,7 +117,7 @@ public:
 	//
 	static const Vector3 &	Get_Mouse_Pos (void)							{ return Input->Get_Mouse_Pos (); }
 	static void					Set_Mouse_Pos (const Vector3 &pos)		{ Input->Set_Mouse_Pos (pos); }
-	
+
 	static const Vector3 &	Get_Last_Mouse_Pos (void)					{ return LastMousePos; }
 	static void					Set_Last_Mouse_Pos (const Vector3 &pos){ LastMousePos = pos; }
 
@@ -209,7 +209,7 @@ private:
 	////////////////////////////////////////////////////////////////
 	//	Private member data
 	////////////////////////////////////////////////////////////////
-	static DynamicVectorClass<DialogBaseClass *>	DialogList;	
+	static DynamicVectorClass<DialogBaseClass *>	DialogList;
 	static DialogBaseClass **							TestArray;
 	static int												TestArrayCount;
 	static int												TestArrayMaxCount;
@@ -221,7 +221,7 @@ private:
 	static DialogControlClass *						InputCapture;
 	static DialogControlClass *						FocusControl;
 	static WWUIInputClass *								Input;
-	
+
 	static DialogTransitionClass *					Transition;
 	static DialogBaseClass *							TransitionDialog;
 	static DialogBaseClass *							PendingActiveDialog;

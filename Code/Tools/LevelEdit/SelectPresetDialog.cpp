@@ -103,7 +103,7 @@ SelectPresetDialogClass::OnInitDialog (void)
 	//	of the tree.
 	//
 	if (m_ClassID == 0) {
-		
+
 		//
 		//	Build the complete preset tree
 		//
@@ -150,7 +150,7 @@ SelectPresetDialogClass::OnInitDialog (void)
 	}
 
 
-	return TRUE;
+	return true;
 }
 
 
@@ -217,7 +217,7 @@ SelectPresetDialogClass::OnOK (void)
 	//
 	//	Save the selected preset
 	//
-	HTREEITEM selected_item = m_TreeCtrl.GetSelectedItem ();	
+	HTREEITEM selected_item = m_TreeCtrl.GetSelectedItem ();
 	if (selected_item != NULL) {
 		m_Preset = (PresetClass *)m_TreeCtrl.GetItemData (selected_item);
 	}
@@ -260,10 +260,10 @@ SelectPresetDialogClass::Build_Full_Preset_Tree (void)
 
 		//
 		//	Add this factory to the tree
-		//		
+		//
 		HTREEITEM tree_item = m_TreeCtrl.InsertItem (PRESET_CATEGORIES[index].name, FOLDER_ICON, FOLDER_ICON);
-		m_IconIndex = PRESET_CATEGORIES[index].icon;		
-				
+		m_IconIndex = PRESET_CATEGORIES[index].icon;
+
 		//
 		//	Add all presets for this factory into the tree
 		//
@@ -274,10 +274,10 @@ SelectPresetDialogClass::Build_Full_Preset_Tree (void)
 		//
 		/*DefinitionFactoryClass *factory = DefinitionFactoryMgrClass::Find_Factory (PRESET_CATEGORIES[index].clsid);
 		if (factory == NULL) {
-			
+
 			//
 			//	Find all the sub-factories
-			//			
+			//
 			for (	factory = DefinitionFactoryMgrClass::Get_First (PRESET_CATEGORIES[index].clsid);
 					factory != NULL;
 					factory = DefinitionFactoryMgrClass::Get_Next (factory, PRESET_CATEGORIES[index].clsid))
@@ -314,10 +314,10 @@ SelectPresetDialogClass::Generate_Tree (int class_id, HTREEITEM parent_item)
 	//
 	DefinitionFactoryClass *factory = DefinitionFactoryMgrClass::Find_Factory (class_id);
 	if (factory == NULL) {
-		
+
 		//
 		//	Find all the sub-factories
-		//			
+		//
 		for (	factory = DefinitionFactoryMgrClass::Get_First (class_id);
 				factory != NULL;
 				factory = DefinitionFactoryMgrClass::Get_Next (factory, class_id))
@@ -326,7 +326,6 @@ SelectPresetDialogClass::Generate_Tree (int class_id, HTREEITEM parent_item)
 			//	Add this sub-factory and all its definitions to the tree
 			//
 			if (factory->Is_Displayed ()) {
-				LPCTSTR name = factory->Get_Name ();
 				HTREEITEM child_item = m_TreeCtrl.InsertItem (factory->Get_Name (), FOLDER_ICON, FOLDER_ICON, parent_item);
 				Generate_Tree (factory->Get_Class_ID (), child_item);
 			}
@@ -362,11 +361,10 @@ SelectPresetDialogClass::Generate_Tree (int class_id, HTREEITEM parent_item)
 void
 SelectPresetDialogClass::OnSelchangedPresetTree
 (
-	NMHDR *		pNMHDR,
+	NMHDR *		/* pNMHDR */,
 	LRESULT *	pResult
 )
 {
-	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 	(*pResult) = 0;
 
 	//
@@ -376,7 +374,7 @@ SelectPresetDialogClass::OnSelchangedPresetTree
 	HTREEITEM selected_item = m_TreeCtrl.GetSelectedItem ();
 	if (selected_item != NULL) {
 		PresetClass *preset = (PresetClass *)m_TreeCtrl.GetItemData (selected_item);
-		
+
 		if (m_AllowNoneSelection == false) {
 			::EnableWindow (::GetDlgItem (m_hWnd, IDOK), preset != NULL);
 		}
@@ -400,7 +398,7 @@ SelectPresetDialogClass::OnInfo (void)
 	if (selected_item != NULL) {
 		PresetClass *preset = (PresetClass *)m_TreeCtrl.GetItemData (selected_item);
 		if (preset != NULL) {
-			
+
 			//
 			//	Show the settings for this preset
 			//

@@ -42,8 +42,8 @@
 #define __DLGLOADSPGAME_H
 
 
+#include "renegadedialog.h"
 #include "menudialog.h"
-#include "resource.h"
 #include "DlgMessageBox.h"
 
 
@@ -55,21 +55,21 @@
 class LoadSPGameMenuClass : public MenuDialogClass, public Observer<DlgMsgBoxEvent>
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	LoadSPGameMenuClass (void)	:
 		CurrSortCol (1),
 		IsSortAscending (false),
-		MenuDialogClass (IDD_MENU_LOAD_SP_GAME)	{}
+		MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MENU_LOAD_SP_GAME))	{}
 
 
 	////////////////////////////////////////////////////////////////
 	//	Public methods
 	////////////////////////////////////////////////////////////////
 	void		On_Init_Dialog (void) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 	void		On_ListCtrl_Delete_Entry (ListCtrlClass *list_ctrl, int ctrl_id, int item_index) override;
 	void		On_ListCtrl_Column_Click (ListCtrlClass *list_ctrl, int ctrl_id, int col_index) override;
 	void		On_ListCtrl_DblClk (ListCtrlClass *list_ctrl, int ctrl_id, int item_index) override;
@@ -101,7 +101,7 @@ private:
 	////////////////////////////////////////////////////////////////
 	//	Static members
 	////////////////////////////////////////////////////////////////
-	static int CALLBACK LoadListSortCallback (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param);
+	static int	LoadListSortCallback (ListCtrlClass *list_ctrl, int item_index1, int item_index2, uint32 user_param);
 
 	////////////////////////////////////////////////////////////////
 	//	Private methods

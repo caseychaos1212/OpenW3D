@@ -36,9 +36,8 @@
 
 
 #include "dlgserversaveload.h"
-#include "resource.h"
 #include "listctrl.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "inputconfigmgr.h"
 #include "string_ids.h"
 #include "rawfile.h"
@@ -63,7 +62,7 @@ const char *DEFAULT_SERVER_SETTINGS_FILE_NAME = "svrcfg_cnc_%04d.ini";
 //
 ////////////////////////////////////////////////////////////////
 ServerSaveLoadMenuClass::ServerSaveLoadMenuClass (void)	:
-	MenuDialogClass (IDD_MENU_SERVER_SETTINGS_SAVELOAD)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MENU_SERVER_SETTINGS_SAVELOAD))
 {
 }
 
@@ -90,7 +89,7 @@ ServerSaveLoadMenuClass::On_Init_Dialog (void)
 		//
 		//	Configure the column
 		//
-		list_ctrl->Add_Column (L"", 1.0F, Vector3 (1, 1, 1));
+		list_ctrl->Add_Column (U_CHAR(""), 1.0F, Vector3 (1, 1, 1));
 
 		//
 		//	Loop over all the configurations
@@ -130,7 +129,7 @@ ServerSaveLoadMenuClass::On_Init_Dialog (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-ServerSaveLoadMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+ServerSaveLoadMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id)
 	{
@@ -285,7 +284,7 @@ ServerSaveLoadMenuClass::Save_Config (bool prompt)
 					//
 					//	Get the new display name for this configuration
 					//
-					const wchar_t *display_name = Get_Dlg_Item_Text (IDC_NAME_EDIT);
+					const unichar_t *display_name = Get_Dlg_Item_Text (IDC_NAME_EDIT);
 					if (display_name[0] != 0) {
 
 						//
@@ -311,10 +310,10 @@ ServerSaveLoadMenuClass::Save_Config (bool prompt)
 					//
 					//	Let the user know the settings are not correct
 					//
-					RenegadeDialogMgrClass::Do_Simple_Dialog(IDD_MP_INVALID_SERVER_CONFIG);
+					RenegadeDialogMgrClass::Do_Simple_Dialog(GetRenegadeDialog(RenegadeDialogID::IDD_MP_INVALID_SERVER_CONFIG));
 #else
 					WideStringClass errorMsg(0, true);
-					errorMsg.Format(L"%s\n\n%s", TRANSLATE(IDS_MENU_TEXT330), (const wchar_t*)outMsg);
+					errorMsg.Format(U_CHAR("%s\n\n%s"), TRANSLATE(IDS_MENU_TEXT330), (const unichar_t*)outMsg);
 					DlgMsgBox::DoDialog(TRANSLATE(IDS_MENU_TEXT329), errorMsg);
 #endif
 				}
@@ -325,7 +324,7 @@ ServerSaveLoadMenuClass::Save_Config (bool prompt)
 			//
 			//	Get the new display name for this configuration
 			//
-			const wchar_t *display_name = Get_Dlg_Item_Text (IDC_NAME_EDIT);
+			const unichar_t *display_name = Get_Dlg_Item_Text (IDC_NAME_EDIT);
 			if (display_name[0] != 0) {
 
 				//
@@ -359,7 +358,7 @@ void
 ServerSaveLoadMenuClass::On_ListCtrl_Delete_Entry
 (
 	ListCtrlClass *list_ctrl,
-	int				ctrl_id,
+	int				/* ctrl_id */,
 	int				item_index
 )
 {
@@ -426,8 +425,8 @@ void
 ServerSaveLoadMenuClass::On_ListCtrl_Sel_Change
 (
 	ListCtrlClass *	list_ctrl,
-	int					ctrl_id,
-	int					old_index,
+	int					/* ctrl_id */,
+	int					/* old_index */,
 	int					new_index
 )
 {
@@ -455,7 +454,7 @@ ServerSaveLoadMenuClass::On_ListCtrl_Sel_Change
 		//
 		//	Clear the name of the current configuration
 		//
-		Set_Dlg_Item_Text (IDC_NAME_EDIT, L"");
+		Set_Dlg_Item_Text (IDC_NAME_EDIT, U_CHAR(""));
 	}
 
 	//
@@ -471,13 +470,13 @@ ServerSaveLoadMenuClass::On_ListCtrl_Sel_Change
 //	ListSortCallback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 ServerSaveLoadMenuClass::ListSortCallback
 (
 	ListCtrlClass *	list_ctrl,
 	int					item_index1,
 	int					item_index2,
-	uint32				user_param
+	uint32				/* user_param */
 )
 {
 
@@ -509,7 +508,7 @@ ServerSaveLoadMenuClass::ListSortCallback
 		}
 	}
 
-	return(wcsicmp(config1->ConfigName, config2->ConfigName));
+	return(u_strcasecmp(config1->ConfigName, config2->ConfigName, U_COMPARE_CODE_POINT_ORDER));
 }
 
 
@@ -519,7 +518,7 @@ ServerSaveLoadMenuClass::ListSortCallback
 //
 ////////////////////////////////////////////////////////////////
 void
-ServerSaveLoadMenuClass::On_EditCtrl_Enter_Pressed (EditCtrlClass *edit_ctrl, int ctrl_id)
+ServerSaveLoadMenuClass::On_EditCtrl_Enter_Pressed (EditCtrlClass * /* edit_ctrl */, int ctrl_id)
 {
 	if (ctrl_id == IDC_NAME_EDIT) {
 		Save_Config (true);
@@ -582,7 +581,7 @@ void ServerSaveLoadMenuClass::Save_Now(void)
 					//
 					//	Get the new display name for this configuration
 					//
-					const wchar_t *display_name = Get_Dlg_Item_Text (IDC_NAME_EDIT);
+					const unichar_t *display_name = Get_Dlg_Item_Text (IDC_NAME_EDIT);
 
 					if (display_name[0] != 0) {
 						//
@@ -629,7 +628,7 @@ void ServerSaveLoadMenuClass::Save_Now(void)
  * HISTORY:                                                                                    *
  *   12/17/2001 5:11PM ST : Created                                                            *
  *=============================================================================================*/
-ServerSettingsClass::ServerSettingsClass(const char *filename, const wchar_t *configname, int file_number)
+ServerSettingsClass::ServerSettingsClass(const char *filename, const unichar_t *configname, int file_number)
 {
 	ConfigName = configname;	//"Default C&C Server Settings";
 	RawFileName = filename;		//"svrcfg_cnc.ini"
@@ -725,12 +724,12 @@ void ServerSettingsManagerClass::Scan(void)
 	for (int i=2 ; i<MAX_SETTINGS_FILES ; i++) {
 
 		sprintf(file_name, DEFAULT_SERVER_SETTINGS_FILE_NAME, i);
-		sprintf(whole_file_name, "data\\%s", file_name);
+		sprintf(whole_file_name, "data/%s", file_name);
 		RawFileClass file(whole_file_name);
 		if (file.Is_Available()) {
 			INIClass *ini = Get_INI(file_name);
 			if (ini) {
-				description = ini->Get_Wide_String(description, "Settings", "wConfigName", L"");	//(unsigned short *)TRANSLATE(IDS_SERVER_SAVELOAD_DEFAULT));
+				description = ini->Get_Wide_String(description, "Settings", "wConfigName", U_CHAR(""));	//(unsigned short *)TRANSLATE(IDS_SERVER_SAVELOAD_DEFAULT));
 				if (description.Get_Length()) {
 					ServerSettingsList.Add(new ServerSettingsClass(file_name, description.Peek_Buffer(), i));
 				} else {
@@ -791,7 +790,7 @@ void ServerSettingsManagerClass::Load_Settings(ServerSettingsClass *settings)
 
 	if (settings && The_Game()) {
 		char filename[MAX_PATH];
-		sprintf(filename, "data\\%s", settings->RawFileName.Peek_Buffer());
+		sprintf(filename, "data/%s", settings->RawFileName.Peek_Buffer());
 		RawFileClass file(filename);
 		if (file.Is_Available()) {
 			The_Game()->Set_Ini_Filename(settings->RawFileName);
@@ -820,7 +819,7 @@ void ServerSettingsManagerClass::Delete_Configuration(ServerSettingsClass *setti
 {
 	if (!settings->Is_Default()) {
 		char filename[MAX_PATH];
-		sprintf(filename, "data\\%s", settings->RawFileName.Peek_Buffer());
+		sprintf(filename, "data/%s", settings->RawFileName.Peek_Buffer());
 		DeleteFileA(filename);
 		for (int i=0 ; i<ServerSettingsList.Count() ; i++) {
 			if (strcmp(settings->RawFileName, ServerSettingsList[i]->RawFileName) == 0) {
@@ -855,7 +854,7 @@ void ServerSettingsManagerClass::Save_Configuration(ServerSettingsClass *setting
 
 	if (settings && The_Game()) {
 		char filename[MAX_PATH];
-		sprintf(filename, "data\\%s", settings->RawFileName.Peek_Buffer());
+		sprintf(filename, "data/%s", settings->RawFileName.Peek_Buffer());
 		RawFileClass file(filename);
 		if (!file.Is_Available()) {
 			file.Create();

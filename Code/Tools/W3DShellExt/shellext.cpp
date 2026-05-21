@@ -21,7 +21,7 @@
 #include "Chunkio.h"
 #include "io.h"
 #include "wdump.h"
-#include "WdumpDoc.h"
+#include "wdumpdoc.h"
 //#include "w3d2dat.h"			/// LFeenanEA: Header file missing, perhaps this tool is outdated?
 //
 // Initialize GUIDs (should be done only and at-least once per DLL/EXE)
@@ -41,10 +41,10 @@ HINSTANCE g_DllInstance = NULL;	// Handle to this DLL itself.
 
 //===============================================================
 extern "C" int APIENTRY
-	DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved){
+	DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID /*lpReserved*/){
 	if (dwReason == DLL_PROCESS_ATTACH){
 		g_DllInstance = hInstance;
-	}else 
+	}else
 	if (dwReason == DLL_PROCESS_DETACH){
 		ODS3("Detaching Process");
 	}
@@ -74,9 +74,9 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppvOut)
 CShellExtClassFactory::CShellExtClassFactory()
 {
     m_cRef = 0L;
-    g_DllRefCount++;	
+    g_DllRefCount++;
 }
-																
+
 //======================================================================================
 CShellExtClassFactory::~CShellExtClassFactory(){
     g_DllRefCount--;
@@ -93,7 +93,7 @@ STDMETHODIMP CShellExtClassFactory::QueryInterface(REFIID riid, LPVOID FAR *ppv)
         return NOERROR;
     }
     return E_NOINTERFACE;
-}	
+}
 //======================================================================================
 STDMETHODIMP_(ULONG) CShellExtClassFactory::AddRef()
 {
@@ -124,7 +124,7 @@ STDMETHODIMP CShellExtClassFactory::CreateInstance(LPUNKNOWN pUnkOuter,REFIID ri
 }
 
 
-STDMETHODIMP CShellExtClassFactory::LockServer(BOOL fLock)
+STDMETHODIMP CShellExtClassFactory::LockServer(BOOL /*fLock*/)
 {
     return NOERROR;
 }
@@ -154,7 +154,7 @@ STDMETHODIMP CShellExt::QueryInterface(REFIID riid, LPVOID FAR *ppv)
     }else {
 		 if (IsEqualIID(riid, IID_IContextMenu)) {
 	        *ppv = (LPCONTEXTMENU)this;
-		 }else{ 
+		 }else{
 			 if (IsEqualIID(riid, IID_IExtractIcon)){
 				*ppv = (LPEXTRACTICON)this;
 			 }else {

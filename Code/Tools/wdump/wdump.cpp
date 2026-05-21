@@ -51,7 +51,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CWdumpApp construction
 
-CWdumpApp::CWdumpApp() 
+CWdumpApp::CWdumpApp()
 : DumpTextures(false), NoWindow(false), TextureDumpFile(0)
 {
 	// TODO: add construction code here,
@@ -128,13 +128,13 @@ BOOL CWdumpApp::InitInstance()
 	if(NoWindow) {
 		if(cmdInfo.m_nShellCommand == CWDumpCommandLineInfo::FileOpen) {
 			const char *c = strrchr(cmdInfo.m_strFileName, '\\');
-			if(c == 0) 
+			if(c == 0)
 				c = (LPCTSTR) cmdInfo.m_strFileName;
 			if(*c == '\\')
 				c++;
 
 			Filename = c;
-			
+
 
 
 /*			STARTUPINFO info;
@@ -147,19 +147,19 @@ BOOL CWdumpApp::InitInstance()
 			} else {
 				int CrtInput;
 				int CrtOutput;
-				if ( (CrtInput  =_open_osfhandle((long) info.hStdInput, _O_RDONLY)) != -1) {
-					if ( (CrtOutput = _open_osfhandle((long) info.hStdOutput, _O_APPEND)) != -1) {
+				if ( (CrtInput  =_open_osfhandle((int) info.hStdInput, _O_RDONLY)) != -1) {
+					if ( (CrtOutput = _open_osfhandle((int) info.hStdOutput, _O_APPEND)) != -1) {
 						_dup2( CrtInput, 0);
 						_dup2( CrtOutput, 1);
 					}
 				}
-					 
+
 //				stdin = (struct _iobuf * ) info.hStdInput;
 //				stdout = (struct _iobuf * ) info.hStdOutput;
 			}
-*/			
+*/
 
-			CWdumpDoc *doc = (CWdumpDoc *) pDocTemplate->OpenDocumentFile(cmdInfo.m_strFileName, FALSE);
+			// CWdumpDoc *doc = (CWdumpDoc *) pDocTemplate->OpenDocumentFile(cmdInfo.m_strFileName, false);
 
 /*			if(info.hStdOutput == NULL) {
 				printf("Press return to close this window..");
@@ -168,15 +168,15 @@ BOOL CWdumpApp::InitInstance()
 			}
 */
 
-			CloseAllDocuments(TRUE);
+			CloseAllDocuments(true);
 			PostQuitMessage(0);
-			return TRUE;
+			return true;
 		}
 	}
 
 	// Dispatch commands specified on the command line
 	if (!ProcessShellCommand(cmdInfo))
-		return FALSE;
+		return false;
 
 
 	m_pMainWnd->ShowWindow(SW_SHOW);
@@ -186,7 +186,7 @@ BOOL CWdumpApp::InitInstance()
 	CWdumpDoc *doc = (CWdumpDoc *) pDocTemplate->GetNextDoc(p);
 	doc->UpdateAllViews(0);
 
-	return TRUE;
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////

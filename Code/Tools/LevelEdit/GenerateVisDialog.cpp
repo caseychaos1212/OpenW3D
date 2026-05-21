@@ -74,7 +74,7 @@ GenerateVisDialogClass::OnInitDialog (void)
 	CDialog::OnInitDialog ();
 
 	m_GranularitySlider.SetRange (1, 32);
-	m_GranularitySlider.SetPos (16);	
+	m_GranularitySlider.SetPos (16);
 	SetDlgItemInt (IDC_GRANULARITY_EDIT, 16);
 
 	m_SampleHeightSlider.SetRange (1, 20);
@@ -83,7 +83,7 @@ GenerateVisDialogClass::OnInitDialog (void)
 
 	bool bcheck = ::Get_Scene_Editor ()->Is_Vis_Quick_And_Dirty();
 	SendDlgItemMessage (IDC_IGNORE_TRANSPARENCY_CHECK, BM_SETCHECK, (WPARAM)bcheck);
-	return TRUE;
+	return true;
 }
 
 
@@ -98,7 +98,7 @@ GenerateVisDialogClass::OnHScroll
 	UINT nSBCode,
 	UINT nPos,
 	CScrollBar* pScrollBar
-) 
+)
 {
 	SetDlgItemInt (IDC_GRANULARITY_EDIT, m_GranularitySlider.GetPos ());
 	SetDlgItemInt (IDC_SAMPLEHEIGHT_EDIT, m_SampleHeightSlider.GetPos ());
@@ -113,25 +113,25 @@ GenerateVisDialogClass::OnHScroll
 //
 //////////////////////////////////////////////////////////////////////////////
 void
-GenerateVisDialogClass::OnOK (void) 
+GenerateVisDialogClass::OnOK (void)
 {
 	SceneEditorClass *scene = ::Get_Scene_Editor ();
 
 	//
 	//	Enable quick and dirty mode (if necessary)
 	//
-	BOOL is_quick_and_dirty = SendDlgItemMessage (IDC_IGNORE_TRANSPARENCY_CHECK, BM_GETCHECK);
-	scene->Set_Vis_Quick_And_Dirty (is_quick_and_dirty == TRUE);	
+	bool is_quick_and_dirty = SendDlgItemMessage (IDC_IGNORE_TRANSPARENCY_CHECK, BM_GETCHECK) != 0;
+	scene->Set_Vis_Quick_And_Dirty (is_quick_and_dirty);
 
 	//
 	//	Read the settings from the dialog
 	//
-	BOOL ignore_bias		= SendDlgItemMessage (IDC_IGNORE_VIS_BIAS, BM_GETCHECK);
-	BOOL selection_only	= SendDlgItemMessage (IDC_SELECTION_ONLY, BM_GETCHECK);
+	bool ignore_bias		= SendDlgItemMessage (IDC_IGNORE_VIS_BIAS, BM_GETCHECK) != 0;
+	bool selection_only	= SendDlgItemMessage (IDC_SELECTION_ONLY, BM_GETCHECK) != 0;
 	float granularity		= (float)m_GranularitySlider.GetPos ();
 	float sample_height	= (float)m_SampleHeightSlider.GetPos ();
 
-	// 
+	//
 	// Record the time when the vis preprocessing is started
 	//
 	DWORD start_time = ::GetTickCount();
@@ -139,27 +139,27 @@ GenerateVisDialogClass::OnOK (void)
 	//
 	// Reset the vis data (which also causes the culling systems to re-partition)
 	//
-	if (selection_only != TRUE) {
+	if (!selection_only) {
 		scene->Reset_Vis(true);
 	}
-	
+
 	//
 	//	Kick off the vis
 	//
 	if (SendDlgItemMessage (IDC_USE_EDGE_SAMPLING, BM_GETCHECK) != 0) {
-		scene->Generate_Edge_Sampled_Vis (granularity, (ignore_bias == TRUE));
+		scene->Generate_Edge_Sampled_Vis (granularity, ignore_bias);
 	} else {
-		scene->Generate_Uniform_Sampled_Vis (granularity, sample_height, (ignore_bias == TRUE), (selection_only == TRUE));
+		scene->Generate_Uniform_Sampled_Vis (granularity, sample_height, ignore_bias, selection_only);
 	}
 
-	if (selection_only != TRUE) {
-		
-		// 
+	if (!selection_only) {
+
+		//
 		// Now do the manual vis points ();
 		//
 		scene->Generate_Manual_Vis ();
 
-		// 
+		//
 		// Now vis the light sources
 		//
 		scene->Generate_Light_Vis ();
@@ -179,12 +179,12 @@ GenerateVisDialogClass::OnOK (void)
 	int minutes = elapsed_time / (1000 * 60);
 	elapsed_time -= minutes * (1000 * 60);
 	int seconds = elapsed_time / 1000;
-	
+
 	CString message;
 	message.Format("Total Elapsed Time: %d hours, %d minutes, %d seconds.",hours,minutes,seconds);
 	MessageBox (message, "Time", MB_OK | MB_ICONEXCLAMATION);
 
 
-	CDialog::OnOK ();	
+	CDialog::OnOK ();
 	return ;
 }

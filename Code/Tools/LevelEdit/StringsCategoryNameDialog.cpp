@@ -72,12 +72,12 @@ END_MESSAGE_MAP()
 //
 /////////////////////////////////////////////////////////////////////////////
 BOOL
-StringsCategoryNameDialogClass::OnInitDialog (void) 
+StringsCategoryNameDialogClass::OnInitDialog (void)
 {
 	CDialog::OnInitDialog ();
 
 	SetDlgItemText (IDC_NAME, Name);
-	return TRUE;
+	return true;
 }
 
 

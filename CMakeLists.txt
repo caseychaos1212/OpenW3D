@@ -17,26 +17,23 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 # This file handles extra settings wanted/needed for different compilers.
 include(compilers)
 
+# This file allows embedding resources
+include(embed)
+
 # Set where the build results will end up
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}" CACHE PATH "Where to output archives")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}" CACHE PATH "Where to output libraries")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}" CACHE PATH "Where to output binaries")
 
-option(RENEGADE_CLIENT "Build full game client." ON)
-add_feature_info(RenegadeClient RENEGADE_CLIENT "Build Renegade game client")
+option(W3D_CLIENT "Build full game client." ON)
+add_feature_info(OpenW3DClient W3D_CLIENT "Build OpenW3D game client")
 
-option(RENEGADE_FDS "Build as headless server." ON)
-add_feature_info(RenegadeHeadless RENEGADE_FDS "Build Renegade headless server")
+option(W3D_FDS "Build as headless server." ON)
+add_feature_info(OpenW3DHeadless W3D_FDS "Build OpenW3D headless server")
 
 # Do we want to build extra SDK stuff or just the game binary?
-option(RENEGADE_TOOLS "Build additional tools." ON)
-option(REN_BUILD_TOOLS "Build editor and mod tools." ${RENEGADE_TOOLS})
-if(REN_BUILD_TOOLS AND NOT RENEGADE_TOOLS)
-    set(RENEGADE_TOOLS ON CACHE BOOL "Build additional tools." FORCE)
-elseif(NOT REN_BUILD_TOOLS AND RENEGADE_TOOLS)
-    set(RENEGADE_TOOLS OFF CACHE BOOL "Build additional tools." FORCE)
-endif()
-add_feature_info(RenegadeTools REN_BUILD_TOOLS "Build Renegade Mod Tools")
+option(W3D_TOOLS "Build additional tools." ON)
+add_feature_info(OpenW3DTools W3D_TOOLS "Build OpenW3D Mod Tools")
 
 option(REN_PHYS_SCENE_BRIDGE "Bridge physics world into WW3D scenes." ON)
 add_feature_info(RenegadeSceneBridge REN_PHYS_SCENE_BRIDGE "Bridge physics world into WW3D scenes")
@@ -53,9 +50,24 @@ if(SYNTAX_CHECK_ONLY)
     add_compile_options("-fsyntax-only")
 endif(SYNTAX_CHECK_ONLY)
 
+# Do we want to build with SDL3 for windows and inputs?
+cmake_dependent_option(W3D_BUILD_OPTION_SDL3 "Build OpenW3D with SDL3." OFF WIN32 ON)
+add_feature_info(SDL3Build W3D_BUILD_OPTION_SDL3 "Build OpenW3D with SDL3")
+
+# Do we want to build with webbrowser?
+cmake_dependent_option(W3D_BUILD_OPTION_WEBBROWSER "Build OpenW3D with webbrowser." ON WIN32 OFF)
+add_feature_info(BrowserBuild W3D_BUILD_OPTION_WEBBROWSER "Build OpenW3D with webbrowser")
+
 # Do we want to build with ffmpeg for audio/video decoding?
-option(W3D_BUILD_OPTION_FFMPEG "Build with ffmpeg." OFF)
-add_feature_info(FFMpegBuild W3D_BUILD_OPTION_FFMPEG "Build Renegade with FFMpeg")
+cmake_dependent_option(W3D_BUILD_OPTION_FFMPEG "Build with ffmpeg." OFF WIN32 ON)
+add_feature_info(FFMpegBuild W3D_BUILD_OPTION_FFMPEG "Build OpenW3D with FFMpeg")
+
+# Do we want to build with OpenAL/ffmpeg for audio playback?
+cmake_dependent_option(W3D_BUILD_OPTION_OPENAL "Build with openal." ON W3D_BUILD_OPTION_FFMPEG OFF)
+add_feature_info(OpenALBuild W3D_BUILD_OPTION_OPENAL "Build OpenW3D with OpenAL")
+
+option(W3D_BUILD_QT_TOOLS "Build Qt-based GUI tools." OFF)
+add_feature_info(QtTools W3D_BUILD_QT_TOOLS "Build Qt front-end tools")
 
 if(NOT WIN32)
     add_compile_definitions(__cdecl=)
@@ -73,22 +85,61 @@ if(W3D_BUILD_OPTION_FFMPEG)
     include(ffmpeg)
 endif()
 
-# Find/Add build dependencies and stubs.
-# Only 32bit Windows can make use of these APIs as the libraries shipped with the game.
-if(WIN32)
-    include(miles)
+if(W3D_BUILD_OPTION_SDL3)
+    include(sdl3)
+    add_compile_definitions(-DOPENW3D_SDL3=1)
+elseif(WIN32)
+    add_compile_definitions(-DOPENW3D_WIN32=1)
+else()
+    message(FATAL_ERROR "Invalid backend")
+endif()
 
+add_compile_definitions(-DWEBBROWSER_ENABLED=$<BOOL:${W3D_BUILD_OPTION_WEBBROWSER}>)
+
+if(W3D_BUILD_OPTION_OPENAL)
+    include(openal)
+endif()
+
+if(W3D_BUILD_QT_TOOLS)
+    if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+        message(FATAL_ERROR "Qt tooling is only supported for 64-bit builds. Configure with a 64-bit generator or set W3D_BUILD_QT_TOOLS=OFF.")
+    endif()
+    set(CMAKE_AUTOMOC ON)
+    set(CMAKE_AUTOUIC ON)
+    set(CMAKE_AUTORCC ON)
+    include(qt_tools)
+endif()
+
+if(WIN32)
     # Do we want to build with bink for video decoding?
-    option(W3D_BUILD_OPTION_BINK "Build with bink." ON)
-    add_feature_info(BinkBuild W3D_BUILD_OPTION_BINK "Build Renegade with Bink")
+    cmake_dependent_option(W3D_BUILD_OPTION_BINK "Build with bink." ON NOT W3D_BUILD_OPTION_FFMPEG OFF)
+    add_feature_info(BinkBuild W3D_BUILD_OPTION_BINK "Build OpenW3D with Bink")
 
     if(W3D_BUILD_OPTION_BINK)
         include(bink)
         target_compile_definitions(binkstub INTERFACE W3D_HAS_BINK)
     endif()
 
-    include(dx9)
+    # Do we want to build with miles for audio playback?
+    cmake_dependent_option(W3D_BUILD_OPTION_MILES "Build with miles." ON NOT W3D_BUILD_OPTION_OPENAL OFF)
+    add_feature_info(MilesBuild W3D_BUILD_OPTION_MILES "Build OpenW3D with Miles Audio")
+
+    if(W3D_BUILD_OPTION_MILES)
+        include(miles)
+    endif()
+
+    option(W3D_BUILD_OPTION_ICU "Build with ICU." OFF)
+    add_feature_info(ICUBuild W3D_BUILD_OPTION_ICU "Build OpenW3D with ICU")
+
+    if(W3D_BUILD_OPTION_ICU)
+        include(icu)
+    endif()
+else()
+    set(W3D_BUILD_OPTION_ICU ON)
+    include(icu)
 endif()
+
+include(dx9)
 
 include(gamespy)
 

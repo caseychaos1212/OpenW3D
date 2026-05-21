@@ -37,10 +37,10 @@ struct IDirect3DSurface9;
 // ----------------------------------------------------------------------------
 
 struct LegacyDDCOLORKEY
-{ 
-	unsigned ColorSpaceLowValue; 
-	unsigned ColorSpaceHighValue; 
-}; 
+{
+	unsigned ColorSpaceLowValue;
+	unsigned ColorSpaceHighValue;
+};
 
 // ----------------------------------------------------------------------------
 //
@@ -54,7 +54,7 @@ struct LegacyDDSCAPS2
 	unsigned Caps;
 	unsigned Caps2;
 	unsigned Caps3;
-	unsigned Caps4; 
+	unsigned Caps4;
 };
 
 // ----------------------------------------------------------------------------
@@ -66,47 +66,47 @@ struct LegacyDDSCAPS2
 
 struct LegacyDDPIXELFORMAT
 {
-	unsigned Size; 
-	unsigned Flags; 
-	unsigned FourCC; 
-	union 
-	{ 
-		unsigned RGBBitCount; 
-		unsigned YUVBitCount; 
-		unsigned ZBufferBitDepth; 
-		unsigned AlphaBitDepth; 
+	unsigned Size;
+	unsigned Flags;
+	unsigned FourCC;
+	union
+	{
+		unsigned RGBBitCount;
+		unsigned YUVBitCount;
+		unsigned ZBufferBitDepth;
+		unsigned AlphaBitDepth;
 		unsigned LuminanceBitCount;
 		unsigned BumpBitCount;
 	};
-	union 
-	{ 
-		unsigned RBitMask; 
-		unsigned YBitMask; 
+	union
+	{
+		unsigned RBitMask;
+		unsigned YBitMask;
 		unsigned StencilBitDepth;
 		unsigned LuminanceBitMask;
 		unsigned BumpDuBitMask;
 	};
-	union 
-	{ 
-		unsigned GBitMask; 
-		unsigned UBitMask; 
+	union
+	{
+		unsigned GBitMask;
+		unsigned UBitMask;
 		unsigned ZBitMask;
 		unsigned BumpDvBitMask;
 	};
-	union 
-	{ 
-		unsigned BBitMask; 
-		unsigned VBitMask; 
+	union
+	{
+		unsigned BBitMask;
+		unsigned VBitMask;
 		unsigned StencilBitMask;
 		unsigned BumpLuminanceBitMask;
 	};
-	union 
-	{ 
-		unsigned RGBAlphaBitMask; 
-		unsigned YUVAlphaBitMask; 
+	union
+	{
+		unsigned RGBAlphaBitMask;
+		unsigned YUVAlphaBitMask;
 		unsigned LuminanceAlphaBitMask;
-		unsigned RGBZBitMask; 
-		unsigned YUVZBitMask; 
+		unsigned RGBZBitMask;
+		unsigned YUVZBitMask;
 	};
 };
 
@@ -167,7 +167,7 @@ class DDSFileClass
 	unsigned FullWidth;
 	unsigned FullHeight;
 	unsigned MipLevels;
-	unsigned long DateTime;
+	unsigned int DateTime;
 	unsigned ReductionFactor;
 	unsigned char* DDSMemory;
 	WW3DFormat Format;
@@ -188,7 +188,7 @@ public:
 	unsigned Get_Height(unsigned level) const;
 	unsigned Get_Full_Width() const { return FullWidth; }		// Get the width of level 0 of non-reduced texture
 	unsigned Get_Full_Height() const { return FullHeight; }		// Get the height of level 0 of non-reduced texture
-	unsigned long Get_Date_Time() const { return DateTime; }
+	unsigned int Get_Date_Time() const { return DateTime; }
 
 	unsigned Get_Mip_Level_Count() const { return MipLevels; }
 	const unsigned char* Get_Memory_Pointer(unsigned level) const;
@@ -199,10 +199,10 @@ public:
 	void Copy_Level_To_Surface(unsigned level,IDirect3DSurface9* d3d_surface);
 	void Copy_Level_To_Surface(
 		unsigned level,
-		WW3DFormat dest_format, 
-		unsigned dest_width, 
-		unsigned dest_height, 
-		unsigned char* dest_surface, 
+		WW3DFormat dest_format,
+		unsigned dest_width,
+		unsigned dest_height,
+		unsigned char* dest_surface,
 		unsigned dest_pitch);
 
 	// Get pixel in A8R8G8B8 format. This isn't the fastest possible way of reading data from DDS.

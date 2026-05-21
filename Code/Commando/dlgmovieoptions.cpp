@@ -34,8 +34,10 @@
  * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include "renegadedialog.h"
 #include "dlgmovieoptions.h"
 #include "listctrl.h"
+#include "pathutil.h"
 #include "BINKMovie.h"
 #include "registry.h"
 #include "translatedb.h"
@@ -50,7 +52,7 @@
 ////////////////////////////////////////////////////////////////
 MovieOptionsMenuClass::MovieOptionsMenuClass (void)	:
 	IsPlaying (false),
-	MenuDialogClass (IDD_OPTIONS_MOVIES)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_OPTIONS_MOVIES))
 {
 	return ;
 }
@@ -77,12 +79,12 @@ MovieOptionsMenuClass::On_Init_Dialog (void)
 
 		//
 		//	Add the movies to the list...
-		//		
+		//
 		RegistryClass registry (APPLICATION_SUB_KEY_NAME_MOVIES);
 		if (registry.Is_Valid ()) {
 
-			const char *INTRO_MOVIE	= "MOVIES\\R_INTRO.BIK";
-						
+			const char *INTRO_MOVIE	= "MOVIES/R_INTRO.BIK";
+
 			//
 			//	Insert the renegade intro movie by default...
 			//
@@ -107,7 +109,7 @@ MovieOptionsMenuClass::On_Init_Dialog (void)
 				//
 				//	Add an entry for this movie
 				//
-				const wchar_t *wide_desc = TRANSLATE_BY_DESC(string_id_des);
+				const unichar_t *wide_desc = TRANSLATE_BY_DESC(string_id_des);
 				int item_index = list_ctrl->Insert_Entry (0xFF, wide_desc);
 				if (item_index != -1) {
 					list_ctrl->Set_Entry_Data (item_index, 0, (uintptr_t)new StringClass (list[index]));
@@ -127,7 +129,7 @@ MovieOptionsMenuClass::On_Init_Dialog (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-MovieOptionsMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MovieOptionsMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	if (IsPlaying) {
 		return ;
@@ -163,7 +165,7 @@ MovieOptionsMenuClass::On_ListCtrl_Delete_Entry
 	}
 
 	if (ctrl_id == IDC_LIST_CTRL) {
-		
+
 		//
 		//	Remove the data we associated with this entry
 		//
@@ -171,7 +173,7 @@ MovieOptionsMenuClass::On_ListCtrl_Delete_Entry
 		list_ctrl->Set_Entry_Data (item_index, 0, 0);
 		if (filename != NULL) {
 			delete filename;
-		}		
+		}
 	}
 
 	return ;
@@ -186,9 +188,9 @@ MovieOptionsMenuClass::On_ListCtrl_Delete_Entry
 void
 MovieOptionsMenuClass::On_ListCtrl_DblClk
 (
-	ListCtrlClass *list_ctrl,
-	int				ctrl_id,
-	int				item_index
+	ListCtrlClass * /* list_ctrl */,
+	int				/* ctrl_id */,
+	int				/* item_index */
 )
 {
 	if (IsPlaying) {
@@ -215,18 +217,18 @@ MovieOptionsMenuClass::Begin_Play_Movie (void)
 	if (list_ctrl == NULL) {
 		return ;
 	}
-	
+
 	//
 	//	Get the currently selected entry
 	//
 	int curr_sel = list_ctrl->Get_Curr_Sel ();
 	if (curr_sel != -1) {
 		StringClass *filename = (StringClass *)list_ctrl->Get_Entry_Data (curr_sel, 0);
-		
+
 		//
 		//	Play the movie (if it exists locally)
 		//
-		if (::GetFileAttributesA (filename->Peek_Buffer ()) != 0xFFFFFFFF) {
+		if (!cPathUtil::PathExists (filename->Peek_Buffer())) {
 			Play_Movie (filename->Peek_Buffer ());
 		} else {
 
@@ -244,14 +246,15 @@ MovieOptionsMenuClass::Begin_Play_Movie (void)
 			//
 			StringClass cd_path;
 			if (CDVerifier.Get_CD_Path (cd_path)) {
-				
+
 				//
 				//	Build a full-path to the movie on the CD
 				//
 				StringClass full_path = cd_path;
-				if (cd_path[cd_path.Get_Length () - 1] != '\\') {
-					full_path += "\\";
-				}
+				const size_t path_length = cd_path.Get_Length ();
+					if (path_length == 0 || cd_path[static_cast<int>(path_length - 1)] != '\\') {
+						full_path += "\\";
+					}
 				full_path += filename_only;
 				Play_Movie (full_path);
 			} else {
@@ -274,11 +277,11 @@ void
 MovieOptionsMenuClass::Play_Movie (const char *filename)
 {
 	WWAudioClass::Get_Instance ()->Temp_Disable_Audio (true);
-	
+
 	FontCharsClass* font = StyleMgrClass::Get_Font(StyleMgrClass::FONT_INGAME_SUBTITLE_TXT);
 
-	BINKMovie::Play (filename, "data\\subtitle.ini", font);
-	
+	BINKMovie::Play (filename, "data/subtitle.ini", font);
+
 	if (font) {
 		font->Release_Ref();
 	}
@@ -341,7 +344,7 @@ bool
 MovieOptionsMenuClass::On_Key_Down (uint32 key_id, uint32 key_data)
 {
 	bool retval = false;
-	
+
 	//
 	//	Stop playing the movie on any keypress
 	//
@@ -373,17 +376,18 @@ MovieOptionsMenuClass::HandleNotification (CDVerifyEvent &event)
 		//
 		StringClass cd_path;
 		if (CDVerifier.Get_CD_Path (cd_path)) {
-			
+
 			//
 			//	Build a full-path to the movie on the CD
 			//
 			StringClass full_path = cd_path;
-			if (cd_path[cd_path.Get_Length () - 1] != '\\') {
-				full_path += "\\";
-			}
+			const size_t path_length = cd_path.Get_Length ();
+				if (path_length == 0 || cd_path[static_cast<int>(path_length - 1)] != '\\') {
+					full_path += "/";
+				}
 			full_path += PendingMovieFilename;
 			Play_Movie (full_path);
-		}		
+		}
 	}
 
 	PendingMovieFilename = "";

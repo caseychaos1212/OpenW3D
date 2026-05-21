@@ -84,11 +84,10 @@ END_MESSAGE_MAP()
 void
 ConversationPickerDialogClass::OnSelchangedConversationTree
 (
-	NMHDR *		pNMHDR,
+	NMHDR *		/* pNMHDR */,
 	LRESULT *	pResult
 )
 {
-	NM_TREEVIEW *pNMTreeView = (NM_TREEVIEW *)pNMHDR;
 	(*pResult) = 0;
 
 	Conversation = NULL;
@@ -118,7 +117,7 @@ BOOL
 ConversationPickerDialogClass::OnInitDialog (void)
 {
 	CDialog::OnInitDialog ();
-	
+
 	//
 	// Pass the general use imagelist onto the tree control
 	//
@@ -144,7 +143,7 @@ ConversationPickerDialogClass::OnInitDialog (void)
 	m_TreeCtrl.Expand (GlobalsRoot, TVE_EXPAND);
 	m_TreeCtrl.Expand (LevelsRoot, TVE_EXPAND);
 
-	return TRUE;
+	return true;
 }
 
 
@@ -186,7 +185,7 @@ ConversationPickerDialogClass::Insert_Entry (ConversationClass *conversation)
 	HTREEITEM tree_item = m_TreeCtrl.InsertItem (conversation->Get_Name (), DIALOGUE_ICON,
 													DIALOGUE_ICON, parent_item);
 	if (tree_item != NULL) {
-		
+
 		//
 		//	Associate the conversation with the entry in the tree
 		//

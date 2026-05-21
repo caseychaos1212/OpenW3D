@@ -17,27 +17,27 @@
 */
 
 /* $Header: /Commando/Code/Tools/ViewTrans/viewtrans.cpp 3     7/06/98 6:28p Greg_h $ */
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Trnasformation Viewer Utility                                * 
- *                                                                                             * 
- *                    File Name : VIEWTRANS.CPP                                                * 
- *                                                                                             * 
- *                   Programmer : Greg Hjelstrom                                               * 
- *                                                                                             * 
- *                   Start Date : 02/24/97                                                     * 
- *                                                                                             * 
- *                  Last Update : February 25, 1997 [GH]                                       * 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
- *   UtilityDlgProc -- Dialog Proc to handle all of the dialog's windows messages              * 
- *   TVU::TransViewerUtility -- Constructor                                                    * 
- *   TVU::OnInitDialog -- Initializes the custom controls.                                     * 
- *   TVU::BeginEditParams -- Adds the rollup to the control panel                              * 
- *   TVU::EndEditParams -- Removes the rollup from the panel                                   * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Trnasformation Viewer Utility                                *
+ *                                                                                             *
+ *                    File Name : VIEWTRANS.CPP                                                *
+ *                                                                                             *
+ *                   Programmer : Greg Hjelstrom                                               *
+ *                                                                                             *
+ *                   Start Date : 02/24/97                                                     *
+ *                                                                                             *
+ *                  Last Update : February 25, 1997 [GH]                                       *
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
+ *   UtilityDlgProc -- Dialog Proc to handle all of the dialog's windows messages              *
+ *   TVU::TransViewerUtility -- Constructor                                                    *
+ *   TVU::OnInitDialog -- Initializes the custom controls.                                     *
+ *   TVU::BeginEditParams -- Adds the rollup to the control panel                              *
+ *   TVU::EndEditParams -- Removes the rollup from the panel                                   *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 
@@ -58,17 +58,17 @@ UtilityClassDesc	UtilityDesc;
 
 
 
-/*********************************************************************************************** 
- * UtilityDlgProc -- Dialog Proc to handle all of the dialog's windows messages                * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   02/25/1997 GH  : Created.                                                                 * 
+/***********************************************************************************************
+ * UtilityDlgProc -- Dialog Proc to handle all of the dialog's windows messages                *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   02/25/1997 GH  : Created.                                                                 *
  *=============================================================================================*/
 BOOL CALLBACK UtilityDlgProc(HWND hDlg, UINT message, WPARAM wParam,LPARAM lParam)
 {
@@ -80,11 +80,11 @@ BOOL CALLBACK UtilityDlgProc(HWND hDlg, UINT message, WPARAM wParam,LPARAM lPara
 		case WM_INITDIALOG:
 			// Initialize all our Custom Controls
 			TheUtility.OnInitDialog(hDlg, lParam);
-		 	return TRUE;
+		 	return true;
 
 		case WM_DESTROY:
 			// Release all our Custom Controls
-			return FALSE;
+			return false;
 
 		case WM_LBUTTONDOWN: case WM_LBUTTONUP:	case WM_MOUSEMOVE:
 			// Pass these messages on to the RollupMouseMessage method
@@ -95,103 +95,103 @@ BOOL CALLBACK UtilityDlgProc(HWND hDlg, UINT message, WPARAM wParam,LPARAM lPara
 
 		case WM_MOUSEACTIVATE:
 			to->ip->RealizeParamPanel();
-			return FALSE;
+			return false;
 
 		default:
 			break;
 	}
-	return FALSE;
+	return false;
 }
 
 
 
-/*********************************************************************************************** 
- * TVU::TransViewerUtility -- Constructor                                                      * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   02/25/1997 GH  : Created.                                                                 * 
+/***********************************************************************************************
+ * TVU::TransViewerUtility -- Constructor                                                      *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   02/25/1997 GH  : Created.                                                                 *
  *=============================================================================================*/
-TransViewerUtility::TransViewerUtility(void) 
+TransViewerUtility::TransViewerUtility(void)
 {
 	iu = NULL;
-	ip = NULL;	
-	hPanel = NULL;	
+	ip = NULL;
+	hPanel = NULL;
 }
 
 
-/*********************************************************************************************** 
- * TVU::BeginEditParams -- Adds the rollup to the control panel                                * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   02/25/1997 GH  : Created.                                                                 * 
+/***********************************************************************************************
+ * TVU::BeginEditParams -- Adds the rollup to the control panel                                *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   02/25/1997 GH  : Created.                                                                 *
  *=============================================================================================*/
-void TransViewerUtility::BeginEditParams(Interface *ip, IUtil *iu) 
+void TransViewerUtility::BeginEditParams(Interface *ip, IUtil *iu)
 {
 	this->iu = iu;
 	this->ip = ip;
 
 	// Add the rollup page to the command panel.
 	hPanel = ip->AddRollupPage(
-		hInstance, 
+		hInstance,
 		MAKEINTRESOURCE(IDD_VIEWTRANS),
 		UtilityDlgProc,
-		ROLLUP_PAGE_TITLE, 
-		(LPARAM)this);		
+		ROLLUP_PAGE_TITLE,
+		(LPARAM)this);
 
-	
+
 	// update the display
 	SelectionSetChanged(ip,iu);
 }
-	
-/*********************************************************************************************** 
- * TVU::EndEditParams -- Removes the rollup from the panel                                     * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   02/25/1997 GH  : Created.                                                                 * 
+
+/***********************************************************************************************
+ * TVU::EndEditParams -- Removes the rollup from the panel                                     *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   02/25/1997 GH  : Created.                                                                 *
  *=============================================================================================*/
-void TransViewerUtility::EndEditParams(Interface *ip, IUtil *iu) 
+void TransViewerUtility::EndEditParams(Interface *ip, IUtil *iu)
 {
 	// Delete the rollup page
-	ip->DeleteRollupPage(hPanel);		
+	ip->DeleteRollupPage(hPanel);
 
-	// The panel index is only valid within BeginEditParams and 
+	// The panel index is only valid within BeginEditParams and
 	// EndEditParams.  Set it to null for safety.
-	hPanel = NULL;				
+	hPanel = NULL;
 }
 
-/*********************************************************************************************** 
- * TVU::OnInitDialog -- Initializes the custom controls.                                       * 
- *                                                                                             * 
- * INPUT:                                                                                      * 
- *                                                                                             * 
- * OUTPUT:                                                                                     * 
- *                                                                                             * 
- * WARNINGS:                                                                                   * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   02/25/1997 GH  : Created.                                                                 * 
+/***********************************************************************************************
+ * TVU::OnInitDialog -- Initializes the custom controls.                                       *
+ *                                                                                             *
+ * INPUT:                                                                                      *
+ *                                                                                             *
+ * OUTPUT:                                                                                     *
+ *                                                                                             *
+ * WARNINGS:                                                                                   *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   02/25/1997 GH  : Created.                                                                 *
  *=============================================================================================*/
 void TransViewerUtility::OnInitDialog(HWND hDlg, LPARAM lParam)
 {
-	
+
 }
 
 
@@ -262,7 +262,7 @@ void TransViewerUtility::Display_Data
 	sprintf(string,"%5.3f",vect.z);
 	SetWindowText(GetDlgItem(hPanel, IDC_OBJTM_8),string);
 
-	
+
 	///////////////////////////////////////////
 	// Translation portion of the ObjectTM
 	///////////////////////////////////////////
@@ -300,7 +300,7 @@ void TransViewerUtility::Display_Data
 	SetWindowText(GetDlgItem(hPanel, IDC_NODETM_7),string);
 	sprintf(string,"%5.3f",vect.z);
 	SetWindowText(GetDlgItem(hPanel, IDC_NODETM_8),string);
-	
+
 	///////////////////////////////////////////
 	// Translation portion of the NodeTM
 	///////////////////////////////////////////

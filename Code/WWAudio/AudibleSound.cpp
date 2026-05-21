@@ -49,8 +49,7 @@
 #include "persistfactory.h"
 #include "LogicalSound.h"
 #include "definitionclassids.h"
-#include "soundstreamhandle.h"
-#include "sound2dhandle.h"
+#include "soundhandle.h"
 #include "systimer.h"
 #include <algorithm>
 
@@ -200,7 +199,7 @@ AudibleSoundClass::AudibleSoundClass (const AudibleSoundClass &src)
 		m_LoopsLeft (0),
 		m_Type (TYPE_SOUND_EFFECT),
 		m_FadeType (FADE_NONE),
-		m_FadeTimer (0),		
+		m_FadeTimer (0),
 		m_FadeTime (0),
 		m_VirtualChannel (0),
 		m_bDirty (true),
@@ -692,7 +691,7 @@ AudibleSoundClass::Stop (bool remove_from_playlist)
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 void
-AudibleSoundClass::Seek (unsigned long milliseconds)
+AudibleSoundClass::Seek (unsigned int milliseconds)
 {
 	MMSLockClass lock;
 
@@ -709,48 +708,6 @@ AudibleSoundClass::Seek (unsigned long milliseconds)
 		if (m_SoundHandle != NULL) {
 			m_SoundHandle->Set_Sample_MS_Position (m_CurrentPosition);
 		}
-	}
-
-	return ;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//	Set_Miles_Handle
-//
-////////////////////////////////////////////////////////////////////////////////////////////////
-void
-AudibleSoundClass::Set_Miles_Handle (MILES_HANDLE handle)
-{
-	//
-	// Start fresh
-	//
-	Free_Miles_Handle ();
-
-	//
-	//	Is our data valid?
-	//
-	if (handle != INVALID_MILES_HANDLE && m_Buffer != NULL) {
-
-		//
-		//	Determine which type of sound handle to create, streaming or standard 2D
-		//
-		if (m_Buffer->Is_Streaming ()) {
-			m_SoundHandle = new SoundStreamHandleClass;
-		} else {
-			m_SoundHandle = new Sound2DHandleClass;
-		}
-
-		//
-		//	Configure the sound handle
-		//
-		m_SoundHandle->Set_Miles_Handle (handle);
-
-		//
-		//	Use this new handle
-		//
-		Initialize_Miles_Handle ();
 	}
 
 	return ;
@@ -785,21 +742,19 @@ AudibleSoundClass::Initialize_Miles_Handle (void)
 		//
 		// Record the total length of the sample in milliseconds...
 		//
-		m_SoundHandle->Get_Sample_MS_Position ((S32 *)&m_Length, NULL);
+		m_SoundHandle->Get_Sample_MS_Position ((int *)&m_Length, NULL);
 
 		//
 		// Pass our cached settings onto miles
 		//
-		m_SoundHandle->Set_Sample_Volume (0);
-		m_SoundHandle->Set_Sample_Pan (int(m_Pan * 127.0F));
+		m_SoundHandle->Set_Sample_Volume (0.0F);
+		m_SoundHandle->Set_Sample_Pan (m_Pan);
 		m_SoundHandle->Set_Sample_Loop_Count (m_LoopCount);
 
 		//
-		//	Apply the pitch factor (if necessary)
+		//	Apply the pitch factor even when it is 1.0F because handles are pooled.
 		//
-		if (m_PitchFactor != 1.0F) {
-			Set_Pitch_Factor (m_PitchFactor);
-		}
+		Set_Pitch_Factor (m_PitchFactor);
 
 		// If this sound is already playing (and just now got a handle)
 		// then make sure we start it.
@@ -820,7 +775,7 @@ AudibleSoundClass::Initialize_Miles_Handle (void)
 		// Pass the 'real' volume onto miles
 		//
 		float real_volume = Determine_Real_Volume ();
-		m_SoundHandle->Set_Sample_Volume (int(real_volume * 127.0F));
+		m_SoundHandle->Set_Sample_Volume (real_volume);
 
 		//
 		// Associate this object instance with the handle
@@ -881,7 +836,7 @@ AudibleSoundClass::Get_Pan (void)
 	// Do we have a valid sample handle from miles?
 	//
 	if (m_SoundHandle != NULL) {
-		m_Pan = ((float)m_SoundHandle->Get_Sample_Pan ()) / 127.0F;
+		m_Pan = m_SoundHandle->Get_Sample_Pan ();
 	}
 
 	return m_Pan;
@@ -908,7 +863,7 @@ AudibleSoundClass::Set_Pan (float pan)
 	// Do we have a valid sample handle from miles?
 	//
 	if (m_SoundHandle != NULL) {
-		m_SoundHandle->Set_Sample_Pan (int(m_Pan * 127.0F));
+		m_SoundHandle->Set_Sample_Pan (m_Pan);
 	}
 
 	return ;
@@ -931,56 +886,7 @@ AudibleSoundClass::Set_Pitch_Factor (float factor)
 	// Do we have a valid sample handle from miles?
 	//
 	if (m_SoundHandle != NULL) {
-
-		if (m_Buffer != NULL) {
-
-			//
-			//	Get the base rate of the sound and scale our playback rate
-			// based on the factor
-			//
-			int base_rate	= m_Buffer->Get_Rate ();
-			int new_rate	= base_rate * m_PitchFactor;
-			m_SoundHandle->Set_Sample_Playback_Rate (new_rate);
-		}
-	}
-
-	return ;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//	Get_Playback_Rate
-//
-////////////////////////////////////////////////////////////////////////////////////////////////
-int
-AudibleSoundClass::Get_Playback_Rate (void)
-{
-	MMSLockClass lock;
-	int retval = 0;
-
-	// Do we have a valid sample handle from miles?
-	if (m_SoundHandle != NULL) {
-		retval = m_SoundHandle->Get_Sample_Playback_Rate ();
-	}
-
-	return retval;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//	Set_Playback_Rate
-//
-////////////////////////////////////////////////////////////////////////////////////////////////
-void
-AudibleSoundClass::Set_Playback_Rate (int rate_in_hz)
-{
-	MMSLockClass lock;
-
-	// Do we have a valid sample handle from miles?
-	if (m_SoundHandle != NULL) {
-		m_SoundHandle->Set_Sample_Playback_Rate (rate_in_hz);
+		m_SoundHandle->Set_Sample_Pitch(m_PitchFactor);
 	}
 
 	return ;
@@ -999,7 +905,7 @@ AudibleSoundClass::Get_Volume (void)
 
 	// Do we have a valid sample handle from miles?
 	if (m_SoundHandle != NULL) {
-		m_Volume = ((float)m_SoundHandle->Get_Sample_Volume ()) / 127.0F;
+		m_Volume = m_SoundHandle->Get_Sample_Volume ();
 	}
 
 	// Return the current pan value
@@ -1033,7 +939,7 @@ AudibleSoundClass::Internal_Set_Volume (float volume)
 		// effect volume.
 		//
 		float real_volume = Determine_Real_Volume ();
-		m_SoundHandle->Set_Sample_Volume (int(real_volume * 127.0F));
+		m_SoundHandle->Set_Sample_Volume (real_volume);
 	}
 
 	return ;
@@ -1121,7 +1027,7 @@ AudibleSoundClass::Set_Priority (float priority)
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 bool
-AudibleSoundClass::On_Frame_Update (unsigned int milliseconds)
+AudibleSoundClass::On_Frame_Update (unsigned int /* milliseconds */)
 {
 	//
 	// Do we need to track this sound's play-progress?
@@ -1151,6 +1057,13 @@ AudibleSoundClass::On_Frame_Update (unsigned int milliseconds)
 		m_LogicalSound->Set_Transform (m_Transform);
 	}
 
+	//
+	// OpenAL addition, attempt to queue audio if the handle buffer is streaming.
+	//
+	if (m_SoundHandle != NULL) {
+		m_SoundHandle->Queue_Audio();
+	}
+	
 	return true;
 }
 
@@ -1164,7 +1077,7 @@ void
 AudibleSoundClass::Update_Play_Position (void)
 {
 	// Determine the current offset from the beginning of the sound buffer.
-	unsigned long play_time = TIMEGETTIME () - m_Timestamp;
+	unsigned int play_time = TIMEGETTIME () - m_Timestamp;
 	m_CurrentPosition = play_time;
 
 	// Have we gone past the end of a sounds play-time?
@@ -1198,8 +1111,9 @@ AudibleSoundClass::Allocate_Miles_Handle (void)
 	//
 	// If we need to, get a play-handle from the audio system
 	//
-	if (m_SoundHandle == NULL) {
-		Set_Miles_Handle ((MILES_HANDLE)WWAudioClass::Get_Instance ()->Get_2D_Sample (*this));
+	if (m_SoundHandle == NULL && m_Buffer != NULL) {
+		m_SoundHandle = WWAudioClass::Get_Instance ()->Get_2D_Handle (*this, m_Buffer->Is_Streaming());
+		Initialize_Miles_Handle ();
 	}
 
 	return ;

@@ -90,7 +90,7 @@ DECLARE_SCRIPT(PDS_Test_Modify_Attack, "WaypathID=:int")
 			params.AttackCheckBlocked = false;
 			Commands->Action_Attack (game_obj, params);
 
-			//params.Set_Attack (Commands->Get_The_Star (), 100, 0.5F, true);			
+			//params.Set_Attack (Commands->Get_The_Star (), 100, 0.5F, true);
 			//params.AttackCheckBlocked = false;
 			//Commands->Action_Attack( game_obj, params );
 			//Commands->Action_Goto( game_obj, params );
@@ -105,12 +105,12 @@ DECLARE_SCRIPT(PDS_Test_Modify_Attack, "WaypathID=:int")
 			params.WaypathID			= Get_Int_Parameter (0);
 			params.WaypathSplined	= true;
 			params.AttackActive		= true;
-			params.Set_Attack (Commands->Get_The_Star (), 100, 0.5F, true);	
+			params.Set_Attack (Commands->Get_The_Star (), 100, 0.5F, true);
 			params.AttackCheckBlocked = false;
-			
+
 			Commands->Modify_Action (game_obj, 777, params, true, true);
 
-			Commands->Start_Timer(game_obj, this, 4.0F, 999);			
+			Commands->Start_Timer(game_obj, this, 4.0F, 999);
 
 		} else if (timer_id == 999) {
 
@@ -121,8 +121,8 @@ DECLARE_SCRIPT(PDS_Test_Modify_Attack, "WaypathID=:int")
 			params.WaypathSplined	= true;
 			params.AttackActive		= false;
 			params.AttackCheckBlocked = false;
-			//params.Set_Attack (Commands->Get_The_Star (), 100, 0.5F, true);	
-			
+			//params.Set_Attack (Commands->Get_The_Star (), 100, 0.5F, true);
+
 			Commands->Modify_Action (game_obj, 777, params, true, true);
 
 			Commands->Start_Timer(game_obj, this, 4.0F, 888);
@@ -148,7 +148,7 @@ DECLARE_SCRIPT(PDS_Test_Dock, "DockDestObjID=:int,DockEntranceObjID=:int")
 	{
 		if (timer_id != 777) {
 			return ;
-		}		
+		}
 
 		//
 		//	Lookup the objects which mark the destination (docked) position
@@ -162,7 +162,7 @@ DECLARE_SCRIPT(PDS_Test_Dock, "DockDestObjID=:int,DockEntranceObjID=:int")
 			//	Start the vehicle's engine
 			//
 			//Commands->Enable_Engine (game_obj, true);
-			
+
 			//
 			// Lookup the positions of the two docking markers
 			//
@@ -199,7 +199,7 @@ DECLARE_SCRIPT(PDS_Test_Conversation, "Conversation Name=:string,Soldier1_ID=0:i
 	////////////////////////////////////////////////////////////////////
 	//	Timer_Expired
 	////////////////////////////////////////////////////////////////////
-	void Action_Complete (GameObject * game_obj, int action_id, ActionCompleteReason complete_reason) override
+	void Action_Complete (GameObject * game_obj, int action_id, ActionCompleteReason /*complete_reason*/) override
 	{
 		//
 		//	Just for kicks, make the unit crouch
@@ -214,7 +214,7 @@ DECLARE_SCRIPT(PDS_Test_Conversation, "Conversation Name=:string,Soldier1_ID=0:i
 	////////////////////////////////////////////////////////////////////
 	//	Custom
 	////////////////////////////////////////////////////////////////////
-	void Custom (GameObject *game_obj, int event, uintptr_t data, GameObject *sender) override
+	void Custom (GameObject * /*game_obj*/, int event, intptr_t /*param*/, GameObject * /*sender*/) override
 	{
 		if (event == CUSTOM_EVENT_CONVERSATION_BEGAN) {
 			int test = 0;
@@ -250,7 +250,7 @@ DECLARE_SCRIPT(PDS_Test_Conversation, "Conversation Name=:string,Soldier1_ID=0:i
 			int soldier1_id = Get_Int_Parameter (1);
 			int soldier2_id = Get_Int_Parameter (2);
 			int soldier3_id = Get_Int_Parameter (3);
-			
+
 			//
 			//	Have the participants join the conversation
 			//
@@ -267,14 +267,14 @@ DECLARE_SCRIPT(PDS_Test_Conversation, "Conversation Name=:string,Soldier1_ID=0:i
 					Commands->Join_Conversation (soldier, conv_id, true, true, true);
 				}
 			}
-			
+
 			if (soldier2_id != 0) {
 				GameObject *soldier = Commands->Find_Object (soldier2_id);
 				if (soldier != NULL) {
 					Commands->Join_Conversation (soldier, conv_id, true, true, true);
 				}
 			}
-			
+
 			if (soldier3_id != 0) {
 				GameObject *soldier = Commands->Find_Object (soldier3_id);
 				if (soldier != NULL) {
@@ -311,7 +311,7 @@ DECLARE_SCRIPT(PDS_Get_In_Vehicle_Do_Waypath, "VehicleID=:int,WaypathID=:int,V3T
 		m_StartedWaypath = false;
 		GameObject *dest_obj = Commands->Find_Object (Get_Int_Parameter (0));
 		if (dest_obj != NULL) {
-			
+
 			//
 			// Instruct our game object to goto the driver's side of the destination vehicle
 			//
@@ -333,12 +333,12 @@ DECLARE_SCRIPT(PDS_Get_In_Vehicle_Do_Waypath, "VehicleID=:int,WaypathID=:int,V3T
 	//	Movement_Complete
 	////////////////////////////////////////////////////////////////////
 //	void Movement_Complete (GameObject *game_obj, MovementCompleteReason /*reason*/)
-	void Action_Complete (GameObject * game_obj, int action_id, ActionCompleteReason complete_reason) override
+	void Action_Complete (GameObject * game_obj, int /*action_id*/, ActionCompleteReason /*complete_reason*/) override
 	{
 		//
 		//	Now tell the object to follow the waypath
 		//
-		if (m_StartedWaypath == false) {			
+		if (m_StartedWaypath == false) {
 //			Commands->Action_Movement_Follow_Waypath (game_obj, Get_Int_Parameter(1), 0, 0, true);
 			ActionParamsStruct params;
 			params.Set_Basic( this, 50, 0 );
@@ -380,7 +380,7 @@ DECLARE_SCRIPT(PDS_Test_Goto_Player, "")
 		return ;
 	}
 
-	void Action_Complete (GameObject * game_obj, int action_id, ActionCompleteReason complete_reason) override
+	void Action_Complete (GameObject * /*game_obj*/, int action_id, ActionCompleteReason /*complete_reason*/) override
 	{
 		if (action_id == 777) {
 			int test = 0;
@@ -418,7 +418,7 @@ DECLARE_SCRIPT(PDS_Test_Goto_Loc, "ObjDestID=:int")
 		//
 		GameObject* dest_obj = Commands->Find_Object(Get_Int_Parameter(0));
 		if (dest_obj != NULL) {
-			
+
 			//
 			// Instruct our game object to goto the location of the destination object
 			//
@@ -449,7 +449,7 @@ DECLARE_SCRIPT(PDS_Test_Follow_Player, "")
 		return ;
 	}
 
-	void	Poked( GameObject * obj, GameObject * poker ) override
+	void	Poked( GameObject * obj, GameObject * /*poker*/ ) override
 	{
 		Commands->Grant_Key (obj, 1, true);
 		return ;
@@ -458,7 +458,7 @@ DECLARE_SCRIPT(PDS_Test_Follow_Player, "")
 	////////////////////////////////////////////////////////////////////
 	//	Timer_Expired
 	////////////////////////////////////////////////////////////////////
-	void Timer_Expired (GameObject *game_obj, int timer_id) override
+	void Timer_Expired (GameObject *game_obj, int /*timer_id*/) override
 	{
 		Commands->Innate_Disable (game_obj);
 //		Commands->Action_Movement_Follow_Object (game_obj, Commands->Get_The_Star (), 2.0F);
@@ -484,7 +484,7 @@ DECLARE_SCRIPT(PDS_Test_Follow_Player, "")
 DECLARE_SCRIPT(PDS_Test_Follow_Waypath, "WaypathID=:int,WaypointStartID=:int,WaypointEndID=:int")
 {
 	void Created (GameObject *game_obj) override
-	{		
+	{
 		Commands->Grant_Key (game_obj, 0, true);
 		Commands->Grant_Key (game_obj, 1, true);
 		Commands->Grant_Key (game_obj, 2, true);
@@ -500,7 +500,7 @@ DECLARE_SCRIPT(PDS_Test_Follow_Waypath, "WaypathID=:int,WaypointStartID=:int,Way
 		params.Set_Basic( this, 100, 777 );
 		params.Set_Movement( Vector3(0,0,0), 1, 5 );
 		params.Set_Attack (Commands->Get_The_Star (), 100, 0.5F, true);
-		
+
 		params.WaypathID = Get_Int_Parameter(0);
 		params.WaypathSplined = true;
 		params.AttackActive = false;
@@ -525,8 +525,8 @@ DECLARE_SCRIPT(PDS_Test_Follow_Waypath, "WaypathID=:int,WaypointStartID=:int,Way
 			params.WaypathSplined	= true;
 			params.AttackActive		= false;
 			params.AttackCheckBlocked = false;
-			params.Set_Attack (Commands->Get_The_Star (), 100, 0.5F, true);	
-			
+			params.Set_Attack (Commands->Get_The_Star (), 100, 0.5F, true);
+
 			Commands->Modify_Action (game_obj, 777, params, true, true);
 
 			//Commands->Action_Goto( game_obj, params );
@@ -534,7 +534,7 @@ DECLARE_SCRIPT(PDS_Test_Follow_Waypath, "WaypathID=:int,WaypointStartID=:int,Way
 		}
 	}
 
-	void	Damaged( GameObject * game_obj, GameObject * damager, float amount ) override
+	void	Damaged( GameObject * game_obj, GameObject * /*damager*/, float /*amount*/ ) override
 	{
 		ActionParamsStruct params;
 		params.Set_Basic (this, 100, 777);
@@ -543,8 +543,8 @@ DECLARE_SCRIPT(PDS_Test_Follow_Waypath, "WaypathID=:int,WaypointStartID=:int,Way
 		params.WaypathSplined	= true;
 		params.AttackActive		= true;
 		params.AttackCheckBlocked = false;
-		params.Set_Attack (Commands->Get_The_Star (), 100, 0.5F, true);	
-		
+		params.Set_Attack (Commands->Get_The_Star (), 100, 0.5F, true);
+
 		Commands->Modify_Action (game_obj, 777, params, true, true);
 
 		// attack for a while, then go back to following the waypath
@@ -594,7 +594,7 @@ DECLARE_SCRIPT(PDS_Test_Harvester, "TiberiumID=:int,DriveToID=:int,EntranceID=:i
 	////////////////////////////////////////////////////////////////////
 	//	Timer_Expired
 	////////////////////////////////////////////////////////////////////
-	void Timer_Expired (GameObject *obj, int timer_id) override
+	void Timer_Expired (GameObject * /*obj*/, int timer_id) override
 	{
 		if (timer_id == 777) {
 			Next_State ();
@@ -607,7 +607,7 @@ DECLARE_SCRIPT(PDS_Test_Harvester, "TiberiumID=:int,DriveToID=:int,EntranceID=:i
 	//	Movement_Complete
 	////////////////////////////////////////////////////////////////////
 //	void Movement_Complete (GameObject *obj, MovementCompleteReason reason)
-	void Action_Complete (GameObject * game_obj, int action_id, ActionCompleteReason complete_reason) override
+	void Action_Complete (GameObject * /*game_obj*/, int /*action_id*/, ActionCompleteReason /*complete_reason*/) override
 	{
 		Next_State ();
 		return ;
@@ -678,12 +678,12 @@ DECLARE_SCRIPT(PDS_Test_Harvester, "TiberiumID=:int,DriveToID=:int,EntranceID=:i
 		//
 		GameObject* dest_obj = Commands->Find_Object (obj_id);
 		if (dest_obj != NULL) {
-			
+
 			//
 			// Instruct our game object to goto the location of the destination object
 			//
 			Vector3 pos = Commands->Get_Position (dest_obj);
-			
+
 			if (force_backup == false) {
 //				Commands->Action_Movement_Goto_Location (m_GameObj, pos, 1.0F);
 				ActionParamsStruct params;
@@ -714,7 +714,7 @@ DECLARE_SCRIPT(PDS_Test_Harvester, "TiberiumID=:int,DriveToID=:int,EntranceID=:i
 enum
 {
 	INVENTORY_EMPTY		= 0,
-	INVENTORY_MEDKIT,	
+	INVENTORY_MEDKIT,
 };
 
 enum
@@ -736,12 +736,12 @@ DECLARE_SCRIPT(PDS_Test_Inventory, "")
 	};
 
 	int			Inventory[INVENTORY_MAX];
-	
+
 
 	////////////////////////////////////////////////////////////////////
 	//	Created
 	////////////////////////////////////////////////////////////////////
-	void Created (GameObject *game_obj) override
+	void Created (GameObject * /*game_obj*/) override
 	{
 		//
 		//	Clear the inventory
@@ -756,13 +756,13 @@ DECLARE_SCRIPT(PDS_Test_Inventory, "")
 	////////////////////////////////////////////////////////////////////
 	//	Custom
 	////////////////////////////////////////////////////////////////////
-	void Custom (GameObject *game_obj, int event, uintptr_t data, GameObject *sender)
+	void Custom (GameObject * /*game_obj*/, int event, intptr_t param, GameObject * /*sender*/) override
 	{
 		if (event == CUSTOM_HAS_MEDKIT) {
-			int *retval = (int *)data;
+			int *retval = (int *)param;
 			if (retval != NULL) {
 				(*retval) = 0;
-				
+
 				//
 				//	Check all the inventory slots for the medkit
 				//
@@ -775,16 +775,16 @@ DECLARE_SCRIPT(PDS_Test_Inventory, "")
 			}
 
 		} else if (event == CUSTOM_GOT_OBJECT) {
-				
+
 			//
 			//	Find an empty slot in the inventory and stick this object into it
 			//
 			for (int index = 0; index < INVENTORY_MAX; index ++) {
 				if (Inventory[index] == INVENTORY_EMPTY) {
-					Inventory[index] = data;
+					Inventory[index] = param;
 					break;
 				}
-			}			
+			}
 		}
 
 		return ;
@@ -846,7 +846,7 @@ DECLARE_SCRIPT(PDS_Test_Controller, "")
 	////////////////////////////////////////////////////////////////////
 	//	Timer_Expired
 	////////////////////////////////////////////////////////////////////
-	void Timer_Expired (GameObject *game_obj, int timer_id) override
+	void Timer_Expired (GameObject * /*game_obj*/, int timer_id) override
 	{
 		if (timer_id == 777) {
 			GameObject *the_player = Commands->Get_The_Star ();
@@ -893,10 +893,10 @@ DECLARE_SCRIPT(PDS_Test_Gunboat, "")
 	{
 		GameObj	= game_obj;
 		State		= STATE_AT_BEACHHEAD;
-		
+
 		Move_To_Next_Location ();
 		//State = STATE_IN_TRANSIT;
-		
+
 		Commands->Enable_Engine (GameObj, true);
 		Commands->Disable_All_Collisions (GameObj);
 		Start_Attack ();
@@ -934,14 +934,14 @@ DECLARE_SCRIPT(PDS_Test_Gunboat, "")
 		}
 
 		if (waypath_id != 0) {
-			
+
 			ActionParamsStruct params;
 			params.WaypathID			= waypath_id;
 			params.WaypointStartID	= 0;
 			params.WaypointEndID		= 0;
 			params.WaypathSplined	= true;
 			Commands->Action_Goto (GameObj, params);
-		}				
+		}
 
 		return ;
 	}
@@ -949,17 +949,17 @@ DECLARE_SCRIPT(PDS_Test_Gunboat, "")
 	////////////////////////////////////////////////////////////////////
 	//	Timer_Expired
 	////////////////////////////////////////////////////////////////////
-	void Timer_Expired (GameObject *game_obj, int timer_id) override
+	void Timer_Expired (GameObject * /*game_obj*/, int timer_id) override
 	{
 		if (timer_id == TIMER_ATTACK) {
 			GameObject *the_player = Commands->Get_The_Star ();
 			if (the_player != NULL) {
-				
+
 				Vector3 pos = Commands->Get_Position (the_player);
 				//pos.X += Commands->Get_Random (-1.0F, 1.0F) * Commands->Get_Random (6.0F, 10.0F);
 				//pos.Y += Commands->Get_Random (-1.0F, 1.0F) * Commands->Get_Random (6.0F, 10.0F);
 				//pos.Z += Commands->Get_Random (-1.0F, 1.0F) * Commands->Get_Random (6.0F, 10.0F);
-				
+
 				ActionParamsStruct params;
 				params.Set_Basic (this, 50, 0);
 				params.Set_Attack (pos, 200, 0, true);
@@ -979,7 +979,7 @@ DECLARE_SCRIPT(PDS_Test_Sound, "")
 	int SoundID;
 	bool IsPlaying;
 
-	void Created (GameObject* game_obj) override
+	void Created (GameObject* /*game_obj*/) override
 	{
 		IsPlaying = true;
 		return ;
@@ -988,7 +988,7 @@ DECLARE_SCRIPT(PDS_Test_Sound, "")
 	////////////////////////////////////////////////////////////////////
 	//	Poked
 	////////////////////////////////////////////////////////////////////
-	void	Poked (GameObject * obj, GameObject * poker) override
+	void	Poked (GameObject * /*obj*/, GameObject * /*poker*/) override
 	{
 		if (IsPlaying) {
 			Commands->Stop_Sound (1700002, false);
@@ -1004,9 +1004,9 @@ DECLARE_SCRIPT(PDS_Test_Sound, "")
 	////////////////////////////////////////////////////////////////////
 	//	Custom
 	////////////////////////////////////////////////////////////////////
-	void Custom (GameObject *game_obj, int event, uintptr_t data, GameObject *sender) override
+	void Custom (GameObject * /*game_obj*/, int event, intptr_t param, GameObject * /*sender*/) override
 	{
-		if (event == CUSTOM_EVENT_SOUND_ENDED && data == SoundID) {
+		if (event == CUSTOM_EVENT_SOUND_ENDED && param == SoundID) {
 			int test = 0;
 			test ++;
 		}

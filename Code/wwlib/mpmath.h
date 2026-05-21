@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Command & Conquer                                            * 
- *                                                                                             * 
- *                     $Archive:: /VSS_Sync/wwlib/mpmath.h                                    $* 
- *                                                                                             * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Command & Conquer                                            *
+ *                                                                                             *
+ *                     $Archive:: /VSS_Sync/wwlib/mpmath.h                                    $*
+ *                                                                                             *
  *                      $Author:: Vss_sync                                                    $*
- *                                                                                             * 
+ *                                                                                             *
  *                     $Modtime:: 3/21/01 12:01p                                              $*
- *                                                                                             * 
+ *                                                                                             *
  *                    $Revision:: 4                                                           $*
  *                                                                                             *
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 #if _MSC_VER >= 1000
 #pragma once
@@ -50,11 +50,11 @@
 #define	UNITSIZE					32
 #define	MAX_BIT_PRECISION		2048
 #define	MAX_UNIT_PRECISION	(MAX_BIT_PRECISION/UNITSIZE)
-#define	signeddigit	signed long
+#define	signeddigit	signed int
 #define	LOG_UNITSIZE			5
 
-//#define	digit	unsigned long
-typedef unsigned long digit;
+//#define	digit	unsigned int
+typedef unsigned int digit;
 
 #define MPEXPORT
 
@@ -114,7 +114,7 @@ void MPEXPORT XMP_Randomize(digit * result, Straw & rng, int nbits, int precisio
 void MPEXPORT XMP_Randomize_Bounded(digit * result, Straw & rng, digit const * min, digit const * max, int precision);
 bool MPEXPORT XMP_Is_Prime(digit const * prime, int precision);
 bool MPEXPORT XMP_Rabin_Miller_Test(Straw & rng, digit const * w, int rounds, int precision);
-int MPEXPORT XMP_DER_Length_Encode(unsigned long length, unsigned char * output);
+int MPEXPORT XMP_DER_Length_Encode(unsigned int length, unsigned char * output);
 int MPEXPORT XMP_DER_Encode(digit const * from, unsigned char * output, int precision);
 void MPEXPORT XMP_DER_Decode(digit * result, unsigned char const * input, int precision);
 }

@@ -55,7 +55,7 @@ class ChunkLoadClass;
 //
 //	PrimitiveAnimationChannelClass
 //
-//	This template class provides animated 'channels' of data for the 
+//	This template class provides animated 'channels' of data for the
 // RingRenderObjClass and SphereRenderObjClass objects.
 //
 /////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ public:
 	/////////////////////////////////////////////////////////
 	const PrimitiveAnimationChannelClass<T> &operator= (const PrimitiveAnimationChannelClass<T> &src);
 	const KeyClass &		operator[] (int index)	{ return Get_Key (index); }
-	
+
 	/////////////////////////////////////////////////////////
 	//	Public methods
 	/////////////////////////////////////////////////////////
@@ -115,7 +115,7 @@ public:
 	void						Insert_Key (int index, const T &value, float time);
 	void						Delete_Key (int index);
 	void						Reset (void);
-	
+
 	virtual void			Save (ChunkSaveClass &csave);
 	virtual void			Load (ChunkLoadClass &cload);
 
@@ -160,10 +160,6 @@ protected:
 template<class T>
 class LERPAnimationChannelClass : public PrimitiveAnimationChannelClass<T>
 {
-	using PrimitiveAnimationChannelClass<T>::m_Data;
-	using PrimitiveAnimationChannelClass<T>::m_LastIndex;
-public:
-	using PrimitiveAnimationChannelClass<T>::KeyClass;
 public:
 
 	/////////////////////////////////////////////////////////
@@ -264,7 +260,7 @@ PrimitiveAnimationChannelClass<T>::operator= (const PrimitiveAnimationChannelCla
 	//
 	//	Copy the data array
 	//
-	for (int index = 0; index < src.Get_Key_Count (); index ++) {		
+	for (int index = 0; index < src.Get_Key_Count (); index ++) {
 		m_Data.Add (src.Get_Key (index));
 	}
 
@@ -279,7 +275,7 @@ template<class T> void
 PrimitiveAnimationChannelClass<T>::Save (ChunkSaveClass &csave)
 {
 	csave.Begin_Chunk (CHUNKID_VARIABLES);
-		
+
 		//
 		//	Save each key
 		//
@@ -303,7 +299,7 @@ PrimitiveAnimationChannelClass<T>::Load (ChunkLoadClass &cload)
 
 	while (cload.Open_Chunk ()) {
 		switch (cload.Cur_Chunk_ID ()) {
-			
+
 			case CHUNKID_VARIABLES:
 				Load_Variables (cload);
 				break;
@@ -326,7 +322,7 @@ PrimitiveAnimationChannelClass<T>::Load_Variables (ChunkLoadClass &cload)
 	//
 	while (cload.Open_Micro_Chunk ()) {
 		switch (cload.Cur_Micro_Chunk_ID ()) {
-			
+
 			case VARID_KEY:
 			{
 				KeyClass value;
@@ -338,7 +334,7 @@ PrimitiveAnimationChannelClass<T>::Load_Variables (ChunkLoadClass &cload)
 
 		cload.Close_Micro_Chunk ();
 	}
-	
+
 	return ;
 }
 
@@ -348,31 +344,31 @@ PrimitiveAnimationChannelClass<T>::Load_Variables (ChunkLoadClass &cload)
 template<class T> T
 LERPAnimationChannelClass<T>::Evaluate (float time)
 {
-	int key_count	= m_Data.Count ();
-	T value			= m_Data[key_count - 1].Get_Value ();
+	int key_count	= this->m_Data.Count ();
+	T value			= this->m_Data[key_count - 1].Get_Value ();
 
 	//
 	//	Don't interpolate past the last keyframe
 	//
-	if (time < m_Data[key_count - 1].Get_Time ()) {
+	if (time < this->m_Data[key_count - 1].Get_Time ()) {
 
 		// Check to see if the last key index is valid
-		if (time < m_Data[m_LastIndex].Get_Time ()) {
-			m_LastIndex = 0;
+		if (time < this->m_Data[this->m_LastIndex].Get_Time ()) {
+			this->m_LastIndex = 0;
 		}
 
-		auto *key1 = &m_Data[m_LastIndex];
-		auto *key2 = &m_Data[key_count - 1];
+		auto *key1 = &this->m_Data[this->m_LastIndex];
+		auto *key2 = &this->m_Data[key_count - 1];
 
 		//
 		// Search, using last_key as our starting point
 		//
-		for (int keyidx = m_LastIndex; keyidx < (key_count - 1); keyidx ++) {
+		for (int keyidx = this->m_LastIndex; keyidx < (key_count - 1); keyidx ++) {
 
-			if (time < m_Data[keyidx+1].Get_Time ()) {
-				key1 = &m_Data[keyidx];
-				key2 = &m_Data[keyidx+1];
-				m_LastIndex = keyidx;
+			if (time < this->m_Data[keyidx+1].Get_Time ()) {
+				key1 = &this->m_Data[keyidx];
+				key2 = &this->m_Data[keyidx+1];
+				this->m_LastIndex = keyidx;
 				break;
 			}
 		}

@@ -41,6 +41,7 @@
 #include "preset.h"
 #include "definitionfactorymgr.h"
 #include "definitionfactory.h"
+#include "editorbuild.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -68,11 +69,11 @@ PresetLoggerClass::Log_Created (PresetClass *preset)
 		//	Determine what type of preset this is
 		//
 		StringClass type_name;
-		DefinitionFactoryClass *factory = DefinitionFactoryMgrClass::Find_Factory (preset->Get_Class_ID ());	
+		DefinitionFactoryClass *factory = DefinitionFactoryMgrClass::Find_Factory (preset->Get_Class_ID ());
 		if (factory != NULL) {
 			type_name = factory->Get_Name ();
 		}
-		
+
 		//
 		//	Build a log entry with relevant information about the operation
 		//
@@ -108,7 +109,7 @@ PresetLoggerClass::Log_Moved (PresetClass *preset, const char *new_parent_name)
 	//
 	TextFileClass file;
 	if (Open_Log_File (file)) {
-		
+
 		//
 		//	Determine what the parent's name should be
 		//
@@ -155,7 +156,7 @@ PresetLoggerClass::Log_Renamed (const char *old_name, const char *new_name)
 	//
 	TextFileClass file;
 	if (Open_Log_File (file)) {
-		
+
 		//
 		//	Lookup the users name
 		//
@@ -201,7 +202,7 @@ PresetLoggerClass::Log_Deleted (const char *preset_name)
 		char computer_name[256];
 		DWORD size = sizeof (computer_name);
 		::GetComputerName (computer_name, &size);
-		
+
 		//
 		//	Write an entry to the end of the log
 		//
@@ -238,7 +239,7 @@ PresetLoggerClass::Log_File_Reference_Changed
 	//
 	TextFileClass file;
 	if (Open_Log_File (file)) {
-		
+
 		//
 		//	Write an entry to the end of the log
 		//
@@ -263,18 +264,18 @@ PresetLoggerClass::Log_File_Reference_Changed
 //
 //////////////////////////////////////////////////////////////////////////
 bool
-PresetLoggerClass::Open_Log_File (TextFileClass &file_obj)
+PresetLoggerClass::Open_Log_File ([[maybe_unused]] TextFileClass &file_obj)
 {
 	bool retval = false;
 
+#ifndef PUBLIC_EDITOR_VER
 	HANDLE file = INVALID_HANDLE_VALUE;
-	
+
 	//
 	//	Try 10 times to open the file
 	//
-#ifndef PUBLIC_EDITOR_VER	
 	for (int index = 0; index < 10; index ++) {
-		
+
 		//
 		//	Try to open the file exclusively
 		//
@@ -298,13 +299,13 @@ PresetLoggerClass::Open_Log_File (TextFileClass &file_obj)
 		//
 		::Sleep (250);
 	}
-#endif //PUBLIC_EDITOR_VER
-	
+
 	if (file != INVALID_HANDLE_VALUE) {
 		file_obj.Attach (file);
 		retval = true;
 	}
-	
+#endif //PUBLIC_EDITOR_VER
+
 	return retval;
 }
 

@@ -124,7 +124,7 @@ HarvesterClass::Go_Harvest (void)
 	//	Tranform this random offset into a world space position
 	//
 	Vector3 rand_pos = TiberiumRegion.Center + (TiberiumRegion.Basis * rand_offset);
-	
+
 	//
 	//	Setup an action to instruct the vehicle to goto that location
 	//
@@ -203,7 +203,7 @@ HarvesterClass::Harvest_Tiberium (void)
 	//
 	State			= STATE_HARVESTING;
 	StateTimer	= WWMath::Random_Float (3.0F, 7.0F);
-	
+
 	//
 	//	Start playing the harvest animation
 	//
@@ -220,7 +220,7 @@ HarvesterClass::Harvest_Tiberium (void)
 void
 HarvesterClass::Action_Complete
 (
-	GameObject *				game_obj,
+	GameObject *				/* game_obj */,
 	int							action_id,
 	ActionCompleteReason		complete_reason
 )
@@ -235,7 +235,7 @@ HarvesterClass::Action_Complete
 		//	Which action was completed?
 		//
 		if (action_id == ACTIONID_GOTO_TIBERIUM) {
-			
+
 			//
 			//	Check to ensure we were going to harvest the
 			// tiberium before actually start harvesting
@@ -260,8 +260,8 @@ HarvesterClass::Action_Complete
 void
 HarvesterClass::Animation_Complete
 (
-	GameObject *	game_obj,
-	const char *	animation_name
+	GameObject *	/* game_obj */,
+	const char *	/* animation_name */
 )
 {
 	return ;
@@ -333,9 +333,9 @@ HarvesterClass::Think (void)
 	}
 
 	switch (State)
-	{		
+	{
 		case STATE_HARVESTING:
-			
+
 			//
 			//	Check to see if we should harvest in a new location
 			//
@@ -345,7 +345,7 @@ HarvesterClass::Think (void)
 			}
 
 			break;
-		
+
 		case STATE_UNINITIALIZED:
 			if (Vehicle != NULL) {
 				Go_Harvest ();
@@ -396,10 +396,10 @@ HarvesterClass::Play_Harvest_Animation (bool onoff)
 		//
 		//	Play the animation looped...
 		//
-		Vehicle->Set_Animation (HarvestAnimationName, true);		
+		Vehicle->Set_Animation (HarvestAnimationName, true);
 
 	} else {
-		
+
 		//
 		//	Stop the animation
 		//
@@ -421,10 +421,10 @@ HarvesterClass::Play_Harvest_Animation (bool onoff)
 void
 HarvesterClass::Custom
 (
-	GameObject *	game_obj,
+	GameObject *	/* game_obj */,
 	int				type,
-	uintptr_t		param,
-	GameObject *	sender
+	intptr_t		/* param */,
+	GameObject *	/* sender */
 )
 {
 	//

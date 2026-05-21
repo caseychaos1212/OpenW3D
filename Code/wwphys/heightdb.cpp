@@ -83,7 +83,7 @@ Vector3	HeightDBClass::m_LevelMax (0, 0, 0);
 //
 /////////////////////////////////////////////////////////////////////////
 HeightDBClass::HeightDBClass (void)
-{	
+{
 	return ;
 }
 
@@ -143,7 +143,7 @@ HeightDBClass::Get_Height (const Vector3 &pos)
 		//	Is the position inside our data set?
 		//
 		if (percent_x >= 0 && percent_x <= 1.0F && percent_y >= 0 && percent_y <= 1.0F) {
-			
+
 			int entry_ul_x = (m_NumPointsX - 1) * percent_x;
 			int entry_ul_y = (m_NumPointsY - 1) * percent_y;
 			int entry_ur_x = entry_ul_x + 1;
@@ -167,7 +167,7 @@ HeightDBClass::Get_Height (const Vector3 &pos)
 			float *ur_entry = Get_Height_Entry (entry_ur_y, entry_ur_x);
 			float *lr_entry = Get_Height_Entry (entry_lr_y, entry_lr_x);
 			float *ll_entry = Get_Height_Entry (entry_ll_y, entry_ll_x);
-						
+
 			float local_per_x = ((pos.X - m_LevelMin.X) - (entry_ul_x * m_PatchSize)) / m_PatchSize;
 			float local_per_y = ((pos.Y - m_LevelMin.Y) - (entry_ul_y * m_PatchSize)) / m_PatchSize;
 
@@ -180,7 +180,7 @@ HeightDBClass::Get_Height (const Vector3 &pos)
 			float h4 = (1 - local_per_x)	* (local_per_y)		* (*ll_entry);
 
 			height = h1 + h2 + h3 + h4;
-		}		
+		}
 	}
 
 	return height;
@@ -250,7 +250,7 @@ HeightDBClass::Generate (void)
 			if (height_value != NULL) {
 				(*height_value) = (z_pos + HEIGHT_OFFSET);
 			}
-				
+
 			//
 			//	Move over one columne
 			//
@@ -264,7 +264,7 @@ HeightDBClass::Generate (void)
 	}
 
 	Examine_Level_Geometry ();
-	
+
 	//
 	//	Now average out the height values so we don't get large jumps in height
 	//
@@ -349,7 +349,7 @@ HeightDBClass::Free_Data (void)
 	}
 
 	m_NumPointsX = 0;
-	m_NumPointsY = 0;	
+	m_NumPointsY = 0;
 	return ;
 }
 
@@ -413,15 +413,15 @@ HeightDBClass::Process_Render_Obj (RenderObjClass *render_obj)
 	//
 	int count = render_obj->Get_Num_Sub_Objects ();
 	for (int index = 0; index < count; index ++) {
-		
+
 		// Get a pointer to this subobject
 		RenderObjClass *sub_object = render_obj->Get_Sub_Object (index);
 		if (sub_object != NULL) {
-			
+
 			Process_Render_Obj (sub_object);
 			sub_object->Release_Ref ();
 		}
-	}	
+	}
 
 	//
 	// Is this render object a mesh?
@@ -434,7 +434,7 @@ HeightDBClass::Process_Render_Obj (RenderObjClass *render_obj)
 		//
 		MeshClass *mesh = static_cast<MeshClass *> (render_obj);
 		Submit_Mesh (*mesh);
-	}	
+	}
 
 	return ;
 }
@@ -452,8 +452,8 @@ HeightDBClass::Submit_Mesh (MeshClass &mesh)
 	//	Get this mesh's polygon information
 	//
 	MeshModelClass *model = mesh.Get_Model ();
-	if (model != NULL) {		
-		
+	if (model != NULL) {
+
 		const Vector3 *vertex_array	= model->Get_Vertex_Array ();
 		int count							= model->Get_Vertex_Count ();
 
@@ -471,7 +471,7 @@ HeightDBClass::Submit_Mesh (MeshClass &mesh)
 			//	Is the position inside our data set?
 			//
 			if (percent_x >= 0 && percent_x <= 1.0F && percent_y >= 0 && percent_y <= 1.0F) {
-				
+
 				int entry_ul_x = (m_NumPointsX - 1) * percent_x;
 				int entry_ul_y = (m_NumPointsY - 1) * percent_y;
 				int entry_ur_x = entry_ul_x + 1;
@@ -524,14 +524,14 @@ HeightDBClass::Save (ChunkSaveClass &csave)
 	//
 	//	Save the variables to their own chunk
 	//
-	csave.Begin_Chunk (CHUNKID_VARIABLES);	
+	csave.Begin_Chunk (CHUNKID_VARIABLES);
 
 		WRITE_MICRO_CHUNK (csave, VARID_NUM_POINTS_X,	m_NumPointsX);
 		WRITE_MICRO_CHUNK (csave, VARID_NUM_POINTS_Y,	m_NumPointsY);
 		WRITE_MICRO_CHUNK (csave, VARID_PATCH_SIZE,		m_PatchSize);
 		WRITE_MICRO_CHUNK (csave, VARID_LEV_MIN,			m_LevelMin);
 		WRITE_MICRO_CHUNK (csave, VARID_LEV_MAX,			m_LevelMax);
-	
+
 	csave.End_Chunk ();
 
 	//
@@ -556,10 +556,10 @@ HeightDBClass::Load (ChunkLoadClass &cload)
 {
 	Free_Data ();
 
-	bool retval = true;	
+	bool retval = true;
 	while (cload.Open_Chunk ()) {
 		switch (cload.Cur_Chunk_ID ()) {
-			
+
 			//
 			//	Read the height data from the chunk
 			//

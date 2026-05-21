@@ -81,7 +81,7 @@ template<class T> class DynamicVectorClass;
 //////////////////////////////////////////////////////////////////////////////////
 // RenderObjClass
 // This is the interface for all objects that get rendered by WW3D.
-// 
+//
 // Render object RTTI:  If you really need to typecast a render object
 //		pointer that you got from the asset manager, the class id mechanism
 //		can be used to check what you really have.  User class id's can come
@@ -107,14 +107,14 @@ template<class T> class DynamicVectorClass;
 //	VertexProcessors: Vertex processors are classes that are not actually 'rendered'
 //		They insert into the system an object that performs operations on all of
 //		the subsequent vertices that are processed.  Lights and Fogs are types of
-//		vertex processors.  
+//		vertex processors.
 //
-// "Scene Graph": A scene is organized as a list of render objects.  There is no 
-//		implied hierarchical structure to a scene.  RenderObjects can contain other 
+// "Scene Graph": A scene is organized as a list of render objects.  There is no
+//		implied hierarchical structure to a scene.  RenderObjects can contain other
 //		render objects (they follow the 'Composite' pattern) which is how hierarchical
 //		objects are built.  Hierarchical models are render objects that just
 //		contain other render objects and apply hierarchical transforms to them.
-//		Hierarchical Models can be inserted inside of other hierarchical models.   
+//		Hierarchical Models can be inserted inside of other hierarchical models.
 //
 //	Predictive LOD: The predictive LOD system selects LODs for the visible objects
 //		so that the various resources (polys, vertices, etc.) do not pass given
@@ -136,7 +136,7 @@ public:
 	//	Note:  It is very important that these values NEVER CHANGE.  That means
 	//	when adding a new class id, it should be added to the end of the enum.
 	//
-	enum 
+	enum
 	{
 		CLASSID_UNKNOWN	= 0xFFFFFFFF,
 		CLASSID_MESH		= 0,
@@ -152,7 +152,7 @@ public:
 		CLASSID_DYNASCREENMESH,
 		CLASSID_TEXTDRAW,
 		CLASSID_FOG,
-		CLASSID_LAYERFOG,		
+		CLASSID_LAYERFOG,
 		CLASSID_LIGHT,
 		CLASSID_PARTICLEEMITTER,
 		CLASSID_PARTICLEBUFFER,
@@ -188,12 +188,12 @@ public:
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Render Object Interface - Cloning and Identification
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	virtual RenderObjClass *	Clone(void) const																= 0;		
+	virtual RenderObjClass *	Clone(void) const																= 0;
 	virtual int						Class_ID(void)	const															{ return CLASSID_UNKNOWN; }
 	virtual const char *			Get_Name(void) const															{ return "UNNAMED"; }
-	virtual void					Set_Name(const char * name)												{ }
+	virtual void					Set_Name(const char * /*name*/)												{ }
 	virtual const char *			Get_Base_Model_Name (void) const											{ return NULL; }
-	virtual void					Set_Base_Model_Name (const char *name)									{ }
+	virtual void					Set_Base_Model_Name (const char */*name*/)									{ }
 	virtual int						Get_Num_Polys(void) const													{ return 0; }
 
 
@@ -202,24 +202,24 @@ public:
 	//
 	// Render - this object should render its polygons.  Typically called from a SceneClass
 	// Special_Render - all special-case rendering goes here to avoid polluting the main render pipe (e.g. VIS)
-	// On_Frame_Update - render objects can register for an On_Frame_Update call; the scene will call this once 
+	// On_Frame_Update - render objects can register for an On_Frame_Update call; the scene will call this once
 	//                   per frame if they do so.
 	// Restart - This interface is used to facilitate model recycling.  If a render object is "Restarted" it should
-	//           put itself back into a state as if it has never been rendered (e.g. particle emitters 
+	//           put itself back into a state as if it has never been rendered (e.g. particle emitters
 	//           should reset their "emitted particle counts" so they can be re-used.)
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	virtual void					Render(RenderInfoClass & rinfo)											= 0;
-	virtual void					Special_Render(SpecialRenderInfoClass & rinfo)						{ }
+	virtual void					Special_Render(SpecialRenderInfoClass & /*rinfo*/)						{ }
 	virtual void					On_Frame_Update(void) 														{ }
-	virtual void					Restart(void)																	{ }	
+	virtual void					Restart(void)																	{ }
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Render Object Interface - "Scene Graph"
-	// Some of the functions in this group are non-virtual as they are meant 
-	// to be never overriden or are supposed to be implemented in terms of 
+	// Some of the functions in this group are non-virtual as they are meant
+	// to be never overriden or are supposed to be implemented in terms of
 	// the other virtual functions.  We want to keep the virtual interface
-	// as small as possible 
+	// as small as possible
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	virtual void					Add(SceneClass * scene);
 	virtual void					Remove(void);
@@ -242,16 +242,16 @@ public:
 	virtual void					Notify_Added(SceneClass * scene);
 	virtual void					Notify_Removed(SceneClass * scene);
 
-	virtual int						Get_Num_Sub_Objects(void) const											{ return 0; } 					
-	virtual RenderObjClass *	Get_Sub_Object(int index) const											{ return NULL; }
-	virtual int						Add_Sub_Object(RenderObjClass * subobj)								{ return 0; }
-	virtual int						Remove_Sub_Object(RenderObjClass * robj)								{ return 0; }
+	virtual int						Get_Num_Sub_Objects(void) const											{ return 0; }
+	virtual RenderObjClass *	Get_Sub_Object(int /*index*/) const											{ return NULL; }
+	virtual int						Add_Sub_Object(RenderObjClass * /*subobj*/)								{ return 0; }
+	virtual int						Remove_Sub_Object(RenderObjClass * /*robj*/)								{ return 0; }
 	virtual RenderObjClass *	Get_Sub_Object_By_Name(const char * name) const;
 
-	virtual int						Get_Num_Sub_Objects_On_Bone(int boneindex) const					{ return 0; }
-	virtual RenderObjClass *	Get_Sub_Object_On_Bone(int index,int boneindex)	const				{ return NULL; }
-	virtual int						Get_Sub_Object_Bone_Index(RenderObjClass * subobj)	const 		{ return 0; }
-	virtual int						Add_Sub_Object_To_Bone(RenderObjClass * subobj,int bone_index)	{ return 0; }
+	virtual int						Get_Num_Sub_Objects_On_Bone(int /*boneindex*/) const					{ return 0; }
+	virtual RenderObjClass *	Get_Sub_Object_On_Bone(int /*index*/,int /*boneindex*/)	const				{ return NULL; }
+	virtual int						Get_Sub_Object_Bone_Index(RenderObjClass * /*subobj*/)	const 		{ return 0; }
+	virtual int						Add_Sub_Object_To_Bone(RenderObjClass * /*subobj*/,int /*bone_index*/)	{ return 0; }
 	virtual int						Add_Sub_Object_To_Bone(RenderObjClass * subobj,const char * bname);
 	virtual int						Remove_Sub_Objects_From_Bone(const char * bname);
 
@@ -269,27 +269,27 @@ public:
 	};
 
 	virtual void					Set_Animation( void )														{ }
-	virtual void					Set_Animation( HAnimClass * motion,
-															float frame, int anim_mode = ANIM_MODE_MANUAL)	{ }
-	virtual void					Set_Animation( HAnimClass * motion0,
-															float frame0,
-															HAnimClass * motion1,
-															float frame1,
-															float percentage)											{ }
-	virtual void					Set_Animation( HAnimComboClass * anim_combo)							{ }
+	virtual void					Set_Animation( HAnimClass * /*motion*/,
+															float /*frame*/, int /*anim_mode*/ = ANIM_MODE_MANUAL)	{ }
+	virtual void					Set_Animation( HAnimClass * /*motion0*/,
+															float /*frame0*/,
+															HAnimClass * /*motion1*/,
+															float /*frame1*/,
+															float /*percentage*/)											{ }
+	virtual void					Set_Animation( HAnimComboClass * /*anim_combo*/)							{ }
 
 	virtual HAnimClass *			Peek_Animation( void )														{ return NULL; }
 	virtual int						Get_Num_Bones(void)															{ return 0; }
-	virtual const char *			Get_Bone_Name(int bone_index)												{ return NULL; }
-	virtual int						Get_Bone_Index(const char * bonename)									{ return 0; }
-	virtual const Matrix3D &	Get_Bone_Transform(const char * bonename)    						{ return Get_Transform(); }
-	virtual const Matrix3D &	Get_Bone_Transform(int boneindex)      								{ return Get_Transform(); }
-	virtual void					Capture_Bone(int bindex)													{ }
-	virtual void					Release_Bone(int bindex)													{ }
-	virtual bool					Is_Bone_Captured(int bindex) const										{ return false; }
-	virtual void					Control_Bone(int bindex,const Matrix3D & objtm,bool world_space_translation = false)						{ }
+	virtual const char *			Get_Bone_Name(int /*bone_index*/)												{ return NULL; }
+	virtual int						Get_Bone_Index(const char * /*bonename*/)									{ return 0; }
+	virtual const Matrix3D &	Get_Bone_Transform(const char * /*bonename*/)    						{ return Get_Transform(); }
+	virtual const Matrix3D &	Get_Bone_Transform(int /*boneindex*/)      								{ return Get_Transform(); }
+	virtual void					Capture_Bone(int /*bindex*/)													{ }
+	virtual void					Release_Bone(int /*bindex*/)													{ }
+	virtual bool					Is_Bone_Captured(int /*bindex*/) const										{ return false; }
+	virtual void					Control_Bone(int /*bindex*/,const Matrix3D & /*objtm*/,bool /*world_space_translation*/ = false)						{ }
 	virtual const HTreeClass *	Get_HTree(void) const														{ return NULL; }
-	
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Render Object Interface - Collision Detection
 	// Cast_Ray - intersects a ray with the render object
@@ -301,12 +301,12 @@ public:
 	// Intersect_Sphere - tests a ray for intersection with the bounding spheres
 	// Intersect_Sphere_Quick - tests a ray for intersection with bounding spheres
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	virtual bool					Cast_Ray(RayCollisionTestClass & raytest)								{ return false; }
-	virtual bool					Cast_AABox(AABoxCollisionTestClass & boxtest)						{ return false; }
-	virtual bool					Cast_OBBox(OBBoxCollisionTestClass & boxtest)						{ return false; }
-	
-	virtual bool					Intersect_AABox(AABoxIntersectionTestClass & boxtest)				{ return false; }
-	virtual bool					Intersect_OBBox(OBBoxIntersectionTestClass & boxtest)				{ return false; }
+	virtual bool					Cast_Ray(RayCollisionTestClass & /*raytest*/)								{ return false; }
+	virtual bool					Cast_AABox(AABoxCollisionTestClass & /*boxtest*/)						{ return false; }
+	virtual bool					Cast_OBBox(OBBoxCollisionTestClass & /*boxtest*/)						{ return false; }
+
+	virtual bool					Intersect_AABox(AABoxIntersectionTestClass & /*boxtest*/)				{ return false; }
+	virtual bool					Intersect_OBBox(OBBoxIntersectionTestClass & /*boxtest*/)				{ return false; }
 
 	virtual bool					Intersect(IntersectionClass *Intersection, IntersectionResultClass *Final_Result);
 	virtual bool					Intersect_Sphere(IntersectionClass *Intersection, IntersectionResultClass *Final_Result);
@@ -339,10 +339,10 @@ public:
 	virtual float	Get_Cost(void) const;
 	virtual float	Get_Value(void) const																		{ return AT_MIN_LOD; }
 	virtual float	Get_Post_Increment_Value(void) const													{ return AT_MAX_LOD; }
-	virtual void	Set_LOD_Level(int lod)																		{ }
+	virtual void	Set_LOD_Level(int /*lod*/)																		{ }
 	virtual int		Get_LOD_Level(void) const																	{ return 0; }
 	virtual int		Get_LOD_Count(void) const																	{ return 1; }
-	virtual void	Set_LOD_Bias(float bias)																	{ }
+	virtual void	Set_LOD_Bias(float /*bias*/)																	{ }
 	virtual int	Calculate_Cost_Value_Arrays(float screen_area, float *values, float *costs) const;
 	virtual RenderObjClass *	Get_Current_LOD(void)														{ Add_Ref(); return this; }
 
@@ -350,7 +350,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Render Object Interface - Dependency Generation
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	//
 	//	Note:  The strings contained in these lists need to be freed by the caller.
 	// They should be freed using the delete operator.
@@ -363,26 +363,26 @@ public:
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Render Object Interface - Decals
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	virtual void					Create_Decal(DecalGeneratorClass * generator)						{ }
-	virtual void					Delete_Decal(uint32 decal_id)												{ }
-	
+	virtual void					Create_Decal(DecalGeneratorClass * /*generator*/)						{ }
+	virtual void					Delete_Decal(uint32 /*decal_id*/)												{ }
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Render Object Interface - Attributes, Options, Properties, etc
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	virtual MaterialInfoClass * Get_Material_Info(void) 													{ return NULL; }
-	virtual void					Set_User_Data(void *value, bool recursive = false)					{ User_Data = value; };
+	virtual void					Set_User_Data(void *value, bool /*recursive*/ = false)					{ User_Data = value; };
 	virtual void *					Get_User_Data()																{ return User_Data; };
 	virtual int						Get_Num_Snap_Points(void)													{ return 0; }
-	virtual void					Get_Snap_Point(int index,Vector3 * set)								{ }
+	virtual void					Get_Snap_Point(int /*index*/,Vector3 * /*set*/)								{ }
 //	virtual float					Calculate_Texture_Reduction_Factor(float norm_screensize);
 //	virtual void					Set_Texture_Reduction_Factor(float trf);
 	virtual float					Get_Screen_Size(CameraClass &camera);
-	virtual void					Scale(float scale) 															{ };
-	virtual void					Scale(float scalex, float scaley, float scalez)						{ };
+	virtual void					Scale(float /*scale*/) 															{ };
+	virtual void					Scale(float /*scalex*/, float /*scaley*/, float /*scalez*/)						{ };
 
    virtual int						Get_Sort_Level(void) const													{ return 0; /* SORT_LEVEL_NONE */ }
-   virtual void					Set_Sort_Level(int level)													{ }
-	
+   virtual void					Set_Sort_Level(int /*level*/)													{ }
+
 	virtual int						Is_Really_Visible(void)														{ return ((Bits & IS_REALLY_VISIBLE) == IS_REALLY_VISIBLE); }
 	virtual int						Is_Not_Hidden_At_All(void)													{ return ((Bits & IS_NOT_HIDDEN_AT_ALL) == IS_NOT_HIDDEN_AT_ALL); }
 	virtual int						Is_Visible(void) const														{ return (Bits & IS_VISIBLE); }
@@ -427,7 +427,7 @@ protected:
 
 	virtual void					Update_Cached_Bounding_Volumes(void) const;
 	virtual void					Update_Sub_Object_Bits(void);
-	
+
 	bool								Bounding_Volumes_Valid(void) const										{ return (Bits & BOUNDING_VOLUMES_VALID) != 0; }
 	void								Invalidate_Cached_Bounding_Volumes(void) const						{ Bits &= ~BOUNDING_VOLUMES_VALID; }
 	void								Validate_Cached_Bounding_Volumes(void)	const							{ Bits |= BOUNDING_VOLUMES_VALID; }
@@ -436,7 +436,7 @@ protected:
 	void								Load_Sub_Object_User_Lighting(ChunkLoadClass & cload);
 
 
-	enum 
+	enum
 	{
 		COLLISION_TYPE_MASK =		0x000000FF,
 
@@ -444,19 +444,19 @@ protected:
 		IS_NOT_HIDDEN =				0x00000200,
 		IS_NOT_ANIMATION_HIDDEN =	0x00000400,
 		IS_FORCE_VISIBLE =			0x00000800,
-		BOUNDING_VOLUMES_VALID =	0x00002000,		
+		BOUNDING_VOLUMES_VALID =	0x00002000,
 		IS_TRANSLUCENT =				0x00004000,			// is additive or alpha blended on any poly
 		//IS_VERTEX_PROCESSOR =		0x00008000,			// is or has a vertex processor, OBSOLETE!
 		SUBOBJS_MATCH_LOD =			0x00010000,			// force sub-objects to have same LOD level
 		SUBOBJ_TRANSFORMS_DIRTY =	0x00020000,			// my sub-objects need me to update their transform
 		HAS_USER_LIGHTING =			0x00040000,			// the user has installed a static lighting solve.
-		
+
 		IS_REALLY_VISIBLE =			IS_VISIBLE | IS_NOT_HIDDEN | IS_NOT_ANIMATION_HIDDEN,
       IS_NOT_HIDDEN_AT_ALL =     IS_NOT_HIDDEN | IS_NOT_ANIMATION_HIDDEN,
-		DEFAULT_BITS =					COLLISION_TYPE_ALL | IS_NOT_HIDDEN | IS_NOT_ANIMATION_HIDDEN,
+		DEFAULT_BITS =					unsigned(COLLISION_TYPE_ALL) | IS_NOT_HIDDEN | IS_NOT_ANIMATION_HIDDEN,
 	};
 
-	mutable unsigned long		Bits;
+	mutable unsigned int		Bits;
 	Matrix3D							Transform;
 	mutable SphereClass			CachedBoundingSphere;
 	mutable AABoxClass			CachedBoundingBox;
@@ -466,7 +466,7 @@ protected:
 	SceneClass *					Scene;
 	RenderObjClass *				Container;
 	void *							User_Data;
-	
+
 	friend class SceneClass;
 	friend class RenderObjProxyClass;
 };
@@ -475,7 +475,7 @@ WWINLINE const SphereClass & RenderObjClass::Get_Bounding_Sphere(void) const
 {
 	if (!(Bits & BOUNDING_VOLUMES_VALID)) {
 		Update_Cached_Bounding_Volumes();
-	} 
+	}
 	return CachedBoundingSphere;
 }
 
@@ -487,17 +487,17 @@ WWINLINE const AABoxClass & RenderObjClass::Get_Bounding_Box(void) const
 	return CachedBoundingBox;
 }
 
-/************************************************************************** 
- * Bound_Degrees -- Bounds a degree value between 0 and 360.              * 
- *                                                                        * 
- * INPUT:                                                                 * 
- *                                                                        * 
- * OUTPUT:                                                                * 
- *                                                                        * 
- * WARNINGS:                                                              * 
- *                                                                        * 
- * HISTORY:                                                               * 
- *   09/22/1997 PWG : Created.                                            * 
+/**************************************************************************
+ * Bound_Degrees -- Bounds a degree value between 0 and 360.              *
+ *                                                                        *
+ * INPUT:                                                                 *
+ *                                                                        *
+ * OUTPUT:                                                                *
+ *                                                                        *
+ * WARNINGS:                                                              *
+ *                                                                        *
+ * HISTORY:                                                               *
+ *   09/22/1997 PWG : Created.                                            *
  *========================================================================*/
 WWINLINE float Bound_Degrees(float angle)
 {

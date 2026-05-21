@@ -105,10 +105,10 @@ WinMain
 #endif //_DEBUG
 
 		//::AfxWinInit (hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-		//::AfxInitialize (FALSE, _MFC_VER);
+		//::AfxInitialize (false, _MFC_VER);
 
 		AFX_MODULE_STATE* pModuleState = AfxGetModuleState();
-		pModuleState->m_bDLL = (BYTE)FALSE;
+		pModuleState->m_bDLL = (BYTE)false;
 	#ifdef _MBCS
 		// set correct multi-byte code-page for Win32 apps
 		_setmbcp(_MB_CP_ANSI);
@@ -136,7 +136,7 @@ WinMain
 ////////////////////////////////////////////////////////////
 void
 Do_Version_Check (void)
-{	
+{
 	char curr_filename[MAX_PATH];
 	::GetModuleFileName (NULL, curr_filename, MAX_PATH);
 
@@ -180,7 +180,7 @@ BOOL CW3DViewApp::InitInstance (void)
 		// You should modify this string to be something appropriate
 		// such as the name of your company or organization.
 		SetRegistryKey(_T("Westwood Studios"));
-		
+
 		//
 		// Load standard INI file options (including MRU)
 		//
@@ -210,7 +210,7 @@ BOOL CW3DViewApp::InitInstance (void)
 
 		// Enable DDE Execute open
 		EnableShellOpen();
-		RegisterShellFileTypes(TRUE);
+		RegisterShellFileTypes(true);
 
 		 // Parse command line for standard shell commands, DDE, file open
 		CCommandLineInfo cmdInfo;
@@ -223,7 +223,7 @@ BOOL CW3DViewApp::InitInstance (void)
 
 		// Dispatch commands specified on the command line
 		if (!ProcessShellCommand(cmdInfo))
-			return FALSE;
+			return false;
 
 		// The one and only window has been initialized, so show and update it.
 		m_pMainWnd->ShowWindow(SW_SHOW);
@@ -360,7 +360,7 @@ void Debug_Refs(void)
 // CW3DViewApp
 //
 int
-CW3DViewApp::ExitInstance() 
+CW3DViewApp::ExitInstance()
 {
 	//
 	// Free any resources the WW3D engine allocated
@@ -407,7 +407,7 @@ fnTopLevelWindowSearch
 	LPARAM lParam
 )
 {
-	BOOL bcontinue = TRUE;
+	BOOL bcontinue = true;
 
 	// Is this a viewer window?
 	if (::GetProp (hwnd, "WW3DVIEWER") != 0) {
@@ -415,7 +415,7 @@ fnTopLevelWindowSearch
 		(*((HWND *)lParam)) = hwnd;
 	}
 
-	// Return the TRUE/FALSE result code
+	// Return the true/false result code
 	return bcontinue;
 }
 
@@ -457,11 +457,11 @@ CAboutDlg::OnInitDialog (void)
 		}
 		SAFE_DELETE (pblock);
 	}
-	
+
 	// Put the version string into the dialog
 	CString version_string;
 	version_string.Format (IDS_VERSION, (version_major >> 16), (version_major & 0xFFFF));
 	SetDlgItemText (IDC_VERSION, version_string);
-	return TRUE;
+	return true;
 }
 

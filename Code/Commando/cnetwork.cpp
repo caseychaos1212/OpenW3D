@@ -38,6 +38,7 @@
 
 #include <shellapi.h>
 #include <stdio.h>
+#include <limits>
 
 #include "specialbuilds.h"
 
@@ -88,7 +89,6 @@
 #include "ServerSettings.h"
 #include "DlgMPConnectionRefused.h"
 
-#include "resource.h"
 #include <wwui/dialogmgr.h>
 #include "ffactory.h"
 #include "realcrc.h"
@@ -101,9 +101,9 @@ extern bool g_is_loading;
 //
 char												cNetwork::MessageToSend[];
 char												cNetwork::Command[];
-int												cNetwork::ExeKey								= 0;
-int												cNetwork::ExeCRC								= 0;
-int												cNetwork::StringsCRC							= 0;
+uint32_t											cNetwork::ExeKey								= 0;
+uint32_t											cNetwork::ExeCRC								= 0;
+uint32_t											cNetwork::StringsCRC							= 0;
 char												cNetwork::ClientString[];
 char												cNetwork::ClientEnumerationString[];
 CombatNetworkReceiverInstanceClass *	cNetwork::NetworkReceiver					= NULL;
@@ -128,7 +128,7 @@ bool												cNetwork::LastServerConnectionStateBad = false;
 bool												cNetwork::SensibleUpdates					= true;
 
 //-----------------------------------------------------------------------------
-void cNetwork::Init_Client(unsigned short my_port)
+void cNetwork::Init_Client([[maybe_unused]] unsigned short my_port)
 {
 	WWMEMLOG(MEM_NETWORK);
 
@@ -171,9 +171,9 @@ void cNetwork::Init_Client(unsigned short my_port)
 		The_Game()->Set_Password(cGameSpyAdmin::Get_Password_Attempt());
 	}
 
-	ULONG bbo = 0;
+	unsigned int bbo = 0;
 	//if (IS_SOLOPLAY || GameModeManager::Find("LAN")->Is_Active()) {
-	if (IS_SOLOPLAY || 
+	if (IS_SOLOPLAY ||
 		 (GameModeManager::Find("LAN")->Is_Active() && !cGameSpyAdmin::Is_Gamespy_Game())) {
 
 		bbo = cBandwidth::Get_Bandwidth_Bps_From_Type(BANDWIDTH_LANT1);
@@ -324,14 +324,14 @@ void cNetwork::Accept_Handler(void)
 }
 
 //-----------------------------------------------------------------------------
-void cNetwork::Refusal_Handler(REFUSAL_CODE refusal_code)
+void cNetwork::Refusal_Handler([[maybe_unused]] REFUSAL_CODE refusal_code)
 {
 #ifndef FREEDEDICATEDSERVER
 
    WWDEBUG_SAY(("cNetwork::Refusal_Handler\n"));
 
 	// Close connecting dialog as neccessary.
-	DialogBaseClass* dialog = DialogMgrClass::Find_Dialog(IDD_MULTIPLAY_CONNECTING);
+	DialogBaseClass* dialog = DialogMgrClass::Find_Dialog((int)RenegadeDialogID::IDD_MULTIPLAY_CONNECTING);
 
 	if (dialog != NULL) {
 		// Sending 1 as the parameter tells the dialog that it is being closed
@@ -360,7 +360,7 @@ void cNetwork::Refusal_Handler(REFUSAL_CODE refusal_code)
    // The server refused our connection request! At this stage this
    // is fatal. Later on we would have to re-init the connection etc.
    //
-	static const unsigned long _refusalStrings[] = {
+	static const unsigned int _refusalStrings[] = {
 		IDS_MP_CONNECTION_REFUSED_GAME_FULL,      // REFUSAL_GAME_FULL
 		IDS_MP_PASSWORD_WRONG, // REFUSAL_BAD_PASSWORD
 		IDS_MENU_VERSION_MISMATCH, // REFUSAL_VERSION_MISMATCH
@@ -368,12 +368,12 @@ void cNetwork::Refusal_Handler(REFUSAL_CODE refusal_code)
 		IDS_MP_CONNECTION_REFUSED_BY_APPLICATION  // REFUSAL_BY_APPLICATION
 		};
 
-	const unsigned long refusalMsg = _refusalStrings[refusal_code - 1];
+	const unsigned int refusalMsg = _refusalStrings[refusal_code - 1];
 
 	if (cGameSpyAdmin::Is_Gamespy_Game()) {
 		if (refusal_code == REFUSAL_VERSION_MISMATCH) {
 			WideStringClass tval;
-			tval.Format(L"%s...%s", TRANSLATE(IDS_MP_CONNECTION_REFUSED_BY_APPLICATION), 
+			tval.Format(U_CHAR("%s...%s"), TRANSLATE(IDS_MP_CONNECTION_REFUSED_BY_APPLICATION),
 				TRANSLATE(IDS_MENU_VERSION_MISMATCH));
 			DlgMPConnectionRefused::DoDialog(tval, false);
 		} else {
@@ -382,8 +382,8 @@ void cNetwork::Refusal_Handler(REFUSAL_CODE refusal_code)
 	} else {
 		DlgMsgBox::DoDialog(TRANSLATE (IDS_MENU_SERVER_MESSAGE_TITLE), TRANSLATE(refusalMsg));
 	}
-	
-	
+
+
 	//
 	// N.B. We cannot destroy the connection from inside this callback.
 	//
@@ -398,73 +398,73 @@ int cNetwork::Get_Data_Files_CRC(void)
 	static int crc = UNINITIALLIZED_CRC;
 	if ( crc == UNINITIALLIZED_CRC ) {
 		const char * filelist[] = {
-		"jgo`fqv+aag",					//"objects.ddb",           
-		"dwhjw+lkl",					//"armor.ini",             
-		"gjk`v+lkl",					//"bones.ini",             
-		"vpwcdf``cc`fqv+lkl",		//"surfaceeffects.ini",    
-		"fdh`wdv+lkl",					//"cameras.ini",           
-		"fZkjaZhbZi5+r6a",			//"c_nod_mg_l0.w3d",       
-		"fZkjaZwnZi5+r6a",			//"c_nod_rk_l0.w3d",       
-		"fZkjaZciZi5+r6a",			//"c_nod_fl_l0.w3d",       
-		"fZkjaZ`kZi5+r6a",			//"c_nod_en_l0.w3d",       
-		"fZkjaZhbjZi5+r6a",			//"c_nod_mgo_l0.w3d",      
-		"fZkjaZwnjZi5+r6a",			//"c_nod_rko_l0.w3d",      
-		"fZkjaZfm`hqZi5+r6a",		//"c_nod_chemt_l0.w3d",    
-		"fZkjaZvklu`wZi5+r6a",		//"c_nod_sniper_l0.w3d",   
-		"fZkjaZwvjiaZi5+r6a",		//"c_nod_rsold_l0.w3d",    
-		"fZkjaZvqiqmZi5+r6a",		//"c_nod_stlth_l0.w3d",    
-		"fZkjaZvdnpZi5+r6a",			//"c_nod_saku_l0.w3d",     
-		"fZkjaZvdnp7Zi5+r6a",		//"c_nod_saku2_l0.w3d",    
-		"fZkjaZwdsZi5+r6a",			//"c_nod_rav_l0.w3d",      
-		"fZkjaZhwdsZi5+r6a",			//"c_nod_mrav_l0.w3d",     
-		"fZkjaZhaZi5+r6a",			//"c_nod_mdz_l0.w3d",      
-		"fZkjaZha7Zi5+r6a",			//"c_nod_mdz2_l0.w3d",     
-		"fZkjaZqfZi5+r6a",			//"c_nod_tc_l0.w3d",       
-		"fZkjaZhpqdkqZi5+r6a",		//"c_nod_mutant_l0.w3d",   
-		"fZkjaZhviaZi5+r6a",			//"c_nod_msld_l0.w3d",     
-		"fZkjaZvvjiaZi5+r6a",		//"c_nod_ssold_l0.w3d",    
-		"fZkjaZu`qhZi5+r6a",			//"c_nod_petm_l0.w3d",     
-		"fZkjaZndk`Zi5+r6a",			//"c_nod_kane_l0.w3d",     
-		"fZbalZhbZi5+r6a",			//"c_gdi_mg_l0.w3d",       
-		"fZbalZwnZi5+r6a",			//"c_gdi_rk_l0.w3d",       
-		"fZbalZbwZi5+r6a",			//"c_gdi_gr_l0.w3d",       
-		"fZbalZ`kZi5+r6a",			//"c_gdi_en_l0.w3d",       
-		"fZbalZhbjZi5+r6a",			//"c_gdi_mgo_l0.w3d",      
-		"fZbalZwnjZi5+r6a",			//"c_gdi_rko_l0.w3d",      
-		"fZbalZv|aZi5+r6a",			//"c_gdi_syd_l0.w3d",      
-		"fZbalZa`daZi5+r6a",			//"c_gdi_dead_l0.w3d",     
-		"fZbalZbpkZi5+r6a",			//"c_gdi_gun_l0.w3d",      
-		"fZbalZuqfmZi5+r6a",			//"c_gdi_ptch_l0.w3d",     
-		"fZmdsjfZi5+r6a",				//"c_havoc_l0.w3d",        
-		"fZmdsjfkZi5+r6a",			//"c_havocn_l0.w3d",       
-		"fZmdsjfrZi5+r6a",			//"c_havocw_l0.w3d",       
-		"fZmdsjfaZi5+r6a",			//"c_havocd_l0.w3d",       
-		"fZbalZv|aZi5+r6a",			//"c_gdi_syd_l0.w3d",      
-		"fZbalZv|a7Zi5+r6a",			//"c_gdi_syd2_l0.w3d",     
-		"fZbalZhjglZi5+r6a",			//"c_gdi_mobi_l0.w3d",     
-		"fZbalZmjqrZi5+r6a",			//"c_gdi_hotw_l0.w3d",     
-		"fZbalZiqZi5+r6a",			//"c_gdi_lt_l0.w3d",       
-		"fZkjaZu`qwZi5+r6a",			//"c_nod_petr_l0.w3d",     
-		"fZijbdkZi5+r6a",				//"c_logan_l0.w3d",        
-		"fZbalZijfn`Zi5+r6a",		//"c_gdi_locke_l0.w3d",    
-		"sZkjaZgpbb|+r6a",			//"v_nod_buggy.w3d",       
-		"sZkjaZdufZh+r6a",			//"v_nod_apc_m.w3d",       
-		"sZkjaZdwqiw|+r6a",			//"v_nod_artlry.w3d",      
-		"sZkjaZcidh`+r6a",			//"v_nod_flame.w3d",       
-		"sZkjaZiqdkn+r6a",			//"v_nod_ltank.w3d",       
-		"sZkjaZvqiqm+r6a",			//"v_nod_stlth.w3d",       
-		"sZkjaZqwkvuqZh+r6a",		//"v_nod_trnspt_m.w3d",    
-		"sZkjaZdudfm`Zh+r6a",		//"v_nod_apache_m.w3d",    
-		"sZfmdh`i`jk+r6a",			//"v_chameleon.w3d",       
-		"sZbalZmphs``+r6a",			//"v_gdi_humvee.w3d",      
-		"sZbalZdufZh+r6a",			//"v_gdi_apc_m.w3d",       
-		"sZbalZhwiv+r6a",				//"v_gdi_mrls.w3d",        
-		"sZbalZh`aqkn+r6a",			//"v_gdi_medtnk.w3d",      
-		"sZbalZhdhhqm+r6a",			//"v_gdi_mammth.w3d",      
-		"sZulfnpu54+r6a",				//"v_pickup01.w3d",        
-		"sZv`adk54+r6a",				//"v_sedan01.w3d",         
-		"sZbalZjwfdZh+r6a",			//"v_gdi_orca_m.w3d",      
-		"sZbalZqwkvuqZh+r6a",		//"v_gdi_trnspt_m.w3d",    
+		"jgo`fqv+aag",					//"objects.ddb",
+		"dwhjw+lkl",					//"armor.ini",
+		"gjk`v+lkl",					//"bones.ini",
+		"vpwcdf``cc`fqv+lkl",		//"surfaceeffects.ini",
+		"fdh`wdv+lkl",					//"cameras.ini",
+		"fZkjaZhbZi5+r6a",			//"c_nod_mg_l0.w3d",
+		"fZkjaZwnZi5+r6a",			//"c_nod_rk_l0.w3d",
+		"fZkjaZciZi5+r6a",			//"c_nod_fl_l0.w3d",
+		"fZkjaZ`kZi5+r6a",			//"c_nod_en_l0.w3d",
+		"fZkjaZhbjZi5+r6a",			//"c_nod_mgo_l0.w3d",
+		"fZkjaZwnjZi5+r6a",			//"c_nod_rko_l0.w3d",
+		"fZkjaZfm`hqZi5+r6a",		//"c_nod_chemt_l0.w3d",
+		"fZkjaZvklu`wZi5+r6a",		//"c_nod_sniper_l0.w3d",
+		"fZkjaZwvjiaZi5+r6a",		//"c_nod_rsold_l0.w3d",
+		"fZkjaZvqiqmZi5+r6a",		//"c_nod_stlth_l0.w3d",
+		"fZkjaZvdnpZi5+r6a",			//"c_nod_saku_l0.w3d",
+		"fZkjaZvdnp7Zi5+r6a",		//"c_nod_saku2_l0.w3d",
+		"fZkjaZwdsZi5+r6a",			//"c_nod_rav_l0.w3d",
+		"fZkjaZhwdsZi5+r6a",			//"c_nod_mrav_l0.w3d",
+		"fZkjaZhaZi5+r6a",			//"c_nod_mdz_l0.w3d",
+		"fZkjaZha7Zi5+r6a",			//"c_nod_mdz2_l0.w3d",
+		"fZkjaZqfZi5+r6a",			//"c_nod_tc_l0.w3d",
+		"fZkjaZhpqdkqZi5+r6a",		//"c_nod_mutant_l0.w3d",
+		"fZkjaZhviaZi5+r6a",			//"c_nod_msld_l0.w3d",
+		"fZkjaZvvjiaZi5+r6a",		//"c_nod_ssold_l0.w3d",
+		"fZkjaZu`qhZi5+r6a",			//"c_nod_petm_l0.w3d",
+		"fZkjaZndk`Zi5+r6a",			//"c_nod_kane_l0.w3d",
+		"fZbalZhbZi5+r6a",			//"c_gdi_mg_l0.w3d",
+		"fZbalZwnZi5+r6a",			//"c_gdi_rk_l0.w3d",
+		"fZbalZbwZi5+r6a",			//"c_gdi_gr_l0.w3d",
+		"fZbalZ`kZi5+r6a",			//"c_gdi_en_l0.w3d",
+		"fZbalZhbjZi5+r6a",			//"c_gdi_mgo_l0.w3d",
+		"fZbalZwnjZi5+r6a",			//"c_gdi_rko_l0.w3d",
+		"fZbalZv|aZi5+r6a",			//"c_gdi_syd_l0.w3d",
+		"fZbalZa`daZi5+r6a",			//"c_gdi_dead_l0.w3d",
+		"fZbalZbpkZi5+r6a",			//"c_gdi_gun_l0.w3d",
+		"fZbalZuqfmZi5+r6a",			//"c_gdi_ptch_l0.w3d",
+		"fZmdsjfZi5+r6a",				//"c_havoc_l0.w3d",
+		"fZmdsjfkZi5+r6a",			//"c_havocn_l0.w3d",
+		"fZmdsjfrZi5+r6a",			//"c_havocw_l0.w3d",
+		"fZmdsjfaZi5+r6a",			//"c_havocd_l0.w3d",
+		"fZbalZv|aZi5+r6a",			//"c_gdi_syd_l0.w3d",
+		"fZbalZv|a7Zi5+r6a",			//"c_gdi_syd2_l0.w3d",
+		"fZbalZhjglZi5+r6a",			//"c_gdi_mobi_l0.w3d",
+		"fZbalZmjqrZi5+r6a",			//"c_gdi_hotw_l0.w3d",
+		"fZbalZiqZi5+r6a",			//"c_gdi_lt_l0.w3d",
+		"fZkjaZu`qwZi5+r6a",			//"c_nod_petr_l0.w3d",
+		"fZijbdkZi5+r6a",				//"c_logan_l0.w3d",
+		"fZbalZijfn`Zi5+r6a",		//"c_gdi_locke_l0.w3d",
+		"sZkjaZgpbb|+r6a",			//"v_nod_buggy.w3d",
+		"sZkjaZdufZh+r6a",			//"v_nod_apc_m.w3d",
+		"sZkjaZdwqiw|+r6a",			//"v_nod_artlry.w3d",
+		"sZkjaZcidh`+r6a",			//"v_nod_flame.w3d",
+		"sZkjaZiqdkn+r6a",			//"v_nod_ltank.w3d",
+		"sZkjaZvqiqm+r6a",			//"v_nod_stlth.w3d",
+		"sZkjaZqwkvuqZh+r6a",		//"v_nod_trnspt_m.w3d",
+		"sZkjaZdudfm`Zh+r6a",		//"v_nod_apache_m.w3d",
+		"sZfmdh`i`jk+r6a",			//"v_chameleon.w3d",
+		"sZbalZmphs``+r6a",			//"v_gdi_humvee.w3d",
+		"sZbalZdufZh+r6a",			//"v_gdi_apc_m.w3d",
+		"sZbalZhwiv+r6a",				//"v_gdi_mrls.w3d",
+		"sZbalZh`aqkn+r6a",			//"v_gdi_medtnk.w3d",
+		"sZbalZhdhhqm+r6a",			//"v_gdi_mammth.w3d",
+		"sZulfnpu54+r6a",				//"v_pickup01.w3d",
+		"sZv`adk54+r6a",				//"v_sedan01.w3d",
+		"sZbalZjwfdZh+r6a",			//"v_gdi_orca_m.w3d",
+		"sZbalZqwkvuqZh+r6a",		//"v_gdi_trnspt_m.w3d",
 		};
 #define	NUM_CRC_FILES	(sizeof(	filelist ) / sizeof( filelist[0] ) )
 		crc = 0;
@@ -475,15 +475,21 @@ int cNetwork::Get_Data_Files_CRC(void)
 			while ( *n ) *n++ ^= 0x5;
 //			Debug_Say(( "		\"%s\",\n", name ));
 			FileClass * file = _TheFileFactory->Get_File( name );
-			if ( file && file->Is_Available() ) {
-				int size = file->Size();
+			if (file && file->Is_Available()) {
+				size_t size = file->Size();
 				file->Open();
-				while ( size > 0 ) {
-					unsigned char buffer[ 4096 ];
-					int amount = std::min( (int)size, (int)sizeof(buffer) );
-					amount = file->Read( buffer, amount );
-					crc = CRC_Memory( buffer, amount, crc );
-					size -= amount;
+				while (size > 0) {
+					unsigned char buffer[4096];
+					size_t chunk = size;
+					if (chunk > sizeof(buffer)) {
+						chunk = sizeof(buffer);
+					}
+					int amount = file->Read(buffer, static_cast<int>(chunk));
+					if (amount <= 0) {
+						break;
+					}
+					crc = CRC_Memory(buffer, amount, crc);
+					size -= static_cast<size_t>(amount);
 				}
 				file->Close();
 			} else {
@@ -514,10 +520,12 @@ void cNetwork::Compute_Exe_Key(void)
 	//
 	string.Format("RENEGADE %u", BuildInfoClass::Get_Build_Number());
 
-	WWDEBUG_SAY(("File id string: %s\n", string));
+	WWDEBUG_SAY(("File id string: %s\n", string.Peek_Buffer()));
 	key_string += string;
 	key_string += " ";
-	ExeCRC = CRCEngine()(string, strlen(string));
+	const char *exe_string = string;
+	const size_t exe_string_length = ::strlen(exe_string);
+	ExeCRC = CRCEngine()(exe_string, exe_string_length);
 
 	//
 	// TSS 09/07/01
@@ -533,10 +541,12 @@ void cNetwork::Compute_Exe_Key(void)
 	//
 	//cMiscUtil::Get_File_Id_String("Data\\strings.tdb", string);
 	string.Format("strings.tdb %u", TranslateDBClass::Get_Version_Number());
-	WWDEBUG_SAY(("File id string: %s\n", string));
+	WWDEBUG_SAY(("File id string: %s\n", string.Peek_Buffer()));
 	key_string += string;
 	key_string += " ";
-	StringsCRC = CRCEngine()(string, strlen(string));
+	const char *tdb_string = string;
+	const size_t tdb_length = ::strlen(tdb_string);
+	StringsCRC = CRCEngine()(tdb_string, tdb_length);
 
 	//
 	// TSS102401 - we can't match always.dbs either.
@@ -546,7 +556,9 @@ void cNetwork::Compute_Exe_Key(void)
 	//
 	// Use the crc of the keystring as the key
 	//
-	ExeKey = CRCEngine()(key_string, strlen(key_string));
+	const char *key_string_buffer = key_string;
+	const size_t key_length = ::strlen(key_string_buffer);
+	ExeKey = CRCEngine()(key_string_buffer, key_length);
 
 	//
 	// Include data file crc
@@ -643,7 +655,7 @@ void cNetwork::Init_Server(void)
 
 
 	//if (IS_SOLOPLAY || GameModeManager::Find("LAN")->Is_Active()) {
-	if (IS_SOLOPLAY || 
+	if (IS_SOLOPLAY ||
 		 (GameModeManager::Find("LAN")->Is_Active() && !cGameSpyAdmin::Is_Gamespy_Game())) {
 
 		ULONG bbo = cBandwidth::Get_Bandwidth_Bps_From_Type(BANDWIDTH_LANT1);
@@ -653,7 +665,7 @@ void cNetwork::Init_Server(void)
 	} else {
 		//WWASSERT(GameModeManager::Find("WOL")->Is_Active());
 		WWASSERT(cUserOptions::BandwidthBps.Get() > 0);
-		unsigned long bw = cBandwidth::Get_Bandwidth_Bps_From_Type((BANDWIDTH_TYPE_ENUM)cUserOptions::Get_Bandwidth_Type());
+		unsigned int bw = cBandwidth::Get_Bandwidth_Bps_From_Type((BANDWIDTH_TYPE_ENUM)cUserOptions::Get_Bandwidth_Type());
 
 		/*
 		** Only use a portion of the bandwidth based on how many slave servers there are.
@@ -801,12 +813,12 @@ void cNetwork::Update_Fps(void)
 
 void cNetwork::Connection_Status_Change_Feedback(void)
 {
-	static unsigned long _last_print = TIMEGETTIME();
+	static unsigned int _last_print = TIMEGETTIME();
 	static bool _last_print_bad = false;
-	static unsigned long _print_good_soon = 0;
+	static unsigned int _print_good_soon = 0;
 
-	unsigned long time = TIMEGETTIME();
-	const wchar_t *string = NULL;
+	unsigned int time = TIMEGETTIME();
+	const unichar_t *string = NULL;
 	if (LastServerConnectionStateBad) {
 		if (_last_print_bad && time - _last_print < 4000) {
 			return;
@@ -977,7 +989,7 @@ void cNetwork::Update(void)
 }
 
 //-----------------------------------------------------------------------------
-void cNetwork::Client_Send_Packet(cPacket & packet, int mode)
+void cNetwork::Client_Send_Packet([[maybe_unused]] cPacket & packet, [[maybe_unused]] int mode)
 {
 #ifndef FREEDEDICATEDSERVER
 
@@ -1183,7 +1195,7 @@ void cNetwork::Server_Broken_Connection_Handler(int broken_rhost_id)
 
 	WideStringClass widestring;
 	widestring.Format(
-		L"%s %d\n",
+		U_CHAR("%s %d\n"),
 		TRANSLATION(IDS_MP_CONNECTION_TO_CLIENT_BROKEN),
 		broken_rhost_id);
    WWASSERT(CombatManager::Get_Message_Window () != NULL);
@@ -1214,7 +1226,7 @@ void cNetwork::Client_Broken_Connection_Handler(void)
    /**/
 	if (PClientConnection->Have_Id()) {
 		//cHelpText::Set(TRANSLATION(IDS_MP_CONNECTION_TO_SERVER_BROKEN));
-		DlgMsgBox::DoDialog(L"", TRANSLATION(IDS_MP_CONNECTION_TO_SERVER_BROKEN));
+		DlgMsgBox::DoDialog(U_CHAR(""), TRANSLATION(IDS_MP_CONNECTION_TO_SERVER_BROKEN));
 	} else {
 		//cHelpText::Set(TRANSLATION(IDS_MP_UNABLE_CONNECT_TO_SERVER));
 	}
@@ -1418,7 +1430,7 @@ REFUSAL_CODE cNetwork::Application_Acceptance_Handler(cPacket & packet)
 	packet.Get_Wide_Terminated_String(password.Get_Buffer(256), 256, true);
 
 	// Get clients exe version
-	int client_exe_key = packet.Get(client_exe_key);
+	uint32_t client_exe_key = packet.Get(client_exe_key);
 
 	// Make sure the clients password matches the games password.
 	WWASSERT(PTheGameData != NULL);
@@ -1442,7 +1454,7 @@ REFUSAL_CODE cNetwork::Application_Acceptance_Handler(cPacket & packet)
 	// Make sure the player is not already in the game
    //GAMESPY
 	//if (cPlayerManager::Find_Player(player_name)) {
-	if (!cGameSpyAdmin::Is_Gamespy_Game() && 
+	if (!cGameSpyAdmin::Is_Gamespy_Game() &&
 	    cPlayerManager::Find_Player(player_name)) {
 		return REFUSAL_PLAYER_EXISTS;
 	}
@@ -1510,7 +1522,7 @@ void cNetwork::Connection_Handler(int new_rhost_id)
 
 
 //-----------------------------------------------------------------------------
-void cNetwork::Set_Desired_Frame_Sleep_Ms(int b)
+void cNetwork::Set_Desired_Frame_Sleep_Ms([[maybe_unused]] int b)
 {
    WWASSERT(b >= 0);
 
@@ -1579,7 +1591,7 @@ void cNetwork::Set_Simulated_Latency_Range_Ms(int lower, int upper)
 }
 
 //-----------------------------------------------------------------------------
-void cNetwork::Set_Spam_Count(int spam_count)
+void cNetwork::Set_Spam_Count([[maybe_unused]] int spam_count)
 {
    WWASSERT(spam_count >= 0);
 
@@ -1590,7 +1602,7 @@ void cNetwork::Set_Spam_Count(int spam_count)
 }
 
 //-----------------------------------------------------------------------------
-void cNetwork::Get_Simulated_Latency_Range_Ms(int & lower, int & upper)
+void cNetwork::Get_Simulated_Latency_Range_Ms([[maybe_unused]] int & lower, [[maybe_unused]] int & upper)
 {
 #ifdef WWDEBUG
 	lower = cDevOptions::SimulatedLatencyRangeMsLower.Get();

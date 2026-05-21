@@ -35,8 +35,8 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgmpwolautologinprompt.h"
+#include "renegadedialog.h"
 #include "mpsettingsmgr.h"
-#include "resource.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 MPWolAutoLoginPromptDialogClass::MPWolAutoLoginPromptDialogClass (void)	:
-	PopupDialogClass (IDD_MP_WOL_AUTO_LOGIN_PROMPT)
+	PopupDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_AUTO_LOGIN_PROMPT))
 {
 	return ;
 }
@@ -69,7 +69,7 @@ MPWolAutoLoginPromptDialogClass::~MPWolAutoLoginPromptDialogClass (void)
 //////////////////////////////////////////////////////////////////////
 void
 MPWolAutoLoginPromptDialogClass::On_Init_Dialog (void)
-{	
+{
 	Check_Dlg_Button (IDC_DONT_ASK_AGAIN_CHECK, true);
 	PopupDialogClass::On_Init_Dialog ();
 	return ;
@@ -82,7 +82,7 @@ MPWolAutoLoginPromptDialogClass::On_Init_Dialog (void)
 //
 //////////////////////////////////////////////////////////////////////
 void
-MPWolAutoLoginPromptDialogClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MPWolAutoLoginPromptDialogClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	//
 	//	Remember the "don't show me this again" setting

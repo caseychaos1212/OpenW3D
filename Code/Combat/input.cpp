@@ -698,7 +698,7 @@ void	Input::Free_Mappings( void )
 }
 
 
-void	Input::Load_Registry( const char * key )
+void	Input::Load_Registry( const char * /* key */ )
 {
 	/*RegistryClass * registry = new RegistryClass( key );
 	WWASSERT( registry );
@@ -714,7 +714,7 @@ void	Input::Load_Registry( const char * key )
 
 }
 
-void	Input::Save_Registry( const char * key )
+void	Input::Save_Registry( const char * /* key */ )
 {
 	/*RegistryClass * registry = new RegistryClass( key );
 	WWASSERT( registry );
@@ -1021,7 +1021,7 @@ bool	Input::Is_Button_Down (int button_id)
 /*
 **
 */
-float	Input::Get_Value( int function_index, int input, float clamp )
+float	Input::Get_Value( int function_index, int input, float /* clamp */ )
 {
 	if (!UsingDirectInput) {
 		return(0.0f);
@@ -1304,7 +1304,7 @@ Input::Save_Configuration (const char *filename)
 	//	Save the data to a file
 	//
 	StringClass	config_filename;
-	config_filename.Format( "config\\%s", filename );
+	config_filename.Format( "config/%s", filename );
 	FileClass *ini_file = _TheWritingFileFactory->Get_File (config_filename);
 	if (ini_file != NULL) {
 		ini_file->Open (FileClass::WRITE);
@@ -1609,12 +1609,12 @@ Input::Save_Accelerated_Keys (INIClass	*input_ini)
 ////////////////////////////////////////////////////////////////
 void
 Input::Get_Translated_Key_Name (int dik_id, WideStringClass &name)
-{	
+{
 	for (int index = 0; index < KEYNAME_MAP_COUNT; index ++) {
 
 		//
 		//	Is this the entry we're looking for?
-		//	
+		//
 		if (DIK_KEY_NAME_ARRAY[index].dik_id == dik_id) {
 			if (DIK_KEY_NAME_ARRAY[index].text_id != 0) {
 				name = TRANSLATE (DIK_KEY_NAME_ARRAY[index].text_id);

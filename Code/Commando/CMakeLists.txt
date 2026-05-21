@@ -174,7 +174,8 @@ set(COMMANDO_SRC
     gdskirmish.h
     lanchat.cpp
     lanchat.h
-    dialogresource.h
+    renegadedialog.cpp
+    renegadedialog.h
     dialogtests.cpp
     dialogtests.h
     dlgcharacteroptions.cpp
@@ -471,15 +472,21 @@ if(WIN32)
 endif()
 
 # Targets to build.
-if(RENEGADE_CLIENT) # Full game client
+if(W3D_CLIENT) # Full game client
     add_executable(renegade WIN32 ${COMMANDO_SRC})
 
     target_link_libraries(renegade PRIVATE
         commando
     )
+
+    embed_resources(renegade
+        SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/renegade_resources.cpp"
+        RESOURCES
+            "${CMAKE_CURRENT_SOURCE_DIR}/Renegade.ico"
+    )
 endif()
 
-if(RENEGADE_FDS) # Dedicated headless server
+if(W3D_FDS) # Dedicated headless server
     add_executable(renegadeserver WIN32 ${COMMANDO_SRC})
 
     target_link_libraries(renegadeserver PRIVATE

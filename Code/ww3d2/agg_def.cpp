@@ -24,7 +24,7 @@
  *                                                                                             *
  *                     $Archive:: /Commando/Code/ww3d2/agg_def.cpp          $*
  *                                                                                             *
- *                       Author:: Patrick Smith                                                
+ *                       Author:: Patrick Smith
  *                                                                                             *
  *                     $Modtime:: 4/05/01 10:21a                                              $*
  *                                                                                             *
@@ -40,10 +40,9 @@
 #include "wwdebug.h"
 #include "assetmgr.h"
 #include "matinfo.h"
+#include "pathutil.h"
 #include "texture.h"
 #include "wwstring.h"
-
-#include <windows.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -118,11 +117,11 @@ AggregateDefClass::~AggregateDefClass (void)
 {
 	// Free the name buffer if necessary
 	if (m_pName != NULL) {
-		
+
 		// free() is used because the buffer was allocated with ::_strdup().
 		::free (m_pName);
 		m_pName = NULL;
-	}	
+	}
 
 	Free_Subobject_List ();
 	return ;
@@ -139,10 +138,10 @@ AggregateDefClass::operator= (const AggregateDefClass &src)
 	int index;
 
 	// Free the name buffer if necessary
-	if (m_pName != NULL) {		
+	if (m_pName != NULL) {
 		::free (m_pName);
 		m_pName = NULL;
-	}	
+	}
 
 	// Start with a fresh set of data
 	Free_Subobject_List ();
@@ -150,7 +149,7 @@ AggregateDefClass::operator= (const AggregateDefClass &src)
 	// Copy the src object's name and info struct
 	Set_Name (src.Get_Name ());
 	::memcpy (&m_Info, &src.m_Info, sizeof (m_Info));
-	::memcpy (&m_MiscInfo, &src.m_MiscInfo, sizeof (m_MiscInfo));	
+	::memcpy (&m_MiscInfo, &src.m_MiscInfo, sizeof (m_MiscInfo));
 	m_Version = src.m_Version;
 
 	// Loop through all the entries in the src object's subobj list
@@ -203,7 +202,7 @@ AggregateDefClass::Create (void)
 	// Attempt to create an instance of the hierarchy
 	RenderObjClass *pmodel = Create_Render_Object (m_Info.BaseModelName);
 	if (pmodel != NULL) {
-		
+
 		// Perform the aggregation
 		Attach_Subobjects (*pmodel);
 
@@ -235,7 +234,7 @@ AggregateDefClass::Find_Subobject
 {
 	RenderObjClass *parent_model = &model;
 	parent_model->Add_Ref ();
-	
+
 	// Loop through all the models in our "path" until we've either failed
 	// or found the exact mesh we were looking for...
 	for (int index = 1;
@@ -247,13 +246,13 @@ AggregateDefClass::Find_Subobject
 		if (bone_path[index][0] == 0) {
 			sub_obj = parent_model->Get_Sub_Object_By_Name (mesh_path[index]);
 		} else {
-			
+
 			int bone_index = parent_model->Get_Bone_Index (bone_path[index]);
 			int subobj_count = parent_model->Get_Num_Sub_Objects_On_Bone (bone_index);
-			
+
 			// Loop through all the subobjects on this bone
-			for (int subobj_index = 0; (subobj_index < subobj_count) && (sub_obj == NULL); subobj_index ++) {				
-				
+			for (int subobj_index = 0; (subobj_index < subobj_count) && (sub_obj == NULL); subobj_index ++) {
+
 				// Is this the subobject we were looking for?
 				RenderObjClass *ptemp_obj = parent_model->Get_Sub_Object_On_Bone (subobj_index, bone_index);
 				if (::stricmp (ptemp_obj->Get_Name (), mesh_path[index]) == 0) {
@@ -286,7 +285,7 @@ AggregateDefClass::Attach_Subobjects (RenderObjClass &base_model)
 	for (int index = 0; index < m_SubobjectList.Count (); index ++) {
 		W3dAggregateSubobjectStruct *psubobj_info = m_SubobjectList[index];
 		if (psubobj_info != NULL) {
-			
+
 			// Now create this subobject and attach it to its bone.
 			RenderObjClass *prender_obj = Create_Render_Object (psubobj_info->SubobjectName);
 			if (prender_obj != NULL) {
@@ -303,7 +302,7 @@ AggregateDefClass::Attach_Subobjects (RenderObjClass &base_model)
 			}
 		}
 	}
-	
+
 	return ;
 }
 
@@ -320,7 +319,7 @@ AggregateDefClass::Create_Render_Object (const char *passet_name)
 
 	// Attempt to get an instance of the render object from the asset manager
 	prender_obj = WW3DAssetManager::Get_Instance()->Create_Render_Obj (passet_name);
-	
+
 	// If we couldn't find the render object in the asset manager, then attempt to
 	// load it from file
 	if ((prender_obj == NULL) &&
@@ -329,7 +328,7 @@ AggregateDefClass::Create_Render_Object (const char *passet_name)
 		// It should be in the asset manager now, so attempt to get it again.
 		prender_obj = WW3DAssetManager::Get_Instance()->Create_Render_Obj (passet_name);
 	}
-	
+
 	// Return a pointer to the render object
 	return prender_obj;
 }
@@ -347,22 +346,16 @@ AggregateDefClass::Load_Assets (const char *passet_name)
 
 	// Param OK?
 	if (passet_name != NULL) {
-		
-		// Determine what the current working directory is
-		char path[MAX_PATH];
-		::GetCurrentDirectoryA (sizeof (path), path);
 
-		// Ensure the path is directory delimited
-		if (path[::strlen(path)-1] != '\\') {
-			::strcat (path, "\\");
-		}
+		// Determine what the current working directory is
+		StringClass path = cPathUtil::GetWorkingDirectory(true);
 
 		// Assume the filename is simply the "asset name" + the w3d extension
-		::strcat (path, passet_name);
-		::strcat (path, ".w3d");
+		path += passet_name;
+		path += ".w3d";
 
 		// If the file exists, then load it into the asset manager.
-		if (::GetFileAttributesA (path) != 0xFFFFFFFF) {
+		if (cPathUtil::PathExists(path)) {
 			retval = WW3DAssetManager::Get_Instance()->Load_3D_Assets (path);
 		}
 	}
@@ -391,9 +384,9 @@ AggregateDefClass::Initialize (RenderObjClass &base_model)
 	m_Info.BaseModelName[sizeof (m_Info.BaseModelName) - 1] = '\0';
 	m_Info.SubobjectCount = 0;
 	m_MiscInfo.OriginalClassID = base_model.Class_ID ();
-	m_MiscInfo.Flags = 0;	
+	m_MiscInfo.Flags = 0;
 	m_MiscInfo.Flags |= base_model.Is_Sub_Objects_Match_LOD_Enabled () ? W3D_AGGREGATE_FORCE_SUB_OBJ_LOD : 0;
-	
+
 
 	// Pass the aggregate name along
 	Set_Name (base_model.Get_Name ());
@@ -407,7 +400,7 @@ AggregateDefClass::Initialize (RenderObjClass &base_model)
 	Build_Subobject_List (*pvanilla_model, base_model);
 
 	// Release the model if necessary
-	REF_PTR_RELEASE (pvanilla_model);	
+	REF_PTR_RELEASE (pvanilla_model);
 	return ;
 }
 
@@ -428,9 +421,9 @@ AggregateDefClass::Build_Subobject_List
 
 	// Loop through all the bones in this render obj
 	int bone_count = model.Get_Num_Bones ();
-	for (int bone_index = 0; bone_index < bone_count; bone_index ++) {			
+	for (int bone_index = 0; bone_index < bone_count; bone_index ++) {
 		const char *pbone_name = model.Get_Bone_Name (bone_index);
-		
+
 		// Build a list of nodes that are contained in the vanilla model
 		DynamicVectorClass <RenderObjClass *> orig_node_list;
 		for (index = 0;
@@ -455,18 +448,18 @@ AggregateDefClass::Build_Subobject_List
 
 		int node_count = node_list.Count ();
 		if (node_count > 0) {
-			
+
 			// Loop through the subobjects and add each one to our internal list
 			W3dAggregateSubobjectStruct subobj_info = { 0 };
 			for (int node_index = 0; node_index < node_count; node_index ++) {
 				RenderObjClass *psubobject = node_list[node_index];
 				WWASSERT (psubobject != NULL);
-				
+
 				// Is this subobject new?  (i.e. not in a 'vanilla' instance?)
 				const char *prototype_name = psubobject->Get_Name ();
 				if (psubobject != NULL &&
 					 (Is_Object_In_List (prototype_name, orig_node_list) == false)) {
-					
+
 					// Add this subobject to our list
 					::strncpy (subobj_info.SubobjectName, prototype_name, sizeof (subobj_info.SubobjectName));
 					subobj_info.SubobjectName[sizeof (subobj_info.SubobjectName) - 1] = '\0';
@@ -519,13 +512,13 @@ AggregateDefClass::Is_Object_In_List
 	// were are looking for.
 	for (int node_index = 0; (node_index < node_list.Count ()) && (retval == false); node_index ++) {
 		RenderObjClass *prender_obj = node_list[node_index];
-		
+
 		// Is this the render object we were looking for?
 		if (prender_obj != NULL &&
 		    ::stricmp (prender_obj->Get_Name (), passet_name) == 0) {
 			retval = true;
 		}
-	}	
+	}
 
 	// Return the true/false result code
 	return retval;
@@ -541,7 +534,7 @@ AggregateDefClass::Load_W3D (ChunkLoadClass &chunk_load)
 {
 	W3dTextureReplacerHeaderStruct header = { 0 };
 
-	
+
 	while (chunk_load.Open_Chunk()) {
 
 		WW3DErrorType error = WW3D_ERROR_OK;
@@ -561,7 +554,7 @@ AggregateDefClass::Load_W3D (ChunkLoadClass &chunk_load)
 					if (header.ReplacedTexturesCount > 0) {
 						WWDEBUG_SAY(("Obsolete texture replacement chunk encountered in aggregate: %s\r\n",m_pName));
 					}
-				} 
+				}
 				break;
 
 			case W3D_CHUNK_AGGREGATE_CLASS_INFO:
@@ -569,14 +562,14 @@ AggregateDefClass::Load_W3D (ChunkLoadClass &chunk_load)
 				break;
 
 			default:
-				
+
 				// Unknown chunk.
 				break;
-		}	
+		}
 		chunk_load.Close_Chunk();
 		if (error != WW3D_ERROR_OK) return (error);
 	}
-	
+
 	return WW3D_ERROR_OK;
 }
 
@@ -596,7 +589,7 @@ AggregateDefClass::Read_Header (ChunkLoadClass &chunk_load)
 	if (chunk_load.Read (&header, sizeof (header)) == sizeof (header)) {
 
 		// Copy the name from the header structure
-		m_pName = ::_strdup (header.Name);
+		m_pName = ::strdup (header.Name);
 		m_Version = header.Version;
 
 		// Success!
@@ -632,7 +625,7 @@ AggregateDefClass::Read_Info (ChunkLoadClass &chunk_load)
 
 			// Read this subobject's definition from the file
 			ret_val = Read_Subobject (chunk_load);
-		}				
+		}
 	}
 
 	// Return the WW3D_ERROR_TYPE return code
@@ -720,13 +713,13 @@ AggregateDefClass::Save_W3D (ChunkSaveClass &chunk_save)
 	WW3DErrorType ret_val = WW3D_ERROR_SAVE_FAILED;
 
 	// Begin a chunk that identifies an aggregate
-	if (chunk_save.Begin_Chunk (W3D_CHUNK_AGGREGATE) == TRUE) {
-		
+	if (chunk_save.Begin_Chunk (W3D_CHUNK_AGGREGATE) == true) {
+
 		// Attempt to save the different sections of the aggregate definition
 		if ((Save_Header (chunk_save) == WW3D_ERROR_OK) &&
 			 (Save_Info (chunk_save) == WW3D_ERROR_OK) &&
 			 (Save_Class_Info (chunk_save) == WW3D_ERROR_OK)) {
-			
+
 			// Success!
 			ret_val = WW3D_ERROR_OK;
 		}
@@ -751,8 +744,8 @@ AggregateDefClass::Save_Header (ChunkSaveClass &chunk_save)
 	WW3DErrorType ret_val = WW3D_ERROR_SAVE_FAILED;
 
 	// Begin a chunk that identifies the aggregate
-	if (chunk_save.Begin_Chunk (W3D_CHUNK_AGGREGATE_HEADER) == TRUE) {
-		
+	if (chunk_save.Begin_Chunk (W3D_CHUNK_AGGREGATE_HEADER) == true) {
+
 		// Fill the header structure
 		W3dAggregateHeaderStruct header = { 0 };
 		header.Version = W3D_CURRENT_AGGREGATE_VERSION;
@@ -762,7 +755,7 @@ AggregateDefClass::Save_Header (ChunkSaveClass &chunk_save)
 		// Write the header out to the chunk
 		if (chunk_save.Write (&header, sizeof (header)) == sizeof (header)) {
 			// Success!
-			ret_val = WW3D_ERROR_OK;			
+			ret_val = WW3D_ERROR_OK;
 		}
 
 		// End the header chunk
@@ -785,8 +778,8 @@ AggregateDefClass::Save_Info (ChunkSaveClass &chunk_save)
 	WW3DErrorType ret_val = WW3D_ERROR_SAVE_FAILED;
 
 	// Begin a chunk that identifies the aggregate settings
-	if (chunk_save.Begin_Chunk (W3D_CHUNK_AGGREGATE_INFO) == TRUE) {
-		
+	if (chunk_save.Begin_Chunk (W3D_CHUNK_AGGREGATE_INFO) == true) {
+
 		// Write the settings structure out to the chunk
 		if (chunk_save.Write (&m_Info, sizeof (m_Info)) == sizeof (m_Info)) {
 			// Success!
@@ -848,11 +841,11 @@ AggregateDefClass::Save_Class_Info (ChunkSaveClass &chunk_save)
 	WW3DErrorType ret_val = WW3D_ERROR_SAVE_FAILED;
 
 	// Begin a chunk that identifies the texture replacer header
-	if (chunk_save.Begin_Chunk (W3D_CHUNK_AGGREGATE_CLASS_INFO) == TRUE) {
-		
+	if (chunk_save.Begin_Chunk (W3D_CHUNK_AGGREGATE_CLASS_INFO) == true) {
+
 		// Write the class information structure out to the chunk
 		if (chunk_save.Write (&m_MiscInfo, sizeof (m_MiscInfo)) == sizeof (m_MiscInfo)) {
-			
+
 			// Success!
 			ret_val = WW3D_ERROR_OK;
 		}
@@ -879,10 +872,10 @@ AggregateLoaderClass::Load_W3D (ChunkLoadClass &chunk_load)
 	// Create a definition object
 	AggregateDefClass *pdefinition = new AggregateDefClass;
 	if (pdefinition != NULL) {
-		
+
 		// Ask the definition object to load the aggregate data
 		if (pdefinition->Load_W3D (chunk_load) != WW3D_ERROR_OK) {
-			
+
 			// Error!  Free the definition
 			delete pdefinition;
 			pdefinition = NULL;

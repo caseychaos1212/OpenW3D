@@ -42,7 +42,7 @@
 #define __RENEGADE_DIALOG_MGR_H
 
 #include "dialogfactory.h"
-#include "dialogresource.h"
+#include "renegadedialog.h"
 #include "wwuiinput.h"
 #include "win.h"
 
@@ -50,7 +50,7 @@
 ////////////////////////////////////////////////////////////////
 //	Prototypes
 ////////////////////////////////////////////////////////////////
-int MyLoadStringW (UINT str_id, LPWSTR buffer, int buffer_len);
+int MyLoadStringW (unsigned str_id, unichar_t *buffer, int buffer_len);
 
 
 ////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ public:
 	////////////////////////////////////////////////////////////////
 	//	Public methods
 	////////////////////////////////////////////////////////////////
-	
+
 	//
 	//	Initialization
 	//
@@ -115,7 +115,7 @@ public:
 	//
 	//	Dialog creation
 	//
-	static void		Do_Simple_Dialog (int dlg_res_id);
+	static void		Do_Simple_Dialog (const DialogResource *dialog_resource);
 
 	//
 	//	Menu traversal access
@@ -131,7 +131,7 @@ inline void
 RenegadeDialogMgrClass::Do_Dialog_By_Button_ID (int button_id)
 {
 	WWASSERT (button_id >= DIALOG_LINK_FIRST && button_id <= DIALOG_LINK_LAST);
-	
+
 	//
 	//	Start the dialog
 	//

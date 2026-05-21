@@ -97,12 +97,12 @@ CMeshPropPage::OnInitDialog (void)
 {
 	// Allow the base class to process this message
     CPropertyPage::OnInitDialog();
-	
+
     if (m_stringMeshName.GetLength () > 0)
     {
         // Get a pointer to the mesh object from the asset manager
         MeshClass *pCMesh = (MeshClass *)WW3DAssetManager::Get_Instance()->Create_Render_Obj (m_stringMeshName);
-        
+
         ASSERT (pCMesh);
         if (pCMesh)
         {
@@ -132,19 +132,19 @@ CMeshPropPage::OnInitDialog (void)
             // Determine what type of mesh this is
             if ((dwFlags & W3D_MESH_FLAG_COLLISION_BOX) == W3D_MESH_FLAG_COLLISION_BOX)
             {
-                SendDlgItemMessage (IDC_MESH_TYPE_COLLISION_BOX, BM_SETCHECK, (WPARAM)TRUE);
+                SendDlgItemMessage (IDC_MESH_TYPE_COLLISION_BOX, BM_SETCHECK, (WPARAM)true);
             }
             else if ((dwFlags & W3D_MESH_FLAG_SKIN) == W3D_MESH_FLAG_SKIN)
             {
-                SendDlgItemMessage (IDC_MESH_TYPE_SKIN, BM_SETCHECK, (WPARAM)TRUE);
+                SendDlgItemMessage (IDC_MESH_TYPE_SKIN, BM_SETCHECK, (WPARAM)true);
             }
             else if ((dwFlags & W3D_MESH_FLAG_SHADOW) == W3D_MESH_FLAG_SHADOW)
             {
-                SendDlgItemMessage (IDC_MESH_TYPE_SHADOW, BM_SETCHECK, (WPARAM)TRUE);
+                SendDlgItemMessage (IDC_MESH_TYPE_SHADOW, BM_SETCHECK, (WPARAM)true);
             }
             else
             {
-                SendDlgItemMessage (IDC_MESH_TYPE_NORMAL, BM_SETCHECK, (WPARAM)TRUE);
+                SendDlgItemMessage (IDC_MESH_TYPE_NORMAL, BM_SETCHECK, (WPARAM)true);
             }
 
 
@@ -152,19 +152,19 @@ CMeshPropPage::OnInitDialog (void)
             DWORD dwCollisionFlags = dwFlags & W3D_MESH_FLAG_COLLISION_TYPE_MASK;
             if ((dwCollisionFlags & W3D_MESH_FLAG_COLLISION_TYPE_PHYSICAL) == W3D_MESH_FLAG_COLLISION_TYPE_PHYSICAL)
             {
-                SendDlgItemMessage (IDC_COLLISION_TYPE_PHYSICAL, BM_SETCHECK, (WPARAM)TRUE);
+                SendDlgItemMessage (IDC_COLLISION_TYPE_PHYSICAL, BM_SETCHECK, (WPARAM)true);
             }
-            
+
             // Is this collision type projectile?
             if ((dwCollisionFlags & W3D_MESH_FLAG_COLLISION_TYPE_PROJECTILE) == W3D_MESH_FLAG_COLLISION_TYPE_PROJECTILE)
             {
-                SendDlgItemMessage (IDC_COLLISION_TYPE_PROJECTILE, BM_SETCHECK, (WPARAM)TRUE);
+                SendDlgItemMessage (IDC_COLLISION_TYPE_PROJECTILE, BM_SETCHECK, (WPARAM)true);
             }
 
             // Is this a hidden mesh?
             if ((dwFlags & W3D_MESH_FLAG_HIDDEN) == W3D_MESH_FLAG_HIDDEN)
             {
-                SendDlgItemMessage (IDC_HIDDEN, BM_SETCHECK, (WPARAM)TRUE);
+                SendDlgItemMessage (IDC_HIDDEN, BM_SETCHECK, (WPARAM)true);
             }
 
             // Free the object
@@ -174,15 +174,15 @@ CMeshPropPage::OnInitDialog (void)
     }
 
     GetParent ()->GetDlgItem (IDOK)->ShowWindow (SW_HIDE);
-    GetParent ()->GetDlgItem (IDCANCEL)->SetWindowText ("Close");	
-	return TRUE;
+    GetParent ()->GetDlgItem (IDCANCEL)->SetWindowText ("Close");
+	return true;
 }
 
 
-void CMeshPropPage::OnClose() 
+void CMeshPropPage::OnClose()
 {
 	// TODO: Add your message handler code here and/or call default
-	
+
 	CPropertyPage::OnClose();
     return ;
 }

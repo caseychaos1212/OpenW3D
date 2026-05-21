@@ -232,7 +232,7 @@ void	ArmedGameObj::Re_Init( const ArmedGameObjDef & definition )
 		int weapon_index = WeaponBag->Get_Count();
 		while (weapon_index --) {
 			WeaponClass *weapon = WeaponBag->Peek_Weapon( weapon_index );
-			
+
 			//
 			//	If this isn't a beacon, then remove it
 			//
@@ -475,7 +475,7 @@ void	ArmedGameObj::Init_Muzzle_Bones( void )
 	}
 }
 
-bool	ArmedGameObj::Set_Targeting( const Vector3 & pos, bool do_tilt )
+bool	ArmedGameObj::Set_Targeting( const Vector3 & pos, bool /* do_tilt */ )
 {
 	TargetingPos = pos;
 	// Move the turret to match the target

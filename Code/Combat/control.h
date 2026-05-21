@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Combat/control.h                             $* 
- *                                                                                             * 
- *                      $Author:: Byon_g                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 2/21/02 5:06p                                               $* 
- *                                                                                             * 
- *                    $Revision:: 36                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Combat/control.h                             $*
+ *                                                                                             *
+ *                      $Author:: Byon_g                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 2/21/02 5:06p                                               $*
+ *                                                                                             *
+ *                    $Revision:: 36                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #ifndef	CONTROL_H
@@ -124,7 +124,7 @@ public:
 	bool	Get_Boolean( BooleanControl control );
 
 	void	Clear_One_Time_Boolean( void )				{OneTimeBooleanBits = 0;}
-	unsigned	long Get_One_Time_Boolean_Bits(void)	{return OneTimeBooleanBits;}
+	unsigned	int Get_One_Time_Boolean_Bits(void)	{return OneTimeBooleanBits;}
 	unsigned	char Get_Continuous_Boolean_Bits(void) {return ContinuousBooleanBits;}
 
 	// Analog Controls
@@ -143,24 +143,24 @@ public:
 	static void Set_Precision(void);
 
 private:
-	unsigned		long	OneTimeBooleanBits;
-	unsigned		long	PendingOneTimeBooleanBits;
+	unsigned		int	OneTimeBooleanBits;
+	unsigned		int	PendingOneTimeBooleanBits;
 	unsigned		char	ContinuousBooleanBits;
 	unsigned		char	PendingContinuousBooleanBits;
 	float			AnalogValues[ ANALOG_CONTROL_COUNT ];
 };
 
 
-inline void	ControlClass::Set_Analog( AnalogControl control, float value )	
+inline void	ControlClass::Set_Analog( AnalogControl control, float value )
 {
-	WWASSERT(WWMath::Is_Valid_Float(value)); 
-	AnalogValues[ control ] = value; 
+	WWASSERT(WWMath::Is_Valid_Float(value));
+	AnalogValues[ control ] = value;
 }
 
 inline float ControlClass::Get_Analog( AnalogControl control )
-{ 
-	WWASSERT(WWMath::Is_Valid_Float(AnalogValues[ control ])); 
-	return AnalogValues[ control ]; 
+{
+	WWASSERT(WWMath::Is_Valid_Float(AnalogValues[ control ]));
+	return AnalogValues[ control ];
 }
 
 #endif	//	CONTROL_H

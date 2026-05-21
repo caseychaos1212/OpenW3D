@@ -52,6 +52,7 @@
 #include "combatgmode.h"
 #include "useroptions.h"
 #include "lanchat.h"
+#include "netutil.h"
 #include "rendobj.h"
 #include "phys.h"
 #include "pscene.h"
@@ -77,6 +78,7 @@
 #include "gamespyadmin.h"
 #include "ServerSettings.h"
 #include "GameSpy_QnR.h"
+#include "ConsoleMode.h"
 #include "specialbuilds.h"
 #include "modpackagemgr.h"
 
@@ -126,24 +128,24 @@ bool GameInitMgrClass::Is_Game_In_Progress(void)
 //
 ////////////////////////////////////////////////////////////////
 void
-GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned long clanID)
+GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned int clanID)
 {
-	unsigned long time;
+	unsigned int time;
 
 	WWASSERT(map_name != NULL);
    WWDEBUG_SAY (("GameInitMgrClass::Start_Game(%s)\n", map_name));
 
 	// NOTE: Multi-play does not need this fix because it does not sound page swap.
 	if (IS_SOLOPLAY) {
-	
+
 		// IML: First, allow a short period to process any outstanding sound effects that may have
 		// been started by the caller.
 		time = TIMEGETTIME();
 		while (TIMEGETTIME() - time < PRE_SERVICE_TIME) {
 			WWAudioClass::Get_Instance ()->On_Frame_Update (0);
 		}
-		
- 		// IML: Ensure that there are no sound effects lingering on any playlist. 
+
+ 		// IML: Ensure that there are no sound effects lingering on any playlist.
 		WWAudioClass::Get_Instance ()->Flush_Playlist();
 
 		// IML: Allow audio system to clean-up after flush.
@@ -183,9 +185,9 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned lon
 	//
 	#ifdef WWDEBUG
 	WideStringClass outMsg;
-	
+
 	if (!The_Game()->Is_Valid_Settings(outMsg)) {
-		WWDEBUG_SAY(("ERROR: %S\n", (const wchar_t*)outMsg));
+		WWDEBUG_SAY(("ERROR: %S\n", (const unichar_t*)outMsg));
 		WWASSERT("The_Game()->Is_Valid_Settings()");
 	}
 	#endif
@@ -275,7 +277,7 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned lon
 void
 GameInitMgrClass::End_Game (void)
 {
-	unsigned long time;
+	unsigned int time;
 
 	WWDEBUG_SAY (("GameInitMgrClass::End_Game\n"));
 
@@ -294,7 +296,7 @@ GameInitMgrClass::End_Game (void)
 			WWAudioClass::Get_Instance ()->On_Frame_Update (0);
 		}
 
-		// IML: Ensure that there are no sound effects lingering on any playlist. 
+		// IML: Ensure that there are no sound effects lingering on any playlist.
 		WWAudioClass::Get_Instance ()->Flush_Playlist();
 
 		// IML: Allow audio system to clean-up after flush.
@@ -437,7 +439,7 @@ GameInitMgrClass::End_Game (void)
 void
 GameInitMgrClass::Continue_Game(void)
 {
-	unsigned long time;
+	unsigned int time;
 
 	// IML : First, allow a short period to process any outstanding sound effects that may have been started by the caller.
 	// NOTE: Multi-play does not need this fix because it does not sound page swap.
@@ -507,7 +509,7 @@ GameInitMgrClass::Display_End_Game_Menu (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-GameInitMgrClass::Transmit_Player_Data (int teamChoice, unsigned long clanID)
+GameInitMgrClass::Transmit_Player_Data (int teamChoice, unsigned int clanID)
 {
 	WWMEMLOG(MEM_NETWORK);
    WWDEBUG_SAY (("GameInitMgrClass::Transmit_Player_Data\n"));
@@ -545,13 +547,26 @@ GameInitMgrClass::Start_Client_Server (void)
    WWDEBUG_SAY (("GameInitMgrClass::Start_Client_Server\n"));
 
 	assert(GameModeManager::Find("WOL"));
-	if (GameModeManager::Find("WOL")->Is_Active()) {
-		WWASSERT(PTheGameData != NULL);
-		The_Game()->Set_Port(WOLNATInterface.Get_Port_As_Server());
-	} else if (GameModeManager::Find("LAN")->Is_Active() && cGameSpyAdmin::Is_Gamespy_Game()) {
-		WWASSERT(PTheGameData != NULL);
-		The_Game()->Set_Port(cUserOptions::GameSpyGamePort.Get());
-	}
+		if (GameModeManager::Find("WOL")->Is_Active()) {
+			if (PTheGameData != NULL) {
+				const unsigned short wol_port = WOLNATInterface.Get_Port_As_Server();
+				if (wol_port >= MIN_SERVER_PORT && wol_port <= MAX_SERVER_PORT) {
+					The_Game()->Set_Port(wol_port);
+			} else {
+				WWDEBUG_SAY(("WOL port %hu outside valid range, keeping existing game port\n", wol_port));
+			}
+		}
+		} else if (GameModeManager::Find("LAN")->Is_Active() && cGameSpyAdmin::Is_Gamespy_Game()) {
+			if (PTheGameData != NULL) {
+				const int gamespy_port = cUserOptions::GameSpyGamePort.Get();
+				if (gamespy_port >= MIN_SERVER_PORT && gamespy_port <= MAX_SERVER_PORT) {
+					The_Game()->Set_Port(gamespy_port);
+					ConsoleBox.Print("GameSpy server port set to %d\n", gamespy_port);
+				} else {
+					WWDEBUG_SAY(("GameSpy port %d outside valid range, keeping existing game port\n", gamespy_port));
+				}
+			}
+		}
 
 #ifdef WWDEBUG
 	cRemoteHost::Set_Allow_Extra_Modem_Bandwidth_Throttling(cDevOptions::ExtraModemBandwidthThrottling.Get());
@@ -592,7 +607,13 @@ GameInitMgrClass::Start_Client_Server (void)
 
 		assert(GameModeManager::Find("WOL"));
 		if (GameModeManager::Find("WOL")->Is_Active()) {
-			cNetwork::Init_Client(WOLNATInterface.Get_Port_As_Server_Client());
+			const unsigned short wol_client_port = WOLNATInterface.Get_Port_As_Server_Client();
+			if (wol_client_port >= MIN_SERVER_PORT && wol_client_port <= MAX_SERVER_PORT) {
+				cNetwork::Init_Client(wol_client_port);
+			} else {
+				WWDEBUG_SAY(("WOL client port %hu outside valid range, falling back to default client init\n", wol_client_port));
+				cNetwork::Init_Client();
+			}
 		} else {
 			cNetwork::Init_Client();
 		}
@@ -602,7 +623,7 @@ GameInitMgrClass::Start_Client_Server (void)
 		//
 		WWDEBUG_SAY(("BEFORE GameInitMgrClass::Start_Client_Server tight update loop\n"));
 		WWDEBUG_SAY(("Game IP = %s\n", cNetUtil::Address_To_String(The_Game()->Get_Ip_Address())));
-		unsigned long time = TIMEGETTIME();
+		unsigned int time = TIMEGETTIME();
 		do {
 			cNetwork::Update ();
 			if (TIMEGETTIME() - time > 20*1000) {
@@ -846,6 +867,15 @@ void
 GameInitMgrClass::Initialize_WOL (void)
 {
 #ifndef MULTIPLAYERDEMO
+
+#ifdef _WIN64
+	// WOLAPI COM binaries are 32-bit only; bail out early in 64-bit builds.
+	ConsoleBox.Print("Westwood Online is not available in 64-bit builds. Returning to main menu.\n");
+	RenegadeDialogMgrClass::Goto_Location (RenegadeDialogMgrClass::LOC_MAIN_MENU);
+	cGameType::Set_Game_Type(GAMETYPE_NONE);
+	Mode = MODE_UNKNOWN;
+	return;
+#endif
 
 	WWDEBUG_SAY (("GameInitMgrClass::Initialize_WOL\n"));
 

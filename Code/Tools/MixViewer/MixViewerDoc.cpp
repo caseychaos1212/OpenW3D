@@ -101,7 +101,7 @@ BOOL
 CMixViewerDoc::OnNewDocument (void)
 {
 	if (!CDocument::OnNewDocument ()) {
-		return FALSE;
+		return false;
 	}
 
 	//
@@ -114,7 +114,7 @@ CMixViewerDoc::OnNewDocument (void)
 		view->Reset ();
    }
 
-	return TRUE;
+	return true;
 }
 
 
@@ -127,7 +127,7 @@ BOOL
 CMixViewerDoc::OnOpenDocument (LPCTSTR path)
 {
 	if (!CDocument::OnOpenDocument (path)) {
-		return FALSE;
+		return false;
 	}
 
 	//
@@ -144,8 +144,8 @@ CMixViewerDoc::OnOpenDocument (LPCTSTR path)
 		CMixViewerView *view = (CMixViewerView *)GetNextView (pos);
 		view->Reload (path);
 	}
-		
-	return TRUE;
+
+	return true;
 }
 
 
@@ -166,6 +166,6 @@ CMixViewerDoc::Reload_Views (void)
 		CMixViewerView *view = (CMixViewerView *)GetNextView (pos);
 		view->Reload (GetPathName ());
 	}
-	
+
 	return ;
 }

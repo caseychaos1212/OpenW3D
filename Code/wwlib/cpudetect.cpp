@@ -162,9 +162,9 @@ static unsigned Calculate_Processor_Speed(int64_t& ticks_per_second)
 
 	unsigned start=TIMEGETTIME();
 	unsigned elapsed;
-	while ((elapsed=TIMEGETTIME()-start)<200) {
+	do {
 		Time.timer1 = READ_TSC();
-	}
+	} while ((elapsed=TIMEGETTIME()-start)<200);
 
 	int64_t t=Time.timer1-Time.timer0;
 	ticks_per_second=(1000/200)*t;	// Ticks per second
@@ -824,13 +824,13 @@ void CPUDetectClass::Init_Processor_String()
 
 void CPUDetectClass::Init_CPUID_Instruction()
 {
-	unsigned long cpuid_available=0;
+#if defined(_MC_VER) && defined(_M_IX86)
+	unsigned int cpuid_available=0;
 
    // The pushfd/popfd commands are done using emits
    // because CodeWarrior seems to have problems with
    // the command (huh?)
 
-#if defined(_MC_VER) && defined(_M_IX86)
    __asm
    {
 		mov cpuid_available,0	// clear flag
@@ -914,7 +914,7 @@ void CPUDetectClass::Init_OS()
 			OSVersionNumberMajor = os.dwMajorVersion;
 			OSVersionNumberMinor = os.dwMinorVersion;
 			OSVersionBuildNumber = os.dwBuildNumber;
-			OSVersionPlatformId = os.dwPlatformId;		
+			OSVersionPlatformId = os.dwPlatformId;
             OSVersionExtraInfo = os.szCSDVersion;
 			return;
 		}
@@ -923,7 +923,7 @@ void CPUDetectClass::Init_OS()
 	OSVersionNumberMajor = 6;
 	OSVersionNumberMinor = 2;
 	OSVersionBuildNumber = 0;
-	OSVersionPlatformId = 2;	
+	OSVersionPlatformId = 2;
     OSVersionExtraInfo = "";
 }
 
@@ -971,7 +971,7 @@ void CPUDetectClass::Init_Processor_Log()
 		(OSVersionBuildNumber&0xff000000)>>24,
 		(OSVersionBuildNumber&0xff0000)>>16,
 		(OSVersionBuildNumber&0xffff)));
-	SYSLOG(("OS-Info: %s\r\n",OSVersionExtraInfo));
+	SYSLOG(("OS-Info: %s\r\n",OSVersionExtraInfo.Peek_Buffer()));
 
 	SYSLOG(("Processor: %s\r\n",CPUDetectClass::Get_Processor_String()));
 	SYSLOG(("Clock speed: ~%dMHz\r\n",CPUDetectClass::Get_Processor_Speed()));
@@ -982,7 +982,7 @@ void CPUDetectClass::Init_Processor_Log()
 	case 2: cpu_type="Dual"; break;
 	case 3: cpu_type="*Intel Reserved*"; break;
 	}
-	SYSLOG(("Processor type: %s\r\n",cpu_type));
+	SYSLOG(("Processor type: %s\r\n",cpu_type.Peek_Buffer()));
 
 	SYSLOG(("\r\n"));
 

@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 
+#include "renegadedialog.h"
 #include "dlgevaobjectivestab.h"
 #include "listctrl.h"
 #include "string_ids.h"
@@ -67,7 +68,7 @@ extern int	CurrentObjectiveIndex;
 //
 ////////////////////////////////////////////////////////////////
 EvaObjectivesTabClass::EvaObjectivesTabClass (void)	:
-	ChildDialogClass (IDD_ENCYCLOPEDIA_OBJECTIVES_TAB)
+	ChildDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_ENCYCLOPEDIA_OBJECTIVES_TAB))
 {
 	return ;
 }
@@ -108,7 +109,7 @@ EvaObjectivesTabClass::On_Init_Dialog (void)
 //
 ////////////////////////////////////////////////////////////////
 void
-EvaObjectivesTabClass::On_Command (int ctrl_id, int message_id, DWORD param)
+EvaObjectivesTabClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	ChildDialogClass::On_Command (ctrl_id, message_id, param);
 	return ;
@@ -121,7 +122,7 @@ EvaObjectivesTabClass::On_Command (int ctrl_id, int message_id, DWORD param)
 //
 ////////////////////////////////////////////////////////////////
 void
-EvaObjectivesTabClass::On_ListCtrl_Sel_Change (ListCtrlClass *list_ctrl, int ctrl_id, int old_index, int new_index)
+EvaObjectivesTabClass::On_ListCtrl_Sel_Change (ListCtrlClass * /* list_ctrl */, int ctrl_id, int /* old_index */, int /* new_index */)
 {
 	if (ctrl_id == IDC_OBJECTIVES_LIST_CTRL) {
 		Update_Curr_Objective_Controls ();
@@ -155,7 +156,7 @@ EvaObjectivesTabClass::Update_Curr_Objective_Controls (void)
 	if (curr_sel >= 0) {
 		Objective *objective = ObjectiveManager::Get_Objective (list_ctrl->Get_Entry_Data (curr_sel, 0));
 		if (objective != NULL) {
-			
+
 			//
 			//	Put the long description into the edit control
 			//
@@ -165,7 +166,7 @@ EvaObjectivesTabClass::Update_Curr_Objective_Controls (void)
 			//	Configure the image ctrl
 			//
 			image_ctrl->Set_Texture (objective->HUDPogTextureName);
-		}		
+		}
 	}
 
 	return ;
@@ -192,10 +193,10 @@ EvaObjectivesTabClass::Fill_Objectives_List (void)
 	//	Loop over all the objectives
 	//
 	int count = ObjectiveManager::Get_Objective_Count ();
-	for (int index = 0; index < count; index ++) {		
+	for (int index = 0; index < count; index ++) {
 		Objective *objective = ObjectiveManager::Get_Objective (index);
 		if (objective != NULL) {
-			
+
 			//
 			//	Don't display hidden objectives (unless you really want to)
 			//
@@ -208,11 +209,11 @@ EvaObjectivesTabClass::Fill_Objectives_List (void)
 				int item_index = list_ctrl->Insert_Entry (index, objective->Type_To_Name ());
 				if (item_index != -1) {
 					WideStringClass text = TRANSLATE (objective->ShortDescriptionID);
-					
+
 					//
 					//	Strip off the line delimiter (if necessary)
 					//
-					if (text.Get_Length () > 0 && text[text.Get_Length () - 1] == L'\n') {
+					if (text.Get_Length () > 0 && text[text.Get_Length () - 1] == U_CHAR('\n')) {
 						text.Erase (text.Get_Length () - 1, 1);
 					}
 
@@ -226,7 +227,7 @@ EvaObjectivesTabClass::Fill_Objectives_List (void)
 					Vector3 color = objective->Type_To_Color ();
 					list_ctrl->Set_Entry_Color (item_index, COL_PRIORITY, color);
 					list_ctrl->Set_Entry_Color (item_index, COL_TEXT, color);
-					list_ctrl->Set_Entry_Color (item_index, COL_STATUS, color);					
+					list_ctrl->Set_Entry_Color (item_index, COL_STATUS, color);
 				}
 			}
 		}
@@ -254,13 +255,13 @@ EvaObjectivesTabClass::Fill_Objectives_List (void)
 //	ListSortCallback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 EvaObjectivesTabClass::ListSortCallback
 (
 	ListCtrlClass *	list_ctrl,
 	int					item_index1,
 	int					item_index2,
-	uint32				user_param
+	uint32				/* user_param */
 )
 {
 	int count = list_ctrl->Get_Entry_Count ();
@@ -296,6 +297,6 @@ EvaObjectivesTabClass::ListSortCallback
 		//
 		result = (item_index1 - item_index2);
 	}
-			
+
 	return result;
 }

@@ -39,7 +39,6 @@
 #define _DLGWOLAUTOSTART_H
 
 #include "menudialog.h"
-#include "resource.h"
 
 /*
 ** This dialog just shows progress during a server auto start.
@@ -51,8 +50,8 @@ class AutoRestartProgressDialogClass : public MenuDialogClass
 	public:
 		AutoRestartProgressDialogClass(void);
 		void On_Init_Dialog(void) override;
-		void On_Command(int ctrl_id, int message_id, DWORD param) override;
-		void Add_Text(const wchar_t *txt);
+		void On_Command(int ctrl_id, int message_id, unsigned int param) override;
+		void Add_Text(const unichar_t *txt);
 		static AutoRestartProgressDialogClass *Get_Instance(void) {return(Instance);}
 
 	private:

@@ -56,20 +56,20 @@ class LoginProfile :
 			};
 
 		static void EnableSaving(bool);
-		
+
 		static void SetCurrent(LoginProfile*);
 
 		// Get the profile for the specified login.
-		static LoginProfile* Get(const wchar_t* loginName, bool createOK = false);
-		
+		static LoginProfile* Get(const unichar_t* loginName, bool createOK = false);
+
 		// Create a login profile.
-		static LoginProfile* Create(const wchar_t* loginName);
+		static LoginProfile* Create(const unichar_t* loginName);
 
 		// Delete the profile.
-		static void Delete(const wchar_t* loginName);
+		static void Delete(const unichar_t* loginName);
 
 		// Get login name
-		const wchar_t* GetName(void) const;
+		const unichar_t* GetName(void) const;
 
 		// Set the preferred game server
 		void SetPreferredServer(const char* name);
@@ -89,9 +89,9 @@ class LoginProfile :
 		int GetSidePreference(void) const
 			{return mSidePref;}
 
-		void SetGamesPlayed(unsigned long);
+		void SetGamesPlayed(unsigned int);
 
-		unsigned long GetGamesPlayed(void) const
+		unsigned int GetGamesPlayed(void) const
 			{return mGamesPlayed;}
 
 		// Get cached ranking
@@ -109,7 +109,7 @@ class LoginProfile :
 		LoginProfile();
 		virtual ~LoginProfile();
 
-		bool FinalizeCreate(const wchar_t* loginName);
+		bool FinalizeCreate(const unichar_t* loginName);
 
 		void LoadRank(const char* valueName, Ranking& rank);
 		void SaveRank(const char* valueName, const Ranking& rank);
@@ -122,7 +122,7 @@ class LoginProfile :
 		StringClass mServer;
 		WOL::Locale mLocale;
 		int mSidePref;
-		unsigned long mGamesPlayed;
+		unsigned int mGamesPlayed;
 
 		Ranking mTeamRank;
 		Ranking mClanRank;

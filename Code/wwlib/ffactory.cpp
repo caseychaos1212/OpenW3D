@@ -16,21 +16,21 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Command & Conquer                                            * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/wwlib/ffactory.cpp                           $* 
- *                                                                                             * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Command & Conquer                                            *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/wwlib/ffactory.cpp                           $*
+ *                                                                                             *
  *                      $Author:: Jani_p                                                      $*
- *                                                                                             * 
+ *                                                                                             *
  *                     $Modtime:: 8/24/01 11:50a                                              $*
- *                                                                                             * 
+ *                                                                                             *
  *                    $Revision:: 17                                                          $*
  *                                                                                             *
- *---------------------------------------------------------------------------------------------* 
+ *---------------------------------------------------------------------------------------------*
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include	"ffactory.h"
@@ -104,7 +104,7 @@ void SimpleFileFactoryClass::Get_Sub_Directory( StringClass& new_dir ) const
 
 	// We cannot return a const char * here because the StringClass
 	// may reallocate its buffer during a call to Set_Sub_Directory.
-	// I opted to return a StringClass instead of a reference to 
+	// I opted to return a StringClass instead of a reference to
 	// StringClass because it seems like that would behave more
 	// reasonably. (no sudden changes from or to empty string in
 	// the middle of a calling function.) (DRM, 04/19/01)
@@ -135,7 +135,7 @@ void SimpleFileFactoryClass::Set_Sub_Directory( const char * sub_directory )
 
 void SimpleFileFactoryClass::Prepend_Sub_Directory( const char * sub_directory )
 {
-	int sub_len = strlen(sub_directory);
+	size_t sub_len = ::strlen(sub_directory);
 	// Overflow prevention
 	if (sub_len > 1021) {
 		WWASSERT(0);
@@ -147,8 +147,8 @@ void SimpleFileFactoryClass::Prepend_Sub_Directory( const char * sub_directory )
 	// Ensure sub_directory ends with a slash, and append a semicolon
 	char temp_sub_dir[1024];
 	strcpy(temp_sub_dir, sub_directory);
-	if (temp_sub_dir[sub_len - 1] != '\\') {
-		temp_sub_dir[sub_len] = '\\';
+	if (temp_sub_dir[sub_len - 1] != '\\' && temp_sub_dir[sub_len - 1] != '/') {
+		temp_sub_dir[sub_len] = '/';
 		temp_sub_dir[sub_len + 1] = 0;
 		sub_len++;
 	}
@@ -170,7 +170,7 @@ void SimpleFileFactoryClass::Prepend_Sub_Directory( const char * sub_directory )
 
 void SimpleFileFactoryClass::Append_Sub_Directory( const char * sub_directory )
 {
-	int sub_len = strlen(sub_directory);
+	size_t sub_len = ::strlen(sub_directory);
 	// Overflow prevention
 	if (sub_len > 1022) {
 		WWASSERT(0);
@@ -182,8 +182,8 @@ void SimpleFileFactoryClass::Append_Sub_Directory( const char * sub_directory )
 	// Ensure sub_directory ends with a slash
 	char temp_sub_dir[1024];
 	strcpy(temp_sub_dir, sub_directory);
-	if (temp_sub_dir[sub_len - 1] != '\\') {
-		temp_sub_dir[sub_len] = '\\';
+	if (temp_sub_dir[sub_len - 1] != '\\' && temp_sub_dir[sub_len - 1] != '/') {
+		temp_sub_dir[sub_len] = '/';
 		temp_sub_dir[sub_len + 1] = 0;
 		sub_len++;
 	}
@@ -197,8 +197,8 @@ void SimpleFileFactoryClass::Append_Sub_Directory( const char * sub_directory )
 	CriticalSectionClass::LockClass lock(Mutex);
 
 	// Ensure a trailing semicolon is present, unless the directory list is empty
-	int len = SubDirectory.Get_Length();
-	if (len && SubDirectory[len - 1] != ';') {
+	size_t len = SubDirectory.Get_Length();
+	if (len && SubDirectory[static_cast<int>(len - 1)] != ';') {
 		SubDirectory += ';';
 	}
 
@@ -216,12 +216,15 @@ Is_Full_Path (const char *path)
 	bool retval = false;
 
 	if (path != NULL && path[0] != 0) {
-		
+
 		// Check for drive designation
 		retval = bool(path[1] == ':');
 
 		// Check for network path
 		retval |= bool((path[0] == '\\') && (path[1] == '\\'));
+
+		// Check for POSIX-style absolute paths.
+		retval |= bool(path[0] == '/');
 	}
 
 	return retval;
@@ -291,13 +294,13 @@ FileClass * SimpleFileFactoryClass::Get_File( char const *filename )
 					}
 				}
 			} else {
-				new_name.Format("%s%s",SubDirectory,stripped_name);
+				new_name.Format("%s%s",SubDirectory.Peek_Buffer(),stripped_name.Peek_Buffer());
 			}
 		}
 
 		// END SERIALIZATION
 	}
-	
+
 	file->Set_Name( new_name );	// Call Set_Name to force an allocated name
 	return file;
 }
@@ -306,5 +309,4 @@ void SimpleFileFactoryClass::Return_File( FileClass *file )
 {
 	delete file;
 }
-
 

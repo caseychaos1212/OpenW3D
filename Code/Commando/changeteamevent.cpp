@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/commando/changeteamevent.cpp                    $* 
- *                                                                                             * 
- *                      $Author:: Patrick                                                     $* 
- *                                                                                             * 
- *                     $Modtime:: 1/17/02 3:30p                                               $* 
- *                                                                                             * 
- *                    $Revision:: 22                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/commando/changeteamevent.cpp                    $*
+ *                                                                                             *
+ *                      $Author:: Patrick                                                     $*
+ *                                                                                             *
+ *                     $Modtime:: 1/17/02 3:30p                                               $*
+ *                                                                                             *
+ *                    $Revision:: 22                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "changeteamevent.h"
@@ -92,9 +92,9 @@ cChangeTeamEvent::Act(void)
 
 	cPlayer * p_player = cPlayerManager::Find_Player(SenderId);
 
-	if (p_player != NULL && 
-		 The_Game() != NULL && 
-		 //The_Game()->Is_Team_Game() && 
+	if (p_player != NULL &&
+		 The_Game() != NULL &&
+		 //The_Game()->Is_Team_Game() &&
 		 (The_Game()->IsTeamChangingAllowed.Is_True() || p_player->Invulnerable.Is_True()))
 	{
 		int team = p_player->Get_Player_Type();
@@ -102,12 +102,12 @@ cChangeTeamEvent::Act(void)
 		WWASSERT(team == PLAYERTYPE_NOD || team == PLAYERTYPE_GDI);
 
 		int new_team = PLAYERTYPE_NOD;
-		
-		if (team == PLAYERTYPE_NOD) 
+
+		if (team == PLAYERTYPE_NOD)
 		{
 			new_team = PLAYERTYPE_GDI;
-		} 
-		else 
+		}
+		else
 		{
 			new_team = PLAYERTYPE_NOD;
 		}
@@ -155,7 +155,7 @@ cChangeTeamEvent::Act(void)
 
 
 			//
-			// We have to respawn him and possibly change his model... 
+			// We have to respawn him and possibly change his model...
 			// let's just destroy the soldier and leave the rest up to God.
 			//
 			p_soldier->Set_Delete_Pending();
@@ -165,8 +165,8 @@ cChangeTeamEvent::Act(void)
 		// Tell everyone
 		//
 		WideStringClass text;
-		//text.Format(L"_%s_changed_teams!_", p_player->Get_Name());
-		text.Format(L"%s %s", p_player->Get_Name(), TRANSLATE(IDS_MP_CHANGED_TEAMS));
+		//text.Format(U_CHAR("_%s_changed_teams!_"), p_player->Get_Name());
+		text.Format(U_CHAR("%s %s"), p_player->Get_Name().Peek_Buffer(), TRANSLATE(IDS_MP_CHANGED_TEAMS));
 
 		cScTextObj * p_message = new cScTextObj;
 		p_message->Init(text, TEXT_MESSAGE_PUBLIC, false, HOST_TEXT_SENDER, -1);
@@ -206,15 +206,15 @@ cChangeTeamEvent::Import_Creation(BitStreamClass & packet)
 }
 
 //-----------------------------------------------------------------------------
-bool 
+bool
 cChangeTeamEvent::Is_Change_Team_Possible(void)
 {
 	return
 		cNetwork::I_Am_Client() &&
 		GameModeManager::Find("Combat") != NULL &&
 		GameModeManager::Find("Combat")->Is_Active() &&
-		The_Game() != NULL && 
-		//The_Game()->Is_Team_Game() && 
+		The_Game() != NULL &&
+		//The_Game()->Is_Team_Game() &&
 		The_Game()->IsTeamChangingAllowed.Is_True();
 }
 

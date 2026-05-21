@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgmpwolbuddies.h"
+#include "renegadedialog.h"
 #include "renegadedialogmgr.h"
 #include "WOLBuddyMgr.h"
 #include "dlgmpwolpagebuddy.h"
@@ -74,7 +75,7 @@ void MPWolBuddiesMenuClass::Display(void)
 	//	Create the dialog if necessary, otherwise simply bring it to the front
 	if (_mInstance == NULL) {
 		MPWolBuddiesMenuClass* dialog = new MPWolBuddiesMenuClass;
-		
+
 		if (dialog) {
 			dialog->Start_Dialog();
 			dialog->Release_Ref();
@@ -93,7 +94,7 @@ void MPWolBuddiesMenuClass::Display(void)
 //
 ////////////////////////////////////////////////////////////////
 MPWolBuddiesMenuClass::MPWolBuddiesMenuClass (void)	:
-	MenuDialogClass(IDD_MP_WOL_BUDDIES),
+	MenuDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MP_WOL_BUDDIES)),
 	mBuddyListChanged(false),
 	mBuddyInfoChanged(false)
 {
@@ -144,7 +145,7 @@ MPWolBuddiesMenuClass::On_Init_Dialog (void)
 		bar->Add_Button(IDC_MP_SHORTCUT_NEWS, TRANSLATE(IDS_MP_SHORTCUT_NEWS));
 		bar->Add_Button(IDC_MP_SHORTCUT_CLANS, TRANSLATE(IDS_MP_SHORTCUT_CLANS));
 		bar->Add_Button(IDC_MP_SHORTCUT_RANKINGS, TRANSLATE(IDS_MP_SHORTCUT_RANKINGS));
-		bar->Add_Button(IDC_MP_SHORTCUT_NET_STATUS, TRANSLATE(IDS_MP_SHORTCUT_NET_STATUS));		
+		bar->Add_Button(IDC_MP_SHORTCUT_NET_STATUS, TRANSLATE(IDS_MP_SHORTCUT_NET_STATUS));
 	}
 
 	//	Get a pointer to the list control
@@ -206,7 +207,7 @@ void MPWolBuddiesMenuClass::On_Frame_Update(void)
 //
 ////////////////////////////////////////////////////////////////
 void
-MPWolBuddiesMenuClass::On_Command (int ctrl_id, int message_id, DWORD param)
+MPWolBuddiesMenuClass::On_Command (int ctrl_id, int message_id, unsigned int param)
 {
 	switch (ctrl_id) {
 		case IDC_MP_WOL_BUDDIES_PAGE_BUTTON:
@@ -289,7 +290,7 @@ void MPWolBuddiesMenuClass::Update_Buddy_Info(int index, const RefPtr<WWOnline::
 		clanName = clan->GetAbbr();
 		list_ctrl->Set_Entry_Text(index, COL_CLAN, clanName);
 	} else {
-		list_ctrl->Set_Entry_Text(index, COL_CLAN, L"");
+		list_ctrl->Set_Entry_Text(index, COL_CLAN, U_CHAR(""));
 	}
 
 	//	Build a textual description of the user's location
@@ -321,24 +322,24 @@ void MPWolBuddiesMenuClass::Update_Buddy_Ranking(int index, const RefPtr<WWOnlin
 		RefPtr<WWOnline::LadderData> ladder = user->GetLadderFromType(ladderType);
 
 		if (ladder.IsValid()) {
-			wchar_t text[64];
+			unichar_t text[64];
 
-			swprintf(text, sizeof(text), L"%d", ladder->GetWins());
+			u_snprintf_u(text, sizeof(text), U_CHAR("%d"), ladder->GetWins());
 			list->Set_Entry_Text(index, COL_WINS, text);
 
-			swprintf(text, sizeof(text), L"%d / %d", ladder->GetReserved1(), ladder->GetKills());
+			u_snprintf_u(text, sizeof(text), U_CHAR("%d / %d"), ladder->GetReserved1(), ladder->GetKills());
 			list->Set_Entry_Text(index, COL_DEATHS, text);
 
-			swprintf(text, sizeof(text), L"%d", ladder->GetPoints());
+			u_snprintf_u(text, sizeof(text), U_CHAR("%d"), ladder->GetPoints());
 			list->Set_Entry_Text(index, COL_POINTS, text);
 
-			swprintf(text, sizeof(text), L"%d", ladder->GetRung());
+			u_snprintf_u(text, sizeof(text), U_CHAR("%d"), ladder->GetRung());
 			list->Set_Entry_Text(index, COL_RANK, text);
 		} else {
-			list->Set_Entry_Text(index, COL_WINS, L"-");
-			list->Set_Entry_Text(index, COL_DEATHS, L"- / -");
-			list->Set_Entry_Text(index, COL_POINTS, L"-");
-			list->Set_Entry_Text(index, COL_RANK, L"-");
+			list->Set_Entry_Text(index, COL_WINS, U_CHAR("-"));
+			list->Set_Entry_Text(index, COL_DEATHS, U_CHAR("- / -"));
+			list->Set_Entry_Text(index, COL_POINTS, U_CHAR("-"));
+			list->Set_Entry_Text(index, COL_RANK, U_CHAR("-"));
 		}
 	}
 }
@@ -349,7 +350,7 @@ void MPWolBuddiesMenuClass::Update_Buddy_Ranking(int index, const RefPtr<WWOnlin
 //	Refresh_Buddy_List
 //
 ////////////////////////////////////////////////////////////////
-void	
+void
 MPWolBuddiesMenuClass::Refresh_Buddy_List (void)
 {
 	ListCtrlClass *list_ctrl = (ListCtrlClass *)Get_Dlg_Item (IDC_BUDDY_LIST_CTRL);
@@ -371,11 +372,11 @@ MPWolBuddiesMenuClass::Refresh_Buddy_List (void)
 
 	//	Loop over all the buddies
 	const WWOnline::UserList& buddies = mBuddyMgr->GetBuddyList();
-	const unsigned int count = buddies.size();
+	const size_t count = buddies.size();
 
-	for (unsigned int index = 0; index < count; ++index) {
+	for (size_t index = 0; index < count; ++index) {
 		//	Add the buddy to the list control
-		int item_index = list_ctrl->Insert_Entry(list_ctrl->Get_Entry_Count() , L"");
+		int item_index = list_ctrl->Insert_Entry(list_ctrl->Get_Entry_Count() , U_CHAR(""));
 		WWASSERT(item_index != -1);
 
 		if (item_index != -1) {
@@ -409,9 +410,9 @@ void MPWolBuddiesMenuClass::Update_Buddy_List(void)
 
 		//	Loop over all the buddies
 		const WWOnline::UserList& buddies = mBuddyMgr->GetBuddyList();
-		unsigned int count = buddies.size();
+		const size_t count = buddies.size();
 
-		for (unsigned int index = 0; index < count; ++index) {
+		for (size_t index = 0; index < count; ++index) {
 			const RefPtr<WWOnline::UserData>& buddy = buddies[index];
 
 			// Add the buddy to the list control
@@ -511,7 +512,7 @@ MPWolBuddiesMenuClass::HandleNotification(WOLBuddyMgrEvent &event)
 //
 ////////////////////////////////////////////////////////////////
 void
-MPWolBuddiesMenuClass::On_ListCtrl_Sel_Change(ListCtrlClass* list, int id, int oldsel, int newsel)
+MPWolBuddiesMenuClass::On_ListCtrl_Sel_Change(ListCtrlClass* list, int id, int /* oldsel */, int newsel)
 {
 	if (IDC_BUDDY_LIST_CTRL == id) {
 		if (newsel != -1) {
@@ -535,7 +536,7 @@ MPWolBuddiesMenuClass::On_ListCtrl_Sel_Change(ListCtrlClass* list, int id, int o
 //
 ////////////////////////////////////////////////////////////////
 void
-MPWolBuddiesMenuClass::On_ListCtrl_DblClk(ListCtrlClass* list_ctrl, int ctrl_id, int item_index)
+MPWolBuddiesMenuClass::On_ListCtrl_DblClk(ListCtrlClass* list_ctrl, int ctrl_id, int /* item_index */)
 {
 	if (IDC_BUDDY_LIST_CTRL == ctrl_id) {
 		//	Get the index of the currently selected user in the list control
@@ -562,7 +563,7 @@ MPWolBuddiesMenuClass::On_ListCtrl_DblClk(ListCtrlClass* list_ctrl, int ctrl_id,
 					if (mPendingJoin.IsValid()) {
 						// Ask the user if they want to join this buddy
 						WideStringClass message(0, true);
-						message.Format(TRANSLATE (IDS_MENU_JOIN_REQUEST_MESSAGE), (const wchar_t*)buddyName);
+						message.Format(TRANSLATE (IDS_MENU_JOIN_REQUEST_MESSAGE), (const unichar_t*)buddyName);
 						DlgMsgBox::DoDialog(0, message, DlgMsgBox::YesNo, this);
 					}
 					break;
@@ -579,7 +580,7 @@ MPWolBuddiesMenuClass::On_ListCtrl_DblClk(ListCtrlClass* list_ctrl, int ctrl_id,
 }
 
 
-void MPWolBuddiesMenuClass::On_ComboBoxCtrl_Sel_Change(ComboBoxCtrlClass* , int id, int , int newsel)
+void MPWolBuddiesMenuClass::On_ComboBoxCtrl_Sel_Change(ComboBoxCtrlClass* , int id, int , int /* newsel */)
 {
 	if (id == IDC_RANKTYPE) {
 		ListCtrlClass* list = (ListCtrlClass*)Get_Dlg_Item(IDC_BUDDY_LIST_CTRL);
@@ -588,7 +589,7 @@ void MPWolBuddiesMenuClass::On_ComboBoxCtrl_Sel_Change(ComboBoxCtrlClass* , int 
 			int count = list->Get_Entry_Count();
 
 			for (int index = 0; index < count; ++index) {
-				const wchar_t* name = list->Get_Entry_Text(index, COL_NAME);
+				const unichar_t* name = list->Get_Entry_Text(index, COL_NAME);
 				RefPtr<WWOnline::UserData> buddy = mBuddyMgr->FindBuddy(name);
 
 				if (buddy.IsValid()) {
@@ -629,9 +630,9 @@ void MPWolBuddiesMenuClass::Page_Selected_User(void)
 	// pass it to the page dialog
 	WideStringClass buddy_name(64, true);
 	Get_Selected_Buddy(buddy_name);
-	
+
 	// Show the dialog
-	MPWolPageBuddyPopupClass* dialog = new MPWolPageBuddyPopupClass;			
+	MPWolPageBuddyPopupClass* dialog = new MPWolPageBuddyPopupClass;
 	WWASSERT(dialog && "Failed to create page buddy dialog");
 
 	if (dialog) {

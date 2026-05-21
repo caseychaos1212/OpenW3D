@@ -56,10 +56,10 @@ class SquadData :
 		static void Reset(void);
 
 		// Find a squad by its ID
-		static RefPtr<SquadData> FindByID(unsigned long);
+		static RefPtr<SquadData> FindByID(unsigned int);
 
 		// Find a squad by its abbreviation
-		static RefPtr<SquadData> FindByAbbr(const wchar_t* abbr);
+		static RefPtr<SquadData> FindByAbbr(const unichar_t* abbr);
 
 		// Create SquadData instance from WOL::Squad
 		static RefPtr<SquadData> Create(const WOL::Squad&);
@@ -72,7 +72,7 @@ class SquadData :
 			{return mData;}
 
 		// Get ID of this squad
-		unsigned long GetID(void) const
+		unsigned int GetID(void) const
 			{return mData.id;}
 
 		// Get full name of this squad
@@ -139,7 +139,7 @@ class SquadData :
 class SquadEvent
 	{
 	public:
-		SquadEvent(const wchar_t* memberName, const RefPtr<SquadData>& squadData) :
+		SquadEvent(const unichar_t* memberName, const RefPtr<SquadData>& squadData) :
 				mMemberName(memberName),
 				mSquadData(squadData)
 			{}
@@ -147,7 +147,7 @@ class SquadEvent
 		~SquadEvent()
 			{}
 
-		const wchar_t* GetMemberName(void) const
+		const unichar_t* GetMemberName(void) const
 			{return mMemberName;}
 
 		const RefPtr<SquadData>& GetSquadData(void) const
@@ -158,7 +158,7 @@ class SquadEvent
 		SquadEvent(const SquadEvent&);
 		const SquadEvent& operator=(const SquadEvent&);
 
-		const wchar_t* mMemberName;
+		const unichar_t* mMemberName;
 		RefPtr<SquadData> mSquadData;
 	};
 

@@ -55,7 +55,7 @@ class RefCounted
 			{if (--mRefCount == 0) delete this;}
 
 		//! Retrieve current reference count.
-		inline unsigned long ReferenceCount(void) const
+		inline unsigned int ReferenceCount(void) const
 			{return mRefCount;}
 
 	protected:
@@ -73,14 +73,14 @@ class RefCounted
 			{assert(mRefCount == 0);}
 
 		// Should not be allowed by default
-		inline virtual bool operator==(const RefCounted&) const
+		inline virtual bool operator==(const RefCounted&/* src*/) const
 			{return false;}
 
-		inline bool operator!=(const RefCounted&) const
+		inline bool operator!=(const RefCounted&/* src*/) const
 			{return false;}
 
 	private:
-		unsigned long mRefCount;
+		unsigned int mRefCount;
 	};
 
 #endif // __REFCOUNTED_H__

@@ -45,6 +45,7 @@
 #include "SoundScene.h"
 #include "WWAudio.h"
 #include "metalmap.h"
+#include "pathutil.h"
 #include "dx8wrapper.h"
 #include <algorithm>
 
@@ -70,12 +71,12 @@ IMPLEMENT_DYNCREATE(CGraphicView, CView)
 //
 ////////////////////////////////////////////////////////////////////////////
 CGraphicView::CGraphicView (void)
-    : m_bInitialized (FALSE),		
+    : m_bInitialized (false),
       m_pCamera (NULL),
       m_TimerID (0),
-      m_bMouseDown (FALSE),
-      m_bRMouseDown (FALSE),
-      m_bActive (TRUE),
+      m_bMouseDown (false),
+      m_bRMouseDown (false),
+      m_bActive (true),
       m_animationSpeed (1.0F),
       m_dwLastFrameUpdate (0),
 		m_iWindowed (1),
@@ -89,10 +90,10 @@ CGraphicView::CGraphicView (void)
 		m_UpdateCounter (0),
       m_allowedCameraRotation (FreeRotation),
 		m_ObjectCenter (0.0f, 0.0f, 0.0f)
-{    
+{
     // Get the windowed mode from the registry
     CString string_windowed = theApp.GetProfileString ("Config", "Windowed", "1");
-	 m_iWindowed = ::atoi ((LPCTSTR)string_windowed);	 
+	 m_iWindowed = ::atoi ((LPCTSTR)string_windowed);
     return ;
 }
 
@@ -132,9 +133,6 @@ END_MESSAGE_MAP()
 void
 CGraphicView::OnDraw (CDC* pDC)
 {
-	// Get the document to display
-    CW3DViewDoc* doc = (CW3DViewDoc *)GetDocument();
-
     // Are we in a valid state?
     if (!pDC->IsPrinting ())
     {
@@ -164,13 +162,13 @@ void CGraphicView::Dump(CDumpContext& dc) const
 //
 ////////////////////////////////////////////////////////////////////////////
 int
-CGraphicView::OnCreate (LPCREATESTRUCT lpCreateStruct) 
+CGraphicView::OnCreate (LPCREATESTRUCT lpCreateStruct)
 {
 	// Allow the base class to process this message
     if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-    m_dwLastFrameUpdate = timeGetTime ();//::GetTickCount ();	
+    m_dwLastFrameUpdate = timeGetTime ();//::GetTickCount ();
 	return 0;
 }
 
@@ -184,12 +182,12 @@ BOOL
 CGraphicView::InitializeGraphicView (void)
 {
 	// Assume failure
-	BOOL bReturn = FALSE;
+	BOOL bReturn = false;
 	if (g_iDeviceIndex < 0) {
-		return FALSE;
+		return false;
 	}
 
-	m_bInitialized = FALSE;
+	m_bInitialized = false;
 
 	// Initialize the rendering engine with the information from
 	// this window.
@@ -217,12 +215,12 @@ CGraphicView::InitializeGraphicView (void)
     {
         // Instantiate a new camera class
 	    m_pCamera = new CameraClass ();
-        bReturn = (m_pCamera != NULL); 
-        
+        bReturn = (m_pCamera != NULL);
+
         // Were we successful in creating a camera?
         ASSERT (m_pCamera);
         if (m_pCamera)
-        {	    
+        {
             // Create a transformation matrix
             Matrix3D transform (1);
 	        transform.Translate (Vector3 (0.0F, 0.0F, 35.0F));
@@ -241,7 +239,7 @@ CGraphicView::InitializeGraphicView (void)
 
 	 if (m_pLightMesh == NULL)
 	 {
-		ResourceFileClass light_mesh_file (NULL, "Light.w3d");
+		ResourceFileClass light_mesh_file ("Light.w3d");
 		WW3DAssetManager::Get_Instance()->Load_3D_Assets (light_mesh_file);
 
 		m_pLightMesh = WW3DAssetManager::Get_Instance()->Create_Render_Obj ("LIGHT");
@@ -267,7 +265,7 @@ CGraphicView::InitializeGraphicView (void)
 													 TIME_PERIODIC);
     }
 
-	// Return the TRUE/FALSE result code
+	// Return the true/false result code
 	return bReturn;
 }
 
@@ -295,7 +293,7 @@ CGraphicView::OnSize
 			cy = g_iHeight;
 		}
 
-		// Change the resolution of the rendering device to 
+		// Change the resolution of the rendering device to
 		// match that of the view's current dimensions
 		if (m_iWindowed == 1) {
 			WW3D::Set_Device_Resolution (cx, cy, g_iBitsPerPixel, m_iWindowed);
@@ -337,7 +335,7 @@ CGraphicView::OnDestroy (void)
 
 		// Stop the timer
 		::timeKillEvent ((UINT)m_TimerID);
-		m_TimerID = 0;        
+		m_TimerID = 0;
 	}
 
 	// Cache this information in the registry
@@ -346,7 +344,7 @@ CGraphicView::OnDestroy (void)
 	theApp.WriteProfileString ("Config", "Windowed", temp_string);
 
 	// We are no longer initialized
-	m_bInitialized = FALSE;    
+	m_bInitialized = false;
 	return ;
 }
 
@@ -357,7 +355,7 @@ CGraphicView::OnDestroy (void)
 //
 ////////////////////////////////////////////////////////////////////////////
 void
-CGraphicView::OnInitialUpdate (void) 
+CGraphicView::OnInitialUpdate (void)
 {
 	// Allow the base class to process this message
     CView::OnInitialUpdate ();
@@ -380,7 +378,7 @@ CGraphicView::OnInitialUpdate (void)
 //
 ////////////////////////////////////////////////////////////////////////////
 void
-Set_Lowest_LOD (RenderObjClass *render_obj) 
+Set_Lowest_LOD (RenderObjClass *render_obj)
 {
 	if (render_obj != NULL) {
 		for (int index = 0; index < render_obj->Get_Num_Sub_Objects (); index ++) {
@@ -469,14 +467,14 @@ CGraphicView::RepaintView
 
 		// Perform the object rotation if necessary
 		if ((m_objectRotation != NoRotation) &&
-			(bUpdateAnimation == TRUE))
+			(bUpdateAnimation != 0))
 		{
 			Rotate_Object ();
 		}
 
 		// Perform the light rotation if necessary
 		if ((m_LightRotation != NoRotation) &&
-			(bUpdateAnimation == TRUE))
+			(bUpdateAnimation != 0))
 		{
 			Rotate_Light ();
 		}
@@ -496,7 +494,7 @@ CGraphicView::RepaintView
 		{
 			LightClass *pscene_light = doc->GetSceneLight();
 			Vector3 ambient,diffuse,l,v;
-			ambient=doc->GetScene()->Get_Ambient_Light();		
+			ambient=doc->GetScene()->Get_Ambient_Light();
 			pscene_light->Get_Diffuse(&diffuse);
 			l=pscene_light->Get_Position();
 			l.Normalize();
@@ -505,37 +503,36 @@ CGraphicView::RepaintView
 			metal->Update_Lighting(ambient,diffuse,l,v);
 			metal->Update_Textures();
 		}
-		
+
 		//
 		//	Render the background BMP
-		//		
-		WW3D::Begin_Render (TRUE, TRUE, doc->GetBackgroundColor ());
-		WW3D::Render (doc->Get2DScene (), doc->Get2DCamera (), FALSE, FALSE);
+		//
+		WW3D::Begin_Render (true, true, doc->GetBackgroundColor ());
+		WW3D::Render (doc->Get2DScene (), doc->Get2DCamera (), false, false);
 
 		//
 		// Render the background scene
 		//
-		if (doc->GetBackgroundObjectName ().GetLength () > 0) {			
-			WW3D::Render (doc->GetBackObjectScene (), doc->GetBackObjectCamera (), FALSE, FALSE);
+		if (doc->GetBackgroundObjectName ().GetLength () > 0) {
+			WW3D::Render (doc->GetBackObjectScene (), doc->GetBackObjectCamera (), false, false);
 		}
 
 		//
 		// Render the main scene
 		//
-		DWORD pt_high = 0L;
 
 		// Wait for all previous rendering to complete before starting benchmark.
-		DWORD profile_time = ::Get_CPU_Clock (pt_high);
+		uint64_t profile_time = ::Get_CPU_Clock ();
 
-		WW3D::Render (doc->GetScene (), m_pCamera, FALSE, FALSE);
-		
+		WW3D::Render (doc->GetScene (), m_pCamera, false, false);
+
 		// Wait for all rendering to complete before stopping benchmark.
-		DWORD milliseconds = (::Get_CPU_Clock (pt_high) - profile_time) / 1000;
+		uint64_t clock_cycles = (::Get_CPU_Clock () - profile_time) / 1000;
 
 		//
 		// Render the cursor
 		//
-		WW3D::Render (doc->GetCursorScene (), doc->Get2DCamera (), FALSE, FALSE);
+		WW3D::Render (doc->GetCursorScene (), doc->Get2DCamera (), false, false);
 
 		// Render the dazzles
 		doc->Render_Dazzles(m_pCamera);
@@ -554,7 +551,7 @@ CGraphicView::RepaintView
 		if ((cur_ticks - m_ParticleCountUpdate > 250)) {
 			m_ParticleCountUpdate = cur_ticks;
 			doc->Update_Particle_Count ();
-			
+
 			int polys = (prender_obj != NULL) ? prender_obj->Get_Num_Polys () : 0;
 			((CMainFrame *)::AfxGetMainWnd ())->UpdatePolygonCount (polys);
 		}
@@ -562,8 +559,8 @@ CGraphicView::RepaintView
 		//
 		//	Update the frame time in the status bar
 		//
-		((CMainFrame *)::AfxGetMainWnd ())->Update_Frame_Time (milliseconds);
-	}        
+		((CMainFrame *)::AfxGetMainWnd ())->Update_Frame_Time (clock_cycles);
+	}
 
 	_already_painting = false;
 	return ;
@@ -578,30 +575,7 @@ CGraphicView::RepaintView
 void
 CGraphicView::UpdateDisplay (void)
 {
-	// Get the document to display
-    CW3DViewDoc* doc = (CW3DViewDoc *)GetDocument();
-
-    // Are we in a valid state?
-    /*if (m_bInitialized && doc->GetScene ())
-    {
-        RenderObjClass *pCRenderObj = doc->GetDisplayedObject ();
-        if (pCRenderObj)
-        {
-            Matrix3D transform = pCRenderObj->Get_Transform ();
-            transform.Rotate_X (0.05F);
-            transform.Rotate_Y (0.05F);
-            transform.Rotate_Z (0.05F);
-
-            pCRenderObj->Set_Transform (transform);
-        }
-
-		// Render the current view inside the frame
-        WW3D::Begin_Render (TRUE, TRUE, Vector3 (0.2,0.4,0.6));
-		WW3D::Render (doc->GetScene (), m_pCamera, FALSE, FALSE);
-		WW3D::End_Render ();
-    } */       
-
-    return ;
+	return ;
 }
 
 
@@ -620,7 +594,7 @@ CGraphicView::WindowProc
 {
 	// Is this the repaint message we are expecting?
 	if (message == WM_USER+101) {
-		
+
 		//
 		//	Force the repaint...
 		//
@@ -628,7 +602,7 @@ CGraphicView::WindowProc
 		RemoveProp (m_hWnd, "WaitingToProcess");
 
 	} else if (message == WM_PAINT) {
-		
+
 		// If we are in fullscreen mode, then erase the window background
 		if (m_iWindowed == 0) {
 
@@ -639,14 +613,14 @@ CGraphicView::WindowProc
 			// Get the window's DC
 			HDC hDC = ::GetDC (m_hWnd);
 			if (hDC) {
-				
+
 				// Erase the background
 				::FillRect (hDC, &rect, (HBRUSH)(COLOR_WINDOW + 1));
 				::ReleaseDC (m_hWnd, hDC);
 			}
 		}
 
-		RepaintView (FALSE);
+		RepaintView (false);
 		ValidateRect (NULL);
 		return 0;
 
@@ -655,15 +629,14 @@ CGraphicView::WindowProc
 		if ((wParam == VK_CONTROL) && (m_bLightMeshInScene == false)) {
 			CW3DViewDoc* doc = (CW3DViewDoc *)GetDocument();
 			m_pLightMesh->Add (doc->GetScene ());
-			m_bLightMeshInScene = true;			
+			m_bLightMeshInScene = true;
 		}
 
 	} else if (message == WM_KEYUP) {
 
 		if ((wParam == VK_CONTROL) && (m_bLightMeshInScene == true)) {
-			CW3DViewDoc* doc = (CW3DViewDoc *)GetDocument();
 			m_pLightMesh->Remove ();
-			m_bLightMeshInScene = false;			
+			m_bLightMeshInScene = false;
 		}
 	}
 
@@ -680,11 +653,11 @@ CGraphicView::WindowProc
 void CALLBACK
 fnTimerCallback
 (
-	UINT uID,
-	UINT uMsg,
+	UINT /* uID */,
+	UINT /* uMsg */,
 	DWORD_PTR dwUser,
-	DWORD_PTR dw1,
-	DWORD_PTR dw2
+	DWORD_PTR /* dw1 */,
+	DWORD_PTR /* dw2 */
 )
 {
 	HWND hwnd = (HWND)dwUser;
@@ -722,7 +695,7 @@ CGraphicView::OnLButtonDown
 	SetCapture ();
 
 	// Mouse button is down
-	m_bMouseDown = TRUE;
+	m_bMouseDown = true;
 	m_lastPoint = point;
 
 	if (m_bRMouseDown) {
@@ -756,7 +729,7 @@ CGraphicView::OnLButtonUp
     }
 
     // Mouse button is up
-    m_bMouseDown = FALSE;    
+    m_bMouseDown = FALSE;
 
     if (m_bRMouseDown == TRUE)
     {
@@ -776,7 +749,7 @@ CGraphicView::OnLButtonUp
 
 float minZoomAdjust = 0.0F;
 Vector3 sphereCenter;
-Quaternion rotation;
+Quaternion rotationGlobal;
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -789,9 +762,8 @@ CGraphicView::OnMouseMove
 (
     UINT nFlags,
     CPoint point
-) 
+)
 {
-	int iDeltaX = m_lastPoint.x-point.x;
 	int iDeltaY = m_lastPoint.y-point.y;
 
 	// Get the document to display
@@ -828,7 +800,7 @@ CGraphicView::OnMouseMove
 
 		transform.Translate (cameraPan);
 
-		Matrix3 view = Build_Matrix3 (rotation);
+		Matrix3 view = Build_Matrix3 (rotationGlobal);
 		Vector3 move = view * cameraPan;
 		sphereCenter += move;
 
@@ -874,7 +846,7 @@ CGraphicView::OnMouseMove
 			Matrix3D::Inverse_Transform_Vector(matrix,sphereCenter,&to_center);
 
 			Matrix3D light_tm(light_orientation, sphereCenter);
-			light_tm.Translate(-to_center); 
+			light_tm.Translate(-to_center);
 
 			m_pLightMesh->Set_Transform(light_tm);
 			pSceneLight->Set_Transform(light_tm);
@@ -896,7 +868,7 @@ CGraphicView::OnMouseMove
 			GetClientRect (&rect);
 			float deltay = (float(iDeltaY))/(float(rect.bottom - rect.top));
 			float adjustment = deltay * (m_ViewedSphere.Radius * 3.0F);
-			
+
 			// Determine the light's new position based on this factor
 			Matrix3D transform = pscene_light->Get_Transform ();
 			transform.Translate (Vector3 (0, 0, adjustment));
@@ -942,40 +914,40 @@ CGraphicView::OnMouseMove
 
 				// Rotate around the object (orbit) using a 0.00F - 1.00F percentage of
 				// the mouse coordinates
-				rotation = ::Trackball (lastPointX, lastPointY, pointX, pointY, 0.8F);
+				rotationGlobal = ::Trackball (lastPointX, lastPointY, pointX, pointY, 0.8F);
 
 				// Do we want to 'lock-out' all rotation except X?
 				if (m_allowedCameraRotation == OnlyRotateX)
 				{
-					Matrix3D tempMatrix = Build_Matrix3D (rotation);
+					Matrix3D tempMatrix = Build_Matrix3D (rotationGlobal);
 					Matrix3D tempMatrix2 (1);
 
 					tempMatrix2.Rotate_X (tempMatrix.Get_X_Rotation ());
 					tempMatrix2.Set_Translation (tempMatrix.Get_Translation ());
 
-					rotation = Build_Quaternion (tempMatrix2);
+					rotationGlobal = Build_Quaternion (tempMatrix2);
 				}
 				// Do we want to 'lock-out' all rotation except Y?
 				else if (m_allowedCameraRotation == OnlyRotateY)
 				{
-					Matrix3D tempMatrix = Build_Matrix3D (rotation);
+					Matrix3D tempMatrix = Build_Matrix3D (rotationGlobal);
 					Matrix3D tempMatrix2 (1);
 
 					tempMatrix2.Rotate_Y (tempMatrix.Get_Y_Rotation ());
 					tempMatrix2.Set_Translation (tempMatrix.Get_Translation ());
 
-					rotation = Build_Quaternion (tempMatrix2);
+					rotationGlobal = Build_Quaternion (tempMatrix2);
 				}
 				// Do we want to 'lock-out' all rotation except Z?
 				else if (m_allowedCameraRotation == OnlyRotateZ)
 				{
-					Matrix3D tempMatrix = Build_Matrix3D (rotation);
+					Matrix3D tempMatrix = Build_Matrix3D (rotationGlobal);
 					Matrix3D tempMatrix2 (1);
 
 					tempMatrix2.Rotate_Z (tempMatrix.Get_Z_Rotation ());
 					tempMatrix2.Set_Translation (tempMatrix.Get_Translation ());
 
-					rotation = Build_Quaternion (tempMatrix2);
+					rotationGlobal = Build_Quaternion (tempMatrix2);
 				}
 
 				// Get the transformation matrix for the camera and its inverse
@@ -987,7 +959,7 @@ CGraphicView::OnMouseMove
 
 				transform.Translate (to_object);
 
-				Matrix3D::Multiply (transform, Build_Matrix3D (rotation), &transform);
+				Matrix3D::Multiply (transform, Build_Matrix3D (rotationGlobal), &transform);
 
 				transform.Translate (-to_object);
 
@@ -997,7 +969,7 @@ CGraphicView::OnMouseMove
 				doc->GetBackObjectCamera ()->Set_Transform (transform);
 				doc->GetBackObjectCamera ()->Set_Position (Vector3 (0.00F, 0.00F, 0.00F));
 			}
-		}        
+		}
 
 		m_lastPoint = point;
 	}
@@ -1010,7 +982,7 @@ CGraphicView::OnMouseMove
 
 		Vector3 distanceVectorZ = transform.Get_Z_Vector ();
 		if (iDeltaY != 0)
-		{        
+		{
 
 			// Get the bouding rectangle of the main view
 			CRect rect;
@@ -1053,7 +1025,7 @@ CGraphicView::OnMouseMove
 						// Ensure the status bar is updated with the correct poly count
 						pCMainWnd->UpdatePolygonCount (prender_obj->Get_Num_Polys ());
 					}
-					
+
 					// Ensure the status bar is updated with the correct camera distance
 					pCMainWnd->UpdateCameraDistance (m_CameraDistance);
 				}
@@ -1096,7 +1068,7 @@ CGraphicView::Reset_Camera_To_Display_Emitter (ParticleEmitterClass &emitter)
 	// Do we need to take into account acceleration?
 	Vector3 distance_maxima (0, 0, 0);
 	if ((acceleration.X != 0) || (acceleration.Y != 0) || (acceleration.Z != 0)) {
-		
+
 		// Determine at what time (for each x,y,z) a maxima will occur.
 		Vector3 time_max (0, 0, 0);
 		time_max.X = (acceleration.X != 0) ? ((-velocity.X) / acceleration.X) : 0.00F;
@@ -1175,14 +1147,14 @@ CGraphicView::Reset_Camera_To_Display_Sphere (SphereClass &sphere)
 	sphereCenter	= sphere.Center;
 	m_ObjectCenter	= sphereCenter;
 	minZoomAdjust	= m_CameraDistance / 190.0F;
-	rotation			= Build_Quaternion (transform);
+	rotationGlobal			= Build_Quaternion (transform);
 
 	// Move the camera back to get a good view of the object
 	m_pCamera->Set_Transform (transform);
 
 	// Make the same adjustment for the scene light
 	CW3DViewDoc* doc = (CW3DViewDoc *)GetDocument();
-	LightClass *pSceneLight = doc->GetSceneLight ();	
+	LightClass *pSceneLight = doc->GetSceneLight ();
 	if ((m_pLightMesh != NULL) && (pSceneLight != NULL)) {
 
 		// Reposition the light and its 'mesh' as appropriate
@@ -1242,14 +1214,14 @@ CGraphicView::Reset_Camera_To_Display_Object (RenderObjClass &render_object)
 {
 	// Reset the camera to get a good look at this object's bounding sphere
 	SphereClass sp = render_object.Get_Bounding_Sphere ();
-	Reset_Camera_To_Display_Sphere (sp);		
+	Reset_Camera_To_Display_Sphere (sp);
 
 	// Should we update the camera's position as well?
 	int index = render_object.Get_Bone_Index ("CAMERA");
 	if (index > 0) {
 
 		// Convert the bone's transform into a camera transform
-		Matrix3D	transform = render_object.Get_Bone_Transform (index);												
+		Matrix3D	transform = render_object.Get_Bone_Transform (index);
 		if (m_CameraBonePosX) {
 			Matrix3D tmp = transform;
 			Matrix3D cam_transform (Vector3 (0, -1, 0), Vector3 (0, 0, 1), Vector3 (-1, 0, 0), Vector3 (0, 0, 0));
@@ -1295,7 +1267,7 @@ CGraphicView::Load_Default_Dat (void)
 	::strcat (filename, "\\default.dat");
 
 	// Does the file exist in the directory?
-	if (::GetFileAttributes (filename) != 0xFFFFFFFF) {
+	if (::cPathUtil::PathExists (filename)) {
 
 		// Ask the document to load the settings from this data file
 		CW3DViewDoc *pCDoc = (CW3DViewDoc *)GetDocument ();
@@ -1318,13 +1290,13 @@ CGraphicView::OnRButtonUp
 (
     UINT nFlags,
     CPoint point
-) 
+)
 {
 	// Mouse button is up
-	m_bRMouseDown = FALSE;
+	m_bRMouseDown = false;
 
 	if (m_bMouseDown) {
-		((CW3DViewDoc *)GetDocument())->Set_Cursor ("orbit.tga");		
+		((CW3DViewDoc *)GetDocument())->Set_Cursor ("orbit.tga");
 	} else {
 		::SetCursor (::LoadCursor (NULL, IDC_ARROW));
 		((CW3DViewDoc *)GetDocument())->Set_Cursor ("cursor.tga");
@@ -1352,7 +1324,7 @@ CGraphicView::OnRButtonDown
     SetCapture ();
 
     // Mouse button is down
-    m_bRMouseDown = TRUE;
+    m_bRMouseDown = true;
     m_lastPoint = point;
 
     if (m_bMouseDown)
@@ -1365,7 +1337,7 @@ CGraphicView::OnRButtonDown
         ::SetCursor (::LoadCursor (::AfxGetResourceHandle (), MAKEINTRESOURCE (IDC_CURSOR_ZOOM)));
 		  ((CW3DViewDoc *)GetDocument())->Set_Cursor ("zoom.tga");
     }
-    
+
 	// Allow the base class to process this message
     CView::OnRButtonDown(nFlags, point);
     return ;
@@ -1397,10 +1369,10 @@ CGraphicView::SetAnimationState (ANIMATION_STATE animationState)
                 if (pCRenderObj)
                 {
                     // Reset the animation to frame 0
-                    														 
+
                     if (doc->GetCurrentAnimation()) {
                     	pCRenderObj->Set_Animation (doc->GetCurrentAnimation (), 0);
-                    }	 
+                    }
                 }
 
                 // Reset the animation to frame 0
@@ -1444,12 +1416,12 @@ CGraphicView::SetCameraPos (CAMERA_POS cameraPos)
     if (pCRenderObj)
     {
         SphereClass sphere = m_ViewedSphere;
-    
+
         m_CameraDistance = sphere.Radius * 3.00F;
         m_CameraDistance = (m_CameraDistance < 1.0F) ? 1.0F : m_CameraDistance;
         m_CameraDistance = (m_CameraDistance > 400.0F) ? 400.0F : m_CameraDistance;
 
-        Matrix3D transform (1);        
+        Matrix3D transform (1);
 
         switch (cameraPos)
         {
@@ -1556,10 +1528,10 @@ CGraphicView::SetAllowedCameraRotation (CAMERA_ROTATION cameraRotation)
 ////////////////////////////////////////////////////////////////////////////
 void
 CGraphicView::ResetObject (void)
-{    
+{
     // Get the current document
     CW3DViewDoc *doc = ::GetCurrentDocument ();
-    
+
     ASSERT (doc);
     if (doc)
     {
@@ -1582,7 +1554,7 @@ CGraphicView::ResetObject (void)
 //
 ////////////////////////////////////////////////////////////////////////////
 void
-CGraphicView::OnGetMinMaxInfo (MINMAXINFO FAR* lpMMI) 
+CGraphicView::OnGetMinMaxInfo (MINMAXINFO FAR* lpMMI)
 {
 	CView::OnGetMinMaxInfo (lpMMI);
 	return ;
@@ -1631,8 +1603,8 @@ CGraphicView::Rotate_Object (void)
 
 		// Set the new transform for the object
 		prender_obj->Set_Transform (transform);
-	}           
-	
+	}
+
 	return ;
 }
 
@@ -1651,7 +1623,7 @@ CGraphicView::Rotate_Light (void)
 	// Get the currently displayed object
 	LightClass *pscene_light = doc->GetSceneLight ();
 	RenderObjClass *prender_obj = doc->GetDisplayedObject ();
-	if ((pscene_light != NULL) && (prender_obj != NULL)) {		
+	if ((pscene_light != NULL) && (prender_obj != NULL)) {
 		Matrix3D rotation_matrix (1);
 
 		// Build a rotation matrix that contains the x,y,z
@@ -1683,7 +1655,7 @@ CGraphicView::Rotate_Light (void)
 		Matrix3D coord_system = prender_obj->Get_Transform ();
 		coord_system.Get_Orthogonal_Inverse (coord_inv);
 
-		Matrix3D transform = pscene_light->Get_Transform ();				
+		Matrix3D transform = pscene_light->Get_Transform ();
 		Matrix3D::Multiply (coord_inv, transform, &coord_to_obj);
 
 		Matrix3D::Multiply (coord_system, rotation_matrix, &transform);
@@ -1697,8 +1669,8 @@ CGraphicView::Rotate_Light (void)
 		// Pass the new transform onto the light
 		m_pLightMesh->Set_Transform (transform);
 		pscene_light->Set_Transform (transform);
-	}           
-	
+	}
+
 	return ;
 }
 
@@ -1774,9 +1746,9 @@ CGraphicView::Set_Camera_Distance (float dist)
 
 	//
 	//	Reposition the camera
-	//	
+	//
 	Matrix3D new_tm(1);
-	new_tm.Look_At (m_ViewedSphere.Center + Vector3 (m_CameraDistance, 0.00F, 0.00F), m_ViewedSphere.Center, 0);	
+	new_tm.Look_At (m_ViewedSphere.Center + Vector3 (m_CameraDistance, 0.00F, 0.00F), m_ViewedSphere.Center, 0);
 	m_pCamera->Set_Transform (new_tm);
 
 	//
@@ -1786,7 +1758,7 @@ CGraphicView::Set_Camera_Distance (float dist)
 	if (main_wnd != NULL) {
 		main_wnd->UpdateCameraDistance (m_CameraDistance);
 	}
-	
+
 	return ;
 }
 

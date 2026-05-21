@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Command & Conquer                                            * 
- *                                                                                             * 
- *                     $Archive:: /G/wwlib/BUFF.CPP                                           $* 
- *                                                                                             * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Command & Conquer                                            *
+ *                                                                                             *
+ *                     $Archive:: /G/wwlib/BUFF.CPP                                           $*
+ *                                                                                             *
  *                      $Author:: Eric_c                                                      $*
- *                                                                                             * 
+ *                                                                                             *
  *                     $Modtime:: 4/15/99 10:14a                                              $*
- *                                                                                             * 
+ *                                                                                             *
  *                    $Revision:: 2                                                           $*
  *                                                                                             *
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  *   Buffer::Buffer -- Constructor for buffer object.                                          *
  *   Buffer::Buffer -- Copy constructor for buffer object.                                     *
  *   Buffer::Buffer -- Self-allocating constructor for buffer object.                          *
@@ -64,7 +64,7 @@
  * HISTORY:                                                                                    *
  *   07/29/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-Buffer::Buffer(void * buffer, long size) :
+Buffer::Buffer(void * buffer, int size) :
 	BufferPtr(buffer),
 	Size(size),
 	IsAllocated(false)
@@ -77,7 +77,7 @@ Buffer::Buffer(void * buffer, long size) :
 
 
 // Alternate constructor for char * pointer.
-Buffer::Buffer(char * buffer, long size) :
+Buffer::Buffer(char * buffer, int size) :
 	BufferPtr(buffer),
 	Size(size),
 	IsAllocated(false)
@@ -90,7 +90,7 @@ Buffer::Buffer(char * buffer, long size) :
 
 
 // Alternate constructor for void const * pointer.
-Buffer::Buffer(void const * buffer, long size) :
+Buffer::Buffer(void const * buffer, int size) :
 	BufferPtr((void*)buffer),
 	Size(size),
 	IsAllocated(false)
@@ -119,7 +119,7 @@ Buffer::Buffer(void const * buffer, long size) :
  * HISTORY:                                                                                    *
  *   07/29/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-Buffer::Buffer(long size) :
+Buffer::Buffer(int size) :
 	BufferPtr(NULL),
 	Size(size),
 	IsAllocated(false)

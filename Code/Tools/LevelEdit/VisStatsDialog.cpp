@@ -129,23 +129,23 @@ VisStatsDialogClass::OnInitDialog (void)
 	//	Build a list of vis statistics
 	//
 	DynamicVectorClass<VisSectorStatsClass> stats_list;
-	PhysicsSceneClass::Get_Instance ()->Generate_Vis_Statistics_Report (stats_list);	
+	PhysicsSceneClass::Get_Instance ()->Generate_Vis_Statistics_Report (stats_list);
 
 	//
 	//	Populate the list control with the vis statistics
 	//
 	for (int index = 0; index < stats_list.Count (); index ++) {
 		VisSectorStatsClass &sector_stats = stats_list[index];
-				
+
 		LPCTSTR name = sector_stats.Get_Name ();
 		if (name != NULL) {
-			
+
 			//
 			//	Add this sector to the list
 			//
 			int item_index = m_SectorList.InsertItem (0, name);
 			if (item_index >= 0) {
-				
+
 				//
 				//	Set the columns of information for this sector
 				//
@@ -167,9 +167,9 @@ VisStatsDialogClass::OnInitDialog (void)
 				m_SectorList.SetItemData (item_index, (DWORD_PTR)(new VisSectorStatsClass(sector_stats)));
 			}
 		}
-	}	
-	
-	return TRUE;
+	}
+
+	return true;
 }
 
 
@@ -181,7 +181,7 @@ VisStatsDialogClass::OnInitDialog (void)
 void
 VisStatsDialogClass::OnDblclkSectorList
 (
-	NMHDR*	pNMHDR,
+	NMHDR*	/* pNMHDR */,
 	LRESULT* pResult
 )
 {
@@ -200,7 +200,7 @@ VisStatsDialogClass::OnDblclkSectorList
 	UINT flags = 0;
 	int index = m_SectorList.HitTest (hit_point, &flags);
 	if ((index >= 0) && ((flags & LVHT_ONITEMLABEL) || (flags & LVHT_ONITEMICON))) {
-		
+
 		//
 		//	Snap the camera to the point
 		//
@@ -225,7 +225,7 @@ VisStatsDialogClass::OnDeleteitemSectorList
 (
 	NMHDR *	pNMHDR,
 	LRESULT* pResult
-) 
+)
 {
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	(*pResult) = 0;
@@ -281,10 +281,10 @@ VisSectorSortCompareFn (LPARAM param1, LPARAM param2, LPARAM sort_info)
 	VisSectorStatsClass *stats2 = (VisSectorStatsClass *)param2;
 
 	LONG column_id = LOWORD (sort_info);
-	BOOL ascending	= HIWORD (sort_info);
+	bool ascending	= HIWORD (sort_info) != 0;
 
 	if (stats1 != NULL && stats2 != NULL) {
-		
+
 		//
 		//	Determine the order based on which column the user clicked on
 		//
@@ -302,7 +302,7 @@ VisSectorSortCompareFn (LPARAM param1, LPARAM param2, LPARAM sort_info)
 	//
 	//	Invert the sort if necessary
 	//
-	if (ascending != TRUE) {
+	if (!ascending) {
 		retval = -retval;
 	}
 

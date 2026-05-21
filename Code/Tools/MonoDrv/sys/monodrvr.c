@@ -33,26 +33,26 @@
  *                                                                                             *
  *---------------------------------------------------------------------------------------------*
  * Functions:                                                                                  *
- *   Display_Signon_Banner -- Display the signon banner at driver start.                       * 
- *   DriverEntry -- Offical driver start entry point.                                          * 
- *   Mono_Bring_To_Top -- Brings the mono page to the visible top of the display stack.        * 
- *   Mono_Claim_Resources -- Claims resources for the MGA driver.                              * 
+ *   Display_Signon_Banner -- Display the signon banner at driver start.                       *
+ *   DriverEntry -- Offical driver start entry point.                                          *
+ *   Mono_Bring_To_Top -- Brings the mono page to the visible top of the display stack.        *
+ *   Mono_Claim_Resources -- Claims resources for the MGA driver.                              *
  *   Mono_Clear_Screen -- Clears the monochrome screen & homes cursor.                         *
  *   Mono_Detect_MGA_Adapter -- Try to detec the MGA adapter.                                  *
- *   Mono_Dispatch -- Main IRP dispatch handler routine.                                       * 
- *   Mono_Fetch_Ptr -- Fetch a USER address space pointer to mono buffer.                      * 
- *   Mono_Fill_Attribute -- Fills rectangle with attribute specified.                          * 
+ *   Mono_Dispatch -- Main IRP dispatch handler routine.                                       *
+ *   Mono_Fetch_Ptr -- Fetch a USER address space pointer to mono buffer.                      *
+ *   Mono_Fill_Attribute -- Fills rectangle with attribute specified.                          *
  *   Mono_Get_Address_Ptr -- Converts a physical address into a usable pointer.                *
- *   Mono_Init_Buffer -- Initialize a mono buffer to known (unused) state.                     * 
+ *   Mono_Init_Buffer -- Initialize a mono buffer to known (unused) state.                     *
  *   Mono_Pan -- Pan the mono screen over one column.                                          *
  *   Mono_Print -- Prints text (with formatting) to mono screen.                               *
  *   Mono_Print_Raw -- Print text (without processing) to mono screen.                         *
  *   Mono_Printf -- Print formatted text to the mono device.                                   *
  *   Mono_Scroll -- Scroll the mono screen up one line.                                        *
  *   Mono_Set_View_Pos -- Set the mono display ram view offset.                                *
- *   Mono_Unload -- Unloads the driver from the system.                                        * 
- *   Mono_Unreport_Resource_Usage -- Free reported hardware usage.                             * 
- *   Mono_Update_Cursor -- Updates the CRTC cursor to reflect current visible page.            * 
+ *   Mono_Unload -- Unloads the driver from the system.                                        *
+ *   Mono_Unreport_Resource_Usage -- Free reported hardware usage.                             *
+ *   Mono_Update_Cursor -- Updates the CRTC cursor to reflect current visible page.            *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "ntddk.h"
@@ -155,7 +155,7 @@ typedef struct BuffControl
 	/*
 	**	These are the behavior flags for this buffer.
 	*/
-	long Flags;
+	int Flags;
 } BuffControl;
 
 
@@ -202,10 +202,10 @@ typedef struct MonoGlobals
 */
 typedef struct MonoResourceType
 {
-	unsigned long PhysicalAddress;
-	unsigned long Length;
-	unsigned long AddressSpace;
-	unsigned long RangeSharable;
+	unsigned int PhysicalAddress;
+	unsigned int Length;
+	unsigned int AddressSpace;
+	unsigned int RangeSharable;
 } MonoResourceType;
 
 
@@ -236,15 +236,15 @@ static BOOLEAN Mono_Detect_MGA_Adapter(void);
 static NTSTATUS Mono_Dispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp);
 static void Mono_Fill_Attribute(BuffControl * control, int x, int y, int w, int h, int attrib);
 static void * Mono_Fetch_Ptr(MonoGlobals * device, BuffControl * page);
-static void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS PhysicalAddress, unsigned long AddressSpace, unsigned long NumberOfBytes);
+static void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS PhysicalAddress, unsigned int AddressSpace, unsigned int NumberOfBytes);
 static void Display_Signon_Banner(BuffControl * control);
 static void Mono_Bring_To_Top(MonoGlobals * device, BuffControl * page);
 static void Mono_Clear_Screen(BuffControl * control);
 static void Mono_Free_Resources(PDRIVER_OBJECT DriverObject);
 static void Mono_Init_Buffer(BuffControl * buffer);
 static void Mono_Pan(BuffControl * control);
-static void Mono_Print(BuffControl * control, unsigned char * string, unsigned long length);
-static void Mono_Print_Raw(BuffControl * control, unsigned char * string, unsigned long length);
+static void Mono_Print(BuffControl * control, unsigned char * string, unsigned int length);
+static void Mono_Print_Raw(BuffControl * control, unsigned char * string, unsigned int length);
 static void Mono_Printf(BuffControl * control, char const * DbgMessage, ...);
 static void Mono_Scroll(BuffControl * control);
 static void Mono_Set_View_Pos(MonoGlobals * device, int pos);
@@ -253,23 +253,23 @@ static void Mono_Update_Cursor(MonoGlobals * device);
 
 
 
-/*********************************************************************************************** 
- * DriverEntry -- Offical driver start entry point.                                            * 
- *                                                                                             * 
- *    This routine is called by the system when the driver is first loaded. It is responsible  * 
- *    for initializing the driver state.                                                       * 
- *                                                                                             * 
- * INPUT:   driverobject   -- Pointer to the loaded driver object.                             * 
- *                                                                                             * 
- *          registry       -- Pointer to the registry string for this driver object.           * 
- *                                                                                             * 
- * OUTPUT:  Returns with the NTSTATUS of the driver initialization. If it is anything but      * 
- *          STATUS_SUCCESS, the the driver will not load.                                      * 
- *                                                                                             * 
- * WARNINGS:   none                                                                            * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   01/06/1997 JLB : Created.                                                                 * 
+/***********************************************************************************************
+ * DriverEntry -- Offical driver start entry point.                                            *
+ *                                                                                             *
+ *    This routine is called by the system when the driver is first loaded. It is responsible  *
+ *    for initializing the driver state.                                                       *
+ *                                                                                             *
+ * INPUT:   driverobject   -- Pointer to the loaded driver object.                             *
+ *                                                                                             *
+ *          registry       -- Pointer to the registry string for this driver object.           *
+ *                                                                                             *
+ * OUTPUT:  Returns with the NTSTATUS of the driver initialization. If it is anything but      *
+ *          STATUS_SUCCESS, the the driver will not load.                                      *
+ *                                                                                             *
+ * WARNINGS:   none                                                                            *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   01/06/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
 NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 {
@@ -288,7 +288,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 		**	Creates the device object.
 		*/
 		RtlInitUnicodeString(&device_name, DEVICE_NAME);
-		error_flag = IoCreateDevice(DriverObject, sizeof(MonoGlobals), &device_name, FILE_DEVICE_MONO, 0, FALSE, &device_object);
+		error_flag = IoCreateDevice(DriverObject, sizeof(MonoGlobals), &device_name, FILE_DEVICE_MONO, 0, false, &device_object);
 		if (NT_SUCCESS(error_flag)) {
 			MonoGlobals * mono_globals = (MonoGlobals *)device_object->DeviceExtension;
 
@@ -301,7 +301,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 			** Initialize the dispatch event object. This allows us to
 			** synchronize access to the h/w registers...
 			*/
-			KeInitializeEvent(&mono_globals->SyncEvent, SynchronizationEvent, TRUE);
+			KeInitializeEvent(&mono_globals->SyncEvent, SynchronizationEvent, true);
 
 			/*
 			** Map all the required resources, save the addresses
@@ -369,31 +369,31 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 }
 
 
-/*********************************************************************************************** 
- * Mono_Dispatch -- Main IRP dispatch handler routine.                                         * 
- *                                                                                             * 
- *    This routine is called whenever an IRP occurs. It is passed the driver object pointer    * 
- *    and the IRP info.                                                                        * 
- *                                                                                             * 
- * INPUT:   driver   -- Pointer to the device object.                                          * 
- *                                                                                             * 
- *          irp      -- Pointer to the IRP object.                                             * 
- *                                                                                             * 
- * OUTPUT:  Returns with the NTSTATUS of this IRP handler.                                     * 
- *                                                                                             * 
- * WARNINGS:   none                                                                            * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   01/06/1997 JLB : Created.                                                                 * 
+/***********************************************************************************************
+ * Mono_Dispatch -- Main IRP dispatch handler routine.                                         *
+ *                                                                                             *
+ *    This routine is called whenever an IRP occurs. It is passed the driver object pointer    *
+ *    and the IRP info.                                                                        *
+ *                                                                                             *
+ * INPUT:   driver   -- Pointer to the device object.                                          *
+ *                                                                                             *
+ *          irp      -- Pointer to the IRP object.                                             *
+ *                                                                                             *
+ * OUTPUT:  Returns with the NTSTATUS of this IRP handler.                                     *
+ *                                                                                             *
+ * WARNINGS:   none                                                                            *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   01/06/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
 NTSTATUS Mono_Dispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 {
 	PIO_STACK_LOCATION irpStack;
 	MonoGlobals *  mono_globals;
 	void * ioBuffer;
-	unsigned long inputBufferLength;
-	unsigned long outputBufferLength;
-	unsigned long ioControlCode;
+	unsigned int inputBufferLength;
+	unsigned int outputBufferLength;
+	unsigned int ioControlCode;
 	NTSTATUS ntStatus;
 	FILE_OBJECT * fileobject = NULL;
 	BuffControl * control = NULL;
@@ -421,7 +421,7 @@ NTSTATUS Mono_Dispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	*/
 	fileobject = irpStack->FileObject;
 	if (fileobject != NULL)  {
-		currentindex = (long)fileobject->FsContext;
+		currentindex = (int)fileobject->FsContext;
 	}
 
 	/*
@@ -435,7 +435,7 @@ NTSTATUS Mono_Dispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	** Synchronize execution of the dispatch routine by acquiring the device
 	** event object. This ensures all request are serialized.
 	*/
-	KeWaitForSingleObject(&mono_globals->SyncEvent, Executive, KernelMode, FALSE, NULL);
+	KeWaitForSingleObject(&mono_globals->SyncEvent, Executive, KernelMode, false, NULL);
 
 	/*
 	**	Get a working pointer to the display page.
@@ -485,7 +485,7 @@ NTSTATUS Mono_Dispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 				} else {
 					BuffControl * newcon = &mono_globals->Control[avail];
 					Mono_Init_Buffer(newcon);
-					newcon->Allocated = TRUE;
+					newcon->Allocated = true;
 					Mono_Clear_Screen(newcon);
 					Mono_Bring_To_Top(mono_globals, newcon);
 					fileobject->FsContext = (void*)avail;
@@ -544,7 +544,7 @@ NTSTATUS Mono_Dispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 				/*
 				**	Fill a region of the screen with a specific attribute.
 				*/
-				case IOCTL_MONO_FILL_ATTRIB:  
+				case IOCTL_MONO_FILL_ATTRIB:
 					if (inputBufferLength == sizeof(int)*5) {
 						int x,y,w,h,a;
 
@@ -583,7 +583,7 @@ NTSTATUS Mono_Dispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 						control->WinY = *(((int*)ioBuffer) + 1);
 						if (control->WinY < 0) control->WinY = 0;
 						if (control->WinY >= MONO_HEIGHT) control->WinY = MONO_HEIGHT-1;
-						
+
 						control->WinW = *(((int*)ioBuffer) + 2);
 						if (control->WinW < 1) control->WinW = 1;
 						if (control->WinW > MONO_WIDTH-control->WinX) control->WinW = MONO_WIDTH-control->WinX;
@@ -591,7 +591,7 @@ NTSTATUS Mono_Dispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 						control->WinH = *(((int*)ioBuffer) + 3);
 						if (control->WinH < 1) control->WinH = 1;
 						if (control->WinH > MONO_HEIGHT-control->WinY) control->WinH = MONO_HEIGHT-control->WinY;
-						
+
 						control->XPos = 0;
 						control->YPos = 0;
 					} else {
@@ -716,7 +716,7 @@ NTSTATUS Mono_Dispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		Mono_Update_Cursor(mono_globals);
 	}
 
-	KeSetEvent(&mono_globals->SyncEvent, 0, FALSE);
+	KeSetEvent(&mono_globals->SyncEvent, 0, false);
 
 	ntStatus = Irp->IoStatus.Status;
 
@@ -726,21 +726,21 @@ NTSTATUS Mono_Dispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 }
 
 
-/*********************************************************************************************** 
- * Mono_Unload -- Unloads the driver from the system.                                          * 
- *                                                                                             * 
- *    This will free any resources allocated by this driver, break any symbolic link, and      * 
- *    delete the driver object from the system. Effectively, this is the suicide function      * 
- *    for the MGA driver.                                                                      * 
- *                                                                                             * 
- * INPUT:   driver   -- Pointer to the driver object to delete.                                * 
- *                                                                                             * 
- * OUTPUT:  none                                                                               * 
- *                                                                                             * 
- * WARNINGS:   Don't use the driver after calling this function.                               * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   01/06/1997 JLB : Created.                                                                 * 
+/***********************************************************************************************
+ * Mono_Unload -- Unloads the driver from the system.                                          *
+ *                                                                                             *
+ *    This will free any resources allocated by this driver, break any symbolic link, and      *
+ *    delete the driver object from the system. Effectively, this is the suicide function      *
+ *    for the MGA driver.                                                                      *
+ *                                                                                             *
+ * INPUT:   driver   -- Pointer to the driver object to delete.                                *
+ *                                                                                             *
+ * OUTPUT:  none                                                                               *
+ *                                                                                             *
+ * WARNINGS:   Don't use the driver after calling this function.                               *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   01/06/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
 void Mono_Unload(PDRIVER_OBJECT DriverObject)
 {
@@ -750,7 +750,7 @@ void Mono_Unload(PDRIVER_OBJECT DriverObject)
 
 	RtlInitUnicodeString(&link_string, SYMBOLIC_NAME);
 	IoDeleteSymbolicLink(&link_string);
-	
+
 	if (DriverObject->DeviceObject != NULL)  {
 		IoDeleteDevice(DriverObject->DeviceObject);
 	}
@@ -789,18 +789,18 @@ BOOLEAN Mono_Detect_MGA_Adapter(void)
 		WRITE_PORT_UCHAR(crtc_registerss, 0x0F);
 		WRITE_PORT_UCHAR(crtc_registerss+1, 0x55);
 		if (READ_PORT_UCHAR(crtc_registerss+1) != 0x55) {
-			return(FALSE);
+			return(false);
 		}
 		WRITE_PORT_UCHAR(crtc_registerss+1, 0xAA);
 		if (READ_PORT_UCHAR(crtc_registerss+1) != 0xAA) {
-			return(FALSE);
+			return(false);
 		}
 
 		WRITE_PORT_UCHAR(crtc_registerss+1, 0x00);
-		return(TRUE);
+		return(true);
 	}
 
-	return(FALSE);
+	return(false);
 }
 
 
@@ -825,7 +825,7 @@ BOOLEAN Mono_Detect_MGA_Adapter(void)
  * HISTORY:                                                                                    *
  *   01/05/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
-void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS address, unsigned long space, unsigned long length)
+void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS address, unsigned int space, unsigned int length)
 {
 	PHYSICAL_ADDRESS logical_address;
 	void * usable_ptr = NULL;
@@ -840,7 +840,7 @@ void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS address, unsigned long space, unsig
 		**	MmMapIoSpace is required. This is usually required for port addresses.
 		*/
 		if (space == 0) {
-			usable_ptr = MmMapIoSpace(logical_address, length, FALSE);
+			usable_ptr = MmMapIoSpace(logical_address, length, false);
 		} else {
 			usable_ptr = (void *)logical_address.LowPart;
 		}
@@ -850,25 +850,25 @@ void * Mono_Get_Address_Ptr(PHYSICAL_ADDRESS address, unsigned long space, unsig
 }
 
 
-/*********************************************************************************************** 
- * Mono_Claim_Resources -- Claims resources for the MGA driver.                                * 
- *                                                                                             * 
- *    This routine will scan the registry in order to claim the hardware resources needed by   * 
- *    this MGA display driver. If any of the required resources have already been claimed      * 
- *    in an exclusive mode, then the driver should not load.                                   * 
- *                                                                                             * 
- * INPUT:   driver   -- Pointer to the driver object.                                          * 
- *                                                                                             * 
- * OUTPUT:  bool; Were the required resources claimed successfully?                            * 
- *                                                                                             * 
- * WARNINGS:   If the resources were not claimed, then the driver should not load.             * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   01/06/1997 JLB : Created.                                                                 * 
+/***********************************************************************************************
+ * Mono_Claim_Resources -- Claims resources for the MGA driver.                                *
+ *                                                                                             *
+ *    This routine will scan the registry in order to claim the hardware resources needed by   *
+ *    this MGA display driver. If any of the required resources have already been claimed      *
+ *    in an exclusive mode, then the driver should not load.                                   *
+ *                                                                                             *
+ * INPUT:   driver   -- Pointer to the driver object.                                          *
+ *                                                                                             *
+ * OUTPUT:  bool; Were the required resources claimed successfully?                            *
+ *                                                                                             *
+ * WARNINGS:   If the resources were not claimed, then the driver should not load.             *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   01/06/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
 BOOLEAN Mono_Claim_Resources(PDRIVER_OBJECT driver)
 {
-	unsigned long resource_list_size = 0;
+	unsigned int resource_list_size = 0;
 	PCM_RESOURCE_LIST resource_list = NULL;
 
 	/*
@@ -882,8 +882,8 @@ BOOLEAN Mono_Claim_Resources(PDRIVER_OBJECT driver)
 		UNICODE_STRING class_name;
 		PCM_PARTIAL_RESOURCE_DESCRIPTOR partial_resource_list;
 		BOOLEAN conflict_flag;
-		unsigned long index;
-	
+		unsigned int index;
+
 		RtlZeroMemory(resource_list, resource_list_size);
 
 		/*
@@ -928,30 +928,30 @@ BOOLEAN Mono_Claim_Resources(PDRIVER_OBJECT driver)
 		**	that have been claimed in the registry.
 		*/
 		RtlInitUnicodeString(&class_name, RESOURCE_NAME);
-		IoReportResourceUsage(&class_name, driver, resource_list, resource_list_size, NULL, NULL, 0, FALSE, &conflict_flag);
+		IoReportResourceUsage(&class_name, driver, resource_list, resource_list_size, NULL, NULL, 0, false, &conflict_flag);
 
 		ExFreePool(resource_list);
-		
-		return(conflict_flag == FALSE);
+
+		return(conflict_flag == false);
 	}
-	return(FALSE);
+	return(false);
 }
 
 
-/*********************************************************************************************** 
- * Mono_Free_Resources -- Free reported hardware usage.                                        * 
- *                                                                                             * 
- *    This routine will clear the registry of the reported hardware usage by the mono          * 
- *    display driver. It should be called only when the driver is being unloaded.              * 
- *                                                                                             * 
- * INPUT:   driver   -- Pointer to the driver object.                                          * 
- *                                                                                             * 
- * OUTPUT:  none                                                                               * 
- *                                                                                             * 
- * WARNINGS:   none                                                                            * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   01/06/1997 JLB : Created.                                                                 * 
+/***********************************************************************************************
+ * Mono_Free_Resources -- Free reported hardware usage.                                        *
+ *                                                                                             *
+ *    This routine will clear the registry of the reported hardware usage by the mono          *
+ *    display driver. It should be called only when the driver is being unloaded.              *
+ *                                                                                             *
+ * INPUT:   driver   -- Pointer to the driver object.                                          *
+ *                                                                                             *
+ * OUTPUT:  none                                                                               *
+ *                                                                                             *
+ * WARNINGS:   none                                                                            *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   01/06/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
 void Mono_Free_Resources(PDRIVER_OBJECT driver)
 {
@@ -960,25 +960,25 @@ void Mono_Free_Resources(PDRIVER_OBJECT driver)
 	CM_RESOURCE_LIST resource_list =  {0};
 
 	RtlInitUnicodeString(&class_name, RESOURCE_NAME);
-	IoReportResourceUsage(&class_name, driver, &resource_list, sizeof(resource_list), NULL, NULL, 0, FALSE, &found_conflict);
+	IoReportResourceUsage(&class_name, driver, &resource_list, sizeof(resource_list), NULL, NULL, 0, false, &found_conflict);
 }
 
 
 
-/*********************************************************************************************** 
- * Mono_Update_Cursor -- Updates the CRTC cursor to reflect current visible page.              * 
- *                                                                                             * 
- *    Use this routine to update the display cursor to match the recorded cursor position      * 
- *    for the currently visible page.                                                          * 
- *                                                                                             * 
- * INPUT:   device   -- Pointer to the mono driver globals.                                    * 
- *                                                                                             * 
- * OUTPUT:  none                                                                               * 
- *                                                                                             * 
- * WARNINGS:   none                                                                            * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   01/06/1997 JLB : Created.                                                                 * 
+/***********************************************************************************************
+ * Mono_Update_Cursor -- Updates the CRTC cursor to reflect current visible page.              *
+ *                                                                                             *
+ *    Use this routine to update the display cursor to match the recorded cursor position      *
+ *    for the currently visible page.                                                          *
+ *                                                                                             *
+ * INPUT:   device   -- Pointer to the mono driver globals.                                    *
+ *                                                                                             *
+ * OUTPUT:  none                                                                               *
+ *                                                                                             *
+ * WARNINGS:   none                                                                            *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   01/06/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
 void Mono_Update_Cursor(MonoGlobals * device)
 {
@@ -1013,7 +1013,7 @@ void Mono_Update_Cursor(MonoGlobals * device)
  * HISTORY:                                                                                    *
  *   01/04/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
-void Mono_Print(BuffControl * control, unsigned char * string, unsigned long length)
+void Mono_Print(BuffControl * control, unsigned char * string, unsigned int length)
 {
 	if (control != NULL)  {
 		unsigned char space = ' ';
@@ -1052,7 +1052,7 @@ void Mono_Print(BuffControl * control, unsigned char * string, unsigned long len
 					/*
 					**	If a <CR><LF> pair is detected, then treat it
 					**	just as if it were a '\n'. This is for backward
-					**	compatibility. If it is just a '\r', then it 
+					**	compatibility. If it is just a '\r', then it
 					**	functions similarly to the '\n' code.
 					*/
 					case '\r':
@@ -1072,9 +1072,9 @@ void Mono_Print(BuffControl * control, unsigned char * string, unsigned long len
 						bchar = '\0';
 						break;
 				}
-				
+
 				/*
-				**	If wrapping at right margin is desired, then check for 
+				**	If wrapping at right margin is desired, then check for
 				**	this condition and force a line break if margin is reached.
 				*/
 				if (bchar == '\0' && IS_FLAG_ON(control, MONOFLAG_WRAP))  {
@@ -1287,12 +1287,12 @@ void Mono_Pan(BuffControl * control)
  * HISTORY:                                                                                    *
  *   01/04/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
-void Mono_Print_Raw(BuffControl * control, unsigned char * string, unsigned long length)
+void Mono_Print_Raw(BuffControl * control, unsigned char * string, unsigned int length)
 {
 	if (control != NULL)  {
 		unsigned short * vidmem = control->Buffer + (control->XPos+control->WinX) + ((control->YPos+control->WinY)*MONO_WIDTH);
 		int x = control->XPos;
-		
+
 		while (length > 0) {
 			*vidmem++ = BUILD_MONO_CHAR(*string++, control->Attribute);
 			x++;
@@ -1408,23 +1408,23 @@ void Mono_Set_View_Pos(MonoGlobals * device, int pos)
 }
 
 
-/*********************************************************************************************** 
- * Mono_Bring_To_Top -- Brings the mono page to the visible top of the display stack.          * 
- *                                                                                             * 
- *    This routine will take the page specified and bring it to the top of the display stack.  * 
- *    Effectively, this makes it visible.                                                      * 
- *                                                                                             * 
- * INPUT:   device   -- Pointer to the mono device globals.                                    * 
- *                                                                                             * 
- *          page     -- Pointer to the page that is to be displayed.                           * 
- *                                                                                             * 
- * OUTPUT:  none                                                                               * 
- *                                                                                             * 
- * WARNINGS:   If either the visible page or the one specified is locked, then no action       * 
- *             can be performed.                                                               * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   01/06/1997 JLB : Created.                                                                 * 
+/***********************************************************************************************
+ * Mono_Bring_To_Top -- Brings the mono page to the visible top of the display stack.          *
+ *                                                                                             *
+ *    This routine will take the page specified and bring it to the top of the display stack.  *
+ *    Effectively, this makes it visible.                                                      *
+ *                                                                                             *
+ * INPUT:   device   -- Pointer to the mono device globals.                                    *
+ *                                                                                             *
+ *          page     -- Pointer to the page that is to be displayed.                           *
+ *                                                                                             *
+ * OUTPUT:  none                                                                               *
+ *                                                                                             *
+ * WARNINGS:   If either the visible page or the one specified is locked, then no action       *
+ *             can be performed.                                                               *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   01/06/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
 void Mono_Bring_To_Top(MonoGlobals * device, BuffControl * page)
 {
@@ -1442,12 +1442,12 @@ void Mono_Bring_To_Top(MonoGlobals * device, BuffControl * page)
 	/*
 	**	Swap the contents of the page buffers and then swap the page buffer
 	**	pointers.
-	*/ 
+	*/
 	{
 		unsigned short temp[MONO_WIDTH*MONO_HEIGHT];
 		void * tempptr;
 		int tempindex;
-	
+
 		RtlCopyMemory(temp, page->Buffer, MONO_PAGE_SIZE);
 		RtlCopyMemory(page->Buffer, visible_page->Buffer, MONO_PAGE_SIZE);
 		RtlCopyMemory(visible_page->Buffer, temp, MONO_PAGE_SIZE);
@@ -1462,19 +1462,19 @@ void Mono_Bring_To_Top(MonoGlobals * device, BuffControl * page)
 }
 
 
-/*********************************************************************************************** 
- * Display_Signon_Banner -- Display the signon banner at driver start.                         * 
- *                                                                                             * 
- *    This displays the signon banner that the driver displays when it first starts.           * 
- *                                                                                             * 
- * INPUT:   control  -- Pointer to the buffer that the signon banner will be displayed to.     * 
- *                                                                                             * 
- * OUTPUT:  none                                                                               * 
- *                                                                                             * 
- * WARNINGS:   none                                                                            * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   01/06/1997 JLB : Created.                                                                 * 
+/***********************************************************************************************
+ * Display_Signon_Banner -- Display the signon banner at driver start.                         *
+ *                                                                                             *
+ *    This displays the signon banner that the driver displays when it first starts.           *
+ *                                                                                             *
+ * INPUT:   control  -- Pointer to the buffer that the signon banner will be displayed to.     *
+ *                                                                                             *
+ * OUTPUT:  none                                                                               *
+ *                                                                                             *
+ * WARNINGS:   none                                                                            *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   01/06/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
 void Display_Signon_Banner(BuffControl * control)
 {
@@ -1504,23 +1504,23 @@ void Display_Signon_Banner(BuffControl * control)
 }
 
 
-/*********************************************************************************************** 
- * Mono_Fetch_Ptr -- Fetch a USER address space pointer to mono buffer.                        * 
- *                                                                                             * 
- *    This routine will create a user address space pointer (one that the ring 3 program can   * 
- *    use).                                                                                    * 
- *                                                                                             * 
- * INPUT:   device   -- Pointer to the mono device globals.                                    * 
- *                                                                                             * 
- *          page     -- Pointer to the page that a pointer will be generated for.              * 
- *                                                                                             * 
- * OUTPUT:  Returns with a user pointer to the monochrome card memory that is represented      * 
- *          by the page specified.                                                             * 
- *                                                                                             * 
- * WARNINGS:   This effectively locks the buffer so that it cannot be swapped.                 * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   01/06/1997 JLB : Created.                                                                 * 
+/***********************************************************************************************
+ * Mono_Fetch_Ptr -- Fetch a USER address space pointer to mono buffer.                        *
+ *                                                                                             *
+ *    This routine will create a user address space pointer (one that the ring 3 program can   *
+ *    use).                                                                                    *
+ *                                                                                             *
+ * INPUT:   device   -- Pointer to the mono device globals.                                    *
+ *                                                                                             *
+ *          page     -- Pointer to the page that a pointer will be generated for.              *
+ *                                                                                             *
+ * OUTPUT:  Returns with a user pointer to the monochrome card memory that is represented      *
+ *          by the page specified.                                                             *
+ *                                                                                             *
+ * WARNINGS:   This effectively locks the buffer so that it cannot be swapped.                 *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   01/06/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
 void * Mono_Fetch_Ptr(MonoGlobals * device, BuffControl * page)
 {
@@ -1575,21 +1575,21 @@ void * Mono_Fetch_Ptr(MonoGlobals * device, BuffControl * page)
 }
 
 
-/*********************************************************************************************** 
- * Mono_Init_Buffer -- Initialize a mono buffer to known (unused) state.                       * 
- *                                                                                             * 
- *    This is equivalent to a constructor for the BuffControl object. It resets all values     * 
- *    that it can to a known state.                                                            * 
- *                                                                                             * 
- * INPUT:   buffer   -- Pointer to the buffer object to initialize.                            * 
- *                                                                                             * 
- * OUTPUT:  none                                                                               * 
- *                                                                                             * 
- * WARNINGS:   The internal MGA RAM pointer is not reset by this routine. This value is        * 
- *             managed at the driver level, not the buffer object level.                       * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   01/06/1997 JLB : Created.                                                                 * 
+/***********************************************************************************************
+ * Mono_Init_Buffer -- Initialize a mono buffer to known (unused) state.                       *
+ *                                                                                             *
+ *    This is equivalent to a constructor for the BuffControl object. It resets all values     *
+ *    that it can to a known state.                                                            *
+ *                                                                                             *
+ * INPUT:   buffer   -- Pointer to the buffer object to initialize.                            *
+ *                                                                                             *
+ * OUTPUT:  none                                                                               *
+ *                                                                                             *
+ * WARNINGS:   The internal MGA RAM pointer is not reset by this routine. This value is        *
+ *             managed at the driver level, not the buffer object level.                       *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   01/06/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
 void Mono_Init_Buffer(BuffControl * buffer)
 {
@@ -1598,32 +1598,32 @@ void Mono_Init_Buffer(BuffControl * buffer)
 	buffer->Attribute = DEFAULT_ATTRIBUTE;
 	buffer->LockPtr = NULL;
 	buffer->LockCount = 0;
-	buffer->Allocated = FALSE;
+	buffer->Allocated = false;
 	buffer->WinX = 0;
 	buffer->WinY = 0;
 	buffer->WinW = MONO_WIDTH;
 	buffer->WinH = MONO_HEIGHT;
 	buffer->Flags = 0;
-}	
+}
 
 
-/*********************************************************************************************** 
- * Mono_Fill_Attribute -- Fills rectangle with attribute specified.                            * 
- *                                                                                             * 
- *    This routine will set the attribute for the region specified. It can be used to          * 
- *    hightlight or otherwise perform some cheesy effects without altering the text that       * 
- *    is already present.                                                                      * 
- *                                                                                             * 
- * INPUT:   x,y,w,h  -- Coordinates and dimensions of the rectangle to alter.                  * 
- *                                                                                             * 
- *          attrib   -- The attribute to set for the rectangle specified.                      * 
- *                                                                                             * 
- * OUTPUT:  none                                                                               * 
- *                                                                                             * 
- * WARNINGS:   It is possible to set an attribute such that the text 'disappears'.             * 
- *                                                                                             * 
- * HISTORY:                                                                                    * 
- *   01/06/1997 JLB : Created.                                                                 * 
+/***********************************************************************************************
+ * Mono_Fill_Attribute -- Fills rectangle with attribute specified.                            *
+ *                                                                                             *
+ *    This routine will set the attribute for the region specified. It can be used to          *
+ *    hightlight or otherwise perform some cheesy effects without altering the text that       *
+ *    is already present.                                                                      *
+ *                                                                                             *
+ * INPUT:   x,y,w,h  -- Coordinates and dimensions of the rectangle to alter.                  *
+ *                                                                                             *
+ *          attrib   -- The attribute to set for the rectangle specified.                      *
+ *                                                                                             *
+ * OUTPUT:  none                                                                               *
+ *                                                                                             *
+ * WARNINGS:   It is possible to set an attribute such that the text 'disappears'.             *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   01/06/1997 JLB : Created.                                                                 *
  *=============================================================================================*/
 void Mono_Fill_Attribute(BuffControl * control, int x, int y, int w, int h, int attrib)
 {
@@ -1655,4 +1655,4 @@ void Mono_Fill_Attribute(BuffControl * control, int x, int y, int w, int h, int 
 			rowptr += MONO_WIDTH;
 		}
 	}
-}	
+}

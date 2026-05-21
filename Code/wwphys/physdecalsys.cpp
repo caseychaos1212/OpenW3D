@@ -88,7 +88,7 @@ void PhysDecalSysClass::Update_Decal_Fade_Distances(const CameraClass & camera)
 }
 
 int PhysDecalSysClass::Create_Decal
-(	
+(
 	const Matrix3D &	tm,
 	const char *		texture_name,
 	float					radius,
@@ -116,7 +116,7 @@ int PhysDecalSysClass::Create_Decal
 	/*
 	** Set up the transform, projection, and bounding volume parameters
 	** I want a thin bounding volume.  Since the transform given is right at the impact point,
-	** we need to back-up some amount and then set the near and far z depths such that 
+	** we need to back-up some amount and then set the near and far z depths such that
 	** they bound the point
 	*/
 	float backup_dist = DECAL_HALF_SLAB_THICKNESS + 0.01f;
@@ -175,7 +175,7 @@ int PhysDecalSysClass::Create_Decal
 	}
 
 	/*
-	** Done.  Return the logical id of the decal if we actually created anything, 
+	** Done.  Return the logical id of the decal if we actually created anything,
 	** otherwise return -1
 	*/
 	int return_id = -1;
@@ -200,9 +200,9 @@ void PhysDecalSysClass::Unlock_Decal_Generator(DecalGeneratorClass * generator)
 	** to our internal pools
 	*/
 	if (generator->Get_Mesh_List().Is_Empty() == false) {
-	
+
 		if (is_decal_id_permanent(generator->Get_Decal_ID())) {
-			
+
 			LogicalDecalClass * newdecal = new LogicalDecalClass;
 			newdecal->Init(generator);
 			PermanentDecals.Add(newdecal);
@@ -219,15 +219,15 @@ void PhysDecalSysClass::Unlock_Decal_Generator(DecalGeneratorClass * generator)
 			** bump the index forward
 			*/
 			NextTempDecalIndex = (NextTempDecalIndex + 1) % TempDecals.Length();
-	
+
 		}
 	}
 
 	DecalSystemClass::Unlock_Decal_Generator(generator);
 }
 
-void PhysDecalSysClass::Decal_Mesh_Destroyed(uint32 decal_id,DecalMeshClass * mesh)	
-{ 
+void PhysDecalSysClass::Decal_Mesh_Destroyed(uint32 decal_id,DecalMeshClass * mesh)
+{
 	/*
 	** Must remove this mesh from any decals
 	*/
@@ -269,12 +269,12 @@ uint32 PhysDecalSysClass::Generate_Decal_Id(void)
 {
 	uint32 id;
 	if (CreatePermanentDecals) {
-		
+
 		id = Generate_Unique_Global_Decal_Id() & 0x7FFFFFFF;
 		id |= 0x80000000;
 
 	} else {
-		
+
 		id = NextTempDecalIndex;
 
 	}
@@ -313,15 +313,15 @@ bool PhysDecalSysClass::internal_remove_decal(uint32 id,MeshClass * deleted_mesh
 {
 	bool success = false;
 	if (is_decal_id_permanent(id)) {
-		
+
 		/*
 		** Find the decal with the given id in the Permanent decal array
 		*/
 		MultiListIterator<LogicalDecalClass> it(&PermanentDecals);
 		for (it.First(); !it.Is_Done(); it.Next()) {
-			
+
 			LogicalDecalClass * decal = it.Get_Obj();
-			
+
 			if (decal->DecalID == id) {
 
 				/*
@@ -342,7 +342,7 @@ bool PhysDecalSysClass::internal_remove_decal(uint32 id,MeshClass * deleted_mesh
 				break;
 			}
 		}
-	
+
 	} else {
 
 		/*
@@ -371,7 +371,7 @@ PhysDecalSysClass::LogicalDecalClass::LogicalDecalClass(void) :
 {
 }
 
-PhysDecalSysClass::LogicalDecalClass::~LogicalDecalClass(void) 
+PhysDecalSysClass::LogicalDecalClass::~LogicalDecalClass(void)
 {
 	Reset();
 }
@@ -380,10 +380,10 @@ void PhysDecalSysClass::LogicalDecalClass::Init(DecalGeneratorClass * gen)
 {
 	/*
 	** Reset ourselves in case we were being used to track a previous decal.
-	** This causes that decal to get removed from the system.  
+	** This causes that decal to get removed from the system.
 	*/
 	Reset();
-	
+
 	/*
 	** Record the data for this decal
 	*/
@@ -397,7 +397,7 @@ void PhysDecalSysClass::LogicalDecalClass::Init(DecalGeneratorClass * gen)
 }
 
 void PhysDecalSysClass::LogicalDecalClass::Reset(void)
-{ 
+{
 	for (int i=0; i<Meshes.Count(); i++) {
 		Meshes[i]->Delete_Decal(DecalID);
 	}

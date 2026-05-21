@@ -21,24 +21,24 @@
 // Project:      wwutil
 // Author:       Tom Spencer-Smith
 // Date:         June 1998
-// Description:  
+// Description:
 //
 //-----------------------------------------------------------------------------
 #include "miscutil.h" // I WANNA BE FIRST!
 
 #include <time.h>
+#include <cstdio>
 
 #include "rawfile.h"
 #include "wwdebug.h"
-#include <windows.h>
 #include "ffactory.h"
 
 //
-// cMiscUtil statics 
+// cMiscUtil statics
 //
 
 //---------------------------------------------------------------------------
-LPCSTR cMiscUtil::Get_Text_Time(void)
+const char * cMiscUtil::Get_Text_Time(void)
 {
    //
    // Returns a pointer to an internal statically allocated buffer...
@@ -49,7 +49,7 @@ LPCSTR cMiscUtil::Get_Text_Time(void)
 	time_t time_now = ::time(NULL);
    char * time_str = ::ctime(&time_now);
    time_str[::strlen(time_str) - 1] = 0; // remove \n
-   return time_str; 
+   return time_str;
 }
 
 //---------------------------------------------------------------------------
@@ -71,7 +71,7 @@ void cMiscUtil::Seconds_To_Hms(float seconds, int & h, int & m, int & s)
 }
 
 //-----------------------------------------------------------------------------
-bool cMiscUtil::Is_String_Same(LPCSTR str1, LPCSTR str2)
+bool cMiscUtil::Is_String_Same(const char * str1, const char * str2)
 {
    WWASSERT(str1 != NULL);
    WWASSERT(str2 != NULL);
@@ -80,7 +80,7 @@ bool cMiscUtil::Is_String_Same(LPCSTR str1, LPCSTR str2)
 }
 
 //-----------------------------------------------------------------------------
-bool cMiscUtil::Is_String_Different(LPCSTR str1, LPCSTR str2)
+bool cMiscUtil::Is_String_Different(const char * str1, const char * str2)
 {
    WWASSERT(str1 != NULL);
    WWASSERT(str2 != NULL);
@@ -89,14 +89,14 @@ bool cMiscUtil::Is_String_Different(LPCSTR str1, LPCSTR str2)
 }
 
 //-----------------------------------------------------------------------------
-bool cMiscUtil::File_Exists(LPCSTR filename)
+bool cMiscUtil::File_Exists(const char * filename)
 {
 #if 0
    WWASSERT(filename != NULL);
 
 	WIN32_FIND_DATAA find_info;
    HANDLE file_handle = ::FindFirstFileA(filename, &find_info);
-	
+
 	if (file_handle != INVALID_HANDLE_VALUE) {
 		::FindClose(file_handle);
 		return true;
@@ -111,15 +111,6 @@ bool cMiscUtil::File_Exists(LPCSTR filename)
 	_TheFileFactory->Return_File( file );
 	return false;
 #endif
-}
-
-//-----------------------------------------------------------------------------
-bool cMiscUtil::File_Is_Read_Only(LPCSTR filename)
-{
-   WWASSERT(filename != NULL);
-
-	DWORD attributes = ::GetFileAttributesA(filename);
-	return ((attributes != 0xFFFFFFFF) && (attributes & FILE_ATTRIBUTE_READONLY));
 }
 
 //-----------------------------------------------------------------------------
@@ -148,78 +139,21 @@ bool cMiscUtil::Is_Whitespace(char c)
 
 //-----------------------------------------------------------------------------
 void cMiscUtil::Trim_Trailing_Whitespace(char * text)
-{	
+{
    WWASSERT(text != NULL);
 
-	int length = ::strlen(text);
+	int length = static_cast<int>(::strlen(text));
 	while (length > 0 && Is_Whitespace(text[length - 1])) {
 		text[--length] = 0;
 	}
 }
 
 //-----------------------------------------------------------------------------
-void cMiscUtil::Get_File_Id_String(LPCSTR filename, StringClass & str)
-{
-	WWASSERT(filename != NULL);
-
-//	WWDEBUG_SAY(("cMiscUtil::Get_File_Id_String for %s\n", filename));
-
-   //
-   // Get size
-   //
-   RawFileClass file(filename);
-   int filesize = file.Size();
-	//WWASSERT(filesize > 0);
-	if (filesize <= 0)
-	{
-		WWDEBUG_SAY(("Error: cMiscUtil::Get_File_Id_String for %s: filesize = %d\n", 
-			filename, filesize));
-		DIE;
-	}
-   file.Close();
-
-	//
-	// Note... this timedatestamp is not present for all file types...
-	//
-	IMAGE_FILE_HEADER header = {0};
-	extern bool Get_Image_File_Header(LPCSTR filename, IMAGE_FILE_HEADER *file_header);
-	/*
-	bool success;
-	success = Get_Image_File_Header(filename, &header);
-	WWASSERT(success);
-	*/
-	Get_Image_File_Header(filename, &header);
-	int time_date_stamp = header.TimeDateStamp;
-
-	char working_filename[500];
-	strcpy(working_filename, filename);
-	::strupr(working_filename);
-
-   //
-   // Strip path off filename
-   //
-   char * p_start = &working_filename[strlen(working_filename)];
-   int num_chars = 1;
-   while (p_start > working_filename && *(p_start - 1) != '\\') {
-      p_start--;
-      num_chars++;
-   }
-   ::memmove(working_filename, p_start, num_chars);
-
-	//
-	// Put all this data into a string
-	//
-	str.Format("%s %d %d", working_filename, filesize, time_date_stamp);
-
-	//WWDEBUG_SAY(("File id string: %s\n", str));
-}
-
-//-----------------------------------------------------------------------------
-void cMiscUtil::Remove_File(LPCSTR filename)
+void cMiscUtil::Remove_File(const char * filename)
 {
    WWASSERT(filename != NULL);
 
-	::DeleteFileA(filename);
+    ::remove(filename);
 }
 
 
@@ -255,7 +189,7 @@ int cMiscUtil::Get_Exe_Key(void)
 	succeeded = ::GetModuleFileNameA(NULL, filename, sizeof(filename));
 	::strupr(filename);
 	WWASSERT(succeeded);
-      
+
    //
    // Get size
    //
@@ -311,7 +245,7 @@ int cMiscUtil::Get_Exe_Key(void)
 	succeeded = ::GetModuleFileNameA(NULL, filename, sizeof(filename));
 	::strupr(filename);
 	WWASSERT(succeeded);
-      
+
 	StringClass string;
 	Get_File_Id_String(filename, string);
 

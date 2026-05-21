@@ -53,14 +53,15 @@
 #include "wwprofile.h"
 #include "FastAllocator.h"
 #include "wwdebug.h"
-#include <windows.h>
 //#include "systimer.h"
 #include "systimer.h"
 #include "rawfile.h"
 #include "ffactory.h"
 #include "simplevec.h"
 #include "cpudetect.h"
+#include <limits>
 #include <cstdint>
+#include <thread>
 
 static SimpleDynVecClass<WWProfileHierachyNodeClass*> ProfileCollectVector;
 static double TotalFrameTimes;
@@ -146,7 +147,7 @@ WWProfileHierachyNodeClass* WWProfileHierachyNodeClass::Clone_Hierarchy(WWProfil
 	node->TotalTime=TotalTime;
 	node->StartTime=StartTime;
 	node->RecursionCounter=RecursionCounter;
-	
+
 	if (Child) {
 		node->Child=Child->Clone_Hierarchy(this);
 	}
@@ -166,7 +167,9 @@ void WWProfileHierachyNodeClass::Write_To_File(FileClass* file,int recursion)
 		for (i=0;i<recursion;++i) { string+="\t"; }
 		work.Format("%s\t%d\t%f\r\n",Name,TotalCalls,TotalTime*1000.0f);
 		string+=work;
-		file->Write(string.Peek_Buffer(),string.Get_Length());
+		const size_t length = string.Get_Length();
+		WWASSERT(length <= static_cast<size_t>(std::numeric_limits<int>::max()));
+		file->Write(string.Peek_Buffer(), static_cast<int>(length));
 	}
 	if (Child) {
 		Child->Write_To_File(file,recursion+1);
@@ -296,7 +299,7 @@ WWProfileHierachyNodeClass	*	WWProfileManager::CurrentRootNode = &WWProfileManag
 int									WWProfileManager::FrameCounter = 0;
 int64_t								WWProfileManager::ResetTime = 0;
 
-static unsigned int				ThreadID = static_cast<unsigned int>(-1);
+static std::thread::id				ThreadID;
 
 
 /***********************************************************************************************
@@ -319,7 +322,7 @@ static unsigned int				ThreadID = static_cast<unsigned int>(-1);
  *=============================================================================================*/
 void	WWProfileManager::Start_Profile( const char * name )
 {
-	if (::GetCurrentThreadId() != ThreadID) {
+    if (std::this_thread::get_id() != ThreadID) {
 		return;
 	}
 
@@ -333,7 +336,7 @@ void	WWProfileManager::Start_Profile( const char * name )
 
 void	WWProfileManager::Start_Root_Profile( const char * name )
 {
-	if (::GetCurrentThreadId() != ThreadID) {
+    if (std::this_thread::get_id() != ThreadID) {
 		return;
 	}
 
@@ -359,7 +362,7 @@ void	WWProfileManager::Start_Root_Profile( const char * name )
  *=============================================================================================*/
 void	WWProfileManager::Stop_Profile( void )
 {
-	if (::GetCurrentThreadId() != ThreadID) {
+    if (std::this_thread::get_id() != ThreadID) {
 		return;
 	}
 
@@ -372,7 +375,7 @@ void	WWProfileManager::Stop_Profile( void )
 
 void	WWProfileManager::Stop_Root_Profile( void )
 {
-	if (::GetCurrentThreadId() != ThreadID) {
+    if (std::this_thread::get_id() != ThreadID) {
 		return;
 	}
 
@@ -400,8 +403,8 @@ void	WWProfileManager::Stop_Root_Profile( void )
  *   9/24/2000  gth : Created.                                                                 *
  *=============================================================================================*/
 void	WWProfileManager::Reset( void )
-{  
-	ThreadID = ::GetCurrentThreadId();
+{
+    ThreadID = std::this_thread::get_id();
 
 	Root.Reset();
 	FrameCounter = 0;
@@ -507,7 +510,7 @@ void	WWProfileManager::End_Collecting(const char* filename)
 {
 	int i;
 	if (filename && ProfileCollectVector.Count()!=0) {
-		FileClass * file= _TheWritingFileFactory->Get_File(filename);	
+		FileClass * file= _TheWritingFileFactory->Get_File(filename);
 		if (file != NULL) {
 			//
 			//	Open or create the file
@@ -520,15 +523,23 @@ void	WWProfileManager::End_Collecting(const char* filename)
 				"Total frames: %d, average frame time: %fms\r\n"
 				"All frames taking more than twice the average frame time are marked with keyword SPIKE.\r\n\r\n",
 				ProfileCollectVector.Count(),avg_frame_time*1000.0f);
-			file->Write(str.Peek_Buffer(),str.Get_Length());
+			{
+				const size_t length = str.Get_Length();
+				WWASSERT(length <= static_cast<size_t>(std::numeric_limits<int>::max()));
+				file->Write(str.Peek_Buffer(), static_cast<int>(length));
+			}
 
 			for (i=0;i<ProfileCollectVector.Count();++i) {
 				float frame_time=ProfileCollectVector[i]->Get_Total_Time();
 				str.Format("FRAME: %d %fms %s ---------------\r\n",i,frame_time*1000.0f,frame_time>avg_frame_time*2.0f ? "SPIKE" : "");
-				file->Write(str.Peek_Buffer(),str.Get_Length());
+				{
+					const size_t length = str.Get_Length();
+					WWASSERT(length <= static_cast<size_t>(std::numeric_limits<int>::max()));
+					file->Write(str.Peek_Buffer(), static_cast<int>(length));
+				}
 				ProfileCollectVector[i]->Write_To_File(file,0);
 			}
-		
+
 			//
 			//	Close the file
 			//
@@ -742,7 +753,7 @@ WWMemoryAndTimeLog::WWMemoryAndTimeLog(const char* name)
 	IntermediateAllocSizeStart=AllocSizeStart;
 	StringClass tmp(0,true);
 	for (unsigned i=0;i<TabCount;++i) tmp+="\t";
-	WWRELEASE_SAY(("%s%s {\n",tmp,name));
+    WWRELEASE_SAY(("%s%s {\n",tmp.Peek_Buffer(),name));
 	TabCount++;
 }
 
@@ -751,13 +762,13 @@ WWMemoryAndTimeLog::~WWMemoryAndTimeLog()
 	if (TabCount>0) TabCount--;
 	StringClass tmp(0,true);
 	for (unsigned i=0;i<TabCount;++i) tmp+="\t";
-	WWRELEASE_SAY(("%s} ",tmp));
+    WWRELEASE_SAY(("%s} ",tmp.Peek_Buffer()));
 
 	unsigned current_time=WWProfile_Get_System_Time();
 	int current_alloc_count=FastAllocatorGeneral::Get_Allocator()->Get_Total_Allocation_Count();
 	int current_alloc_size=FastAllocatorGeneral::Get_Allocator()->Get_Total_Allocated_Size();
 	WWRELEASE_SAY(("IN TOTAL %s took %d.%3.3d s, did %d memory allocations of %d bytes\n",
-		Name,
+        Name.Peek_Buffer(),
 		(current_time - TimeStart)/1000, (current_time - TimeStart)%1000,
 		current_alloc_count - AllocCountStart,
 		current_alloc_size - AllocSizeStart));
@@ -774,7 +785,7 @@ void WWMemoryAndTimeLog::Log_Intermediate(const char* text)
 	StringClass tmp(0,true);
 	for (unsigned i=0;i<TabCount;++i) tmp+="\t";
 	WWRELEASE_SAY(("%s%s took %d.%3.3d s, did %d memory allocations of %d bytes\n",
-		tmp,
+        tmp.Peek_Buffer(),
 		text,
 		(current_time - IntermediateTimeStart)/1000, (current_time - IntermediateTimeStart)%1000,
 		current_alloc_count - IntermediateAllocCountStart,

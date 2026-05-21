@@ -27,7 +27,7 @@
 
 #include "DlgMPConnectionRefused.h"
 #include "cnetwork.h"
-#include "resource.h"
+#include "renegadedialog.h"
 #include <wwdebug/wwdebug.h>
 #include "dlgmainmenu.h"
 #include "gamespyadmin.h"
@@ -51,8 +51,8 @@
 *
 ******************************************************************************/
 
-bool DlgMPConnectionRefused::DoDialog(const wchar_t * text, bool show_splash_screen)
-	{	
+bool DlgMPConnectionRefused::DoDialog(const unichar_t * text, bool show_splash_screen)
+	{
 	DlgMPConnectionRefused* popup = new DlgMPConnectionRefused(text, show_splash_screen);
 
 	if (popup)
@@ -81,8 +81,8 @@ bool DlgMPConnectionRefused::DoDialog(const wchar_t * text, bool show_splash_scr
 *
 ******************************************************************************/
 
-DlgMPConnectionRefused::DlgMPConnectionRefused(const wchar_t * text, bool show_splash_screen) :
-		PopupDialogClass(IDD_MULTIPLAY_CONNECTION_REFUSED)
+DlgMPConnectionRefused::DlgMPConnectionRefused(const unichar_t * text, bool show_splash_screen) :
+		PopupDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MULTIPLAY_CONNECTION_REFUSED))
 	{
 	WWDEBUG_SAY(("DlgMPConnectionRefused: Instantiated\n"));
 
@@ -156,7 +156,7 @@ void DlgMPConnectionRefused::On_Init_Dialog(void)
 *
 ******************************************************************************/
 
-void DlgMPConnectionRefused::On_Command(int ctrlID, int message, DWORD param)
+void DlgMPConnectionRefused::On_Command(int ctrlID, int message, unsigned int param)
 	{
 	if ((IDOK == ctrlID) && (1 != param))
 		{
@@ -164,7 +164,7 @@ void DlgMPConnectionRefused::On_Command(int ctrlID, int message, DWORD param)
 			{
 			cNetwork::Cleanup_Client();
 			}
-		if (cGameSpyAdmin::Get_Is_Launched_From_Gamespy()) 
+		if (cGameSpyAdmin::Get_Is_Launched_From_Gamespy())
 			{
 
 #ifdef MULTIPLAYERDEMO
@@ -174,7 +174,7 @@ void DlgMPConnectionRefused::On_Command(int ctrlID, int message, DWORD param)
 				DialogMgrClass::Flush_Dialogs ();
 				START_DIALOG (SplashOutroMenuDialogClass);
 			}
-			else 
+			else
 			{
 				extern void Stop_Main_Loop (int);
 				Stop_Main_Loop(EXIT_SUCCESS);

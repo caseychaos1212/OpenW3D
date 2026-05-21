@@ -88,7 +88,7 @@ EditStringTwiddlerDialogClass::OnInitDialog (void)
 	//	Configure the list control
 	//
 	ListCtrl.InsertColumn (0, "String ID");
-	
+
 	//
 	//	Size the column
 	//
@@ -120,7 +120,7 @@ EditStringTwiddlerDialogClass::OnInitDialog (void)
 	::SetFocus (::GetDlgItem (m_hWnd, IDC_CODEID_EDIT));
 	SendDlgItemMessage (IDC_CODEID_EDIT, EM_SETSEL, (WPARAM)0, (LPARAM)-1);
 
-	return FALSE;
+	return false;
 }
 
 
@@ -165,7 +165,7 @@ EditStringTwiddlerDialogClass::OnAddButton (void)
 	//
 	StringPickerMainDialogClass dialog (this);
 	if (dialog.DoModal () == IDOK) {
-		
+
 		//
 		//	Add this string to our list
 		//
@@ -194,10 +194,10 @@ EditStringTwiddlerDialogClass::OnOK (void)
 	//	Is this a valid ID?
 	//
 	if (Validate_String_ID (m_hWnd, string_id)) {
-		
+
 		//
 		//	Create a new twiddler (if necessary)
-		//		
+		//
 		if (StringObject == NULL) {
 			StringObject = new StringTwiddlerClass;
 		}
@@ -216,7 +216,7 @@ EditStringTwiddlerDialogClass::OnOK (void)
 			int string_id = (int)ListCtrl.GetItemData (index);
 			StringObject->Add_String (string_id);
 		}
-		
+
 		CDialog::OnOK ();
 	}
 
@@ -236,7 +236,7 @@ EditStringTwiddlerDialogClass::OnKeydownListctrl (NMHDR *pNMHDR, LRESULT *pResul
 	*pResult = 0;
 
 	if (pLVKeyDown->wVKey == VK_DELETE) {
-		
+
 		//
 		//	Delete all the selected items (except for the last item)
 		//

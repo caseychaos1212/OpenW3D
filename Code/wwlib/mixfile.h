@@ -96,17 +96,17 @@ private:
 	bool		Get_Temp_Filename (const char *path, StringClass &full_path);
 
 	struct FileInfoStruct {
-		bool operator== (const FileInfoStruct &src)	{ return false; }
-		bool operator!= (const FileInfoStruct &src)	{ return true; }
+		bool operator== (const FileInfoStruct &/* src*/)	{ return false; }
+		bool operator!= (const FileInfoStruct &/* src*/)	{ return true; }
 
-		unsigned long CRC;				// CRC code for embedded file.
-		unsigned long Offset;			// Offset from start of data section.
-		unsigned long Size;				// Size of data subfile.
+		unsigned int CRC;				// CRC code for embedded file.
+		unsigned int Offset;			// Offset from start of data section.
+		unsigned int Size;				// Size of data subfile.
 	};
 
 	struct AddInfoStruct {
-		bool operator== (const AddInfoStruct &src)	{ return false; }
-		bool operator!= (const AddInfoStruct &src)	{ return true; }
+		bool operator== (const AddInfoStruct &/* src*/)	{ return false; }
+		bool operator!= (const AddInfoStruct &/* src*/)	{ return true; }
 
 		StringClass FullPath;
 		StringClass	Filename;
@@ -143,12 +143,12 @@ private:
 	static int File_Info_Compare(const void * a, const void * b);
 
 	struct FileInfoStruct {
-		bool operator== (const FileInfoStruct &src)	{ return false; }
-		bool operator!= (const FileInfoStruct &src)	{ return true; }
+		bool operator== (const FileInfoStruct &/* src*/)	{ return false; }
+		bool operator!= (const FileInfoStruct &/* src*/)	{ return true; }
 
-		unsigned long	CRC;				// CRC code for embedded file.
-		unsigned long	Offset;			// Offset from start of data section.
-		unsigned long	Size;				// Size of data subfile.
+		unsigned int	CRC;				// CRC code for embedded file.
+		unsigned int	Offset;			// Offset from start of data section.
+		unsigned int	Size;				// Size of data subfile.
 		StringClass		Filename;
 	};
 

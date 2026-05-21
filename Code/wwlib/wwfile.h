@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Command & Conquer                                            * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/wwlib/wwfile.h                               $* 
- *                                                                                             * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Command & Conquer                                            *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/wwlib/wwfile.h                               $*
+ *                                                                                             *
  *                      $Author:: Ian_l                                                       $*
- *                                                                                             * 
+ *                                                                                             *
  *                     $Modtime:: 10/31/01 2:00p                                              $*
- *                                                                                             * 
+ *                                                                                             *
  *                    $Revision:: 9                                                           $*
  *                                                                                             *
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 #if _MSC_VER >= 1000
 #pragma once
@@ -57,8 +57,15 @@
 #define SEEK_END					2	// Seek from end of file.
 #endif
 
-#ifndef NULL
-	#define	NULL	0
+#if defined(OPENW3D_WIN32)
+#include <windows.h>
+#define	NULL_HANDLE		INVALID_HANDLE_VALUE
+#define	HANDLE_TYPE		HANDLE
+#elif defined(OPENW3D_SDL3)
+#define	NULL_HANDLE	 	NULL
+#define	HANDLE_TYPE		struct SDL_IOStream*
+#else
+#error "Not implemented"
 #endif
 
 
@@ -66,13 +73,13 @@ class FileClass
 {
 	public:
 
-		enum 
+		enum
 		{
 			READ = 1,
 			WRITE = 2,
 			PRINTF_BUFFER_SIZE = 1024
 		};
-		
+
 		virtual ~FileClass(void) {};
 		virtual char const * File_Name(void) const = 0;
 		virtual char const * Set_Name(char const *filename) = 0;
@@ -88,10 +95,10 @@ class FileClass
 		virtual int Size(void) = 0;
 		virtual int Write(void const *buffer, int size) = 0;
 		virtual void Close(void) = 0;
-		virtual unsigned long Get_Date_Time(void) {return(0);}
-		virtual bool Set_Date_Time(unsigned long ) {return(false);}
-		virtual void Error(int error, int canretry = false, char const * filename=NULL) = 0;
-		virtual void * Get_File_Handle(void) { return reinterpret_cast<void *>(-1); } 
+		virtual unsigned int Get_Date_Time(void) {return(0);}
+		virtual bool Set_Date_Time(unsigned int ) {return(false);}
+		virtual void Error(int error, int canretry = false, char const * filename=nullptr) = 0;
+		virtual HANDLE_TYPE Get_File_Handle(void) { return nullptr; }
 		virtual void Bias(int start, int length=-1) = 0;
 
 		operator char const * ()

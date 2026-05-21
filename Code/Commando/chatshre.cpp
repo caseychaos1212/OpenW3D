@@ -21,7 +21,7 @@
 // Project:      Network.lib, for Commando
 // Author:       Tom Spencer-Smith
 // Date:         Dec 1998
-// Description:  
+// Description:
 //
 //-----------------------------------------------------------------------------
 #include "chatshre.h"
@@ -30,11 +30,11 @@
 
 //-----------------------------------------------------------------------------
 
-#define ADD_CASE(exp) case exp: return #exp; break;  
-LPCSTR Translate_Location(ChatLocationEnum location)
+#define ADD_CASE(exp) case exp: return #exp; break;
+const char *Translate_Location(ChatLocationEnum location)
 {
    switch (location) {
-		
+
 		ADD_CASE(WOLLOC_EXIT);
 		ADD_CASE(WOLLOC_NOLIST);
 		ADD_CASE(WOLLOC_LOBBYLIST);
@@ -49,7 +49,7 @@ LPCSTR Translate_Location(ChatLocationEnum location)
 		ADD_CASE(LANLOC_GAMEDATA);
 		ADD_CASE(LANLOC_INGAME);
 
-		default: 
+		default:
 			WWASSERT(0);
 			return ""; // to avoid compiler warning
 	}

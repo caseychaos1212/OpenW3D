@@ -35,7 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "dlgcncteaminfo.h"
-#include "resource.h"
+#include "renegadedialog.h"
 #include "listctrl.h"
 #include "imagectrl.h"
 #include "playertype.h"
@@ -80,7 +80,7 @@ enum
 //
 ////////////////////////////////////////////////////////////////
 CNCTeamInfoDialogClass::CNCTeamInfoDialogClass (void)	:
-	MenuDialogClass (IDD_CNC_TEAM_INFO)
+	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_CNC_TEAM_INFO))
 {
 	return ;
 }
@@ -186,7 +186,7 @@ CNCTeamInfoDialogClass::Configure_Icons (void)
 		vfact_icon_name		= "HUD_C&C_N_AIRSTRIP.TGA";
 	}
 
-	const int ICON_CTRLS[] = 
+	const int ICON_CTRLS[] =
 	{
 		IDC_BUILDING01_ICON,
 		IDC_BUILDING02_ICON,
@@ -195,7 +195,7 @@ CNCTeamInfoDialogClass::Configure_Icons (void)
 		IDC_BUILDING05_ICON,
 	};
 
-	const int HEALTH_CTRLS[] = 
+	const int HEALTH_CTRLS[] =
 	{
 		IDC_BUILDING01_HEALTHBAR,
 		IDC_BUILDING02_HEALTHBAR,
@@ -205,7 +205,7 @@ CNCTeamInfoDialogClass::Configure_Icons (void)
 	};
 
 	int next_slot = 0;
-	
+
 	//
 	//	Configure the image ctrls on the dialog
 	//
@@ -304,7 +304,7 @@ CNCTeamInfoDialogClass::Populate_Player_List (void)
 	//
 	int index = 0;
 	for (	SLNode<cPlayer> *player_node = cPlayerManager::Get_Player_Object_List ()->Head ();
-			player_node != NULL; 
+			player_node != NULL;
 			player_node = player_node->Next ())
 	{
 		cPlayer *player = player_node->Data ();
@@ -317,16 +317,16 @@ CNCTeamInfoDialogClass::Populate_Player_List (void)
 		//
 		//	Does this player belong to the same team?
 		//
-		if (player->Get_Player_Type () == team_id) {		
+		if (player->Get_Player_Type () == team_id) {
 
 			//
 			//	Make a new entry for this player
-			//			
-			int item_index = list_ctrl->Insert_Entry (index ++, L"");
+			//
+			int item_index = list_ctrl->Insert_Entry (index ++, U_CHAR(""));
 			if (item_index >= 0) {
 				WideStringClass displayName(0, true);
 				Build_Player_Display_Name(player, displayName);
-				list_ctrl->Set_Entry_Text (item_index, COL_NAME,		(const wchar_t*)displayName);
+				list_ctrl->Set_Entry_Text (item_index, COL_NAME,		(const unichar_t*)displayName);
 
 				list_ctrl->Set_Entry_Int (item_index, COL_RANK,			player->Get_Rung ());
 				list_ctrl->Set_Entry_Int (item_index, COL_CREDITS,		(int) player->Get_Money ());
@@ -341,9 +341,9 @@ CNCTeamInfoDialogClass::Populate_Player_List (void)
 					//::Strip_Path_From_Filename (tga_filename, game_obj->Get_Definition ().Get_Icon_Filename ());
 					//list_ctrl->Add_Icon (item_index, COL_CHARACTER,	tga_filename);
 
-					const wchar_t *name = TRANSLATE (game_obj->Get_Translated_Name_ID ());
+					const unichar_t *name = TRANSLATE (game_obj->Get_Translated_Name_ID ());
 					list_ctrl->Set_Entry_Text (item_index, COL_CHARACTER, name);
-					
+
 					//
 					//	Fill in the vehicle icon (if the player is in one)
 					//
@@ -355,8 +355,8 @@ CNCTeamInfoDialogClass::Populate_Player_List (void)
 						name = TRANSLATE (vehicle->Get_Translated_Name_ID ());
 						list_ctrl->Set_Entry_Text (item_index, COL_VEHICLE, name);
 					}
-				}				
-				
+				}
+
 				//
 				//	Put a star by the player's name if this is the local player
 				//
@@ -392,13 +392,13 @@ CNCTeamInfoDialogClass::Populate_Player_List (void)
 //	ListSortCallback
 //
 ////////////////////////////////////////////////////////////////
-int CALLBACK
+int
 CNCTeamInfoDialogClass::ListSortCallback
 (
 	ListCtrlClass *	list_ctrl,
 	int					item_index1,
 	int					item_index2,
-	uint32				user_param
+	uint32				/* user_param */
 )
 {
 	int rank1 = (int)list_ctrl->Get_Entry_Data (item_index1, COL_RANK);
@@ -446,7 +446,7 @@ void CNCTeamInfoDialogClass::Build_Player_Display_Name(const cPlayer* player, Wi
 			RefPtr<WWOnline::SquadData> clan = user->GetSquad();
 
 			if (clan.IsValid()) {
-				outName.Format(L"%s [%S]", player->Get_Name(), clan->GetAbbr());
+				outName.Format(U_CHAR("%s [%S]"), player->Get_Name(), clan->GetAbbr());
 				return;
 			}
 		}

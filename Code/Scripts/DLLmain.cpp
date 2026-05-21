@@ -58,7 +58,7 @@
 ******************************************************************************/
 
 __declspec(dllexport)
-BOOL APIENTRY DllMain(HINSTANCE hinst, DWORD reason, LPVOID)
+BOOL APIENTRY DllMain(HINSTANCE /*hinst*/, DWORD reason, LPVOID)
 {
 	if (reason == DLL_PROCESS_ATTACH) {
 //		DebugPrint("\n========== Script.dll loaded ==========\n");
@@ -68,7 +68,7 @@ BOOL APIENTRY DllMain(HINSTANCE hinst, DWORD reason, LPVOID)
 //		DebugPrint("\n========== Script.dll Unloaded ==========\n");
 	}
 
-	return TRUE;
+	return true;
 }
 
 

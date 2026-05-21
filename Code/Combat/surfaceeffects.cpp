@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando                                                     * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Combat/surfaceeffects.cpp                    $* 
- *                                                                                             * 
- *                      $Author:: Greg_h                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 6/14/02 10:48a                                              $* 
- *                                                                                             * 
- *                    $Revision:: 56                                                          $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando                                                     *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Combat/surfaceeffects.cpp                    $*
+ *                                                                                             *
+ *                      $Author:: Greg_h                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 6/14/02 10:48a                                              $*
+ *                                                                                             *
+ *                    $Revision:: 56                                                          $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "surfaceeffects.h"
@@ -313,7 +313,7 @@ void	SurfaceEffectsManager::Init( void )
 	if (_IsSurfaceEffectsInitted) {
 		Shutdown();
 	}
-	
+
 	for ( int i = 0; i < SURFACE_TYPE_MAX; i++ ) {
 		SurfaceStopsBullets[i] = true;
 		SurfaceDamageWarhead[i] = 0;
@@ -477,7 +477,7 @@ void	SurfaceEffectsManager::Apply_Effect
 {
 	WWPROFILE( "Apply Surface Effect" );
 
-	bool ok = (	(surface_type >= 0) && 
+	bool ok = (	(surface_type >= 0) &&
 					(surface_type < SURFACE_TYPE_MAX) &&
 					(hitter_type >=0 ) &&
 					(hitter_type < NUM_HITTER_TYPES) );
@@ -490,7 +490,7 @@ void	SurfaceEffectsManager::Apply_Effect
 	if ( Mode == MODE_OFF ) {
 		return;
 	}
-	
+
 	// If the user has specified an override type, use it.
 	if (OverrideSurfaceType != -1) { surface_type = OverrideSurfaceType; }
 
@@ -714,7 +714,7 @@ bool	SurfaceEffectsManager::Does_Surface_Stop_Bullets( int surface_type )
 	return SurfaceStopsBullets[ surface_type ];
 }
 
-void	SurfaceEffectsManager::Apply_Damage( int surface_type, PhysicalGameObj * obj )
+void	SurfaceEffectsManager::Apply_Damage( [[maybe_unused]] int surface_type, [[maybe_unused]] PhysicalGameObj * obj )
 {
 
 #ifndef PARAM_EDITING_ON

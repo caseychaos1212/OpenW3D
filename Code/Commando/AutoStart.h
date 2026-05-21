@@ -42,7 +42,6 @@
 #include <wwlib/Signaler.h>
 #include "wolgmode.h"
 #include "menudialog.h"
-#include "resource.h"
 #include <WWOnline/RefPtr.h>
 #include <WWOnline/WOLSession.h>
 
@@ -134,7 +133,7 @@ class AutoRestartClass : public Observer<WOLLogonAction>, public Observer<WWOnli
 		/*
 		** Time we last tried to create the game channel.
 		*/
-		unsigned long LastChannelCreateTime;
+		unsigned int LastChannelCreateTime;
 
 		/*
 		** Number of times we tried to create the channel.

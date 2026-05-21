@@ -196,7 +196,7 @@ void cGod::Think(void)
 
 //-----------------------------------------------------------------------------
 cPlayer * cGod::Create_Player(int client_id, const WideStringClass & name,
-															int team_choice, unsigned long clanID, bool is_invulnerable)
+															int team_choice, unsigned int clanID, bool is_invulnerable)
 {
 	WWMEMLOG(MEM_NETWORK);
 	WWASSERT(cNetwork::I_Am_Server());
@@ -273,7 +273,7 @@ void cGod::Create_Ai_Player(void)
 	do {
 		client_id--;
 		WWASSERT(client_id > cPlayer::INVALID_ID);
-		name.Format(L"Guard%d", -client_id);
+		name.Format(U_CHAR("Guard%d"), -client_id);
 	} while (cPlayerManager::Is_Player_Present(name));
 
 	Create_Player(client_id, name, -1, 0);

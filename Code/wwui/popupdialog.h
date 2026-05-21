@@ -43,6 +43,7 @@
 
 
 #include "dialogbase.h"
+#include "dialogspec.h"
 #include "rendobj.h"
 #include "wwstring.h"
 #include "render2dsentence.h"
@@ -67,7 +68,7 @@ public:
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
 	////////////////////////////////////////////////////////////////
-	PopupDialogClass (int res_id);
+	PopupDialogClass (const DialogResource *dialog_resource);
 	virtual ~PopupDialogClass (void);
 
 	////////////////////////////////////////////////////////////////
@@ -84,7 +85,7 @@ public:
 	//
 	virtual void				Render (void) override;
 
-	virtual void Set_Title(const wchar_t* title);
+	virtual void Set_Title(const unichar_t* title);
 
 protected:
 
@@ -92,7 +93,7 @@ protected:
 	//	Protected methods
 	////////////////////////////////////////////////////////////////
 	void				Build_Background_Renderers (void);
-	
+
 	//
 	// Set whether or not background is darkened
 	//
@@ -106,7 +107,7 @@ protected:
 
 	////////////////////////////////////////////////////////////////
 	//	Protected member data
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	Render2DClass				BlackoutRenderer;
 	Render2DClass				BackgroundRenderer;
 	Render2DSentenceClass	TextRenderer;

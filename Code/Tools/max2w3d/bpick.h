@@ -17,22 +17,22 @@
 */
 
 /* $Header: /Commando/Code/Tools/max2w3d/bpick.h 6     10/28/97 6:08p Greg_h $ */
-/*********************************************************************************************** 
- ***                            Confidential - Westwood Studios                              *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Commando Tools - WWSkin                                      * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/Tools/max2w3d/bpick.h                        $* 
- *                                                                                             * 
- *                      $Author:: Greg_h                                                      $* 
- *                                                                                             * 
- *                     $Modtime:: 10/21/97 2:05p                                              $* 
- *                                                                                             * 
- *                    $Revision:: 6                                                           $* 
- *                                                                                             * 
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+/***********************************************************************************************
+ ***                            Confidential - Westwood Studios                              ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Commando Tools - WWSkin                                      *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/Tools/max2w3d/bpick.h                        $*
+ *                                                                                             *
+ *                      $Author:: Greg_h                                                      $*
+ *                                                                                             *
+ *                     $Modtime:: 10/21/97 2:05p                                              $*
+ *                                                                                             *
+ *                    $Revision:: 6                                                           $*
+ *                                                                                             *
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 
@@ -46,7 +46,7 @@
 
 /*
 **	To use the Bone picking class, you should inherit from this class
-** and implement the User_Picked... functions.  
+** and implement the User_Picked... functions.
 */
 class BonePickerUserClass
 {
@@ -64,15 +64,15 @@ public:
 class BonePickerClass : public PickNodeCallback, public PickModeCallback, public HitByNameDlgCallback
 {
 public:
-	
-	BonePickerClass(void) : User(NULL), BoneList(NULL), SinglePick(FALSE) {}
+
+	BonePickerClass(void) : User(NULL), BoneList(NULL), SinglePick(false) {}
 
 	/*
 	** Tell this class who is using it and optionally the list
 	** of bones to allow the user to select from.
 	** Call this before giving this class to MAX...
 	*/
-	void Set_User(BonePickerUserClass * user,int singlepick = FALSE, INodeTab * bonelist = NULL) { User = user; SinglePick = singlepick; BoneList = bonelist; }
+	void Set_User(BonePickerUserClass * user,int singlepick = false, INodeTab * bonelist = NULL) { User = user; SinglePick = singlepick; BoneList = bonelist; }
 
 	/*
 	** From BonePickNodeCallback:
@@ -84,22 +84,22 @@ public:
 	*/
 	BOOL HitTest(IObjParam *ip,HWND hWnd,ViewExp *vpt,IPoint2 m,int flags);
 	BOOL Pick(IObjParam *ip,ViewExp *vpt);
-		
+
 	void EnterMode(IObjParam *ip) { }
 	void ExitMode(IObjParam *ip) { }
 
 	PickNodeCallback * GetFilter() {return this;}
-	BOOL RightClick(IObjParam *ip,ViewExp *vpt) { return TRUE; }
-	
+	BOOL RightClick(IObjParam *ip,ViewExp *vpt) { return true; }
+
 	/*
 	** From HitByNameDlgCallback
 	*/
 	virtual TCHAR * dialogTitle(void);
 	virtual TCHAR * buttonText(void);
 	virtual BOOL singleSelect(void) { return SinglePick; }
-	virtual BOOL useFilter(void) { return TRUE; }
-	virtual BOOL useProc(void) { return TRUE; }
-	virtual BOOL doCustomHilite(void) { return FALSE; }
+	virtual BOOL useFilter(void) { return true; }
+	virtual BOOL useProc(void) { return true; }
+	virtual BOOL doCustomHilite(void) { return false; }
 	virtual BOOL filter(INode * inode);
 	virtual void proc(INodeTab & nodeTab);
 
@@ -107,7 +107,7 @@ protected:
 
 	/*
 	** The bone picker will pass the bones on to the "user" of
-	** the class.  
+	** the class.
 	*/
 	BonePickerUserClass * User;
 

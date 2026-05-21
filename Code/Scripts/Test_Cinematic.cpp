@@ -20,9 +20,9 @@
 *
 * FILE
 *
-* DESCRIPTION				   
-*											 
-* PROGRAMMER				 
+* DESCRIPTION
+*
+* PROGRAMMER
 *     Byon Garrabrant
 *
 * VERSION INFO
@@ -38,6 +38,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "wwlib/wwstring.h"
+#include <limits>
 
 #define		LAST_VALID_TIMESTAMP		999000.0f
 
@@ -61,7 +62,7 @@ DECLARE_SCRIPT (M00_Cinematic_Attack_Command_DLS, "AttackDuration=1.0:float")
 		Commands->Send_Custom_Event( obj, obj, 1, 1, Get_Float_Parameter("AttackDuration") );
 	}
 
-	void Custom( GameObject * obj, int type, uintptr_t param, GameObject * sender ) override
+	void Custom( GameObject * obj, int /*type*/, intptr_t /*param*/, GameObject * /*sender*/ ) override
 	{
 		Commands->Action_Reset( obj, 100 );
 
@@ -81,12 +82,12 @@ DECLARE_SCRIPT(Test_Cinematic_Primary_Killed, "CallbackID=:int")
 		SAVE_VARIABLE( custom_sent, 1 );
 	}
 
-	virtual	void Created (GameObject *game_obj) override
+	virtual	void Created (GameObject * /* game_obj */) override
 	{
 		custom_sent = false;
 	}
 
-	virtual	void	Killed( GameObject * obj, GameObject * killer ) override
+	virtual	void	Killed( GameObject * obj, GameObject * /* killer */ ) override
 	{
 		if (!custom_sent)
 		{
@@ -197,12 +198,12 @@ public:
 	/*
 	** Loading the control file, line-by-line
 	*/
-	void	Load_Control_File( const char * filename ) 
+	void	Load_Control_File( const char * filename )
 	{
 		Commands->Debug_Message( "Loading Control File %s\n", filename );
 
 		char full_filename[80];
-		snprintf( full_filename, sizeof(full_filename), "DATA\\%s", filename );
+		snprintf( full_filename, sizeof(full_filename), "DATA/%s", filename );
 //		FILE * in = fopen( full_filename, "rt" );
 		void *handle = Commands->Text_File_Open( filename );
 		if ( handle == nullptr ) {
@@ -220,7 +221,7 @@ public:
 
 			// Remove leading and trailing white space
 			while ( *line && *line <= ' ' )	line++;
-			int length = ::strlen( line );
+			size_t length = ::strlen( line );
 			while ( (length != 0) && (line[length-1] <= ' ') )	{
 				line[--length] = 0;
 			}
@@ -282,7 +283,7 @@ public:
 		}
 
 		// Remove trailing whitespace
-		int length = ::strlen( parameter );
+		size_t length = ::strlen( parameter );
 		while ( length && parameter[ length-1 ] <= ' ' ) {
 			parameter[ --length ] = 0;
 		}
@@ -341,7 +342,9 @@ public:
 		ControlLine * controls = Controls;
 		while ( controls != NULL ) {
 			Commands->Save_Data(saver, CHUNKID_CONTROL_TIME, sizeof( controls->Time ), &controls->Time );
-			int len = strlen( controls->Command ) + 1;
+			const size_t command_len = ::strlen( controls->Command ) + 1;
+			assert(command_len <= static_cast<size_t>(std::numeric_limits<int>::max()));
+			int len = static_cast<int>(command_len);
 			Commands->Save_Data(saver, CHUNKID_CONTROL_COMMAND_SIZE, sizeof( len ), &len );
 			Commands->Save_Data(saver, CHUNKID_CONTROL_COMMAND, len, controls->Command );
 //Commands->Debug_Message( "Saving Command %f %s\n", controls->Time, controls->Command );
@@ -872,7 +875,7 @@ public:
 	{
 		int onoff = atoi( Get_First_Parameter( params ) );
 		float time = atof( Get_Next_Parameter() );
-		
+
 		Commands->Enable_Letterbox(!!onoff,time);
 	}
 
@@ -890,14 +893,14 @@ public:
 	{
 		float opacity = atof( Get_First_Parameter( params ) );
 		float time = atof( Get_Next_Parameter() );
-		
+
 		Commands->Set_Screen_Fade_Opacity(opacity,time);
 	}
 
 	/*
 	**
 	*/
-	bool	Title_Match( char ** command, const char * title ) 
+	bool	Title_Match( char ** command, const char * title )
 	{
         if ( strnicmp( *command, title, strlen( title ) ) == 0 ) {
 			*command += strlen( title );
@@ -913,7 +916,7 @@ public:
 		return false;
 	}
 
-	void	Parse_Command( char *command ) 
+	void	Parse_Command( char *command )
 	{
 //		Commands->Debug_Message( "Parse %s\n", (int)command );
 
@@ -952,9 +955,9 @@ public:
 
 //		Commands->Debug_Message( "Cinematic Time %1.3f Frame %1.3f Bump Time %1.3f\n", Time, Time * 30.0f, bump_time );
 
-		// If Primary Destroyed, 
+		// If Primary Destroyed,
 		if ( PrimaryKilled ) {
-			// skip all timestamps < LAST_VALID_TIMESTAMP  
+			// skip all timestamps < LAST_VALID_TIMESTAMP
 			while ( Controls != NULL && Controls->Time <= LAST_VALID_TIMESTAMP ) {
 				Remove_Head_Control_Line();
 			}
@@ -1012,13 +1015,13 @@ public:
 		Parse_Commands( obj );
 	}
 
-	void Timer_Expired (GameObject* obj, int Timer_ID) override
+	void Timer_Expired (GameObject* obj, int /*timer_id*/) override
 	{
 //		Commands->Debug_Message("In Timer_Expired Get_Sync_Time is %d.\n", Commands->Get_Sync_Time());
 		Parse_Commands(obj);
 	}
 
-	void	Custom( GameObject * obj, int type, uintptr_t param, GameObject * sender ) override
+	void	Custom( GameObject * obj, int type, intptr_t param, GameObject * /*sender*/ ) override
 	{
 		if ( type == M00_CUSTOM_CINEMATIC_PRIMARY_KILLED ) {
 			if ( !PrimaryKilled ) {		// Prevent loops
@@ -1069,7 +1072,7 @@ TIME	Destroy_Object					SLOT
 TIME	Play_Animation					SLOT	ANIMATION_NAME	LOOPING	SUB_OBJ_NAME	IS_BLENDED
 TIME	Play_Audio						PRESET_NAME	HOST_SLOT	HOST_BONE_NAME
 TIME	Control_Camera					SLOT
-TIME	Send_Custon						[TO_ID/#TO_SLOT]	TYPE	[PARAM/#SLOT_PARAM]	
+TIME	Send_Custon						[TO_ID/#TO_SLOT]	TYPE	[PARAM/#SLOT_PARAM]
 TIME	Attach_To_Bone					SLOT	HOST_SLOT	HOST_BONE_NAME
 TIME	Attach_Script					SLOT	SCRIPT_NAME	"SCRIPT_PARAMETERS"
 TIME	Move_Slot						New_Slot, Old_Slot
@@ -1078,10 +1081,10 @@ TIME	Shake_Camera					SLOT, INTENSITY, DURATION
 TIME	Enable_Shadow					SLOT, [1/0]
 TIME	Enable_Letterbox				[1/0], TIME_TO_ANIMATE_IN
 TIME	Set_Screen_Fade_Color		RED,GREEN,BLUE,TIME_TO_FADE (all colors floating point 0.0-1.0)
-TIME	Set_Screen_Fade_Opacity		OPACITY,TIME_TO_FADE 
-	
+TIME	Set_Screen_Fade_Opacity		OPACITY,TIME_TO_FADE
 
-To fill a slot, Send_Custom to the controller with 
+
+To fill a slot, Send_Custom to the controller with
 type = M00_CUSTOM_CINEMATIC_SET_SLOT + SLOT_NUMBER
 parameter = OBJECT_ID
 

@@ -18,10 +18,10 @@
 
 //
 // Filename:     msgstatlist.cpp
-// Project:      
+// Project:
 // Author:       Tom Spencer-Smith
-// Date:         
-// Description:  
+// Date:
+// Description:
 //
 //------------------------------------------------------------------------------------
 #include "msgstatlist.h" // I WANNA BE FIRST!
@@ -62,7 +62,7 @@ void cMsgStatList::Init(int num_stats)
 void cMsgStatList::Increment_Num_Msg_Sent(int message_type, int increment)
 {
 	WWASSERT(message_type >= 0 && message_type < NumStats);
-	WWASSERT(increment > 0); 
+	WWASSERT(increment > 0);
 
 	PStat[message_type].Increment_Num_Msg_Sent(increment);
 	PStat[NumStats].Increment_Num_Msg_Sent(increment);
@@ -72,7 +72,7 @@ void cMsgStatList::Increment_Num_Msg_Sent(int message_type, int increment)
 void cMsgStatList::Increment_Num_Byte_Sent(int message_type, int increment)
 {
 	WWASSERT(message_type >= 0 && message_type < NumStats);
-	WWASSERT(increment > 0); 
+	WWASSERT(increment > 0);
 
 	PStat[message_type].Increment_Num_Byte_Sent(increment);
 	PStat[NumStats].Increment_Num_Byte_Sent(increment);
@@ -82,7 +82,7 @@ void cMsgStatList::Increment_Num_Byte_Sent(int message_type, int increment)
 void cMsgStatList::Increment_Num_Msg_Recd(int message_type, int increment)
 {
 	WWASSERT(message_type >= 0 && message_type < NumStats);
-	WWASSERT(increment > 0); 
+	WWASSERT(increment > 0);
 
 	PStat[message_type].Increment_Num_Msg_Recd(increment);
 	PStat[NumStats].Increment_Num_Msg_Recd(increment);
@@ -92,14 +92,14 @@ void cMsgStatList::Increment_Num_Msg_Recd(int message_type, int increment)
 void cMsgStatList::Increment_Num_Byte_Recd(int message_type, int increment)
 {
 	WWASSERT(message_type >= 0 && message_type < NumStats);
-	WWASSERT(increment > 0); 
+	WWASSERT(increment > 0);
 
 	PStat[message_type].Increment_Num_Byte_Recd(increment);
 	PStat[NumStats].Increment_Num_Byte_Recd(increment);
 }
 
 //-----------------------------------------------------------------------------
-DWORD cMsgStatList::Get_Num_Msg_Sent(int message_type) const
+unsigned int cMsgStatList::Get_Num_Msg_Sent(int message_type) const
 {
 	if (message_type == ALL_MESSAGES) {
 		message_type = NumStats;
@@ -110,7 +110,7 @@ DWORD cMsgStatList::Get_Num_Msg_Sent(int message_type) const
 }
 
 //-----------------------------------------------------------------------------
-DWORD cMsgStatList::Get_Num_Byte_Sent(int message_type) const
+unsigned int cMsgStatList::Get_Num_Byte_Sent(int message_type) const
 {
 	if (message_type == ALL_MESSAGES) {
 		message_type = NumStats;
@@ -121,7 +121,7 @@ DWORD cMsgStatList::Get_Num_Byte_Sent(int message_type) const
 }
 
 //-----------------------------------------------------------------------------
-DWORD cMsgStatList::Get_Num_Msg_Recd(int message_type) const
+unsigned int cMsgStatList::Get_Num_Msg_Recd(int message_type) const
 {
 	if (message_type == ALL_MESSAGES) {
 		message_type = NumStats;
@@ -132,7 +132,7 @@ DWORD cMsgStatList::Get_Num_Msg_Recd(int message_type) const
 }
 
 //-----------------------------------------------------------------------------
-DWORD cMsgStatList::Get_Num_Byte_Recd(int message_type) const
+unsigned int cMsgStatList::Get_Num_Byte_Recd(int message_type) const
 {
 	if (message_type == ALL_MESSAGES) {
 		message_type = NumStats;
@@ -143,7 +143,7 @@ DWORD cMsgStatList::Get_Num_Byte_Recd(int message_type) const
 }
 
 //-----------------------------------------------------------------------------
-DWORD cMsgStatList::Compute_Avg_Num_Byte_Sent(int message_type) const
+unsigned int cMsgStatList::Compute_Avg_Num_Byte_Sent(int message_type) const
 {
 	if (message_type == ALL_MESSAGES) {
 		message_type = NumStats;
@@ -154,7 +154,7 @@ DWORD cMsgStatList::Compute_Avg_Num_Byte_Sent(int message_type) const
 }
 
 //-----------------------------------------------------------------------------
-DWORD cMsgStatList::Compute_Avg_Num_Byte_Recd(int message_type) const
+unsigned int cMsgStatList::Compute_Avg_Num_Byte_Recd(int message_type) const
 {
 	if (message_type == ALL_MESSAGES) {
 		message_type = NumStats;
@@ -176,7 +176,7 @@ cMsgStat & cMsgStatList::Get_Stat(int message_type)
 }
 
 //-----------------------------------------------------------------------------
-void cMsgStatList::Set_Name(int message_type, LPCSTR name)
+void cMsgStatList::Set_Name(int message_type, const char *name)
 {
 	WWASSERT(message_type >= 0 && message_type < NumStats);
 
@@ -184,7 +184,7 @@ void cMsgStatList::Set_Name(int message_type, LPCSTR name)
 }
 
 //-----------------------------------------------------------------------------
-LPCSTR cMsgStatList::Get_Name(int message_type) const
+const char * cMsgStatList::Get_Name(int message_type) const
 {
 	WWASSERT(message_type >= 0 && message_type <= NumStats);
 

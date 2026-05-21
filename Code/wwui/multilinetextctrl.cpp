@@ -40,6 +40,7 @@
 #include "dialogbase.h"
 #include <winuser.h>
 #include <algorithm>
+#include <limits>
 
 
 //////////////////////////////////////////////////////////////////////
@@ -59,7 +60,7 @@ MultiLineTextCtrlClass::MultiLineTextCtrlClass (void)	:
 	//
 	//	Configure the renderers
 	//
-	StyleMgrClass::Assign_Font (&TextRenderer, StyleMgrClass::FONT_CONTROLS);	
+	StyleMgrClass::Assign_Font (&TextRenderer, StyleMgrClass::FONT_CONTROLS);
 	StyleMgrClass::Configure_Renderer (&ControlRenderer);
 	TextRenderer.Set_Texture_Size_Hint (256);
 
@@ -67,7 +68,7 @@ MultiLineTextCtrlClass::MultiLineTextCtrlClass (void)	:
 	//	We don't want the scroll bar getting focus
 	//
 	ScrollBarCtrl.Set_Wants_Focus (false);
-	ScrollBarCtrl.Set_Advise_Sink (this);	
+	ScrollBarCtrl.Set_Advise_Sink (this);
 	ScrollBarCtrl.Set_Is_Embedded (true);
 
 	// Calculate the no. of lines to scroll for each mouse wheel increment.
@@ -85,8 +86,8 @@ MultiLineTextCtrlClass::MultiLineTextCtrlClass (void)	:
 //////////////////////////////////////////////////////////////////////
 MultiLineTextCtrlClass::~MultiLineTextCtrlClass (void)
 {
-	ScrollBarCtrl.Set_Advise_Sink (NULL);	
-	
+	ScrollBarCtrl.Set_Advise_Sink (NULL);
+
 	if (Parent != NULL) {
 		Parent->Remove_Control (&ScrollBarCtrl);
 	}
@@ -146,8 +147,9 @@ MultiLineTextCtrlClass::Create_Text_Renderer (void)
 				dest = src_start;							\
 			} else {											\
 				size_t bytes	= ((char *)src_end - (char *)src_start);	\
-				size_t len		= bytes / sizeof (wchar_t);						\
-				::memcpy (dest.Get_Buffer (len + 1), src_start, bytes);	\
+				size_t len		= bytes / sizeof (unichar_t);						\
+				WWASSERT(len + 1 <= static_cast<size_t>(std::numeric_limits<int>::max())); \
+				::memcpy (dest.Get_Buffer (static_cast<int>(len + 1)), src_start, bytes);	\
 				dest.Peek_Buffer ()[len] = 0;										\
 			}
 
@@ -155,14 +157,14 @@ MultiLineTextCtrlClass::Create_Text_Renderer (void)
 	//
 	//	Determine where to start drawing the text from
 	//
-	const wchar_t *text_start = TextRenderer.Find_Row_Start (Title, ScrollPos);
-	const wchar_t *text_end	= TextRenderer.Find_Row_Start (Title, ScrollPos+RowsPerPage);
+	const unichar_t *text_start = TextRenderer.Find_Row_Start (Title, ScrollPos);
+	const unichar_t *text_end	= TextRenderer.Find_Row_Start (Title, ScrollPos+RowsPerPage);
 	if (text_start != NULL) {
 
 		//
 		//	Should we draw the text centered?
 		//
-		if ((Style & ES_CENTER) == ES_CENTER) {			
+		if ((Style & ES_CENTER) == ES_CENTER) {
 
 			float char_height = TextRenderer.Peek_Font ()->Get_Char_Height ();
 			RectClass text_rect = ClientRect;
@@ -170,8 +172,8 @@ MultiLineTextCtrlClass::Create_Text_Renderer (void)
 			//
 			//	Render each line separately
 			//
-			const wchar_t *line_start = text_start;
-			const wchar_t *line_end	= TextRenderer.Find_Row_Start (Title, ScrollPos + 1);			
+			const unichar_t *line_start = text_start;
+			const unichar_t *line_end	= TextRenderer.Find_Row_Start (Title, ScrollPos + 1);
 			for (int index = 0; index < RowsPerPage; index ++) {
 
 				//
@@ -234,7 +236,7 @@ MultiLineTextCtrlClass::Render (void)
 
 	//
 	//	Render the image...
-	//		
+	//
 	ControlRenderer.Render ();
 	TextRenderer.Render ();
 
@@ -257,7 +259,7 @@ MultiLineTextCtrlClass::Update_Client_Rect (void)
 	ClientRect = Rect;
 	ClientRect.Inflate (Vector2 (-5.0F * StyleMgrClass::Get_X_Scale (), -3.75F * StyleMgrClass::Get_Y_Scale ()));
 	ClientRect.Left	= int(ClientRect.Left);
-	ClientRect.Top		= int(ClientRect.Top);	
+	ClientRect.Top		= int(ClientRect.Top);
 	ClientRect.Right	= int(ClientRect.Right);
 	ClientRect.Bottom	= int(ClientRect.Bottom);
 
@@ -336,7 +338,7 @@ MultiLineTextCtrlClass::Update_Scroll_Bar_Visibility (void)
 		ClientRect = Rect;
 		ClientRect.Inflate (Vector2 (-5.0F * StyleMgrClass::Get_X_Scale (), -3.75F * StyleMgrClass::Get_Y_Scale ()));
 		ClientRect.Left	= int(ClientRect.Left);
-		ClientRect.Top		= int(ClientRect.Top);	
+		ClientRect.Top		= int(ClientRect.Top);
 		ClientRect.Right	= int(ClientRect.Right);
 		ClientRect.Bottom	= int(ClientRect.Bottom);
 
@@ -389,7 +391,7 @@ MultiLineTextCtrlClass::Calculate_Row_Count (void)
 //
 ////////////////////////////////////////////////////////////////
 bool
-MultiLineTextCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
+MultiLineTextCtrlClass::On_Key_Down (uint32 key_id, uint32 /* key_data */)
 {
 	switch (key_id)
 	{
@@ -462,7 +464,7 @@ MultiLineTextCtrlClass::Set_Scroll_Pos (int new_position)
 		ScrollPos = new_position;
 		ScrollPos = std::min (ScrollPos, RowCount - RowsPerPage);
 		ScrollPos = std::max (ScrollPos, 0);
-		ScrollBarCtrl.Set_Pos (ScrollPos, false);		
+		ScrollBarCtrl.Set_Pos (ScrollPos, false);
 		Set_Dirty ();
 	}
 
@@ -476,12 +478,12 @@ MultiLineTextCtrlClass::Set_Scroll_Pos (int new_position)
 //
 ////////////////////////////////////////////////////////////////
 void
-MultiLineTextCtrlClass::Set_Text (const wchar_t *title)
+MultiLineTextCtrlClass::Set_Text (const unichar_t *title)
 {
 	DialogControlClass::Set_Text (title);
 
 	ScrollPos		= 0;
-	RowCount			= 0;	
+	RowCount			= 0;
 	//Update_Scroll_Bar_Visibility ();
 	return ;
 }

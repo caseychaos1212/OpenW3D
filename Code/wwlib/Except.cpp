@@ -55,17 +55,18 @@
 #include "cpudetect.h"
 #include	"Except.h"
 //#include "debug.h"
-#include "mpu.h"
 //#include "commando/nat.h"
 #include "thread.h"
+#include "vector.h"
 #include "wwdebug.h"
 #include "wwmemlog.h"
+#include <limits>
 
 #include	<conio.h>
 #include	<imagehlp.h>
 #include <crtdbg.h>
 #include	<stdio.h>
-#include <inttypes.h>
+#include <cinttypes>
 
 #if defined(_M_IX86) || defined(__i386__)
 #define ARCH_REG_IP Eip
@@ -130,9 +131,9 @@ bool TryingToExit = false;
 ** Register dump variables. These are used to allow the game to restart from an arbitrary
 ** position after an exception occurs.
 */
-unsigned long ExceptionReturnStack = 0;
-unsigned long ExceptionReturnAddress = 0;
-unsigned long ExceptionReturnFrame = 0;
+unsigned int ExceptionReturnStack = 0;
+unsigned int ExceptionReturnAddress = 0;
+unsigned int ExceptionReturnFrame = 0;
 
 /*
 ** Number of times the exception handler has recursed. Recursions are bad.
@@ -434,7 +435,7 @@ void Dump_Exception_Info(EXCEPTION_POINTERS *e_info)
 	** The following are set for access violation only
 	*/
 	int access_read_write=-1;
-	unsigned long access_address = 0;
+	unsigned int access_address = 0;
 
 	if (e_info->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION) {
 		DebugString("Exception Handler: Exception is access violation\n");
@@ -576,7 +577,7 @@ void Dump_Exception_Info(EXCEPTION_POINTERS *e_info)
 	for (int thread = 0 ; thread < ThreadList.Count() ; thread++) {
 		sprintf(scrap, "  ID: %08X - %s", ThreadList[thread]->ThreadID, ThreadList[thread]->ThreadName);
 		Add_Txt(scrap);
-		if (GetCurrentThreadId() == ThreadList[thread]->ThreadID) {
+		if (ThreadClass::Get_Current_Thread_ID() == ThreadList[thread]->ThreadID) {
 			Add_Txt("   ***CURRENT THREAD***");
 		}
 		Add_Txt("\r\n");
@@ -585,7 +586,7 @@ void Dump_Exception_Info(EXCEPTION_POINTERS *e_info)
 	/*
 	** CPU type
 	*/
-	sprintf(scrap, "\r\nCPU %s, %d Mhz, Vendor: %s\r\n", (char*)CPUDetectClass::Get_Processor_String(), Get_RDTSC_CPU_Speed(), (char*)CPUDetectClass::Get_Processor_Manufacturer_Name());
+	sprintf(scrap, "\r\nCPU %s, Vendor: %s\r\n", (char*)CPUDetectClass::Get_Processor_String(), (char*)CPUDetectClass::Get_Processor_Manufacturer_Name());
 	Add_Txt(scrap);
 
 
@@ -608,17 +609,17 @@ void Dump_Exception_Info(EXCEPTION_POINTERS *e_info)
 	sprintf(scrap, "CS:%04x  SS:%04x  DS:%04x  ES:%04x  FS:%04x  GS:%04x\r\n", context->SegCs, context->SegSs, context->SegDs, context->SegEs, context->SegFs, context->SegGs);
 	Add_Txt(scrap);
 #elif defined(_M_AMD64) || defined(__x86_64__)
-	sprintf(scrap, "Rip:%I6408X\tRsp:%I6408X\tRbp:%I6408X\r\n", context->Rip, context->Rsp, context->Rbp);
+	sprintf(scrap, "Rip:%016llX\tRsp:%016llX\tRbp:%016llX\r\n", static_cast<unsigned long long>(context->Rip), static_cast<unsigned long long>(context->Rsp), static_cast<unsigned long long>(context->Rbp));
 	Add_Txt(scrap);
-	sprintf(scrap, "Eax:%I6408X\tEbx:%I6408X\tEcx:%I6408X\r\n", context->Rax, context->Rbx, context->Rcx);
+	sprintf(scrap, "Rax:%016llX\tRbx:%016llX\tRcx:%016llX\r\n", static_cast<unsigned long long>(context->Rax), static_cast<unsigned long long>(context->Rbx), static_cast<unsigned long long>(context->Rcx));
 	Add_Txt(scrap);
-	sprintf(scrap, "Edx:%I6408X\tEsi:%I6408X\tEdi:%I6408X\r\n", context->Rdx, context->Rsi, context->Rdi);
+	sprintf(scrap, "Rdx:%016llX\tRsi:%016llX\tRdi:%016llX\r\n", static_cast<unsigned long long>(context->Rdx), static_cast<unsigned long long>(context->Rsi), static_cast<unsigned long long>(context->Rdi));
 	Add_Txt(scrap);
-	sprintf(scrap, " R8:%I6408X\t R9:%I6408X\tR10:%I6408X\r\n", context->R8, context->R9, context->R10);
+	sprintf(scrap, " R8:%016llX\t R9:%016llX\tR10:%016llX\r\n", static_cast<unsigned long long>(context->R8), static_cast<unsigned long long>(context->R9), static_cast<unsigned long long>(context->R10));
 	Add_Txt(scrap);
-	sprintf(scrap, "R11:%I6408X\tR12:%I6408X\tR13:%I6408X\r\n", context->R11, context->R12, context->R13);
+	sprintf(scrap, "R11:%016llX\tR12:%016llX\tR13:%016llX\r\n", static_cast<unsigned long long>(context->R11), static_cast<unsigned long long>(context->R12), static_cast<unsigned long long>(context->R13));
 	Add_Txt(scrap);
-	sprintf(scrap, "R14:%I6408X\tR15:%I6408X\r\n", context->R14, context->R15);
+	sprintf(scrap, "R14:%016llX\tR15:%016llX\r\n", static_cast<unsigned long long>(context->R14), static_cast<unsigned long long>(context->R15));
 	Add_Txt(scrap);
 	sprintf(scrap, "EFlags:%08X \r\n", context->EFlags);
 	Add_Txt(scrap);
@@ -739,7 +740,7 @@ void Dump_Exception_Info(EXCEPTION_POINTERS *e_info)
 	sprintf(scrap, "\r\nBytes at CS:EIP (%08X)  : ", context->Eip);
 #elif defined(_M_AMD64) || defined(__x86_64__)
 	DebugString("RIP bytes dump...\n");
-	sprintf(scrap, "\r\nBytes at CS:RIP (%I6408X)  : ", context->Rip);
+	sprintf(scrap, "\r\nBytes at CS:RIP (%016llX)  : ", static_cast<unsigned long long>(context->Rip));
 #else
 #pragma error "Not implemented"
 #endif
@@ -765,7 +766,7 @@ void Dump_Exception_Info(EXCEPTION_POINTERS *e_info)
 	*/
 	DebugString("Stack dump...\n");
 	Add_Txt("Stack dump (* indicates possible code address) :\r\n");
-	unsigned long *stackptr = (unsigned long*) context->ARCH_REG_STACK;
+	unsigned int *stackptr = (unsigned int*) context->ARCH_REG_STACK;
 
 	for (int j=0 ; j<2048 ; j++) {
 		if (IsBadReadPtr(stackptr, 4)) {
@@ -853,15 +854,6 @@ int Exception_Handler(int exception_code, EXCEPTION_POINTERS *e_info)
 {
 	DebugString("Exception!\n");
 
-#ifdef DEMO_TIME_OUT
-	if ( !WindowedMode ) {
-		Load_Title_Page("TITLE.PCX", true);
-		MouseCursor->Release_Mouse();
-		MessageBoxA(MainWindow, "This demo has timed out. Thank you for playing Red Alert 2.","Byeee!", MB_ICONEXCLAMATION|MB_OK);
-		return (EXCEPTION_EXECUTE_HANDLER);
-	}
-#endif	//DEMO_TIME_OUT
-
 	/*
 	** If we were trying to quit and we got another exception then just shut down the whole shooting match right here.
 	*/
@@ -908,8 +900,10 @@ int Exception_Handler(int exception_code, EXCEPTION_POINTERS *e_info)
 		HANDLE debug_file;
 		DWORD	actual;
 		debug_file = CreateFileA("_except.txt", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-		if (debug_file != INVALID_HANDLE_VALUE){
-			WriteFile(debug_file, ExceptionText, strlen(ExceptionText), &actual, NULL);
+	if (debug_file != INVALID_HANDLE_VALUE){
+		const size_t text_length = ::strlen(ExceptionText);
+		WWASSERT(text_length <= std::numeric_limits<DWORD>::max());
+		WriteFile(debug_file, ExceptionText, static_cast<DWORD>(text_length), &actual, NULL);
 			CloseHandle (debug_file);
 
 #if (0)
@@ -953,8 +947,8 @@ int Exception_Handler(int exception_code, EXCEPTION_POINTERS *e_info)
 #endif //_DEBUG
 		TryingToExit = true;
 
-		unsigned long id = Get_Main_Thread_ID();
-		if (id != GetCurrentThreadId()) {
+		unsigned int id = Get_Main_Thread_ID();
+		if (id != ThreadClass::Get_Current_Thread_ID()) {
 			DebugString("Exiting due to exception in sub thread\n");
 			ExitProcess(EXIT_SUCCESS);
 		}
@@ -983,7 +977,7 @@ int Exception_Handler(int exception_code, EXCEPTION_POINTERS *e_info)
  * HISTORY:                                                                                    *
  *   8/30/2001 3:04PM ST : Created                                                             *
  *=============================================================================================*/
-void Register_Thread_ID(unsigned long thread_id, const char *thread_name, bool main_thread)
+void Register_Thread_ID(unsigned int thread_id, const char *thread_name, bool main_thread)
 {
 	WWMEMLOG(MEM_GAMEDATA);
 	if (thread_name) {
@@ -1024,7 +1018,7 @@ void Register_Thread_ID(unsigned long thread_id, const char *thread_name, bool m
  * HISTORY:                                                                                    *
  *   2/6/2002 9:40PM ST : Created                                                              *
  *=============================================================================================*/
-bool Register_Thread_Handle(unsigned long thread_id, HANDLE thread_handle)
+bool Register_Thread_Handle(unsigned int thread_id, HANDLE thread_handle)
 {
 	for (int i=0 ; i<ThreadList.Count() ; i++) {
 		if (ThreadList[i]->ThreadID == thread_id) {
@@ -1095,7 +1089,7 @@ HANDLE Get_Thread_Handle(int thread_index)
  * HISTORY:                                                                                    *
  *   8/30/2001 3:10PM ST : Created                                                             *
  *=============================================================================================*/
-void Unregister_Thread_ID(unsigned long thread_id, const char *thread_name)
+void Unregister_Thread_ID([[maybe_unused]] unsigned int thread_id, const char *thread_name)
 {
 	for (int i=0 ; i<ThreadList.Count() ; i++) {
 		if (strcmp(thread_name, ThreadList[i]->ThreadName) == 0) {
@@ -1123,7 +1117,7 @@ void Unregister_Thread_ID(unsigned long thread_id, const char *thread_name)
  * HISTORY:                                                                                    *
  *   12/6/2001 12:20PM ST : Created                                                            *
  *=============================================================================================*/
-unsigned long Get_Main_Thread_ID(void)
+unsigned int Get_Main_Thread_ID(void)
 {
 	for (int i=0 ; i<ThreadList.Count() ; i++) {
 		if (ThreadList[i]->Main) {
@@ -1183,7 +1177,7 @@ void Load_Image_Helper(void)
 
 		int symload = 0;
 
-		if (_SymInitialize != NULL && _SymInitialize(GetCurrentProcess(), NULL, FALSE)) {
+		if (_SymInitialize != NULL && _SymInitialize(GetCurrentProcess(), NULL, false)) {
 
 			if (_SymSetOptions != NULL) {
 				_SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_UNDNAME);
@@ -1299,7 +1293,7 @@ bool Lookup_Symbol(void *code_ptr, char *symbol, int &displacement)
  * HISTORY:                                                                                    *
  *   6/12/2001 11:57AM ST : Created                                                            *
  *=============================================================================================*/
-int Stack_Walk(void **return_addresses, int num_addresses, CONTEXT *context)
+int Stack_Walk(void **return_addresses, int num_addresses, CONTEXT * /* context */)
 {
 	return CaptureStackBackTrace(1, num_addresses, return_addresses, NULL);
 }
@@ -1318,7 +1312,7 @@ void Register_Application_Version_Callback(const char *(*app_ver_callback)(void)
 
 
 
-void Set_Exit_On_Exception(bool set)
+void Set_Exit_On_Exception(bool /* set */)
 {
 	ExitOnException = true;
 }

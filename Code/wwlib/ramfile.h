@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Command & Conquer                                            * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Code/wwlib/ramfile.h                              $* 
- *                                                                                             * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Command & Conquer                                            *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Code/wwlib/ramfile.h                              $*
+ *                                                                                             *
  *                      $Author:: Ian_l                                                       $*
- *                                                                                             * 
+ *                                                                                             *
  *                     $Modtime:: 10/31/01 2:02p                                              $*
- *                                                                                             * 
+ *                                                                                             *
  *                    $Revision:: 2                                                           $*
  *                                                                                             *
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #ifndef RAMFILE_H
@@ -59,8 +59,8 @@ class RAMFileClass : public FileClass
 		virtual int Size(void) override;
 		virtual int Write(void const * buffer, int size) override;
 		virtual void Close(void) override;
-		virtual unsigned long Get_Date_Time(void) override {return(0);}
-		virtual bool Set_Date_Time(unsigned long ) override {return(true);}
+		virtual unsigned int Get_Date_Time(void) override {return(0);}
+		virtual bool Set_Date_Time(unsigned int ) override {return(true);}
 		virtual void Error(int , int = false, char const * =NULL) override {}
 		virtual void Bias(int start, int length=-1) override;
 

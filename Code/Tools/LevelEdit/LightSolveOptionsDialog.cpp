@@ -67,16 +67,15 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // LightSolveOptionsDialogClass message handlers
 
-BOOL LightSolveOptionsDialogClass::OnInitDialog() 
+BOOL LightSolveOptionsDialogClass::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	return TRUE;
+	return true;
 }
 
-void LightSolveOptionsDialogClass::OnOK() 
+void LightSolveOptionsDialogClass::OnOK()
 {
 	LightSolveContextClass context;
-	SceneEditorClass *scene = ::Get_Scene_Editor ();
 
 	//
 	// Setup the solve options
@@ -88,8 +87,8 @@ void LightSolveOptionsDialogClass::OnOK()
 	// Run the solve
 	//
 	LightSolveProgressDialog::Solve(context,this);
-	
-	CDialog::OnOK ();	
+
+	CDialog::OnOK ();
 	return ;
 }
 

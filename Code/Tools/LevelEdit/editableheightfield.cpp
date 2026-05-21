@@ -161,7 +161,7 @@ EditableHeightfieldClass::~EditableHeightfieldClass (void)
 //
 //////////////////////////////////////////////////////////////////////
 const EditableHeightfieldClass &
-EditableHeightfieldClass::operator= (const EditableHeightfieldClass &src)
+EditableHeightfieldClass::operator= (const EditableHeightfieldClass &/* src */)
 {
 	return *this;
 }
@@ -222,7 +222,7 @@ EditableHeightfieldClass::Set_Dimensions (float width, float height, float meter
 	GridPointsX		= int(width / Density);
 	GridPointsY		= int(height / Density);
 	GridPointsX		= std::max (1, GridPointsX);
-	GridPointsY		= std::max (1, GridPointsY);	
+	GridPointsY		= std::max (1, GridPointsY);
 	GridPointCount	= (GridPointsX * GridPointsY);
 	Width				= (GridPointsX * Density);
 	Height			= (GridPointsY * Density);
@@ -265,7 +265,7 @@ EditableHeightfieldClass::Allocate_Grid (void)
 	//	Allocate the arrays
 	//
 	GridNormals	= new Vector3[GridPointCount];
-	Grid			= new Vector3[GridPointCount];	
+	Grid			= new Vector3[GridPointCount];
 
 	//
 	//	Allocate and initiailze the array of quad flags
@@ -297,14 +297,14 @@ EditableHeightfieldClass::Initialize_Grid (void)
 	//
 	for (int y_pos = 0; y_pos < GridPointsY; y_pos ++) {
 		int start_index = (y_pos * GridPointsX);
-		float x_value = 0;			
+		float x_value = 0;
 
 		for (int x_pos = 0; x_pos < GridPointsX; x_pos ++) {
-			
+
 			//
 			//	Simply set the x,y,z position of this vertex
 			//
-			Grid[start_index + x_pos].Set (x_value, y_value, 0.0F);			
+			Grid[start_index + x_pos].Set (x_value, y_value, 0.0F);
 			x_value += Density;
 
 			//
@@ -314,7 +314,7 @@ EditableHeightfieldClass::Initialize_Grid (void)
 
 			//
 			//	Calculate the UV coordinate for this texture at this vertex
-			//			
+			//
 			for (int index = 0; index < MAX_TEXTURE_PASSES; index ++) {
 				if (MaterialList[index] != NULL) {
 					float meters_per_texture = MaterialList[index]->Get_Meters_Per_Tile ();
@@ -337,7 +337,7 @@ EditableHeightfieldClass::Initialize_Grid (void)
 	Update_Normals (0, 0, GridPointsX - 1, GridPointsY - 1);
 	Update_Patch_Pos_And_Normals (0, 0, GridPointsX - 1, GridPointsY - 1);
 	Update_UVs ();
-	Update_Texture_Quad_List (0, 0, GridPointsX - 1, GridPointsY - 1);	
+	Update_Texture_Quad_List (0, 0, GridPointsX - 1, GridPointsY - 1);
 	return ;
 }
 
@@ -351,7 +351,7 @@ void
 EditableHeightfieldClass::Free_Grid (void)
 {
 	SAFE_DELETE_ARRAY (Grid);
-	SAFE_DELETE_ARRAY (GridNormals);	
+	SAFE_DELETE_ARRAY (GridNormals);
 	SAFE_DELETE_ARRAY (QuadFlags);
 
 	//
@@ -395,9 +395,6 @@ EditableHeightfieldClass::Update_Texture_Quad_List (int min_x, int min_y, int ma
 	max_patch_x = std::min (max_patch_x, (PatchesX - 1));
 	max_patch_y = std::min (max_patch_y, (PatchesY - 1));
 
-	int row_count = GridPointsY - 1;
-	int col_count = GridPointsX - 1;
-
 	int quads_per_patch_x = PatchGridPointsX - 1;
 	int quads_per_patch_y = PatchGridPointsY - 1;
 
@@ -406,7 +403,7 @@ EditableHeightfieldClass::Update_Texture_Quad_List (int min_x, int min_y, int ma
 	//	they should be rendered in...
 	//
 	for (int patch_y = min_patch_y; patch_y <= max_patch_y; patch_y ++) {
-		for (int patch_x = min_patch_x; patch_x <= max_patch_x; patch_x ++) {			
+		for (int patch_x = min_patch_x; patch_x <= max_patch_x; patch_x ++) {
 
 			//
 			//	Reset the passes for this patch
@@ -444,7 +441,7 @@ EditableHeightfieldClass::Update_Texture_Quad_List (int min_x, int min_y, int ma
 					//
 					//	Calculate what vertices define the four corners of this quad
 					//
-					int start_index = (quad_y * GridPointsX) + quad_x;					
+					int start_index = (quad_y * GridPointsX) + quad_x;
 					int v0_index = start_index;
 					int v1_index = start_index + 1;
 					int v2_index = start_index + GridPointsX + 1;
@@ -469,7 +466,7 @@ EditableHeightfieldClass::Update_Texture_Quad_List (int min_x, int min_y, int ma
 					//
 					bool is_set = false;
 					for (int layer = 0; layer < MAX_TEXTURE_PASSES; layer ++) {
-						
+
 						//
 						//	Is there a significant influence from one of the textures on this quad?
 						//
@@ -535,7 +532,7 @@ EditableHeightfieldClass::Set_Material (int index, TerrainMaterialClass *materia
 	if (index < 0 || index >= MAX_TEXTURE_PASSES) {
 		return ;
 	}
-	
+
 	//
 	//	Store this material in its slot
 	//
@@ -567,10 +564,10 @@ EditableHeightfieldClass::On_Material_Changed (int index)
 	/*for (int y_pos = 0; y_pos < GridPointsY; y_pos ++) {
 		int start_index = (y_pos * GridPointsX);
 		for (int x_pos = 0; x_pos < GridPointsX; x_pos ++) {
-			
+
 			//
 			//	Calculate the UV coordinate for this texture at this vertex
-			//			
+			//
 			float meters_per_texture = MaterialList[index]->Get_Meters_Per_Tile ();
 			float u_value = Grid[start_index + x_pos].X / meters_per_texture;
 			float v_value = Grid[start_index + x_pos].Y / meters_per_texture;
@@ -581,7 +578,7 @@ EditableHeightfieldClass::On_Material_Changed (int index)
 	//
 	//	Now, make each patch update its internal rendering structures
 	//
-	int patch_count = PatchesX * PatchesY; 
+	int patch_count = PatchesX * PatchesY;
 	for (int patch_index = 0; patch_index < patch_count; patch_index ++) {
 		PatchGrid[patch_index]->Update_UVs ();
 	}
@@ -617,7 +614,7 @@ EditableHeightfieldClass::Update_Normals (int min_x, int min_y, int max_x, int m
 	for (y_pos = min_y; y_pos <= max_y; y_pos ++) {
 		int vert_index = (y_pos * GridPointsX) + min_x;
 		for (int x_pos = min_x; x_pos <= max_x; x_pos ++) {
-			
+
 			//
 			//	Initialize this normal
 			//
@@ -656,11 +653,9 @@ EditableHeightfieldClass::Update_Normals (int min_x, int min_y, int max_x, int m
 			//
 			if (y_pos > 0 && x_pos < (GridPointsX - 1)) {
 				int q1_v0_index = vert_index - GridPointsX;
-				int q1_v1_index = (vert_index - GridPointsX) + 1;
 				int q1_v2_index = vert_index + 1;
 				int q1_v3_index = vert_index;
 				const Vector3 &q1_v0 = Grid[q1_v0_index];
-				const Vector3 &q1_v1 = Grid[q1_v1_index];
 				const Vector3 &q1_v2 = Grid[q1_v2_index];
 				const Vector3 &q1_v3 = Grid[q1_v3_index];
 				Vector3 q1_normal2 = Vector3::Cross_Product (q1_v3 - q1_v2, q1_v0 - q1_v2);
@@ -692,11 +687,9 @@ EditableHeightfieldClass::Update_Normals (int min_x, int min_y, int max_x, int m
 				int q3_v0_index = vert_index - 1;
 				int q3_v1_index = vert_index;
 				int q3_v2_index = vert_index + GridPointsX;
-				int q3_v3_index = vert_index + GridPointsX - 1;
 				const Vector3 &q3_v0 = Grid[q3_v0_index];
 				const Vector3 &q3_v1 = Grid[q3_v1_index];
 				const Vector3 &q3_v2 = Grid[q3_v2_index];
-				const Vector3 &q3_v3 = Grid[q3_v3_index];
 				Vector3 q3_normal1 = Vector3::Cross_Product (q3_v2 - q3_v1, q3_v0 - q3_v1);
 				GridNormals[vert_index] += q3_normal1;
 			}
@@ -704,7 +697,7 @@ EditableHeightfieldClass::Update_Normals (int min_x, int min_y, int max_x, int m
 			GridNormals[vert_index ++].Normalize ();
 		}
 	}
-	
+
 	return ;
 }
 
@@ -727,7 +720,7 @@ EditableHeightfieldClass::Initialize_Material (void)
 
 	//
 	//	Allocate a test texture
-	//	
+	//
 	/*full_path = ::Get_File_Mgr ()->Make_Full_Path ("Heightfield\\L03_bushes.tga");
 	MaterialList[1] = new TerrainMaterialClass;
 	MaterialList[1]->Set_Texture (full_path);
@@ -735,7 +728,7 @@ EditableHeightfieldClass::Initialize_Material (void)
 
 	//
 	//	Allocate a test texture
-	//	
+	//
 	full_path = ::Get_File_Mgr ()->Make_Full_Path ("Heightfield\\cht_GryStn.tga");
 	MaterialList[2] = new TerrainMaterialClass;
 	MaterialList[2]->Set_Texture (full_path);
@@ -743,7 +736,7 @@ EditableHeightfieldClass::Initialize_Material (void)
 
 	//
 	//	Allocate a test texture
-	//	
+	//
 	full_path = ::Get_File_Mgr ()->Make_Full_Path ("Heightfield\\cht_snwmts.tga");
 	MaterialList[3] = new TerrainMaterialClass;
 	MaterialList[3]->Set_Texture (full_path);
@@ -751,7 +744,7 @@ EditableHeightfieldClass::Initialize_Material (void)
 
 	//
 	//	Allocate a test texture
-	//	
+	//
 	full_path = ::Get_File_Mgr ()->Make_Full_Path ("Heightfield\\lv8_dirt2.tga");
 	MaterialList[4] = new TerrainMaterialClass;
 	MaterialList[4]->Set_Texture (full_path);
@@ -759,7 +752,7 @@ EditableHeightfieldClass::Initialize_Material (void)
 
 	//
 	//	Allocate a test texture
-	//	
+	//
 	full_path = ::Get_File_Mgr ()->Make_Full_Path ("Heightfield\\L03_lav001.tga");
 	MaterialList[5] = new TerrainMaterialClass;
 	MaterialList[5]->Set_Texture (full_path);
@@ -767,12 +760,12 @@ EditableHeightfieldClass::Initialize_Material (void)
 
 	//
 	//	Allocate a test texture
-	//	
+	//
 	full_path = ::Get_File_Mgr ()->Make_Full_Path ("Heightfield\\L03_bchsnd.tga");
 	MaterialList[6] = new TerrainMaterialClass;
 	MaterialList[6]->Set_Texture (full_path);
 	MaterialList[6]->Set_Meters_Per_Tile (25.0F);*/
-	return ;	
+	return ;
 }
 
 
@@ -790,7 +783,7 @@ EditableHeightfieldClass::Free_Material (void)
 	for (int index = 0; index < MAX_TEXTURE_PASSES; index ++) {
 		REF_PTR_RELEASE (MaterialList[index]);
 	}
-	
+
 	return ;
 }
 
@@ -818,7 +811,7 @@ EditableHeightfieldClass::Deform_Heightfield
 
 	Vector3 center;
 	Matrix3D::Transform_Vector (world_to_obj_tm, world_space_center, &center);
-	
+
 	//
 	//	Offset the affect verts
 	//
@@ -846,7 +839,7 @@ EditableHeightfieldClass::Deform_Heightfield
 		int curr_offset = (y_pos * GridPointsX) + min_x;
 
 		for (int x_pos = min_x; x_pos <= max_x; x_pos ++) {
-			
+
 			Vector3 &vert_pos = Grid[curr_offset];
 
 			//
@@ -859,35 +852,35 @@ EditableHeightfieldClass::Deform_Heightfield
 			//	Is this vertex inside the affected region?
 			//
 			if (dist <= outter_radius) {
-				
+
 				//
 				//	Calculate what percentage this vertex is affected by the deformation
 				//
-				float percent = 1.0F;				
+				float percent = 1.0F;
 				if (dist > inner_radius && delta_radius > 0.0F) {
 					percent = 1.0F - ((dist - inner_radius) / delta_radius);
 				}
-				
+
 				//
 				//	Scale the amount and apply it to the z-position of the vertex
 				//
 				float delta_amount = percent * amount;
 				vert_pos.Z += delta_amount;
 			}
-			
+
 			//
 			//	Advance to the next vertex
 			//
 			curr_offset ++;
 		}
 	}
-	
+
 	//
 	//	Update the normals of the affected verts
 	//
 	Update_Normals (min_x, min_y, max_x, max_y);
 	Update_Patch_Pos_And_Normals (min_x, min_y, max_x, max_y);
-	Update_UVs ();	
+	Update_UVs ();
 	return ;
 }
 
@@ -901,7 +894,7 @@ void
 EditableHeightfieldClass::Smooth_Foundation_Heightfield
 (
 	const Vector3 &	world_space_center,
-	float					amount,
+	float					/* amount */,
 	float					inner_radius,
 	float					outter_radius
 )
@@ -915,7 +908,7 @@ EditableHeightfieldClass::Smooth_Foundation_Heightfield
 
 	Vector3 center;
 	Matrix3D::Transform_Vector (world_to_obj_tm, world_space_center, &center);
-	
+
 	//
 	//	Offset the affect verts
 	//
@@ -946,7 +939,7 @@ EditableHeightfieldClass::Smooth_Foundation_Heightfield
 		int curr_offset = (y_pos * GridPointsX) + min_x;
 
 		for (int x_pos = min_x; x_pos <= max_x; x_pos ++) {
-			
+
 			Vector3 &vert_pos = Grid[curr_offset];
 
 			//
@@ -963,7 +956,7 @@ EditableHeightfieldClass::Smooth_Foundation_Heightfield
 				avg_height += vert_pos.Z;
 				count ++;
 			}
-			
+
 			//
 			//	Advance to the next vertex
 			//
@@ -988,7 +981,7 @@ EditableHeightfieldClass::Smooth_Foundation_Heightfield
 		int curr_offset = (y_pos * GridPointsX) + min_x;
 
 		for (int x_pos = min_x; x_pos <= max_x; x_pos ++) {
-			
+
 			Vector3 &vert_pos = Grid[curr_offset];
 
 			//
@@ -1001,15 +994,15 @@ EditableHeightfieldClass::Smooth_Foundation_Heightfield
 			//	Is this vertex inside the affected region?
 			//
 			if (dist <= outter_radius) {
-				
+
 				//
 				//	Calculate what percentage this vertex is affected by the deformation
 				//
-				float percent = 1.0F;				
+				float percent = 1.0F;
 				if (dist > inner_radius && delta_radius > 0.0F) {
 					percent = 1.0F - ((dist - inner_radius) / delta_radius);
 				}
-				
+
 				//
 				//	Scale the amount and apply it to the z-position of the vertex
 				//
@@ -1017,20 +1010,20 @@ EditableHeightfieldClass::Smooth_Foundation_Heightfield
 				float z_value = (vert_pos.Z - avg_height) * real_percent;
 				vert_pos.Z -= z_value;
 			}
-			
+
 			//
 			//	Advance to the next vertex
 			//
 			curr_offset ++;
 		}
 	}
-	
+
 	//
 	//	Update the normals of the affected verts
 	//
 	Update_Normals (min_x, min_y, max_x, max_y);
 	Update_Patch_Pos_And_Normals (min_x, min_y, max_x, max_y);
-	Update_UVs ();	
+	Update_UVs ();
 	return ;
 }
 
@@ -1044,7 +1037,7 @@ void
 EditableHeightfieldClass::Smooth_Heightfield
 (
 	const Vector3 &	world_space_center,
-	float					amount,
+	float					/* amount */,
 	float					inner_radius,
 	float					outter_radius
 )
@@ -1058,7 +1051,7 @@ EditableHeightfieldClass::Smooth_Heightfield
 
 	Vector3 center;
 	Matrix3D::Transform_Vector (world_to_obj_tm, world_space_center, &center);
-	
+
 	//
 	//	Offset the affect verts
 	//
@@ -1081,7 +1074,7 @@ EditableHeightfieldClass::Smooth_Heightfield
 	static const Vector2i INDEX_RING_OFFSETS[] =
 	{
 		Vector2i (-1, -1),	Vector2i (0, -1),	Vector2i (+1, -1),
-		Vector2i (-1, 0),								Vector2i (+1, 0), 
+		Vector2i (-1, 0),								Vector2i (+1, 0),
 		Vector2i (-1, +1),	Vector2i (0, +1),	Vector2i (+1, +1)
 	};
 
@@ -1100,7 +1093,7 @@ EditableHeightfieldClass::Smooth_Heightfield
 		int curr_offset = (y_pos * GridPointsX) + min_x;
 
 		for (int x_pos = min_x; x_pos <= max_x; x_pos ++) {
-			
+
 			Vector3 &vert_pos = Grid[curr_offset];
 
 			//
@@ -1113,15 +1106,15 @@ EditableHeightfieldClass::Smooth_Heightfield
 			//	Is this vertex inside the affected region?
 			//
 			if (dist <= outter_radius) {
-				
+
 				//
 				//	Calculate what percentage this vertex is affected by the deformation
 				//
-				float percent = 1.0F;				
+				float percent = 1.0F;
 				if (dist > inner_radius && delta_radius > 0.0F) {
 					percent = 1.0F - ((dist - inner_radius) / delta_radius);
 				}
-				
+
 				//
 				//	Scale the amount and apply it to the z-position of the vertex
 				//
@@ -1137,7 +1130,7 @@ EditableHeightfieldClass::Smooth_Heightfield
 				for (int index = 0; index < 7; index ++) {
 					int new_x_pos = x_pos + INDEX_RING_OFFSETS[index].I;
 					int new_y_pos = y_pos + INDEX_RING_OFFSETS[index].J;
-					
+
 					//
 					//	If there is a vertex in this position, the take
 					// into consideration its height
@@ -1164,7 +1157,7 @@ EditableHeightfieldClass::Smooth_Heightfield
 				new_height_list.Add (z_value);
 				new_height_list_pos.Add (curr_offset);
 			}
-			
+
 			//
 			//	Advance to the next vertex
 			//
@@ -1176,20 +1169,20 @@ EditableHeightfieldClass::Smooth_Heightfield
 	//	Now, loop over all the verts in this region and apply the new heights
 	//
 	for (int index = 0; index < new_height_list.Count (); index ++) {
-		
+
 		//
 		//	Set this vertex's height
 		//
 		Vector3 &vert_pos = Grid[new_height_list_pos[index]];
 		vert_pos.Z = new_height_list[index];
 	}
-	
+
 	//
 	//	Update the normals of the affected verts
 	//
 	Update_Normals (min_x, min_y, max_x, max_y);
 	Update_Patch_Pos_And_Normals (min_x, min_y, max_x, max_y);
-	Update_UVs ();	
+	Update_UVs ();
 	return ;
 }
 
@@ -1235,7 +1228,7 @@ EditableHeightfieldClass::Cutout_Heightfield
 	for (int quad_y = min_y; quad_y <= max_y; quad_y ++) {
 		int quad_index = (quad_y * (GridPointsX - 1)) + min_x;
 		for (int quad_x = min_x; quad_x <= max_x; quad_x ++) {
-			
+
 			//
 			//	Set the bits that specify this quad is not to be rendered
 			//
@@ -1251,7 +1244,7 @@ EditableHeightfieldClass::Cutout_Heightfield
 			quad_index ++;
 		}
 	}
-	
+
 	//
 	//	Update the texture rendering lists
 	//
@@ -1285,7 +1278,7 @@ EditableHeightfieldClass::Paint_Heightfield
 
 	Vector3 center;
 	Matrix3D::Transform_Vector (world_to_obj_tm, world_space_center, &center);
-	
+
 	//
 	//	Offset the affect verts
 	//
@@ -1313,7 +1306,7 @@ EditableHeightfieldClass::Paint_Heightfield
 		int curr_offset = (y_pos * GridPointsX) + min_x;
 
 		for (int x_pos = min_x; x_pos <= max_x; x_pos ++) {
-			
+
 			Vector3 &vert_pos = Grid[curr_offset];
 
 			//
@@ -1326,43 +1319,39 @@ EditableHeightfieldClass::Paint_Heightfield
 			//	Is this vertex inside the affected region?
 			//
 			if (dist <= outter_radius) {
-				
+
 				//
 				//	Calculate what percentage this vertex is affected by the deformation
 				//
-				float percent = 1.0F;				
+				float percent = 1.0F;
 				if (dist > inner_radius && delta_radius > 0.0F) {
 					percent = 1.0F - ((dist - inner_radius) / delta_radius);
 				}
-				
+
 				//
 				//	Scale the amount and apply it to the z-position of the vertex
 				//
 				float delta_amount = percent * amount;
-				
+
 				//
 				//	Determine how much influence each of the other texture channel had
 				//
-				float amount					= TextureWeights[texture_index][curr_offset];
-				float old_remainder_amount	= 1.0F - amount;
-
-				if (old_remainder_amount < 0 || old_remainder_amount > 1.0F) {
-					int test = 0;
-				}
+				float weight_amount					= TextureWeights[texture_index][curr_offset];
+				float old_remainder_amount	= 1.0F - weight_amount;
 
 				//
 				//	Increment the amount of influence for this texture channel
 				//
-				float new_amount	= amount + delta_amount;
+				float new_amount	= weight_amount + delta_amount;
 				new_amount			= WWMath::Clamp (new_amount, 0.0F, 1.0F);
 
 				//
 				//	Calculate how much influence is left for the other texture channels
 				//
 				float remainder = (1.0F - new_amount);
-				
+
 				if (old_remainder_amount != 0.0F) {
-					
+
 					//
 					//	Reduce the amount of influence each pass has after this operation...
 					//
@@ -1376,14 +1365,14 @@ EditableHeightfieldClass::Paint_Heightfield
 
 				TextureWeights[texture_index][curr_offset] = new_amount;
 			}
-			
+
 			//
 			//	Advance to the next vertex
 			//
 			curr_offset ++;
 		}
 	}
-	
+
 	//
 	//	Update the texture rendering lists
 	//
@@ -1411,7 +1400,7 @@ EditableHeightfieldClass::Save (ChunkSaveClass &csave)
 		WRITE_MICRO_CHUNK (csave, VARID_GRID_HEIGHT,				Height);
 		WRITE_MICRO_CHUNK (csave, VARID_GRID_DENSITY,			Density);
 
-		int texture_passes = MAX_TEXTURE_PASSES;		
+		int texture_passes = MAX_TEXTURE_PASSES;
 		WRITE_MICRO_CHUNK (csave, VARID_MAX_TEXTURE_PASSES,	texture_passes);
 
 	csave.End_Chunk ();
@@ -1424,7 +1413,7 @@ EditableHeightfieldClass::Save (ChunkSaveClass &csave)
 		for (index = 0; index < GridPointCount; index ++) {
 			csave.Write (&Grid[index].Z, sizeof (float));
 		}
-				
+
 	csave.End_Chunk ();
 
 	//
@@ -1435,13 +1424,13 @@ EditableHeightfieldClass::Save (ChunkSaveClass &csave)
 		//
 		//	Save the array of texture weights per vertex per pass
 		//
-		for (index = 0; index < GridPointCount; index ++) {			
+		for (index = 0; index < GridPointCount; index ++) {
 			for (int pass = 0; pass < MAX_TEXTURE_PASSES; pass ++) {
 				csave.Write (&TextureWeights[pass][index], sizeof (float));
 			}
 		}
-				
-	csave.End_Chunk ();	
+
+	csave.End_Chunk ();
 
 	//
 	//	Now, write out the array of quad flags
@@ -1450,7 +1439,7 @@ EditableHeightfieldClass::Save (ChunkSaveClass &csave)
 
 		int quad_count = (GridPointsX - 1) * (GridPointsY - 1);
 		csave.Write (QuadFlags, sizeof (uint8) * quad_count);
-				
+
 	csave.End_Chunk ();
 
 	//
@@ -1459,7 +1448,7 @@ EditableHeightfieldClass::Save (ChunkSaveClass &csave)
 	csave.Begin_Chunk (CHUNKID_MATERIAL_LIST);
 
 		for (index = 0; index < MAX_TEXTURE_PASSES; index ++) {
-			
+
 			//
 			//	Is there a material to save?
 			//
@@ -1481,7 +1470,7 @@ EditableHeightfieldClass::Save (ChunkSaveClass &csave)
 				csave.End_Chunk ();
 			}
 		}
-				
+
 	csave.End_Chunk ();
 
 	return true;
@@ -1504,7 +1493,7 @@ EditableHeightfieldClass::Load_Materials (ChunkLoadClass &cload)
 
 	while (cload.Open_Chunk ()) {
 		switch (cload.Cur_Chunk_ID ()) {
-			
+
 			//
 			//	Load all the variables from this chunk
 			//
@@ -1522,7 +1511,7 @@ EditableHeightfieldClass::Load_Materials (ChunkLoadClass &cload)
 				CString full_texture_path	= material->Get_Texture_Name ();
 				CString rel_texture_path	= ::Get_File_Mgr ()->Make_Relative_Path (full_texture_path);
 				material->Set_Texture (rel_texture_path);
-				
+
 
 				//
 				//	Insert the material into our list
@@ -1555,7 +1544,7 @@ EditableHeightfieldClass::Load (ChunkLoadClass &cload)
 
 	while (cload.Open_Chunk ()) {
 		switch (cload.Cur_Chunk_ID ()) {
-			
+
 			//
 			//	Load all the variables from this chunk
 			//
@@ -1580,7 +1569,7 @@ EditableHeightfieldClass::Load (ChunkLoadClass &cload)
 				//
 				//	Read the array of texture weights per vertex per pass
 				//
-				for (int index = 0; index < GridPointCount; index ++) {			
+				for (int index = 0; index < GridPointCount; index ++) {
 					for (int pass = 0; pass < MAX_TEXTURE_PASSES; pass ++) {
 						cload.Read (&TextureWeights[pass][index], sizeof (float));
 					}
@@ -1641,14 +1630,14 @@ EditableHeightfieldClass::Load_Variables (ChunkLoadClass &cload)
 			READ_MICRO_CHUNK (cload, VARID_GRID_PT_COUNT,			GridPointCount);
 			READ_MICRO_CHUNK (cload, VARID_GRID_WIDTH,				Width);
 			READ_MICRO_CHUNK (cload, VARID_GRID_HEIGHT,				Height);
-			READ_MICRO_CHUNK (cload, VARID_GRID_DENSITY,				Density);			
-			READ_MICRO_CHUNK (cload, VARID_MAX_TEXTURE_PASSES,		texture_passes);			
+			READ_MICRO_CHUNK (cload, VARID_GRID_DENSITY,				Density);
+			READ_MICRO_CHUNK (cload, VARID_MAX_TEXTURE_PASSES,		texture_passes);
 		}
 
 		cload.Close_Micro_Chunk ();
 	}
 
-	WWASSERT (texture_passes == MAX_TEXTURE_PASSES);	
+	WWASSERT (texture_passes == MAX_TEXTURE_PASSES);
 
 	//
 	//	Allocate and initialize the grid and supporting data structures
@@ -1768,7 +1757,7 @@ EditableHeightfieldClass::Create
 	//
 	int stride			= (((bmp_info.bmWidth * 3) + 3) & ~3);
 	uint8 *bmp_bits	= new uint8[stride * bmp_info.bmHeight];
-	
+
 	//
 	//	Get the bitmap data
 	//
@@ -1792,7 +1781,7 @@ EditableHeightfieldClass::Create
 	for (int y_pos = 0; y_pos < GridPointsY; y_pos ++) {
 		int start_index = (y_pos * GridPointsX);
 		for (int x_pos = 0; x_pos < GridPointsX; x_pos ++) {
-			
+
 			float x_percent = (float)x_pos / (float)(GridPointsX - 1);
 			float y_percent = (float)y_pos / (float)(GridPointsY - 1);
 
@@ -1847,7 +1836,7 @@ EditableHeightfieldClass::Create
 					float intensity = total_intensity / (count * 255);
 					z_value = intensity * scale;
 				}
-				
+
 			} else {
 
 				int pixel_x0 = (int)pixel_x;
@@ -1940,19 +1929,19 @@ EditableHeightfieldClass::Allocate_Patches (void)
 	PatchGrid			= new RenegadeTerrainPatchClass *[patch_count];
 	PhysObjGrid			= new StaticPhysClass *[patch_count];
 	for (int index = 0; index < patch_count; index ++) {
-		
+
 		//
 		//	Create this patch
 		//
 		PatchGrid[index] = new RenegadeTerrainPatchClass;
 		PatchGrid[index]->Allocate (PatchGridPointsX, PatchGridPointsY, Density);
-		
+
 		//
 		//	Calculate the coordinate for this patch
 		//
 		int patch_y_pos = (index / PatchesX);
 		int patch_x_pos = index - (patch_y_pos * PatchesX);
-		
+
 		//
 		//	Let the patch know what its bounding box is...
 		//
@@ -1962,13 +1951,13 @@ EditableHeightfieldClass::Allocate_Patches (void)
 		float patch_max_y = (patch_y_pos + 1) * (PatchHeight - Density);
 		PatchGrid[index]->Set_Bounding_Box_Min (Vector3 (patch_min_x, patch_min_y, 0.0F));
 		PatchGrid[index]->Set_Bounding_Box_Max (Vector3 (patch_max_x, patch_max_y, 0.0F));
-		
+
 		//
 		// Create the physics object for this heightfield
 		//
 		PhysObjGrid[index] = new StaticPhysClass;
 		PhysObjGrid[index]->Set_Model (PatchGrid[index]);
-		PhysObjGrid[index]->Set_Transform (Matrix3D (1));		
+		PhysObjGrid[index]->Set_Transform (Matrix3D (1));
 
 		//
 		//	Add the heightfield to the scene
@@ -2027,7 +2016,7 @@ EditableHeightfieldClass::Update_Patch_Pos_And_Normals
 		//
 		int min_vert_y = y_pos * (PatchGridPointsY - 1);
 		int max_vert_y = (y_pos + 1) * (PatchGridPointsY - 1);
-		
+
 		for (int x_pos = min_patch_x; x_pos <= max_patch_x; x_pos ++) {
 
 			//
@@ -2035,18 +2024,18 @@ EditableHeightfieldClass::Update_Patch_Pos_And_Normals
 			//
 			int min_vert_x = x_pos * (PatchGridPointsX - 1);
 			int max_vert_x = (x_pos + 1) * (PatchGridPointsX - 1);
-			
+
 			//
 			//	Determine which patch this is
 			//
-			int patch_index = (y_pos * PatchesX) + x_pos;					
+			int patch_index = (y_pos * PatchesX) + x_pos;
 
 			//
 			//	Loop over the verts in this patch
 			//
 			for (int vert_y = min_vert_y; vert_y <= max_vert_y; vert_y ++) {
 				for (int vert_x = min_vert_x; vert_x <= max_vert_x; vert_x ++) {
-					
+
 					//
 					//	Get the position and normal at this vertex
 					//
@@ -2058,7 +2047,7 @@ EditableHeightfieldClass::Update_Patch_Pos_And_Normals
 					//
 					int patch_vert_x = vert_x - min_vert_x;
 					int patch_vert_y = vert_y - min_vert_y;
-					
+
 					//
 					//	Update the vertex position and normal inside the patch
 					//
@@ -2091,7 +2080,7 @@ EditableHeightfieldClass::Free_Patches (void)
 	//
 	//	Release our hold on each patch in the grid
 	//
-	for (int index = 0; index < patch_count; index ++) {				
+	for (int index = 0; index < patch_count; index ++) {
 		::Get_Scene_Editor ()->Remove_Object (PhysObjGrid[index]);
 		REF_PTR_RELEASE (PhysObjGrid[index]);
 		REF_PTR_RELEASE (PatchGrid[index]);

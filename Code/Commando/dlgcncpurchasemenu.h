@@ -61,21 +61,21 @@ class MerchandiseCtrlClass;
 class CNCPurchaseMenuClass : public MenuDialogClass
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	CNCPurchaseMenuClass (void);
 
 	////////////////////////////////////////////////////////////////
 	//	Public methods
 	////////////////////////////////////////////////////////////////
-	
+
 	//
 	//	Inherited
 	//
 	void		On_Init_Dialog (void) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 	void		On_Frame_Update (void) override;
 	void		On_Merchandise_Selected (MerchandiseCtrlClass *ctrl, int ctrl_id) override;
 	void		On_Merchandise_DblClk (MerchandiseCtrlClass *ctrl, int ctrl_id) override;
@@ -102,7 +102,7 @@ private:
 
 	////////////////////////////////////////////////////////////////
 	//	Private methods
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	void		Add_Item_To_Shopping_Cart (int ctrl_index);
 	void		Clear_Shopping_Cart (void);
 	void		Purchase (void);

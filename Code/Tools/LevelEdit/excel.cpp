@@ -288,7 +288,7 @@ ExcelClass::Initialize (void)
 	//	Allocate the application object
 	//
 	Application = new _Application;
-	
+
 	//
 	//	Attempt to start excel
 	//
@@ -325,8 +325,8 @@ ExcelClass::Initialize (void)
 			V_VT ( &solid ) = VT_I4;
 			V_VT ( &yellow ) = VT_I4;
 
-			V_BOOL ( &no ) = FALSE;
-			V_BOOL ( &yes ) = TRUE;
+			V_BOOL ( &no ) = false;
+			V_BOOL ( &yes ) = true;
 			V_I4 ( &dummy ) = 1;
 			V_I4 ( &dummy0 ) = 0;
 			V_BSTR ( &nullstring ) = SysAllocString ( OLESTR ("") );
@@ -362,7 +362,7 @@ ExcelClass::Shutdown (void)
 	SAFE_DELETE (RangeObj);
 	SAFE_DELETE (WorksheetObj);
 
-	if (WorkbooksObj != NULL) {		
+	if (WorkbooksObj != NULL) {
 		WorkbooksObj->Close ();
 		SAFE_DELETE (WorksheetObj);
 	}
@@ -380,7 +380,7 @@ ExcelClass::Shutdown (void)
 	return ;
 }
 
-
+#define WIDETOOLE(x) (reinterpret_cast<const wchar_t*>(static_cast<const unichar_t*>(x)))
 /////////////////////////////////////////////////////////////////////////
 //
 //	New_Workbook
@@ -401,12 +401,12 @@ ExcelClass::New_Workbook (const char *template_filename)
 
 	VARIANT temp;
 	V_VT (&temp)	= VT_BSTR;
-	V_BSTR (&temp)	= ::SysAllocString (wide_filename);
+	V_BSTR (&temp)	= ::SysAllocString (WIDETOOLE(wide_filename));
 
 	//
 	//	Create the new workbook
 	//
-	LPDISPATCH dispatch = WorkbooksObj->Add (temp);	
+	LPDISPATCH dispatch = WorkbooksObj->Add (temp);
 	if (dispatch != NULL) {
 
 		//
@@ -439,7 +439,7 @@ ExcelClass::Open_Workbook (const char *filename)
 														nullstring, yes, dummy, dummy, no, no, dummy, no);
 
 	if (dispatch != NULL) {
-		
+
 		//
 		//	Wrap the dispatch pointer in a friendlier object
 		//
@@ -469,7 +469,7 @@ ExcelClass::Save_Workbook (const char *filename)
 	wide_filename.Convert_From (filename);
 
 	V_VT (&name)	= VT_BSTR;
-	V_BSTR (&name)	= SysAllocString (wide_filename);
+	V_BSTR (&name)	= SysAllocString (WIDETOOLE(wide_filename));
 
 	V_VT (&fileformat) = VT_I4;
 	V_I4 (&fileformat) = xlWorkbookNormal;
@@ -477,7 +477,7 @@ ExcelClass::Save_Workbook (const char *filename)
 	V_VT (&rc) = VT_I4;
 	V_I4 (&rc) = xlLocalSessionChanges;
 
-	WorkbookObj->SaveAs ( name, fileformat, nullstring, nullstring, no, no, 
+	WorkbookObj->SaveAs ( name, fileformat, nullstring, nullstring, no, no,
 					xlNoChange, rc, no, empty, empty );
 
 	VariantClear (&name);
@@ -498,7 +498,7 @@ ExcelClass::Save_Workbook (const char *filename)
 		//	Check to see if the file still exists
 		//
 		if (::GetFileAttributes (CurrPath) != 0xFFFFFFFF) {
-				
+
 				WideStringClass wide_filename;
 				wide_filename.Convert_From (CurrPath);
 
@@ -537,7 +537,7 @@ ExcelClass::Close_Workbook (void)
 	//	Simply close and delete the workbook
 	//
 	if (WorkbookObj != NULL) {
-		WorkbookObj->SetSaved (TRUE);
+		WorkbookObj->SetSaved (true);
 		WorkbookObj->Close (no, nullstring, no);
 		SAFE_DELETE (WorkbookObj);
 	}
@@ -561,28 +561,28 @@ ExcelClass::Get_String (int row, int col, WideStringClass &string)
 	//
 	VARIANT variant_value;
 	if (Get_Cell (row, col, variant_value)) {
-		
+
 		//
 		//	Is this a string?
 		//
 		if (V_VT (&variant_value) == VT_BSTR) {
-			string = V_BSTR (&variant_value);
+			string = reinterpret_cast<unichar_t*>(V_BSTR (&variant_value));
 			retval = true;
 		} else if (V_VT (&variant_value) == VT_R4) {
 			int value = (int)variant_value.fltVal;
-			string.Format (L"%d", value);
+			string.Format (U_CHAR("%d"), value);
 			retval = true;
 		} else if (V_VT (&variant_value) == VT_R8) {
 			int value = (int)variant_value.dblVal;
-			string.Format (L"%d", value);
+			string.Format (U_CHAR("%d"), value);
 			retval = true;
 		} else if (	V_VT (&variant_value) == VT_I2 || V_VT (&variant_value) == VT_I4 ||
 						V_VT (&variant_value) == VT_UI2 || V_VT (&variant_value) == VT_UI4)
 		{
-			string.Format (L"%d", variant_value.iVal);
+			string.Format (U_CHAR("%d"), variant_value.iVal);
 			retval = true;
 		}
-		
+
 		//
 		//	Free the variant data
 		//
@@ -604,9 +604,9 @@ ExcelClass::Set_String (int row, int col, const WideStringClass &value)
 	//
 	//	Configure a variant with the string data we want to set
 	//
-	VARIANT variant_value;	
+	VARIANT variant_value;
 	V_VT (&variant_value)	= VT_BSTR;
-	V_BSTR (&variant_value) = ::SysAllocString (value);
+	V_BSTR (&variant_value) = ::SysAllocString (WIDETOOLE(value));
 
 	//
 	//	Put the string into the cell
@@ -636,7 +636,7 @@ ExcelClass::Get_Int (int row, int col, int &value)
 	//
 	VARIANT variant_value;
 	if (Get_Cell (row, col, variant_value)) {
-		
+
 		//
 		//	Is this an integer?
 		//
@@ -644,7 +644,7 @@ ExcelClass::Get_Int (int row, int col, int &value)
 			value = V_I4(&variant_value);
 			retval = true;
 		}
-		
+
 		//
 		//	Free the variant data
 		//
@@ -666,7 +666,7 @@ ExcelClass::Set_Int (int row, int col, int value)
 	//
 	//	Configure a variant with the integer data we want to set
 	//
-	VARIANT variant_value;	
+	VARIANT variant_value;
 	V_VT (&variant_value)	= VT_I4;
 	V_I4 (&variant_value)	= value;
 
@@ -718,19 +718,19 @@ ExcelClass::Get_Cell (int row, int col, VARIANT &result)
 	}
 
 	bool retval = false;
-	
+
 	//
 	//	Generate the name of the cell we'll be using
 	//
 	WideStringClass cell_name;
-	cell_name.Format (L"%c%d", 'A'+col , row + 1);
+	cell_name.Format (U_CHAR("%c%d"), 'A'+col , row + 1);
 
  	//
 	//	Configure a variant object for use as a cell ID
 	//
 	VARIANT cell;
 	V_VT (&cell)	= VT_BSTR;
- 	V_BSTR (&cell)	= ::SysAllocString (cell_name);
+ 	V_BSTR (&cell)	= ::SysAllocString (WIDETOOLE(cell_name));
 
 	//
 	//	Get the data
@@ -768,26 +768,26 @@ ExcelClass::Set_Cell (int row, int col, const VARIANT &data)
 	}
 
 	bool retval = false;
-	
+
 	//
 	//	Generate the name of the cell we'll be using
 	//
 	WideStringClass cell_name;
-	cell_name.Format (L"%c%d", 'A'+col, row + 1);
+	cell_name.Format (U_CHAR("%c%d"), 'A'+col, row + 1);
 
  	//
 	//	Configure a variant object for use as a cell ID
 	//
 	VARIANT cell;
 	V_VT (&cell)	= VT_BSTR;
- 	V_BSTR (&cell)	= ::SysAllocString (cell_name);
+ 	V_BSTR (&cell)	= ::SysAllocString (WIDETOOLE(cell_name));
 
 	//
 	//	Get the cell range
 	//
 	LPDISPATCH dispatch = WorksheetObj->GetRange (cell, cell);
 	if (dispatch != NULL) {
-		
+
 		//
 		//	Shove our new data into this range
 		//

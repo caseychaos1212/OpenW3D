@@ -103,19 +103,6 @@ SoundPseudo3DClass::operator= (const SoundPseudo3DClass &src)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	Set_Miles_Handle
-//
-////////////////////////////////////////////////////////////////////////////////////////////////
-void
-SoundPseudo3DClass::Set_Miles_Handle (MILES_HANDLE handle)
-{
-	AudibleSoundClass::Set_Miles_Handle (handle);
-	return ;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-//
 //	Initialize_Miles_Handle
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,13 +123,13 @@ SoundPseudo3DClass::Initialize_Miles_Handle (void)
 void
 SoundPseudo3DClass::Update_Pseudo_Volume (float distance)
 {
-	MMSLockClass lock;	
+	MMSLockClass lock;
 
 	//
 	// Only do this if the sound is really playing
 	//
 	if (m_SoundHandle != NULL) {
-		
+
 		float volume_mod = Determine_Real_Volume ();
 		float max_distance = Get_DropOff_Radius ();
 		float min_distance = Get_Max_Vol_Radius ();
@@ -153,7 +140,7 @@ SoundPseudo3DClass::Update_Pseudo_Volume (float distance)
 		if (distance > min_distance) {
 			volume = 1.0F - ((distance - min_distance) / delta);
 			volume = std::min (volume, 1.0F);
-			volume = std::max (volume, 0.0F);			
+			volume = std::max (volume, 0.0F);
 		}
 
 		// Multiply the 'max' volume with the calculated volume
@@ -162,7 +149,7 @@ SoundPseudo3DClass::Update_Pseudo_Volume (float distance)
 		//
 		// Pass the volume on
 		//
-		m_SoundHandle->Set_Sample_Volume (int(volume * 127.0F));
+		m_SoundHandle->Set_Sample_Volume (volume);
 	}
 
 	return ;
@@ -177,14 +164,14 @@ SoundPseudo3DClass::Update_Pseudo_Volume (float distance)
 void
 SoundPseudo3DClass::Update_Pseudo_Volume (void)
 {
-	MMSLockClass lock;	
+	MMSLockClass lock;
 
 	// Only do this if the sound is really playing
 	if (m_SoundHandle != NULL) {
-		
+
 		//
 		// Find the difference in the sound position and its listener's position
-		//		
+		//
 		Vector3 sound_pos = m_ListenerTransform.Get_Translation () - m_Transform.Get_Translation ();
 		float distance = sound_pos.Quick_Length ();
 
@@ -206,13 +193,13 @@ SoundPseudo3DClass::Update_Pseudo_Volume (void)
 void
 SoundPseudo3DClass::Update_Pseudo_Pan (void)
 {
-	MMSLockClass lock;	
+	MMSLockClass lock;
 
 	//
 	// Only do this if the sound is really playing
 	//
 	if (m_SoundHandle != NULL) {
-		
+
 		//
 		//	Transform the sound's position into 'listener-space'
 		//
@@ -230,7 +217,7 @@ SoundPseudo3DClass::Update_Pseudo_Pan (void)
 		//
 		// Pass the pan on
 		//
-		m_SoundHandle->Set_Sample_Pan (S32(pan * 127.0F));
+		m_SoundHandle->Set_Sample_Pan (pan * 127.0F);
 	}
 
 	return ;
@@ -269,8 +256,8 @@ SoundPseudo3DClass::Free_Miles_Handle (void)
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 bool
-SoundPseudo3DClass::On_Frame_Update (unsigned int milliseconds)
-{	
+SoundPseudo3DClass::On_Frame_Update (unsigned int /* milliseconds */)
+{
 	// If necessary, update the volume based on the distance
 	// from the listener
 	if (m_SoundHandle != NULL) {
@@ -290,6 +277,6 @@ SoundPseudo3DClass::On_Frame_Update (unsigned int milliseconds)
 ////////////////////////////////////////////////////////////////////////////////////////////////
 const PersistFactoryClass &
 SoundPseudo3DClass::Get_Factory (void) const
-{	
+{
 	return _PseudoSound3DPersistFactory;
 }

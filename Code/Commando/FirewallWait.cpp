@@ -69,7 +69,7 @@ FirewallDetectWait::FirewallDetectWait(void) :
 
 FirewallDetectWait::~FirewallDetectWait()
 	{
-	WWDEBUG_SAY(("FirewallDetectWait: End - %S\n", mEndText));
+	WWDEBUG_SAY(("FirewallDetectWait: End - %S\n", mEndText.Peek_Buffer()));
 
 	mWOLSession->EnablePinging(true);
 
@@ -84,7 +84,7 @@ void FirewallDetectWait::WaitBeginning(void)
 	{
 	WWDEBUG_SAY(("FirewallDetectWait: Beginning\n"));
 
-	mEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
+	mEvent = CreateEventA(NULL, true, false, NULL);
 
 	if (mEvent == NULL)
 		{
@@ -166,7 +166,7 @@ FirewallConnectWait::FirewallConnectWait(void) :
 
 FirewallConnectWait::~FirewallConnectWait()
 	{
-	WWDEBUG_SAY(("FirewallConnectWait: End - %S\n", mEndText));
+	WWDEBUG_SAY(("FirewallConnectWait: End - %S\n", mEndText.Peek_Buffer()));
 
 	mWOLSession->EnablePinging(true);
 
@@ -186,8 +186,8 @@ void FirewallConnectWait::WaitBeginning(void)
 	{
 	WWDEBUG_SAY(("FirewallConnectWait: Beginning\n"));
 
-	mEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
-	mCancelEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
+	mEvent = CreateEventA(NULL, true, false, NULL);
+	mCancelEvent = CreateEventA(NULL, true, false, NULL);
 
 	if (mEvent == NULL)
 		{
@@ -234,8 +234,8 @@ WaitCondition::WaitResult FirewallConnectWait::GetResult(void)
 				// Maybe change the wait text if there are players queued in front of us.
 				if (mQueueCount != mLastQueueCount)
 					{
-					wchar_t temp[256];
-					swprintf(temp, sizeof(temp), TRANSLATION(IDS_FIREWALL_QUEUE_NOTIFICATION), mQueueCount);
+					unichar_t temp[256];
+					u_snprintf_u(temp, sizeof(temp), TRANSLATION(IDS_FIREWALL_QUEUE_NOTIFICATION), mQueueCount);
 					WideStringClass text(temp, true);
 					SetWaitText(text);
 					mLastQueueCount = mQueueCount;
@@ -281,7 +281,7 @@ WaitCondition::WaitResult FirewallConnectWait::GetResult(void)
 //
 // Override base class end wait to check for cancel being pressed.
 //
-void FirewallConnectWait::EndWait(WaitResult result, const wchar_t* endText)
+void FirewallConnectWait::EndWait(WaitResult result, const unichar_t* endText)
 	{
 	WWDEBUG_SAY(("FirewallConnectWait: EndWait\n"));
 

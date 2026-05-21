@@ -16,22 +16,22 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*********************************************************************************************** 
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               *** 
- *********************************************************************************************** 
- *                                                                                             * 
- *                 Project Name : Command & Conquer                                            * 
- *                                                                                             * 
- *                     $Archive:: /Commando/Library/RNDSTRAW.CPP                              $* 
- *                                                                                             * 
+/***********************************************************************************************
+ ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
+ ***********************************************************************************************
+ *                                                                                             *
+ *                 Project Name : Command & Conquer                                            *
+ *                                                                                             *
+ *                     $Archive:: /Commando/Library/RNDSTRAW.CPP                              $*
+ *                                                                                             *
  *                      $Author:: Greg_h                                                      $*
- *                                                                                             * 
+ *                                                                                             *
  *                     $Modtime:: 7/22/97 11:37a                                              $*
- *                                                                                             * 
+ *                                                                                             *
  *                    $Revision:: 1                                                           $*
  *                                                                                             *
- *---------------------------------------------------------------------------------------------* 
- * Functions:                                                                                  * 
+ *---------------------------------------------------------------------------------------------*
+ * Functions:                                                                                  *
  *   RandomStraw::Get -- Fetch random data.                                                    *
  *   RandomStraw::RandomStraw -- Constructor for the random straw class.                       *
  *   RandomStraw::Reset -- Reset the data to known initial state.                              *
@@ -241,7 +241,7 @@ void RandomStraw::Seed_Short(short seed)
  * HISTORY:                                                                                    *
  *   07/10/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-void RandomStraw::Seed_Long(long seed)
+void RandomStraw::Seed_Long(int seed)
 {
 	for (int index = 0; index < (sizeof(seed)*CHAR_BIT); index++) {
 		Seed_Bit(seed);

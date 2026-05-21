@@ -87,7 +87,7 @@ END_MESSAGE_MAP()
 //  OnInitDialog
 //
 BOOL
-CAnimationSpeed::OnInitDialog (void) 
+CAnimationSpeed::OnInitDialog (void)
 {
 	// Allow the base class to process this message
     CDialog::OnInitDialog ();
@@ -105,11 +105,11 @@ CAnimationSpeed::OnInitDialog (void)
 		  CheckDlgButton(IDC_COMPRESSQ, pCDoc->GetChannelQCompression());
 			CheckRadioButton(IDC_16BIT, IDC_8BIT, IDC_16BIT+2);//-pCDoc->GetChannelQnBytes());
 		  if(pCDoc->GetChannelQCompression()){
-				GetDlgItem(IDC_16BIT)->EnableWindow(TRUE);
-				GetDlgItem(IDC_8BIT)->EnableWindow(TRUE);
+				GetDlgItem(IDC_16BIT)->EnableWindow(true);
+				GetDlgItem(IDC_8BIT)->EnableWindow(true);
 		  }else{
-			  GetDlgItem(IDC_16BIT)->EnableWindow(FALSE);
-			  GetDlgItem(IDC_8BIT)->EnableWindow(FALSE);
+			  GetDlgItem(IDC_16BIT)->EnableWindow(false);
+			  GetDlgItem(IDC_8BIT)->EnableWindow(false);
 		  }
 	 }
 
@@ -128,13 +128,13 @@ CAnimationSpeed::OnInitDialog (void)
             m_iInitialPercent = int(animationSpeed*100.00F);
         }
     }
-	
+
     // Set the range of the slider control
     m_speedSlider.SetRange (1, 200);
-    
+
     // Set the initial pos of the slider control
     m_speedSlider.SetPos (m_iInitialPercent);
-    return TRUE;
+    return true;
 }
 
 //////////////////////////////////////////////////////////////
@@ -163,7 +163,7 @@ CAnimationSpeed::OnHScroll
             pCGraphicView->SetAnimationSpeed (((float)m_iInitialPercent) / (100.00F));
         }
     }
-	
+
 	// Allow the base class to process this message
     CDialog::OnHScroll (nSBCode, nPos, pScrollBar);
     return ;
@@ -197,7 +197,7 @@ CAnimationSpeed::OnBlend (void)
         pCDoc->SetAnimationBlend (SendDlgItemMessage (IDC_BLEND, BM_GETCHECK));
     }
 
-    return ;	
+    return ;
 }
 
 void CAnimationSpeed::
@@ -209,11 +209,11 @@ OnCompressq(){
 		pCDoc->SetChannelQCompression(b_compress);
 		//Enable/Disable
 		if(b_compress){
-				GetDlgItem(IDC_16BIT)->EnableWindow(TRUE);
-				GetDlgItem(IDC_8BIT)->EnableWindow(TRUE);
+				GetDlgItem(IDC_16BIT)->EnableWindow(true);
+				GetDlgItem(IDC_8BIT)->EnableWindow(true);
 		  }else{
-			  GetDlgItem(IDC_16BIT)->EnableWindow(FALSE);
-			  GetDlgItem(IDC_8BIT)->EnableWindow(FALSE);
+			  GetDlgItem(IDC_16BIT)->EnableWindow(false);
+			  GetDlgItem(IDC_8BIT)->EnableWindow(false);
 		  }
 		//Update
 		  if(b_compress != b_was_compressed){
@@ -227,7 +227,7 @@ OnCompressq(){
 
 void CAnimationSpeed::
 On16bit(){
-/*	
+/*
 CW3DViewDoc *pCDoc = ::GetCurrentDocument ();
 	pCDoc->SetChannelQnBytes(2);
 	QnBytes = 2;

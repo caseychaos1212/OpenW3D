@@ -42,7 +42,6 @@
 #define __DLG_MP_WOL_CHAT_H
 
 #include "menudialog.h"
-#include "resource.h"
 #include "WOLChatMgr.h"
 
 namespace WWOnline
@@ -88,7 +87,7 @@ protected:
 	void		Update_Current_Channel(void);
 
 	void		Send_Message(bool is_emot);
-	void		Add_Message(const wchar_t* text);
+	void		Add_Message(const unichar_t* text);
 	void		Refresh_Message_List(void);
 	void		Update_Message_Color(void);
 
@@ -100,7 +99,7 @@ protected:
 
 	void		Set_Focus_To_Chat_Edit_Ctrl(void);
 
-	void		On_Command(int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command(int ctrl_id, int mesage_id, unsigned int param) override;
 	void		On_ListCtrl_Sel_Change(ListCtrlClass *list_ctrl, int ctrl_id, int old_index, int new_index) override;
 	void		On_ListCtrl_Mouse_Over(ListCtrlClass *list_ctrl, int ctrl_id, int index) override;
 	void		On_EditCtrl_Enter_Pressed (EditCtrlClass *edit_ctrl, int ctrl_id) override;

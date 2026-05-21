@@ -42,7 +42,6 @@
 #define __DLG_MP_WOL_MAIN_H
 
 #include "menudialog.h"
-#include "resource.h"
 #include "WOLLogonMgr.h"
 #include "DlgMessageBox.h"
 
@@ -57,22 +56,22 @@ class MPWolMainMenuClass :
 	public Observer<DlgMsgBoxEvent>
 {
 public:
-	
+
 	////////////////////////////////////////////////////////////////
 	//	Public constructors/destructors
-	////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////
 	MPWolMainMenuClass (void);
 	~MPWolMainMenuClass (void);
 
 	////////////////////////////////////////////////////////////////
 	//	Public methods
 	////////////////////////////////////////////////////////////////
-	
+
 	//
 	//	Inherited
 	//
 	void		On_Init_Dialog (void) override;
-	void		On_Command (int ctrl_id, int mesage_id, DWORD param) override;
+	void		On_Command (int ctrl_id, int mesage_id, unsigned int param) override;
 	void		On_Frame_Update (void) override;
 
 	//
@@ -91,7 +90,7 @@ protected:
 	////////////////////////////////////////////////////////////////
 	//	Protected methods
 	////////////////////////////////////////////////////////////////
-	
+
 	bool CheckWOLVersion(void);
 
 	//
@@ -99,7 +98,7 @@ protected:
 	//
 	void		On_Activate(bool onoff) override;
 	void		On_Last_Menu_Ending (void) override;
-	
+
 	void		Update_Login_Profile(void);
 	void		Build_Persona_Combobox (void);
 	void		Build_Server_Combobox (void);
