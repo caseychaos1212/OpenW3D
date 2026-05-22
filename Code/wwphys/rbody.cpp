@@ -1973,7 +1973,7 @@ void RigidBodyClass::Assert_Not_Intersecting(void)
 	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
 		world->Cast_OBBox(test);
 	}
-//	WWASSERT(result.StartBad != true);			
+//	WWASSERT(result.StartBad != true);
 	if (result.StartBad) {
 		WWDEBUG_SAY(("   !!!!!!!!!!!!!!!!!!!!!!!!!   Rigid Body %s intersecting!\r\n",Model->Get_Name()));
 	} else {
@@ -2285,7 +2285,6 @@ bool RigidBodyDefClass::Is_Type(const char * type_name)
 		return MoveablePhysDefClass::Is_Type(type_name);
 	}
 }
-
 
 
 

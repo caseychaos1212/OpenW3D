@@ -157,7 +157,7 @@ void VehiclePhysClass::Update_Wheels (void)
 	for (int i=0; i<Wheels.Length(); i++) {
 		Wheels[i]->Update_Model();
 	}
-	
+
 	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
 		world->Release_Collision_Region();
 	}
@@ -878,4 +878,3 @@ bool VehiclePhysDefClass::Is_Type(const char * type_name)
 		return RigidBodyDefClass::Is_Type(type_name);
 	}
 }
-

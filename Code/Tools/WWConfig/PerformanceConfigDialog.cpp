@@ -405,7 +405,7 @@ PerformanceConfigDialogClass::Load_Values (void)
 	int static_shadows = 1;
 	int prelit_mode = WW3D::PRELIT_MODE_LIGHTMAP_MULTI_TEXTURE;
 	int texture_filter = TextureClass::TEXTURE_FILTER_BILINEAR;
-	int shadow_mode = PhysicsSceneClass::SHADOW_MODE_BLOBS_PLUS;
+	int shadow_mode = PhysicsWorldClass::SHADOW_MODE_BLOBS_PLUS;
 	int texture_red = 0;
 	int surface_effect = 1;
 	int particle_detail = 1;
@@ -423,7 +423,7 @@ PerformanceConfigDialogClass::Load_Values (void)
 
 		prelit_mode		= ini.Get_Int (W3D_SECTION_SYSTEM, VALUE_INI_PRELIT_MODE, WW3D::PRELIT_MODE_LIGHTMAP_MULTI_TEXTURE);
 		texture_filter	= ini.Get_Int (W3D_SECTION_SYSTEM, VALUE_INI_TEXTURE_FILTER, TextureClass::TEXTURE_FILTER_BILINEAR);
-		shadow_mode		= ini.Get_Int (W3D_SECTION_SYSTEM, VALUE_INI_SHADOW_MODE, PhysicsSceneClass::SHADOW_MODE_BLOBS_PLUS);
+		shadow_mode		= ini.Get_Int (W3D_SECTION_SYSTEM, VALUE_INI_SHADOW_MODE, PhysicsWorldClass::SHADOW_MODE_BLOBS_PLUS);
 		texture_red		= ini.Get_Int (W3D_SECTION_SYSTEM, VALUE_INI_TEXTURE_RES, 0);
 		surface_effect	= ini.Get_Int (W3D_SECTION_SYSTEM, VALUE_INI_SURFACE_EFFECT, 1);
 		particle_detail	= ini.Get_Int (W3D_SECTION_SYSTEM, VALUE_INI_PARTICLE_DETAIL, 1);
@@ -440,7 +440,7 @@ PerformanceConfigDialogClass::Load_Values (void)
 
 		prelit_mode		= registry.Get_Int (VALUE_NAME_PRELIT_MODE, WW3D::PRELIT_MODE_LIGHTMAP_MULTI_TEXTURE);
 		texture_filter	= registry.Get_Int (VALUE_NAME_TEXTURE_FILTER, TextureClass::TEXTURE_FILTER_BILINEAR);
-		shadow_mode		= registry.Get_Int (VALUE_NAME_SHADOW_MODE, PhysicsSceneClass::SHADOW_MODE_BLOBS_PLUS);
+		shadow_mode		= registry.Get_Int (VALUE_NAME_SHADOW_MODE, PhysicsWorldClass::SHADOW_MODE_BLOBS_PLUS);
 		texture_red		= registry.Get_Int (VALUE_NAME_TEXTURE_RES, 0);
 		surface_effect	= registry.Get_Int (VALUE_NAME_SURFACE_EFFECT, 1);
 		particle_detail	= registry.Get_Int (VALUE_NAME_PARTICLE_DETAIL, 1);
@@ -724,7 +724,7 @@ PerformanceConfigDialogClass::Apply_Changes (void)
 		registry.Set_Int (VALUE_NAME_DYN_LOD, lod_budget);
 		registry.Set_Int (VALUE_NAME_STATIC_LOD, lod_budget);
 
-		registry.Set_Int (VALUE_NAME_DYN_SHADOWS, (shadow_mode != PhysicsSceneClass::SHADOW_MODE_NONE));
+		registry.Set_Int (VALUE_NAME_DYN_SHADOWS, (shadow_mode != PhysicsWorldClass::SHADOW_MODE_NONE));
 		registry.Set_Int (VALUE_NAME_STATIC_SHADOWS, static_shadows);
 
 		registry.Set_Int (VALUE_NAME_PRELIT_MODE, prelit_mode);
@@ -739,7 +739,7 @@ PerformanceConfigDialogClass::Apply_Changes (void)
 	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_DYN_LOD, lod_budget);
 	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_STATIC_LOD, lod_budget);
 
-	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_DYN_SHADOWS, (shadow_mode != PhysicsSceneClass::SHADOW_MODE_NONE));
+	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_DYN_SHADOWS, (shadow_mode != PhysicsWorldClass::SHADOW_MODE_NONE));
 	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_STATIC_SHADOWS, static_shadows);
 
 	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_PRELIT_MODE, prelit_mode);
@@ -799,7 +799,7 @@ void PerformanceConfigDialogClass::OnGraphicsAutoSetup()
 		registry.Set_Int (VALUE_NAME_DYN_LOD, lod_budget);
 		registry.Set_Int (VALUE_NAME_STATIC_LOD, lod_budget);
 
-		registry.Set_Int (VALUE_NAME_DYN_SHADOWS, (shadow_mode != PhysicsSceneClass::SHADOW_MODE_NONE));
+		registry.Set_Int (VALUE_NAME_DYN_SHADOWS, (shadow_mode != PhysicsWorldClass::SHADOW_MODE_NONE));
 		registry.Set_Int (VALUE_NAME_STATIC_SHADOWS, static_shadows);
 
 		registry.Set_Int (VALUE_NAME_PRELIT_MODE, prelit_mode);

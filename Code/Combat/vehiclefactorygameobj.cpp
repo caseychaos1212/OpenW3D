@@ -646,7 +646,7 @@ VehicleFactoryGameObj::Destroy_Blocking_Objects (void)
 	}
 
 	COMBAT_WORLD->Collect_Objects (GeneratingRegion, false, true, &objs_to_kill);
-	
+
 	//
 	//	Loop over all the objects
 	//

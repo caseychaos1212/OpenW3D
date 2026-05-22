@@ -85,7 +85,7 @@ void DynamicShadowManagerClass::Update_Shadow(void)
 		return;
 	}
 	PhysicsWorldClass::ShadowEnum shadow_mode = scene->Get_Shadow_Mode();
-	
+
 	float near_atten;
 	float far_atten;
 	scene->Get_Shadow_Attenuation(&near_atten,&far_atten);
@@ -126,9 +126,9 @@ void DynamicShadowManagerClass::Update_Shadow(void)
 	** release any projector that we may have and return
 	*/
 	if (	(Parent.Do_Any_Effects_Suppress_Shadows()) ||
-			(Parent.Is_Shadow_Generation_Enabled() == false) || 
+			(Parent.Is_Shadow_Generation_Enabled() == false) ||
 			(shadow_mode == PhysicsWorldClass::SHADOW_MODE_NONE) ||
-			(shadow_dist2 > shadow_shutoff2) || 
+			(shadow_dist2 > shadow_shutoff2) ||
 			(model == NULL) ||
 			(model->Is_Hidden()) ||
 			(objbox.Extent.Length2() < 0.1f) )
@@ -293,7 +293,7 @@ void DynamicShadowManagerClass::Allocate_Shadow(void)
 		if (scene == NULL) {
 			return;
 		}
-		
+
 		Shadow = NEW_REF(DynTexProjectClass,(&Parent));
 		Shadow->Enable_Attenuation(true);
 		Shadow->Enable_Depth_Gradient(true);
@@ -318,4 +318,3 @@ void DynamicShadowManagerClass::Release_Shadow(void)
 		Shadow = NULL;
 	}
 }
-

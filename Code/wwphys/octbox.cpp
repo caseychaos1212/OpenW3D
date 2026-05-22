@@ -294,7 +294,7 @@ void OctBoxClass::Compute_Octant_Contact(int oi,bool /* lock_to_centroids */)
 														Parent.Get_Collision_Group(),
 														COLLISION_TYPE_PHYSICAL | COLLISION_TYPE_VEHICLE);
 	world->Cast_OBBox(boxtest,true);
-	
+
 	/*
 	** Wake up any vehicle in contact with us
 	*/
@@ -354,7 +354,6 @@ void OctBoxClass::Compute_Octant_Contact(int oi,bool /* lock_to_centroids */)
 		}
 	}
 }
-
 
 
 

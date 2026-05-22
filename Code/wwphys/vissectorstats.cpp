@@ -200,7 +200,7 @@ void VisSectorStatsClass::Compute_Stats(StaticPhysClass * obj,VisTableClass * vi
 		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
 			RefPhysListIterator it = world->Get_Static_Object_Iterator();
 			for (it.First(); !it.Is_Done(); it.Next()) {
-				
+
 				StaticPhysClass * obj = it.Peek_Obj()->As_StaticPhysClass();
 				if (obj && vistable->Get_Bit(obj->Get_Vis_Object_ID())) {
 
@@ -275,4 +275,3 @@ const char *VisSectorStatsClass::Get_Name(void)
 
 	return name;
 }
-

@@ -123,7 +123,7 @@ static void Get_Detail_String(StringClass& str)
 	int static_shadows	= 1;
 	int texture_filter	= TextureClass::TEXTURE_FILTER_BILINEAR;
 	int prelit_mode		= WW3D::PRELIT_MODE_LIGHTMAP_MULTI_TEXTURE;
-	int shadow_mode		= PhysicsSceneClass::SHADOW_MODE_BLOBS_PLUS;
+	int shadow_mode		= PhysicsWorldClass::SHADOW_MODE_BLOBS_PLUS;
 	int texture_red		= 0;
 	int surface_effect	= 1;
 	int particle_detail	= 1;
@@ -152,10 +152,10 @@ static void Get_Detail_String(StringClass& str)
 
 	str+="Shadow Mode: ";
 	switch (shadow_mode) {
-	case PhysicsSceneClass::SHADOW_MODE_NONE: str+="None\r\n"; break;
-	case PhysicsSceneClass::SHADOW_MODE_BLOBS: str+="Blobs\r\n"; break;
-	case PhysicsSceneClass::SHADOW_MODE_BLOBS_PLUS: str+="Blobs Plus\r\n"; break;
-	case PhysicsSceneClass::SHADOW_MODE_HARDWARE: str+="Hardware\r\n"; break;
+	case PhysicsWorldClass::SHADOW_MODE_NONE: str+="None\r\n"; break;
+	case PhysicsWorldClass::SHADOW_MODE_BLOBS: str+="Blobs\r\n"; break;
+	case PhysicsWorldClass::SHADOW_MODE_BLOBS_PLUS: str+="Blobs Plus\r\n"; break;
+	case PhysicsWorldClass::SHADOW_MODE_HARDWARE: str+="Hardware\r\n"; break;
 	default: str+="???\r\n"; break;
 	}
 
@@ -250,7 +250,7 @@ void Get_Compact_Detail_String(StringClass& str)
 	int static_shadows	= 1;
 	int texture_filter	= TextureClass::TEXTURE_FILTER_BILINEAR;
 	int prelit_mode		= WW3D::PRELIT_MODE_LIGHTMAP_MULTI_TEXTURE;
-	int shadow_mode		= PhysicsSceneClass::SHADOW_MODE_BLOBS_PLUS;
+	int shadow_mode		= PhysicsWorldClass::SHADOW_MODE_BLOBS_PLUS;
 	int texture_red		= 0;
 	int surface_effect	= 1;
 	int particle_detail	= 1;

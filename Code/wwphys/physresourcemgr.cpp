@@ -49,10 +49,10 @@ inline PhysicsWorldClass * Peek_Active_World()
 	return PhysicsWorldClass::Get_Active_World();
 }
 
-inline bool Physics_Render_Assets_Available()
+inline bool Physics_Render_Output_Available()
 {
 	if (PhysicsWorldClass * world = Peek_Active_World()) {
-		return world->Render_Assets_Available();
+		return world->Render_Output_Available();
 	}
 	return false;
 }
@@ -90,7 +90,7 @@ void PhysResourceMgrClass::Shutdown(void)
 bool PhysResourceMgrClass::Set_Shadow_Blob_Texture(const char * texname)
 {
 	if (texname == NULL) return false;
-	if (!Physics_Render_Assets_Available()) {
+	if (!Physics_Render_Output_Available()) {
 		return false;
 	}
 
@@ -107,7 +107,7 @@ bool PhysResourceMgrClass::Set_Shadow_Blob_Texture(const char * texname)
 
 TextureClass *	PhysResourceMgrClass::Get_Shadow_Blob_Texture(void)
 {
-	if (!Physics_Render_Assets_Available()) {
+	if (!Physics_Render_Output_Available()) {
 		return NULL;
 	}
 	if (_ShadowBlobTexture == NULL) {
@@ -157,7 +157,7 @@ MaterialPassClass * PhysResourceMgrClass::Get_Highlight_Material_Pass(void)
 
 TextureClass * PhysResourceMgrClass::Get_Stealth_Texture(void)
 {
-	if (!Physics_Render_Assets_Available()) {
+	if (!Physics_Render_Output_Available()) {
 		return NULL;
 	}
 	TextureClass * tex = Peek_Stealth_Texture();
@@ -169,7 +169,7 @@ TextureClass * PhysResourceMgrClass::Get_Stealth_Texture(void)
 
 TextureClass * PhysResourceMgrClass::Peek_Stealth_Texture(void)
 {
-	if (!Physics_Render_Assets_Available()) {
+	if (!Physics_Render_Output_Available()) {
 		return NULL;
 	}
 	if (_StealthTexture == NULL) {
@@ -194,7 +194,7 @@ VertexMaterialClass * PhysResourceMgrClass::Create_Emissive_Material(void)
 
 TextureClass * PhysResourceMgrClass::Get_Grid_Texture(void)
 {
-	if (!Physics_Render_Assets_Available()) {
+	if (!Physics_Render_Output_Available()) {
 		return NULL;
 	}
 	TextureClass * tex = Peek_Grid_Texture();
@@ -206,7 +206,7 @@ TextureClass * PhysResourceMgrClass::Get_Grid_Texture(void)
 
 TextureClass * PhysResourceMgrClass::Peek_Grid_Texture(void)
 {
-	if (!Physics_Render_Assets_Available()) {
+	if (!Physics_Render_Output_Available()) {
 		return NULL;
 	}
 	if (_GridTexture == NULL) {
@@ -214,4 +214,3 @@ TextureClass * PhysResourceMgrClass::Peek_Grid_Texture(void)
 	}
 	return _GridTexture;
 }
-

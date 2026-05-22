@@ -149,8 +149,8 @@ int PhysDecalSysClass::Create_Decal
 		tex = world->Acquire_Texture(texture_name);
 	}
 	if (tex != NULL) {
-		tex->Set_U_Addr_Mode(TextureClass::TEXTURE_ADDRESS_CLAMP); 
-		tex->Set_V_Addr_Mode(TextureClass::TEXTURE_ADDRESS_CLAMP); 
+		tex->Set_U_Addr_Mode(TextureClass::TEXTURE_ADDRESS_CLAMP);
+		tex->Set_V_Addr_Mode(TextureClass::TEXTURE_ADDRESS_CLAMP);
 		material->Set_Texture(tex);
 		tex->Release_Ref();
 	}

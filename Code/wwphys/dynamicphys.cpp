@@ -157,7 +157,7 @@ void DynamicPhysClass::Internal_Update_Visibility_Status(void)
 
 	VisObjectID = world->Get_Dynamic_Object_Vis_ID(Model->Get_Bounding_Box(),&VisNodeID);
 	if ((int)VisObjectID >= world->Get_Vis_Table_Size()) {
-		
+
 		int size = world->Get_Vis_Table_Size();
 //		int id = PhysicsWorldClass::Get_Active_World()->Get_Dynamic_Object_Vis_ID(Model->Get_Bounding_Box(),&VisNodeID);
 

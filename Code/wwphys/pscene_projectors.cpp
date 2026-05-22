@@ -87,6 +87,85 @@ const float		MIN_STATIC_SHADOW_COS_HALF_THETA		= cos(DEG_TO_RADF(10.0f)/2.0f);	/
 const int		DEFAULT_MAX_DYNAMIC_SHADOWS			= 6;
 const int		DEFAULT_DYNAMIC_SHADOW_RESOLUTION	= 256;
 
+namespace
+{
+
+bool Are_Asset_Manager_Assets_Available(void)
+{
+	return WW3DAssetManager::Get_Instance() != NULL;
+}
+
+bool Is_WW3D_Render_Output_Available(void)
+{
+	return WW3D::Is_Initted() && Are_Asset_Manager_Assets_Available();
+}
+
+RenderObjClass * Create_Asset_Manager_Render_Obj(const char * name)
+{
+	if (!Are_Asset_Manager_Assets_Available() || (name == NULL)) {
+		return NULL;
+	}
+
+	WW3DAssetManager * manager = WW3DAssetManager::Get_Instance();
+	return (manager != NULL) ? manager->Create_Render_Obj(name) : NULL;
+}
+
+RenderObjClass * Create_Asset_Manager_Render_Obj_From_Filename(const char * filename)
+{
+	if (!Are_Asset_Manager_Assets_Available() || (filename == NULL)) {
+		return NULL;
+	}
+
+	StringClass render_obj_name(filename,true);
+	if (const char * slash = ::strrchr(filename,'\\')) {
+		render_obj_name = slash + 1;
+	}
+	if (render_obj_name.Get_Length() > 4) {
+		render_obj_name.Erase(render_obj_name.Get_Length() - 4, 4);
+	}
+
+	RenderObjClass * created = Create_Asset_Manager_Render_Obj(render_obj_name);
+	if (created == NULL) {
+		WWDEBUG_SAY(("Failed to create %s from %s\n", (const char *)render_obj_name, (filename != NULL) ? filename : "<null>"));
+	}
+	return created;
+}
+
+HAnimClass * Acquire_Asset_Manager_HAnim(const char * name)
+{
+	if (!Are_Asset_Manager_Assets_Available() || (name == NULL)) {
+		return NULL;
+	}
+	WW3DAssetManager * manager = WW3DAssetManager::Get_Instance();
+	return (manager != NULL) ? manager->Get_HAnim(name) : NULL;
+}
+
+}
+
+class PhysicsAssetRenderBridge : public PhysicsWorldRenderBridge
+{
+public:
+	bool Are_Render_Assets_Available(void) const override
+	{
+		return Are_Asset_Manager_Assets_Available();
+	}
+
+	RenderObjClass * Create_Render_Obj(const char * name) override
+	{
+		return Create_Asset_Manager_Render_Obj(name);
+	}
+
+	RenderObjClass * Create_Render_Obj_From_Filename(const char * filename) override
+	{
+		return Create_Asset_Manager_Render_Obj_From_Filename(filename);
+	}
+
+	HAnimClass * Acquire_HAnim(const char * name) override
+	{
+		return Acquire_Asset_Manager_HAnim(name);
+	}
+};
+
 /**
 ** StaticShadowTexMgrClass
 ** This object simply manages the list of unique shadow textures being used by the
@@ -276,43 +355,27 @@ public:
 
 	bool Are_Render_Assets_Available(void) const override
 	{
-		return WW3D::Is_Initted() && (WW3DAssetManager::Get_Instance() != NULL);
+		return Are_Asset_Manager_Assets_Available();
+	}
+
+	bool Is_Render_Output_Available(void) const override
+	{
+		return Is_WW3D_Render_Output_Available();
 	}
 
 	RenderObjClass * Create_Render_Obj(const char * name) override
 	{
-		if (!Are_Render_Assets_Available() || (name == NULL)) {
-			return NULL;
-		}
-
-		WW3DAssetManager * manager = WW3DAssetManager::Get_Instance();
-		return (manager != NULL) ? manager->Create_Render_Obj(name) : NULL;
+		return Create_Asset_Manager_Render_Obj(name);
 	}
 
 	RenderObjClass * Create_Render_Obj_From_Filename(const char * filename) override
 	{
-		if (!Are_Render_Assets_Available() || (filename == NULL)) {
-			return NULL;
-		}
-
-		StringClass render_obj_name(filename,true);
-		if (const char * slash = ::strrchr(filename,'\\')) {
-			render_obj_name = slash + 1;
-		}
-		if (render_obj_name.Get_Length() > 4) {
-			render_obj_name.Erase(render_obj_name.Get_Length() - 4, 4);
-		}
-
-		RenderObjClass * created = Create_Render_Obj(render_obj_name);
-		if (created == NULL) {
-			WWDEBUG_SAY(("Failed to create %s from %s\n", (const char *)render_obj_name, (filename != NULL) ? filename : "<null>"));
-		}
-		return created;
+		return Create_Asset_Manager_Render_Obj_From_Filename(filename);
 	}
 
 	TextureClass * Acquire_Texture(const char * name) override
 	{
-		if (!Are_Render_Assets_Available() || (name == NULL)) {
+		if (!Is_Render_Output_Available() || (name == NULL)) {
 			return NULL;
 		}
 		WW3DAssetManager * manager = WW3DAssetManager::Get_Instance();
@@ -324,11 +387,7 @@ public:
 
 	HAnimClass * Acquire_HAnim(const char * name) override
 	{
-		if (!Are_Render_Assets_Available() || (name == NULL)) {
-			return NULL;
-		}
-		WW3DAssetManager * manager = WW3DAssetManager::Get_Instance();
-		return (manager != NULL) ? manager->Get_HAnim(name) : NULL;
+		return Acquire_Asset_Manager_HAnim(name);
 	}
 
 	unsigned Get_Render_Time_Millis(void) const override
@@ -1636,6 +1695,189 @@ void PhysicsSceneRenderBridge::Setup_Static_Directional_Shadow(PhysicsWorldClass
 PhysicsWorldRenderBridge * Create_PhysicsScene_Render_Bridge(PhysicsSceneClass & scene)
 {
 	return new PhysicsSceneRenderBridge(scene);
+}
+
+PhysicsWorldRenderBridge * Create_Physics_Asset_Render_Bridge(void)
+{
+	return new PhysicsAssetRenderBridge();
+}
+
+#else
+
+void PhysicsWorldClass::Enable_Static_Projectors(bool onoff)
+{
+	StaticProjectorsEnabled = onoff;
+}
+
+bool PhysicsWorldClass::Are_Static_Projectors_Enabled(void)
+{
+	return StaticProjectorsEnabled;
+}
+
+void PhysicsWorldClass::Enable_Dynamic_Projectors(bool onoff)
+{
+	DynamicProjectorsEnabled = onoff;
+}
+
+bool PhysicsWorldClass::Are_Dynamic_Projectors_Enabled(void)
+{
+	return DynamicProjectorsEnabled;
+}
+
+void PhysicsWorldClass::Set_Shadow_Mode(ShadowEnum shadow_mode)
+{
+	if (((int)shadow_mode >= 0) && ((int)shadow_mode < SHADOW_MODE_COUNT)) {
+		if (ShadowMode!=shadow_mode) {
+			ShadowMode = shadow_mode;
+
+			switch (ShadowMode) {
+			default:
+			case SHADOW_MODE_NONE:			// no shadows at all
+			case SHADOW_MODE_BLOBS:			// projected blob shadows
+				Set_Max_Simultaneous_Shadows(0);
+				break;
+			case SHADOW_MODE_BLOBS_PLUS:	// projected blobs with main character having a rendered shadow
+				Set_Max_Simultaneous_Shadows(1);
+				break;
+			case SHADOW_MODE_HARDWARE:		// use render-to-texture hardware
+				Set_Max_Simultaneous_Shadows(4);
+				break;
+			}
+		}
+	}
+}
+
+PhysicsWorldClass::ShadowEnum PhysicsWorldClass::Get_Shadow_Mode(void)
+{
+	return ShadowMode;
+}
+
+void PhysicsWorldClass::Set_Shadow_Attenuation(float atten_start_distance,float atten_end_distance)
+{
+	if (atten_start_distance < 0.0f) {
+		atten_start_distance = 0.0f;
+	}
+	if (atten_end_distance < atten_start_distance) {
+		atten_end_distance = atten_start_distance;
+	}
+	ShadowAttenStart = atten_start_distance;
+	ShadowAttenEnd = atten_end_distance;
+}
+
+void PhysicsWorldClass::Get_Shadow_Attenuation(float * set_atten_start,float * set_atten_end)
+{
+	if (set_atten_start != NULL) {
+		*set_atten_start = ShadowAttenStart;
+	}
+	if (set_atten_end != NULL) {
+		*set_atten_end = ShadowAttenEnd;
+	}
+}
+
+void PhysicsWorldClass::Set_Shadow_Normal_Intensity(float normal_intensity)
+{
+	if (normal_intensity < 0.0f) {
+		normal_intensity = 0.0f;
+	}
+	if (normal_intensity > 1.0f) {
+		normal_intensity = 1.0f;
+	}
+	ShadowNormalIntensity = normal_intensity;
+}
+
+float PhysicsWorldClass::Get_Shadow_Normal_Intensity(void)
+{
+	return ShadowNormalIntensity;
+}
+
+void PhysicsWorldClass::Release_Projector_Resources(void)
+{
+}
+
+void PhysicsWorldClass::Set_Shadow_Resolution(unsigned int res)
+{
+	ShadowResWidth = ShadowResHeight = static_cast<int>(res);
+}
+
+unsigned int PhysicsWorldClass::Get_Shadow_Resolution(void)
+{
+	return static_cast<unsigned int>(ShadowResWidth);
+}
+
+void PhysicsWorldClass::Set_Max_Simultaneous_Shadows(unsigned int count)
+{
+	MaxShadowCount = count;
+}
+
+unsigned int PhysicsWorldClass::Get_Max_Simultaneous_Shadows(void)
+{
+	return MaxShadowCount;
+}
+
+SpecialRenderInfoClass * PhysicsWorldClass::Get_Shadow_Render_Context(int /*width*/,int /*height*/)
+{
+	return NULL;
+}
+
+MaterialPassClass * PhysicsWorldClass::Get_Shadow_Material_Pass(void)
+{
+	return NULL;
+}
+
+CameraClass * PhysicsWorldClass::Get_Shadow_Camera(void)
+{
+	return NULL;
+}
+
+void PhysicsWorldClass::Apply_Projectors(const CameraClass & /*camera*/)
+{
+}
+
+void PhysicsWorldClass::Invalidate_Static_Shadow_Projectors(void)
+{
+	StaticProjectorsDirty = true;
+}
+
+void PhysicsWorldClass::Generate_Static_Shadow_Projectors(void)
+{
+}
+
+void PhysicsWorldClass::Setup_Static_Directional_Shadow(StaticAnimPhysClass & /*obj*/,const Vector3 & /*light_dir*/,TextureClass * /*render_target*/)
+{
+}
+
+void PhysicsWorldClass::Add_Static_Texture_Projector(TexProjectClass * /*newprojector*/)
+{
+}
+
+void PhysicsWorldClass::Remove_Static_Texture_Projector(TexProjectClass * /*projector*/)
+{
+}
+
+void PhysicsWorldClass::Add_Dynamic_Texture_Projector(TexProjectClass * /*newprojector*/)
+{
+}
+
+void PhysicsWorldClass::Remove_Dynamic_Texture_Projector(TexProjectClass * /*projector*/)
+{
+}
+
+void PhysicsWorldClass::Remove_Texture_Projector(TexProjectClass * /*projector*/)
+{
+}
+
+bool PhysicsWorldClass::Contains(TexProjectClass * /*projector*/)
+{
+	return false;
+}
+
+float PhysicsWorldClass::Compute_Projector_Attenuation(TexProjectClass * /*dynamic_projector*/,const Vector3 & /*view_pos*/,const Vector3 & /*view_dir*/)
+{
+	return 0.0f;
+}
+
+void PhysicsWorldClass::Apply_Projector_To_Objects(TexProjectClass * /*tex_proj*/,const CameraClass & /*camera*/)
+{
 }
 
 #endif // WWPHYS_SCENE_BRIDGE

@@ -1585,7 +1585,7 @@ bool Phys3Class::Apply_Move
 		Dec_Ignore_Counter();
 		return false;
 	}
-	
+
 	/*
 	** Apply Move:
 	**
@@ -1648,7 +1648,7 @@ bool Phys3Class::Apply_Move
 			** Sweep the box
 			*/
 			world->Cast_AABox(test);
-			
+
 			/*
 			** IF: the 'step' test did not start out intersecting (no low roof) then
 			** warp our position up and continue
@@ -1667,7 +1667,7 @@ bool Phys3Class::Apply_Move
 				result.Reset();
 				test.Translate(Vector3(0,0,-STEP_HEIGHT));
 				world->Cast_AABox(test);
-			
+
 			}
 
 		} else {
@@ -2219,7 +2219,7 @@ bool Phys3Class::Can_Teleport(const Matrix3D &test_tm, bool check_dyn_only, NonR
 	if (check_dyn_only) {
 		test.CheckStaticObjs = false;
 	}
-	
+
 	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World ();
 	if (world == NULL) {
 		return false;

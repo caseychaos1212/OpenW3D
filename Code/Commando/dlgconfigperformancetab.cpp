@@ -605,54 +605,53 @@ DlgConfigPerformanceTabClass::On_Apply (void)
 	int static_shadows	= Is_Dlg_Button_Checked (IDC_TERRAIN_SHADOW_CHECK);
 	int npatches			= Is_Dlg_Button_Checked (IDC_NPATCH_CHECK);
 
-		//
-		//	Determine a good LOD budget to use
-		//
-		int lod_budget = 0;
-		if (geometry_detail == 0) {
-			lod_budget = 0;
-		} else if (geometry_detail == 1) {
-			lod_budget = MAX_LOD_MED;
-		} else if (geometry_detail == 2) {
-			lod_budget = MAX_LOD_HIGH;
-		}
+	//
+	//	Determine a good LOD budget to use
+	//
+	int lod_budget = 0;
+	if (geometry_detail == 0) {
+		lod_budget = 0;
+	} else if (geometry_detail == 1) {
+		lod_budget = MAX_LOD_MED;
+	} else if (geometry_detail == 2) {
+		lod_budget = MAX_LOD_HIGH;
+	}
 
-		//
-		//	Store the values in the registry
-		//
-		registry.Set_Int (VALUE_NAME_DYN_LOD, lod_budget);
-		registry.Set_Int (VALUE_NAME_STATIC_LOD, lod_budget);
+	//
+	//	Store the values in the registry
+	//
+	registry.Set_Int (VALUE_NAME_DYN_LOD, lod_budget);
+	registry.Set_Int (VALUE_NAME_STATIC_LOD, lod_budget);
 
-		registry.Set_Int (VALUE_NAME_DYN_SHADOWS, (shadow_mode != PhysicsSceneClass::SHADOW_MODE_NONE));
-		registry.Set_Int (VALUE_NAME_STATIC_SHADOWS, static_shadows);
+	registry.Set_Int (VALUE_NAME_DYN_SHADOWS, (shadow_mode != PhysicsWorldClass::SHADOW_MODE_NONE));
+	registry.Set_Int (VALUE_NAME_STATIC_SHADOWS, static_shadows);
 
-		registry.Set_Int (VALUE_NAME_SHADOW_MODE,		shadow_mode);
-		registry.Set_Int (VALUE_NAME_TEXTURE_RES,		std::max (2 - texture_red, 0));
-		registry.Set_Int (VALUE_NAME_PARTICLE_DETAIL, particle_detail);
+	registry.Set_Int (VALUE_NAME_SHADOW_MODE, shadow_mode);
+	registry.Set_Int (VALUE_NAME_TEXTURE_RES, std::max (2 - texture_red, 0));
+	registry.Set_Int (VALUE_NAME_PARTICLE_DETAIL, particle_detail);
 
-		if (DX8Wrapper::Get_Current_Caps() && DX8Wrapper::Get_Current_Caps()->Support_NPatches ()) {
-			registry.Set_Int (VALUE_NAME_NPATCHES,	npatches);
-		}
+	if (DX8Wrapper::Get_Current_Caps() && DX8Wrapper::Get_Current_Caps()->Support_NPatches ()) {
+		registry.Set_Int (VALUE_NAME_NPATCHES, npatches);
+	}
 
-		//
-		//	Pass the values onto the game
-		//
+	//
+	//	Pass the values onto the game
+	//
 	if (COMBAT_WORLD != NULL) {
 		COMBAT_WORLD->Set_Polygon_Budgets (lod_budget, lod_budget);
 		COMBAT_WORLD->Enable_Dynamic_Projectors ((shadow_mode != PhysicsWorldClass::SHADOW_MODE_NONE));
 		COMBAT_WORLD->Enable_Static_Projectors ((static_shadows != 0));
 	}
-		// Note! It is important to invalidate all textures when
-		// changing the amount of render targets, as render target
-		// creation may have problems if the card is running low on
-		// texture memory!
+	// Note! It is important to invalidate all textures when
+	// changing the amount of render targets, as render target
+	// creation may have problems if the card is running low on
+	// texture memory!
 	if (COMBAT_WORLD != NULL && COMBAT_WORLD->Get_Shadow_Mode()!=(PhysicsWorldClass::ShadowEnum)shadow_mode) {
 		WW3D::_Invalidate_Textures();
 		COMBAT_WORLD->Set_Shadow_Mode ((PhysicsWorldClass::ShadowEnum)shadow_mode);
 	}
-		WW3D::Set_Texture_Reduction (std::max (2 - texture_red, 0));
-		SurfaceEffectsManager::Set_Mode ((SurfaceEffectsManager::MODE)surface_effect);
-	}
+	WW3D::Set_Texture_Reduction (std::max (2 - texture_red, 0));
+	SurfaceEffectsManager::Set_Mode ((SurfaceEffectsManager::MODE)surface_effect);
 
 	//
 	//	Store the values in the config file
@@ -660,35 +659,16 @@ DlgConfigPerformanceTabClass::On_Apply (void)
 	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_DYN_LOD, lod_budget);
 	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_STATIC_LOD, lod_budget);
 
-	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_DYN_SHADOWS, (shadow_mode != PhysicsSceneClass::SHADOW_MODE_NONE));
+	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_DYN_SHADOWS, (shadow_mode != PhysicsWorldClass::SHADOW_MODE_NONE));
 	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_STATIC_SHADOWS, static_shadows);
 
-	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_SHADOW_MODE,		shadow_mode);
-	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_TEXTURE_RES,		std::max (2 - texture_red, 0));
+	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_SHADOW_MODE, shadow_mode);
+	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_TEXTURE_RES, std::max (2 - texture_red, 0));
 	ini.Put_Int (W3D_SECTION_SYSTEM, VALUE_INI_PARTICLE_DETAIL, particle_detail);
 
-
-
 	if (DX8Wrapper::Get_Current_Caps() && DX8Wrapper::Get_Current_Caps()->Support_NPatches ()) {
-		ini.Put_Bool (W3D_SECTION_SYSTEM, VALUE_INI_NPATCHES,	npatches != 0);
+		ini.Put_Bool (W3D_SECTION_SYSTEM, VALUE_INI_NPATCHES, npatches != 0);
 	}
-
-	//
-	//	Pass the values onto the game
-	//
-	COMBAT_SCENE->Set_Polygon_Budgets (lod_budget, lod_budget);
-	COMBAT_SCENE->Enable_Dynamic_Projectors ((shadow_mode != PhysicsSceneClass::SHADOW_MODE_NONE));
-	COMBAT_SCENE->Enable_Static_Projectors ((static_shadows != 0));
-	// Note! It is important to invalidate all textures when
-	// changing the amount of render targets, as render target
-	// creation may have problems if the card is running low on
-	// texture memory!
-	if (COMBAT_SCENE->Get_Shadow_Mode()!=(PhysicsSceneClass::ShadowEnum)shadow_mode) {
-		WW3D::_Invalidate_Textures();
-		COMBAT_SCENE->Set_Shadow_Mode ((PhysicsSceneClass::ShadowEnum)shadow_mode);
-	}
-	WW3D::Set_Texture_Reduction (std::max (2 - texture_red, 0));
-	SurfaceEffectsManager::Set_Mode ((SurfaceEffectsManager::MODE)surface_effect);
 	OpenW3D::Save_Config(ini);
 	return true;
 }

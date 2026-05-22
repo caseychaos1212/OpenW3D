@@ -165,7 +165,7 @@ PhysClass::~PhysClass(void)
 void PhysClass::Init(const PhysDefClass & def)
 {
 	Definition = &def;
-	Flags = DEFAULT_FLAGS; 
+	Flags = DEFAULT_FLAGS;
 	const bool render_available = Physics_Render_Assets_Available();
 	if (!def.ModelName.Is_Empty() && render_available) {
 
@@ -204,8 +204,8 @@ void PhysClass::Init(const PhysDefClass & def)
 	}
 }
 
-void PhysClass::Set_Model(RenderObjClass * model)	
-{ 
+void PhysClass::Set_Model(RenderObjClass * model)
+{
 	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
 	bool in_scene = (world != NULL) ? world->Contains(this) : false;
 
@@ -217,7 +217,7 @@ void PhysClass::Set_Model(RenderObjClass * model)
 	if (Model) {
 		previous_transform = Model->Get_Transform();
 		// If we had an old model, copy the transform
-		if ( model ) {	
+		if ( model ) {
 			model->Set_Transform( Model->Get_Transform() );
 		}
 #if WWPHYS_SCENE_BRIDGE
@@ -231,7 +231,7 @@ void PhysClass::Set_Model(RenderObjClass * model)
 	}
 	Model = model;
 	if (Model) {
-		Model->Add_Ref(); 
+		Model->Add_Ref();
 #if WWPHYS_SCENE_BRIDGE
 		if (in_scene && render_scene != NULL) {
 			Model->Notify_Added(render_scene);
@@ -345,10 +345,10 @@ void PhysClass::Update_Simple_Shape_Cull_Box(void)
 	Set_Cull_Box(box);
 }
 
-RenderObjClass * PhysClass::Get_Model(void)				
-{ 
-	if (Model) Model->Add_Ref(); 
-	return Model; 
+RenderObjClass * PhysClass::Get_Model(void)
+{
+	if (Model) Model->Add_Ref();
+	return Model;
 }
 
 void PhysClass::Set_Name(const char * name)
@@ -452,7 +452,7 @@ LightEnvironmentClass * PhysClass::Get_Static_Lighting_Environment(void)
 														Get_Vis_Object_ID());
 			Set_Flag(STATIC_LIGHTING_DIRTY,false);
 		}
-	} 
+	}
 
 	/*
 	** Return our lighting cache to the caller
@@ -471,7 +471,7 @@ void PhysClass::Update_Sun_Status(void)
 	unsigned current_time = world->Get_Render_Time_Millis();
 	if ((current_time-SunStatusLastUpdated)<250) return;
 	SunStatusLastUpdated=current_time;
-	
+
 	Vector3 sunlight;
 	world->Get_Sun_Light_Vector(&sunlight);
 	if (sunlight.Length2() == 0.0f) {
@@ -480,7 +480,7 @@ void PhysClass::Update_Sun_Status(void)
 
 	Vector3 center;
 	if (Model != NULL) {
-		center = Model->Get_Bounding_Sphere().Center; 
+	center = Model->Get_Bounding_Sphere().Center;
 	} else {
 		Get_Transform().Get_Translation(&center);
 	}
@@ -497,17 +497,17 @@ void PhysClass::Update_Sun_Status(void)
 
 	// if the ray hits a static object which is casting a projected shadow, ignore that object
 	// and check again.
-	if (	(sunresult.Fraction < 1.0f) && 
-			(sunraytest.CollidedPhysObj != NULL) ) 
-	{ 
+	if (	(sunresult.Fraction < 1.0f) &&
+			(sunraytest.CollidedPhysObj != NULL) )
+	{
 			PhysClass * obj = sunraytest.CollidedPhysObj;
 			if (obj->Is_Casting_Shadow()) {
 				obj->Inc_Ignore_Counter();
 				sunresult.Reset();
-				world->Cast_Ray(sunraytest);			
+				world->Cast_Ray(sunraytest);
 				obj->Dec_Ignore_Counter();
-			}		
-	}	
+			}
+	}
 	Dec_Ignore_Counter();
 
 	Enable_Is_In_The_Sun(sunresult.Fraction == 1.0f);
@@ -653,7 +653,7 @@ bool PhysClass::Save (ChunkSaveClass &csave)
 		WRITE_MICRO_CHUNK(csave,PHYS_VARIABLE_DEFID,defid);
 	}
 	csave.End_Chunk();
-	
+
 	if (Model != NULL) {
 		csave.Begin_Chunk(PHYS_CHUNK_MODEL);
 		csave.Begin_Chunk(Model->Get_Factory().Chunk_ID());
@@ -896,8 +896,8 @@ void PhysClass::Add_Debug_Axes(const Matrix3D & transform,const Vector3 & color)
 }
 #endif
 
-bool PhysClass::Is_Debug_Display_Enabled(void) const					
-{ 
+bool PhysClass::Is_Debug_Display_Enabled(void) const
+{
 	const bool self_debug = ((Flags & DEBUGDISPLAY) == DEBUGDISPLAY);
 	PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World();
 	if (world == NULL) {
@@ -1026,7 +1026,7 @@ bool PhysDefClass::Save(ChunkSaveClass &csave)
 
 	csave.Begin_Chunk(PHYSDEF_CHUNK_VARIABLES);
 	WRITE_MICRO_CHUNK_WWSTRING(csave,PHYSDEF_VARIABLE_MODELNAME,ModelName);
-	WRITE_MICRO_CHUNK(csave,PHYSDEF_VARIABLE_ISPRELIT,IsPreLit);	
+	WRITE_MICRO_CHUNK(csave,PHYSDEF_VARIABLE_ISPRELIT,IsPreLit);
 	int def_shape_type = static_cast<int>(ShapeDefinition.Type);
 	WRITE_MICRO_CHUNK(csave,PHYSDEF_VARIABLE_SIMPLE_SHAPE_TYPE,def_shape_type);
 	if (ShapeDefinition.Type == PHYS_SIMPLE_SHAPE_AA_BOX) {

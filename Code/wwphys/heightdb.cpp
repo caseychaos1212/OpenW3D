@@ -369,7 +369,7 @@ HeightDBClass::Examine_Level_Geometry (void)
 
 	RefPhysListIterator it1 = world->Get_Static_Object_Iterator ();
 	RefPhysListIterator it2 = world->Get_Static_Anim_Object_Iterator ();
-	
+
 	//
 	//	Process the static meshes
 	//

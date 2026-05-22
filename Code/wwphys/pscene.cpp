@@ -129,7 +129,7 @@ PhysicsWorldRenderBridge * Create_PhysicsScene_Render_Bridge(PhysicsSceneClass &
 #define SHATTER_DEBUG		0					// debugging, freeze shattered particles in place for 60sec
 
 /*
-** Static members of PhysicsWorldClass 
+** Static members of PhysicsWorldClass
 */
 bool						PhysicsWorldClass::AllowCollisionFlags[NUM_COLLISION_FLAGS];
 PhysicsWorldClass *	PhysicsWorldClass::ActiveWorld = NULL;
@@ -232,7 +232,7 @@ PhysicsWorldClass::PhysicsWorldClass(void) :
 	ActiveWorld = this;
 	WWMEMLOG(MEM_PHYSICSDATA);
 	Set_Render_Bridge(new PhysicsWorldRenderBridge());
-	
+
 	/*
 	** Initialize Umbra
 	*/
@@ -320,7 +320,7 @@ PhysicsWorldClass::~PhysicsWorldClass(void)
 	if (ActiveWorld == this) {
 		ActiveWorld = NULL;
 	}
-}	
+}
 
 void PhysicsWorldClass::Set_Render_Bridge(PhysicsWorldRenderBridge * bridge)
 {
@@ -337,6 +337,11 @@ void PhysicsWorldClass::Set_Render_Bridge(PhysicsWorldRenderBridge * bridge)
 bool PhysicsWorldClass::Render_Assets_Available(void) const
 {
 	return (RenderBridge != NULL) && RenderBridge->Are_Render_Assets_Available();
+}
+
+bool PhysicsWorldClass::Render_Output_Available(void) const
+{
+	return (RenderBridge != NULL) && RenderBridge->Is_Render_Output_Available();
 }
 
 RenderObjClass * PhysicsWorldClass::Create_Render_Obj(const char * name) const
@@ -687,7 +692,7 @@ void PhysicsWorldClass::Add_Static_Light(LightPhysClass * newlight,int cull_node
  *   7/7/2000   gth : Created.                                                                 *
  *=============================================================================================*/
 void PhysicsWorldClass::Internal_Add_Static_Light(LightPhysClass * newlight)
-{	
+{
 	// Add the object to the appropriate lists
 	StaticLightList.Add(newlight);
 
@@ -890,9 +895,9 @@ bool PhysicsWorldClass::Contains(PhysClass * obj)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-RefPhysListIterator PhysicsWorldClass::Get_Dynamic_Object_Iterator(void)		
-{ 
-	return RefPhysListIterator(&ObjList); 
+RefPhysListIterator PhysicsWorldClass::Get_Dynamic_Object_Iterator(void)
+{
+	return RefPhysListIterator(&ObjList);
 }
 
 
@@ -908,9 +913,9 @@ RefPhysListIterator PhysicsWorldClass::Get_Dynamic_Object_Iterator(void)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-RefPhysListIterator PhysicsWorldClass::Get_Static_Object_Iterator(void)			
-{ 
-	return RefPhysListIterator(&StaticObjList); 
+RefPhysListIterator PhysicsWorldClass::Get_Static_Object_Iterator(void)
+{
+	return RefPhysListIterator(&StaticObjList);
 }
 
 
@@ -926,9 +931,9 @@ RefPhysListIterator PhysicsWorldClass::Get_Static_Object_Iterator(void)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-RefPhysListIterator PhysicsWorldClass::Get_Static_Anim_Object_Iterator(void)	
-{ 
-	return RefPhysListIterator(&StaticAnimList); 
+RefPhysListIterator PhysicsWorldClass::Get_Static_Anim_Object_Iterator(void)
+{
+	return RefPhysListIterator(&StaticAnimList);
 }
 
 
@@ -944,9 +949,9 @@ RefPhysListIterator PhysicsWorldClass::Get_Static_Anim_Object_Iterator(void)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-RefPhysListIterator PhysicsWorldClass::Get_Static_Light_Iterator(void)			
-{ 
-	return RefPhysListIterator(&StaticLightList); 
+RefPhysListIterator PhysicsWorldClass::Get_Static_Light_Iterator(void)
+{
+	return RefPhysListIterator(&StaticLightList);
 }
 
 
@@ -962,9 +967,9 @@ RefPhysListIterator PhysicsWorldClass::Get_Static_Light_Iterator(void)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-TexProjListIterator PhysicsWorldClass::Get_Static_Projector_Iterator(void)		
-{ 
-	return TexProjListIterator(&StaticProjectorList); 
+TexProjListIterator PhysicsWorldClass::Get_Static_Projector_Iterator(void)
+{
+	return TexProjListIterator(&StaticProjectorList);
 }
 
 
@@ -980,9 +985,9 @@ TexProjListIterator PhysicsWorldClass::Get_Static_Projector_Iterator(void)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-TexProjListIterator PhysicsWorldClass::Get_Dynamic_Projector_Iterator(void)	
-{ 
-	return TexProjListIterator(&DynamicProjectorList); 
+TexProjListIterator PhysicsWorldClass::Get_Dynamic_Projector_Iterator(void)
+{
+	return TexProjListIterator(&DynamicProjectorList);
 }
 
 
@@ -1003,8 +1008,8 @@ TexProjListIterator PhysicsWorldClass::Get_Dynamic_Projector_Iterator(void)
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
 void PhysicsWorldClass::Add_To_Dirty_Cull_List(PhysClass *obj)
-{ 
-	DirtyCullList.Add (obj); 
+{
+	DirtyCullList.Add (obj);
 }
 
 
@@ -1020,9 +1025,9 @@ void PhysicsWorldClass::Add_To_Dirty_Cull_List(PhysClass *obj)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsWorldClass::Remove_From_Dirty_Cull_List(PhysClass *obj)			
-{ 
-	DirtyCullList.Remove (obj); 
+void PhysicsWorldClass::Remove_From_Dirty_Cull_List(PhysClass *obj)
+{
+	DirtyCullList.Remove (obj);
 }
 
 
@@ -1038,9 +1043,9 @@ void PhysicsWorldClass::Remove_From_Dirty_Cull_List(PhysClass *obj)
  * HISTORY:                                                                                    *
  *   11/29/2000 gth : Created.                                                                 *
  *=============================================================================================*/
-bool PhysicsWorldClass::Is_In_Dirty_Cull_List(PhysClass *obj)					
-{ 
-	return DirtyCullList.Contains (obj); 
+bool PhysicsWorldClass::Is_In_Dirty_Cull_List(PhysClass *obj)
+{
+	return DirtyCullList.Contains (obj);
 }
 
 /***********************************************************************************************
@@ -1427,8 +1432,8 @@ void PhysicsWorldClass::Customized_Render(RenderInfoClass & rinfo)
 
 		if (vis_sector != NULL) {
 			MaterialPassClass * matpass = PhysResourceMgrClass::Get_Highlight_Material_Pass();
-			if (matpass) {			
-				
+			if (matpass) {
+
 				if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
 					world->Flush_Render_Info(rinfo);
 				}
@@ -1534,7 +1539,7 @@ void PhysicsWorldClass::Render_Objects(
 
 	RefPhysListIterator it(static_ws_list);
 
-	
+
 	if (Has_Debug_Mesh_Draw_Mode()) {
 		if (Is_Backface_Occluder_Debug_Enabled()) {
 
@@ -1695,9 +1700,9 @@ void PhysicsWorldClass::Render_Backface_Occluders
 			/*
 			** Flush the system and invert the backface culling check
 			*/
-		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
-			world->Flush_Special_Render_Info(context);
-		}
+			if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+				world->Flush_Render_Info(context);
+			}
 			ShaderClass::Invert_Backface_Culling(true);
 
 			/*
@@ -1740,9 +1745,9 @@ void PhysicsWorldClass::Render_Backface_Occluders
 			/*
 			** Flush all rendering and restore the normal backface culling state
 			*/
-		if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
-			world->Flush_Special_Render_Info(context);
-		}
+			if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
+				world->Flush_Render_Info(context);
+			}
 			ShaderClass::Invert_Backface_Culling(false);
 			context.Pop_Material_Pass();
 			context.Pop_Override_Flags();
@@ -2350,7 +2355,7 @@ void PhysicsSceneClass::Load_Render_Settings(ChunkLoadClass & cload)
 **
 ******************************************************************************************/
 PhysicsWorldClass::StatsStruct::StatsStruct(void)
-{ 
+{
 	Reset();
 }
 

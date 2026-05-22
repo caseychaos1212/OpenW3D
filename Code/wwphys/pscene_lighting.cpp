@@ -74,9 +74,9 @@
  * HISTORY:                                                                                    *
  *   8/10/2000  gth : Created.                                                                 *
  *=============================================================================================*/
-void PhysicsWorldClass::Set_Lighting_LOD_Cutoff(float intensity)				
-{ 
-	LightEnvironmentClass::Set_Lighting_LOD_Cutoff(intensity); 
+void PhysicsWorldClass::Set_Lighting_LOD_Cutoff(float intensity)
+{
+	LightEnvironmentClass::Set_Lighting_LOD_Cutoff(intensity);
 }
 
 
@@ -95,8 +95,8 @@ void PhysicsWorldClass::Set_Lighting_LOD_Cutoff(float intensity)
  *   8/10/2000  gth : Created.                                                                 *
  *=============================================================================================*/
 float PhysicsWorldClass::Get_Lighting_LOD_Cutoff(void)
-{ 
-	return LightEnvironmentClass::Get_Lighting_LOD_Cutoff(); 
+{
+	return LightEnvironmentClass::Get_Lighting_LOD_Cutoff();
 }
 
 

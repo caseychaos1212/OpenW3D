@@ -190,7 +190,7 @@ bool PhysTexProjectClass::Compute_Texture(PhysClass * obj,bool additive_projecti
 	LightEnvironmentClass lenv;
 	if (!additive_projection) {
 		lenv.Reset(Vector3(0,0,0),Vector3(0,0,0));		// light env that makes everything black
-	
+
 		MaterialPassClass * shadow_mtl = world->Get_Shadow_Material_Pass();
 		if (shadow_mtl) {
 			pushed_mtls = true;

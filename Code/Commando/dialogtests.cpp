@@ -1747,7 +1747,7 @@ EditWheeledVehicleDialogClass::On_Command (int ctrl_id, int message_id, unsigned
 				VehicleDef->Set_Max_Steering_Angle(Get_Dlg_Item_Float(IDC_MAX_STEERING_ANGLE_EDIT));
 				VehicleDef->Set_Shift_Up_Rpm(Get_Dlg_Item_Float(IDC_SHIFT_UP_RPM_EDIT));
 				VehicleDef->Set_Shift_Down_Rpm(Get_Dlg_Item_Float(IDC_SHIFT_DOWN_RPM_EDIT));
-				
+
 			PhysicsWorldClass * pscene = COMBAT_WORLD;
 			if (pscene) {
 				RefPhysListIterator iterator = pscene->Get_Dynamic_Object_Iterator();
@@ -1836,7 +1836,7 @@ EditTrackedVehicleDialogClass::On_Command (int ctrl_id, int message_id, unsigned
 				VehicleDef->Set_Track_U_Scale_Factor(Get_Dlg_Item_Float(IDC_TRACK_U_SCALE_FACTOR_EDIT));
 				VehicleDef->Set_Track_V_Scale_Factor(Get_Dlg_Item_Float(IDC_TRACK_V_SCALE_FACTOR_EDIT));
 				VehicleDef->Set_Turn_Torque_Scale_Factor(Get_Dlg_Item_Float(IDC_TURN_TORQUE_SCALE_FACTOR_EDIT));
-			
+
 			PhysicsWorldClass * pscene = COMBAT_WORLD;
 				if (pscene) {
 					RefPhysListIterator iterator = pscene->Get_Dynamic_Object_Iterator();

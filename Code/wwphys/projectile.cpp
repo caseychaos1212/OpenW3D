@@ -262,7 +262,7 @@ void ProjectileClass::Timestep(float dt)
 			LineSegClass ray(oldstate.Position,State.Position);
 			PhysRayCollisionTestClass raytest(ray,&res,Get_Collision_Group(),COLLISION_TYPE_PROJECTILE);
 
-			{ 
+			{
 			WWPROFILE("Raycast");
 			Inc_Ignore_Counter();
 			if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
@@ -270,7 +270,7 @@ void ProjectileClass::Timestep(float dt)
 			}
 			Dec_Ignore_Counter();
 		}
-			
+
 			/*
 			** If the result was a "startbad", just do the whole step
 			*/
@@ -646,4 +646,3 @@ bool ProjectileDefClass::Is_Type(const char * type_name)
 		return MoveablePhysDefClass::Is_Type(type_name);
 	}
 }
-

@@ -449,7 +449,7 @@ void LightSolveClass::Generate_Static_Light_Solve(LightSolveContextClass & conte
 	}
 
 	RefPhysListIterator it = world->Get_Static_Object_Iterator();
-	
+
 	/*
 	** Build a list of the objects to be solved
 	*/

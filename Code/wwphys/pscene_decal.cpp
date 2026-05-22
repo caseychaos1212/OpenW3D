@@ -44,7 +44,7 @@
 #include "physdecalsys.h"
 #include "phys.h"
 int PhysicsWorldClass::Create_Decal
-(	
+(
 	const Matrix3D &	tm,
 	const char *		texture_name,
 	float					radius,
@@ -66,5 +66,4 @@ bool PhysicsWorldClass::Remove_Decal(uint32 id)
 	}
 	return RenderBridge->Remove_Decal(id);
 }
-
 

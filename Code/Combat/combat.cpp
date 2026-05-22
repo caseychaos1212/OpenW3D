@@ -294,6 +294,7 @@ void	CombatManager::Scene_Init( bool render_available )
 		GameWorld = new PhysicsWorldClass;
 #if WWPHYS_SCENE_BRIDGE
 		GameScene = NULL;
+		GameWorld->Set_Render_Bridge(Create_Physics_Asset_Render_Bridge());
 #endif
 	}
 
@@ -679,6 +680,33 @@ PhysicsSceneClass	*	CombatManager::Get_Scene( void )
 PhysicsWorldClass * CombatManager::Get_World( void )
 {
 	return GameWorld;
+}
+
+bool CombatManager::Has_Render_Scene( void )
+{
+	return GameScene != NULL;
+}
+
+void CombatManager::Add_Render_Object_To_Render_Scene( RenderObjClass *obj )
+{
+#if WWPHYS_SCENE_BRIDGE
+	if (GameScene != NULL && obj != NULL) {
+		GameScene->Add_Render_Object(obj);
+	}
+#else
+	(void)obj;
+#endif
+}
+
+void CombatManager::Remove_Render_Object_From_Render_Scene( RenderObjClass *obj )
+{
+#if WWPHYS_SCENE_BRIDGE
+	if (GameScene != NULL && obj != NULL) {
+		GameScene->Remove_Render_Object(obj);
+	}
+#else
+	(void)obj;
+#endif
 }
 
 /*
@@ -1431,7 +1459,5 @@ void	CombatManager::Register_Star_Killer( ArmedGameObj * killer )
 		StarKillerID = 0;
 	}
 }
-
-
 
 

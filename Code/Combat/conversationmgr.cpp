@@ -489,7 +489,7 @@ ConversationMgrClass::Build_Buddy_List
 	if (world != NULL) {
 		world->Collect_Objects(box, false, true, &obj_list);
 	}
-	
+
 	//
 	//	Loop over all the collected objects
 	//

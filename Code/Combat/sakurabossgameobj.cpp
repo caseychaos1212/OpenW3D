@@ -2745,7 +2745,7 @@ SakuraBossGameObj::Find_Closest_Human_Player (void)
 	if (COMBAT_WORLD != NULL) {
 		COMBAT_WORLD->Collect_Objects (valley_box, false, true, &objs_in_valley);
 	}
-	
+
 	//
 	//	Loop over all the objects
 	//

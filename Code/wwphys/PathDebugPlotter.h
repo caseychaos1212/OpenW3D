@@ -171,7 +171,7 @@ PathDebugPlotterClass::Display (bool display)
 	PhysicsWorldClass *world = PhysicsWorldClass::Get_Active_World ();
 
 	if (world != NULL) {
-		
+
 		if ((m_ShouldDisplay == false) && display) {
 
 			if (m_PhysObj == NULL) {
@@ -192,4 +192,3 @@ PathDebugPlotterClass::Display (bool display)
 }
 
 #endif //__PATH_DEBUG_PLOTTER_H
-

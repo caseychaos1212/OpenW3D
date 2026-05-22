@@ -158,28 +158,28 @@ int PhysicsWorldClass::Get_Vis_Grid_Display_Mode(void)
 }
 
 void PhysicsWorldClass::Vis_Grid_Debug_Reset_Node(void)
-{ 
-	DynamicObjVisSystem->Debug_Reset_Node(); 
+{
+	DynamicObjVisSystem->Debug_Reset_Node();
 }
 
-bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Parent(void)			
-{ 
-	return DynamicObjVisSystem->Debug_Enter_Parent(); 
+bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Parent(void)
+{
+	return DynamicObjVisSystem->Debug_Enter_Parent();
 }
 
-bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Sibling(void)			
-{ 
-	return DynamicObjVisSystem->Debug_Enter_Sibling(); 
-}
-	
-bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Front_Child(void)		
-{ 
-	return DynamicObjVisSystem->Debug_Enter_Front_Child(); 
+bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Sibling(void)
+{
+	return DynamicObjVisSystem->Debug_Enter_Sibling();
 }
 
-bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Back_Child(void)		
-{ 
-	return DynamicObjVisSystem->Debug_Enter_Back_Child(); 
+bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Front_Child(void)
+{
+	return DynamicObjVisSystem->Debug_Enter_Front_Child();
+}
+
+bool PhysicsWorldClass::Vis_Grid_Debug_Enter_Back_Child(void)
+{
+	return DynamicObjVisSystem->Debug_Enter_Back_Child();
 }
 
 bool PhysicsWorldClass::Is_Vis_Sector_Missing(void)

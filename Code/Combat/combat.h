@@ -71,6 +71,7 @@ class SoldierGameObj;
 class DazzleLayerClass;
 class MessageWindowClass;
 class SoundEnvironmentClass;
+class RenderObjClass;
 
 
 /*
@@ -207,6 +208,9 @@ public:
 	// The Scene
 	static	PhysicsSceneClass			*Get_Scene( void );
 	static	PhysicsWorldClass			*Get_World( void );
+	static	bool							Has_Render_Scene( void );
+	static	void							Add_Render_Object_To_Render_Scene( RenderObjClass *obj );
+	static	void							Remove_Render_Object_From_Render_Scene( RenderObjClass *obj );
 	static	SimpleSceneClass			*Get_Background_Scene( void )		{ return BackgroundScene; }
 	static	CCameraClass				*Get_Camera( void )					{ return MainCamera; }
 	static   SoundEnvironmentClass	*Get_Sound_Environment( void )	{ return SoundEnvironment;	}

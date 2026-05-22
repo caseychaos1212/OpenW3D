@@ -482,7 +482,7 @@ CLevelEditView::Repaint_View (void)
 
 		//
 		//	Collect visible objects and such...
-		//		
+		//
 		PhysicsSceneClass::Get_Instance ()->PhysicsWorldClass::Pre_Render_Processing(*camera);
 
 		//

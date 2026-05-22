@@ -114,7 +114,7 @@ void RigidBodyClass::Timestep(float dt)
 															Get_Collision_Group(),
 															COLLISION_TYPE_PHYSICAL);
 		world->Cast_OBBox(boxmove);
-	
+
 		if (result.StartBad) {
 			remaining_time = 0;
 			State = oldstate;

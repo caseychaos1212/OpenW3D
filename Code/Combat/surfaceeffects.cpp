@@ -219,14 +219,13 @@ PersistantSurfaceEmitterClass::~PersistantSurfaceEmitterClass( void )
 	Set_Emitter( NULL );
 }
 
-#if WWPHYS_SCENE_BRIDGE
 void	PersistantSurfaceEmitterClass::Set_Emitter( const char * name )
 {
 	// Stop Old Emitter
 	if ( Emitter != NULL ) {
 		// Check if it is in the scene, it may ahve already been remove by completion
 		if ( Emitter->Peek_Scene() != NULL ) {
-			PhysicsSceneClass::Get_Instance()->Remove_Render_Object( Emitter );
+			CombatManager::Remove_Render_Object_From_Render_Scene( Emitter );
 		}
 		Emitter->Stop();
 		Emitter->Release_Ref();
@@ -234,27 +233,16 @@ void	PersistantSurfaceEmitterClass::Set_Emitter( const char * name )
 	}
 
 	// Start new Emitter
-	if ( name != NULL ) {
+	if ( name != NULL && CombatManager::Has_Render_Scene() ) {
 		Emitter = (ParticleEmitterClass *)WW3DAssetManager::Get_Instance()->Create_Render_Obj( name );
 		if ( Emitter ) {
 			SET_REF_OWNER( Emitter );
 //			Emitter->Set_Remove_On_Complete( false );
 			Emitter->Start();
-			PhysicsSceneClass::Get_Instance()->Add_Render_Object( Emitter );
+			CombatManager::Add_Render_Object_To_Render_Scene( Emitter );
 		}
 	}
 }
-#else
-void	PersistantSurfaceEmitterClass::Set_Emitter( const char * name )
-{
-	(void)name;
-	if (Emitter != NULL) {
-		Emitter->Stop();
-		Emitter->Release_Ref();
-		Emitter = NULL;
-	}
-}
-#endif
 
 
 /*
@@ -543,7 +531,7 @@ void	SurfaceEffectsManager::Apply_Effect
 	}
 
 	// Create the emitter
-	if ((allow_emitters) && (emitter_name) && (Mode != MODE_NO_EMITTERS)) {
+	if ((allow_emitters) && (emitter_name) && (Mode != MODE_NO_EMITTERS) && CombatManager::Has_Render_Scene()) {
 		WWPROFILE( "Emitter" );
 
 #if (RECYCLE_EMITTERS)
@@ -555,9 +543,7 @@ void	SurfaceEffectsManager::Apply_Effect
 			emitter->Set_Transform( tm );
 			emitter->Start();
 			emitter->Enable_Remove_On_Complete(true);
-#if WWPHYS_SCENE_BRIDGE
-			PhysicsSceneClass::Get_Instance()->Add_Render_Object( emitter );
-#endif
+			CombatManager::Add_Render_Object_To_Render_Scene( emitter );
 			emitter->Release_Ref();
 		}
 #endif
@@ -758,4 +744,3 @@ void SurfaceEffectsManager::Set_Override_Surface_Type(int type)
 
 	PhysicsConstants::Set_Override_Surface_Type(OverrideSurfaceType);
 }
-

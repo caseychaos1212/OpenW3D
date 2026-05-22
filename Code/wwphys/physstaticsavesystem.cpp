@@ -121,7 +121,7 @@ uint32 PhysStaticObjectsSaveSystemClass::Chunk_ID(void) const
 }
 
 bool PhysStaticObjectsSaveSystemClass::Save(ChunkSaveClass &csave)
-{	
+{
 	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World()) {
 		csave.Begin_Chunk(PSOSSC_CHUNKID_SCENE);
 		world->Save_Level_Static_Objects(csave);
@@ -154,4 +154,3 @@ void PhysStaticObjectsSaveSystemClass::On_Post_Load(void)
 		world->Post_Load_Level_Static_Objects();
 	}
 }
-

@@ -1537,7 +1537,7 @@ int SoldierGameObj::Tally_Vis_Visible_Soldiers( void )
 
 	WWASSERT(COMBAT_WORLD != NULL);
 	VisTableClass * pvs = COMBAT_WORLD->Get_Vis_Table(position);
-	
+
 	if (pvs != NULL) {
 
 		retcode = 0;
@@ -2617,7 +2617,7 @@ void	SoldierGameObj::Think( void )
 			}
 		}
 #endif
-		
+
 		if (!in_water) {
 				SurfaceEffectsManager::Update_Persistant_Emitter(	WaterWake,
 																					SURFACE_TYPE_DEFAULT,

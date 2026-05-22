@@ -200,13 +200,13 @@ bool PhysGridCullClass::Cast_Ray(PhysRayCollisionTestClass & raytest)
 	if (world == NULL) {
 		return false;
 	}
-	
+
 	while (obj) {
 
-		if (	
-			world->Do_Groups_Collide(obj->Get_Collision_Group(),raytest.CollisionGroup) && 
-			!obj->Is_Ignore_Me()	
-		) 
+		if (
+			world->Do_Groups_Collide(obj->Get_Collision_Group(),raytest.CollisionGroup) &&
+			!obj->Is_Ignore_Me()
+		)
 		{
 			res |= obj->Cast_Ray(raytest);
 		}
@@ -234,11 +234,11 @@ bool PhysGridCullClass::Cast_Ray(PhysRayCollisionTestClass & raytest)
 	// linearly cull the objects in the NoGridList
 	for (GridListIterator it(NoGridList); !it.Is_Done(); it.Next()) {
 		PhysClass * obj = (PhysClass *)it.Peek_Obj();
-		
-		if (	
-				world->Do_Groups_Collide(obj->Get_Collision_Group(),raytest.CollisionGroup) && 
-				!obj->Is_Ignore_Me()	
-			) 
+
+		if (
+				world->Do_Groups_Collide(obj->Get_Collision_Group(),raytest.CollisionGroup) &&
+				!obj->Is_Ignore_Me()
+			)
 		{
 			res |= obj->Cast_Ray(raytest);
 		}
@@ -320,10 +320,10 @@ bool PhysGridCullClass::Cast_AABox(PhysAABoxCollisionTestClass & boxtest)
 
 	while (obj) {
 
-		if (	
-			world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
-			!obj->Is_Ignore_Me()	
-		) 
+		if (
+			world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) &&
+			!obj->Is_Ignore_Me()
+		)
 		{
 			res |= obj->Cast_AABox(boxtest);
 		}
@@ -351,11 +351,11 @@ bool PhysGridCullClass::Cast_AABox(PhysAABoxCollisionTestClass & boxtest)
 	// linearly cull the objects in the NoGridList
 	for (GridListIterator it(NoGridList); !it.Is_Done(); it.Next()) {
 		PhysClass * obj = (PhysClass*)it.Peek_Obj();
-		
-		if (	
-				world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
-				!obj->Is_Ignore_Me()	
-			) 
+
+		if (
+				world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) &&
+				!obj->Is_Ignore_Me()
+			)
 		{
 			res |= obj->Cast_AABox(boxtest);
 		}
@@ -435,10 +435,10 @@ bool PhysGridCullClass::Cast_OBBox(PhysOBBoxCollisionTestClass & boxtest)
 
 	while (obj) {
 
-		if (	
-			world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
-			!obj->Is_Ignore_Me()	
-		) 
+		if (
+			world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) &&
+			!obj->Is_Ignore_Me()
+		)
 		{
 			res |= obj->Cast_OBBox(boxtest);
 		}
@@ -466,11 +466,11 @@ bool PhysGridCullClass::Cast_OBBox(PhysOBBoxCollisionTestClass & boxtest)
 	// linearly cull the objects in the NoGridList
 	for (GridListIterator it(NoGridList); !it.Is_Done(); it.Next()) {
 		PhysClass * obj = (PhysClass*)it.Peek_Obj();
-		
-		if (	
-				world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) && 
-				!obj->Is_Ignore_Me()	
-			) 
+
+		if (
+				world->Do_Groups_Collide(obj->Get_Collision_Group(),boxtest.CollisionGroup) &&
+				!obj->Is_Ignore_Me()
+			)
 		{
 			res |= obj->Cast_OBBox(boxtest);
 		}

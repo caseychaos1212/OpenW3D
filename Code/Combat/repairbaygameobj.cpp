@@ -647,7 +647,7 @@ RepairBayGameObj::Repair_Vehicle (void)
 	//
 	NonRefPhysListClass objs_to_repair;
 	COMBAT_WORLD->Collect_Objects (RepairZone, false, true, &objs_to_repair);
-	
+
 	//
 	//	Loop over all the objects
 	//

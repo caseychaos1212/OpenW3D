@@ -825,7 +825,7 @@ class PhysDefClass : public DefinitionClass
 {
 public:
 	using SimpleShapeDefinition = PhysSimpleShapeDefinition;
-	
+
 	PhysDefClass(void);
 
 	// From PersistClass
@@ -845,7 +845,7 @@ public:
 	const SimpleShapeDefinition &Get_Simple_Shape_Definition() const { return ShapeDefinition; }
 	void								Set_Simple_Shape_Definition(const SimpleShapeDefinition &def) { ShapeDefinition = def; }
 	bool								Uses_Simple_Shape(void) const	{ return ShapeDefinition.Type != PHYS_SIMPLE_SHAPE_NONE; }
-	
+
 	//	Editable interface requirements
 	DECLARE_EDITABLE(PhysDefClass,DefinitionClass);
 
@@ -854,7 +854,7 @@ protected:
 	StringClass						ModelName;
 	bool								IsPreLit;
 	SimpleShapeDefinition	ShapeDefinition;
-	
+
 	friend class PhysClass;
 };
 

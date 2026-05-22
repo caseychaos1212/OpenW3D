@@ -904,7 +904,7 @@ void CCameraClass::Update()
 		}
 
 		// When Physics_Debug is on, draw the camera collision box in its start point
-#ifdef WWDEBUG	
+#ifdef WWDEBUG
 		if (COMBAT_WORLD != NULL && COMBAT_WORLD->Is_Debug_Display_Enabled()) {
 			COMBAT_WORLD->Add_Debug_OBBox(box,Vector3(1,0,0));
 		}
@@ -1415,7 +1415,7 @@ void	CCameraClass::Handle_Input( void )
 		}
 
 #if WWPHYS_SCENE_BRIDGE
-		if ( Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_IN ) || 
+		if ( Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_IN ) ||
 		 Input::Get_State( INPUT_FUNCTION_DEBUG_FAR_CLIP_OUT ) ) {
 			float fog_start = 0.0f, fog_stop = FarClipPlane;
 			if (SceneClass *scene = static_cast<SceneClass *>(COMBAT_SCENE)) {
@@ -1433,7 +1433,7 @@ void	CCameraClass::Handle_Input( void )
 			}
 			Debug_Say(( "FarClipPlane %f\n", FarClipPlane ));
 			Set_Clip_Planes( NearClipPlane, FarClipPlane );
-		} 
+		}
 #endif
 
 	}

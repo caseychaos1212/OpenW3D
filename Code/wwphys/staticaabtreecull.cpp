@@ -404,7 +404,7 @@ void StaticAABTreeCullClass::Evaluate_Non_Occluder_Visibility
 #if 0
 					/*
 					** DEBUGGING!!! If _test_vis_id is visible, display the vis buffer!
-					** If you want to use this, disable the early exit above: 
+					** If you want to use this, disable the early exit above:
 					** (context.VisTable.Get_Bit(obj->Get_Vis_Object_ID() == 0)
 					*/
 					static int _test_vis_id = -1;

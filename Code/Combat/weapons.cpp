@@ -1259,12 +1259,10 @@ void	WeaponClass::Do_Continuous_Effects( bool enable )
 
 		for ( int i = 0; i < ContinuousEmitters.Length(); i++ ) {
 		if ( ContinuousEmitters[i] != NULL ) {
-#if WWPHYS_SCENE_BRIDGE
 			// Check if it is in the scene, it may have already been removed by completion
 			if ( ContinuousEmitters[i]->Peek_Scene() != NULL ) {
-				PhysicsSceneClass::Get_Instance()->Remove_Render_Object( ContinuousEmitters[i] );
+				CombatManager::Remove_Render_Object_From_Render_Scene( ContinuousEmitters[i] );
 			}
-#endif
 			ContinuousEmitters[i]->Stop();
 			ContinuousEmitters[i]->Release_Ref();
 			ContinuousEmitters[i] = NULL;
@@ -1312,9 +1310,7 @@ void	WeaponClass::Do_Continuous_Effects( bool enable )
 			if ( ContinuousEmitters[i] ) {
 				SET_REF_OWNER( ContinuousEmitters[i] );
 				ContinuousEmitters[i]->Start();
-#if WWPHYS_SCENE_BRIDGE
-				PhysicsSceneClass::Get_Instance()->Add_Render_Object( ContinuousEmitters[i] );
-#endif
+				CombatManager::Add_Render_Object_To_Render_Scene( ContinuousEmitters[i] );
 			}
 		}
 		}

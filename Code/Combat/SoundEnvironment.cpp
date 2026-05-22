@@ -174,4 +174,3 @@ void SoundEnvironmentClass::Update (PhysicsSceneClass *, CameraClass *)
 {
 }
 #endif
-

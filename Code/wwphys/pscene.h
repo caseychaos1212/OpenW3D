@@ -53,6 +53,7 @@
 #endif
 #include "widgetuser.h"
 #include "physlist.h"
+#include "phys.h"
 #include "aabtreecull.h"
 #include "gridcull.h"
 #include "vector.h"
@@ -116,6 +117,7 @@ public:
 	virtual void	Add_Sun_To_Light_Environment(PhysicsWorldClass & /*world*/, LightEnvironmentClass & /*env*/, bool /*use_sun*/) {}
 	virtual void	Compute_Static_Lighting(PhysicsWorldClass & /*world*/, LightEnvironmentClass * /*env*/, const Vector3 & /*obj_center*/, bool /*use_sun*/, int /*vis_object_id*/) {}
 	virtual bool	Are_Render_Assets_Available(void) const { return false; }
+	virtual bool	Is_Render_Output_Available(void) const { return false; }
 	virtual RenderObjClass *	Create_Render_Obj(const char * /*name*/) { return NULL; }
 	virtual RenderObjClass *	Create_Render_Obj_From_Filename(const char * /*filename*/) { return NULL; }
 	virtual TextureClass *	Acquire_Texture(const char * /*name*/) { return NULL; }
@@ -129,6 +131,10 @@ public:
 	virtual void				Flush(SpecialRenderInfoClass & /*info*/) {}
 	virtual bool				Has_Debug_Mesh_Draw_Mode(void) const { return false; }
 };
+
+#if WWPHYS_SCENE_BRIDGE
+PhysicsWorldRenderBridge * Create_Physics_Asset_Render_Bridge(void);
+#endif
 
 // forward referencing the collision detection queries
 class	PhysRayCollisionTestClass;
@@ -387,7 +393,7 @@ August 31, 1998
   - therefore all objects in the "game world" will be represented by a physics object
   - when a physics object changes position, the culling database can be refreshed
   - physobj needs its linkage information built in.
-	
+
 	class PhysicsWorldClass : public SceneClass
 	{
 		void Add_Render_Obj(...)		{ assert(0); }
@@ -594,7 +600,7 @@ public:
 
 	PhysicsWorldClass(void);
 	virtual ~PhysicsWorldClass(void);
-	
+
 	/*
 	** Timestep the world
 	*/
@@ -741,6 +747,7 @@ public:
 	void							Set_Render_Bridge(PhysicsWorldRenderBridge * bridge);
 	PhysicsWorldRenderBridge *	Peek_Render_Bridge(void) const { return RenderBridge; }
 	bool							Render_Assets_Available(void) const;
+	bool							Render_Output_Available(void) const;
 	RenderObjClass *				Create_Render_Obj(const char * name) const;
 	RenderObjClass *				Create_Render_Obj_From_Filename(const char * filename) const;
 	TextureClass *					Acquire_Texture(const char * name) const;
@@ -1089,7 +1096,7 @@ protected:
 	virtual PolyRenderMode	Query_Polygon_Mode(void) const;
 	virtual void				Save_Render_Settings(ChunkSaveClass & csave);
 	virtual void				Load_Render_Settings(ChunkLoadClass & cload);
-	
+
 	/*
 	** Rendering functions
 	*/
@@ -1345,7 +1352,7 @@ private:
 protected:
 
 private:
-	
+
 	/*
 	** WW3D is a friend because we let it call our protected Render function (which no
 	** one else is allowed to call... trying to "contain" surrender :-)

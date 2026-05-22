@@ -54,7 +54,7 @@
 #include "wwdebug.h"
 #endif
 
-#include "rendobj.h"
+class RenderObjClass;
 
 typedef RefMultiListClass<RenderObjClass>		RefRenderObjListClass;
 typedef RefMultiListIterator<RenderObjClass>	RefRenderObjListIterator;
@@ -63,4 +63,3 @@ typedef MultiListClass<RenderObjClass>			NonRefRenderObjListClass;
 typedef MultiListIterator<RenderObjClass>		NonRefRenderObjListIterator;
 
 #endif
-

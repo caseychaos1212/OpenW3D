@@ -212,7 +212,7 @@ UnitCoordinationZoneMgr::Display_Debug_Boxes (void)
 	//
 	//	Pretty simple, just add a debug box for each zone
 	//
-	for (int index = 0; index < ZoneList.Count (); index ++) {	
+	for (int index = 0; index < ZoneList.Count (); index ++) {
 		if (COMBAT_WORLD != NULL) {
 			COMBAT_WORLD->Add_Debug_AABox (ZoneList[index], Vector3 (1.0F, 0.0F, 0.25F));
 		}
@@ -220,4 +220,3 @@ UnitCoordinationZoneMgr::Display_Debug_Boxes (void)
 
 	return ;
 }
-

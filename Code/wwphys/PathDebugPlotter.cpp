@@ -65,7 +65,6 @@ PathDebugPlotterClass::Render_Vector
 	if (PhysicsWorldClass * world = PhysicsWorldClass::Get_Active_World ()) {
 		world->Add_Debug_Vector (pt, vec, color);
 	}
-	
+
 	return ;
 }
-
