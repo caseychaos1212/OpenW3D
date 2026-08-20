@@ -124,6 +124,7 @@ void	HumanStateClass::Init( HumanPhysClass	* human_phys )
 void	HumanStateClass::Reset( void )
 {
 	REF_PTR_RELEASE( HumanPhys );
+	TurnVelocity = 0.0f;
 
 	// Clear the sniping flag
 	if ( Get_State_Flag( SNIPING_FLAG ) ) {
@@ -1056,6 +1057,11 @@ void	HumanStateClass::Update_State( void )
 */
 void	HumanStateClass::Post_Think( void )
 {
+	// TurnVelocity is a one-frame signal.  Consume it even when the current
+	// state cannot use a turn animation so it cannot become stale.
+	const float turn_velocity = TurnVelocity;
+	TurnVelocity = 0;
+
 	// Update sub_state per movement
 	// do it for upright, land, ladder, airborne,
 	if ( Is_Sub_State_Adjustable() || Is_State_Interruptable() ) {
@@ -1098,12 +1104,12 @@ void	HumanStateClass::Post_Think( void )
 			//Debug_Say(( "%f %f\n", move_vector.Length(), WALKING_THRESHHOLD ));
 		}
 
-#if 0	// No turn anims!!!
-		// Get our current turn vector
-		if ( TurnVelocity > 0 )				new_sub_state |= SUB_STATE_TURN_LEFT;
-		else if ( TurnVelocity < 0 ) 		new_sub_state |= SUB_STATE_TURN_RIGHT;
-		TurnVelocity = 0;
-#endif
+		// Play turn animations only while turning in place.  Translational
+		// movement animations take priority when the soldier is also moving.
+		if ( new_sub_state == 0 ) {
+			if ( turn_velocity > 0 )		new_sub_state |= SUB_STATE_TURN_LEFT;
+			else if ( turn_velocity < 0 )	new_sub_state |= SUB_STATE_TURN_RIGHT;
+		}
 
 		// Get him out of WOUNDED, LAND, LOITER states if moving or shooting
 		if ( Is_State_Interruptable() && Get_State() != UPRIGHT ) {

@@ -113,6 +113,21 @@
 
 const float EMOT_ICON_HEIGHT = 2.0F;
 
+static int Find_Exact_Bone_Index( RenderObjClass * model, const char * bone_name )
+{
+	if ( model == nullptr ) {
+		return -1;
+	}
+
+	const int bone_index = model->Get_Bone_Index( bone_name );
+	if ( bone_index < 0 || bone_index >= model->Get_Num_Bones() ) {
+		return -1;
+	}
+
+	const char * actual_name = model->Get_Bone_Name( bone_index );
+	return actual_name != nullptr && stricmp( actual_name, bone_name ) == 0 ? bone_index : -1;
+}
+
 /*
 ** SoldierGameObjDef
 */
@@ -312,6 +327,12 @@ SoldierGameObj::SoldierGameObj() :
 	Vehicle( nullptr ),
 	LegFacing( 0 ),
 	SyncLegs( false ),
+	LegFacingInitialized( false ),
+	LegTwistModel( nullptr ),
+	LegTwistHTree( nullptr ),
+	LegSpineBone( -1 ),
+	LegSpine1Bone( -1 ),
+	LegTwistBonesCaptured( false ),
 	LastLegMode( 0 ),
 	HeadLookDuration( 0 ),
 	HeadRotation( 0,0,0 ),
@@ -352,6 +373,8 @@ SoldierGameObj::SoldierGameObj() :
 //------------------------------------------------------------------------------------
 SoldierGameObj::~SoldierGameObj()
 {
+	Release_Leg_Twist_Bones();
+
 	if ( HealingEffect != nullptr ) {
 		Peek_Human_Phys()->Remove_Effect_From_Me( HealingEffect );
 		REF_PTR_RELEASE( HealingEffect );
@@ -424,6 +447,8 @@ void	SoldierGameObj::Init( const SoldierGameObjDef & definition )
 
 void	SoldierGameObj::Copy_Settings( const SoldierGameObjDef & definition )
 {
+	Reset_Leg_Twist_State();
+
 	HumanState.Init( Peek_Human_Phys() );
 	HumanState.Set_Anim_Control( (HumanAnimControlClass *)Get_Anim_Control() );  // Must set the anim control after the phys object
 //HumanState.Set_Human_Anim_Override( "HAO Test" );
@@ -498,6 +523,8 @@ void	SoldierGameObj::Prepare_Speech_Framework( void )
 
 void	SoldierGameObj::Re_Init( const SoldierGameObjDef & definition )
 {
+	Reset_Leg_Twist_State();
+
 	if ( this == COMBAT_STAR ) {
 		HUDClass::Force_Weapon_Chart_Update();
 		WeaponViewClass::Reset();
@@ -835,6 +862,9 @@ void	SoldierGameObj::On_Post_Load( void )
 	}
 
 	Adjust_Skeleton( Get_Definition().SkeletonHeight, Get_Definition().SkeletonWidth );
+	Cache_Leg_Twist_Bones( Peek_Model() );
+	LegFacingInitialized = true;
+	HumanState.Set_Turn_Velocity( 0.0f );
 
 	// Fixup BackWeaponRenderModel
 	Update_Back_Gun();
@@ -2051,172 +2081,181 @@ void SoldierGameObj::Apply_Control( void )
 }
 
 //------------------------------------------------------------------------------------
+void SoldierGameObj::Cache_Leg_Twist_Bones( RenderObjClass * model )
+{
+	LegTwistModel = model;
+	LegTwistHTree = model != nullptr ? model->Get_HTree() : nullptr;
+	LegSpineBone = Find_Exact_Bone_Index( model, "C SPINE" );
+	LegSpine1Bone = Find_Exact_Bone_Index( model, "C SPINE1" );
+	LegTwistBonesCaptured = false;
+}
+
+//------------------------------------------------------------------------------------
+void SoldierGameObj::Release_Leg_Twist_Bones( void )
+{
+	RenderObjClass * model = Peek_Model();
+	if ( LegTwistBonesCaptured && model != nullptr && model == LegTwistModel ) {
+		if ( LegSpineBone >= 0 && LegSpineBone < model->Get_Num_Bones() && model->Is_Bone_Captured( LegSpineBone ) ) {
+			model->Release_Bone( LegSpineBone );
+		}
+		if ( LegSpine1Bone >= 0 && LegSpine1Bone < model->Get_Num_Bones() && model->Is_Bone_Captured( LegSpine1Bone ) ) {
+			model->Release_Bone( LegSpine1Bone );
+		}
+	}
+	LegTwistBonesCaptured = false;
+}
+
+//------------------------------------------------------------------------------------
+void SoldierGameObj::Reset_Leg_Twist_State( void )
+{
+	Release_Leg_Twist_Bones();
+	LegTwistModel = nullptr;
+	LegTwistHTree = nullptr;
+	LegSpineBone = -1;
+	LegSpine1Bone = -1;
+	LegFacingInitialized = false;
+	SyncLegs = false;
+}
+
+//------------------------------------------------------------------------------------
 void	SoldierGameObj::Handle_Legs( void )
 {
-#if 0
-	if ( Get_State() != HumanStateClass::UPRIGHT ) {
-		LegFacing = Get_Facing();
+	RenderObjClass * model = Peek_Model();
+	const HTreeClass * htree = model != nullptr ? model->Get_HTree() : nullptr;
+	if ( model != LegTwistModel || htree != LegTwistHTree ) {
+		// A network model swap may have destroyed the old model, and Set_HTree
+		// replaces its tree in place.  Do not dereference either stale cache.
+		LegTwistBonesCaptured = false;
+		Cache_Leg_Twist_Bones( model );
+		LegFacingInitialized = false;
 		SyncLegs = false;
 	}
 
-	// If Moving, clear LegFacing
-	if ((Control.Get_Analog( ControlClass::ANALOG_MOVE_FORWARD ) != 0.0f ) ||
-		 (Control.Get_Analog( ControlClass::ANALOG_MOVE_LEFT ) != 0.0f )) {
-
-		LegFacing = Get_Facing();
+	const float body_facing = WWMath::Wrap( Get_Facing(), DEG_TO_RADF( -180.0f ), DEG_TO_RADF( 180.0f ) );
+	if ( !LegFacingInitialized ) {
+		LegFacing = body_facing;
+		LegFacingInitialized = true;
 		SyncLegs = false;
+	}
 
+	const bool is_moving =
+		Control.Get_Analog( ControlClass::ANALOG_MOVE_FORWARD ) != 0.0f ||
+		Control.Get_Analog( ControlClass::ANALOG_MOVE_LEFT ) != 0.0f;
+	const bool bones_valid =
+		model != nullptr &&
+		LegSpineBone >= 0 && LegSpineBone < model->Get_Num_Bones() &&
+		LegSpine1Bone >= 0 && LegSpine1Bone < model->Get_Num_Bones();
+
+	if ( LegTwistBonesCaptured && bones_valid &&
+		( !model->Is_Bone_Captured( LegSpineBone ) || !model->Is_Bone_Captured( LegSpine1Bone ) ) ) {
+		// Adjust_Skeleton and other HTree replacements clear capture flags without
+		// necessarily changing the render-model pointer.
+		Release_Leg_Twist_Bones();
+	}
+
+	bool bones_available = bones_valid;
+	if ( bones_available && !LegTwistBonesCaptured ) {
+		bones_available =
+			!model->Is_Bone_Captured( LegSpineBone ) &&
+			!model->Is_Bone_Captured( LegSpine1Bone );
+	}
+
+	const bool can_twist =
+		Get_State() == HumanStateClass::UPRIGHT &&
+		!is_moving &&
+		bones_available;
+	float turn_step = 0.0f;
+	bool leg_turn_is_authoritative = can_twist;
+
+	if ( !can_twist ) {
+		LegFacing = body_facing;
+		SyncLegs = false;
+		Release_Leg_Twist_Bones();
 	} else {
+		const float clamp_rotation = DEG_TO_RADF( 60.0f );
+		const float sync_rotation = DEG_TO_RADF( 35.0f );
+		const float sync_rate = DEG_TO_RADF( 75.0f );
 
-#define	CLAMP_DEGREES	60
-#define	SYNC_DEGREES	35
-#define	SYNC_RATE		75
-#define	FLIP_RATE		720
+		LegFacing = WWMath::Wrap( LegFacing, DEG_TO_RADF( -180.0f ), DEG_TO_RADF( 180.0f ) );
+		float legs_rotation = WWMath::Wrap(
+			body_facing - LegFacing,
+			DEG_TO_RADF( -180.0f ),
+			DEG_TO_RADF( 180.0f ) );
+		legs_rotation = WWMath::Clamp( legs_rotation, -clamp_rotation, clamp_rotation );
+		LegFacing = WWMath::Wrap(
+			body_facing - legs_rotation,
+			DEG_TO_RADF( -180.0f ),
+			DEG_TO_RADF( 180.0f ) );
 
-		// find the leg difference;
-		LegFacing = WWMath::Wrap( LegFacing, DEG_TO_RADF( -180 ), DEG_TO_RADF( 180 ) );
-
-		float	legs_rotation = Get_Facing() - LegFacing;
-
-		legs_rotation = WWMath::Wrap( legs_rotation, DEG_TO_RADF( -180 ), DEG_TO_RADF( 180 ) );
-
-		// Clamp to with 90
-		legs_rotation = WWMath::Clamp( legs_rotation, DEG_TO_RADF( -CLAMP_DEGREES ), DEG_TO_RADF( CLAMP_DEGREES ) );
-		LegFacing = Get_Facing() - legs_rotation;
-		LegFacing = WWMath::Wrap( LegFacing, DEG_TO_RADF( -180 ), DEG_TO_RADF( 180 ) );
-
-		// if legs are more than 30 degrees off, start correcting
-		if ( WWMath::Fabs( legs_rotation ) > DEG_TO_RAD( SYNC_DEGREES ) ) {
+		if ( WWMath::Fabs( legs_rotation ) > sync_rotation ) {
 			SyncLegs = true;
 		}
 
-SyncLegs = true;
-
-		// if syncing, start moving legs to match rotation
 		if ( SyncLegs ) {
-			float move = DEG_TO_RAD( SYNC_RATE ) * TimeManager::Get_Frame_Seconds() *
-								WWMath::Sign( legs_rotation );
-			if ( WWMath::Fabs( move ) >= WWMath::Fabs( legs_rotation ) ) {
-				move = legs_rotation;	// Complete syncing
+			float frame_seconds = TimeManager::Get_Frame_Seconds();
+			if ( frame_seconds < 0.0f ) {
+				frame_seconds = 0.0f;
+			}
+			const float max_step = sync_rate * frame_seconds;
+			if ( WWMath::Fabs( legs_rotation ) <= max_step ) {
+				turn_step = legs_rotation;
+				LegFacing = body_facing;
 				SyncLegs = false;
-			} else {
-				LegFacing += move;
-				if ( !Is_Human_Controlled() ) {	// human players don't use turn anims
-					HumanState.Set_Turn_Velocity( move );	// Also, play the leg turning anim
-				}
+			} else if ( max_step > 0.0f ) {
+				turn_step = WWMath::Clamp( legs_rotation, -max_step, max_step );
+				LegFacing = WWMath::Wrap(
+					LegFacing + turn_step,
+					DEG_TO_RADF( -180.0f ),
+					DEG_TO_RADF( 180.0f ) );
 			}
 		}
-	}
 
-	if ( !SyncLegs ) {
-		HumanState.Set_Turn_Velocity( 0 );
-	}
+		legs_rotation = WWMath::Wrap(
+			body_facing - LegFacing,
+			DEG_TO_RADF( -180.0f ),
+			DEG_TO_RADF( 180.0f ) );
 
-	// I'm making this staic for now, because all human
-	// skeletons have the bone at the same index
-	static int  root_bone = -1;
-	if ( root_bone == -1 ) {			// Get root bone index
-		root_bone = Peek_Model()->Get_Bone_Index( "root" );
-	}
+		if ( legs_rotation != 0.0f ) {
+			if ( !LegTwistBonesCaptured ) {
+				model->Capture_Bone( LegSpineBone );
+				model->Capture_Bone( LegSpine1Bone );
+				LegTwistBonesCaptured =
+					model->Is_Bone_Captured( LegSpineBone ) &&
+					model->Is_Bone_Captured( LegSpine1Bone );
+			}
 
-	static int  torso_bone = -1;
-	if ( torso_bone == -1 ) {			// Get torso bone index
-		torso_bone = Peek_Model()->Get_Bone_Index( "thorax" );
-	}
-	// Update the model
-	float	legs_rotation = Get_Facing() - LegFacing;
-	if ( legs_rotation ) {
+			if ( LegTwistBonesCaptured ) {
+				Matrix3D spine_adjust( 1 );
+				spine_adjust.Rotate_X( -legs_rotation );
+				model->Control_Bone( LegSpineBone, spine_adjust );
 
-		WWASSERT( root_bone != -1 );
-		WWASSERT( torso_bone != -1 );
-
-		if ( !Peek_Model()->Is_Bone_Captured( root_bone ) ) {
-			Peek_Model()->Capture_Bone( root_bone );
-		}
-		if ( !Peek_Model()->Is_Bone_Captured( torso_bone ) ) {
-			Peek_Model()->Capture_Bone( torso_bone );
-		}
-
-		// LOOK INTO RELATIVE_CONTROL_BONE
-		Matrix3D	root_adjust(1);				// adjust it
-		root_adjust.Rotate_Z( -legs_rotation );
-		Peek_Model()->Control_Bone( root_bone, root_adjust );
-
-		Matrix3D	legs_adjust(1);				// adjust it
-		legs_adjust.Rotate_Z( legs_rotation );
-		Peek_Model()->Control_Bone( torso_bone, legs_adjust );
-	} else {	// no adjustment, release
-
-	 	if ( Peek_Model()->Is_Bone_Captured( root_bone ) ) {
-			Peek_Model()->Release_Bone( root_bone );
-		}
-	 	if ( Peek_Model()->Is_Bone_Captured( torso_bone ) ) {
-			Peek_Model()->Release_Bone( torso_bone );
+				Matrix3D spine1_adjust( 1 );
+				spine1_adjust.Rotate_X( legs_rotation );
+				model->Control_Bone( LegSpine1Bone, spine1_adjust );
+			} else {
+				// If capture unexpectedly fails, fall back to the normal whole-body turn.
+				if ( model->Is_Bone_Captured( LegSpineBone ) ) {
+					model->Release_Bone( LegSpineBone );
+				}
+				if ( model->Is_Bone_Captured( LegSpine1Bone ) ) {
+					model->Release_Bone( LegSpine1Bone );
+				}
+				LegFacing = body_facing;
+				SyncLegs = false;
+				turn_step = 0.0f;
+				leg_turn_is_authoritative = false;
+			}
+		} else {
+			Release_Leg_Twist_Bones();
 		}
 	}
 
-#else
-
-#if 0
-	float	legs_rotation = 0;
-
-	// Compare the facing to the motion, set leg_racing to the difference
-	Vector3 move( Control.Get_Analog( ControlClass::ANALOG_MOVE_FORWARD ), Control.Get_Analog( ControlClass::ANALOG_MOVE_LEFT ), 0 );
-	if ( move.Length() > 0 ) {
-		float move_direction = ::WWMath::Atan2( -move.Y, move.X );
-		float diff = move_direction;
-		diff += 2*DEG_TO_RADF( 360 ) + DEG_TO_RADF( 45 );
-		diff -= WWMath::Floor( diff / DEG_TO_RADF( 90 ) ) * DEG_TO_RADF( 90 );
-		diff -= DEG_TO_RADF( 45 );
-		legs_rotation = diff;
-		Debug_Say(( "Move (%1.1f)  %1.1f %1.1f %1.1f   %1.1f\n", RAD_TO_DEG(diff), move.X, move.Y, move.Z, RAD_TO_DEG( move_direction ) ));
+	if ( Get_State() == HumanStateClass::IN_VEHICLE ) {
+		// SoldierGameObj::Post_Think skips HumanState::Post_Think in vehicles.
+		HumanState.Set_Turn_Velocity( 0.0f );
+	} else if ( leg_turn_is_authoritative ) {
+		HumanState.Set_Turn_Velocity( turn_step );
 	}
-
-
-	// I'm making this staic for now, because all human
-	// skeletons have the bone at the same index
-	static int  root_bone = -1;
-	if ( root_bone == -1 ) {			// Get root bone index
-		root_bone = Peek_Model()->Get_Bone_Index( "c spine" );
-	}
-
-	static int  torso_bone = -1;
-	if ( torso_bone == -1 ) {			// Get torso bone index
-		torso_bone = Peek_Model()->Get_Bone_Index( "c spine1" );
-	}
-
-	if ( legs_rotation ) {
-
-		WWASSERT( root_bone != -1 );
-		WWASSERT( torso_bone != -1 );
-
-		if ( !Peek_Model()->Is_Bone_Captured( root_bone ) ) {
-			Peek_Model()->Capture_Bone( root_bone );
-		}
-		if ( !Peek_Model()->Is_Bone_Captured( torso_bone ) ) {
-			Peek_Model()->Capture_Bone( torso_bone );
-		}
-
-		Matrix3D	root_adjust(1);				// adjust it
-		root_adjust.Rotate_X( legs_rotation );
-		Peek_Model()->Control_Bone( root_bone, root_adjust );
-
-		Matrix3D	legs_adjust(1);				// adjust it
-		legs_adjust.Rotate_X( -legs_rotation );
-		Peek_Model()->Control_Bone( torso_bone, legs_adjust );
-	} else {	// no adjustment, release
-
-	 	if ( Peek_Model()->Is_Bone_Captured( root_bone ) ) {
-			Peek_Model()->Release_Bone( root_bone );
-		}
-	 	if ( Peek_Model()->Is_Bone_Captured( torso_bone ) ) {
-			Peek_Model()->Release_Bone( torso_bone );
-		}
-	}
-
-#endif
-
-#endif
 
 	bool do_steps = false;
 	if ( Is_On_Ladder() ) {
@@ -2343,12 +2382,6 @@ void	SoldierGameObj::Think( void )
 		}
 		*/
 
-		// Handle_Legs moved form Apply_Control because clients don't run it for server objects
-		{
-			WWPROFILE("Handle_Legs");
-			Handle_Legs();
-		}
-
 		/*
 		if (CombatManager::I_Am_Server()) {
 			TransitionManager::Check( this );
@@ -2358,6 +2391,13 @@ void	SoldierGameObj::Think( void )
 	{
 		WWPROFILE( "Embedded smart think in soldier" );
 		SmartGameObj::Think(); 	// Perform smart object thinking	( apply controls )
+	}
+
+	// Handle_Legs lives in Think because clients do not run Apply_Control for
+	// server-owned objects.  Run it after controls so it sees the final heading.
+	{
+		WWPROFILE("Handle_Legs");
+		Handle_Legs();
 	}
 
 {
@@ -4164,6 +4204,7 @@ bool	SoldierGameObj::Use_Ladder_View( void )
 //------------------------------------------------------------------------------------
 void SoldierGameObj::Set_Model(const char *model_name)
 {
+	Reset_Leg_Twist_State();
 	Peek_Physical_Object()->Set_Model_By_Name(model_name);
 	HumanState.Set_Anim_Control( (HumanAnimControlClass *)Get_Anim_Control() );  // Must set the anim control after the phys object
 }
@@ -4258,9 +4299,11 @@ void	SoldierGameObj::Adjust_Skeleton( float height, float width )
 	if ( ( tree_base != nullptr ) && ( tree_tall != nullptr ) && ( tree_wide != nullptr ) ) {
 
 		HTreeClass *tree = HTreeClass::Create_Interpolated( tree_base, tree_tall, tree_wide,
-																			 height, width );
+																 height, width );
 		if ( tree ) {
+			Release_Leg_Twist_Bones();
 			robj->Set_HTree( tree );
+			Cache_Leg_Twist_Bones( robj );
 			delete tree;
 		}
 	}

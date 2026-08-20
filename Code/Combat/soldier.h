@@ -64,6 +64,7 @@ class DynamicSpeechAnimClass;
 class	TransitionEffectClass;
 class PersistantSurfaceEmitterClass;
 class	SoldierObserverClass;
+class HTreeClass;
 
 //const int NO_FLAG = -1;
 
@@ -357,6 +358,12 @@ protected:
 	HumanStateClass		HumanState;
 	float						LegFacing;		// Direction the legs are facing
 	bool						SyncLegs;		// Are we in the process of syncing the legs?
+	bool						LegFacingInitialized;
+	RenderObjClass		*	LegTwistModel;		// Non-owning model used by the cached bone indices
+	const HTreeClass	*	LegTwistHTree;		// Non-owning skeleton used by the cached bone indices
+	int						LegSpineBone;
+	int						LegSpine1Bone;
+	bool						LegTwistBonesCaptured;
 	bool						LastLegMode;
 	int						KeyRing;
 	bool						IsUsingGhostCollision;
@@ -377,6 +384,9 @@ protected:
 	void						Update_Locked_Facing( void );
 	void						Update_Back_Gun( void );
 	void						Set_Back_Weapon_Model( const char *model_name );
+	void						Cache_Leg_Twist_Bones( RenderObjClass * model );
+	void						Release_Leg_Twist_Bones( void );
+	void						Reset_Leg_Twist_State( void );
 	// Move below to public?
 	void						Set_Back_Flag_Model( const char *model_name, const Vector3 & tint = Vector3(0, 0, 0) );
 
