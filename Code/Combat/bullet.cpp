@@ -548,10 +548,10 @@ void BulletClass::Init( const BulletDataClass & data, float progress_time, const
 		RenderObjClass * model = nullptr;
 		model = WW3DAssetManager::Get_Instance ()->Create_Render_Obj( BulletData.AmmoDefinition->ModelName );
 
-		// If no name is given, lets create the nullptr render obj
+		// If no name is given, lets create the NULL render obj
 		if ( model == nullptr ) {
 			Debug_Say(( "Bullet Not Found \"%s\" \n", BulletData.AmmoDefinition->ModelName.Peek_Buffer() ));
-			model = WW3DAssetManager::Get_Instance ()->Create_Render_Obj( "nullptr" );
+			model = WW3DAssetManager::Get_Instance ()->Create_Render_Obj( "NULL" );
 
 		}
 
