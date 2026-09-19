@@ -24,7 +24,6 @@ set(WWLIB_SRC
     mixfile.cpp
     mpmath.cpp
     mpu.cpp
-    msgloop.cpp
     multilist.cpp
     mutex.cpp
     nstrdup.cpp
@@ -150,6 +149,10 @@ set(WWLIB_SRC
     xpipe.h
     xstraw.h
 )
+
+if(WIN32)
+    list(APPEND WWLIB_SRC msgloop.cpp)
+endif()
 
 if(TARGET ffmpeg)
     list(APPEND WWLIB_SRC FFmpegFile.cpp FFmpegFile.h)
