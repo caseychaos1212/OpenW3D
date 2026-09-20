@@ -142,12 +142,12 @@ void SystemInfoLog::Get_Final_String(StringClass& string)
 	avgfps.Format("%d.%1.1d",AvgFPS/10,AvgFPS%10);
 	string.Format(
 		"%5s %16s %6s %6d %6d %6s %8d ",
-		vnum,
-		CurrentLevel,
-		ptime,
+		vnum.Peek_Buffer(),
+		CurrentLevel.Peek_Buffer(),
+		ptime.Peek_Buffer(),
 		MinFPS!=1000 ? MinFPS : 0,
 		MaxFPS,
-		avgfps,
+		avgfps.Peek_Buffer(),
 		CurrentLoadingTime);
 }
 
@@ -193,7 +193,7 @@ void SystemInfoLog::Record_Loading_Time(unsigned loading_time)
 
 void SystemInfoLog::Record_Frame()
 {
-	unsigned fps=TimeManager::Get_Average_Frame_Rate();
+	unsigned fps=unsigned(TimeManager::Get_Average_Frame_Rate());
 	CurrentTotalFPS+=fps;
 	CurrentFPSCount++;
 	if (fps<VeryMinFPS) {
@@ -274,7 +274,7 @@ void PlayerInfoLog::Append_To_Log(PlayerDataClass* data)
 #ifdef WWDEBUG
 	StringClass tmp;
 	StringClass work(0,true);
-	ADD_HISTORY(("Map name: %s\r\n",CurrentMapName));
+	ADD_HISTORY(("Map name: %s\r\n",CurrentMapName.Peek_Buffer()));
 	ADD_HISTORY(("Game time: %2.2f\r\n",data->Get_Game_Time()));
 	ADD_HISTORY(("Session time: %2.2f\r\n",data->Get_Session_Time()));
 	ADD_HISTORY(("Enemies killed: %d\r\n",data->Get_Enemies_Killed()));
@@ -283,10 +283,10 @@ void PlayerInfoLog::Append_To_Log(PlayerDataClass* data)
 	ADD_HISTORY(("Powerups collected: %d\r\n",data->Get_Powerups_Collected()));
 	ADD_HISTORY(("Vehicles destroyed: %d\r\n",data->Get_Vehiclies_Destroyed()));
 	ADD_HISTORY(("Buildings destroyed: %d\r\n",data->Get_Building_Destroyed()));
-	ADD_HISTORY(("Time in vehicles: %d\r\n",data->Get_Vehicle_Time()));
+	ADD_HISTORY(("Time in vehicles: %2.2f\r\n",data->Get_Vehicle_Time()));
 	ADD_HISTORY(("Kills from vehicles: %d\r\n",data->Get_Kills_From_Vehicle()));
 	ADD_HISTORY(("Squishes: %d\r\n",data->Get_Squishes()));
-	ADD_HISTORY(("Credits granted: %d\r\n",data->Get_Credit_Grant()));
+	ADD_HISTORY(("Credits granted: %2.2f\r\n",data->Get_Credit_Grant()));
 	ADD_HISTORY(("Times reloaded: %d\r\n",CombatManager::Get_Reload_Count()));
 	ADD_HISTORY(("Cheats used: %s\r\n",CheatMgrClass::Get_Instance()->Was_Cheat_Used( CheatMgrClass::ALL_CHEATS ) ? "Yes" : "No"));
 	ADD_HISTORY(("Secondary objectives completed: %d\r\n",ObjectiveManager::Get_Num_Completed_Objectives( ObjectiveManager::TYPE_SECONDARY )));
@@ -295,11 +295,11 @@ void PlayerInfoLog::Append_To_Log(PlayerDataClass* data)
 	tmp+="\r\n";
 
 	DWORD written;
-	HANDLE file = CreateFileA("history.txt", GENERIC_WRITE, 0, NULL, OPEN_ALWAYS,
-			FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE file = CreateFileA("history.txt", GENERIC_WRITE, 0, nullptr, OPEN_ALWAYS,
+			FILE_ATTRIBUTE_NORMAL, nullptr);
 	if (INVALID_HANDLE_VALUE != file) {
-		SetFilePointer(file, 0, NULL, FILE_END);
-		WriteFile(file, tmp, strlen(tmp), &written, NULL);
+		SetFilePointer(file, 0, nullptr, FILE_END);
+		WriteFile(file, tmp, strlen(tmp), &written, nullptr);
 		CloseHandle(file);
 	}
 #endif // WWDEBUG
@@ -316,7 +316,7 @@ void PlayerInfoLog::Get_Compact_Log(StringClass& string)
 		team1size=10*Team1TotalSizes/Team1SizeReported;
 	}
 
-	string.Format("%s\t%d.%d\t%d.%d\t",CurrentMapName,team0size/10,team0size%10,team1size/10,team1size%10);
+	string.Format("%s\t%d.%d\t%d.%d\t",CurrentMapName.Peek_Buffer(),team0size/10,team0size%10,team1size/10,team1size%10);
 
 	Team0SizeReported=0;
 	Team1SizeReported=0;

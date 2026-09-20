@@ -91,7 +91,7 @@ static int NumericSortCallback(ListCtrlClass* list, int item1, int item2, uint32
 static int AlphaSortCallback(ListCtrlClass* list, int index1, int index2, uint32 param);
 
 
-MPWolGameListMenuClass* MPWolGameListMenuClass::_mInstance = NULL;
+MPWolGameListMenuClass* MPWolGameListMenuClass::_mInstance = nullptr;
 
 /******************************************************************************
 *
@@ -112,10 +112,10 @@ MPWolGameListMenuClass* MPWolGameListMenuClass::_mInstance = NULL;
 void MPWolGameListMenuClass::DoDialog(void)
 	{
 	//	Create the dialog if necessary, otherwise simply bring it to the front
-	if (_mInstance == NULL)
+	if (_mInstance == nullptr)
 		{
 		MPWolGameListMenuClass* dialog = new MPWolGameListMenuClass;
-		WWASSERT(dialog != NULL && "Failed to create WOL GameList dialog");
+		WWASSERT(dialog != nullptr && "Failed to create WOL GameList dialog");
 
 		if (dialog)
 			{
@@ -157,7 +157,7 @@ MPWolGameListMenuClass::MPWolGameListMenuClass(void) :
 		mSortFlags(0)
 	{
 	WWDEBUG_SAY(("MPWolGameListMenuClass Instantiated\n"));
-	WWASSERT(_mInstance == NULL);
+	WWASSERT(_mInstance == nullptr);
 	_mInstance = this;
 
 	mWOLSession = Session::GetInstance(false);
@@ -184,7 +184,7 @@ MPWolGameListMenuClass::MPWolGameListMenuClass(void) :
 MPWolGameListMenuClass::~MPWolGameListMenuClass(void)
 	{
 	WWDEBUG_SAY(("MPWolGameListMenuClass Destroyed\n"));
-	_mInstance = NULL;
+	_mInstance = nullptr;
 	}
 
 
@@ -233,17 +233,17 @@ void MPWolGameListMenuClass::On_Init_Dialog(void)
 	WOLLogonMgr::GetServerName(serverName);
 
 	WideStringClass string(128, true);
-	string.Format(TRANSLATE (IDS_MENU_CONNECTED_TO_FORMAT), serverName);
+	string.Format(TRANSLATE (IDS_MENU_CONNECTED_TO_FORMAT), serverName.Peek_Buffer());
 	Set_Dlg_Item_Text(IDC_SERVERNAME, string);
 
 	WideStringClass loginName(64, true);
 	WOLLogonMgr::GetLoginName(loginName);
 
-	string.Format(TRANSLATE (IDS_MENU_LOGIN_NAME_FORMAT), loginName);
+	string.Format(TRANSLATE (IDS_MENU_LOGIN_NAME_FORMAT), loginName.Peek_Buffer());
 	Set_Dlg_Item_Text(IDC_LOGINNAME, string);
 
 	WideStringClass conn(BandwidthCheckerClass::Get_Bandwidth_As_String(), true);
-	string.Format(TRANSLATE (IDS_MENU_SPEED_FORMAT), conn);
+	string.Format(TRANSLATE (IDS_MENU_SPEED_FORMAT), conn.Peek_Buffer());
 	Set_Dlg_Item_Text(IDC_CONNECTIONSPEED, string);
 
 	//---------------------------------------------------------------------------
@@ -375,12 +375,12 @@ void MPWolGameListMenuClass::On_Command(int id, int msg, unsigned int param)
 			GameInitMgrClass::Set_WOL_Return_Dialog(RenegadeDialogMgrClass::LOC_INTERNET_GAME_LIST);
 
 			//	Create the new game data
-			if ( PTheGameData != NULL ) {
+			if ( PTheGameData != nullptr ) {
 				delete PTheGameData;
-				PTheGameData = NULL;
+				PTheGameData = nullptr;
 			}
 			PTheGameData = cGameData::Create_Game_Of_Type(cGameData::GAME_TYPE_CNC);
-			WWASSERT(PTheGameData != NULL);
+			WWASSERT(PTheGameData != nullptr);
 
 			// WOL games default as quickmatch servers
 			The_Game()->Set_QuickMatch_Server(true);
@@ -642,15 +642,15 @@ void MPWolGameListMenuClass::UpdateChannels(ListCtrlClass* list, const ChannelLi
 					//
 					//	If this is a mod'd game, then display the mod_name\map_name...
 					//
-					if (gameInfo.ModName() != NULL && gameInfo.ModName()[0] != 0) {
+					if (gameInfo.ModName() != nullptr && gameInfo.ModName()[0] != 0) {
 
 						//
 						//	Strip off the extension for both the map and the mod package
 						//
 						char map_name[_MAX_FNAME] = { 0 };
 						char mod_name[_MAX_FNAME] = { 0 };
-						::_splitpath (gameInfo.MapName(), NULL, NULL, map_name, NULL);
-						::_splitpath (gameInfo.ModName(), NULL, NULL, mod_name, NULL);
+						::_splitpath (gameInfo.MapName(), nullptr, nullptr, map_name, nullptr);
+						::_splitpath (gameInfo.ModName(), nullptr, nullptr, mod_name, nullptr);
 
 						//
 						//	Create the map name from the aggregate of the mod and map
@@ -679,7 +679,7 @@ void MPWolGameListMenuClass::UpdateChannels(ListCtrlClass* list, const ChannelLi
 						selIndex = itemIndex;
 						}
 
-					if (gameInfo.Version() != (unsigned int)cNetwork::Get_Exe_Key() || !gameInfo.IsMapValid())
+					if (gameInfo.Version() != cNetwork::Get_Exe_Key() || !gameInfo.IsMapValid())
 						{
 						ChannelData* rawChannel = (ChannelData*)list->Get_Entry_Data(itemIndex, COL_HOST_NAME);
 
@@ -1145,7 +1145,7 @@ void MPWolGameListMenuClass::HandleNotification(WWOnline::SquadEvent& event)
 
 				for (int index = 0; index < count; ++index)
 					{
-					int marker = detailsList->Get_Entry_Data(index, 0);
+					int marker = int(detailsList->Get_Entry_Data(index, 0));
 
 					if (CLAN_ENTRY_MARKER == marker)
 						{
@@ -1180,7 +1180,7 @@ void MPWolGameListMenuClass::HandleNotification(WWOnline::SquadEvent& event)
 
 void SetGameTypeFlags(ListCtrlClass* list, int itemIndex, const WOLGameInfo& gameInfo)
 	{
-	WWASSERT(list != NULL);
+	WWASSERT(list != nullptr);
 
 	list->Reset_Icons(itemIndex, COL_ICON);
 	uint32 flags = 0;
@@ -1237,7 +1237,7 @@ void SetGameTypeFlags(ListCtrlClass* list, int itemIndex, const WOLGameInfo& gam
 
 void SetPingTimeIcon(ListCtrlClass* list, int itemIndex, int pingTime)
 	{
-	const char* pingIcon = NULL;
+	const char* pingIcon = nullptr;
 
 	if (pingTime <= PING_GREEN_THRESHOLD)
 		{
@@ -1339,10 +1339,10 @@ void MPWolGameListMenuClass::SortGameChannels(int column, bool isAscending, unsi
 
 int FlagsSortCallback(ListCtrlClass* list, int index1, int index2, uint32 mask)
 	{
-	uint32 flags1 = list->Get_Entry_Data(index1, COL_ICON);
+	uint32 flags1 = uint32(list->Get_Entry_Data(index1, COL_ICON));
 	flags1 &= mask;
 
-	uint32 flags2 = list->Get_Entry_Data(index2, COL_ICON);
+	uint32 flags2 = uint32(list->Get_Entry_Data(index2, COL_ICON));
 	flags2 &= mask;
 
 	if (flags1 && !flags2)
@@ -1356,8 +1356,8 @@ int FlagsSortCallback(ListCtrlClass* list, int index1, int index2, uint32 mask)
 	else if (flags1 && flags2)
 		{
 		// Secondary sort by ping time
-		int ping1 = list->Get_Entry_Data(index1, COL_PING);
-		int ping2 = list->Get_Entry_Data(index2, COL_PING);
+		int ping1 = int(list->Get_Entry_Data(index1, COL_PING));
+		int ping2 = int(list->Get_Entry_Data(index2, COL_PING));
 
 		int delta = (ping1 - ping2);
 
@@ -1405,8 +1405,8 @@ int NumericSortCallback(ListCtrlClass* list, int index1, int index2, uint32 para
 	// Sort by numeric value stored in entry data field
 	int	column = LOWORD(param);
 
-	uint32 data1 = list->Get_Entry_Data(index1, column);
-	uint32 data2 = list->Get_Entry_Data(index2, column);
+	uint32 data1 = uint32(list->Get_Entry_Data(index1, column));
+	uint32 data2 = uint32(list->Get_Entry_Data(index2, column));
 
 	int retval = (data1 - data2);
 
@@ -1423,8 +1423,8 @@ int NumericSortCallback(ListCtrlClass* list, int index1, int index2, uint32 para
 		if (column != COL_PING)
 			{
 			// Secondary sort by ping time
-			data1 = list->Get_Entry_Data(index1, COL_PING);
-			data2 = list->Get_Entry_Data(index2, COL_PING);
+			data1 = uint32(list->Get_Entry_Data(index1, COL_PING));
+			data2 = uint32(list->Get_Entry_Data(index2, COL_PING));
 
 			retval = (data1 - data2);
 
@@ -1490,8 +1490,8 @@ int AlphaSortCallback(ListCtrlClass* list, int index1, int index2, uint32 param)
 	// If the strings match then secondary sort by ping time.
 	if (retval == 0)
 		{
-		uint32 data1 = list->Get_Entry_Data(index1, COL_PING);
-		uint32 data2 = list->Get_Entry_Data(index2, COL_PING);
+		uint32 data1 = uint32(list->Get_Entry_Data(index1, COL_PING));
+		uint32 data2 = uint32(list->Get_Entry_Data(index2, COL_PING));
 
 		retval = (data1 - data2);
 

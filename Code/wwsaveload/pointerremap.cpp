@@ -116,10 +116,10 @@ void PointerRemapClass::Process_Request_Table(DynamicVectorClass<PtrRemapStruct>
 		} else {
 
 			// Failed to re-map the pointer.
-			// warn the user, set pointer to NULL, reset index to the pre_search_index.
+			// warn the user, set pointer to nullptr, reset index to the pre_search_index.
 			// If this happens, things could be going very wrong.  (find out why its happening!)
 			pair_index = pre_search_index;
-			*request_table[pointer_index].PointerToRemap = NULL;
+			*request_table[pointer_index].PointerToRemap = nullptr;
 #ifdef WWDEBUG
 			const char * file = request_table[pointer_index].File;
 			int line = request_table[pointer_index].Line;
@@ -193,7 +193,7 @@ void PointerRemapClass::Request_Ref_Counted_Pointer_Remap (RefCountClass **point
 ** sort compare function for pointer pair structures
 ** sorts by the old pointer value
 */
-int __cdecl PointerRemapClass::ptr_pair_compare_function(void const * ptr1, void const * ptr2)
+int PointerRemapClass::ptr_pair_compare_function(void const * ptr1, void const * ptr2)
 {
 	void * old1 = ((PointerRemapClass::PtrPairStruct const *)ptr1)->OldPointer;
 	void * old2 = ((PointerRemapClass::PtrPairStruct const *)ptr2)->OldPointer;
@@ -211,7 +211,7 @@ int __cdecl PointerRemapClass::ptr_pair_compare_function(void const * ptr1, void
 ** sort compare function for pointer remap structures
 ** sorts by the old pointer value
 */
-int __cdecl PointerRemapClass::ptr_request_compare_function(void const * ptr1, void const * ptr2)
+int PointerRemapClass::ptr_request_compare_function(void const * ptr1, void const * ptr2)
 {
 	PtrRemapStruct * remap1 = (PtrRemapStruct *)ptr1;
 	PtrRemapStruct * remap2 = (PtrRemapStruct *)ptr2;

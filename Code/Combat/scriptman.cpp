@@ -44,10 +44,11 @@
 #include "ffactorylist.h"
 #include "rawfile.h"
 #include "gametype.h"
+#include "soutil.h"
 #include <stdio.h>
 #include <win.h>
 
-ScriptCommands* EngineCommands = NULL;
+ScriptCommands* EngineCommands = nullptr;
 
 #if 1
 #define	SCRIPT_PROFILE_START( x )	WWProfileManager::Profile_Start( "Scripts" );
@@ -60,9 +61,9 @@ ScriptCommands* EngineCommands = NULL;
 /*
 **
 */
-HINSTANCE hDLL = NULL;
-LPFN_CREATE_SCRIPT ScriptManager::ScriptCreateFunct = NULL;
-LPFN_DESTROY_SCRIPT ScriptManager::ScriptDestroyFunct = NULL;
+SharedObject *hDLL = nullptr;
+LPFN_CREATE_SCRIPT ScriptManager::ScriptCreateFunct = nullptr;
+LPFN_DESTROY_SCRIPT ScriptManager::ScriptDestroyFunct = nullptr;
 SimpleDynVecClass<ScriptClass *> ScriptManager::ActiveScriptList;
 SimpleDynVecClass<ScriptClass *> ScriptManager::PendingDestroyList;
 bool	ScriptManager::EnableScriptCreation = true;
@@ -74,7 +75,7 @@ bool	ScriptManager::EnableScriptCreation = true;
 */
 void ScriptManager::Init(void)
 {
-	hDLL = NULL;
+	hDLL = nullptr;
 	EngineCommands = Get_Script_Commands();
 
 #ifdef	PARAM_EDITING_ON	// Editor build
@@ -105,18 +106,16 @@ void ScriptManager::Shutdown(void)
 	// Release scripts
 	while (ActiveScriptList.Count()) {
 		ScriptClass* script = ActiveScriptList[0];
-		assert(script != NULL);
+		assert(script != nullptr);
 
-		assert(ScriptDestroyFunct != NULL);
+		assert(ScriptDestroyFunct != nullptr);
 		ScriptDestroyFunct(script);
 
 		ActiveScriptList.Delete(0);
 	}
 
-	if (hDLL != NULL) {
-		FreeLibrary(hDLL);
-		hDLL = NULL;
-	}
+	delete hDLL;
+	hDLL = nullptr;
 }
 
 
@@ -125,18 +124,18 @@ void ScriptManager::Destroy_Pending(void)
 	// Destroy all the scripts in the pending destroy list.
 	while (PendingDestroyList.Count()) {
 		ScriptClass* script = PendingDestroyList[0];
-		assert(script != NULL);
+		assert(script != nullptr);
 
 		// If the script has an owner then it must be detached before it
 		// can be destroyed.
 		ScriptableGameObj* object = script->Owner();
 
-		if (object != NULL) {
+		if (object != nullptr) {
 			object->Remove_Observer(script);
 		}
 
 		// Destroy the script
-		assert(ScriptDestroyFunct != NULL);
+		assert(ScriptDestroyFunct != nullptr);
 		ScriptDestroyFunct(script);
 		PendingDestroyList.Delete(0);
 	}
@@ -153,9 +152,9 @@ void ScriptManager::Load_Scripts(const char* dll_filename)
 		char path_to_exe[MAX_PATH];
 		char fdrive[_MAX_DRIVE];
 		char fdir[_MAX_DIR];
-		GetModuleFileNameA(NULL, path_to_exe, sizeof(path_to_exe));
-		_splitpath(path_to_exe, fdrive, fdir, NULL, NULL);
-		_makepath(dll_fullpath, fdrive, fdir, dll_filename, NULL);
+		GetModuleFileNameA(nullptr, path_to_exe, sizeof(path_to_exe));
+		_splitpath(path_to_exe, fdrive, fdir, nullptr, nullptr);
+		_makepath(dll_fullpath, fdrive, fdir, dll_filename, nullptr);
 		dll_filename = dll_fullpath;
 	}
 
@@ -168,73 +167,24 @@ void ScriptManager::Load_Scripts(const char* dll_filename)
 		return;
 	}
 
-#ifndef	PARAM_EDITING_ON	// Only do this in the *game*
+	hDLL = SharedObject::LoadObject(dll_filename);
 
-	// Check if we have a mod, if so, un-pack the scripts from the PKG (if present)
-	FileFactoryClass * mod_pkg = FileFactoryListClass::Get_Instance()->Peek_Temp_FileFactory();
-	if (mod_pkg != NULL) {
-		FileClass * scripts_dll = mod_pkg->Get_File( dll_filename );
-		if ((scripts_dll != NULL) && (scripts_dll->Is_Available())) {
-
-			const char * _TMP_SCRIPTS_DLL_FILENAME = "_MOD_SCRIPTS.DLL";
-
-			scripts_dll->Open(FileClass::READ);
-			RawFileClass unpacked_scripts(_TMP_SCRIPTS_DLL_FILENAME);
-
-			if (unpacked_scripts.Create()) {
-
-				unpacked_scripts.Open(FileClass::WRITE);
-
-				// Copy the dll from the PKG (mix) file into our temporary _scripts directory
-				static char buffer[16000];
-				size_t scripts_size = scripts_dll->Size();
-				size_t cur_pos = 0;
-				while (cur_pos < scripts_size) {
-					size_t remaining = scripts_size - cur_pos;
-					size_t requested = remaining;
-					if (requested > sizeof(buffer)) {
-						requested = sizeof(buffer);
-					}
-					int read_count = scripts_dll->Read(buffer, static_cast<int>(requested));
-					if (read_count <= 0) {
-						break;
-					}
-					unpacked_scripts.Write(buffer, read_count);
-					cur_pos += static_cast<size_t>(read_count);
-				}
-
-
-				// change 'dll_filename' so that we load the newly created dll
-				if (cur_pos == scripts_size) {
-					dll_filename = _TMP_SCRIPTS_DLL_FILENAME;
-				}
-
-				unpacked_scripts.Close();
-			}
-			scripts_dll->Close();
-			mod_pkg->Return_File(scripts_dll);
-		}
-	}
-#endif
-
-	hDLL = ::LoadLibraryA(dll_filename);
-
-	if (hDLL == NULL) {
+	if (hDLL == nullptr) {
 		Debug_Say(("Cound not load DLL file %s\n", dll_filename));
 		return;
 	}
 
 	// Get create script function
-	ScriptCreateFunct = (LPFN_CREATE_SCRIPT)GetProcAddress(hDLL, LPSTR_CREATE_SCRIPT);
-	assert(ScriptCreateFunct != NULL);
+	ScriptCreateFunct = (LPFN_CREATE_SCRIPT)hDLL->LoadFunction(LPSTR_CREATE_SCRIPT);
+	assert(ScriptCreateFunct != nullptr);
 
 	if (!ScriptCreateFunct) {
 		Debug_Say(("Cound not find Create_Script\n"));
 	}
 
 	// Get destroy script function
-	ScriptDestroyFunct = (LPFN_DESTROY_SCRIPT)GetProcAddress(hDLL, LPSTR_DESTROY_SCRIPT);
-	assert(ScriptDestroyFunct != NULL);
+	ScriptDestroyFunct = (LPFN_DESTROY_SCRIPT)hDLL->LoadFunction(LPSTR_DESTROY_SCRIPT);
+	assert(ScriptDestroyFunct != nullptr);
 
 	if (!ScriptDestroyFunct) {
 		Debug_Say(("Cound not find Destroy_Script\n"));
@@ -242,10 +192,10 @@ void ScriptManager::Load_Scripts(const char* dll_filename)
 
 	// Initialize request script destroy function
 	LPFN_SET_REQUEST_DESTROY_FUNC set_request_destroy_func =
-		(LPFN_SET_REQUEST_DESTROY_FUNC)GetProcAddress(hDLL, LPSTR_SET_REQUEST_DESTROY_FUNC);
-	assert(set_request_destroy_func != NULL);
+		(LPFN_SET_REQUEST_DESTROY_FUNC)hDLL->LoadFunction(LPSTR_SET_REQUEST_DESTROY_FUNC);
+	assert(set_request_destroy_func != nullptr);
 
-	if (set_request_destroy_func != NULL) {
+	if (set_request_destroy_func != nullptr) {
 		set_request_destroy_func(Request_Destroy_Script);
 	} else {
 		Debug_Say(("Cound not find Set_Request_Destroy_Func\n"));
@@ -254,10 +204,10 @@ void ScriptManager::Load_Scripts(const char* dll_filename)
 	// Initialize script commands if not being run from the editor
 	if (CombatManager::Are_Observers_Active()) {
 		LPFN_SET_SCRIPT_COMMANDS set_commands_func =
-			(LPFN_SET_SCRIPT_COMMANDS)GetProcAddress(hDLL, LPSTR_SET_SCRIPT_COMMANDS);
-		assert(set_commands_func != NULL);
+			(LPFN_SET_SCRIPT_COMMANDS)hDLL->LoadFunction(LPSTR_SET_SCRIPT_COMMANDS);
+		assert(set_commands_func != nullptr);
 
-		if (set_commands_func != NULL) {
+		if (set_commands_func != nullptr) {
 			ScriptCommandsClass commands;
 			commands.Commands = EngineCommands;
 
@@ -267,7 +217,7 @@ void ScriptManager::Load_Scripts(const char* dll_filename)
 				Debug_Say(("Failed to set script commands!\n"));
 
 				// This should keep us from going to scripts!
-				ScriptCreateFunct = NULL;
+				ScriptCreateFunct = nullptr;
 			}
 		} else {
 			Debug_Say(("Cound not find Set_Script_Commands\n"));
@@ -281,12 +231,12 @@ void ScriptManager::Load_Scripts(const char* dll_filename)
 */
 ScriptClass* ScriptManager::Create_Script(const char* script_name)
 {
-	ScriptClass* script = NULL;
+	ScriptClass* script = nullptr;
 
-	if (EnableScriptCreation && ScriptCreateFunct != NULL) {
+	if (EnableScriptCreation && ScriptCreateFunct != nullptr) {
 		script = ScriptCreateFunct(script_name);
 
-		if (script != NULL) {
+		if (script != nullptr) {
 			script->Set_ID( GameObjObserverManager::Get_Next_Observer_ID() );
 			ActiveScriptList.Add(script);
 		}
@@ -388,12 +338,12 @@ bool	ScriptManager::Load( ChunkLoadClass & cload )
 
 	while (cload.Open_Chunk()) {
 
-		GameObjObserverClass * game_obj_observer_ptr = NULL;
-		PhysicalGameObj * owner_ptr = NULL;
+		GameObjObserverClass * game_obj_observer_ptr = nullptr;
+		PhysicalGameObj * owner_ptr = nullptr;
 
 		WWASSERT( cload.Cur_Chunk_ID() == CHUNKID_SCRIPT_ENTRY );
 
-		ScriptClass *script = NULL;
+		ScriptClass *script = nullptr;
 
 		// Load header
 		cload.Open_Chunk();
@@ -409,20 +359,20 @@ bool	ScriptManager::Load( ChunkLoadClass & cload )
 				{
 					StringClass	name;
 					LOAD_MICRO_CHUNK_WWSTRING( cload, name );
-					WWASSERT( script == NULL );
+					WWASSERT( script == nullptr );
 					script = Create_Script( name );
-					if ( script == NULL ) {
-						Debug_Say(( "Script %s not found \n", name ));
+					if ( script == nullptr ) {
+						Debug_Say(( "Script %s not found \n", name.Peek_Buffer() ));
 					}
 
 					// A Missing script is not fatal
-//					WWASSERT( script != NULL );
+//					WWASSERT( script != nullptr );
 					break;
 				}
 
 				case MICROCHUNKID_PARAM:
 				{
-					if ( script != NULL ) {
+					if ( script != nullptr ) {
 						StringClass	param;
 						LOAD_MICRO_CHUNK_WWSTRING( cload, param );
 						script->Set_Parameters_String(param);
@@ -443,7 +393,7 @@ bool	ScriptManager::Load( ChunkLoadClass & cload )
 		}
 		cload.Close_Chunk();
 
-		if ( script != NULL ) {
+		if ( script != nullptr ) {
 
 			if ( obs_id != -1 ) {
 				script->Set_ID( obs_id );
@@ -458,8 +408,8 @@ bool	ScriptManager::Load( ChunkLoadClass & cload )
 				cload.Close_Chunk();
 			}
 
-			WWASSERT( game_obj_observer_ptr != NULL );
-			if ( game_obj_observer_ptr != NULL ) {
+			WWASSERT( game_obj_observer_ptr != nullptr );
+			if ( game_obj_observer_ptr != nullptr ) {
 				SaveLoadSystemClass::Register_Pointer(game_obj_observer_ptr, (GameObjObserverClass *)script);
 			}
 
@@ -467,7 +417,7 @@ bool	ScriptManager::Load( ChunkLoadClass & cload )
 			*(script->Get_Owner_Ptr()) = owner_ptr;
 			REQUEST_POINTER_REMAP( (void **)script->Get_Owner_Ptr() );
 		} else {
-			SaveLoadSystemClass::Register_Pointer(game_obj_observer_ptr, (GameObjObserverClass *)NULL);
+			SaveLoadSystemClass::Register_Pointer(game_obj_observer_ptr, (GameObjObserverClass *)nullptr);
 		}
 
 

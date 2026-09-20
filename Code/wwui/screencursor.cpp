@@ -45,7 +45,7 @@
 ///////////////////////////////////////////////////////////////////
 ScreenCursorClass::ScreenCursorClass (void)	:
 	Hotspot (0, 0),
-	Texture (NULL),
+	Texture (nullptr),
 	Width (0),
 	Height (0)
 {
@@ -78,7 +78,7 @@ ScreenCursorClass::Set_Texture (TextureClass *texture)
 	//
 	// Find the dimensions of the texture:
 	//
-	if (Texture != NULL) {
+	if (Texture != nullptr) {
 //		SurfaceClass::SurfaceDescription surface_desc;
 //		Texture->Get_Level_Description(surface_desc);
 //		Width	= surface_desc.Width;
@@ -125,10 +125,10 @@ ScreenCursorClass::Render (void)
 	//	Build the screen-space rectangle we'll render to
 	//
 	RectClass rect;
-	rect.Left	= (int)cursor_pos.X;
-	rect.Top		= (int)cursor_pos.Y;
-	rect.Right	= (int)cursor_pos.X + Width;
-	rect.Bottom	= (int)cursor_pos.Y + Height;
+	rect.Left	= WWMath::Trunc(cursor_pos.X);
+	rect.Top		= WWMath::Trunc(cursor_pos.Y);
+	rect.Right	= WWMath::Trunc(cursor_pos.X + Width);
+	rect.Bottom	= WWMath::Trunc(cursor_pos.Y + Height);
 
 	//
 	//	Render the mouse cursor

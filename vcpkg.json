@@ -5,6 +5,11 @@
     "ffmpeg",
     "icu",
     "openal-soft",
-    "sdl3"
+    "sdl3",
+    "freetype",
+    "qtbase",
+    "qttools",
+    "qtimageformats",
+    "qtsvg"
   ]
 }

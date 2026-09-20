@@ -158,7 +158,7 @@ class FirewallHelperClass {
 		*/
 		void Detect_Firewall(HANDLE event = INVALID_HANDLE_VALUE);
 		unsigned short Get_Raw_Firewall_Behavior(void);	// {return((unsigned short)Behavior);};
-		short Get_Source_Port_Allocation_Delta(void) {return(SourcePortAllocationDelta);}
+		short Get_Source_Port_Allocation_Delta(void) {return short(SourcePortAllocationDelta);}
 
 		/*
 		** Query class for behavior.
@@ -300,7 +300,11 @@ class FirewallHelperClass {
 		/*
 		** Threading.
 		*/
+		#ifdef _WIN32
 		static unsigned int __stdcall NAT_Thread_Start(void *param);
+		#else
+		static void *NAT_Thread_Start(void *param);
+		#endif
 		unsigned int NAT_Thread_Main_Loop(void);
 		void Add_Thread_Action(int thread_action, HANDLE thread_event);
 		void Set_Thread_Event(void);

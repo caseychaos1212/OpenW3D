@@ -250,7 +250,7 @@ bool	PhysicalGameObjDef::Is_Valid_Config (StringClass &message)
 	bool retval = false;
 
 	DefinitionClass *phys_def = DefinitionMgrClass::Find_Definition (PhysDefID);
-	if (phys_def != NULL) {
+	if (phys_def != nullptr) {
 		retval = phys_def->Is_Valid_Config (message);
 	} else {
 		message += "Can't find physics object definition.\n";
@@ -264,8 +264,8 @@ bool	PhysicalGameObjDef::Is_Valid_Config (StringClass &message)
 ** PhysicalGameObj
 */
 PhysicalGameObj::PhysicalGameObj( void ) :
-	PhysObj( NULL ),
-	AnimControl( NULL ),
+	PhysObj( nullptr ),
+	AnimControl( nullptr ),
 	//TintColor(1, 1, 1),
 	HibernationTimer( 0 ),		// Start alseep
 	HibernationEnable( true ),
@@ -273,7 +273,7 @@ PhysicalGameObj::PhysicalGameObj( void ) :
 	RadarBlipShapeType( 0 ),
 	RadarBlipColorType( 0 ),
 	RadarBlipIntensity( 0 ),
-	ActiveConversation( NULL ),
+	ActiveConversation( nullptr ),
 	PendingHostObjID( 0 ),
 	HUDPokableIndicatorEnabled( false ),
 	IsInnateConversationsEnabled( true )
@@ -284,15 +284,15 @@ PhysicalGameObj::PhysicalGameObj( void ) :
 
 PhysicalGameObj::~PhysicalGameObj( void )
 {
-	if ( AnimControl != NULL ) {
+	if ( AnimControl != nullptr ) {
 		delete AnimControl;
-		AnimControl = NULL;
+		AnimControl = nullptr;
 	}
 
-	if ( PhysObj != NULL ) {
+	if ( PhysObj != nullptr ) {
 		COMBAT_SCENE->Remove_Object( PhysObj );
 		PhysObj->Release_Ref();
-		PhysObj = NULL;
+		PhysObj = nullptr;
 	}
 
 	REF_PTR_RELEASE( ActiveConversation );
@@ -313,7 +313,7 @@ void	PhysicalGameObj::Init( const PhysicalGameObjDef & definition )
 	*/
 	if ( definition.UseCreationEffect ) {
 		PhysClass * physobj = Peek_Physical_Object();
-		if (physobj != NULL) {
+		if (physobj != nullptr) {
 			TransitionEffectClass * effect = CombatMaterialEffectManager::Get_Spawn_Effect();
 			physobj->Add_Effect_To_Me(effect);
 			REF_PTR_RELEASE(effect);
@@ -333,18 +333,18 @@ void	PhysicalGameObj::Copy_Settings( const PhysicalGameObjDef & definition )
 	//
 	//	Release our hold on the physics object
 	//
-	if ( PhysObj != NULL ) {
+	if ( PhysObj != nullptr ) {
 		COMBAT_SCENE->Remove_Object( PhysObj );
 		PhysObj->Release_Ref();
-		PhysObj = NULL;
+		PhysObj = nullptr;
 	}
 
 	// Set the Physical Object
-	WWASSERT( PhysObj == NULL );
+	WWASSERT( PhysObj == nullptr );
 	DefinitionClass * podef = DefinitionMgrClass::Find_Definition( definition.PhysDefID );
 	WWASSERT( SuperClassID_From_ClassID( podef->Get_Class_ID() ) == CLASSID_PHYSICS );
 	PhysObj = (PhysClass *)podef->Create();
-	WWASSERT( PhysObj != NULL );
+	WWASSERT( PhysObj != nullptr );
 
 	PhysObj->Set_Collision_Group( DEFAULT_COLLISION_GROUP );
 	PhysObj->Set_Observer( this );
@@ -459,7 +459,7 @@ bool	PhysicalGameObj::Save( ChunkSaveClass & csave )
 		csave.End_Chunk();
 	}
 
-   if ( HostGameObj.Get_Ptr() != NULL ) {
+   if ( HostGameObj.Get_Ptr() != nullptr ) {
 		csave.Begin_Chunk( CHUNKID_HOST_GAME_OBJ );
 		HostGameObj.Save( csave );
 		csave.End_Chunk();
@@ -484,8 +484,8 @@ bool	PhysicalGameObj::Save( ChunkSaveClass & csave )
 
 bool	PhysicalGameObj::Load( ChunkLoadClass &cload )
 {
-	WWASSERT( PhysObj == NULL );		// May need to change to release???
-	CombatPhysObserverClass * phys_observer_ptr = NULL;
+	WWASSERT( PhysObj == nullptr );		// May need to change to release???
+	CombatPhysObserverClass * phys_observer_ptr = nullptr;
 
 	while (cload.Open_Chunk()) {
 		switch(cload.Cur_Chunk_ID()) {
@@ -530,7 +530,7 @@ bool	PhysicalGameObj::Load( ChunkLoadClass &cload )
 				break;
 
 			case CHUNKID_ANIM_CONTROL:
-				Set_Animation( NULL );  // Build AnimControl
+				Set_Animation( nullptr );  // Build AnimControl
 				AnimControl->Load( cload );
 				break;
 
@@ -546,16 +546,16 @@ bool	PhysicalGameObj::Load( ChunkLoadClass &cload )
 		cload.Close_Chunk();
 	}
 
-	WWASSERT( PhysObj != NULL );
+	WWASSERT( PhysObj != nullptr );
 	REQUEST_REF_COUNTED_POINTER_REMAP( (RefCountClass **)&PhysObj );
 
-	if ( ActiveConversation != NULL ) {
+	if ( ActiveConversation != nullptr ) {
 		REQUEST_REF_COUNTED_POINTER_REMAP( (RefCountClass **)&ActiveConversation );
 	}
 
 	// Register the multiple-inheritance versions of our this pointer.
-	WWASSERT(phys_observer_ptr != NULL);
-	if (phys_observer_ptr != NULL) {
+	WWASSERT(phys_observer_ptr != nullptr);
+	if (phys_observer_ptr != nullptr) {
 		SaveLoadSystemClass::Register_Pointer(phys_observer_ptr, (CombatPhysObserverClass *)this);
 	}
 
@@ -567,7 +567,7 @@ bool	PhysicalGameObj::Load( ChunkLoadClass &cload )
 void PhysicalGameObj::On_Post_Load (void)
 {
 	// Plug ourselves back into the physics object as an observer
-	WWASSERT(PhysObj != NULL);
+	WWASSERT(PhysObj != nullptr);
 	PhysObj->Set_Observer(this);
 
 	Hide_Muzzle_Flashes();
@@ -582,9 +582,9 @@ AnimControlClass *	PhysicalGameObj::Get_Anim_Control( void )
 
 void	PhysicalGameObj::Set_Anim_Control( AnimControlClass * anim_control )
 {
-	WWASSERT( AnimControl == NULL );
+	WWASSERT( AnimControl == nullptr );
 	AnimControl = anim_control;
-	WWASSERT( AnimControl != NULL );
+	WWASSERT( AnimControl != nullptr );
 }
 
 bool	PhysicalGameObj::Is_Soft( void )
@@ -660,7 +660,7 @@ void PhysicalGameObj::Teleport_To_Host_Bone( void )
 
 	if ( HostGameObj.Get_Ptr() ) {
 		RenderObjClass * model = ((PhysicalGameObj * )(HostGameObj.Get_Ptr()))->Peek_Model();
-		if ( model != NULL ) {
+		if ( model != nullptr ) {
 
 			/*
 			** Calculate the bone's transform and try to go there
@@ -679,7 +679,7 @@ void PhysicalGameObj::Teleport_To_Host_Bone( void )
 				** Don't collide with our host
 				*/
 				PhysClass * host_phys = ((PhysicalGameObj * )HostGameObj.Get_Ptr())->Peek_Physical_Object();
-				if (host_phys != NULL) {
+				if (host_phys != nullptr) {
 					host_phys->Inc_Ignore_Counter();
 				}
 
@@ -694,7 +694,7 @@ void PhysicalGameObj::Teleport_To_Host_Bone( void )
 				/*
 				** Re-enable collision for our host object
 				*/
-				if (host_phys != NULL) {
+				if (host_phys != nullptr) {
 					host_phys->Dec_Ignore_Counter();
 				}
 			}
@@ -702,7 +702,7 @@ void PhysicalGameObj::Teleport_To_Host_Bone( void )
 			/*
 			** If we are not a moveable object, just set the transform.
 			*/
-			if (Peek_Physical_Object()->As_MoveablePhysClass() == NULL) {
+			if (Peek_Physical_Object()->As_MoveablePhysClass() == nullptr) {
 				Set_Transform(new_transform);
 				ok = true;
 			}
@@ -717,12 +717,12 @@ void PhysicalGameObj::Teleport_To_Host_Bone( void )
 
 void PhysicalGameObj::Post_Think( void )
 {
-	if ( AnimControl != NULL ) {
+	if ( AnimControl != nullptr ) {
 		if ( AnimControl->Peek_Model() != Peek_Model() ) {
 			Debug_Say(( "Anim control doesn't match Model\n" ));
 
 			// For some reason???  some vehicles come in with an anim control, but no model in the anim control.
-			if ( Get_Anim_Control() != NULL && Get_Anim_Control()->Peek_Model() == NULL ) {
+			if ( Get_Anim_Control() != nullptr && Get_Anim_Control()->Peek_Model() == nullptr ) {
 				Get_Anim_Control()->Set_Model( Peek_Model() );
 			}
 		}
@@ -734,7 +734,7 @@ void PhysicalGameObj::Post_Think( void )
 		Reset_Hibernating();
 		HostGameObj = GameObjManager::Find_PhysicalGameObj( PendingHostObjID );
 		Set_Object_Dirty_Bit( NetworkObjectClass::BIT_RARE, true );
-		if ( HostGameObj.Get_Ptr() != NULL ) {
+		if ( HostGameObj.Get_Ptr() != nullptr ) {
 //			Debug_Say(( "Found Pending Host\n" ));
 			PendingHostObjID = 0;		// Fond em
 		}
@@ -758,14 +758,14 @@ void PhysicalGameObj::Post_Think( void )
 		}
 	}
 
-	if ( AnimControl != NULL ) {
+	if ( AnimControl != nullptr ) {
 		bool	anim_complete = AnimControl->Is_Complete();
 
 		AnimControl->Update( TimeManager::Get_Frame_Seconds() );	// update the animation control
 
 		if ( !anim_complete && AnimControl->Is_Complete() ) {
 			// we just completed.  Return Animation_Complete IF this is not a smart obj with animation action
-			if ( As_SmartGameObj() == NULL || !As_SmartGameObj()->Get_Action()->Is_Animating() ) {
+			if ( As_SmartGameObj() == nullptr || !As_SmartGameObj()->Get_Action()->Is_Animating() ) {
 				const GameObjObserverList & observer_list = Get_Observers();
 				for( int index = 0; index < observer_list.Count(); index++ ) {
 					observer_list[ index ]->Animation_Complete( this, AnimControl->Get_Animation_Name() );
@@ -776,7 +776,7 @@ void PhysicalGameObj::Post_Think( void )
 
 // FIXME Going to hell on a client is problematic.
 #ifndef PARAM_EDITING_ON  //(gth) don't go to hell in the editor cause it will cause a crash!
-	if (CombatManager::I_Am_Only_Client () == false && COMBAT_SCENE != NULL) {
+	if (CombatManager::I_Am_Only_Client () == false && COMBAT_SCENE != nullptr) {
 		Vector3 pos;
 		Get_Position(&pos);
 		Vector3 min;
@@ -793,7 +793,7 @@ void PhysicalGameObj::Post_Think( void )
 
 void PhysicalGameObj::Set_Collision_Group( int group )
 {
-	Peek_Physical_Object()->Set_Collision_Group( group );
+	Peek_Physical_Object()->Set_Collision_Group( static_cast<unsigned char>(group) );
 }
 
 void	PhysicalGameObj::Attach_To_Object_Bone( PhysicalGameObj * host, const char * bone_name )
@@ -805,9 +805,9 @@ void	PhysicalGameObj::Attach_To_Object_Bone( PhysicalGameObj * host, const char 
 	//	Zero the velocity of the object if we are detaching it from
 	// the bone...  (This makes physics behave better)
 	//
-	if (HostGameObj != host && host == NULL) {
+	if (HostGameObj != host && host == nullptr) {
 		RigidBodyClass *rigid_body = Peek_Physical_Object()->As_RigidBodyClass();
-		if (rigid_body != NULL) {
+		if (rigid_body != nullptr) {
 
 			Vector3 velocity;
 			rigid_body->Get_Velocity (&velocity);
@@ -828,7 +828,7 @@ void	PhysicalGameObj::Attach_To_Object_Bone( PhysicalGameObj * host, const char 
 	}
 
 	HostGameObj = host;
-	if ( host != NULL ) {
+	if ( host != nullptr ) {
 		WWASSERT( host->Peek_Model() );
 		HostGameObjBone = host->Peek_Model()->Get_Bone_Index( bone_name );
 
@@ -875,7 +875,7 @@ void	PhysicalGameObj::Reset_Radar_Blip_Color_Type( void )
 */
 void	PhysicalGameObj::Set_Animation( const char *animation_name, bool looping, float frame_offset )
 {
-	if ( AnimControl == NULL ) {
+	if ( AnimControl == nullptr ) {
 		Set_Anim_Control( new SimpleAnimControlClass );		// be sure we have a anim control
 	}
 
@@ -883,7 +883,7 @@ void	PhysicalGameObj::Set_Animation( const char *animation_name, bool looping, f
 	if ( !anim_name.Is_Empty() ) {
 
 		// make sure it lead with model name
-		if ( ::strchr( anim_name, '.' ) == NULL ) {
+		if ( ::strchr( anim_name, '.' ) == nullptr ) {
 			Create_Animation_Name( anim_name, animation_name, Peek_Model()->Get_Name() );
 		}
 
@@ -907,7 +907,7 @@ void	PhysicalGameObj::Set_Animation( const char *animation_name, bool looping, f
 */
 void	PhysicalGameObj::Set_Animation_Frame ( const char *animation_name, int frame )
 {
-	if ( AnimControl == NULL ) {
+	if ( AnimControl == nullptr ) {
 		Set_Anim_Control( new SimpleAnimControlClass );		// be sure we have a anim control
 	}
 
@@ -915,14 +915,14 @@ void	PhysicalGameObj::Set_Animation_Frame ( const char *animation_name, int fram
 	if ( !anim_name.Is_Empty() ) {
 
 		// make sure it lead with model name
-		if ( ::strchr( anim_name, '.' ) == NULL ) {
+		if ( ::strchr( anim_name, '.' ) == nullptr ) {
 			Create_Animation_Name( anim_name, animation_name, Peek_Model()->Get_Name() );
 		}
 
 		AnimControl->Set_Model( Peek_Model() );
 
 		AnimControl->Set_Animation( anim_name, 0 );
-		AnimControl->Set_Mode( ANIM_MODE_STOP, frame );
+		AnimControl->Set_Mode( ANIM_MODE_STOP, float(frame) );
 
 		//
 		//	"Dirty" the object for networking
@@ -936,31 +936,31 @@ void	PhysicalGameObj::Set_Animation_Frame ( const char *animation_name, int fram
 */
 void	PhysicalGameObj::Set_Transform(const Matrix3D & tm)
 {
-	WWASSERT(Peek_Physical_Object() != NULL);
+	WWASSERT(Peek_Physical_Object() != nullptr);
 	Peek_Physical_Object()->Set_Transform(tm);
 }
 
 const Matrix3D &	PhysicalGameObj::Get_Transform(void) const
 {
-	WWASSERT(Peek_Physical_Object() != NULL);
+	WWASSERT(Peek_Physical_Object() != nullptr);
 	return Peek_Physical_Object()->Get_Transform();
 }
 
 void	PhysicalGameObj::Get_Position(Vector3 * set_pos) const
 {
-	WWASSERT(Peek_Physical_Object() != NULL);
+	WWASSERT(Peek_Physical_Object() != nullptr);
 	Peek_Physical_Object()->Get_Position(set_pos);
 }
 
 void	PhysicalGameObj::Set_Position(const Vector3 & pos)
 {
-	WWASSERT(Peek_Physical_Object() != NULL);
+	WWASSERT(Peek_Physical_Object() != nullptr);
 	Peek_Physical_Object()->Set_Position(pos);
 }
 
 float	PhysicalGameObj::Get_Facing(void) const
 {
-	WWASSERT(Peek_Physical_Object() != NULL);
+	WWASSERT(Peek_Physical_Object() != nullptr);
 	return Peek_Physical_Object()->Get_Facing();
 }
 
@@ -973,7 +973,7 @@ void	PhysicalGameObj::Reset_Hibernating( void )
 		End_Hibernation ();
 	}
 
-	HibernationTimer = MIN( HIBERNATION_DELAY, HibernationTimer + TimeManager::Get_Frame_Seconds() * 2 );
+	HibernationTimer = std::min( (float)HIBERNATION_DELAY, HibernationTimer + TimeManager::Get_Frame_Seconds() * 2 );
 }
 
 void	PhysicalGameObj::Begin_Hibernation( void )
@@ -1094,11 +1094,11 @@ void	PhysicalGameObj::Export_Rare( BitStreamClass &packet )
 	//	Pass the model name across
 	//
 
-	WWASSERT(Peek_Physical_Object() != NULL);
+	WWASSERT(Peek_Physical_Object() != nullptr);
 
 	const char *model_name = "NULL";
 	RenderObjClass *render_model = Peek_Physical_Object()->Peek_Model();
-	if (render_model != NULL && render_model->Get_Name() != NULL) {
+	if (render_model != nullptr && render_model->Get_Name() != nullptr) {
 		model_name = render_model->Get_Name();
 	}
 	WWASSERT(::strlen(model_name) < 256);
@@ -1111,10 +1111,10 @@ void	PhysicalGameObj::Export_Rare( BitStreamClass &packet )
 	int target_frame		= 0;
 	int curr_frame			= 0;
 	AnimMode anim_mode	= ANIM_MODE_TARGET;
-	if (AnimControl != NULL) {
+	if (AnimControl != nullptr) {
 		animation_name	= AnimControl->Get_Animation_Name();
-		target_frame	= AnimControl->Get_Target_Frame ();
-		curr_frame		= AnimControl->Get_Current_Frame ();
+		target_frame	= int(AnimControl->Get_Target_Frame ());
+		curr_frame		= int(AnimControl->Get_Current_Frame ());
 		anim_mode		= AnimControl->Get_Mode ();
 	}
 
@@ -1130,7 +1130,7 @@ void	PhysicalGameObj::Export_Rare( BitStreamClass &packet )
 	//	Lookup the id of the host object
 	//
 	int host_model_id = 0;
-	if (HostGameObj != NULL) {
+	if (HostGameObj != nullptr) {
 		host_model_id = HostGameObj.Get_Ptr ()->Get_ID ();
 	}
 
@@ -1150,7 +1150,7 @@ void	PhysicalGameObj::Export_Rare( BitStreamClass &packet )
 
 	// We want to copy the hidden status for cinematics, (specefically, airstrip drops of vehicles)
 	// but, we only want to change vehicles visibility
-	if ( IS_COOP_MISSION || As_VehicleGameObj() != NULL ) {
+	if ( IS_COOP_MISSION || As_VehicleGameObj() != nullptr ) {
 		// Send hidden
 		bool hidden = false;
 		if ( Peek_Model() && As_SoldierGameObj() == NULL ) {
@@ -1232,22 +1232,22 @@ void	PhysicalGameObj::Import_Rare( BitStreamClass &packet )
 	//	Pass the animation information onto the controller
 	//
 	RenderObjClass *current_model = Peek_Model();
-	if (AnimControl == NULL && !animation_name.Is_Empty() && current_model != NULL) {
+	if (AnimControl == nullptr && !animation_name.Is_Empty() && current_model != nullptr) {
 		if (log_this_import) {
 			CoopDebugLog::Log("PhysicalGameObj::Import_Rare create SimpleAnimControl net_id=%d def=%s", Get_Network_ID(), definition_name);
 		}
 		Set_Anim_Control(new SimpleAnimControlClass);
 	}
 
-	if (AnimControl != NULL && current_model != NULL) {
+	if (AnimControl != nullptr && current_model != nullptr) {
 		if (log_this_import) {
-			const char *current_model_name = current_model->Get_Name() != NULL ? current_model->Get_Name() : "<null>";
+			const char *current_model_name = current_model->Get_Name() != nullptr ? current_model->Get_Name() : "<null>";
 			CoopDebugLog::Log("PhysicalGameObj::Import_Rare apply animation start net_id=%d def=%s model=%s anim=%s",
 				Get_Network_ID(), definition_name, current_model_name, animation_name.Peek_Buffer());
 		}
 		AnimControl->Set_Model(current_model);
-		AnimControl->Set_Animation( animation_name, 0, curr_frame );
-		AnimControl->Set_Target_Frame( target_frame );
+		AnimControl->Set_Animation( animation_name, 0, float(curr_frame) );
+		AnimControl->Set_Target_Frame( float(target_frame) );
 		AnimControl->Set_Mode( (AnimMode)anim_mode );
 		if (log_this_import) {
 			CoopDebugLog::Log("PhysicalGameObj::Import_Rare apply animation done net_id=%d def=%s", Get_Network_ID(), definition_name);
@@ -1272,12 +1272,12 @@ void	PhysicalGameObj::Import_Rare( BitStreamClass &packet )
 	if ( host_model_id != 0 ) {
 		HostGameObj = GameObjManager::Find_PhysicalGameObj( host_model_id );
 
-		if ( HostGameObj.Get_Ptr() == NULL ) {
+		if ( HostGameObj.Get_Ptr() == nullptr ) {
 			PendingHostObjID = host_model_id;	// Pending Host
 			Reset_Hibernating();
 		}
 	} else {
-		HostGameObj = NULL;
+		HostGameObj = nullptr;
 	}
 
 	//
@@ -1293,7 +1293,7 @@ void	PhysicalGameObj::Import_Rare( BitStreamClass &packet )
 	}
 
 
-	if ( IS_COOP_MISSION || As_VehicleGameObj() != NULL ) {
+	if ( IS_COOP_MISSION || As_VehicleGameObj() != nullptr ) {
 		// Get Hidden
 		bool hidden = packet.Get( hidden );
 		if ( Peek_Model() ) {
@@ -1317,7 +1317,7 @@ void PhysicalGameObj::Export_Frequent( BitStreamClass &packet )
 
 	if ( HostGameObj.Get_Ptr() ) {
 		RenderObjClass * model = ((PhysicalGameObj * )(HostGameObj.Get_Ptr()))->Peek_Model();
-		on_host_bone = ( model != NULL );
+		on_host_bone = ( model != nullptr );
 	}
 
 	packet.Add(on_host_bone);
@@ -1374,7 +1374,7 @@ int	PhysicalGameObj::Get_Vis_ID ()
 	//
 	//	Do we have a physics object we can use?
 	//
-	if (phys_obj != NULL) {
+	if (phys_obj != nullptr) {
 
 		return phys_obj->Get_Vis_Object_ID();
 
@@ -1452,7 +1452,7 @@ void Tint(RenderObjClass *robj, const Vector3 & color)
 //-----------------------------------------------------------------------------
 void PhysicalGameObj::Set_Tint(Vector3 color)
 {
-   if (TintColor != color && Peek_Model() != NULL) {
+   if (TintColor != color && Peek_Model() != nullptr) {
 		Tint(Peek_Model(), color);
 		TintColor = color;
    }
@@ -1479,8 +1479,8 @@ void PhysicalGameObj::Object_Shattered_Something
 	SurfaceEffectsManager::Apply_Effect(	surface_type,
 														SurfaceEffectsManager::HITTER_TYPE_BULLET,
 														tm,
-														NULL,
-														NULL,
+														nullptr,
+														nullptr,
 														false,	// no decals
 														false		// no emitter
 														);

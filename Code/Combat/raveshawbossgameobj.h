@@ -145,7 +145,7 @@ public:
 	//
 	// Damage
 	//
-   virtual	void						Apply_Damage_Extended (const OffenseObjectClass &offense, float scale = 1.0f, const	Vector3 & direction = Vector3 (0, 0, 0), const char *collision_box_name = NULL) override;
+   virtual	void						Apply_Damage_Extended (const OffenseObjectClass &offense, float scale = 1.0f, const	Vector3 & direction = Vector3 (0, 0, 0), const char *collision_box_name = nullptr) override;
 
 protected:
 
@@ -190,7 +190,7 @@ protected:
 	void									Link_Stealth_Soldier_To_Hand (void);
 	void									Link_Thrown_Object_To_Hands (void);
 	SimpleGameObj *					Find_Object_To_Throw (void);
-	WWINLINE SoldierGameObj *		Peek_Stealth_Soldier (void);
+	SoldierGameObj *		Peek_Stealth_Soldier (void);
 	void									Verify_Stealth_Soldier (void);
 
 	void									Link_Player_To_Hands (void);
@@ -396,7 +396,7 @@ private:
 	///////////////////////////////////////////////////////////////////
 	//	Private methods
 	///////////////////////////////////////////////////////////////////
-	static int __cdecl	fnSortLightningRodsCallback (const void *elem1, const void *elem2);
+	static int fnSortLightningRodsCallback (const void *elem1, const void *elem2);
 
 	///////////////////////////////////////////////////////////////////
 	//	Private member data
@@ -485,17 +485,17 @@ private:
 ///////////////////////////////////////////////////////////////////
 //	Peek_Stealth_Soldier
 ///////////////////////////////////////////////////////////////////
-WWINLINE SoldierGameObj *
+SoldierGameObj *
 RaveshawBossGameObjClass::Peek_Stealth_Soldier (void)
 {
-	SoldierGameObj *soldier = NULL;
+	SoldierGameObj *soldier = nullptr;
 
 	//
 	//	Dig the soldier out of the game object reference
 	//
-	if (StealthSoldier != NULL) {
+	if (StealthSoldier != nullptr) {
 		PhysicalGameObj *phys_game_obj = StealthSoldier.Get_Ptr ()->As_PhysicalGameObj ();
-		if (phys_game_obj != NULL) {
+		if (phys_game_obj != nullptr) {
 			soldier = phys_game_obj->As_SoldierGameObj ();
 		}
 	}

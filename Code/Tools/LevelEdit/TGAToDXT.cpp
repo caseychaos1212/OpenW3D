@@ -37,6 +37,7 @@
 #include "StdAfx.h"
 #include "Targa.h"
 #include "TGAToDXT.H"
+#include <algorithm>
 #include <crnlib.h>
 #include <io.h>
 #include <stdlib.h>
@@ -51,8 +52,8 @@ TGAToDXTClass _TGAToDXTConverter;
 //
 ///////////////////////////////////////////////////////////////////////////////
 TGAToDXTClass::TGAToDXTClass()
-	: WriteTimePtr (NULL),
-		Buffer(NULL),
+	: WriteTimePtr (nullptr),
+		Buffer(nullptr),
 	  BufferSize (1024),
 	  BufferCount (0)
 {
@@ -97,7 +98,7 @@ bool TGAToDXTClass::Convert (const char *inputpathname, const char *outputpathna
 		// 4. Dimensions must be power of 2 (see below).
 		validbitdepth = ((targa.Header.PixelDepth == 24) || (targa.Header.PixelDepth == 32));
 		validsize	  = (targa.Header.Width >= 4) && (targa.Header.Height >= 4);
-		validaspect	  = ((float) MAX (targa.Header.Width, targa.Header.Height)) / ((float) MIN (targa.Header.Width, targa.Header.Height)) <= 8.0f;
+		validaspect	  = ((float) std::max(targa.Header.Width, targa.Header.Height)) / ((float) std::min(targa.Header.Width, targa.Header.Height)) <= 8.0f;
 		if (validbitdepth && validsize && validaspect) {
 			crn_comp_params comp_params;
       comp_params.m_width = targa.Header.Width;
@@ -122,7 +123,7 @@ bool TGAToDXTClass::Convert (const char *inputpathname, const char *outputpathna
 				Buffer = static_cast<unsigned char *>(output_file_data);
 				BufferCount = output_file_size;
 				Write (outputpathname);
-				Buffer = NULL;
+				Buffer = nullptr;
 				crn_free_block(output_file_data);
 				success = true;
 			}
@@ -147,15 +148,15 @@ void TGAToDXTClass::Write (const char *outputpathname)
 	HANDLE hfile;
 	DWORD  bytecountwritten;
 
-	hfile = ::CreateFileA (outputpathname, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0L, NULL);
+	hfile = ::CreateFileA (outputpathname, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, 0L, nullptr);
 	if (hfile != INVALID_HANDLE_VALUE) {
       LockFile (hfile, 0, 0, BufferCount, 0);
-      WriteFile (hfile, Buffer, BufferCount, &bytecountwritten, NULL);
+      WriteFile (hfile, Buffer, BufferCount, &bytecountwritten, nullptr);
       UnlockFile (hfile, 0, 0, BufferCount, 0);
 
 		// Stamp the write time (if one has been supplied).
-		if (WriteTimePtr != NULL) {
-			SetFileTime (hfile, NULL, NULL, WriteTimePtr);
+		if (WriteTimePtr != nullptr) {
+			SetFileTime (hfile, nullptr, nullptr, WriteTimePtr);
 		}
 
 		CloseHandle (hfile);
@@ -171,7 +172,7 @@ void TGAToDXTClass::Write (const char *outputpathname)
 //	ReadDTXnFile
 //
 ///////////////////////////////////////////////////////////////////////////////
-void ReadDTXnFile (DWORD /* datacount */, void * /* data */)
+void ReadDTXnFile (unsigned /* datacount */, void * /* data */)
 {
 	// Not implemented.
 	ASSERT (false);
@@ -183,7 +184,7 @@ void ReadDTXnFile (DWORD /* datacount */, void * /* data */)
 //	WriteDTXnFile
 //
 ///////////////////////////////////////////////////////////////////////////////
-void WriteDTXnFile (DWORD datacount, void *data)
+void WriteDTXnFile (unsigned datacount, void *data)
 {
 	// Ensure that the buffer is large enough.
 	if (_TGAToDXTConverter.BufferSize < _TGAToDXTConverter.BufferCount + datacount) {
@@ -191,9 +192,9 @@ void WriteDTXnFile (DWORD datacount, void *data)
 		unsigned			newbuffersize;
 		unsigned char *newbuffer;
 
-		newbuffersize = MAX (_TGAToDXTConverter.BufferSize * 2, _TGAToDXTConverter.BufferCount + datacount);
+		newbuffersize = std::max(_TGAToDXTConverter.BufferSize * 2, _TGAToDXTConverter.BufferCount + datacount);
 		newbuffer	  = new unsigned char [newbuffersize];
-		ASSERT (newbuffer != NULL);
+		ASSERT (newbuffer != nullptr);
 		memcpy (newbuffer, _TGAToDXTConverter.Buffer, _TGAToDXTConverter.BufferCount);
 		delete [] _TGAToDXTConverter.Buffer;
 		_TGAToDXTConverter.Buffer = newbuffer;

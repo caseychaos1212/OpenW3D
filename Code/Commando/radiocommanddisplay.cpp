@@ -63,7 +63,7 @@
 ////////////////////////////////////////////////////////////////
 float					RadioCommandDisplayClass::DisplayTimer		= 0.0F;
 bool					RadioCommandDisplayClass::IsDisplayed		= false;
-TextWindowClass *	RadioCommandDisplayClass::TextWindow		= NULL;
+TextWindowClass *	RadioCommandDisplayClass::TextWindow		= nullptr;
 
 
 
@@ -75,9 +75,9 @@ TextWindowClass *	RadioCommandDisplayClass::TextWindow		= NULL;
 void
 RadioCommandDisplayClass::Shutdown (void)
 {
-	if (TextWindow != NULL) {
+	if (TextWindow != nullptr) {
 		delete TextWindow;
-		TextWindow = NULL;
+		TextWindow = nullptr;
 	}
 
 	IsDisplayed		= false;
@@ -97,9 +97,9 @@ RadioCommandDisplayClass::Initialize (void)
 	//
 	//	Start fresh
 	//
-	if (TextWindow != NULL) {
+	if (TextWindow != nullptr) {
 		delete TextWindow;
-		TextWindow = NULL;
+		TextWindow = nullptr;
 	}
 
 	//
@@ -154,7 +154,7 @@ void
 RadioCommandDisplayClass::Update (DISPLAY_TYPE type)
 {
 	CNCModeSettingsDef *cnc_def = CNCModeSettingsDef::Get_Instance ();
-	if (TextWindow == NULL || cnc_def == NULL) {
+	if (TextWindow == nullptr || cnc_def == nullptr) {
 		return ;
 	}
 
@@ -194,7 +194,7 @@ RadioCommandDisplayClass::Update (DISPLAY_TYPE type)
 		}
 
 		WideStringClass command_key (0, true);
-		command_key.Format (U_CHAR("%s + %d"), access_key, key_id);
+		command_key.Format (U_CHAR("%s + %d"), access_key.Peek_Buffer(), key_id);
 
 		//
 		//	Insert an item for this radio command

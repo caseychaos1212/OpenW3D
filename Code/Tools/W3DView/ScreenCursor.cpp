@@ -54,11 +54,11 @@
 ///////////////////////////////////////////////////////////////////
 ScreenCursorClass::ScreenCursorClass (void)
 	:	m_ScreenPos (0, 0),
-		m_pTexture (NULL),
-		m_pVertMaterial (NULL),
+		m_pTexture (nullptr),
+		m_pVertMaterial (nullptr),
 		m_Width (0),
 		m_Height (0),
-		m_hWnd (NULL)
+		m_hWnd (nullptr)
 {
 	Initialize ();
 	return ;
@@ -72,9 +72,9 @@ ScreenCursorClass::ScreenCursorClass (void)
 ///////////////////////////////////////////////////////////////////
 ScreenCursorClass::ScreenCursorClass (const ScreenCursorClass &src)
 	:	m_ScreenPos (0, 0),
-		m_pTexture (NULL),
-		m_hWnd (NULL),
-		m_pVertMaterial (NULL),
+		m_pTexture (nullptr),
+		m_hWnd (nullptr),
+		m_pVertMaterial (nullptr),
 		m_Width (0),
 		m_Height (0),
 		RenderObjClass (src)
@@ -157,7 +157,7 @@ ScreenCursorClass::Set_Texture (TextureClass *texture)
 	MEMBER_ADD (m_pTexture, texture);
 
 	// Find the dimensions of the texture:
-	if (m_pTexture != NULL) {
+	if (m_pTexture != nullptr) {
 		m_Width	= m_pTexture->Get_Width();
 		m_Height	= m_pTexture->Get_Height();
 	}
@@ -180,7 +180,7 @@ ScreenCursorClass::On_Frame_Update (void)
 	POINT point = { 0 };
 	::GetCursorPos (&point);
 
-	if (m_hWnd != NULL) {
+	if (m_hWnd != nullptr) {
 
 		//
 		//	Normalize the screen position
@@ -214,8 +214,8 @@ ScreenCursorClass::On_Frame_Update (void)
 	//
 	float normal_width = ((float)m_Width) / (float)screen_cx;
 	float normal_height = ((float)m_Height) / (float)screen_cy;
-	float x_pos = floor(m_ScreenPos.X * ((float)screen_cx) + 0.5F) / ((float)screen_cx);
-	float y_pos = floor(m_ScreenPos.Y * ((float)screen_cy) + 0.5F) / ((float)screen_cy);
+	float x_pos = WWMath::Floor(m_ScreenPos.X * ((float)screen_cx) + 0.5F) / ((float)screen_cx);
+	float y_pos = WWMath::Floor(m_ScreenPos.Y * ((float)screen_cy) + 0.5F) / ((float)screen_cy);
 	float z_pos = 0;
 
 	//
@@ -295,9 +295,9 @@ ScreenCursorClass::Render (RenderInfoClass & /* rinfo */)
 		DynamicIBAccessClass::WriteLockClass lock(&ibaccess);
 		unsigned short * indices = lock.Get_Index_Array();
 		for (int i=0; i<FACE_COUNT; i++) {
-			indices[3*i+0] = m_Triangles[i][0];
-			indices[3*i+1] = m_Triangles[i][1];
-			indices[3*i+2] = m_Triangles[i][2];
+			indices[3*i+0] = (unsigned short)m_Triangles[i][0];
+			indices[3*i+1] = (unsigned short)m_Triangles[i][1];
+			indices[3*i+2] = (unsigned short)m_Triangles[i][2];
 		}
 	}
 
@@ -334,7 +334,7 @@ void
 ScreenCursorClass::Get_Obj_Space_Bounding_Sphere(SphereClass & sphere) const
 {
 	sphere.Center = Get_Transform().Get_Translation();
-	sphere.Radius = std::max (m_Width, m_Height);
+	sphere.Radius = float(std::max (m_Width, m_Height));
 }
 
 
@@ -348,7 +348,7 @@ ScreenCursorClass::Get_Obj_Space_Bounding_Box(AABoxClass & box) const
 {
 	Matrix3D transform = Get_Transform ();
 	box.Center = transform.Get_Translation ();
-	box.Extent.Set(0.1F, m_Width, m_Height);
+	box.Extent.Set(0.1F, float(m_Width), float(m_Height));
 }
 
 
@@ -360,7 +360,7 @@ ScreenCursorClass::Get_Obj_Space_Bounding_Box(AABoxClass & box) const
 void
 ScreenCursorClass::Notify_Added (SceneClass * scene)
 {
-	if (scene != NULL) {
+	if (scene != nullptr) {
 		scene->Register (this, SceneClass::ON_FRAME_UPDATE);
 	}
 
@@ -376,7 +376,7 @@ ScreenCursorClass::Notify_Added (SceneClass * scene)
 void
 ScreenCursorClass::Notify_Removed (SceneClass * scene)
 {
-	if (scene != NULL) {
+	if (scene != nullptr) {
 		scene->Unregister (this, SceneClass::ON_FRAME_UPDATE);
 	}
 

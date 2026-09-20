@@ -69,7 +69,7 @@ enum
 /////////////////////////////////////////////////////////////////////////
 //	Static member initialization
 /////////////////////////////////////////////////////////////////////////
-float *	HeightDBClass::m_HeightArray	= NULL;
+float *	HeightDBClass::m_HeightArray	= nullptr;
 int		HeightDBClass::m_NumPointsX	= 0;
 int		HeightDBClass::m_NumPointsY	= 0;
 float		HeightDBClass::m_PatchSize		= 8;
@@ -134,7 +134,7 @@ HeightDBClass::Get_Height (const Vector3 &pos)
 {
 	float height = pos.Z;
 
-	if (m_HeightArray != NULL && m_NumPointsX > 0 && m_NumPointsY > 0) {
+	if (m_HeightArray != nullptr && m_NumPointsX > 0 && m_NumPointsY > 0) {
 
 		float percent_x = (pos.X - m_LevelMin.X) / (m_LevelMax.X - m_LevelMin.X);
 		float percent_y = (pos.Y - m_LevelMin.Y) / (m_LevelMax.Y - m_LevelMin.Y);
@@ -144,8 +144,8 @@ HeightDBClass::Get_Height (const Vector3 &pos)
 		//
 		if (percent_x >= 0 && percent_x <= 1.0F && percent_y >= 0 && percent_y <= 1.0F) {
 
-			int entry_ul_x = (m_NumPointsX - 1) * percent_x;
-			int entry_ul_y = (m_NumPointsY - 1) * percent_y;
+			int entry_ul_x = int((m_NumPointsX - 1) * percent_x);
+			int entry_ul_y = int((m_NumPointsY - 1) * percent_y);
 			int entry_ur_x = entry_ul_x + 1;
 			int entry_ur_y = entry_ul_y;
 			int entry_lr_x = entry_ul_x + 1;
@@ -204,8 +204,8 @@ HeightDBClass::Generate (void)
 	//
 	//	Determine how big a heightmap we will need to store data for this level
 	//
-	m_NumPointsX	= ((m_LevelMax.X - m_LevelMin.X) / generate_patch_size) + 1;
-	m_NumPointsY	= ((m_LevelMax.Y - m_LevelMin.Y) / generate_patch_size) + 1;
+	m_NumPointsX	= int((m_LevelMax.X - m_LevelMin.X) / generate_patch_size) + 1;
+	m_NumPointsY	= int((m_LevelMax.Y - m_LevelMin.Y) / generate_patch_size) + 1;
 	int entries		= m_NumPointsX * m_NumPointsY;
 
 	m_HeightArray	= new float[entries];
@@ -243,7 +243,7 @@ HeightDBClass::Generate (void)
 			//	Store this height value in our array
 			//
 			float *height_value = Get_Height_Entry (row, col);
-			if (height_value != NULL) {
+			if (height_value != nullptr) {
 				(*height_value) = (z_pos + HEIGHT_OFFSET);
 			}
 
@@ -315,7 +315,7 @@ HeightDBClass::Generate (void)
 	for (row = 0; row < temp_points_y; row ++) {
 		for (col = 0; col < temp_points_x; col ++) {
 			float *z_val = Get_Height_Entry (row * 2, col * 2);
-			if (z_val != NULL) {
+			if (z_val != nullptr) {
 				temp_height_array[(row * temp_points_x) + col] = *z_val;
 			} else {
 				temp_height_array[(row * temp_points_x) + col] = 0;
@@ -339,9 +339,9 @@ HeightDBClass::Generate (void)
 void
 HeightDBClass::Free_Data (void)
 {
-	if (m_HeightArray != NULL) {
+	if (m_HeightArray != nullptr) {
 		delete [] m_HeightArray;
-		m_HeightArray = NULL;
+		m_HeightArray = nullptr;
 	}
 
 	m_NumPointsX = 0;
@@ -366,9 +366,9 @@ HeightDBClass::Examine_Level_Geometry (void)
 	//
 	for (it1.First (); !it1.Is_Done (); it1.Next ()) {
 		PhysClass *phys_obj = it1.Peek_Obj ();
-		if (phys_obj != NULL) {
+		if (phys_obj != nullptr) {
 			RenderObjClass *model = phys_obj->Peek_Model ();
-			if (model != NULL) {
+			if (model != nullptr) {
 				Process_Render_Obj (model);
 			}
 		}
@@ -379,9 +379,9 @@ HeightDBClass::Examine_Level_Geometry (void)
 	//
 	for (it2.First (); !it2.Is_Done (); it2.Next ()) {
 		PhysClass *phys_obj = it2.Peek_Obj ();
-		if (phys_obj != NULL) {
+		if (phys_obj != nullptr) {
 			RenderObjClass *model = phys_obj->Peek_Model ();
-			if (model != NULL) {
+			if (model != nullptr) {
 				Process_Render_Obj (model);
 			}
 		}
@@ -407,7 +407,7 @@ HeightDBClass::Process_Render_Obj (RenderObjClass *render_obj)
 
 		// Get a pointer to this subobject
 		RenderObjClass *sub_object = render_obj->Get_Sub_Object (index);
-		if (sub_object != NULL) {
+		if (sub_object != nullptr) {
 
 			Process_Render_Obj (sub_object);
 			sub_object->Release_Ref ();
@@ -443,7 +443,7 @@ HeightDBClass::Submit_Mesh (MeshClass &mesh)
 	//	Get this mesh's polygon information
 	//
 	MeshModelClass *model = mesh.Get_Model ();
-	if (model != NULL) {
+	if (model != nullptr) {
 
 		const Vector3 *vertex_array	= model->Get_Vertex_Array ();
 		int count							= model->Get_Vertex_Count ();
@@ -463,8 +463,8 @@ HeightDBClass::Submit_Mesh (MeshClass &mesh)
 			//
 			if (percent_x >= 0 && percent_x <= 1.0F && percent_y >= 0 && percent_y <= 1.0F) {
 
-				int entry_ul_x = (m_NumPointsX - 1) * percent_x;
-				int entry_ul_y = (m_NumPointsY - 1) * percent_y;
+				int entry_ul_x = int((m_NumPointsX - 1) * percent_x);
+				int entry_ul_y = int((m_NumPointsY - 1) * percent_y);
 				int entry_ur_x = entry_ul_x + 1;
 				int entry_ur_y = entry_ul_y;
 				int entry_lr_x = entry_ul_x + 1;

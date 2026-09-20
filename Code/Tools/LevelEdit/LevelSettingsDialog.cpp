@@ -40,7 +40,7 @@ static char THIS_FILE[] = __FILE__;
 // LevelSettingsDialogClass
 //
 /////////////////////////////////////////////////////////////////////////////
-LevelSettingsDialogClass::LevelSettingsDialogClass(CWnd* pParent /*=NULL*/)
+LevelSettingsDialogClass::LevelSettingsDialogClass(CWnd* pParent /*=nullptr*/)
 	: CDialog(LevelSettingsDialogClass::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(LevelSettingsDialogClass)
@@ -239,12 +239,12 @@ LevelSettingsDialogClass::Fill_Script_Combobox (int ctrl_id, const char *default
 	//
 	for (int index = 0; index < ScriptMgrClass::Get_Count (); index ++) {
 		EditScriptClass *script = ScriptMgrClass::Get_Script (index);
-		if (script != NULL) {
+		if (script != nullptr) {
 
 			//
 			// Add this script to the combobox
 			//
-			int item_index = SendDlgItemMessage (ctrl_id, CB_ADDSTRING, 0, (LPARAM)script->Get_Name ());
+			LRESULT item_index = SendDlgItemMessage (ctrl_id, CB_ADDSTRING, 0, (LPARAM)script->Get_Name ());
 			SendDlgItemMessage (ctrl_id, CB_SETITEMDATA, (WPARAM)item_index, (LPARAM)script);
 
 			//

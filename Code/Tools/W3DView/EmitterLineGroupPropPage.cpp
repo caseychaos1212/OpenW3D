@@ -41,9 +41,9 @@ IMPLEMENT_DYNCREATE(EmitterLineGroupPropPageClass, CPropertyPage)
 
 EmitterLineGroupPropPageClass::EmitterLineGroupPropPageClass() :
 	CPropertyPage(EmitterLineGroupPropPageClass::IDD),
-	m_pEmitterList(NULL),
+	m_pEmitterList(nullptr),
 	m_bValid(true),
-	m_BlurTimeBar(NULL),
+	m_BlurTimeBar(nullptr),
 	m_Lifetime(0),
 	m_MinBlurTime(0),
 	m_MaxBlurTime(1)
@@ -89,7 +89,7 @@ EmitterLineGroupPropPageClass::Initialize (void)
 	SAFE_DELETE_ARRAY (m_BlurTimes.KeyTimes);
 	SAFE_DELETE_ARRAY (m_BlurTimes.Values);
 
-	if (m_pEmitterList != NULL) {
+	if (m_pEmitterList != nullptr) {
 		m_Lifetime = m_pEmitterList->Get_Lifetime ();
 		m_pEmitterList->Get_Blur_Time_Keyframes (m_BlurTimes);
 
@@ -259,7 +259,7 @@ BOOL EmitterLineGroupPropPageClass::OnNotify(WPARAM wParam, LPARAM lParam, LRESU
 	//	Update the spinner controls if necessary
 	//
 	NMHDR *pheader = (NMHDR *)lParam;
-	if ((pheader != NULL) && (pheader->code == UDN_DELTAPOS)) {
+	if ((pheader != nullptr) && (pheader->code == UDN_DELTAPOS)) {
 		LPNMUPDOWN pupdown = (LPNMUPDOWN)lParam;
 		::Update_Spinner_Buddy (pheader->hwndFrom, pupdown->iDelta);
 	}
@@ -308,7 +308,7 @@ BOOL EmitterLineGroupPropPageClass::OnNotify(WPARAM wParam, LPARAM lParam, LRESU
 					//
 					if ((new_max != m_MaxBlurTime) || (new_min != m_MinBlurTime)) {
 
-						int count = m_BlurTimeBar->Get_Point_Count ();
+						count = m_BlurTimeBar->Get_Point_Count ();
 						for (int index = 0; index < count; index ++) {
 
 							float frame = Denormalize_Blur_Time(m_BlurTimeBar->Get_Graph_Percent (index));

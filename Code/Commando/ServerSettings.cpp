@@ -253,6 +253,8 @@ bool ServerSettingsClass::Parse(bool apply)
 				case MODE_GAMESPY:
 					restart_reg.Set_Int(AutoRestartClass::REG_VALUE_AUTO_RESTART_TYPE, 0);
 					break;
+				case MODE_NONE:
+					break;
 			}
 		}
 
@@ -681,7 +683,7 @@ void ServerSettingsClass::Encrypt_Serial(StringClass serial_in, StringClass &ser
 	/*
 	** See if the key file is available. If not, don't bother encrypting.
 	*/
-	HANDLE handle = CreateFileA ("woldata.key", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	HANDLE handle = CreateFileA ("woldata.key", GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (handle == INVALID_HANDLE_VALUE) {
 		delete [] s;
 		serial_out = serial_in;
@@ -691,7 +693,7 @@ void ServerSettingsClass::Encrypt_Serial(StringClass serial_in, StringClass &ser
 	/*
 	** Read the key.
 	*/
-	if (!ReadFile(handle, stringbuffer, sizeof (stringbuffer), &bytesread, NULL)) {
+	if (!ReadFile(handle, stringbuffer, sizeof (stringbuffer), &bytesread, nullptr)) {
 		WWDEBUG_SAY(("Unable to read serial encryption key file\n"));
 		delete [] s;
 		serial_out = serial_in;
@@ -711,7 +713,7 @@ void ServerSettingsClass::Encrypt_Serial(StringClass serial_in, StringClass &ser
 		t += (sign * stringbuffer[i]);
 		t += 1000;
 		t %= 10;
-		c  = t + '0';
+		c  = char(t + '0');
 		s[p] = c;
 		p++;
 		if (p == numberlength) {
@@ -887,7 +889,7 @@ void ServerSettingsClass::Write_Server_List(const WWOnline::IRCServerList &serve
 bool ServerSettingsClass::Check_Game_Settings_File(char *config_file)
 {
 	cGameDataCnc *game_settings = (cGameDataCnc*) cGameData::Create_Game_Of_Type(cGameData::GAME_TYPE_CNC);
-	WWASSERT(game_settings != NULL);
+	WWASSERT(game_settings != nullptr);
 
 	if (game_settings) {
 		game_settings->Set_Ini_Filename(config_file);

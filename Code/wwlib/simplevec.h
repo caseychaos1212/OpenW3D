@@ -55,6 +55,7 @@
 #define SIMPLEVEC_H
 
 #include "always.h"
+#include <algorithm>
 #include <assert.h>
 #include <string.h>		// for memmove
 
@@ -77,7 +78,7 @@ public:
 	int				Length(void) const		{ return VectorMax; }
 	virtual bool	Resize(int newsize);
 	virtual bool	Uninitialised_Grow(int newsize);
-	void				Zero_Memory(void)			{ if (Vector != NULL) { memset(Vector,0,VectorMax * sizeof(T)); } }
+	void				Zero_Memory(void)			{ if (Vector != nullptr) { memset(Vector,0,VectorMax * sizeof(T)); } }
 
 protected:
 
@@ -101,7 +102,7 @@ protected:
  *=============================================================================================*/
 template<class T>
 inline SimpleVecClass<T>::SimpleVecClass(int size) :
-	Vector(NULL),
+	Vector(nullptr),
 	VectorMax(0)
 {
 	if (size > 0) {
@@ -124,9 +125,9 @@ inline SimpleVecClass<T>::SimpleVecClass(int size) :
 template<class T>
 inline SimpleVecClass<T>::~SimpleVecClass(void)
 {
-	if (Vector != NULL) {
+	if (Vector != nullptr) {
 		delete[] Vector;
-		Vector = NULL;
+		Vector = nullptr;
 		VectorMax = 0;
 	}
 }
@@ -162,19 +163,19 @@ inline bool SimpleVecClass<T>::Resize(int newsize)
 		**	If there is an old vector, then it must be copied (as much as is feasible)
 		**	to the new vector.
 		*/
-		if (Vector != NULL) {
+		if (Vector != nullptr) {
 
 			/*
 			**	Mem copy as much of the old vector into the new vector as possible.
 			*/
 			int copycount = (newsize < VectorMax) ? newsize : VectorMax;
-			memcpy(newptr,Vector,copycount * sizeof(T));
+			memcpy(static_cast<void *>(newptr),Vector,copycount * sizeof(T));
 
 			/*
 			**	Delete the old vector.
 			*/
 			delete[] Vector;
-			Vector = NULL;
+			Vector = nullptr;
 		}
 
 		/*
@@ -189,9 +190,9 @@ inline bool SimpleVecClass<T>::Resize(int newsize)
 		** Delete entire vector and reset counts
 		*/
 		VectorMax = 0;
-		if (Vector != NULL) {
+		if (Vector != nullptr) {
 			delete[] Vector;
-			Vector = NULL;
+			Vector = nullptr;
 		}
 	}
 	return true;
@@ -319,9 +320,9 @@ inline SimpleDynVecClass<T>::SimpleDynVecClass(int size) :
 template<class T>
 inline SimpleDynVecClass<T>::~SimpleDynVecClass(void)
 {
-    if (this->Vector != NULL) {
+    if (this->Vector != nullptr) {
         delete[] this->Vector;
-        this->Vector = NULL;
+        this->Vector = nullptr;
 	}
 }
 
@@ -439,7 +440,7 @@ inline bool SimpleDynVecClass<T>::Delete(int index,bool allow_shrink)
 	** cannot be used for classes that cannot be memcopied!!
 	*/
 	if (index < ActiveCount-1) {
-        memmove(&(this->Vector[index]),&(this->Vector[index+1]),(ActiveCount - index - 1) * sizeof(T));
+        memmove(static_cast<void *>(&this->Vector[index]),&this->Vector[index+1],(ActiveCount - index - 1) * sizeof(T));
 	}
 	ActiveCount--;
 
@@ -508,7 +509,7 @@ inline bool SimpleDynVecClass<T>::Delete_Range(int start,int count,bool allow_sh
 	** cannot be used for classes that cannot be memcopied!!
 	*/
 	if (start < ActiveCount - count) {
-        memmove(&(this->Vector[start]),&(this->Vector[start + count]),(ActiveCount - start - count) * sizeof(T));
+        memmove(static_cast<void *>(&this->Vector[start]),&this->Vector[start + count],(ActiveCount - start - count) * sizeof(T));
 	}
 
 	ActiveCount -= count;
@@ -571,8 +572,8 @@ inline bool SimpleDynVecClass<T>::Grow(int new_size_hint)
 	** Vector should grow to 25% bigger, grow at least 4 elements,
 	** and grow at least up to the user's new_size_hint
 	*/
-    int new_size = MAX(this->Length() + this->Length()/4,this->Length() + 4);
-	new_size = MAX(new_size,new_size_hint);
+    int new_size = std::max(this->Length() + this->Length()/4, this->Length() + 4);
+	new_size = std::max(new_size, new_size_hint);
 
 	return Resize(new_size);
 }

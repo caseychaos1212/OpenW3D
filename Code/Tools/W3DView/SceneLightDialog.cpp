@@ -40,7 +40,7 @@ static char THIS_FILE[] = __FILE__;
 //
 //  CSceneLightDialog
 //
-CSceneLightDialog::CSceneLightDialog(CWnd* pParent /*=NULL*/)
+CSceneLightDialog::CSceneLightDialog(CWnd* pParent /*=nullptr*/)
 	: m_CurrentChannel (DIFFUSE),
 	  m_InitialStartAtten (0),
 	  m_InitialEndAtten (0),
@@ -127,8 +127,8 @@ CSceneLightDialog::OnInitDialog (void)
 		Set_Color_Control_State (diffuse);
 
 		// Get the light's attenuation
-		double start = 0;
-		double end = 0;
+		float start = 0;
+		float end = 0;
 		pCDoc->GetSceneLight ()->Get_Far_Attenuation_Range (start, end);
 		BOOL atten_on = pCDoc->GetSceneLight ()->Get_Flag (LightClass::FAR_ATTENUATION);
 		SendDlgItemMessage (IDC_ATTENUATION_CHECK, BM_SETCHECK, (WPARAM)atten_on);
@@ -138,7 +138,7 @@ CSceneLightDialog::OnInitDialog (void)
 
 		// Attempt to calculate the light's distance from the object
 		float distance = 0;
-		if (pCDoc->GetDisplayedObject () != NULL) {
+		if (pCDoc->GetDisplayedObject () != nullptr) {
 
 			// Get the position of the light and the displayed object
 			Vector3 light_pos = pCDoc->GetSceneLight ()->Get_Position ();
@@ -155,15 +155,15 @@ CSceneLightDialog::OnInitDialog (void)
 
 		// Set-up the spin controls
 		m_DistanceSpin.SetRange32 (0, 1000000);
-		m_DistanceSpin.SetPos ((distance * 100));
+		m_DistanceSpin.SetPos (int(distance * 100));
 		m_StartAttenSpin.SetRange32 (0, 1000000);
-		m_StartAttenSpin.SetPos ((start * 100));
+		m_StartAttenSpin.SetPos (int(start * 100));
 		m_EndAttenSpin.SetRange32 (0, 1000000);
-		m_EndAttenSpin.SetPos ((end * 100));
+		m_EndAttenSpin.SetPos (int(end * 100));
 
 		// Setup the slider control
 		m_IntensitySlider.SetRange (0, 100);
-		m_IntensitySlider.SetPos (intensity * 100.0F);
+		m_IntensitySlider.SetPos (int(intensity * 100.0F));
 
 		// Record the initial settings so we can restore them on cancel
 		m_InitialStartAtten = start;
@@ -299,7 +299,7 @@ CSceneLightDialog::WindowProc
 		{
 			// Did this notification come from a spin control?
 			NMHDR *pheader = (NMHDR *)lParam;
-			if ((pheader != NULL) && (pheader->code == UDN_DELTAPOS)) {
+			if ((pheader != nullptr) && (pheader->code == UDN_DELTAPOS)) {
 				LPNMUPDOWN pupdown = (LPNMUPDOWN)lParam;
 
 				// Get the buddy window associated with this spin control

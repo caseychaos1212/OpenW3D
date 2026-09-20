@@ -158,12 +158,12 @@ DECLARE_SCRIPT (MX0_A02_Controller, "")
 			}
 		case (MX0_A02_CUSTOM_TYPE_GET_SNIPER_01_ID):
 			{
-				MX0_A01_NOD_SNIPER_01 = param;
+				MX0_A01_NOD_SNIPER_01 = int(param);
 				break;
 			}
 		case (MX0_A02_CUSTOM_TYPE_GET_SNIPER_02_ID):
 			{
-				MX0_A01_NOD_SNIPER_02 = param;
+				MX0_A01_NOD_SNIPER_02 = int(param);
 				break;
 			}
 		case (MX0_A02_CUSTOM_TYPE_MAIN_STARTUP):
@@ -411,7 +411,7 @@ DECLARE_SCRIPT (MX0_A02_Controller, "")
 		case (MX0_A02_CUSTOM_TYPE_SOLDIER_KILLED_NOD):
 			{
 
-				GameObject * soldier = Commands->Find_Object (param);
+				GameObject * soldier = Commands->Find_Object (int(param));
 				if (soldier)
 				{
 					if (soldier_congrats_loop > 3)
@@ -564,7 +564,7 @@ DECLARE_SCRIPT (MX0_A02_Controller, "")
 
 						if (space_available)
 						{
-							int count = MX0_A02_ACTOR_NOD_START;
+							count = MX0_A02_ACTOR_NOD_START;
 							while (count < MX0_A02_ACTOR_HEADCOUNT)
 							{
 								if (!MX0_A02_UNIT_ID[count])
@@ -844,8 +844,8 @@ DECLARE_SCRIPT (MX0_A02_Controller, "")
 				GameObject * debris = Commands->Find_Object (MX0_A02_BLOCKAGE_ID);
 				if (debris)
 				{
-					Commands->Create_Explosion ("Ground Explosion 01 - Harmless", Vector3(-71.233f, -41.517f, 0.181f), NULL);
-					Commands->Set_Animation (debris, "AG_L0_BLOCKAGE1.AG_L0_BLOCKAGE1", false, NULL, 0.0f, -1.0f, false);
+					Commands->Create_Explosion ("Ground Explosion 01 - Harmless", Vector3(-71.233f, -41.517f, 0.181f), nullptr);
+					Commands->Set_Animation (debris, "AG_L0_BLOCKAGE1.AG_L0_BLOCKAGE1", false, nullptr, 0.0f, -1.0f, false);
 					Commands->Start_Timer (obj, this, 2.0f, MX0_A02_TIMER_DESTROY_RUBBLE);
 				}
 				GameObject * soldier = Commands->Find_Object (MX0_A02_UNIT_ID[1]);
@@ -893,7 +893,7 @@ DECLARE_SCRIPT (MX0_A02_Controller, "")
 			{
 				if (pre_ambient_on)
 				{
-					GameObject * soldier = NULL;
+					GameObject * soldier = nullptr;
 					switch (pre_ambient_count)
 					{
 					case (1):
@@ -965,7 +965,7 @@ DECLARE_SCRIPT (MX0_A02_Controller, "")
 					{
 						pre_ambient_count = 1;
 					}
-					Commands->Start_Timer (obj, this, Get_Int_Random (2, 4), MX0_A02_TIMER_PRE_AMBIENT);
+					Commands->Start_Timer (obj, this, float(Get_Int_Random (2, 4)), MX0_A02_TIMER_PRE_AMBIENT);
 				}
 				break;
 			}
@@ -1542,7 +1542,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 				}
 			case (MX0_A02_CUSTOM_TYPE_REGISTER_ACTOR_ID):
 				{
-					my_register_id = param;
+					my_register_id = int(param);
 					break;
 				}
 			case (MX0_A02_CUSTOM_TYPE_DAMAGE_ON):
@@ -1570,7 +1570,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 				{
 					if (default_state)
 					{
-						GameObject * target = Commands->Find_Object (param);
+						GameObject * target = Commands->Find_Object (int(param));
 						if (target)
 						{
 							ActionParamsStruct params;
@@ -1589,13 +1589,13 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 				}
 			case (MX0_A02_CUSTOM_TYPE_PRE_AMBIENT):
 				{
-					MX0_A02_Say_Something (obj, param, false);
+					MX0_A02_Say_Something (obj, int(param), false);
 					break;
 				}
 			case (MX0_A02_CUSTOM_KILL_SNIPER_01):
 				{
 					default_state = false;
-					GameObject * sniper = Commands->Find_Object (param);
+					GameObject * sniper = Commands->Find_Object (int(param));
 					if (sniper)
 					{
 						MX0_A02_NOD_SNIPER_01 = Commands->Get_ID (sniper);
@@ -1629,7 +1629,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 			case (MX0_A02_CUSTOM_KILL_SNIPER_02):
 				{
 					default_state = false;
-					GameObject * sniper = Commands->Find_Object (param);
+					GameObject * sniper = Commands->Find_Object (int(param));
 					if (sniper)
 					{
 						MX0_A02_NOD_SNIPER_02 = Commands->Get_ID (sniper);
@@ -1690,7 +1690,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 				{
 					if (default_state)
 					{
-						int speech_num = MX0_A02_SPEECH_GDI_PLAYER_CONGRATS_01 + param;
+						int speech_num = MX0_A02_SPEECH_GDI_PLAYER_CONGRATS_01 + int(param);
 						MX0_A02_Say_Something (obj, speech_num, false);
 					}
 					break;
@@ -1699,7 +1699,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 				{
 					if (default_state)
 					{
-						int speech_num = MX0_A02_SPEECH_GDI_SOLDIER_CONGRATS_01 + param;
+						int speech_num = MX0_A02_SPEECH_GDI_SOLDIER_CONGRATS_01 + int(param);
 						MX0_A02_Say_Something (obj, speech_num, false);
 					}
 					break;
@@ -1717,7 +1717,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 				}
 			case (MX0_A02_CUSTOM_TYPE_GDI_SHOOTS_NOD_01):
 				{
-					GameObject * target = Commands->Find_Object (param);
+					GameObject * target = Commands->Find_Object (int(param));
 					if (target)
 					{
 						ActionParamsStruct params;
@@ -1734,7 +1734,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 				}
 			case (MX0_A02_CUSTOM_TYPE_GDI_SHOOTS_NOD_02):
 				{
-					GameObject * target = Commands->Find_Object (param);
+					GameObject * target = Commands->Find_Object (int(param));
 					if (target)
 					{
 						ActionParamsStruct params;
@@ -1746,7 +1746,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 				}
 			case (MX0_A02_CUSTOM_TYPE_GET_APC_ID):
 				{
-					GameObject * apc = Commands->Find_Object (param);
+					GameObject * apc = Commands->Find_Object (int(param));
 					if (apc)
 					{
 						GameObject * controller = Commands->Find_Object (MX0_A02_CONTROLLER_ID);
@@ -1909,10 +1909,10 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 			case (MX0_A02_CUSTOM_TYPE_ENGINEER_MOVETOTANK):
 				{
 					MX0_A02_Say_Something (obj, MX0_A02_SPEECH_ENGINEER_TANK_01, false);
-					GameObject * tank = Commands->Find_Object (param);
+					GameObject * tank = Commands->Find_Object (int(param));
 					if (tank)
 					{
-						medtank_id = param;
+						medtank_id = int(param);
 						GameObject * moveloc = Commands->Find_Object (MX0_A02_MOVE_OBJ_06);
 						if (moveloc)
 						{
@@ -2314,7 +2314,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 					}
 				case (MX0_A02_ACTION_RETREAT_MOVE):
 					{
-						Commands->Apply_Damage (obj, 10000.0f, "Blamokiller", NULL);
+						Commands->Apply_Damage (obj, 10000.0f, "Blamokiller", nullptr);
 						break;
 					}
 				case (MX0_A02_ACTION_ENGINEER_01_MEDTANK):
@@ -2425,7 +2425,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 							params.Set_Movement(Commands->Get_Position (moveloc), RUN, 0.5f, false);
 							Commands->Action_Goto (obj, params);
 						}
-						Commands->Start_Timer (obj, this, (MX0_A02_TIMERLENGTH_BASIC_MOVE + Get_Int_Random(0, MX0_A02_TIMERLENGTH_BASIC_MOVE)), MX0_A02_TIMER_BASIC_MOVE_02);
+						Commands->Start_Timer (obj, this, float(MX0_A02_TIMERLENGTH_BASIC_MOVE + Get_Int_Random(0, MX0_A02_TIMERLENGTH_BASIC_MOVE)), MX0_A02_TIMER_BASIC_MOVE_02);
 					}
 					break;
 				}
@@ -2488,7 +2488,7 @@ DECLARE_SCRIPT (MX0_A02_ACTOR, "ActorID=0:int")
 							params.Set_Movement(Commands->Get_Position (moveloc), RUN, 0.5f, false);
 							Commands->Action_Goto (obj, params);
 						}
-						Commands->Start_Timer (obj, this, (MX0_A02_TIMERLENGTH_BASIC_MOVE + Get_Int_Random(0, MX0_A02_TIMERLENGTH_BASIC_MOVE)), MX0_A02_TIMER_BASIC_MOVE_01);
+						Commands->Start_Timer (obj, this, float(MX0_A02_TIMERLENGTH_BASIC_MOVE + Get_Int_Random(0, MX0_A02_TIMERLENGTH_BASIC_MOVE)), MX0_A02_TIMER_BASIC_MOVE_01);
 					}
 					break;
 				}
@@ -3069,7 +3069,7 @@ DECLARE_SCRIPT (MX0_A02_HELICOPTER, "ActorID=0:int")
 	{
 		if (timer_id == MX0_A02_TIMER_DESTROY_HELI_02)
 		{
-			Commands->Apply_Damage (obj, 10000.0f, "Blamokiller", NULL);
+			Commands->Apply_Damage (obj, 10000.0f, "Blamokiller", nullptr);
 		}
 	}
 };
@@ -3216,7 +3216,7 @@ DECLARE_SCRIPT (M00_Test_Sound_RAD, "")
 	{
 		int id = Commands->Create_Conversation("M00_TEST_CONVERSATION", 100, 300, true);
 		Commands->Stop_All_Conversations (); /// <--- This cancels the following conversation!
-		Commands->Join_Conversation(NULL, id, true, true, true);
+		Commands->Join_Conversation(nullptr, id, true, true, true);
 		Commands->Join_Conversation (STAR, id, true, false, false);
 		Commands->Start_Conversation(id, 0);
 	}

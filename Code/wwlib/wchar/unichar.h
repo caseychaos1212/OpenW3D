@@ -22,6 +22,8 @@
 
 #include <wchar.h>
 #include <windows.h>
+#include <assert.h>
+#include <climits>
 
 typedef wchar_t unichar_t;
 #define u_strlen(x) wcslen(x)
@@ -41,13 +43,15 @@ typedef wchar_t unichar_t;
 #define u_strstr(x, y) wcsstr(x, y)
 #define u_snprintf_u(x, y, z, ...) swprintf(x, y, z, ##__VA_ARGS__)
 #define u_sscanf_u(x, y, ...) swscanf(x, y, ##__VA_ARGS__)
+#define u_vsnprintf_n(w, x, y, z) vsnprintf(w, x, y, z)
 
 #define U_COMPARE_CODE_POINT_ORDER 0x8000
 #define U_CHAR(str) (L##str)
 
 inline size_t u_mbtows(unichar_t* dst, const char* src, size_t len)
 {
-	int retval = MultiByteToWideChar (CP_UTF8, 0, src, -1, dst, len);
+	assert(len < INT_MAX);
+	int retval = MultiByteToWideChar (CP_UTF8, 0, src, -1, dst, int(len));
 
 	if (retval <= 0) {
 		return size_t(-1);
@@ -58,7 +62,8 @@ inline size_t u_mbtows(unichar_t* dst, const char* src, size_t len)
 
 inline size_t u_wstomb(char* dst, const unichar_t* src, size_t len)
 {
-	int retval = WideCharToMultiByte(CP_UTF8, 0, src, -1, dst, len, nullptr, nullptr);
+	assert(len < INT_MAX);
+	int retval = WideCharToMultiByte(CP_UTF8, 0, src, -1, dst, int(len), nullptr, nullptr);
 
 	if (retval <= 0) {
 		return size_t(-1);

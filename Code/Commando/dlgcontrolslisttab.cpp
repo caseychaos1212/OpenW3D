@@ -370,7 +370,7 @@ ControlsListTabClass::Load_Key_Mappings (void)
 		//	Get the dialog control that will represent this input
 		//
 		InputCtrlClass *input_ctrl = (InputCtrlClass *)Get_Dlg_Item (PrimaryCtrlIDList[index]);
-		if (input_ctrl != NULL) {
+		if (input_ctrl != nullptr) {
 			WideStringClass key_name;
 
 			//
@@ -392,7 +392,7 @@ ControlsListTabClass::Load_Key_Mappings (void)
 		//	Get the dialog control that will represent this input
 		//
 		input_ctrl = (InputCtrlClass *)Get_Dlg_Item (SecondaryCtrlIDList[index]);
-		if (input_ctrl != NULL) {
+		if (input_ctrl != nullptr) {
 			WideStringClass key_name;
 
 			//
@@ -469,7 +469,7 @@ ControlsListTabClass::HandleNotification (DlgMsgBoxEvent &event)
 		//	Now, update all the controls on the dialog
 		//
 		DialogBaseClass *parent_dlg = Get_Parent_Dialog ();
-		if (parent_dlg != NULL) {
+		if (parent_dlg != nullptr) {
 			((ControlsMenuClass *)parent_dlg)->Reload ();
 		}
 
@@ -550,7 +550,7 @@ ControlsListTabClass::Get_Function_Name (int function_id)
 		return U_CHAR("Sprint");
 	}
 
-	const unichar_t *retval = NULL;
+	const unichar_t *retval = nullptr;
 	for (int index = 0; index < INPUT_NAME_COUNT; index ++) {
 
 		//

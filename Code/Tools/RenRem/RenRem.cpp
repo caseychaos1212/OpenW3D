@@ -83,18 +83,18 @@ void App_Response_Callback(char *response)
 	if (DumpOutput) {
 		HANDLE file = INVALID_HANDLE_VALUE;
 		if (TruncateFile) {
-			file = CreateFileA("RenRem.txt", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			file = CreateFileA("RenRem.txt", GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 		} else {
-			file = CreateFileA("RenRem.txt", GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			file = CreateFileA("RenRem.txt", GENERIC_WRITE, 0, nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 		}
 		TruncateFile = false;
 
 		if (file != INVALID_HANDLE_VALUE) {
-			SetFilePointer(file, 0, NULL, FILE_END);
+			SetFilePointer(file, 0, nullptr, FILE_END);
 			DWORD actual = 0;
 			const size_t response_length = ::strlen(response);
 			assert(response_length <= std::numeric_limits<DWORD>::max());
-			WriteFile(file, response, static_cast<DWORD>(response_length), &actual, NULL);
+			WriteFile(file, response, static_cast<DWORD>(response_length), &actual, nullptr);
 			CloseHandle(file);
 		}
 	}
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
 	}
 
 	ServerControl.Allow_Remote_Admin(true);
-	if (ServerControl.Start_Listening(local_port, password, &App_Request_Callback, &App_Response_Callback) == false) {
+	if (ServerControl.Start_Listening((unsigned short)local_port, password, &App_Request_Callback, &App_Response_Callback) == false) {
 		cprintf("Failed to open socket for port %d\n", local_port);
 		WSACleanup();
 		return(0);
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 	if (RequestBuffer[0] != 0) {
 		Connected = false;
 		GotResponse = false;
-		ServerControl.Send_Message(password, ip, port);
+		ServerControl.Send_Message(password, ip, (unsigned short)port);
 	}
 
 
@@ -228,7 +228,7 @@ int main(int argc, char **argv)
 						}
 
 						if (send) {
-							ServerControl.Send_Message(&CommandBuffer[1], ip, port);
+							ServerControl.Send_Message(&CommandBuffer[1], ip, (unsigned short)port);
 							TruncateFile = true;
 						}
 					}
@@ -273,7 +273,7 @@ int main(int argc, char **argv)
 				Connected = true;
 				GotResponse = false;
 				DumpOutput = true;
-				ServerControl.Send_Message(&RequestBuffer[3], ip, port);
+				ServerControl.Send_Message(&RequestBuffer[3], ip, (unsigned short)port);
 			} else {
 				/*
 				** Must be request response - we are done.

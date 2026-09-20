@@ -100,7 +100,7 @@ public:
 	};
 
 
-	static WW3DErrorType		Init(void * hwnd, char *defaultpal = NULL, bool lite = false);
+	static WW3DErrorType		Init(void * hwnd, char *defaultpal = nullptr, bool lite = false);
 	static WW3DErrorType		Shutdown(void);
 	static bool					Is_Initted(void)								{ return IsInitted; }
 
@@ -143,7 +143,7 @@ public:
 	** special cases like generating a shadow texture for an object.  Basically this function will have the
 	** entire scene rendering overhead.
 	*/
-	static WW3DErrorType		Begin_Render(bool clear = false,bool clearz = true,const Vector3 & color = Vector3(0,0,0), void(*network_callback)(void) = NULL);
+	static WW3DErrorType		Begin_Render(bool clear = false,bool clearz = true,const Vector3 & color = Vector3(0,0,0), void(*network_callback)(void) = nullptr);
 
 	static WW3DErrorType		Render(const LayerListClass & layerlist);
 	static WW3DErrorType		Render(const LayerClass & layer);
@@ -173,12 +173,15 @@ public:
 	** These functions allow you to create screenshots and movies.
 	*/
 	static void					Make_Screen_Shot( const char * filename = "ScreenShot");
+	static int					Make_Back_Buffer_Screen_Shot( const char * filename = "ScreenShot");
 	static void					Start_Movie_Capture( const char * filename_base = "Movie", float frame_rate = 15);
+	static bool					Try_Start_Movie_Capture_From_Back_Buffer( const char * filename_base, float frame_rate);
 	static void					Stop_Movie_Capture( void);
 	static void					Toggle_Movie_Capture( const char * filename_base = "Movie", float frame_rate = 15);
 	static void					Start_Single_Frame_Movie_Capture(const char *filename_base = "Frames");
 	static void					Capture_Next_Movie_Frame();
 	static void					Update_Movie_Capture( void);
+	static bool					Try_Update_Movie_Capture_From_Back_Buffer( void);
 	static float				Get_Movie_Capture_Frame_Rate( void);
 	static void					Pause_Movie(bool mode);
 	static bool					Is_Movie_Paused();

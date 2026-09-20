@@ -41,7 +41,7 @@ static char THIS_FILE[] = __FILE__;
 //
 /////////////////////////////////////////////////////////////////////////////
 PositionPageClass::PositionPageClass (void)
-	: m_pNode (NULL),
+	: m_pNode (nullptr),
 	  m_bInclueRotation (false),
 	  DockableFormClass (PositionPageClass::IDD)
 {
@@ -129,7 +129,7 @@ void PositionPageClass::Dump(CDumpContext& dc) const
 void
 PositionPageClass::HandleInitDialog (void)
 {
-	ASSERT (m_pNode != NULL);
+	ASSERT (m_pNode != nullptr);
 
 	// Get the node's position
 	Matrix3D transform = m_pNode->Get_Transform ();
@@ -141,9 +141,9 @@ PositionPageClass::HandleInitDialog (void)
 	::SetDlgItemFloat (m_hWnd, IDC_ZPOS_EDIT, translation.Z);
 
 	// Fill the rotation controls
-	::SetDlgItemFloat (m_hWnd, IDC_XROT_EDIT, RAD_TO_DEG (transform.Get_X_Rotation ()));
-	::SetDlgItemFloat (m_hWnd, IDC_YROT_EDIT, RAD_TO_DEG (transform.Get_Y_Rotation ()));
-	::SetDlgItemFloat (m_hWnd, IDC_ZROT_EDIT, RAD_TO_DEG (transform.Get_Z_Rotation ()));
+	::SetDlgItemFloat (m_hWnd, IDC_XROT_EDIT, RAD_TO_DEGF (transform.Get_X_Rotation ()));
+	::SetDlgItemFloat (m_hWnd, IDC_YROT_EDIT, RAD_TO_DEGF (transform.Get_Y_Rotation ()));
+	::SetDlgItemFloat (m_hWnd, IDC_ZROT_EDIT, RAD_TO_DEGF (transform.Get_Z_Rotation ()));
 
 	// Enable/disable the 'restrict rotation' checkbox, and set its check state
 	::EnableWindow (::GetDlgItem (m_hWnd, IDC_RESTRICT_CHECK), m_pNode->Can_Be_Rotated_Freely ());
@@ -175,7 +175,7 @@ PositionPageClass::Apply_Changes (void)
 	// Get the rotation angle
 	if (m_bInclueRotation) {
 		float zrot = ::GetDlgItemFloat (m_hWnd, IDC_ZROT_EDIT);
-		transform.Rotate_Z (DEG_TO_RAD (zrot));
+		transform.Rotate_Z (DEG_TO_RADF (zrot));
 	} else {
 		transform = m_pNode->Get_Transform ();
 	}

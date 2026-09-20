@@ -55,7 +55,7 @@ cRemoteHost::cRemoteHost() :
    MustEvict(false),
    LastReliableSendId(-2),		// dummy value
    LastUnreliableSendId(-2),	// dummy value
-	ResendTimeoutMs(cNetUtil::Get_Default_Resend_Timeout_Ms()),
+	ResendTimeoutMs(USHORT(cNetUtil::Get_Default_Resend_Timeout_Ms())),
 	LastServiceCount(0),
 	LastContactTime(0),
 	TargetBps(0),
@@ -80,7 +80,7 @@ cRemoteHost::cRemoteHost() :
 {
    //WWDEBUG_SAY(("cRemoteHost::cRemoteHost\n"));
 
-	ZeroMemory(&Address, sizeof(struct sockaddr_in));
+	memset(&Address, 0, sizeof(struct sockaddr_in));
 
 	if (IsFlowControlEnabled) {
       //ThresholdPriority = cNetUtil::Get_Initial_Threshold_Priority();
@@ -173,9 +173,9 @@ cRemoteHost::~cRemoteHost()
    SLNode<cPacket> * objnode;
    cPacket * p_packet;
    for (int list_type = 0; list_type < 4; list_type++) {
-      for (objnode = PacketList[list_type].Head(); objnode != NULL;) {
+      for (objnode = PacketList[list_type].Head(); objnode != nullptr;) {
          p_packet = objnode->Data();
-         WWASSERT(p_packet != NULL);
+         WWASSERT(p_packet != nullptr);
          objnode = objnode->Next();
          PacketList[list_type].Remove(p_packet);
 		   p_packet->Flush();
@@ -211,7 +211,7 @@ void cRemoteHost::Add_Packet(cPacket & packet, BYTE list_type)
    }
 
    cPacket * p_packet = new cPacket;
-   WWASSERT(p_packet != NULL);
+   WWASSERT(p_packet != nullptr);
    *p_packet = packet; // copy data
 
 	if (list_type == RELIABLE_SEND_LIST || list_type == UNRELIABLE_SEND_LIST) {
@@ -222,10 +222,10 @@ void cRemoteHost::Add_Packet(cPacket & packet, BYTE list_type)
 		// Locate insertion point according to packet id
 		//
 		SLNode<cPacket> * objnode;
-		cPacket * obj = NULL;
+		cPacket * obj = nullptr;
 		for (objnode = PacketList[list_type].Head(); objnode; objnode = objnode->Next()) {
 			obj = objnode->Data();
-			WWASSERT(obj != NULL);
+			WWASSERT(obj != nullptr);
 
 			if (obj->Get_Id() > packet.Get_Id()) {
 				break;
@@ -237,7 +237,7 @@ void cRemoteHost::Add_Packet(cPacket & packet, BYTE list_type)
 		// TSS - this is inefficient: we have already parsed the
 		// list once
 		//
-		if (objnode == NULL) {
+		if (objnode == nullptr) {
 			PacketList[list_type].Add_Tail(p_packet);
 		} else {
 			PacketList[list_type].Insert_Before(p_packet, obj);
@@ -256,10 +256,10 @@ void cRemoteHost::Remove_Packet(int packet_id, BYTE list_type)
       list_type == UNRELIABLE_RCV_LIST);
 
    SLNode<cPacket> * objnode;
-	for (objnode = PacketList[list_type].Head(); objnode != NULL;) {
+	for (objnode = PacketList[list_type].Head(); objnode != nullptr;) {
 
       cPacket * p_packet = objnode->Data();
-      WWASSERT(p_packet != NULL);
+      WWASSERT(p_packet != nullptr);
       objnode = objnode->Next();
 
 		if (packet_id == p_packet->Get_Id()) {
@@ -679,10 +679,10 @@ void cRemoteHost::Adjust_Resend_Timeout(void)
 			candidate_resend_timeout_ms = std::min(candidate_resend_timeout_ms, 3000);
 			candidate_resend_timeout_ms = std::max(candidate_resend_timeout_ms, 333);
 
-			ResendTimeoutMs = (ResendTimeoutMs + candidate_resend_timeout_ms) / 2;
+			ResendTimeoutMs = USHORT((ResendTimeoutMs + candidate_resend_timeout_ms) / 2);
 			if (candidate_resend_timeout_ms < ResendTimeoutMs) {
 				WWASSERT(candidate_resend_timeout_ms < 0xffff);
-				ResendTimeoutMs = candidate_resend_timeout_ms;
+				ResendTimeoutMs = USHORT(candidate_resend_timeout_ms);
 				//WWDEBUG_SAY((">> ResendTimeoutMs for rhost %d = %d\n", Id, ResendTimeoutMs));
 			}
 

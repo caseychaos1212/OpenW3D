@@ -38,7 +38,7 @@
 #include "stdafx.h"
 #include "wdump.h"
 #include "Chunk_D.h"
-#include "rawfilem.h"
+#include "rawfile.h"
 #include "finddialog.h"
 
 #ifdef _DEBUG
@@ -64,11 +64,11 @@ ChunkTableClass::~ChunkTableClass() {
 }
 void ChunkTableClass::NewType(int ID, const char *name, void (*callback)(ChunkItem *item, CListCtrl *list), bool wrapper) {
 	ChunkType *chunktype = new ChunkType(name, callback, wrapper);
-	Types.SetAt((void *) ID, (void *) chunktype);
+	Types.SetAt(reinterpret_cast<void *>(static_cast<intptr_t>(ID)), chunktype);
 }
 void ChunkTableClass::AddItem(CListCtrl *List, int &Counter, const char *Name, const char *Value, const char *Type) {
 
-	if (List != NULL) {
+	if (List != nullptr) {
 		int list_item = List->InsertItem(Counter++, Name);
 		List->SetItemText(list_item, 1, Type);
 		List->SetItemText(list_item, 2, Value);
@@ -206,20 +206,20 @@ void ChunkTableClass::AddItem(CListCtrl *List, int &Counter, const char *Name, W
 
 void ChunkTableClass::AddItem(CListCtrl *List, int &Counter, const char *name, W3dShaderStruct * shader)
 {
-	static char * _depth_compare[] = { "Pass Never","Pass Less","Pass Equal","Pass Less or Equal", "Pass Greater","Pass Not Equal","Pass Greater or Equal","Pass Always" };
-	static char * _depth_mask[] = { "Write Disable", "Write Enable" };
-	static char * _color_mask[] = { "Write Disable", "Write Enable" };
-	static char * _destblend[] = { "Zero","One","Src Color","One Minus Src Color","Src Alpha","One Minus Src Alpha","Src Color Prefog" };
-	static char * _fogfunc[] = { "Disable","Enable","Scale Fragment","Replace Fragment" };
-	static char * _prigradient[] = { "Disable","Modulate","Add","Bump-Environment" };
-	static char * _secgradient[] = { "Disable","Enable" };
-	static char * _srcblend[] = { "Zero","One","Src Alpha","One Minus Src Alpha" };
-	static char * _texturing[] = { "Disable","Enable" };
-	static char * _detailcolor[] = { "Disable","Detail","Scale","InvScale","Add","Sub","SubR","Blend","DetailBlend" };
-	static char * _detailalpha[] = { "Disable","Detail","Scale","InvScale" };
-	static char * _dithermask[] = { "Disable", "Enable" };
-	static char * _shademodel[] = { "Smooth", "Flat" };
-	static char * _alphatest[] = { "Alpha Test Disable", "Alpha Test Enable" };
+	static const char * _depth_compare[] = { "Pass Never","Pass Less","Pass Equal","Pass Less or Equal", "Pass Greater","Pass Not Equal","Pass Greater or Equal","Pass Always" };
+	static const char * _depth_mask[] = { "Write Disable", "Write Enable" };
+	static const char * _color_mask[] = { "Write Disable", "Write Enable" };
+	static const char * _destblend[] = { "Zero","One","Src Color","One Minus Src Color","Src Alpha","One Minus Src Alpha","Src Color Prefog" };
+	static const char * _fogfunc[] = { "Disable","Enable","Scale Fragment","Replace Fragment" };
+	static const char * _prigradient[] = { "Disable","Modulate","Add","Bump-Environment" };
+	static const char * _secgradient[] = { "Disable","Enable" };
+	static const char * _srcblend[] = { "Zero","One","Src Alpha","One Minus Src Alpha" };
+	static const char * _texturing[] = { "Disable","Enable" };
+	static const char * _detailcolor[] = { "Disable","Detail","Scale","InvScale","Add","Sub","SubR","Blend","DetailBlend" };
+	static const char * _detailalpha[] = { "Disable","Detail","Scale","InvScale" };
+	static const char * _dithermask[] = { "Disable", "Enable" };
+	static const char * _shademodel[] = { "Smooth", "Flat" };
+	static const char * _alphatest[] = { "Alpha Test Disable", "Alpha Test Enable" };
 
 	int counter = 0;
 	char label[256];
@@ -251,19 +251,19 @@ void ChunkTableClass::AddItem(CListCtrl *List, int &Counter, const char *name, W
 
 void ChunkTableClass::AddItem(CListCtrl *List, int &Counter, const char *name, W3dPS2ShaderStruct * shader)
 {
-	static char * _depth_compare[] = { "Pass Never","Pass Less","Pass Always","Pass Less or Equal"};
-	static char * _depth_mask[] = { "Write Disable", "Write Enable" };
-	static char * _color_mask[] = { "Write Disable", "Write Enable" };
-	static char * _ablend[] = { "Src Color","Dest Color","Zero"};
-	static char * _cblend[] = { "Src Alpha","Dest Alpha","One"};
-	static char * _fogfunc[] = { "Disable","Enable","Scale Fragment","Replace Fragment" };
-	static char * _prigradient[] = { "Disable","Modulate","Highlight","Highlight2" };
-	static char * _secgradient[] = { "Disable","Enable" };
-	static char * _texturing[] = { "Disable","Enable" };
-	static char * _detailcolor[] = { "Disable","Detail","Scale","InvScale","Add","Sub","SubR","Blend","DetailBlend" };
-	static char * _detailalpha[] = { "Disable","Detail","Scale","InvScale" };
-	static char * _dithermask[] = { "Disable", "Enable" };
-	static char * _shademodel[] = { "Smooth", "Flat" };
+	static const char * _depth_compare[] = { "Pass Never","Pass Less","Pass Always","Pass Less or Equal"};
+	static const char * _depth_mask[] = { "Write Disable", "Write Enable" };
+	static const char * _color_mask[] = { "Write Disable", "Write Enable" };
+	static const char * _ablend[] = { "Src Color","Dest Color","Zero"};
+	static const char * _cblend[] = { "Src Alpha","Dest Alpha","One"};
+	static const char * _fogfunc[] = { "Disable","Enable","Scale Fragment","Replace Fragment" };
+	static const char * _prigradient[] = { "Disable","Modulate","Highlight","Highlight2" };
+	static const char * _secgradient[] = { "Disable","Enable" };
+	static const char * _texturing[] = { "Disable","Enable" };
+	static const char * _detailcolor[] = { "Disable","Detail","Scale","InvScale","Add","Sub","SubR","Blend","DetailBlend" };
+	static const char * _detailalpha[] = { "Disable","Detail","Scale","InvScale" };
+	static const char * _dithermask[] = { "Disable", "Enable" };
+	static const char * _shademodel[] = { "Smooth", "Flat" };
 
 	int counter = 0;
 	char label[256];
@@ -362,7 +362,6 @@ void ChunkTableClass::List_W3D_CHUNK_VERTICES(ChunkItem *Item, CListCtrl *List) 
 	W3dVectorStruct *data;
 	data = (W3dVectorStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -376,7 +375,6 @@ void ChunkTableClass::List_W3D_CHUNK_VERTEX_NORMALS(ChunkItem *Item, CListCtrl *
 	W3dVectorStruct *data;
 	data = (W3dVectorStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -390,7 +388,6 @@ void ChunkTableClass::List_W3D_CHUNK_SURRENDER_NORMALS(ChunkItem *Item, CListCtr
 	W3dVectorStruct *data;
 	data = (W3dVectorStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -405,7 +402,6 @@ void ChunkTableClass::List_W3D_CHUNK_TEXCOORDS(ChunkItem *Item, CListCtrl *List)
 	W3dTexCoordStruct *data;
 	data = (W3dTexCoordStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -420,7 +416,6 @@ void ChunkTableClass::List_O_W3D_CHUNK_MATERIALS(ChunkItem *Item, CListCtrl *Lis
 	struct W3dMaterialStruct *data;
 	data = (W3dMaterialStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -454,12 +449,12 @@ void ChunkTableClass::List_O_W3D_CHUNK_MATERIALS(ChunkItem *Item, CListCtrl *Lis
 }
 
 
-void ChunkTableClass::List_O_W3D_CHUNK_TRIANGLES(ChunkItem *Item, CListCtrl *List) {
+void ChunkTableClass::List_O_W3D_CHUNK_TRIANGLES(ChunkItem */*Item*/, CListCtrl *List) {
 
 	int Counter = 0;
 	AddItem(List, Counter, "Obsolete structure", "");
 }
-void ChunkTableClass::List_O_W3D_CHUNK_QUADRANGLES(ChunkItem *Item, CListCtrl *List) {
+void ChunkTableClass::List_O_W3D_CHUNK_QUADRANGLES(ChunkItem */*Item*/, CListCtrl *List) {
 		int Counter = 0;
 		AddItem(List, Counter, "Outdated structure", "");
 }
@@ -467,7 +462,6 @@ void ChunkTableClass::List_O_W3D_CHUNK_SURRENDER_TRIANGLES(ChunkItem *Item, CLis
 	struct W3dSurrenderTriStruct *data;
 	data = (W3dSurrenderTriStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -496,11 +490,11 @@ void ChunkTableClass::List_O_W3D_CHUNK_SURRENDER_TRIANGLES(ChunkItem *Item, CLis
 	}
 
 }
-void ChunkTableClass::List_O_W3D_CHUNK_POV_TRIANGLES(ChunkItem *Item, CListCtrl *List) {
+void ChunkTableClass::List_O_W3D_CHUNK_POV_TRIANGLES(ChunkItem */*Item*/, CListCtrl *List) {
 	int Counter = 0;
 	AddItem(List, Counter,"Contact Greg if you need to look at this!", "unsupported");
 }
-void ChunkTableClass::List_O_W3D_CHUNK_POV_QUADRANGLES(ChunkItem *Item, CListCtrl *List) {
+void ChunkTableClass::List_O_W3D_CHUNK_POV_QUADRANGLES(ChunkItem */*Item*/, CListCtrl *List) {
 	int Counter = 0;
 	AddItem(List, Counter,"Contact Greg if you need to look at this!", "unsupported");
 }
@@ -513,12 +507,9 @@ void ChunkTableClass::List_W3D_CHUNK_VERTEX_COLORS(ChunkItem *Item, CListCtrl *L
 	struct W3dRGBStruct *data;
 	data = (W3dRGBStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
-
-	int sz = sizeof(W3dRGBStruct);
 
 	while(data < max) {
 
@@ -535,7 +526,6 @@ void ChunkTableClass::List_W3D_CHUNK_VERTEX_INFLUENCES(ChunkItem *Item, CListCtr
 	struct W3dVertInfStruct *data;
 	data = (W3dVertInfStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -559,7 +549,6 @@ void ChunkTableClass::List_W3D_CHUNK_DAMAGE_HEADER(ChunkItem *Item, CListCtrl *L
 	struct W3dMeshDamageStruct *data;
 	data = (W3dMeshDamageStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -584,7 +573,6 @@ void ChunkTableClass::List_W3D_CHUNK_DAMAGE_VERTICES(ChunkItem *Item, CListCtrl 
 	struct W3dMeshDamageVertexStruct *data;
 	data = (W3dMeshDamageVertexStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -606,7 +594,6 @@ void ChunkTableClass::List_W3D_CHUNK_DAMAGE_COLORS(ChunkItem *Item, CListCtrl *L
 	struct W3dMeshDamageColorStruct *data;
 	data = (W3dMeshDamageColorStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -627,7 +614,6 @@ void ChunkTableClass::List_O_W3D_CHUNK_MATERIALS2(ChunkItem *Item, CListCtrl *Li
 	struct W3dMaterial2Struct *data;
 	data = (W3dMaterial2Struct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -843,7 +829,6 @@ void ChunkTableClass::List_W3D_CHUNK_TRIANGLES(ChunkItem *Item, CListCtrl *List)
 	struct W3dTriStruct *data;
 	data = (W3dTriStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -872,7 +857,6 @@ void ChunkTableClass::List_W3D_CHUNK_PER_TRI_MATERIALS(ChunkItem * Item,CListCtr
 	unsigned short *data;
 	data = (unsigned short *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -890,7 +874,6 @@ void	ChunkTableClass::List_W3D_CHUNK_VERTEX_SHADE_INDICES(ChunkItem * Item,CList
 {
 	uint32 * data = (uint32 *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 
@@ -1131,7 +1114,6 @@ void	ChunkTableClass::List_W3D_CHUNK_DCG(ChunkItem * Item,CListCtrl *List)
 {
 	W3dRGBAStruct *data = (W3dRGBAStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -1150,7 +1132,6 @@ void	ChunkTableClass::List_W3D_CHUNK_DIG(ChunkItem * Item,CListCtrl *List)
 {
 	W3dRGBStruct *data = (W3dRGBStruct *)Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -1169,7 +1150,6 @@ void	ChunkTableClass::List_W3D_CHUNK_SCG(ChunkItem * Item,CListCtrl *List)
 {
 	W3dRGBStruct *data = (W3dRGBStruct *)Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -1211,7 +1191,6 @@ void	ChunkTableClass::List_W3D_CHUNK_STAGE_TEXCOORDS(ChunkItem * Item,CListCtrl 
 {
 	W3dTexCoordStruct *data = (W3dTexCoordStruct *)Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -1280,7 +1259,6 @@ void ChunkTableClass::List_W3D_CHUNK_AABTREE_NODES(ChunkItem * Item,CListCtrl *L
 	W3dMeshAABTreeNode * data = (W3dMeshAABTreeNode *)Item->Data;
 
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *)Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -1330,7 +1308,6 @@ void ChunkTableClass::List_W3D_CHUNK_PIVOTS(ChunkItem *Item, CListCtrl *List) {
 	struct W3dPivotStruct *data;
 	data = (W3dPivotStruct *) Item->Data;
 	int Counter = 0;
-	int index = 0;
 	void *max = (char *) Item->Data + Item->Length;
 	int counter = 0;
 	char buf[256];
@@ -1392,7 +1369,7 @@ void ChunkTableClass::List_W3D_CHUNK_ANIMATION_HEADER(ChunkItem *Item, CListCtrl
 
 void ChunkTableClass::List_W3D_CHUNK_ANIMATION_CHANNEL(ChunkItem *Item, CListCtrl *List)
 {
-	static char * _chntypes[] = {
+	static const char * _chntypes[] = {
 		"X Translation",
 		"Y Translation",
 		"Z Translation",
@@ -1428,7 +1405,7 @@ void ChunkTableClass::List_W3D_CHUNK_ANIMATION_CHANNEL(ChunkItem *Item, CListCtr
 
 void ChunkTableClass::List_W3D_CHUNK_BIT_CHANNEL(ChunkItem *Item, CListCtrl *List)
 {
-	static char * _chntypes[] =
+	static const char * _chntypes[] =
 	{
 		"Visibility",
 	};
@@ -2170,9 +2147,9 @@ ChunkTableClass::ChunkTableClass() {
 }
 
 ChunkType *ChunkTableClass::Lookup(int ID) {
-	ChunkType *chunktype;
-	if(Types.Lookup((void *) ID, (void *&) chunktype))
-		return chunktype;
+	void *chunktype;
+	if(Types.Lookup(reinterpret_cast<void *>(static_cast<intptr_t>(ID)), chunktype))
+		return reinterpret_cast<ChunkType *>(chunktype);
 	return 0;
 }
 
@@ -2200,7 +2177,7 @@ ChunkItem::ChunkItem(ChunkLoadClass &cload) {
 
 ChunkItem::~ChunkItem() {
 	if(Data != 0)
-		delete [] Data;
+		delete [] static_cast<char*>(Data);
 	while(!Chunks.IsEmpty()) {
 		ChunkItem *item = Chunks.RemoveHead();
 		delete item;
@@ -2229,7 +2206,7 @@ bool ChunkData::Load(const char *filename)
 
 	Release_Data();
 
-	RawFileMClass chunk_file;
+	RawFileClass chunk_file;
 
 	if (!chunk_file.Open(filename)) {
 		return false;
@@ -2290,8 +2267,8 @@ void ChunkData::Add_Chunk(ChunkLoadClass & cload, ChunkItem *Parent)
 				existing.SetAt(data, data);
 
 				if(theApp.TextureDumpFile != 0)
-					fprintf(theApp.TextureDumpFile, "%s,%s\n", theApp.Filename, data);
-				TRACE("%s,%s\n", theApp.Filename, data);
+					fprintf(theApp.TextureDumpFile, "%s,%s\n", theApp.Filename.GetString(), data);
+				TRACE("%s,%s\n", theApp.Filename.GetString(), data);
 			}
 		}
 	}

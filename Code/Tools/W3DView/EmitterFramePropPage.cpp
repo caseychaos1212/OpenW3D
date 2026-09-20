@@ -44,9 +44,9 @@ IMPLEMENT_DYNCREATE(EmitterFramePropPageClass, CPropertyPage)
 /////////////////////////////////////////////////////////////
 EmitterFramePropPageClass::EmitterFramePropPageClass() :
 	CPropertyPage(EmitterFramePropPageClass::IDD),
-	m_pEmitterList(NULL),
+	m_pEmitterList(nullptr),
 	m_bValid(true),
-	m_FrameBar(NULL),
+	m_FrameBar(nullptr),
 	m_Lifetime(0),
 	m_MinFrame(0),
 	m_MaxFrame(1)
@@ -103,7 +103,7 @@ EmitterFramePropPageClass::Initialize (void)
 	SAFE_DELETE_ARRAY (m_Frames.KeyTimes);
 	SAFE_DELETE_ARRAY (m_Frames.Values);
 
-	if (m_pEmitterList != NULL) {
+	if (m_pEmitterList != nullptr) {
 		m_Lifetime = m_pEmitterList->Get_Lifetime ();
 		m_pEmitterList->Get_Frame_Keyframes (m_Frames);
 
@@ -213,7 +213,7 @@ BOOL EmitterFramePropPageClass::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* 
 	//	Update the spinner controls if necessary
 	//
 	NMHDR *pheader = (NMHDR *)lParam;
-	if ((pheader != NULL) && (pheader->code == UDN_DELTAPOS)) {
+	if ((pheader != nullptr) && (pheader->code == UDN_DELTAPOS)) {
 		LPNMUPDOWN pupdown = (LPNMUPDOWN)lParam;
 		::Update_Spinner_Buddy (pheader->hwndFrom, pupdown->iDelta);
 	}
@@ -262,11 +262,11 @@ BOOL EmitterFramePropPageClass::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* 
 					//
 					if ((new_max != m_MaxFrame) || (new_min != m_MinFrame)) {
 
-						int count = m_FrameBar->Get_Point_Count ();
+						count = m_FrameBar->Get_Point_Count ();
 						for (int index = 0; index < count; index ++) {
 
-							float frame = Denormalize_Frame(m_FrameBar->Get_Graph_Percent (index));
-							float new_norm = Normalize_Frame(frame,new_min,new_max);
+							float new_frame = Denormalize_Frame(m_FrameBar->Get_Graph_Percent (index));
+							float new_norm = Normalize_Frame(new_frame,new_min,new_max);
 
 							m_FrameBar->Set_Graph_Percent (index, new_norm);
 						}

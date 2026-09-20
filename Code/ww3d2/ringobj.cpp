@@ -171,8 +171,8 @@ RingRenderObjClass::RingRenderObjClass(void)
 	:	anim_time (0.0F),
 		IsAnimating(false),
 		AnimDuration (0.0F),
-		RingMaterial (NULL),
-		RingTexture (NULL),
+		RingMaterial (nullptr),
+		RingTexture (nullptr),
 		Color (0.75F,0.75F,0.75F),
 		InnerScale (1, 1),
 		OuterScale (1, 1),
@@ -213,8 +213,8 @@ RingRenderObjClass::RingRenderObjClass(const W3dRingStruct & def)
 	:	anim_time (0.0F),
 		IsAnimating(false),
 		AnimDuration (0.0F),
-		RingMaterial (NULL),
-		RingTexture (NULL),
+		RingMaterial (nullptr),
+		RingTexture (nullptr),
 		Color (0.75F,0.75F,0.75F),
 		InnerScale (1, 1),
 		OuterScale (1, 1),
@@ -264,8 +264,8 @@ RingRenderObjClass::RingRenderObjClass(const RingRenderObjClass & src)
 	:	anim_time (0.0F),
 		IsAnimating(false),
 		AnimDuration (0.0F),
-		RingMaterial (NULL),
-		RingTexture (NULL),
+		RingMaterial (nullptr),
+		RingTexture (nullptr),
 		Color (0.75F,0.75F,0.75F),
 		InnerScale (1, 1),
 		OuterScale (1, 1),
@@ -375,7 +375,7 @@ void RingRenderObjClass::Generate_Shared_Mesh_Arrays (void)
 
 		for(int i=0; i < RING_NUM_LOD; i++) {
 
-			RingMeshArray[i].Generate(1.0f, size);
+			RingMeshArray[i].Generate(1.0f, int(size));
 
 			size+=step;
 		}
@@ -484,7 +484,7 @@ const char * RingRenderObjClass::Get_Name(void) const
  *=============================================================================================*/
 void RingRenderObjClass::Set_Name(const char * name)
 {
-	WWASSERT(name != NULL);
+	WWASSERT(name != nullptr);
 	WWASSERT(strlen(name) < 2*W3D_NAME_LEN);
 	strcpy(Name,name);
 }
@@ -514,10 +514,10 @@ void RingRenderObjClass::render_ring(RenderInfoClass & /*rinfo*/,const Vector3 &
 	DX8Wrapper::Set_Texture(0,RingTexture);
 	DX8Wrapper::Set_Material(RingMaterial);
 
-	DynamicVBAccessClass vb(BUFFER_TYPE_DYNAMIC_SORTING,dynamic_fvf_type,ring.Vertex_ct);
+	DynamicVBAccessClass vb(BUFFER_TYPE_DYNAMIC_SORTING,dynamic_fvf_type,static_cast<unsigned short>(ring.Vertex_ct));
 	{
 		DynamicVBAccessClass::WriteLockClass Lock(&vb);
-		VertexFormatXYZNDUV2 *vb = Lock.Get_Formatted_Vertex_Array();
+		VertexFormatXYZNDUV2 *fva = Lock.Get_Formatted_Vertex_Array();
 
 		//
 		// set up the vertex color+alpha
@@ -531,25 +531,25 @@ void RingRenderObjClass::render_ring(RenderInfoClass & /*rinfo*/,const Vector3 &
 
 		for (int i=0; i<ring.Vertex_ct; i++)
 		{
-			vb->x = ring.vtx[i].X;
-			vb->y = ring.vtx[i].Y;
-			vb->z = ring.vtx[i].Z;
+			fva->x = ring.vtx[i].X;
+			fva->y = ring.vtx[i].Y;
+			fva->z = ring.vtx[i].Z;
 
-			vb->nx = ring.vtx_normal[i].X;		// may not need this!
-			vb->ny = ring.vtx_normal[i].Y;
-			vb->nz = ring.vtx_normal[i].Z;
+			fva->nx = ring.vtx_normal[i].X;		// may not need this!
+			fva->ny = ring.vtx_normal[i].Y;
+			fva->nz = ring.vtx_normal[i].Z;
 
-			vb->diffuse = color;
+			fva->diffuse = color;
 
 			if (RingTexture) {
-				vb->u1 = ring.vtx_uv[i].X;
-				vb->v1 = ring.vtx_uv[i].Y;
+				fva->u1 = ring.vtx_uv[i].X;
+				fva->v1 = ring.vtx_uv[i].Y;
 			}
-			vb++;
+			fva++;
 		}
 	}
 
-	DynamicIBAccessClass ib(BUFFER_TYPE_DYNAMIC_SORTING,ring.face_ct*3);
+	DynamicIBAccessClass ib(BUFFER_TYPE_DYNAMIC_SORTING,static_cast<unsigned short>(ring.face_ct*3));
 	{
 		DynamicIBAccessClass::WriteLockClass Lock(&ib);
 		unsigned short *mem=Lock.Get_Index_Array();
@@ -565,7 +565,7 @@ void RingRenderObjClass::render_ring(RenderInfoClass & /*rinfo*/,const Vector3 &
 	DX8Wrapper::Set_Index_Buffer(ib,0);
 
 #if (STATIC_SORT_RINGS)
-	DX8Wrapper::Draw_Triangles(0,ring.face_ct,0,ring.Vertex_ct);
+	DX8Wrapper::Draw_Triangles(0,static_cast<unsigned short>(ring.face_ct),0,static_cast<unsigned short>(ring.Vertex_ct));
 #else
 	SortingRendererClass::Insert_Triangles(
 		Get_Bounding_Sphere(),
@@ -677,7 +677,7 @@ void RingRenderObjClass::Render(RenderInfoClass & rinfo)
 		screen_size = sqrtf(screen_size);
 
 		float lod     = screen_size * ((float) RING_NUM_LOD);
-		int	lod_int = lod;
+		int	lod_int = int(lod);
 		lod-=lod_int;
 
 		if (lod >= 0.5f) lod_int++;
@@ -706,7 +706,7 @@ void RingRenderObjClass::Render(RenderInfoClass & rinfo)
 		//
 		//	Make sure this mesh uses the correct UV tiling
 		//
-		if (RingTexture != NULL) {
+		if (RingTexture != nullptr) {
 			RingMeshArray[CurrentLOD].Set_Tiling (TextureTileCount);
 		}
 
@@ -865,7 +865,7 @@ void RingRenderObjClass::Special_Render(SpecialRenderInfoClass & rinfo)
 	temp.Translate(Transform.Get_Translation());
 
 	if (rinfo.RenderType == SpecialRenderInfoClass::RENDER_VIS) {
-		WWASSERT(rinfo.VisRasterizer != NULL);
+		WWASSERT(rinfo.VisRasterizer != nullptr);
 		rinfo.VisRasterizer->Set_Model_Transform(temp);
 		vis_render_ring(rinfo,ObjSpaceCenter,ObjSpaceExtent);
 	}
@@ -1017,7 +1017,7 @@ void RingRenderObjClass::animate()
 			// Convert from milliseconds to seconds and normalize the time
 			//
 			if (AnimDuration > 0) {
-				float	frametime = WW3D::Get_Frame_Time();
+				float	frametime = float(WW3D::Get_Frame_Time());
 				frametime = (frametime * 0.001F) / AnimDuration;
 				anim_time += frametime;
 			} else {
@@ -1070,13 +1070,13 @@ PrototypeClass * RingLoaderClass::Load_W3D(ChunkLoadClass & cload)
 */
 RingPrototypeClass::RingPrototypeClass (void)
 {
-	::memset (&Definition, 0, sizeof (Definition));
+	::memset (static_cast<void *>(&Definition), 0, sizeof (Definition));
 	return ;
 }
 
 RingPrototypeClass::RingPrototypeClass(RingRenderObjClass *ring)
 {
-	::memset (&Definition, 0, sizeof (Definition));
+	::memset (static_cast<void *>(&Definition), 0, sizeof (Definition));
 	::strcpy (Definition.Name, ring->Get_Name ());
 
 	Definition.AnimDuration			= ring->AnimDuration;
@@ -1099,10 +1099,10 @@ RingPrototypeClass::RingPrototypeClass(RingRenderObjClass *ring)
 	//
 	//	Determine the texture name for this sphere
 	//
-	if (ring->RingTexture != NULL) {
+	if (ring->RingTexture != nullptr) {
 		StringClass name = ring->RingTexture->Get_Full_Path();
 		const char *filename = ::strrchr (name, '\\');
-		if (filename != NULL) {
+		if (filename != nullptr) {
 			filename ++;
 		} else {
 			filename = name;
@@ -1279,12 +1279,12 @@ RingMeshClass::RingMeshClass(float radius, int slices):
 Radius(radius),
 Slices(slices),
 Vertex_ct(0),			// 1 vertex minimum, for center
-vtx(NULL),
-orig_vtx(NULL),
-vtx_normal(NULL),
-vtx_uv(NULL),
+vtx(nullptr),
+orig_vtx(nullptr),
+vtx_normal(nullptr),
+vtx_uv(nullptr),
 face_ct(0),
-tri_poly(NULL),
+tri_poly(nullptr),
 TileCount (5),
 InnerScale (1.0F, 1.0F),
 OuterScale (1.0F, 1.0F)
@@ -1308,12 +1308,12 @@ RingMeshClass::RingMeshClass(void):
 Radius(0.0f),
 Slices(0),
 Vertex_ct(0),			// 1 vertex minimum, for center
-vtx(NULL),
-orig_vtx(NULL),
-vtx_normal(NULL),
-vtx_uv(NULL),
+vtx(nullptr),
+orig_vtx(nullptr),
+vtx_normal(nullptr),
+vtx_uv(nullptr),
 face_ct(0),
-tri_poly(NULL),
+tri_poly(nullptr),
 TileCount (5),
 InnerScale (1.0F, 1.0F),
 OuterScale (1.0F, 1.0F)
@@ -1459,9 +1459,9 @@ void RingMeshClass::Generate(float radius, int slices)
 	//	Make the triangle strip...
 	//
 	for (index = 0; index < face_ct; index ++) {
-		tri_poly[index].I = index;
-		tri_poly[index].J = index+1;
-		tri_poly[index].K = index+2;
+		tri_poly[index].I = static_cast<unsigned short>(index);
+		tri_poly[index].J = static_cast<unsigned short>(index+1);
+		tri_poly[index].K = static_cast<unsigned short>(index+2);
 	}
 
 	return ;
@@ -1506,11 +1506,11 @@ void RingMeshClass::Free(void)
 	if (vtx_uv)			delete vtx_uv;
 	if (tri_poly)		delete tri_poly;
 
-	vtx			= NULL;
-	orig_vtx		= NULL;
-	vtx_normal	= NULL;
-	vtx_uv		= NULL;
-	tri_poly		= NULL;
+	vtx			= nullptr;
+	orig_vtx		= nullptr;
+	vtx_normal	= nullptr;
+	vtx_uv		= nullptr;
+	tri_poly		= nullptr;
 
 } // Free
 

@@ -98,7 +98,7 @@ using namespace WWOnline;
 const int RENEGADE_GAMECODE = 12;
 const unichar_t* RENEGADE_LOBBY_PASSWORD = U_CHAR("not_a_valid_password");	// Password removed per Security review requirements. LFeenanEA - 27th January 2025
 
-const unichar_t* __cdecl Translate_WOLString(const char* token)
+const unichar_t* Translate_WOLString(const char* token)
 {
 	if (token) {
 		StringClass desc(80, true);
@@ -115,7 +115,7 @@ const unichar_t* __cdecl Translate_WOLString(const char* token)
 		return text;
 	}
 
-	WWDEBUG_SAY(("WARNING: WOL_xxxx token is NULL\n"));
+	WWDEBUG_SAY(("WARNING: WOL_xxxx token is nullptr\n"));
 	return U_CHAR("WOL_BADSTRING");
 }
 
@@ -137,8 +137,8 @@ const unichar_t* __cdecl Translate_WOLString(const char* token)
 ******************************************************************************/
 
 WolGameModeClass::WolGameModeClass() :
-		mWOLChatMgr(NULL),
-		mWOLBuddyMgr(NULL),
+		mWOLChatMgr(nullptr),
+		mWOLBuddyMgr(nullptr),
 		mGameInProgress(false),
 		mQuietMode(false),
 		mConnected(false),
@@ -221,8 +221,8 @@ void WolGameModeClass::Init(void)
 		LoginProfile::EnableSaving(mWOLSession->IsStoreLoginAllowed());
 	}
 
-	mQuickMatch = NULL;
-	mTheGame = NULL;
+	mQuickMatch = nullptr;
+	mTheGame = nullptr;
 }
 
 
@@ -256,16 +256,16 @@ void WolGameModeClass::Shutdown(void)
 
 	if (mWOLBuddyMgr) {
 		mWOLBuddyMgr->Release_Ref();
-		mWOLBuddyMgr = NULL;
+		mWOLBuddyMgr = nullptr;
 	}
 
 	if (mWOLChatMgr) {
 		mWOLChatMgr->Release_Ref();
-		mWOLChatMgr = NULL;
+		mWOLChatMgr = nullptr;
 	}
 
 	// Release current profile.
-	LoginProfile::SetCurrent(NULL);
+	LoginProfile::SetCurrent(nullptr);
 	LoginInfo::ClearList();
 
 	mMonitorConnection = false;
@@ -342,7 +342,7 @@ void WolGameModeClass::Think(void)
 		//
 		if (cNetwork::I_Am_Server() && mGameInProgress) {
 
-			unsigned int time = TIMEGETTIME();
+			time = TIMEGETTIME();
 
 			//
 			// Clear out old kicklist entries.
@@ -578,7 +578,7 @@ void WolGameModeClass::Leave_Game(void)
 	// Shutdown quickmatch
 	if (mQuickMatch) {
 		mQuickMatch->Release_Ref();
-		mQuickMatch = NULL;
+		mQuickMatch = nullptr;
 	}
 
 	// Leave the game channel.
@@ -589,7 +589,7 @@ void WolGameModeClass::Leave_Game(void)
 		DlgWOLWait::DoDialog(IDS_GAME_LEAVECHANNEL, wait);
 	}
 
-	mTheGame = NULL;
+	mTheGame = nullptr;
 	mGameID = 0;
 	mGameInProgress = false;
 }
@@ -658,7 +658,7 @@ void WolGameModeClass::Start_Game(cGameData* theGame)
 		WWASSERT(wait.IsValid());
 
 		Observer<GameStartEvent>::NotifyMe(*mWOLSession);
-		DlgWOLWait::DoDialog(TRANSLATE (IDS_MENU_STARTING_WOL_GAME), wait, NULL, 0, mQuietMode ? 0xffffffff : 0);
+		DlgWOLWait::DoDialog(TRANSLATE (IDS_MENU_STARTING_WOL_GAME), wait, nullptr, 0, mQuietMode ? 0xffffffff : 0);
 
 		if (The_Game() && The_Game()->IsDedicated.Is_True()) {
 			mConnected = true;
@@ -866,7 +866,7 @@ void WolGameModeClass::Evaluate_Clans(cGameData* theGame)
 				unsigned int hostClanID = host->GetSquadID();
 				theGame->Set_Clan(0, hostClanID);
 
-				WWDEBUG_SAY(("CLANS: Assigning slot 0 to '%S' (host) clan #%lu\n", (const unichar_t*)host->GetName(), hostClanID));
+				WWDEBUG_SAY(("CLANS: Assigning slot 0 to '%S' (host) clan #%u\n", host->GetName().Peek_Buffer(), hostClanID));
 			}
 
 			// Determine which clans are in the game.
@@ -887,7 +887,7 @@ void WolGameModeClass::Evaluate_Clans(cGameData* theGame)
 						WWASSERT(slot != -1 && "More clans in game than slots available");
 
 						if (slot != -1) {
-							WWDEBUG_SAY(("CLANS: Assigning slot %d to clan #%lu\n",  slot, userClanID));
+							WWDEBUG_SAY(("CLANS: Assigning slot %d to clan #%u\n",  slot, userClanID));
 							theGame->Set_Clan(slot, userClanID);
 						}
 					}
@@ -918,7 +918,7 @@ void WolGameModeClass::Evaluate_Clans(cGameData* theGame)
 
 void WolGameModeClass::Update_Channel_Settings(cGameData* theGame, const RefPtr<ChannelData>& channel)
 {
-	WWASSERT(theGame != NULL);
+	WWASSERT(theGame != nullptr);
 	WWASSERT(channel.IsValid());
 
 	if (theGame && channel.IsValid()) {
@@ -930,7 +930,7 @@ void WolGameModeClass::Update_Channel_Settings(cGameData* theGame, const RefPtr<
 			//---------------------------------------------------------------------------
 			// Get average FPS of game (Capped at 255 fps)
 			//---------------------------------------------------------------------------
-			unsigned int fps = TimeManager::Get_Average_Frame_Rate();
+			unsigned int fps = unsigned(TimeManager::Get_Average_Frame_Rate());
 			fps = std::min<unsigned int>(fps, 255);
 
 			int numPlayers = theGame->Get_Current_Players();
@@ -947,7 +947,7 @@ void WolGameModeClass::Update_Channel_Settings(cGameData* theGame, const RefPtr<
 			const char* topic = channel->GetTopic();
 
 			char newTopic[81];
-			sprintf(newTopic, "%s|%02lx%02x%04x%04x%c", topic, fps, avgPing, avgPoints,
+			sprintf(newTopic, "%s|%02x%02x%04x%04x%c", topic, fps, avgPing, avgPoints,
 				avgPlayed, (32 + numPlayers));
 
 			channel->SetTopic(newTopic);
@@ -980,7 +980,7 @@ void WolGameModeClass::Init_WOL_Player(cPlayer* player)
 			RefPtr<LadderData> ladder = user->GetTeamLadder();
 
 			if (ladder.IsValid()) {
-				player->Set_WOL_Points(ladder->GetPoints());
+				player->Set_WOL_Points(static_cast<unsigned short>(ladder->GetPoints()));
 				player->Set_Wol_Rank(ladder->GetRung());
 				player->Set_Num_Wol_Games(ladder->GetReserved2());
 				return;
@@ -1201,7 +1201,7 @@ void WolGameModeClass::Join_WOL_User(const unichar_t* name)
 
 bool WolGameModeClass::Kick_Player(const unichar_t* name)
 {
-	// If the name is not NULL. we are the server and the player to kick is
+	// If the name is not nullptr. we are the server and the player to kick is
 	// not ourself then proceed with the kick.
 	if (name && (u_strlen(name) > 0)) {
 		if (cNetwork::I_Am_Server() && !mWOLSession->IsCurrentUser(name)) {
@@ -1250,7 +1250,7 @@ bool WolGameModeClass::Kick_Player(const unichar_t* name)
  *=============================================================================================*/
 void WolGameModeClass::Ban_Player(const unichar_t* name, unsigned int ip)
 {
-	// If the name is not NULL. we are the server and the player to kick is
+	// If the name is not nullptr. we are the server and the player to kick is
 	// not ourself then proceed with the kick.
 	if (name && cNetwork::I_Am_Server() && !mWOLSession->IsCurrentUser(name)) {
 
@@ -1271,7 +1271,7 @@ void WolGameModeClass::Ban_Player(const unichar_t* name, unsigned int ip)
 			pn += ipstr;
 
 	   	FILE *kick_list = fopen("wolbanlist.txt", "at");
-	   	if (kick_list != NULL) {
+	   	if (kick_list != nullptr) {
 			   fwrite(pn.Peek_Buffer(), 1, pn.Get_Length(), kick_list);
 			   fclose(kick_list);
 	   	}
@@ -1297,8 +1297,8 @@ void WolGameModeClass::Ban_Player(const unichar_t* name, unsigned int ip)
 void WolGameModeClass::Auto_Kick(void)
 {
 	if (cNetwork::I_Am_Server()) {
-		cPlayer *player = NULL;
-		for (SLNode<cPlayer> *player_node = cPlayerManager::Get_Player_Object_List()->Head() ; player_node != NULL; player_node = player_node->Next()) {
+		cPlayer *player = nullptr;
+		for (SLNode<cPlayer> *player_node = cPlayerManager::Get_Player_Object_List()->Head() ; player_node != nullptr; player_node = player_node->Next()) {
 			player = player_node->Data();
 			if (player->Is_Active()) {
 				if (!mWOLSession->IsCurrentUser(player->Get_Name())) {
@@ -1453,7 +1453,7 @@ void WolGameModeClass::HandleNotification(UserEvent& event)
 		// A user has been kicked from the game.
 		case UserEvent::Kicked: {
 			WideStringClass message(0, true);
-			message.Format(TRANSLATE(IDS_MENU_PLAYER_KICKED_MESSAGE), event.Subject()->GetName());
+			message.Format(TRANSLATE(IDS_MENU_PLAYER_KICKED_MESSAGE), event.Subject()->GetName().Peek_Buffer());
 			CombatManager::Get_Message_Window()->Add_Message(message, COLOR_PUBLIC_TEXT);
 			WWAudioClass::Get_Instance()->Create_Instant_Sound("Public_Message", Matrix3D(1));
 		}
@@ -1468,7 +1468,7 @@ void WolGameModeClass::HandleNotification(UserEvent& event)
 
 			// Build a string containing the user's name
 			WideStringClass message(0, true);
-			message.Format(TRANSLATE(IDS_CHAT_LOCATEDUSER), user->GetName());
+			message.Format(TRANSLATE(IDS_CHAT_LOCATEDUSER), user->GetName().Peek_Buffer());
 			message += U_CHAR(" - ");
 			message += location;
 			CombatManager::Get_Message_Window()->Add_Message(message, COLOR_PRIVATE_TEXT);
@@ -1506,8 +1506,8 @@ void WolGameModeClass::HandleNotification(UserEvent& event)
 							int slot = mTheGame->Find_Free_Clan_Slot();
 
 							if (slot != -1) {
-								WWDEBUG_SAY(("CLANS: Slot %d filled by '%S' Clan #%lu\n", slot,
-									(const unichar_t*)user->GetName(), userClanID));
+								WWDEBUG_SAY(("CLANS: Slot %d filled by '%S' Clan #%u\n", slot,
+									user->GetName().Peek_Buffer(), userClanID));
 
 								mTheGame->Set_Clan(slot, userClanID);
 							}
@@ -1522,7 +1522,7 @@ void WolGameModeClass::HandleNotification(UserEvent& event)
 						// competing clans then kick him.
 						if (!mTheGame->Is_Clan_Competing(userClanID)) {
 							WWDEBUG_SAY(("CLANS: Game closed. Kicking user '%S'\n",
-								(const unichar_t*)user->GetName()));
+								user->GetName().Peek_Buffer()));
 
 							mWOLSession->KickUser(user->GetName());
 							requestDetails = false;
@@ -1570,7 +1570,7 @@ void WolGameModeClass::HandleNotification(UserEvent& event)
 void WolGameModeClass::HandleNotification(DlgWOLWaitEvent& wolEvent)
 {
 	if (wolEvent.Result() == WaitCondition::ConditionMet) {
-		WWASSERT(mTheGame != NULL);
+		WWASSERT(mTheGame != nullptr);
 
 		mChannelCreateSuccessFlag = true;
 
@@ -1620,7 +1620,7 @@ void WolGameModeClass::HandleNotification(GameStartEvent& start)
 
 	if (start.IsSuccess()) {
 		mGameID = start.GetGameID();
-		WWDEBUG_SAY(("GameID = %ld\n", mGameID));
+		WWDEBUG_SAY(("GameID = %u\n", mGameID));
 	}
 }
 
@@ -1659,29 +1659,29 @@ void WolGameModeClass::HandleNotification(GameOptionsMessage& message)
 
 			// Game info sent as: MapCRC Seconds remaining
 			StringClass info(0, true);
-			info.Format("GINFO:%08lx %.4f", mapCRC, seconds);
+			info.Format("GINFO:%08x %.4f", mapCRC, seconds);
 
-			WWDEBUG_SAY(("%S\n", info));
+			WWDEBUG_SAY(("%s\n", info.Peek_Buffer()));
 			mWOLSession->SendPrivateGameOptions(requestor, info);
 
 			//-----------------------------------------------------------------------
 			// Send team information
 			//-----------------------------------------------------------------------
 			SList<cTeam>* teamList = cTeamManager::Get_Team_Object_List();
-			WWASSERT(teamList != NULL);
+			WWASSERT(teamList != nullptr);
 
 			SLNode<cTeam>* teamNode = teamList->Head();
 
 			while (teamNode) {
 				cTeam* team = teamNode->Data();
-				WWASSERT(team != NULL);
+				WWASSERT(team != nullptr);
 
 				int teamID = team->Get_Id();
-				int teamScore = team->Get_Score();
+				int teamScore = int(team->Get_Score());
 
 				info.Format("TINFO:%d %d", teamID, teamScore);
 
-				WWDEBUG_SAY(("%S\n", info));
+				WWDEBUG_SAY(("%s\n", info.Peek_Buffer()));
 				mWOLSession->SendPrivateGameOptions(requestor, info);
 
 				teamNode = teamNode->Next();
@@ -1702,7 +1702,7 @@ void WolGameModeClass::HandleNotification(GameOptionsMessage& message)
 					int rung = player->Get_Rung();
 					int kills = player->Get_Kills();
 					int deaths = player->Get_Deaths();
-					int score = player->Get_Score();
+					int score = int(player->Get_Score());
 
 					// PINFO string format: Name fps,type,rank,kills,deaths
 					info.Format("PINFO:%S %d %d %d %d %d", (const unichar_t*)name, type, rung, kills, deaths, score);
@@ -1765,7 +1765,7 @@ void WolGameModeClass::HandleNotification(GameOptionsMessage& message)
 					StringClass dirname(0,true);
 					dirname.Format("sysinfo_%d",DebugManager::Get_Version_Number());
 					if (!cPathUtil::PathExists (dirname)) {
-						if (!CreateDirectoryA(dirname,NULL)) {
+						if (!CreateDirectoryA(dirname,nullptr)) {
 							return;
 						}
 					}
@@ -1779,13 +1779,13 @@ void WolGameModeClass::HandleNotification(GameOptionsMessage& message)
 
 					DWORD written;
 					HANDLE file;
-					file = CreateFileA(filename, GENERIC_WRITE, 0, NULL, OPEN_ALWAYS,
-							FILE_ATTRIBUTE_NORMAL, NULL);
+					file = CreateFileA(filename, GENERIC_WRITE, 0, nullptr, OPEN_ALWAYS,
+							FILE_ATTRIBUTE_NORMAL, nullptr);
 					if (INVALID_HANDLE_VALUE != file) {
-						SetFilePointer(file, 0, NULL, FILE_END);
+						SetFilePointer(file, 0, nullptr, FILE_END);
 						const size_t data_length = ::strlen(datastring);
 						WWASSERT(data_length <= std::numeric_limits<DWORD>::max());
-						WriteFile(file, datastring, static_cast<DWORD>(data_length), &written, NULL);
+						WriteFile(file, datastring, static_cast<DWORD>(data_length), &written, nullptr);
 						CloseHandle(file);
 					}
 				}
@@ -1925,7 +1925,7 @@ void WolGameModeClass::Handle_Disconnect(void)
 				/*
 				** If the game has a time limit and players then we will wait until the next map change otherwise we will stop now.
 				*/
-				WWASSERT(PTheGameData != NULL);
+				WWASSERT(PTheGameData != nullptr);
 				//if (!The_Game()->Get_Time_Limit_Minutes() || SlaveMaster.Am_I_Slave()) {
 					if (cPlayerManager::Count() == 0) {
 						if (SlaveMaster.Am_I_Slave()) {
@@ -1984,7 +1984,7 @@ void WolGameModeClass::HandleNotification(ServerError& /* server_error */)
 			/*
 			** If the game has a time limit and players then we will wait until the next map change otherwise we will stop now.
 			*/
-			WWASSERT(PTheGameData != NULL);
+			WWASSERT(PTheGameData != nullptr);
 
 			if (!The_Game()->Get_Time_Limit_Minutes() || cPlayerManager::Count() == 0) {
 				mStartQuitProcessTime = TIMEGETTIME();
@@ -2064,16 +2064,19 @@ void WolGameModeClass::Quit_And_Restart(void)
 void WolGameModeClass::HandleNotification(WOLPagedEvent& event)
 {
 	PageMessage* page = event.Subject();
-	WWASSERT(page && "NULL page in WOLPagedEvent");
+	WWASSERT(page && "nullptr page in WOLPagedEvent");
 
 	switch (event.GetAction()) {
 		case PAGE_RECEIVED: {
 			WideStringClass message(255, true);
-			message.Format(U_CHAR("%s: %s"), page->GetPagersName(), page->GetPageMessage());
+			message.Format(U_CHAR("%s: %s"), page->GetPagersName().Peek_Buffer(), page->GetPageMessage().Peek_Buffer());
 			CombatManager::Get_Message_Window()->Add_Message(message, COLOR_PAGED_TEXT);
 			WWAudioClass::Get_Instance()->Create_Instant_Sound("Private_Message", Matrix3D(1));
 			break;
 		}
+
+		case PAGE_SENT:
+			break;
 
 		case INVITATION_RECEIVED:
 		case INVITATION_DECLINED:
@@ -2085,7 +2088,7 @@ void WolGameModeClass::HandleNotification(WOLPagedEvent& event)
 		case PAGE_NOT_THERE:
 		case PAGE_TURNED_OFF: {
 			WideStringClass message(255, true);
-			message.Format(U_CHAR("%s %s"), TRANSLATE(IDS_WOL_PAGEUSERERROR), page->GetPageMessage());
+			message.Format(U_CHAR("%s %s"), TRANSLATE(IDS_WOL_PAGEUSERERROR), page->GetPageMessage().Peek_Buffer());
 			CombatManager::Get_Message_Window()->Add_Message(page->GetPageMessage(), COLOR_CONSOLE_TEXT);
 			break;
 		}

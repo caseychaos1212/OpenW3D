@@ -117,8 +117,8 @@ SphereRenderObjClass::SphereRenderObjClass(void)
 	:	anim_time (0.0F),
 		IsAnimating (true),
 		AnimDuration (0.0F),
-		SphereMaterial (NULL),
-		SphereTexture (NULL),
+		SphereMaterial (nullptr),
+		SphereTexture (nullptr),
 		Color (0.75F,0.75F,0.75F),
 		Scale (1, 1, 1),
 		Alpha (1.0F),
@@ -157,8 +157,8 @@ SphereRenderObjClass::SphereRenderObjClass(const W3dSphereStruct & def)
 	:	anim_time (0.0F),
 		IsAnimating (true),
 		AnimDuration (0.0F),
-		SphereMaterial (NULL),
-		SphereTexture (NULL),
+		SphereMaterial (nullptr),
+		SphereTexture (nullptr),
 		Color (0.75F,0.75F,0.75F),
 		Scale (1, 1, 1),
 		Alpha (1.0F),
@@ -205,8 +205,8 @@ SphereRenderObjClass::SphereRenderObjClass(const SphereRenderObjClass & src)
 	:	anim_time (0.0F),
 		IsAnimating (true),
 		AnimDuration (0.0F),
-		SphereMaterial (NULL),
-		SphereTexture (NULL),
+		SphereMaterial (nullptr),
+		SphereTexture (nullptr),
 		Color (0.75F,0.75F,0.75F),
 		Scale (1, 1, 1),
 		Alpha (1.0F),
@@ -296,7 +296,7 @@ void SphereRenderObjClass::Generate_Shared_Mesh_Arrays (const AlphaVectorStruct 
 
 		for(int i=0; i < SPHERE_NUM_LOD; i++) {
 
-			SphereMeshArray[i].Generate(1.0f, size, size);
+			SphereMeshArray[i].Generate(1.0f, int(size), int(size));
 
 			size+=step;
 
@@ -409,7 +409,7 @@ const char * SphereRenderObjClass::Get_Name(void) const
  *=============================================================================================*/
 void SphereRenderObjClass::Set_Name(const char * name)
 {
-	WWASSERT(name != NULL);
+	WWASSERT(name != nullptr);
 	WWASSERT(strlen(name) < 2*W3D_NAME_LEN);
 	strcpy(Name,name);
 }
@@ -441,36 +441,36 @@ void SphereRenderObjClass::render_sphere()
 	DX8Wrapper::Set_Texture(0,SphereTexture);
 	DX8Wrapper::Set_Material(SphereMaterial);
 
-	DynamicVBAccessClass vb(BUFFER_TYPE_DYNAMIC_SORTING,dynamic_fvf_type,mesh.Vertex_ct);
+	DynamicVBAccessClass vb(BUFFER_TYPE_DYNAMIC_SORTING,dynamic_fvf_type,static_cast<unsigned short>(mesh.Vertex_ct));
 	{
 		DynamicVBAccessClass::WriteLockClass Lock(&vb);
-		VertexFormatXYZNDUV2 *vb = Lock.Get_Formatted_Vertex_Array();
+		VertexFormatXYZNDUV2 *fva = Lock.Get_Formatted_Vertex_Array();
 
 		for (int i=0; i<mesh.Vertex_ct; i++)
 		{
-			vb->x = mesh.vtx[i].X;
-			vb->y = mesh.vtx[i].Y;
-			vb->z = mesh.vtx[i].Z;
+			fva->x = mesh.vtx[i].X;
+			fva->y = mesh.vtx[i].Y;
+			fva->z = mesh.vtx[i].Z;
 
-			vb->nx = mesh.vtx_normal[i].X;		// may not need this!
-			vb->ny = mesh.vtx_normal[i].Y;
-			vb->nz = mesh.vtx_normal[i].Z;
+			fva->nx = mesh.vtx_normal[i].X;		// may not need this!
+			fva->ny = mesh.vtx_normal[i].Y;
+			fva->nz = mesh.vtx_normal[i].Z;
 
 			if (Flags & USE_ALPHA_VECTOR) {
-				vb->diffuse = DX8Wrapper::Convert_Color(mesh.dcg[i]);
+				fva->diffuse = DX8Wrapper::Convert_Color(mesh.dcg[i]);
 			} else {
-				vb->diffuse = 0xFFFFFFFF;		// TODO could combine the material color with this and turn off lighting
+				fva->diffuse = 0xFFFFFFFF;		// TODO could combine the material color with this and turn off lighting
 			}
 
 			if (SphereTexture) {
-				vb->u1 = mesh.vtx_uv[i].X;
-				vb->v1 = mesh.vtx_uv[i].Y;
+				fva->u1 = mesh.vtx_uv[i].X;
+				fva->v1 = mesh.vtx_uv[i].Y;
 			}
-			vb++;
+			fva++;
 		}
 	}
 
-	DynamicIBAccessClass ib(BUFFER_TYPE_DYNAMIC_SORTING,mesh.face_ct*3);
+	DynamicIBAccessClass ib(BUFFER_TYPE_DYNAMIC_SORTING,static_cast<unsigned short>(mesh.face_ct*3));
 	{
 		DynamicIBAccessClass::WriteLockClass Lock(&ib);
 		unsigned short *mem=Lock.Get_Index_Array();
@@ -486,7 +486,7 @@ void SphereRenderObjClass::render_sphere()
 	DX8Wrapper::Set_Index_Buffer(ib,0);
 
 #if (STATIC_SORT_SPHERES)
-	DX8Wrapper::Draw_Triangles(0,mesh.face_ct,0,mesh.Vertex_ct);
+	DX8Wrapper::Draw_Triangles(0,static_cast<unsigned short>(mesh.face_ct),0,static_cast<unsigned short>(mesh.Vertex_ct));
 #else
 	SortingRendererClass::Insert_Triangles(
 		Get_Bounding_Sphere(),
@@ -597,7 +597,7 @@ void SphereRenderObjClass::Render(RenderInfoClass & rinfo)
 		screen_size = sqrtf(screen_size);
 
 		float lod     = screen_size * ((float) SPHERE_NUM_LOD);
-		int	lod_int = lod;
+		int	lod_int = int(lod);
 		lod-=lod_int;
 
 		if (lod >= 0.5f) lod_int++;
@@ -690,7 +690,7 @@ void SphereRenderObjClass::Special_Render(SpecialRenderInfoClass & rinfo)
 	temp.Translate(Transform.Get_Translation());
 
 	if (rinfo.RenderType == SpecialRenderInfoClass::RENDER_VIS) {
-		WWASSERT(rinfo.VisRasterizer != NULL);
+		WWASSERT(rinfo.VisRasterizer != nullptr);
 		rinfo.VisRasterizer->Set_Model_Transform(temp);
 		vis_render_sphere(rinfo,ObjSpaceCenter,ObjSpaceExtent);
 	}
@@ -971,7 +971,7 @@ void SphereRenderObjClass::animate (void)
 			// Convert from milliseconds to seconds and normalize the time
 			//
 			if (AnimDuration > 0) {
-				float	frametime = WW3D::Get_Frame_Time();
+				float	frametime = float(WW3D::Get_Frame_Time());
 				frametime = (frametime * 0.001F) / AnimDuration;
 				anim_time += frametime;
 			} else {
@@ -1022,13 +1022,13 @@ PrototypeClass * SphereLoaderClass::Load_W3D(ChunkLoadClass & cload)
 */
 SpherePrototypeClass::SpherePrototypeClass (void)
 {
-	::memset (&Definition, 0, sizeof (Definition));
+	::memset (static_cast<void *>(&Definition), 0, sizeof (Definition));
 	return ;
 }
 
 SpherePrototypeClass::SpherePrototypeClass(SphereRenderObjClass *sphere)
 {
-	::memset (&Definition, 0, sizeof (Definition));
+	::memset (static_cast<void *>(&Definition), 0, sizeof (Definition));
 	::strcpy (Definition.Name, sphere->Get_Name ());
 
 	Definition.DefaultAlpha = sphere->Get_Default_Alpha ();
@@ -1048,10 +1048,10 @@ SpherePrototypeClass::SpherePrototypeClass(SphereRenderObjClass *sphere)
 	//
 	//	Determine the texture name for this sphere
 	//
-	if (sphere->SphereTexture != NULL) {
+	if (sphere->SphereTexture != nullptr) {
 		StringClass name = sphere->SphereTexture->Get_Full_Path();
 		const char *filename = ::strrchr (name, '\\');
-		if (filename != NULL) {
+		if (filename != nullptr) {
 			filename ++;
 		} else {
 			filename = name;
@@ -1227,17 +1227,17 @@ Radius(radius),
 Slices(slices),
 Stacks(stacks),
 Vertex_ct(0),
-vtx(NULL),
-vtx_normal(NULL),
-vtx_uv(NULL),
+vtx(nullptr),
+vtx_normal(nullptr),
+vtx_uv(nullptr),
 strip_ct(0),
 strip_size(0),
-strips(NULL),
+strips(nullptr),
 fan_ct(0),
 fan_size(0),
-fans(NULL),
+fans(nullptr),
 face_ct(0),
-tri_poly(NULL),
+tri_poly(nullptr),
 inverse_alpha(false)
 {
 	// compute # of vertices
@@ -1264,17 +1264,17 @@ Radius(0.0f),
 Slices(0),
 Stacks(0),
 Vertex_ct(0),
-vtx(NULL),
-vtx_normal(NULL),
-vtx_uv(NULL),
+vtx(nullptr),
+vtx_normal(nullptr),
+vtx_uv(nullptr),
 strip_ct(0),
 strip_size(0),
-strips(NULL),
+strips(nullptr),
 fan_ct(0),
 fan_size(0),
-fans(NULL),
+fans(nullptr),
 face_ct(0),
-tri_poly(NULL),
+tri_poly(nullptr),
 inverse_alpha(false)
 {
 
@@ -1323,7 +1323,7 @@ void	SphereMeshClass::Set_Alpha_Vector (const AlphaVectorStruct &v, bool inverse
 			temp = vec * vtx_normal[idx];
 			temp*= Intensity;
 
-			temp = fabs(temp);
+			temp = WWMath::Fabs(temp);
 
 			if (temp > 1.0f) temp = 1.0f;
 
@@ -1338,7 +1338,7 @@ void	SphereMeshClass::Set_Alpha_Vector (const AlphaVectorStruct &v, bool inverse
 			temp = vec * vtx_normal[idx];
 			temp*= Intensity;
 
-			temp = fabs(temp);
+			temp = WWMath::Fabs(temp);
 
 			if (temp > 1.0f) temp = 1.0f;
 
@@ -1511,9 +1511,9 @@ void SphereMeshClass::Generate(float radius, int slices, int stacks)
 		// IJK
 		for(int fidx=0; fidx < (strip_size - 2); fidx++) {
 
-			out->I = in[0];
-			out->J = in[1];
-			out->K = in[2];
+			out->I = static_cast<unsigned short>(in[0]);
+			out->J = static_cast<unsigned short>(in[1]);
+			out->K = static_cast<unsigned short>(in[2]);
 
 			out++;
 			in++;
@@ -1521,9 +1521,9 @@ void SphereMeshClass::Generate(float radius, int slices, int stacks)
 			fidx++;
 			if (fidx >= (strip_size-2)) break;
 
-			out->I = in[0];
-			out->J = in[2];
-			out->K = in[1];
+			out->I = static_cast<unsigned short>(in[0]);
+			out->J = static_cast<unsigned short>(in[2]);
+			out->K = static_cast<unsigned short>(in[1]);
 			out++;
 			in++;
 
@@ -1542,9 +1542,9 @@ void SphereMeshClass::Generate(float radius, int slices, int stacks)
 
 		for (int fidx=0; fidx < (fan_size - 2); fidx++) {
 
-			out->I = base_idx[0];
-			out->J = in[2];
-			out->K = in[1];
+			out->I = static_cast<unsigned short>(base_idx[0]);
+			out->J = static_cast<unsigned short>(in[2]);
+			out->K = static_cast<unsigned short>(in[1]);
 
 			in++;
 			out++;
@@ -1603,13 +1603,13 @@ void SphereMeshClass::Free(void)
 	if (fans)			delete [] fans;
 	if (tri_poly)		delete [] tri_poly;
 
-	vtx			= NULL;
-	vtx_normal	= NULL;
-	vtx_uv		= NULL;
- 	dcg			= NULL;
-	strips		= NULL;
-	fans			= NULL;
-	tri_poly		= NULL;
+	vtx			= nullptr;
+	vtx_normal	= nullptr;
+	vtx_uv		= nullptr;
+ 	dcg			= nullptr;
+	strips		= nullptr;
+	fans			= nullptr;
+	tri_poly		= nullptr;
 
 }
 

@@ -524,10 +524,10 @@ EditCtrlClass::Create_Caret_Renderer (void)
 	//	Create a bounding rectangle for the caret
 	//
 	RectClass rect;
-	rect.Left	= int(ClientRect.Left + text_extent.X);
-	rect.Top		= int(ClientRect.Top + 1);
-	rect.Right	= int(rect.Left + std::max (space_extent, 1.0F));
-	rect.Bottom	= int(ClientRect.Bottom - 1);
+	rect.Left	= WWMath::Trunc(ClientRect.Left + text_extent.X);
+	rect.Top		= WWMath::Trunc(ClientRect.Top + 1);
+	rect.Right	= WWMath::Trunc(rect.Left + std::max (space_extent, 1.0F));
+	rect.Bottom	= WWMath::Trunc(ClientRect.Bottom - 1);
 
 	//
 	//	Draw the caret
@@ -702,7 +702,7 @@ EditCtrlClass::On_Key_Down (uint32 key_id, uint32 key_data)
 	//
 	//	Check to see if the advise sinks are processing this input...
 	//
-	if (AdviseSink != NULL) {
+	if (AdviseSink != nullptr) {
 		handled = AdviseSink->On_EditCtrl_Key_Down (this, key_id, key_data);
 	}
 	if (handled == false) {

@@ -45,9 +45,9 @@ IMPLEMENT_DYNCREATE(EmitterRotationPropPageClass, CPropertyPage)
 /////////////////////////////////////////////////////////////
 EmitterRotationPropPageClass::EmitterRotationPropPageClass() :
 	CPropertyPage(EmitterRotationPropPageClass::IDD),
-	m_pEmitterList(NULL),
+	m_pEmitterList(nullptr),
 	m_bValid(true),
-	m_RotationBar(NULL),
+	m_RotationBar(nullptr),
 	m_Lifetime(0),
 	m_MinRotation(0),
 	m_MaxRotation(1),
@@ -110,7 +110,7 @@ void EmitterRotationPropPageClass::Initialize (void)
 	SAFE_DELETE_ARRAY (m_Rotations.KeyTimes);
 	SAFE_DELETE_ARRAY (m_Rotations.Values);
 
-	if (m_pEmitterList != NULL) {
+	if (m_pEmitterList != nullptr) {
 		m_Lifetime = m_pEmitterList->Get_Lifetime ();
 		m_pEmitterList->Get_Rotation_Keyframes (m_Rotations);
 		m_InitialOrientationRandom = m_pEmitterList->Get_Initial_Orientation_Random();
@@ -190,7 +190,7 @@ BOOL EmitterRotationPropPageClass::OnNotify(WPARAM wParam, LPARAM lParam, LRESUL
 	//	Update the spinner controls if necessary
 	//
 	NMHDR *pheader = (NMHDR *)lParam;
-	if ((pheader != NULL) && (pheader->code == UDN_DELTAPOS)) {
+	if ((pheader != nullptr) && (pheader->code == UDN_DELTAPOS)) {
 		LPNMUPDOWN pupdown = (LPNMUPDOWN)lParam;
 		::Update_Spinner_Buddy (pheader->hwndFrom, pupdown->iDelta);
 	}
@@ -239,11 +239,11 @@ BOOL EmitterRotationPropPageClass::OnNotify(WPARAM wParam, LPARAM lParam, LRESUL
 					//
 					if ((new_max != m_MaxRotation) || (new_min != m_MinRotation)) {
 
-						int count = m_RotationBar->Get_Point_Count ();
+						count = m_RotationBar->Get_Point_Count ();
 						for (int index = 0; index < count; index ++) {
 
-							float rotation = Denormalize_Rotation(m_RotationBar->Get_Graph_Percent (index));
-							float new_norm = Normalize_Rotation(rotation,new_min,new_max);
+							float new_rotation = Denormalize_Rotation(m_RotationBar->Get_Graph_Percent (index));
+							float new_norm = Normalize_Rotation(new_rotation,new_min,new_max);
 
 							m_RotationBar->Set_Graph_Percent (index, new_norm);
 						}

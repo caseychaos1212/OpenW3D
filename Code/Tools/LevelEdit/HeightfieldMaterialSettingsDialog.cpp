@@ -89,7 +89,7 @@ HeightfieldMaterialSettingsDialogClass::OnInitDialog (void)
 	//	Lookup the material we're editing
 	//
 	TerrainMaterialClass *material = HeightfieldEditorClass::Peek_Material (MaterialIndex);
-	if (material != NULL) {
+	if (material != nullptr) {
 
 		//
 		//	Fill in the controls
@@ -139,7 +139,7 @@ HeightfieldMaterialSettingsDialogClass::OnOK (void)
 		//	Get (or create) the material we're editing
 		//
 		TerrainMaterialClass *material = HeightfieldEditorClass::Peek_Material (MaterialIndex);
-		if (material == NULL) {
+		if (material == nullptr) {
 
 			//
 			//	Create the material and add it to the manager
@@ -155,7 +155,7 @@ HeightfieldMaterialSettingsDialogClass::OnOK (void)
 		material->Set_Texture (texture_path);
 		material->Set_Meters_Per_Tile (meters_per_tile);
 		material->Mirror_UVs (IsDlgButtonChecked (IDC_MIRROR_CHECK) == 1);
-		material->Set_Surface_Type (SendDlgItemMessage (IDC_SURFACE_TYPE_COMBO, CB_GETCURSEL));
+		material->Set_Surface_Type (int(SendDlgItemMessage (IDC_SURFACE_TYPE_COMBO, CB_GETCURSEL)));
 
 	} else {
 

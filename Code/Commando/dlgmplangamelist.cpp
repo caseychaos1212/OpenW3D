@@ -85,7 +85,7 @@ enum
 ////////////////////////////////////////////////////////////////
 //	Static member initialization
 ////////////////////////////////////////////////////////////////
-MPLanGameListMenuClass *	MPLanGameListMenuClass::_TheInstance	= NULL;
+MPLanGameListMenuClass *	MPLanGameListMenuClass::_TheInstance	= nullptr;
 
 
 ////////////////////////////////////////////////////////////////
@@ -128,7 +128,7 @@ MPLanGameListMenuClass::On_Init_Dialog (void)
 	//	Get a pointer to the list control
 	//
 	ListCtrlClass *list_ctrl = (ListCtrlClass *)Get_Dlg_Item (IDC_GAME_LIST_CTRL);
-	if (list_ctrl != NULL) {
+	if (list_ctrl != nullptr) {
 		DefaultGameListRect = list_ctrl->Get_Window_Rect();
 		HasDefaultGameListRect = true;
 
@@ -165,7 +165,7 @@ MPLanGameListMenuClass::On_Init_Dialog (void)
 	//	Put the nickname into the nickname edit control
 	//
 	EditCtrlClass* nameEdit = (EditCtrlClass*)Get_Dlg_Item(IDC_NICKNAME_EDIT);
-	assert(nameEdit != NULL);
+	assert(nameEdit != nullptr);
 
 	if (nameEdit) {
 		//nameEdit->Set_Text_Limit(32);
@@ -256,16 +256,16 @@ MPLanGameListMenuClass::On_Command (int ctrl_id, int message_id, unsigned int pa
 			//
 			//	Create the new game data
 			//
-			if ( PTheGameData != NULL ) {
+			if ( PTheGameData != nullptr ) {
 				delete PTheGameData;
-				PTheGameData = NULL;
+				PTheGameData = nullptr;
 			}
 			cGameData::GameTypeEnum game_type = IsCoopList ? cGameData::GAME_TYPE_COOP_MISSION : cGameData::GAME_TYPE_CNC;
 			if (IsCoopList && !GameInitMgrClass::Is_Coop_LAN_Initialized()) {
 				GameInitMgrClass::Initialize_Coop_LAN();
 			}
 			PTheGameData = cGameData::Create_Game_Of_Type (game_type);
-			WWASSERT(PTheGameData != NULL);
+			WWASSERT(PTheGameData != nullptr);
 
 			// LAN games are NEVER quickmatch
 			The_Game()->Set_QuickMatch_Server(false);
@@ -448,7 +448,7 @@ MPLanGameListMenuClass::On_Frame_Update (void)
 
 	if (UpdateNickname) {
 		EditCtrlClass * nameEdit = (EditCtrlClass*)Get_Dlg_Item(IDC_NICKNAME_EDIT);
-		WWASSERT(nameEdit != NULL);
+		WWASSERT(nameEdit != nullptr);
 		nameEdit->Set_Text(cNetInterface::Get_Nickname());
 		UpdateNickname = false;
 	}
@@ -478,7 +478,7 @@ void
 MPLanGameListMenuClass::Update_Game_List (void)
 {
 	ListCtrlClass *list_ctrl = (ListCtrlClass *)Get_Dlg_Item (IDC_GAME_LIST_CTRL);
-	if (list_ctrl == NULL) {
+	if (list_ctrl == nullptr) {
 		return ;
 	}
 
@@ -489,7 +489,7 @@ MPLanGameListMenuClass::Update_Game_List (void)
 	int curr_sel = list_ctrl->Get_Curr_Sel ();
 	if (curr_sel != -1) {
 		cGameChannel *channel = (cGameChannel *)list_ctrl->Get_Entry_Data (curr_sel, 0);
-		if (channel != NULL) {
+		if (channel != nullptr) {
 			selected_owner_name = channel->Get_Game_Data ()->Get_Owner ();
 		}
 	}
@@ -504,14 +504,14 @@ MPLanGameListMenuClass::Update_Game_List (void)
 	//
 	int index = 0;
 	bool found_selected = false;
-	SLNode<cGameChannel> *objnode = NULL;
+	SLNode<cGameChannel> *objnode = nullptr;
 	for (objnode = cGameChannelList::Get_Chan_List ()->Head(); objnode; objnode = objnode->Next ()) {
 
 		//
 		//	Get a pointer to the channel for this game
 		//
 		cGameChannel *channel = objnode->Data ();
-		WWASSERT (channel != NULL);
+		WWASSERT (channel != nullptr);
 
 		bool is_coop_game = channel->Get_Game_Data()->Is_Coop_Mission();
 		if (is_coop_game != IsCoopList) {
@@ -566,8 +566,8 @@ MPLanGameListMenuClass::Update_Game_List (void)
 				//
 				char map_name[_MAX_FNAME] = { 0 };
 				char mod_name[_MAX_FNAME] = { 0 };
-				::_splitpath (channel->Get_Game_Data ()->Get_Map_Name (), NULL, NULL, map_name, NULL);
-				::_splitpath (channel->Get_Game_Data ()->Get_Mod_Name (), NULL, NULL, mod_name, NULL);
+				::_splitpath (channel->Get_Game_Data ()->Get_Map_Name (), nullptr, nullptr, map_name, nullptr);
+				::_splitpath (channel->Get_Game_Data ()->Get_Mod_Name (), nullptr, nullptr, mod_name, nullptr);
 
 				//
 				//	Create the map name from the aggregate of the mod and map
@@ -663,21 +663,21 @@ MPLanGameListMenuClass::Join_Game (void)
 		//	Get the channel data from this entry
 		//
 		cGameChannel *channel = (cGameChannel *)list_ctrl->Get_Entry_Data (index, 0);
-		if (channel != NULL && list_ctrl->Get_Entry_Data (index, 1) == 0) {
+		if (channel != nullptr && list_ctrl->Get_Entry_Data (index, 1) == 0) {
 
 			//
 			//	Free the old game data (if necessary)
 			//
-			if (PTheGameData != NULL) {
+			if (PTheGameData != nullptr) {
 				delete PTheGameData;
-				PTheGameData = NULL;
+				PTheGameData = nullptr;
 			}
 
 			//
 			//	Create a new game data object that matches the one on the server
 			//
 			PTheGameData = cGameData::Create_Game_Of_Type (channel->Get_Game_Data ()->Get_Game_Type ());
-			WWASSERT(PTheGameData != NULL);
+			WWASSERT(PTheGameData != nullptr);
 			*PTheGameData = *channel->Get_Game_Data ();
 
 			// If the game to join is passworded then it is necessary for the user to
@@ -704,7 +704,7 @@ MPLanGameListMenuClass::Join_Game (void)
 ////////////////////////////////////////////////////////////////
 void MPLanGameListMenuClass::ReceiveSignal(DlgPasswordPrompt& passwordDialog)
 {
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	PTheGameData->Set_Password(passwordDialog.GetPassword());
 	Connect_To_Server();
 }
@@ -752,7 +752,7 @@ MPLanGameListMenuClass::On_ListCtrl_Delete_Entry
 	cGameChannel *channel = (cGameChannel *)list_ctrl->Get_Entry_Data (item_index, 0);
 	list_ctrl->Set_Entry_Data (item_index, 0, 0);
 
-	if (channel != NULL) {
+	if (channel != nullptr) {
 		channel->Release_Ref ();
 	}
 
@@ -810,7 +810,7 @@ MPLanGameListMenuClass::Display (void)
 	//
 	//	Create the dialog if necessary, otherwise simply bring it to the front
 	//
-	if (_TheInstance == NULL) {
+	if (_TheInstance == nullptr) {
 		START_DIALOG (MPLanGameListMenuClass);
 	} else {
 		_TheInstance->Apply_Coop_List_Layout();
@@ -885,7 +885,7 @@ MPLanGameListMenuClass::On_Last_Menu_Ending (void)
 	if (UpdateNickname && !g_awaiting_edit) {
 		::MessageBeep(MB_OK);//XXX
 		EditCtrlClass* nameEdit = (EditCtrlClass*)Get_Dlg_Item(IDC_NICKNAME_EDIT);
-		assert(nameEdit != NULL);
+		assert(nameEdit != nullptr);
 		nameEdit->Set_Focus();
 		g_awaiting_edit = true;
 	}

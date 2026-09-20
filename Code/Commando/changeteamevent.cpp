@@ -92,8 +92,8 @@ cChangeTeamEvent::Act(void)
 
 	cPlayer * p_player = cPlayerManager::Find_Player(SenderId);
 
-	if (p_player != NULL &&
-		 The_Game() != NULL &&
+	if (p_player != nullptr &&
+		 The_Game() != nullptr &&
 		 //The_Game()->Is_Team_Game() &&
 		 (The_Game()->IsTeamChangingAllowed.Is_True() || p_player->Invulnerable.Is_True()))
 	{
@@ -127,7 +127,7 @@ cChangeTeamEvent::Act(void)
 		}
 
 		SoldierGameObj * p_soldier = GameObjManager::Find_Soldier_Of_Client_ID(SenderId);
-		if (p_soldier != NULL)
+		if (p_soldier != nullptr)
 		{
 
 			if ( COMBAT_STAR == p_soldier ) {
@@ -166,7 +166,7 @@ cChangeTeamEvent::Act(void)
 		//
 		WideStringClass text;
 		//text.Format(U_CHAR("_%s_changed_teams!_"), p_player->Get_Name());
-		text.Format(U_CHAR("%s %s"), p_player->Get_Name(), TRANSLATE(IDS_MP_CHANGED_TEAMS));
+		text.Format(U_CHAR("%s %s"), p_player->Get_Name().Peek_Buffer(), TRANSLATE(IDS_MP_CHANGED_TEAMS));
 
 		cScTextObj * p_message = new cScTextObj;
 		p_message->Init(text, TEXT_MESSAGE_PUBLIC, false, HOST_TEXT_SENDER, -1);
@@ -211,9 +211,9 @@ cChangeTeamEvent::Is_Change_Team_Possible(void)
 {
 	return
 		cNetwork::I_Am_Client() &&
-		GameModeManager::Find("Combat") != NULL &&
+		GameModeManager::Find("Combat") != nullptr &&
 		GameModeManager::Find("Combat")->Is_Active() &&
-		The_Game() != NULL &&
+		The_Game() != nullptr &&
 		//The_Game()->Is_Team_Game() &&
 		The_Game()->IsTeamChangingAllowed.Is_True();
 }

@@ -97,6 +97,7 @@
 #include "statistics.h"
 #include "pointgr.h"
 #include "ffactory.h"
+#include "wwstring.h"
 #include "ini.h"
 #include "dazzle.h"
 #include "meshmdl.h"
@@ -105,7 +106,12 @@
 #include "bound.h"
 #include "rddesc.h"
 #include "vector3i.h"
+#include <cmath>
 #include <cstdio>
+#ifdef _WIN32
+#include <d3dx9tex.h>
+#endif
+#include <limits>
 #include "dx8wrapper.h"
 #include "TARGA.H"
 #include "sortingrenderer.h"
@@ -119,6 +125,19 @@
 #ifndef _UNIX
 #include "framgrab.h"
 #endif
+
+
+namespace
+{
+enum class MovieCaptureSource
+{
+	None,
+	Front,
+	Back
+};
+
+MovieCaptureSource MovieCaptureSourceState = MovieCaptureSource::None;
+}
 
 
 const char* DAZZLE_INI_FILENAME="DAZZLE.INI";
@@ -180,7 +199,7 @@ float														WW3D::DecalRejectionDistance = 1000000.0f;
 bool														WW3D::AreStaticSortListsEnabled = false;
 bool														WW3D::MungeSortOnLoad = false;
 
-FrameGrabClass *										WW3D::Movie = NULL;
+FrameGrabClass *										WW3D::Movie = nullptr;
 bool														WW3D::PauseRecord;
 bool														WW3D::RecordNextFrame;
 
@@ -191,13 +210,13 @@ int														WW3D::UserStat2 = 0;
 
 float														WW3D::DefaultNativeScreenSize = 1.0f;
 
-RefRenderObjListClass *								WW3D::DefaultStaticSortLists = NULL;
-RefRenderObjListClass *								WW3D::CurrentStaticSortLists = NULL;
+RefRenderObjListClass *								WW3D::DefaultStaticSortLists = nullptr;
+RefRenderObjListClass *								WW3D::CurrentStaticSortLists = nullptr;
 unsigned int											WW3D::MinStaticSortLevel = 1;	// The 0 list is not used
 unsigned int											WW3D::MaxStaticSortLevel = MAX_SORT_LEVEL;
 
 
-VertexMaterialClass *								WW3D::DefaultDebugMaterial  = NULL;
+VertexMaterialClass *								WW3D::DefaultDebugMaterial  = nullptr;
 ShaderClass												WW3D::DefaultDebugShader(DEFAULT_DEBUG_SHADER_BITS);
 ShaderClass												WW3D::LightmapDebugShader(LIGHTMAP_DEBUG_SHADER_BITS);
 
@@ -212,7 +231,7 @@ WW3D::NPatchesGapFillingModeEnum					WW3D::NPatchesGapFillingMode = NPATCHES_GAP
 unsigned													WW3D::NPatchesLevel=1;
 bool														WW3D::IsTexturingEnabled=true;
 
-static HWND												_Hwnd = NULL;		// Not a member to hide windows from WW3D users
+static HWND												_Hwnd = nullptr;		// Not a member to hide windows from WW3D users
 static int												_TextureReduction = 0;
 int														WW3D::LastFrameMemoryAllocations;
 int														WW3D::LastFrameMemoryFrees;
@@ -799,7 +818,8 @@ WW3DErrorType WW3D::Begin_Render(bool clear,bool clearz,const Vector3 & color, v
 #endif //WW3D_DX8
 	Debug_Statistics::Begin_Statistics();
 
-	if (IsCapturing && (!PauseRecord || RecordNextFrame)) {
+	if (IsCapturing && MovieCaptureSourceState == MovieCaptureSource::Front &&
+		(!PauseRecord || RecordNextFrame)) {
 		Update_Movie_Capture();
 		RecordNextFrame = false;
 	}
@@ -975,7 +995,7 @@ WW3DErrorType WW3D::Render(
 		return(WW3D_ERROR_OK);
 	}
 
-	WWPROFILE("WW3D::Render");
+	WWPROFILENAMED("WW3D::Render", top);
 	WWASSERT(IsInitted);
 	WWASSERT(IsRendering);
 
@@ -991,7 +1011,7 @@ WW3DErrorType WW3D::Render(
 	DX8Wrapper::Set_DX8_Render_State(D3DRS_FILLMODE,D3DFILL_SOLID);
 
 	// Install the lighting environment if one is supplied
-	if (rinfo.light_environment != NULL) {
+	if (rinfo.light_environment != nullptr) {
 		DX8Wrapper::Set_Light_Environment(rinfo.light_environment);
 	}
 
@@ -1051,7 +1071,7 @@ WW3DErrorType WW3D::End_Render(bool flip_frame)
 		return(WW3D_ERROR_OK);
 	}
 
-	WWPROFILE("WW3D::End_Render");
+	WWPROFILENAMED("WW3D::End_Render", top);
 
 	assert(IsRendering);
 	assert(IsInitted);
@@ -1238,6 +1258,35 @@ void WW3D::Normalize_Coordinates(int x, int y, float &fx, float &fy)
 }
 
 
+namespace
+{
+int Make_Back_Buffer_Screen_Shot_Filename(const char *filename_base, StringClass &filename)
+{
+	if (filename_base == nullptr || filename_base[0] == '\0' || _TheFileFactory == nullptr) {
+		return 0;
+	}
+
+	static int frame_number = 1;
+	int screenshot_number = 0;
+	bool done = false;
+	while (!done) {
+		screenshot_number = frame_number++;
+		filename.Format("%s%.2d.tga", filename_base, screenshot_number);
+		FileClass *file = _TheFileFactory->Get_File(filename.Peek_Buffer());
+		if (file != nullptr) {
+			file->Open();
+			done = !file->Is_Available();
+			_TheFileFactory->Return_File(file);
+		} else {
+			done = true;
+		}
+	}
+
+	return screenshot_number;
+}
+}
+
+
 /***********************************************************************************************
  * WW3D::Make_Screen_Shot -- saves a screenshot with the given base filename                   *
  *                                                                                             *
@@ -1315,8 +1364,8 @@ void WW3D::Make_Screen_Shot( const char * filename_base )
 
 	Targa targ;
 	memset(&targ.Header,0,sizeof(targ.Header));
-	targ.Header.Width=width;
-	targ.Header.Height=height;
+	targ.Header.Width=short(width);
+	targ.Header.Height=short(height);
 	targ.Header.PixelDepth=24;
 	targ.Header.ImageType=TGA_TRUECOLOR;
 	targ.SetImage(image);
@@ -1337,6 +1386,44 @@ void WW3D::Make_Screen_Shot( const char * filename_base )
 
 
 /***********************************************************************************************
+ * WW3D::Make_Back_Buffer_Screen_Shot -- saves the current render-device back buffer            *
+ *=============================================================================================*/
+int WW3D::Make_Back_Buffer_Screen_Shot( const char * filename_base )
+{
+	WWASSERT(!IsRendering);
+
+#ifdef _WIN32
+	StringClass filename;
+	const int screenshot_number = Make_Back_Buffer_Screen_Shot_Filename(filename_base, filename);
+	if (screenshot_number == 0) {
+		return 0;
+	}
+
+	WWDEBUG_SAY(( "Creating Back Buffer Screen Shot %s\n", filename.Peek_Buffer() ));
+
+	IDirect3DDevice9 *device = DX8Wrapper::_Get_D3D_Device8();
+	if (device == nullptr) {
+		return 0;
+	}
+
+	IDirect3DSurface9 *back_buffer = nullptr;
+	if (FAILED(device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &back_buffer)) ||
+		back_buffer == nullptr) {
+		return 0;
+	}
+
+	const HRESULT save_result = D3DXSaveSurfaceToFileA(
+		filename.Peek_Buffer(), D3DXIFF_TGA, back_buffer, nullptr, nullptr);
+	back_buffer->Release();
+	return SUCCEEDED(save_result) ? screenshot_number : 0;
+#else
+	(void)filename_base;
+	return 0;
+#endif
+}
+
+
+/***********************************************************************************************
  * WW3D::Start_Movie_Capture -- begins dumping frames to a movie                               *
  *                                                                                             *
  * INPUT:                                                                                      *
@@ -1352,19 +1439,20 @@ void WW3D::Make_Screen_Shot( const char * filename_base )
 void WW3D::Start_Movie_Capture( const char * filename_base, float frame_rate )
 {
 #ifdef _WIN32
-	if (IsCapturing) {
+	if (IsCapturing || Movie != nullptr || MovieCaptureSourceState != MovieCaptureSource::None) {
 		Stop_Movie_Capture();
 	}
 	WWASSERT( !IsCapturing);
-	IsCapturing = true;
 
-	RECT bounds;
-	GetWindowRect(_Hwnd,&bounds);
+	RECT bounds = {};
+	if (_Hwnd == nullptr || !GetWindowRect(_Hwnd, &bounds)) {
+		return;
+	}
 	int height=bounds.bottom-bounds.top;
 	int width=bounds.right-bounds.left;
 	int depth=24;
 
-	WWASSERT( Movie == NULL);
+	WWASSERT( Movie == nullptr);
 
 	if (frame_rate == 0.0f) {
 		frame_rate = 1.0f;
@@ -1373,9 +1461,87 @@ void WW3D::Start_Movie_Capture( const char * filename_base, float frame_rate )
 		PauseRecord = false;
 	}
 
-	Movie = new FrameGrabClass( filename_base, FrameGrabClass::AVI, width, height, depth, frame_rate);
+	FrameGrabClass *movie = new FrameGrabClass(
+		filename_base, FrameGrabClass::AVI, width, height, depth, frame_rate);
+	if (movie == nullptr || !movie->IsReady()) {
+		delete movie;
+		MovieCaptureSourceState = MovieCaptureSource::None;
+		IsCapturing = false;
+		return;
+	}
+
+	Movie = movie;
+	MovieCaptureSourceState = MovieCaptureSource::Front;
+	IsCapturing = true;
 
 	WWDEBUG_SAY(( "Starting Movie %s\n", filename_base ));
+#endif
+}
+
+
+/***********************************************************************************************
+ * WW3D::Try_Start_Movie_Capture_From_Back_Buffer -- starts back-buffer movie capture          *
+ *=============================================================================================*/
+bool WW3D::Try_Start_Movie_Capture_From_Back_Buffer( const char * filename_base, float frame_rate )
+{
+#ifdef _WIN32
+	if (IsCapturing || Movie != nullptr || MovieCaptureSourceState != MovieCaptureSource::None) {
+		Stop_Movie_Capture();
+	}
+
+	if (filename_base == nullptr || filename_base[0] == '\0' ||
+		!(frame_rate > 0.0f) || !std::isfinite(frame_rate)) {
+		return false;
+	}
+
+	IDirect3DDevice9 *device = DX8Wrapper::_Get_D3D_Device8();
+	if (device == nullptr) {
+		return false;
+	}
+
+	IDirect3DSurface9 *back_buffer = nullptr;
+	HRESULT result = device->GetBackBuffer(
+		0, 0, D3DBACKBUFFER_TYPE_MONO, &back_buffer);
+	if (FAILED(result) || back_buffer == nullptr) {
+		return false;
+	}
+
+	D3DSURFACE_DESC desc = {};
+	result = back_buffer->GetDesc(&desc);
+	back_buffer->Release();
+	if (FAILED(result) || desc.Width == 0 || desc.Height == 0 ||
+		desc.Width > static_cast<unsigned int>(std::numeric_limits<int>::max()) ||
+		desc.Height > static_cast<unsigned int>(std::numeric_limits<int>::max()) ||
+		desc.MultiSampleType != D3DMULTISAMPLE_NONE ||
+		(desc.Format != D3DFMT_A8R8G8B8 && desc.Format != D3DFMT_X8R8G8B8)) {
+		return false;
+	}
+
+	FrameGrabClass *movie = new FrameGrabClass(
+		filename_base,
+		FrameGrabClass::AVI,
+		static_cast<int>(desc.Width),
+		static_cast<int>(desc.Height),
+		24,
+		frame_rate);
+	if (movie == nullptr || !movie->IsReady()) {
+		delete movie;
+		return false;
+	}
+
+	Movie = movie;
+	// Back-buffer capture is advanced explicitly by the caller rather than
+	// automatically from Begin_Render.
+	PauseRecord = true;
+	RecordNextFrame = false;
+	MovieCaptureSourceState = MovieCaptureSource::Back;
+	IsCapturing = true;
+	WWDEBUG_SAY(( "Starting back-buffer movie %s\n", filename_base ));
+	return true;
+#else
+	(void)filename_base;
+	(void)frame_rate;
+	return false;
 #endif
 }
 
@@ -1396,12 +1562,16 @@ void WW3D::Stop_Movie_Capture( void )
 {
 #ifdef _WIN32
 	if (IsCapturing) {
-		IsCapturing = false;
 		WWDEBUG_SAY(( "Stoping Movie\n" ));
+	}
 
-		WWASSERT( Movie != NULL);
+	IsCapturing = false;
+	PauseRecord = false;
+	RecordNextFrame = false;
+	MovieCaptureSourceState = MovieCaptureSource::None;
+	if (Movie != nullptr) {
 		delete Movie;
-		Movie = NULL;
+		Movie = nullptr;
 	}
 #endif
 }
@@ -1557,45 +1727,148 @@ void WW3D::Update_Movie_Capture( void )
 	WWPROFILE("WW3D::Update_Movie_Capture");
 	WWDEBUG_SAY(( "Updating\n"));
 
-		// Lock front buffer and copy
-
-	IDirect3DSurface9 *fb;
-	fb=DX8Wrapper::_Get_DX8_Front_Buffer();
-	D3DSURFACE_DESC desc;
-	fb->GetDesc(&desc);
-
-	RECT bounds;
-	GetWindowRect(_Hwnd,&bounds);
-
-	D3DLOCKED_RECT lrect;
-
-	DX8_ErrorCode(fb->LockRect(&lrect,&bounds,D3DLOCK_READONLY));
-
-	unsigned int x,y,index,index2,width,height;
-
-	width=bounds.right-bounds.left;
-	height=bounds.bottom-bounds.top;
-
-	char *image=(char *)Movie->GetBuffer();
-
-	for (y=0; y<height; y++)
-	{
-		for (x=0; x<width; x++)
-		{
-			// index for image
-			index=3*(x+(height-y-1)*width);
-			// index for fb
-			index2=y*lrect.Pitch+4*x;
-
-			image[index]=*((char *) lrect.pBits + index2+0);
-			image[index+1]=*((char *) lrect.pBits + index2+1);
-			image[index+2]=*((char *) lrect.pBits + index2+2);
-		}
+	if (!IsCapturing || MovieCaptureSourceState != MovieCaptureSource::Front ||
+		Movie == nullptr || !Movie->IsReady()) {
+		Stop_Movie_Capture();
+		return;
 	}
 
-	fb->Release();
+	// Lock the front buffer and convert its top-down BGRA rows into the
+	// bottom-up, padded BGR24 layout required by the AVI stream.
+	IDirect3DSurface9 *fb = DX8Wrapper::_Get_DX8_Front_Buffer();
+	if (fb == nullptr) {
+		Stop_Movie_Capture();
+		return;
+	}
 
-	Movie->Grab(image);
+	RECT bounds = {};
+	if (_Hwnd == nullptr || !GetWindowRect(_Hwnd, &bounds)) {
+		fb->Release();
+		Stop_Movie_Capture();
+		return;
+	}
+
+	const int width = bounds.right - bounds.left;
+	const int height = bounds.bottom - bounds.top;
+	if (width != Movie->GetWidth() || height != Movie->GetHeight()) {
+		fb->Release();
+		Stop_Movie_Capture();
+		return;
+	}
+
+	D3DLOCKED_RECT lrect = {};
+	const HRESULT lock_result = fb->LockRect(&lrect, &bounds, D3DLOCK_READONLY);
+	if (FAILED(lock_result)) {
+		fb->Release();
+		Stop_Movie_Capture();
+		return;
+	}
+
+	void *movie_buffer = Movie->GetBuffer();
+	const bool converted = FrameGrabClass::ConvertBGRA32ToBGR24(
+		lrect.pBits,
+		lrect.Pitch,
+		movie_buffer,
+		Movie->GetRowStride(),
+		width,
+		height);
+	const HRESULT unlock_result = fb->UnlockRect();
+	fb->Release();
+	if (!converted || FAILED(unlock_result) || !Movie->TryGrab(movie_buffer)) {
+		Stop_Movie_Capture();
+	}
+#endif
+}
+
+
+/***********************************************************************************************
+ * WW3D::Try_Update_Movie_Capture_From_Back_Buffer -- captures the current back buffer          *
+ *=============================================================================================*/
+bool WW3D::Try_Update_Movie_Capture_From_Back_Buffer( void )
+{
+#ifdef _WIN32
+	if (MovieCaptureSourceState != MovieCaptureSource::Back) {
+		return false;
+	}
+	if (!IsCapturing || Movie == nullptr || !Movie->IsReady()) {
+		Stop_Movie_Capture();
+		return false;
+	}
+
+	WWPROFILE("WW3D::Try_Update_Movie_Capture_From_Back_Buffer");
+
+	IDirect3DDevice9 *device = DX8Wrapper::_Get_D3D_Device8();
+	if (device == nullptr) {
+		Stop_Movie_Capture();
+		return false;
+	}
+
+	IDirect3DSurface9 *back_buffer = nullptr;
+	HRESULT result = device->GetBackBuffer(
+		0, 0, D3DBACKBUFFER_TYPE_MONO, &back_buffer);
+	if (FAILED(result) || back_buffer == nullptr) {
+		Stop_Movie_Capture();
+		return false;
+	}
+
+	D3DSURFACE_DESC desc = {};
+	result = back_buffer->GetDesc(&desc);
+	if (FAILED(result) ||
+		desc.Width != static_cast<unsigned int>(Movie->GetWidth()) ||
+		desc.Height != static_cast<unsigned int>(Movie->GetHeight()) ||
+		desc.MultiSampleType != D3DMULTISAMPLE_NONE ||
+		(desc.Format != D3DFMT_A8R8G8B8 && desc.Format != D3DFMT_X8R8G8B8)) {
+		back_buffer->Release();
+		Stop_Movie_Capture();
+		return false;
+	}
+
+	IDirect3DSurface9 *staging_buffer = nullptr;
+	result = device->CreateOffscreenPlainSurface(
+		desc.Width,
+		desc.Height,
+		desc.Format,
+		D3DPOOL_SYSTEMMEM,
+		&staging_buffer,
+		nullptr);
+	if (SUCCEEDED(result)) {
+		result = device->GetRenderTargetData(back_buffer, staging_buffer);
+	}
+	back_buffer->Release();
+	if (FAILED(result) || staging_buffer == nullptr) {
+		if (staging_buffer != nullptr) {
+			staging_buffer->Release();
+		}
+		Stop_Movie_Capture();
+		return false;
+	}
+
+	D3DLOCKED_RECT locked = {};
+	result = staging_buffer->LockRect(&locked, nullptr, D3DLOCK_READONLY);
+	if (FAILED(result)) {
+		staging_buffer->Release();
+		Stop_Movie_Capture();
+		return false;
+	}
+
+	void *movie_buffer = Movie->GetBuffer();
+	const bool converted = FrameGrabClass::ConvertBGRA32ToBGR24(
+		locked.pBits,
+		locked.Pitch,
+		movie_buffer,
+		Movie->GetRowStride(),
+		Movie->GetWidth(),
+		Movie->GetHeight());
+	const HRESULT unlock_result = staging_buffer->UnlockRect();
+	staging_buffer->Release();
+	if (!converted || FAILED(unlock_result) || !Movie->TryGrab(movie_buffer)) {
+		Stop_Movie_Capture();
+		return false;
+	}
+
+	return true;
+#else
+	return false;
 #endif
 }
 
@@ -1687,7 +1960,7 @@ VertexMaterialClass * WW3D::Peek_Default_Debug_Material(void)
 	WWASSERT(DefaultDebugMaterial);
 	return DefaultDebugMaterial;
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -1740,7 +2013,7 @@ ShaderClass	WW3D::Peek_Lightmap_Debug_Shader(void)
 void WW3D::Allocate_Debug_Resources(void)
 {
 #ifdef WWDEBUG
-	WWASSERT(DefaultDebugMaterial == NULL);
+	WWASSERT(DefaultDebugMaterial == nullptr);
 	DefaultDebugMaterial = new VertexMaterialClass;
 	DefaultDebugMaterial->Set_Shininess(0.0f);
 	DefaultDebugMaterial->Set_Opacity(1.0f);
@@ -1777,7 +2050,7 @@ WW3DErrorType WW3D::On_Deactivate_App(void)
 #ifdef WW3D_DX8
 	assert(!IsRendering);
 
-	if ( Gerd == NULL )
+	if ( Gerd == nullptr )
 		return WW3D_ERROR_OK;
 
 	if ( IsWindowed )
@@ -1795,7 +2068,7 @@ WW3DErrorType WW3D::On_Deactivate_App(void)
 WW3DErrorType WW3D::On_Activate_App(void)
 {
 #ifdef WW3D_DX8
-	if ( Gerd == NULL)
+	if ( Gerd == nullptr)
 		return WW3D_ERROR_OK;
 
 	if ( IsWindowed )

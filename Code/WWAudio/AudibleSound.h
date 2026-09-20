@@ -237,7 +237,7 @@ class AudibleSoundClass : public SoundSceneObjClass
 		//
 		virtual unsigned int	Get_Duration (void) const								{ return m_Length; }
 		virtual unsigned int	Get_Play_Position (void) const						{ return m_CurrentPosition; }
-		virtual void				Set_Play_Position (float position)					{ Seek (position * m_Length); }
+		virtual void				Set_Play_Position (float position)					{ Seek (unsigned(position * m_Length)); }
 		virtual void				Set_Play_Position (unsigned int milliseconds)	{ Seek (milliseconds); }
 
 		virtual void				Set_Start_Offset (float offset)						{ m_StartOffset = offset; }
@@ -434,6 +434,10 @@ public:
 	// Accessors
 	virtual const StringClass &			Get_Filename (void) const			{ return m_Filename; }
 	virtual const StringClass &			Get_Display_Text (void) const		{ return m_DisplayText; }
+	float									Get_Priority (void) const			{ return m_Priority; }
+	int										Get_Loop_Count (void) const		{ return m_LoopCount; }
+	bool									Is_3D (void) const					{ return m_Is3D; }
+	int										Get_Type (void) const				{ return m_Type; }
 	virtual float								Get_Max_Vol_Radius (void) const	{ return m_MaxVolRadius; }
 	virtual float								Get_DropOff_Radius (void) const	{ return m_DropOffRadius; }
 	virtual const Vector3 &					Get_Sphere_Color (void) const		{ return m_AttenuationSphereColor; }

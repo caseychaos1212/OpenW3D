@@ -151,8 +151,8 @@ void CardinalSpline3DClass::Update_Tangents(void)
 		Tangents[i].InTangent.Z = (1.0f - Tightness[i])*(Keys[i+1].Point.Z - Keys[i-1].Point.Z);
 		Tangents[i].OutTangent = Tangents[i].InTangent;
 
-		float in_factor = 2.0f * (Keys[i].Time - Keys[i-1].Time) / (Keys[i+1].Time - Keys[i-1].Time);
-		float out_factor = 2.0f * (Keys[i+1].Time - Keys[i].Time) / (Keys[i+1].Time - Keys[i-1].Time);
+		in_factor = 2.0f * (Keys[i].Time - Keys[i-1].Time) / (Keys[i+1].Time - Keys[i-1].Time);
+		out_factor = 2.0f * (Keys[i+1].Time - Keys[i].Time) / (Keys[i+1].Time - Keys[i-1].Time);
 
 		Tangents[i].InTangent *= in_factor;			// compensating for the un-even keys
 		Tangents[i].OutTangent *= out_factor;
@@ -205,7 +205,7 @@ bool CardinalSpline3DClass::Load(ChunkLoadClass &cload)
 				break;
 
 			default:
-				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",__FILE__,__LINE__));
+				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 				break;
 		}
 		cload.Close_Chunk();
@@ -290,8 +290,8 @@ void CardinalSpline1DClass::Update_Tangents(void)
 		Tangents[i].InTangent = (1.0f - Tightness[i])*(Keys[i+1].Point - Keys[i-1].Point);
 		Tangents[i].OutTangent = Tangents[i].InTangent;
 
-		float in_factor = 2.0f * (Keys[i].Time - Keys[i-1].Time) / (Keys[i+1].Time - Keys[i-1].Time);
-		float out_factor = 2.0f * (Keys[i+1].Time - Keys[i].Time) / (Keys[i+1].Time - Keys[i-1].Time);
+		in_factor = 2.0f * (Keys[i].Time - Keys[i-1].Time) / (Keys[i+1].Time - Keys[i-1].Time);
+		out_factor = 2.0f * (Keys[i+1].Time - Keys[i].Time) / (Keys[i+1].Time - Keys[i-1].Time);
 
 		Tangents[i].InTangent *= in_factor;			// compensating for the un-even keys
 		Tangents[i].OutTangent *= out_factor;
@@ -344,7 +344,7 @@ bool CardinalSpline1DClass::Load(ChunkLoadClass &cload)
 				break;
 
 			default:
-				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",__FILE__,__LINE__));
+				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 				break;
 		}
 		cload.Close_Chunk();

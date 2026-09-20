@@ -113,6 +113,7 @@
 #include "shutdown.h"
 #include "specialbuilds.h"
 #include "wwdialog.h"
+#include "debugbreak.h"
 #include <cstdio>
 
 extern const char *VALUE_NAME_TEXTURE_FILTER_MODE;
@@ -195,7 +196,7 @@ static const float _ParticleLODScreenSizes[17] =
  *=============================================================================================*/
 void Append_To_Assert_History(const char * message)
 {
-	if (message == NULL) {
+	if (message == nullptr) {
 		//
 		// bail
 		//
@@ -203,7 +204,7 @@ void Append_To_Assert_History(const char * message)
 	}
 
 	FILE * file = ::fopen("_asserts.txt", "at");
-   if (file == NULL) {
+   if (file == nullptr) {
 		return;
 	}
 
@@ -225,19 +226,19 @@ void Append_To_Assert_History(const char * message)
 	// Full filename
 	//
 	char full_filename[MAX_PATH];
-	::GetModuleFileNameA(NULL, full_filename, sizeof(full_filename));
+	::GetModuleFileNameA(nullptr, full_filename, sizeof(full_filename));
 	::sprintf(line, "Filename:   %s\n", full_filename);
 	::fwrite(line, 1, ::strlen(line), file);
 
 	//
 	// File size
 	//
-	HANDLE hfile = ::CreateFileA(full_filename, 0, 0, NULL, OPEN_EXISTING, 0L, NULL);
+	HANDLE hfile = ::CreateFileA(full_filename, 0, 0, nullptr, OPEN_EXISTING, 0L, nullptr);
 	if (hfile != INVALID_HANDLE_VALUE)
 	{
-		DWORD file_size = ::GetFileSize(hfile, NULL);
+		DWORD file_size = ::GetFileSize(hfile, nullptr);
 		::CloseHandle(hfile);
-		::sprintf(line, "Filesize:   %d\n", file_size);
+		::sprintf(line, "Filesize:   %ld\n", file_size);
 		::fwrite(line, 1, ::strlen(line), file);
 	}
 
@@ -265,7 +266,7 @@ void Append_To_Assert_History(const char * message)
  *=============================================================================================*/
 void Commando_Assert_Handler(const char * message)
 {
-	if (message == NULL) {
+	if (message == nullptr) {
 		//
 		// bail
 		//
@@ -281,7 +282,11 @@ void Commando_Assert_Handler(const char * message)
 	// If the exception handler is try to quit the game then don't show an assert.
 	//
 	if (Is_Trying_To_Exit()) {
+#ifdef _WIN32
 		ExitProcess(0);
+#else
+		_exit(0);
+#endif
 	}
 
 	//
@@ -307,7 +312,7 @@ void Commando_Assert_Handler(const char * message)
 #ifdef WWDEBUG
 
    if (cDevOptions::SoundEffectOnAssert.Is_True() &&
-		WWAudioClass::Get_Instance() != NULL) {
+		WWAudioClass::Get_Instance() != nullptr) {
 		//
 		// Sound effect
 		//
@@ -352,7 +357,7 @@ void Commando_Assert_Handler(const char * message)
 			m$"               "m           "
                        																												*/
 
-		__debugbreak();
+		debugbreak();
 	}
 
 	if (cDevOptions::ExitThreadOnAssert.Is_True()) {
@@ -381,7 +386,7 @@ class LoggingFileFactoryClass : public SimpleFileFactoryClass {
 public:
 	virtual FileClass * Get_File( const char * filename ) override {
 		FileClass * file = BaseFactory->Get_File( filename );
-		Debug_Say(( "FILE_LOG : %s %s\n", filename, ((file==NULL||!file->Is_Available())?"MISSING":"") ));
+		Debug_Say(( "FILE_LOG : %s %s\n", filename, ((file==nullptr||!file->Is_Available())?"MISSING":"") ));
 		return file;
 	}
 	void Set_Base_Factory( FileFactoryClass * factory ) { BaseFactory = factory; }
@@ -424,13 +429,13 @@ void	Construct_Directory_Structure(void)
 	//	Lookup the path of the executable
 	//
 	char path[MAX_PATH] = { 0 };
-	::GetModuleFileNameA (NULL, path, sizeof (path));
+	::GetModuleFileNameA (nullptr, path, sizeof (path));
 
 	//
 	//	Strip off the filename
 	//
 	char *filename = ::strrchr (path, '\\');
-	if (filename != NULL) {
+	if (filename != nullptr) {
 		filename[1] = 0;
 	}
 
@@ -444,21 +449,21 @@ void	Construct_Directory_Structure(void)
 	//	Create the data directory if necessary
 	//
 	if (!cPathUtil::PathExists (data_dir)) {
-		::CreateDirectoryA (data_dir, NULL);
+		::CreateDirectoryA (data_dir, nullptr);
 	}
 
 	//
 	//	Create the save directory if necessary
 	//
 	if (!cPathUtil::PathExists (save_dir)) {
-		::CreateDirectoryA (save_dir, NULL);
+		::CreateDirectoryA (save_dir, nullptr);
 	}
 
 	//
 	//	Create the config directory if necessary
 	//
 	if (!cPathUtil::PathExists (config_dir)) {
-		::CreateDirectoryA (config_dir, NULL);
+		::CreateDirectoryA (config_dir, nullptr);
 	}
 
 
@@ -469,13 +474,13 @@ static bool Verify_Log_Directory(const StringClass& folder)
 {
 	if (cPathUtil::PathExists(folder)) return true;
 	//HANDLE file;
-	//file = CreateFileA(folder, 0, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	//file = CreateFileA(folder, 0, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	//if (file!=INVALID_HANDLE_VALUE) {
 	//	CloseHandle(file);
 	//	return true;
 	//}
 
-	if (CreateDirectoryA(folder,NULL)) {
+	if (CreateDirectoryA(folder,nullptr)) {
 		return true;
 	}
 	if (GetLastError() == ERROR_ALREADY_EXISTS) {
@@ -488,13 +493,13 @@ static bool Create_Log_File_Name(const StringClass& folder, StringClass& filenam
 {
 	StringClass original(filename);
 	if (!use_numbering) {
-		filename.Format("%s/%s",folder,original);
+		filename.Format("%s/%s",folder.Peek_Buffer(),original.Peek_Buffer());
 		return true;
 	}
 	for (int i=0;i<999;++i) {
 		HANDLE file;
-		filename.Format("%s/%3.3d%s",folder,i,original);
-		file = CreateFileA(filename, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+		filename.Format("%s/%3.3d%s",folder.Peek_Buffer(),i,original.Peek_Buffer());
+		file = CreateFileA(filename, GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
 		if (file!=INVALID_HANDLE_VALUE) {
 			CloseHandle(file);
 			return true;
@@ -513,13 +518,13 @@ static void Copy_Log(const StringClass& folder,const char* filename,bool use_num
 			if (Create_Log_File_Name(folder,log_file_name,use_numbering)) {
 				DWORD written;
 				HANDLE file;
-				file = CreateFileA(log_file_name, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+				file = CreateFileA(log_file_name, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 				if (INVALID_HANDLE_VALUE != file) {
 					raw_log_file.Open();
 					unsigned char* memory=new unsigned char[size];
 					raw_log_file.Read(memory,size);
 					raw_log_file.Close();
-					WriteFile(file, memory, size, &written, NULL);
+					WriteFile(file, memory, size, &written, nullptr);
 					delete[] memory;
 					CloseHandle(file);
 				}
@@ -615,9 +620,35 @@ bool RestartNeeded = true;
  * HISTORY:                                                                                    *
  *   12/3/2001 11:26PM ST : Created                                                            *
  *=============================================================================================*/
-void Get_Version_Number(unsigned int * /* major */, unsigned int * /* minor */)
-{
-	// Version info removed per Legal review requirements. LFeenanEA - 8th February 2025
+void Get_Version_Number(unsigned int * major, unsigned int * minor) {
+	unsigned int file_minor = 0;
+	unsigned int file_major = 1;
+	char filename[MAX_PATH];
+
+	GetModuleFileNameA(nullptr, filename, sizeof(filename));
+	DWORD dwHandle;
+	DWORD version_info_size = GetFileVersionInfoSizeA(filename, &dwHandle);
+	if (version_info_size == 0) {
+		return;
+	}
+	char *version_info_buffer = new char[version_info_size];
+	if (GetFileVersionInfoA(filename, 0, version_info_size, version_info_buffer)) {
+		VS_FIXEDFILEINFO * vs_fixed_file_info = nullptr;
+		UINT len = 0;
+		if (VerQueryValueA(version_info_buffer, "\\", reinterpret_cast<void **>(&vs_fixed_file_info), &len)) {
+			file_major = vs_fixed_file_info->dwFileVersionMS;
+			file_minor = vs_fixed_file_info->dwFileVersionLS;
+		}
+	}
+	delete[] version_info_buffer;
+
+	DebugManager::Set_Version_Number(file_major);
+	if (major != nullptr) {
+		*major = file_major;
+	}
+	if (minor != nullptr) {
+		*minor = file_minor;
+	}
 }
 
 
@@ -720,7 +751,7 @@ bool Game_Init(void)
 
 //CRC_Check();
 
-	Get_Version_Number(NULL, NULL);
+	Get_Version_Number(nullptr, nullptr);
 
 	// setup Writing Factory
 	RenegadeWritingFileFactory.Set_Sub_Directory( DATA_SUBDIRECTORY );
@@ -746,7 +777,7 @@ bool Game_Init(void)
 	//
 	WIN32_FIND_DATAA find_info	= { 0 };
 	BOOL keep_going				= true;
-	HANDLE file_find				= NULL;
+	HANDLE file_find				= nullptr;
 	for (file_find = ::FindFirstFileA ("data/*.mix", &find_info);
 		 (file_find != INVALID_HANDLE_VALUE) && keep_going;
 		  keep_going = ::FindNextFileA (file_find, &find_info))
@@ -817,7 +848,7 @@ bool Game_Init(void)
 	PathMgrClass::Initialize ();
 
 	// Initialize WW3D
-	switch ( WW3D::Init(MainWindow, NULL, ConsoleBox.Is_Exclusive() ? true : false)) {
+	switch ( WW3D::Init(MainWindow, nullptr, ConsoleBox.Is_Exclusive() ? true : false)) {
 	case WW3D_ERROR_OK:	// Success!
 		break;
 	case WW3D_ERROR_DIRECTX8_INITIALIZATION_FAILED:
@@ -881,7 +912,7 @@ bool Game_Init(void)
 	//
 	TranslateDBClass::Initialize();
 	FileClass *file	= _TheFileFactory->Get_File( STRINGS_FILENAME );
-	if (file != NULL) {
+	if (file != nullptr) {
 		file->Open (FileClass::READ);				//	Open or the file
 		if ( file->Is_Available() ) {
 			ChunkLoadClass cload (file);				// Load the database
@@ -912,7 +943,7 @@ bool Game_Init(void)
 	//	Load the conversation database
 	//
 	file	= _TheFileFactory->Get_File( CONV_DB_FILENAME );
-	if (file != NULL) {
+	if (file != nullptr) {
 		file->Open (FileClass::READ);				//	Open or the file
 		if ( file->Is_Available() ) {
 			ChunkLoadClass cload (file);				// Load the database
@@ -984,13 +1015,11 @@ bool Game_Init(void)
 	// After TextDisplay is created, install the Display Handler
 	DebugManager::Set_Display_Handler(&TextDisplayHandler);
 
-	//DEADMENU MenuManager::Set_Menu( "Menu_Main" );
-
 	// Load the accelerator table and hand it off to WWLIB.
 	// Note:  Accelerator tables that are loaded from resources (like
 	// we are doing here) do not need to be manually freed.  Windows
 	// will cleanup for us when the process terminates.
-	HACCEL haccel = ::LoadAccelerators (::GetModuleHandleA (NULL), MAKEINTRESOURCE (IDR_ACCELERATOR));
+	HACCEL haccel = ::LoadAccelerators (::GetModuleHandleA (nullptr), MAKEINTRESOURCE (IDR_ACCELERATOR));
 	if (haccel) {
 		::Add_Accelerator (MainWindow, haccel);
 	}
@@ -1097,11 +1126,11 @@ char *Build_Registry_Location_String(const char *base, const char *modifier, con
 {
 	static char _whole_registry_string[1024];
 
-	WWASSERT(base != NULL);
-	WWASSERT(sub != NULL);
+	WWASSERT(base != nullptr);
+	WWASSERT(sub != nullptr);
 
 
-	if (modifier == NULL) {
+	if (modifier == nullptr) {
 		modifier = DefaultRegistryModifier;
 	}
 

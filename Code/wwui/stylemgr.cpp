@@ -98,7 +98,7 @@ static FONT_DESC	DEFAULT_FONTS[StyleMgrClass::FONT_MAX] =
 ////////////////////////////////////////////////////////////////
 //	Local constants
 ////////////////////////////////////////////////////////////////
-TextureClass *				StyleMgrClass::BackdropTexture			= NULL;
+TextureClass *				StyleMgrClass::BackdropTexture			= nullptr;
 
 uint32						StyleMgrClass::TitleColor					= RGB_TO_INT32 (255, 255, 255);
 uint32						StyleMgrClass::TitleHilightColor			= RGB_TO_INT32 (255, 255, 0);
@@ -116,7 +116,7 @@ uint32						StyleMgrClass::HilightColor				= RGB_TO_INT32 (70, 70, 70);
 uint32						StyleMgrClass::TabTextColor				= RGB_TO_INT32 (255, 255, 255);
 uint32						StyleMgrClass::TabGlowColor				= RGB_TO_INT32 (16, 10, 0);
 
-FontCharsClass *			StyleMgrClass::Fonts[FONT_MAX]			= { NULL };
+FontCharsClass *			StyleMgrClass::Fonts[FONT_MAX]			= { nullptr };
 float							StyleMgrClass::ScaleX						= 1.0F;
 float							StyleMgrClass::ScaleY						= 1.0F;
 
@@ -152,7 +152,7 @@ StyleMgrClass::Initialize (void)
 		//	Create the font
 		//
 		Fonts[index] = WW3DAssetManager::Get_Instance()->Get_FontChars (DEFAULT_FONTS[index].name,
-								point_size, DEFAULT_FONTS[index].is_bold);
+								int(point_size), DEFAULT_FONTS[index].is_bold);
 	}
 
 	//
@@ -182,14 +182,14 @@ StyleMgrClass::Initialize_From_INI (const char *filename)
 	//
 	//	Get the INI file
 	//
-	INIClass *ini_file = NULL;
+	INIClass *ini_file = nullptr;
 	FileClass *file_obj = _TheFileFactory->Get_File (filename);
-	if (file_obj != NULL && file_obj->Is_Available( ) ) {
+	if (file_obj != nullptr && file_obj->Is_Available( ) ) {
 		ini_file = new INIClass (*file_obj);
 		_TheFileFactory->Return_File (file_obj);
 	}
 
-	if (ini_file != NULL) {
+	if (ini_file != nullptr) {
 
 		const char *FONT_FILE_SECTION	= "Font File List";
 		const char *FONT_NAME_SECTION	= "Font Names";
@@ -225,7 +225,7 @@ StyleMgrClass::Initialize_From_INI (const char *filename)
 			//
 			//	Install the font into windows
 			//
-			::AddFontResourceA (font_filename);
+			WW3DAssetManager::Get_Instance()->Add_Font(font_filename);
 			FontFileList.Add (font_filename);
 		}
 
@@ -244,8 +244,8 @@ StyleMgrClass::Initialize_From_INI (const char *filename)
 			//	Parse the information
 			//
 			StringClass font_name	= ::strtok (font_entry.Peek_Buffer (), ",");
-			StringClass font_size	= ::strtok (NULL, ",");
-			StringClass font_bold	= ::strtok (NULL, ",");
+			StringClass font_size	= ::strtok (nullptr, ",");
+			StringClass font_bold	= ::strtok (nullptr, ",");
 			bool is_bold				= (::atoi (font_bold) != 0);
 
 			//
@@ -265,7 +265,7 @@ StyleMgrClass::Initialize_From_INI (const char *filename)
 			//	Create the font
 			//
 			Fonts[index] = WW3DAssetManager::Get_Instance()->Get_FontChars (font_name,
-									point_size, is_bold);
+									int(point_size), is_bold);
 
 		}
 
@@ -290,7 +290,7 @@ StyleMgrClass::Initialize_From_INI (const char *filename)
 		//	Free the ini file
 		//
 		delete ini_file;
-		ini_file = NULL;
+		ini_file = nullptr;
 	}
 
 	return ;
@@ -317,7 +317,7 @@ StyleMgrClass::Shutdown (void)
 	//	Unregister this font with windows
 	//
 	for (index = 0; index < FontFileList.Count (); index ++) {
-		::RemoveFontResourceA (FontFileList[index]);
+		WW3DAssetManager::Get_Instance()->Remove_Font(FontFileList[index]);
 	}
 
 	//
@@ -337,7 +337,7 @@ FontCharsClass *
 StyleMgrClass::Get_Font (FONT_STYLE style)
 {
 	FontCharsClass *font = Fonts[style];
-	if (font != NULL) {
+	if (font != nullptr) {
 		font->Add_Ref ();
 	}
 	return font;
@@ -394,7 +394,7 @@ StyleMgrClass::Render_Text
 	//
 	//	If necessary, assign the clipping rectangle
 	//
-	if (clipping_rect != NULL) {
+	if (clipping_rect != nullptr) {
 		renderer->Set_Clipping_Rect (*clipping_rect);
 	}
 
@@ -455,8 +455,8 @@ StyleMgrClass::Render_Title_Text
 	//
 	//	Center the text
 	//
-	int x_pos = int(rect.Left + (rect.Width () / 2) - (text_extent.X / 2));
-	int y_pos = int(rect.Top + (rect.Height () / 2) - (text_extent.Y / 2));
+	float x_pos = WWMath::Trunc(rect.Left + (rect.Width () / 2) - (text_extent.X / 2));
+	float y_pos = WWMath::Trunc(rect.Top + (rect.Height () / 2) - (text_extent.Y / 2));
 
 	//
 	//	Build the textures for the text we'll be drawing
@@ -551,8 +551,8 @@ StyleMgrClass::Render_Text
 	//
 	//	Assume left justification
 	//
-	int x_pos = rect.Left + 1;
-	int y_pos = int(rect.Top + (rect.Height () / 2) - (text_extent.Y / 2));
+	float x_pos = WWMath::Trunc(rect.Left + 1);
+	float y_pos = WWMath::Trunc(rect.Top + (rect.Height () / 2) - (text_extent.Y / 2));
 	if (is_vcentered == false) {
 		y_pos = rect.Top;
 	}
@@ -565,13 +565,13 @@ StyleMgrClass::Render_Text
 		//
 		//	Caclulate right justification
 		//
-		x_pos = int(rect.Right - text_extent.X);
+		x_pos = WWMath::Trunc(rect.Right - text_extent.X);
 	} else if (justify == CENTER_JUSTIFY) {
 
 		//
 		//	Calculate center justification
 		//
-		x_pos = int(rect.Left + (rect.Width () / 2) - (text_extent.X / 2));
+		x_pos = WWMath::Trunc(rect.Left + (rect.Width () / 2) - (text_extent.X / 2));
 	}
 
 	//
@@ -845,17 +845,17 @@ StyleMgrClass::Render_Wrapped_Text_Ex
 	//
 	//	Calculate where to start spitting out the text
 	//
-	float text_height		= renderer->Peek_Font ()->Get_Char_Height ();
+	float text_height		= float(renderer->Peek_Font ()->Get_Char_Height ());
 	RectClass curr_rect	= rect;
 	if (do_vcenter) {
-		curr_rect.Top = int(rect.Center ().Y - ((row_count * text_height) * 0.5F));
+		curr_rect.Top = WWMath::Trunc(rect.Center ().Y - ((row_count * text_height) * 0.5F));
 	}
 
 	//
 	//	Handy macro
 	//
 	#define COPY_LINE(dest,	src_start, src_end)	\
-			if (src_end == NULL) {						\
+			if (src_end == nullptr) {						\
 				dest = src_start;							\
 			} else {											\
 				size_t bytes	= ((char *)src_end - (char *)src_start);	\
@@ -869,7 +869,7 @@ StyleMgrClass::Render_Wrapped_Text_Ex
 	//	Loop over all the lines of text and check for wrapping...
 	//
 	const unichar_t *line_start = renderer->Find_Row_Start (text, 0);
-	while (line_start != NULL) {
+	while (line_start != nullptr) {
 
 		//
 		//	Lookup the start of the next line...
@@ -926,8 +926,8 @@ StyleMgrClass::Render_Wrapped_Text
 	//
 	//	Assume left justification
 	//
-	int x_pos = rect.Left + 1;
-	int y_pos = rect.Top + 1;
+	float x_pos = WWMath::Trunc(rect.Left + 1);
+	float y_pos = WWMath::Trunc(rect.Top + 1);
 
 	//
 	//	Center the text vertically if necessary
@@ -1055,8 +1055,8 @@ StyleMgrClass::Render_Glow
 	//step_count			= std::max (step_count, 4);
 	float angle_inc	= DEG_TO_RADF (360) / step_count;
 
-	float x_inc = radius_x / pass_count;
-	float y_inc = radius_y / pass_count;
+	float x_inc = float(radius_x / pass_count);
+	float y_inc = float(radius_y / pass_count);
 
 	float curr_radiusx = 2.0F;
 	float curr_radiusy = 2.0F;
@@ -1122,7 +1122,7 @@ StyleMgrClass::Configure_Renderer (Render2DClass *renderer)
 void
 StyleMgrClass::Play_Sound (EVENT_AUDIO event)
 {
-	if (	WWAudioClass::Get_Instance () == NULL ||
+	if (	WWAudioClass::Get_Instance () == nullptr ||
 			EventAudioList[event].Get_Length () == 0)
 	{
 		return ;
@@ -1133,7 +1133,7 @@ StyleMgrClass::Play_Sound (EVENT_AUDIO event)
 	//
 	StringClass tmp_copy (EventAudioList[event], true);
 	StringClass filename		= ::strtok (tmp_copy.Peek_Buffer (), ",");
-	StringClass vol_string	= ::strtok (NULL, ",");
+	StringClass vol_string	= ::strtok (nullptr, ",");
 	float volume				= ::atoi (vol_string) / 100.0F;
 
 	//

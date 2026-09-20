@@ -253,7 +253,7 @@ InputConfigMgrClass::Delete_Configuration (int index)
 	Get_Config_Path (config_path);
 
 	StringClass full_path;
-	full_path.Format ("%s/%s", config_path, ConfigList[index].Get_Filename ());
+	full_path.Format ("%s/%s", config_path.Peek_Buffer(), ConfigList[index].Get_Filename ());
 
 	//
 	//	Delete the configuration file
@@ -369,7 +369,7 @@ InputConfigMgrClass::Load_Configuration (const InputConfigClass &config)
 	//
 	//	Reload the UI (if necessary)
 	//
-	if (ControlsMenuClass::Get_Instance () != NULL) {
+	if (ControlsMenuClass::Get_Instance () != nullptr) {
 		ControlsMenuClass::Get_Instance ()->Reload ();
 	}
 
@@ -449,7 +449,7 @@ InputConfigMgrClass::Get_Unique_Config_Filename (StringClass &filename)
 		//
 		//	Check to see if this file exists
 		//
-		full_path.Format ("%s/%s", (const char *)config_path, filename);
+		full_path.Format ("%s/%s", config_path.Peek_Buffer(), filename.Peek_Buffer());
 
 	} while (cPathUtil::PathExists (full_path));
 
@@ -466,8 +466,8 @@ void
 InputConfigMgrClass::Save (void)
 {
 	FileClass *file = _TheFileFactory->Get_File (CFG_DICTIONARY_FILENAME);
-	WWASSERT (file != NULL);
-	if (file == NULL) {
+	WWASSERT (file != nullptr);
+	if (file == nullptr) {
 		return ;
 	}
 
@@ -509,8 +509,8 @@ void
 InputConfigMgrClass::Load (void)
 {
 	FileClass *file = _TheFileFactory->Get_File (CFG_DICTIONARY_FILENAME);
-	WWASSERT (file != NULL);
-	if (file == NULL) {
+	WWASSERT (file != nullptr);
+	if (file == nullptr) {
 		return ;
 	}
 
@@ -693,13 +693,13 @@ InputConfigMgrClass::Get_Config_Path (StringClass &full_path)
 	//	Lookup the path of the executable
 	//
 	char path[MAX_PATH] = { 0 };
-	::GetModuleFileNameA (NULL, path, sizeof (path));
+	::GetModuleFileNameA (nullptr, path, sizeof (path));
 
 	//
 	//	Strip off the filename
 	//
 	char *filename_portion = ::strrchr (path, '\\');
-	if (filename_portion != NULL) {
+	if (filename_portion != nullptr) {
 		filename_portion[0] = 0;
 	}
 

@@ -97,6 +97,7 @@
 #include "openw3d.h"
 #include "ini.h"
 #include "soutil.h"
+#include "pathutil.h"
 
 #ifdef _DEBUG
 #include	<crtdbg.h>
@@ -266,11 +267,7 @@ int main(int argc, char *argv[])
 
 #if WEBBROWSER_ENABLED
 #ifdef _DEBUG // Denzil - DO NOT COMPILE INTO FINAL BUILD
-	bool webInstalled = WebBrowser::InstallPrerequisites();
-
-	if (!webInstalled) {
-		::Show_Message_Box(MESSAGEBOX_BUTTONS_OK | MESSAGEBOX_SEVERITY_WARNING, "Embedded browser prerequisites missing\n\nBrowser functionality questionable.\n\n(Please call Denzil @ 27272)", "Renegade Warning!");
-	}
+	WebBrowser::InstallPrerequisites();
 #endif // WWDEBUG
 #endif // WEBBROWSER_ENABLED
 
@@ -311,7 +308,7 @@ static bool Graphics_Settings_Trouble_Shooting()
 			return 1;
 		}
 		process->Wait();
-		bool success = *process->Return_Code() != 0;
+		bool success = *process->Return_Code() == 0;
 		delete process;
 		return success;
 	}
@@ -319,7 +316,7 @@ static bool Graphics_Settings_Trouble_Shooting()
 }
 
 typedef IDirect3D9* (WINAPI *Direct3DCreate9Type) (UINT SDKVersion);
-static Direct3DCreate9Type	Direct3DCreate9Ptr = NULL;
+static Direct3DCreate9Type	Direct3DCreate9Ptr = nullptr;
 extern const char *Get_D3D9_Object_Name();
 static SharedObject *D3D9Lib = nullptr;
 
@@ -330,9 +327,9 @@ static bool Video_Card_Driver_Check()
 	int disabled=ini.Get_Int(W3D_SECTION_RENDER, "DriverVersionCheckDisabled", 0);
 	if (disabled>=87) return true;
 
-	IDirect3D9* d3d=NULL;
+	IDirect3D9* d3d=nullptr;
 	D3DCAPS9 tmp_caps;
-	const D3DCAPS9* d3dcaps=NULL;
+	const D3DCAPS9* d3dcaps=nullptr;
 	D3DADAPTER_IDENTIFIER9 adapter_id;
 
 	// Init D3D
@@ -340,7 +337,7 @@ static bool Video_Card_Driver_Check()
 
 	D3D9Lib = SharedObject::LoadObject(Get_D3D9_Object_Name());
 
-	if (D3D9Lib != NULL) {
+	if (D3D9Lib != nullptr) {
 		Direct3DCreate9Ptr = reinterpret_cast<Direct3DCreate9Type>(D3D9Lib->LoadFunction("Direct3DCreate9"));
 		if (Direct3DCreate9Ptr) {
 			d3d=Direct3DCreate9Ptr(D3D_SDK_VERSION);		// TODO: handle failure cases...
@@ -371,7 +368,7 @@ static bool Video_Card_Driver_Check()
 	int adapter_count = d3d->GetAdapterCount();
 	for (int adapter_index=0; adapter_index<adapter_count; adapter_index++) {
 		D3DADAPTER_IDENTIFIER9 id;
-		::ZeroMemory(&id, sizeof(D3DADAPTER_IDENTIFIER9));
+		memset(&id, 0, sizeof(D3DADAPTER_IDENTIFIER9));
 		HRESULT res = d3d->GetAdapterIdentifier(adapter_index,0/*D3DENUM_WHQL_LEVEL*/,&id);
 		// If device ok, check if it matches the currently set adapter name
 		if (res == D3D_OK) {
@@ -392,7 +389,7 @@ static bool Video_Card_Driver_Check()
 		return true;
 	}
 
-	::ZeroMemory(&adapter_id, sizeof(D3DADAPTER_IDENTIFIER9));
+	memset(&adapter_id, 0, sizeof(D3DADAPTER_IDENTIFIER9));
 	if (FAILED( d3d->GetAdapterIdentifier(
 		current_adapter_index,
 		0/*D3DENUM_WHQL_LEVEL*/,
@@ -482,7 +479,7 @@ int Start_Application(void)
 		if (!SearchPathA(
 			"data",
 			"always.dat",
-			NULL,
+			nullptr,
 			sizeof(tmp_buffer),
 			tmp_buffer,
 			&tmp_ptr)) {
@@ -610,7 +607,7 @@ LRESULT CALLBACK Main_Window_Proc( HWND hwnd, UINT message, WPARAM wParam, LPARA
 			return 1;
 
 		case WM_PAINT:
-			ValidateRect(hwnd, NULL);
+			ValidateRect(hwnd, nullptr);
 			break;
 
 		/*
@@ -634,7 +631,7 @@ LRESULT CALLBACK Main_Window_Proc( HWND hwnd, UINT message, WPARAM wParam, LPARA
 		*/
 		case WM_CHAR:
 			//Debug_Say(("WM_CHAR %d\n", wParam));
-			Input::Console_Add_Key( wParam );
+			Input::Console_Add_Key( int(wParam) );
 			break;
 
 		/*
@@ -757,7 +754,7 @@ static BOOL Create_Main_Window(void)
 	WNDCLASSA    wc;
 	BOOL        rc;
 
-	ProgramInstance = (HINSTANCE)GetModuleHandleA(NULL);
+	ProgramInstance = (HINSTANCE)GetModuleHandleA(nullptr);
 
 	if (!ConsoleBox.Is_Exclusive()) {
 		wc.style			= CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
@@ -765,10 +762,10 @@ static BOOL Create_Main_Window(void)
 		wc.cbClsExtra		= 0;
 		wc.cbWndExtra		= 0;
 		wc.hInstance		= ProgramInstance;
-		wc.hIcon				= LoadIcon( NULL, IDI_APPLICATION);
-		wc.hCursor			= LoadCursor( NULL, IDC_ARROW);
+		wc.hIcon				= LoadIcon( nullptr, IDI_APPLICATION);
+		wc.hCursor			= LoadCursor( nullptr, IDC_ARROW);
 		wc.hbrBackground	= (HBRUSH)GetStockObject( BLACK_BRUSH);
-		wc.lpszMenuName	= NULL;
+		wc.lpszMenuName	= nullptr;
 		wc.lpszClassName	= SingletonInstanceKeeperClass::Get_GUID ();
 
 		rc = RegisterClassA( &wc);
@@ -777,7 +774,7 @@ static BOOL Create_Main_Window(void)
 		// Assume windowed mode
 		MainWindow = CreateWindowExA(0, SingletonInstanceKeeperClass::Get_GUID(), "Renegade",
 			WS_SYSMENU|WS_CAPTION|WS_MINIMIZEBOX|WS_CLIPCHILDREN,
-				0, 0, 0, 0, NULL, NULL, ProgramInstance, NULL);
+				0, 0, 0, 0, nullptr, nullptr, ProgramInstance, nullptr);
 
 		if (!MainWindow) {
 			return FALSE;
@@ -855,24 +852,24 @@ void Prog_End(void)
  *=============================================================================================*/
 bool Set_Working_Directory(void)
 {
-	char path_buffer[_MAX_PATH];
 	const char *gamedir = cUserOptions::GameDir.Get();
 #if defined(OPENW3D_WIN32)
-	if (gamedir == NULL || gamedir[0] == '\0') {
+	char path_buffer[_MAX_PATH];
+	if (gamedir == nullptr || gamedir[0] == '\0') {
 		char path_to_exe[256];
 		char drive[_MAX_DRIVE];
 		char dir[_MAX_DIR];
-		GetModuleFileNameA(NULL, path_to_exe, sizeof(path_to_exe));
-		_splitpath(path_to_exe, drive, dir, NULL, NULL);
-		_makepath(path_buffer, drive, dir, NULL, NULL);
+		GetModuleFileNameA(nullptr, path_to_exe, sizeof(path_to_exe));
+		_splitpath(path_to_exe, drive, dir, nullptr, nullptr);
+		_makepath(path_buffer, drive, dir, nullptr, nullptr);
 		gamedir = path_buffer;
 	}
-	return !!SetCurrentDirectoryA(gamedir);
+	return cPathUtil::SetWorkingDirectory(gamedir);
 #elif defined(OPENW3D_SDL3)
-	if (gamedir == NULL || gamedir[0] == '\0') {
+	if (gamedir == nullptr || gamedir[0] == '\0') {
 		gamedir = SDL_GetBasePath();
 	}
-	return !chdir(gamedir);
+	return cPathUtil::SetWorkingDirectory(gamedir);
 #else
 	assert(0);
 #endif

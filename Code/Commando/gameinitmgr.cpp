@@ -129,7 +129,7 @@ bool GameInitMgrClass::Is_Game_In_Progress(void)
 {
 	GameModeClass* mode = GameModeManager::Find("Combat");
 	//return (mode && mode->Is_Active());
-	return (mode != NULL && !mode->Is_Inactive());
+	return (mode != nullptr && !mode->Is_Inactive());
 }
 
 
@@ -143,7 +143,7 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned int
 {
 	unsigned int time;
 
-	WWASSERT(map_name != NULL);
+	WWASSERT(map_name != nullptr);
    WWDEBUG_SAY (("GameInitMgrClass::Start_Game(%s)\n", map_name));
 	CoopDebugLog::Log("GameInitMgrClass::Start_Game begin map=%s mode=%d teamChoice=%d client_required=%d server_required=%d game_type=%d",
 		map_name, Mode, teamChoice, IsClientRequired, IsServerRequired, cGameType::Get_Game_Type());
@@ -180,7 +180,7 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned int
 	//	Set the map name
 	//
 	StringClass map(map_name,true);
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	The_Game ()->Set_Map_Name (map);
 	if (IS_COOP_MISSION) {
 		cGameDataCoopMission *coop_game = The_Game()->As_Coop_Mission();
@@ -398,7 +398,7 @@ GameInitMgrClass::End_Game (void)
 	//
 	// A dedicated server will disable sfx & music. Restore them here.
 	//
-	if (WWAudioClass::Get_Instance() != NULL) {
+	if (WWAudioClass::Get_Instance() != nullptr) {
 		if (RestoreSFX) {
 			WWAudioClass::Get_Instance()->Allow_Sound_Effects(true);
 		}
@@ -468,7 +468,7 @@ GameInitMgrClass::End_Game (void)
 
 	if (gameMode && gameMode->Is_Active()) {
 		WolGameModeClass* wolGame = static_cast<WolGameModeClass*>(gameMode);
-		WWASSERT(wolGame != NULL);
+		WWASSERT(wolGame != nullptr);
 		wolGame->Leave_Game();
 	}
 
@@ -641,7 +641,7 @@ GameInitMgrClass::Start_Client_Server (void)
 
 	assert(GameModeManager::Find("WOL"));
 		if (GameModeManager::Find("WOL")->Is_Active()) {
-			if (PTheGameData != NULL) {
+			if (PTheGameData != nullptr) {
 				const unsigned short wol_port = WOLNATInterface.Get_Port_As_Server();
 				if (wol_port >= MIN_SERVER_PORT && wol_port <= MAX_SERVER_PORT) {
 					The_Game()->Set_Port(wol_port);
@@ -650,7 +650,7 @@ GameInitMgrClass::Start_Client_Server (void)
 			}
 		}
 		} else if (GameModeManager::Find("LAN")->Is_Active() && cGameSpyAdmin::Is_Gamespy_Game()) {
-			if (PTheGameData != NULL) {
+			if (PTheGameData != nullptr) {
 				const int gamespy_port = cUserOptions::GameSpyGamePort.Get();
 				if (gamespy_port >= MIN_SERVER_PORT && gamespy_port <= MAX_SERVER_PORT) {
 					The_Game()->Set_Port(gamespy_port);
@@ -675,7 +675,7 @@ GameInitMgrClass::Start_Client_Server (void)
 		//
 		// Dedicated server disables playing of sfx & music
 		//
-		if ((IsClientRequired == false) && WWAudioClass::Get_Instance () != NULL) {
+		if ((IsClientRequired == false) && WWAudioClass::Get_Instance () != nullptr) {
 
 			if (WWAudioClass::Get_Instance ()->Are_Sound_Effects_On ()) {
 				WWAudioClass::Get_Instance ()->Allow_Sound_Effects (false);
@@ -801,9 +801,9 @@ GameInitMgrClass::Initialize_SP (void)
 	//
 	//	Create the new game type
 	//
-	WWASSERT (PTheGameData == NULL);
+	WWASSERT (PTheGameData == nullptr);
 	PTheGameData = new cGameDataSinglePlayer;
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 
 	//
 	//	Remember our state
@@ -872,9 +872,9 @@ GameInitMgrClass::Initialize_Skirmish(void)
 	//
 	//	Create the new game type
 	//
-	WWASSERT (PTheGameData == NULL);
+	WWASSERT (PTheGameData == nullptr);
 	PTheGameData = new cGameDataSkirmish;
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 
 	//
 	//	Remember our state
@@ -1002,14 +1002,14 @@ GameInitMgrClass::Initialize_WOL (void)
 {
 #ifndef MULTIPLAYERDEMO
 
-#ifdef _WIN64
+#if !defined(_WIN32) || defined(_WIN64)
 	// WOLAPI COM binaries are 32-bit only; bail out early in 64-bit builds.
 	ConsoleBox.Print("Westwood Online is not available in 64-bit builds. Returning to main menu.\n");
 	RenegadeDialogMgrClass::Goto_Location (RenegadeDialogMgrClass::LOC_MAIN_MENU);
 	cGameType::Set_Game_Type(GAMETYPE_NONE);
 	Mode = MODE_UNKNOWN;
 	return;
-#endif
+#else
 
 	WWDEBUG_SAY (("GameInitMgrClass::Initialize_WOL\n"));
 
@@ -1032,7 +1032,7 @@ GameInitMgrClass::Initialize_WOL (void)
 	IsServerRequired	= false;
 	Mode					= MODE_WOL;
 	return ;
-
+#endif
 #endif // !MULTIPLAYERDEMO
 }
 
@@ -1106,9 +1106,9 @@ GameInitMgrClass::Shutdown (void)
 	//
 	//	Free the old game data
 	//
-	if (PTheGameData != NULL) {
+	if (PTheGameData != nullptr) {
 		delete PTheGameData;
-		PTheGameData = NULL;
+		PTheGameData = nullptr;
 	}
 
 	//
@@ -1241,7 +1241,7 @@ void _reload_game_configuration_files(void)
 	//	Reload the strings table
 	TranslateDBClass::Initialize();
 	FileClass *file	= _TheFileFactory->Get_File( "STRINGS.TDB" );
-	if (file != NULL) {
+	if (file != nullptr) {
 		file->Open (FileClass::READ);				//	Open or the file
 		if ( file->Is_Available() ) {
 			ChunkLoadClass cload (file);				// Load the database

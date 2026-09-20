@@ -96,14 +96,14 @@ cDonateEvent::Act(void)
 	cPlayer * p_donor = cPlayerManager::Find_Player(SenderId);
 	cPlayer * p_recipient = cPlayerManager::Find_Player(RecipientId);
 
-	if (p_donor != NULL &&
-		 p_recipient != NULL &&
+	if (p_donor != nullptr &&
+		 p_recipient != nullptr &&
 		 Amount >= cDonateEvent::Get_Minimum_Acceptable_Donation() &&
 		 (p_donor->Get_Player_Type() == p_recipient->Get_Player_Type()) &&
 		 p_donor->Get_Money() >= Amount) {
 
-		p_donor->Increment_Money(-Amount);
-		p_recipient->Increment_Money(Amount);
+		p_donor->Increment_Money(float(-Amount));
+		p_recipient->Increment_Money(float(Amount));
 
 		//
 		// Notify recipient
@@ -114,7 +114,7 @@ cDonateEvent::Act(void)
 			TRANSLATE(IDS_MP_DONATION_RECEIVED),
 			Amount,
 			TRANSLATE(IDS_MP_MONEY),
-			p_donor->Get_Name());
+			p_donor->Get_Name().Peek_Buffer());
 
 		cScTextObj * p_message = new cScTextObj;
 		p_message->Init(text, TEXT_MESSAGE_PRIVATE, false, HOST_TEXT_SENDER,

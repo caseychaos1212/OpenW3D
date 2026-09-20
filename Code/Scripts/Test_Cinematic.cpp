@@ -39,6 +39,7 @@
 #include <string.h>
 #include "wwlib/wwstring.h"
 #include <limits>
+#include <stdlib.h>
 
 #define		LAST_VALID_TIMESTAMP		999000.0f
 
@@ -49,8 +50,8 @@ DECLARE_SCRIPT (M00_Cinematic_Attack_Command_DLS, "AttackDuration=1.0:float")
 	{
 		float facing = Commands->Get_Facing(Owner());
 		Vector3 target = Commands->Get_Position(Owner());
-		target.X += cos(DEG_TO_RADF(facing)) * 10.0f;
-		target.Y += sin(DEG_TO_RADF(facing)) * 10.0f;
+		target.X += WWMath::Cos(DEG_TO_RADF(facing)) * 10.0f;
+		target.Y += WWMath::Sin(DEG_TO_RADF(facing)) * 10.0f;
 		target.Z += 2.0f;
 
 		ActionParamsStruct params;
@@ -162,14 +163,14 @@ public:
 		ControlLine * control = new ControlLine;
 		control->Time = time;
 		control->Command = strdup( command );
-		control->Next = NULL;
+		control->Next = nullptr;
 
-		if ( Controls == NULL || Controls->Time > time ) {
+		if ( Controls == nullptr || Controls->Time > time ) {
 			control->Next = Controls;
 			Controls = control;
 		} else {
 			ControlLine * node = Controls;
-			while ( (node->Next != NULL) && (node->Next->Time <= time) ) {
+			while ( (node->Next != nullptr) && (node->Next->Time <= time) ) {
 				node = node->Next;
 			}
 			control->Next = node->Next;
@@ -179,7 +180,7 @@ public:
 
 	void	Remove_Head_Control_Line( void )
 	{
-		if ( Controls != NULL ) {
+		if ( Controls != nullptr ) {
 			ControlLine * control = Controls;
 			Controls = Controls->Next;
 
@@ -190,7 +191,7 @@ public:
 
 	void	Display_Control_Lines( void )
 	{
-		for ( ControlLine * node = Controls; node != NULL; node = node->Next ) {
+		for ( ControlLine * node = Controls; node != nullptr; node = node->Next ) {
 //			Commands->Debug_Message( "%3.2f \"%s\"\n", node->Time, node->Command );
 		}
 	}
@@ -228,7 +229,7 @@ public:
 
 			if ( *line && *line != ';' ) {	// ignore comments
 				float	time;
-				time = atof( line );
+				time = strtof( line , nullptr);
 
 				if ( time < 0 ) {	// handle frame numbers
 					time = -time / 30.f;
@@ -249,13 +250,13 @@ public:
 	/*
 	**
 	*/
-	const char* Get_Command_Parameter( char * string = NULL )
+	const char* Get_Command_Parameter( char * string = nullptr )
 	{
-		if ( string != NULL ) {
+		if ( string != nullptr ) {
 			NextParameter = string;
 		}
 
-		if ( NextParameter == NULL || *NextParameter == 0 ) return "";
+		if ( NextParameter == nullptr || *NextParameter == 0 ) return "";
 
 		// Start at this parameter;
 		char * parameter = NextParameter;
@@ -340,7 +341,7 @@ public:
 		// Save Control Lines
 		Commands->Begin_Chunk(saver, CHUNKID_CONTROL_LINES);
 		ControlLine * controls = Controls;
-		while ( controls != NULL ) {
+		while ( controls != nullptr ) {
 			Commands->Save_Data(saver, CHUNKID_CONTROL_TIME, sizeof( controls->Time ), &controls->Time );
 			const size_t command_len = ::strlen( controls->Command ) + 1;
 			assert(command_len <= static_cast<size_t>(std::numeric_limits<int>::max()));
@@ -356,8 +357,8 @@ public:
 
 	void Load(ScriptLoader& loader) override
 	{
-		Controls = NULL;
-		NextParameter = NULL;
+		Controls = nullptr;
+		NextParameter = nullptr;
 
 		for ( int i = 0; i < NUM_SLOTS; i++ ) {
 			ObjectSlots[i] =0;
@@ -515,8 +516,8 @@ public:
 //			Commands->Debug_Message( "Slot used by %d\n", ObjectSlots[ slot ] );
 		}
 
-		GameObject * obj = NULL;
-		if (( host_slot_name != NULL ) && ( *host_slot_name != 0 ) ) {
+		GameObject * obj = nullptr;
+		if (( host_slot_name != nullptr ) && ( *host_slot_name != 0 ) ) {
 			int host_slot = atoi( host_slot_name );
 			GameObject * host_obj = Commands->Find_Object( ObjectSlots[ host_slot ] );
 			obj = Commands->Create_Object_At_Bone( host_obj, preset_name, host_bone_name );
@@ -554,7 +555,7 @@ public:
 		const char * host_bone_name = Get_Next_Parameter();
 
 		GameObject * host_obj = Commands->Find_Object( ObjectSlots[ host_slot ] );
-		Commands->Create_Explosion_At_Bone( preset_name, host_obj, host_bone_name, NULL );
+		Commands->Create_Explosion_At_Bone( preset_name, host_obj, host_bone_name, nullptr );
 	}
 
 	void	Command_Destroy_Object( char * params )
@@ -621,7 +622,7 @@ public:
 		const char * bone_name = Get_Next_Parameter();
 
 		int slot = -1;
-		if (( slot_name != NULL ) && ( *slot_name != 0 ) ) {
+		if (( slot_name != nullptr ) && ( *slot_name != 0 ) ) {
 			slot = atoi( slot_name );
 		}
 
@@ -667,7 +668,7 @@ public:
 //				Commands->Debug_Message( "Slot Object not found %d\n", slot );
 			}
 		} else {
-			Commands->Set_Camera_Host( NULL );
+			Commands->Set_Camera_Host( nullptr );
 			Commands->Control_Enable( Commands->Get_The_Star(), true );
 			Commands->Enable_HUD(1);
 		}
@@ -681,7 +682,7 @@ public:
 		const char * parameter_name = Get_Next_Parameter();
 
 		int to_id = -1;
-		if ( ::strchr( to_id_name, '#' ) != NULL ) {
+		if ( ::strchr( to_id_name, '#' ) != nullptr ) {
 			int to_slot = atoi( ::strchr( to_id_name, '#' ) + 1 );
 			if ( (to_slot < 0) || ( to_slot >= NUM_SLOTS ) ) {
 //				Commands->Debug_Message( "Bad Slot Number %d\n", to_slot );
@@ -693,7 +694,7 @@ public:
 		}
 
 		int parameter = 0;
-		if ( ::strchr( parameter_name, '#' ) != NULL ) {
+		if ( ::strchr( parameter_name, '#' ) != nullptr ) {
 			int parameter_slot = atoi( ::strchr( parameter_name, '#' ) + 1 );
 			if ( (parameter_slot < 0) || ( parameter_slot >= NUM_SLOTS ) ) {
 //				Commands->Debug_Message( "Bad Slot Number %d\n", parameter_slot );
@@ -736,7 +737,7 @@ public:
 			if ( obj ) {
 
 				if ( host_slot != -1 ) {
-					int id = ObjectSlots[ host_slot ];
+					id = ObjectSlots[ host_slot ];
 					GameObject * host = Commands->Find_Object( id );
 					if	( host ) {
 						Commands->Attach_To_Object_Bone( obj, host, bone_name );
@@ -744,7 +745,7 @@ public:
 //						Commands->Debug_Message( "Host Object not found %d\n", host_slot );
 					}
 				} else {
-					Commands->Attach_To_Object_Bone( obj, NULL, NULL );
+					Commands->Attach_To_Object_Bone( obj, nullptr, nullptr );
 				}
 			} else {
 //				Commands->Debug_Message( "Slot Object not found %d\n", obj_slot );
@@ -791,9 +792,9 @@ public:
 			GameObject * obj = Commands->Find_Object( id );
 			if ( obj ) {
 				Commands->Enable_Hibernation( obj, false );
-				char id[12];
-				sprintf( id, "%d", MyID );
-				Commands->Attach_Script( obj, "Test_Cinematic_Primary_Killed", id );
+				char id_str[12];
+				sprintf( id_str, "%d", MyID );
+				Commands->Attach_Script( obj, "Test_Cinematic_Primary_Killed", id_str );
 			} else {
 //				Commands->Debug_Message( "Slot Object not found %d\n", obj_slot );
 			}
@@ -822,7 +823,7 @@ public:
 	void	Command_Sniper_Control( char * params )
 	{
 		int enabled = atoi( Get_First_Parameter( params ) );
-		float zoom = atof( Get_Next_Parameter() );
+		float zoom = strtof( Get_Next_Parameter() , nullptr);
 
 		Commands->Cinematic_Sniper_Control( enabled != 0, zoom );
 	}
@@ -830,8 +831,8 @@ public:
 	void	Command_Shake_Camera( char * params )
 	{
 		int obj_slot = atoi( Get_First_Parameter( params ) );
-		float intensity = atof( Get_Next_Parameter() );
-		float duration = atof( Get_Next_Parameter() );
+		float intensity = strtof( Get_Next_Parameter() , nullptr);
+		float duration = strtof( Get_Next_Parameter() , nullptr);
 
 		if ( (obj_slot < 0) || ( obj_slot >= NUM_SLOTS ) ) {
 //			Commands->Debug_Message( "Bad Obj Slot Number %d\n", obj_slot );
@@ -874,25 +875,25 @@ public:
 	void	Command_Enable_Letterbox( char * params )
 	{
 		int onoff = atoi( Get_First_Parameter( params ) );
-		float time = atof( Get_Next_Parameter() );
+		float time = strtof( Get_Next_Parameter() , nullptr);
 
 		Commands->Enable_Letterbox(!!onoff,time);
 	}
 
 	void Command_Set_Screen_Fade_Color( char * params )
 	{
-		float r = atof( Get_First_Parameter( params ) );
-		float g = atof( Get_Next_Parameter() );
-		float b = atof( Get_Next_Parameter() );
-		float time = atof( Get_Next_Parameter() );
+		float r = strtof( Get_First_Parameter( params ) , nullptr);
+		float g = strtof( Get_Next_Parameter() , nullptr);
+		float b = strtof( Get_Next_Parameter() , nullptr);
+		float time = strtof( Get_Next_Parameter() , nullptr);
 
 		Commands->Set_Screen_Fade_Color(r,g,b,time);
 	}
 
 	void Command_Set_Screen_Fade_Opacity( char * params )
 	{
-		float opacity = atof( Get_First_Parameter( params ) );
-		float time = atof( Get_Next_Parameter() );
+		float opacity = strtof( Get_First_Parameter( params ) , nullptr);
+		float time = strtof( Get_Next_Parameter() , nullptr);
 
 		Commands->Set_Screen_Fade_Opacity(opacity,time);
 	}
@@ -958,24 +959,24 @@ public:
 		// If Primary Destroyed,
 		if ( PrimaryKilled ) {
 			// skip all timestamps < LAST_VALID_TIMESTAMP
-			while ( Controls != NULL && Controls->Time <= LAST_VALID_TIMESTAMP ) {
+			while ( Controls != nullptr && Controls->Time <= LAST_VALID_TIMESTAMP ) {
 				Remove_Head_Control_Line();
 			}
 
 			// Run all remaining commands
-			while ( Controls != NULL ) {
+			while ( Controls != nullptr ) {
 				Parse_Command( Controls->Command );
 				Remove_Head_Control_Line();
 			}
 		}
 
-		while ( Controls != NULL && Controls->Time <= Time ) {
+		while ( Controls != nullptr && Controls->Time <= Time ) {
 			FrameSync = (Time - Controls->Time) * 30.0f;
 			Parse_Command( Controls->Command );
 			Remove_Head_Control_Line();
 		}
 
-		if ( Controls != NULL ) {
+		if ( Controls != nullptr ) {
 			// if the next command is > than the LAST_VALID_TIMESTAMP, we are done
 			if ( Controls->Time >= LAST_VALID_TIMESTAMP ) {
 				Commands->Destroy_Object( obj );
@@ -1001,7 +1002,7 @@ public:
 	{
 		Commands->Enable_Hibernation( obj, false );
 
-		Controls = NULL;
+		Controls = nullptr;
 		for ( int i = 0; i < NUM_SLOTS; i++ ) {
 			ObjectSlots[ i ] = 0;
 		}
@@ -1036,7 +1037,7 @@ public:
 				if ( ObjectSlots[ slot ] != 0 ) {
 //					Commands->Debug_Message( "Slot number %d used by %d\n", slot, ObjectSlots[ slot ] );
 				} else {
-					ObjectSlots[ slot ] = param;
+					ObjectSlots[ slot ] = int(param);
 //					Commands->Debug_Message( "Slot number %d set to %d\n", slot, ObjectSlots[ slot ] );
 				}
 			}

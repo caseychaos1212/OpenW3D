@@ -64,7 +64,7 @@ DECLARE_SCRIPT(MDD_Objective_Controller, "")
 			Commands->Attach_Script(camera, "Test_Cinematic", "XG_DemoCam.txt");
 		}
 		int id = Commands->Create_Conversation("Demo_Intro", 0, 0, true);
-		Commands->Join_Conversation(NULL, id, true, true, true);
+		Commands->Join_Conversation(nullptr, id, true, true, true);
 		Commands->Join_Conversation(STAR, id, true, true, true);
 		Commands->Start_Conversation(id, 0);
 
@@ -224,7 +224,7 @@ DECLARE_SCRIPT (MDD_Respawn_Controller, "")
 			}
 Commands->Debug_Message (">>>>>>>>>>>>>>>> UNIT COUNT = %i, UNIT MAX = %i.\n",area_unit_count[25],area_unit_max[25]);
 			int players_difficulty = Commands->Get_Difficulty_Level();
-			float timer_length = 25 - (10 * (players_difficulty));
+			float timer_length = float(25 - (10 * (players_difficulty)));
 			Commands->Start_Timer(obj, this, timer_length, 2);
 		}
 		//DEMO
@@ -486,7 +486,7 @@ Commands->Debug_Message (">>>>>>>>>>>>>>>> UNIT COUNT = %i, UNIT MAX = %i.\n",ar
 		{
 			// A specific area is requesting a forced spawn if possible.
 
-			Check_Respawns (param);
+			Check_Respawns (int(param));
 		}
 		else if (type == 103)
 		{
@@ -536,13 +536,13 @@ Commands->Debug_Message (">>>>>>>>>>>>>>>> UNIT COUNT = %i, UNIT MAX = %i.\n",ar
 		{
 			// A request to spawn a new vehicle for the commando has been made.
 
-			Replacement_Vehicle (obj, param);
+			Replacement_Vehicle (obj, int(param));
 		}
 		else if (type == 112)
 		{
 			// A player controlled vehicle has been destroyed, turn on the ability to make a new one
 
-			replacement_vehicle = param;
+			replacement_vehicle = int(param);
 		}
 		else if (type == 113)
 		{
@@ -790,7 +790,7 @@ DECLARE_SCRIPT (MDD_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 
 		// If a zone shouts to return to home points, do so.
 
-		else if ((sound.Type > 1049) && (sound.Type < 1100) && (!no_return_home))
+		else if ((static_cast<int>(sound.Type) > 1049) && (static_cast<int>(sound.Type) < 1100) && (!no_return_home))
 		{
 			int area_id = (sound.Type - 1050);
 			int area_num = Get_Int_Parameter("Area_Number");
@@ -888,7 +888,7 @@ DECLARE_SCRIPT (MDD_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 					bool visibility = Commands->Is_Object_Visible(star_obj, obj);
 					if (!visibility)
 					{
-						Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", NULL);
+						Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", nullptr);
 					}
 					else
 					{
@@ -998,7 +998,7 @@ DECLARE_SCRIPT (MDD_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 		}
 		else if (timer_id == 6)
 		{
-			Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", NULL);
+			Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", nullptr);
 		}
 		else if (timer_id == 7)
 		{
@@ -1007,7 +1007,11 @@ DECLARE_SCRIPT (MDD_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 				// Time to move the chem-warrior. Pick a new location.
 
 				Vector3 newloc;
-				int rndnum = (Get_Int_Random(0.0f,1.0f) * 5);
+				// TODO OmniBlade: So I've silenced the C4244 warning here, but the logic looks screwed.
+				// Intention seems to have been to generate a random float and then round to int. As it stands
+				// it appears to have a 1/2 chance of hitting either case 0 or default.
+				//int rndnum = (Get_Int_Random(0.0f,1.0f) * 5);
+				int rndnum = (Get_Int_Random(0,1) * 5);
 				switch (rndnum)
 				{
 				case (0):
@@ -1184,7 +1188,7 @@ DECLARE_SCRIPT (MDD_Nod_Soldier, "Area_Number:int,Area_Officer:int,Pre_Placed:in
 
 	void Damaged( GameObject * obj, GameObject *damager, float /* amount */) override
 	{
-		if (!initial_damage && damager == NULL)
+		if (!initial_damage && damager == nullptr)
 		{
 			initial_damage = true;
 			Commands->Set_Health(obj, initial_health);
@@ -1243,7 +1247,7 @@ DECLARE_SCRIPT (MDD_GDI_Soldier, "Area_ID:int, Soldier_Type=0:int")
 			int type = Get_Int_Parameter("Soldier_Type");
 			if (type < 12)
 			{
-				Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", NULL);
+				Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", nullptr);
 			}
 			if (!stop_following)
 			{
@@ -1275,7 +1279,7 @@ DECLARE_SCRIPT (MDD_GDI_Soldier, "Area_ID:int, Soldier_Type=0:int")
 
 	void Sound_Heard (GameObject * obj, const CombatSound & sound) override
 	{
-		if ((sound.Type > 1099) && (sound.Type < 1199))
+		if ((static_cast<int>(sound.Type) > 1099) && (static_cast<int>(sound.Type) < 1199))
 		{
 			// Make sure this is the sound this unit is supposed to react to.
 
@@ -1422,7 +1426,7 @@ DECLARE_SCRIPT (MDD_Stationary_Vehicle,"Area_ID:int")
 	{
 		if (timer_id == 1)
 		{
-			Commands->Apply_Damage (obj, 10000.0f, "Blamokiller", NULL);
+			Commands->Apply_Damage (obj, 10000.0f, "Blamokiller", nullptr);
 		}
 		else if (timer_id == 2)
 		{
@@ -1538,7 +1542,7 @@ DECLARE_SCRIPT (MDD_Nod_Apache, "Area_ID:int")
 			{
 				ActionParamsStruct params;
 				params.Set_Basic(this, 90, 0);
-				params.Set_Movement(Vector3(0,0,0), 0.2 + (0.1 * DIFFICULTY), 5.0f);
+				params.Set_Movement(Vector3(0,0,0), 0.2f + (0.1f * DIFFICULTY), 5.0f);
 				params.WaypathID = waypath_id;
 				params.WaypathSplined = true;
 				params.Set_Attack(STAR, 200.0f, 0.0f, true);
@@ -1559,7 +1563,7 @@ DECLARE_SCRIPT (MDD_Nod_Apache, "Area_ID:int")
 
 			ActionParamsStruct params;
 			params.Set_Basic(this, 90, 0);
-			params.Set_Movement(myloc, 0.0, 5.0f);
+			params.Set_Movement(myloc, 0.0f, 5.0f);
 			//DEMO params.Set_Attack(STAR, 200.0f, 0.0f, true);
 			params.Set_Attack(target, 200.0f, 0.0f, true);
 			//DEMO
@@ -1585,7 +1589,7 @@ DECLARE_SCRIPT (MDD_Nod_Apache, "Area_ID:int")
 				if (distance > 3000.0f)
 				//DEMO
 				{
-					Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", NULL);
+					Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", nullptr);
 				}
 			}
 			Commands->Start_Timer(obj, this, 15.0f, 3);
@@ -1749,7 +1753,7 @@ DECLARE_SCRIPT (MDD_Flying_Vehicle, "Unit_ID:int")
 		}
 		else
 		{
-			Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", NULL);
+			Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", nullptr);
 		}
 	}
 
@@ -1828,7 +1832,7 @@ DECLARE_SCRIPT (MDD_Havoc_Unit, "")
 
 	void Sound_Heard (GameObject * obj, const CombatSound & sound) override
 	{
-		if (sound.Type == 1999)
+		if (static_cast<int>(sound.Type) == 1999)
 		{
 			if (sound.Creator)
 			{

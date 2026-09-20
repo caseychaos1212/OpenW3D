@@ -1,12 +1,17 @@
 if(WIN32)
-    if(MSVC)
+    if(NOT MINGW)
         FetchContent_Declare(
             dx9
             GIT_REPOSITORY https://github.com/madebr/min-dx9-sdk.git
-            GIT_TAG        55973049eaaab204bb35a2b4e33a129a75a16244
+            GIT_TAG        efa003f57d5c6282c45559b50616b24f32c4f442
         )
 
         FetchContent_MakeAvailable(dx9)
+        if(MSVC)
+            # The prebuilt legacy DxErr.lib still imports _vsnprintf, which
+            # moved to this compatibility library with the Universal CRT.
+            target_link_libraries(d3d9lib INTERFACE legacy_stdio_definitions)
+        endif()
     else()
         add_library(d3d9lib INTERFACE)
         target_link_libraries(d3d9lib INTERFACE d3d9 d3dx9)
@@ -23,4 +28,3 @@ else()
     target_include_directories(d3d9lib INTERFACE "${PROJECT_SOURCE_DIR}/Code/dxvk_wrapper")
     target_include_directories(d3d9lib INTERFACE "${DXVK_INCLUDE_PATH}/dxvk")
 endif()
-

@@ -45,6 +45,20 @@ if(W3D_BUILD_OPTION_OPENAL)
         openal/OpenALHandle.h
         null/NullUtils.cpp
     )
+elseif(W3D_BUILD_OPTION_MILES)
+    list(APPEND WWAUDIO_SRC
+        miles/MilesAudio.h
+        miles/MilesAudio.cpp
+        miles/MilesSoundBuffer.cpp
+        miles/MilesSoundBuffer.h
+        miles/MilesUtils.cpp
+        miles/sound2dhandle.cpp
+        miles/sound2dhandle.h
+        miles/sound3dhandle.cpp
+        miles/sound3dhandle.h
+        miles/soundstreamhandle.cpp
+        miles/soundstreamhandle.h
+    )
 else()
     list(APPEND WWAUDIO_SRC
         null/NullAudio.h
@@ -61,6 +75,10 @@ target_link_libraries(wwaudio PRIVATE
 )
 
 target_sources(wwaudio PRIVATE ${WWAUDIO_SRC})
+
+if(TARGET milesstub)
+    target_link_libraries(wwaudio PRIVATE milesstub)
+endif()
 
 if(TARGET OpenAL::OpenAL)
     target_link_libraries(wwaudio PRIVATE OpenAL::OpenAL)
@@ -79,7 +97,41 @@ if (W3D_TOOLS)
 
     target_sources(wwaudioe PRIVATE ${WWAUDIO_SRC})
 
+    if(W3D_BUILD_OPTION_MILES)
+        target_compile_definitions(wwaudioe PRIVATE W3D_HAS_MILES)
+    endif()
+
     if(TARGET OpenAL::OpenAL)
         target_link_libraries(wwaudioe PRIVATE OpenAL::OpenAL)
     endif()
+
+    if(TARGET milesstub)
+        target_link_libraries(wwaudioe PRIVATE milesstub)
+    endif()
+endif()
+
+if(BUILD_TESTING)
+    add_executable(wwaudio_lifetime_tests
+        tests/WWAudioLifetimeTests.cpp
+    )
+
+    target_link_libraries(wwaudio_lifetime_tests PRIVATE
+        wwaudio
+        ww3d2
+        wwdebug
+        wwlib
+        wwmath
+        wwphys
+        wwsaveload
+        wwcommon
+    )
+
+    if(WIN32)
+        target_link_libraries(wwaudio_lifetime_tests PRIVATE
+            version
+            winmm
+        )
+    endif()
+
+    add_test(NAME wwaudio_lifetime_tests COMMAND wwaudio_lifetime_tests)
 endif()

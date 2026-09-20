@@ -143,7 +143,7 @@ bool SocketHandlerClass::Open(int inport, int outport)
 	if (Socket == INVALID_SOCKET) {
 		return(false);
 	}
-	DebugString(("SocketHandlerClass - Socket %d opened OK\n", Socket));
+	DebugString(("SocketHandlerClass - Socket %d opened OK\n", static_cast<int>(Socket)));
 
 	/*
 	** Bind our UDP socket to our UDP port number
@@ -284,7 +284,7 @@ void SocketHandlerClass::Close(void)
 	}
 
 	if (Socket != INVALID_SOCKET) {
-		DebugString(("SocketHandlerClass - Closing socket %d bound to port %d\n", Socket, IncomingPort));
+		DebugString(("SocketHandlerClass - Closing socket %d bound to port %d\n", static_cast<int>(Socket), IncomingPort));
 		if (closesocket(Socket) != 0) {
 			DebugString(("SocketHandlerClass - closesocket failed with error code %d\n", LAST_ERROR));
 		}
@@ -412,7 +412,7 @@ void SocketHandlerClass::Write(void *buffer, int buffer_len, void *address, unsi
 	** Create a temporary holding area for the packet.
 	*/
 	WinsockBufferType *packet = (WinsockBufferType*) Get_New_Out_Buffer();
-	fw_assert (packet != NULL);
+	fw_assert (packet != nullptr);
 
 	/*
 	** Copy the packet into the holding buffer.
@@ -491,9 +491,9 @@ int SocketHandlerClass::Read(void *buffer, int buffer_len, void *address, unsign
 	}
 
 	WinsockBufferType *packet = InBuffers[packetnum];
-	fw_assert(packet != NULL);
+	fw_assert(packet != nullptr);
 
-	if (packet == NULL) {
+	if (packet == nullptr) {
 		return(0);
 	}
 
@@ -569,9 +569,9 @@ int SocketHandlerClass::Peek(void *buffer, int buffer_len, void *address, unsign
 	}
 
 	WinsockBufferType *packet = InBuffers[packetnum];
-	fw_assert(packet != NULL);
+	fw_assert(packet != nullptr);
 
-	if (packet == NULL) {
+	if (packet == nullptr) {
 		return(0);
 	}
 
@@ -701,7 +701,7 @@ bool SocketHandlerClass::Passes_CRC_Check(WinsockBufferType *packet)
  *=============================================================================================*/
 void *SocketHandlerClass::Get_New_Out_Buffer(void)
 {
-	WinsockBufferType *buffer = NULL;
+	WinsockBufferType *buffer = nullptr;
 	int pos;
 
 	fw_assert (OutBuffersUsed <= MAX_STATIC_BUFFERS);
@@ -733,7 +733,7 @@ void *SocketHandlerClass::Get_New_Out_Buffer(void)
 		}
 	}
 
-	fw_assert (buffer != NULL);
+	fw_assert (buffer != nullptr);
 	return (buffer);
 }
 
@@ -754,7 +754,7 @@ void *SocketHandlerClass::Get_New_Out_Buffer(void)
  *=============================================================================================*/
 void *SocketHandlerClass::Get_New_In_Buffer(void)
 {
-	WinsockBufferType *buffer = NULL;
+	WinsockBufferType *buffer = nullptr;
 	int pos;
 
 	fw_assert (InBuffersUsed <= MAX_STATIC_BUFFERS);
@@ -786,7 +786,7 @@ void *SocketHandlerClass::Get_New_In_Buffer(void)
 		}
 	}
 
-	fw_assert (buffer != NULL);
+	fw_assert (buffer != nullptr);
 	return (buffer);
 }
 
@@ -918,7 +918,7 @@ void SocketHandlerClass::Service(void)
 					** Create a new holding buffer to store this packet in.
 					*/
 					packet = (WinsockBufferType*) Get_New_In_Buffer();
-					fw_assert (packet != NULL);
+					fw_assert (packet != nullptr);
 
 					/*
 					** Store the packet into the holding buffer.

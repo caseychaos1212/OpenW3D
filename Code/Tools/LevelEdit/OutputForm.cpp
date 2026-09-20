@@ -52,7 +52,7 @@ OutputFormClass::OutputFormClass()
 	//	Create the log file
 	//
 	char filename[MAX_PATH];
-	::GetModuleFileName (NULL, filename, sizeof (filename));
+	::GetModuleFileName (nullptr, filename, sizeof (filename));
 
 	CString directory = ::Strip_Filename_From_Path (filename);
 	CString full_path = Make_Path (directory, "_editorlog.txt");
@@ -60,20 +60,7 @@ OutputFormClass::OutputFormClass()
 	//
 	//	Try to open the log file
 	//
-	HANDLE file = ::CreateFile (	full_path,
-											GENERIC_WRITE,
-											FILE_SHARE_READ,
-											NULL,
-											OPEN_ALWAYS,
-											0L,
-											NULL);
-
-	//
-	//	If we succeeded then pass the handle onto our file object
-	//
-	if (file != INVALID_HANDLE_VALUE) {
-		LogFile.Attach (file);
-	}
+	LogFile.Open(full_path, FileClass::WRITE);
 
 	return ;
 }
@@ -180,7 +167,7 @@ OutputFormClass::OnSize
 
 	if (::IsWindow (m_OutputEdit) && (cx > 0) && (cy > 0)) {
 		// Resize the tab control to fill the entire contents of the client area
-		m_OutputEdit.SetWindowPos (NULL, 0, 0, cx, cy, SWP_NOZORDER | SWP_NOMOVE);
+		m_OutputEdit.SetWindowPos (nullptr, 0, 0, cx, cy, SWP_NOZORDER | SWP_NOMOVE);
 	}
 	return ;
 }

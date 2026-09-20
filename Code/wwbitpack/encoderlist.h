@@ -59,21 +59,12 @@ class cEncoderList
 				static_cast<double>(resolution));
 
 			WWDEBUG_SAY(("cEncoderList::Set_Precision for type %d: %d -> %d bits\n",
-				type, sizeof(T) * 8, EncoderTypes[type].Get_Bit_Precision()));
+				type, static_cast<int>(sizeof(T) * 8), EncoderTypes[type].Get_Bit_Precision()));
 
 			//
 			// Return maximum representation error
 			//
 			return static_cast<T>(resolution / 2.0f + MISCUTIL_EPSILON);
-			/*
-			double max_error = EncoderTypes[type].Get_Resolution() / 2.0f + MISCUTIL_EPSILON;
-			if (::fabs(max_error - static_cast<T>(max_error)) < MISCUTIL_EPSILON) {
-				//return static_cast<T>(max_error);
-				return static_cast<T>(max_error);
-			} else {
-				return static_cast<T>(ceil(max_error));
-			}
-			/**/
 		}
 		//------------------------------------------------------------------------------------
 		static void Set_Precision(int type, int num_bits)

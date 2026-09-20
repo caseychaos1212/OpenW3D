@@ -169,7 +169,7 @@ ThumbnailClass::ThumbnailClass(ThumbnailManagerClass* manager, const StringClass
 		unsigned src_bpp=0;
 		Get_WW3D_Format(src_format,src_bpp,targa);
 		if (src_format==WW3D_FORMAT_UNKNOWN) {
-			WWDEBUG_SAY(("Unknown texture format for %s\n",filename));
+			WWDEBUG_SAY(("Unknown texture format for %s\n",filename.Peek_Buffer()));
 			return;
 		}
 
@@ -476,7 +476,7 @@ void ThumbnailManagerClass::Save(bool force)
 // ----------------------------------------------------------------------------
 ThumbnailManagerClass::ThumbnailManagerClass(const char* thumbnail_filename, const char* mix_filename)
 	:
-	ThumbnailMemory(NULL),
+	ThumbnailMemory(nullptr),
 	ThumbnailFileName(thumbnail_filename),
 	MixFileName(mix_filename),
 	PerTextureTimeStampUsed(false),
@@ -500,7 +500,7 @@ ThumbnailManagerClass::~ThumbnailManagerClass()
 	}
 
 	if (ThumbnailMemory) delete[] ThumbnailMemory;
-	ThumbnailMemory=NULL;
+	ThumbnailMemory=nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -543,7 +543,7 @@ ThumbnailClass* ThumbnailManagerClass::Peek_Thumbnail_Instance(const StringClass
 			thumb=new ThumbnailClass(this,name);
 			if (!thumb->Peek_Bitmap()) {
 				delete thumb;
-				thumb=NULL;
+				thumb=nullptr;
 			}
 		}
 	}
@@ -664,9 +664,9 @@ void ThumbnailManagerClass::Pre_Init(bool display_message_box)
 	// Collect all mix file names
 	DynamicVectorClass<StringClass> mix_names;
 
-	StringClass cur_dir = cPathUtil::GetWorkingDirectory(true);
-	StringClass new_dir = cur_dir + "Data";
-	SetCurrentDirectoryA(new_dir);
+	const std::filesystem::path cur_dir = cPathUtil::GetWorkingDirectory();
+	const std::filesystem::path new_dir = cur_dir / "Data";
+	cPathUtil::SetWorkingDirectory(new_dir);
 
 	WIN32_FIND_DATAA find_data;
 	HANDLE handle=FindFirstFileA("*.mix",&find_data);
@@ -681,7 +681,7 @@ void ThumbnailManagerClass::Pre_Init(bool display_message_box)
 			}
 		}
 	}
-	SetCurrentDirectoryA(cur_dir);
+	cPathUtil::SetWorkingDirectory(cur_dir);
 
 	// First generate thumbnails for always.dat
 	Update_Thumbnail_File("always.dat",display_message_box);

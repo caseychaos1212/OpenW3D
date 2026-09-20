@@ -44,6 +44,7 @@
 #include "cnetwork.h"
 #include "translatedb.h"
 #include "string_ids.h"
+#include <cinttypes>
 
 
 using namespace WWOnline;
@@ -90,7 +91,7 @@ WOLQuickMatch* WOLQuickMatch::Create(void)
 		match->Release_Ref();
 		}
 
-	return NULL;
+	return nullptr;
 	}
 
 
@@ -264,7 +265,7 @@ RefPtr<WaitCondition> WOLQuickMatch::Disconnect(void)
 			}
 		}
 
-	return NULL;
+	return nullptr;
 	}
 
 
@@ -286,15 +287,15 @@ RefPtr<WaitCondition> WOLQuickMatch::Disconnect(void)
 
 bool WOLQuickMatch::SendClientInfo(void)
 	{
-	unsigned int ver = cNetwork::Get_Exe_Key();
+	uint32_t ver = cNetwork::Get_Exe_Key();
 
 	// Get CPU speed
-	int speed = CPUDetectClass::Get_Processor_Speed();
+	uint64_t speed = CPUDetectClass::Get_Processor_Speed();
 
 	// Get amount of physical memory
-	MEMORYSTATUS memStatus;
-	GlobalMemoryStatus(&memStatus);
-	unsigned int memory = (memStatus.dwTotalPhys / 1048576);
+	MEMORYSTATUSEX memStatus;
+	GlobalMemoryStatusEx(&memStatus);
+	uint64_t memory = (memStatus.ullTotalPhys / 1048576);
 
 	//-------------------------------------------------------------------------
 	// Gather pings
@@ -329,7 +330,7 @@ bool WOLQuickMatch::SendClientInfo(void)
 	// Generate client information message
 	//-------------------------------------------------------------------------
 	WideStringClass clientMsg(256, true);
-	clientMsg.Format(U_CHAR("CINFO VER=%lu CPU=%lu MEM=%lu TPOINTS=%ld PLAYED=%lu PINGS=%S"),
+	clientMsg.Format(U_CHAR("CINFO VER=%" PRIu32 " CPU=%" PRIu64 " MEM=%" PRIu64 "TPOINTS=%ld PLAYED=%lu PINGS=%S"),
 		ver, speed, memory, tpoints, played, pseudoPings);
 
 	WWDEBUG_SAY(("WOLQuickMatch: '%S'\n", (const unichar_t*)clientMsg));
@@ -421,7 +422,7 @@ void WOLQuickMatch::ParseResponse(const unichar_t* message)
 			{U_CHAR("INFO "), WOLQuickMatch::ProcessInfo},
 			{U_CHAR("ERROR "), WOLQuickMatch::ProcessError},
 			{U_CHAR("START "), WOLQuickMatch::ProcessStart},
-			{NULL, WOLQuickMatch::ProcessUnknown}
+			{nullptr, WOLQuickMatch::ProcessUnknown}
 			};
 
 		int index = 0;
@@ -604,7 +605,7 @@ void WOLQuickMatch::HandleNotification(ChatMessage& message)
 
 	if (sender.Compare_No_Case(QUICKMATCH_BOTNAME) == 0)
 		{
-		WWDEBUG_SAY(("WOLQuickMatch: BotMsg - '%S'\n", message.GetMessage()));
+		WWDEBUG_SAY(("WOLQuickMatch: BotMsg - '%S'\n", message.GetMessage().Peek_Buffer()));
 		ParseResponse(message.GetMessage());
 		}
 	}

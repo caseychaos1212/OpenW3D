@@ -50,7 +50,7 @@ EmitterParticlePropPageClass::EmitterParticlePropPageClass (EmitterInstanceListC
 	  m_Rate (0),
 	  m_BurstSize (0),
 	  m_MaxParticles (0),
-	  m_Randomizer (NULL),
+	  m_Randomizer (nullptr),
 	  CPropertyPage(EmitterParticlePropPageClass::IDD)
 {
 	//{{AFX_DATA_INIT(EmitterParticlePropPageClass)
@@ -105,14 +105,14 @@ void
 EmitterParticlePropPageClass::Initialize (void)
 {
 	SAFE_DELETE (m_Randomizer);
-	if (m_pEmitterList != NULL) {
+	if (m_pEmitterList != nullptr) {
 
 		//
 		// Read the settings from the emitter
 		//
 		m_Rate			= m_pEmitterList->Get_Emission_Rate ();
 		m_BurstSize		= m_pEmitterList->Get_Burst_Size ();
-		m_MaxParticles	= m_pEmitterList->Get_Max_Emissions ();
+		m_MaxParticles	= int(m_pEmitterList->Get_Max_Emissions ());
 		m_Randomizer	= m_pEmitterList->Get_Creation_Volume ();
 	}
 
@@ -175,7 +175,7 @@ EmitterParticlePropPageClass::OnApply (void)
 	//
 	m_pEmitterList->Set_Emission_Rate (m_Rate);
 	m_pEmitterList->Set_Burst_Size (m_BurstSize);
-	m_pEmitterList->Set_Max_Emissions (m_MaxParticles);
+	m_pEmitterList->Set_Max_Emissions (float(m_MaxParticles));
 	m_pEmitterList->Set_Creation_Volume (m_Randomizer->Clone ());
 
 	// Allow the base class to process this message
@@ -220,7 +220,7 @@ EmitterParticlePropPageClass::OnNotify
 	//	Update the spinner control if necessary
 	//
 	NMHDR *pheader = (NMHDR *)lParam;
-	if ((pheader != NULL) && (pheader->code == UDN_DELTAPOS)) {
+	if ((pheader != nullptr) && (pheader->code == UDN_DELTAPOS)) {
 		LPNMUPDOWN pupdown = (LPNMUPDOWN)lParam;
 		::Update_Spinner_Buddy (pheader->hwndFrom, pupdown->iDelta);
 		SetModified ();
@@ -289,7 +289,7 @@ EmitterParticlePropPageClass::OnCommand
 void
 EmitterParticlePropPageClass::OnMaxParticlesCheck (void)
 {
-	BOOL enable = SendDlgItemMessage (IDC_MAX_PARTICLES_CHECK, BM_GETCHECK);
+	BOOL enable = BOOL(SendDlgItemMessage (IDC_MAX_PARTICLES_CHECK, BM_GETCHECK));
 	::EnableWindow (::GetDlgItem (m_hWnd, IDC_MAX_PARTICLES_EDIT), enable);
 	::EnableWindow (::GetDlgItem (m_hWnd, IDC_MAX_PARTICLES_SPIN), enable);
 

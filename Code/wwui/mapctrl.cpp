@@ -85,7 +85,7 @@ MapCtrlClass::MapCtrlClass (void)	:
 	ZoomOutButtonRect (0, 0, 0, 0),
 	MapCenterPoint (0, 0),
 	MapScale (1, 1),
-	CloudVector (NULL),
+	CloudVector (nullptr),
 	CloudSize (0, 0),
 	OverlayOpacity (1.0F),
 	PulseDirection (-1.0F)
@@ -245,10 +245,10 @@ MapCtrlClass::Create_Control_Renderers (void)
 			//	Build a screen rectangle we'll render into
 			//
 			RectClass screen_rect;
-			screen_rect.Left		= int(screen_pos.X - (marker.Get_Rect ().Width () / 2));
-			screen_rect.Top		= int(screen_pos.Y - (marker.Get_Rect ().Height () / 2));
-			screen_rect.Right		= int(screen_rect.Left + marker.Get_Rect ().Width ());
-			screen_rect.Bottom	= int(screen_rect.Top + marker.Get_Rect ().Height ());
+			screen_rect.Left		= WWMath::Trunc(screen_pos.X - (marker.Get_Rect ().Width () / 2));
+			screen_rect.Top		= WWMath::Trunc(screen_pos.Y - (marker.Get_Rect ().Height () / 2));
+			screen_rect.Right		= WWMath::Trunc(screen_rect.Left + marker.Get_Rect ().Width ());
+			screen_rect.Bottom	= WWMath::Trunc(screen_rect.Top + marker.Get_Rect ().Height ());
 
 			//
 			//	Convert the pixel coordinates into normalized UVs
@@ -300,16 +300,16 @@ MapCtrlClass::Create_Control_Renderers (void)
 	ButtonRenderer.Reset ();
 
 	RectClass temp_rect1;
-	temp_rect1.Left		= int(ZoomInButtonRect.Center ().X - (ZoomInUVRect.Width () / 2));
-	temp_rect1.Top			= int(ZoomInButtonRect.Center ().Y - (ZoomInUVRect.Height () / 2));
-	temp_rect1.Right		= int(temp_rect1.Left + ZoomInUVRect.Width ());
-	temp_rect1.Bottom		= int(temp_rect1.Top + ZoomInUVRect.Height ());
+	temp_rect1.Left		= WWMath::Trunc(ZoomInButtonRect.Center ().X - (ZoomInUVRect.Width () / 2));
+	temp_rect1.Top			= WWMath::Trunc(ZoomInButtonRect.Center ().Y - (ZoomInUVRect.Height () / 2));
+	temp_rect1.Right		= WWMath::Trunc(temp_rect1.Left + ZoomInUVRect.Width ());
+	temp_rect1.Bottom		= WWMath::Trunc(temp_rect1.Top + ZoomInUVRect.Height ());
 
 	RectClass temp_rect2;
-	temp_rect2.Left		= int(ZoomOutButtonRect.Center ().X - (ZoomInUVRect.Width () / 2));
-	temp_rect2.Top			= int(ZoomOutButtonRect.Center ().Y - (ZoomInUVRect.Height () / 2));
-	temp_rect2.Right		= int(temp_rect2.Left + ZoomInUVRect.Width ());
-	temp_rect2.Bottom		= int(temp_rect2.Top + ZoomInUVRect.Height ());
+	temp_rect2.Left		= WWMath::Trunc(ZoomOutButtonRect.Center ().X - (ZoomInUVRect.Width () / 2));
+	temp_rect2.Top			= WWMath::Trunc(ZoomOutButtonRect.Center ().Y - (ZoomInUVRect.Height () / 2));
+	temp_rect2.Right		= WWMath::Trunc(temp_rect2.Left + ZoomInUVRect.Width ());
+	temp_rect2.Bottom		= WWMath::Trunc(temp_rect2.Top + ZoomInUVRect.Height ());
 
 	RectClass temp_uv_rect1 = ZoomInUVRect;
 	RectClass temp_uv_rect2 = ZoomOutUVRect;
@@ -534,15 +534,14 @@ MapCtrlClass::Update_Client_Rect (void)
 	//
 	//	Build the zoom button rectangles
 	//
-	ZoomOutButtonRect;
-	ZoomOutButtonRect.Left		= int(Rect.Right	- (ZoomInUVRect.Width () + 2));
-	ZoomOutButtonRect.Top		= int(Rect.Bottom	- (ZoomInUVRect.Height () + 2));
-	ZoomOutButtonRect.Right		= int(Rect.Right);
-	ZoomOutButtonRect.Bottom	= int(Rect.Bottom);
+	ZoomOutButtonRect.Left		= WWMath::Trunc(Rect.Right	- (ZoomInUVRect.Width () + 2));
+	ZoomOutButtonRect.Top		= WWMath::Trunc(Rect.Bottom	- (ZoomInUVRect.Height () + 2));
+	ZoomOutButtonRect.Right		= WWMath::Trunc(Rect.Right);
+	ZoomOutButtonRect.Bottom	= WWMath::Trunc(Rect.Bottom);
 
 	ZoomInButtonRect				= ZoomOutButtonRect;
-	ZoomInButtonRect.Left		= int(ZoomInButtonRect.Left - (ZoomInUVRect.Width () + 2));
-	ZoomInButtonRect.Right		= int(ZoomInButtonRect.Right - (ZoomInUVRect.Width () + 2));
+	ZoomInButtonRect.Left		= WWMath::Trunc(ZoomInButtonRect.Left - (ZoomInUVRect.Width () + 2));
+	ZoomInButtonRect.Right		= WWMath::Trunc(ZoomInButtonRect.Right - (ZoomInUVRect.Width () + 2));
 
 	Set_Dirty ();
 	return ;
@@ -660,13 +659,13 @@ MapCtrlClass::Set_Map_Texture (const char *filename)
 	//	Load the texture
 	//
 	TextureClass *texture = WW3DAssetManager::Get_Instance ()->Get_Texture (filename, TextureClass::MIP_LEVELS_1);
-	if (texture != NULL) {
+	if (texture != nullptr) {
 
 		//
 		//	Get the dimensions of the texture
 		//
-		MapSize.X = texture->Get_Width();
-		MapSize.Y = texture->Get_Height();
+		MapSize.X = float(texture->Get_Width());
+		MapSize.Y = float(texture->Get_Height());
 		texture->Set_U_Addr_Mode (TextureClass::TEXTURE_ADDRESS_CLAMP);
 		texture->Set_V_Addr_Mode (TextureClass::TEXTURE_ADDRESS_CLAMP);
 
@@ -695,7 +694,7 @@ MapCtrlClass::Set_Map_Texture (const char *filename)
 	//
 	IsUsingOverlay = false;
 	FileClass *file = _TheFileFactory->Get_File (overlay_texture_name);
-	if (file != NULL) {
+	if (file != nullptr) {
 
 		bool is_valid = true;
 
@@ -709,7 +708,7 @@ MapCtrlClass::Set_Map_Texture (const char *filename)
 			overlay_texture_name.Erase (static_cast<int>(overlay_len - 3), 3);
 			overlay_texture_name += "dds";
 			file = _TheFileFactory->Get_File (overlay_texture_name);
-			if (file != NULL && file->Is_Available ()) {
+			if (file != nullptr && file->Is_Available ()) {
 				is_valid = true;
 			}
 		}
@@ -720,7 +719,7 @@ MapCtrlClass::Set_Map_Texture (const char *filename)
 			//
 			//	Configure the overlay renderer
 			//
-			if (texture != NULL) {
+			if (texture != nullptr) {
 				texture->Set_U_Addr_Mode (TextureClass::TEXTURE_ADDRESS_CLAMP);
 				texture->Set_V_Addr_Mode (TextureClass::TEXTURE_ADDRESS_CLAMP);
 				MapOverlayRenderer.Set_Texture (texture);
@@ -729,7 +728,7 @@ MapCtrlClass::Set_Map_Texture (const char *filename)
 			}
 		}
 
-		if (file != NULL) {
+		if (file != nullptr) {
 			_TheFileFactory->Return_File (file);
 		}
 	}
@@ -926,7 +925,7 @@ MapCtrlClass::Set_Marker_Texture (const char *filename)
 	//	Load the texture
 	//
 	TextureClass *texture = WW3DAssetManager::Get_Instance ()->Get_Texture (filename, TextureClass::MIP_LEVELS_1);
-	if (texture != NULL) {
+	if (texture != nullptr) {
 
 		//
 		//	Get the dimensions of the texture
@@ -935,8 +934,8 @@ MapCtrlClass::Set_Marker_Texture (const char *filename)
 //		texture->Get_Level_Description (surface_desc);
 //		IconTextureSize.X = surface_desc.Width;
 //		IconTextureSize.Y = surface_desc.Height;
-		IconTextureSize.X = texture->Get_Width ();
-		IconTextureSize.Y = texture->Get_Height ();
+		IconTextureSize.X = float(texture->Get_Width ());
+		IconTextureSize.Y = float(texture->Get_Height ());
 
 		//
 		//	Set the texture for the map
@@ -1114,7 +1113,7 @@ MapCtrlClass::Reset_Cloud (void)
 void
 MapCtrlClass::Set_Cloud_Cell (int cell_x, int cell_y, bool is_visible)
 {
-	if (CloudVector == NULL) {
+	if (CloudVector == nullptr) {
 		return ;
 	}
 
@@ -1146,9 +1145,9 @@ MapCtrlClass::Set_Cloud_Cell (int cell_x, int cell_y, bool is_visible)
 void
 MapCtrlClass::Free_Cloud_Data (void)
 {
-	if (CloudVector != NULL) {
+	if (CloudVector != nullptr) {
 		delete CloudVector;
-		CloudVector = NULL;
+		CloudVector = nullptr;
 	}
 
 	CloudSize.Set (0, 0);

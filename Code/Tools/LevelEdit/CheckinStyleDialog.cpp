@@ -45,7 +45,7 @@ const TCHAR * const REG_LATER				= TEXT ("Later");
 //
 // CheckinStyleDialogClass
 //
-CheckinStyleDialogClass::CheckinStyleDialogClass(CWnd* pParent /*=NULL*/)
+CheckinStyleDialogClass::CheckinStyleDialogClass(CWnd* pParent /*=nullptr*/)
 	: CDialog(CheckinStyleDialogClass::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CheckinStyleDialogClass)
@@ -126,7 +126,7 @@ CheckinStyleDialogClass::OnCommand
 INT_PTR
 CheckinStyleDialogClass::DoModal (void)
 {
-	UINT ret_code = IDC_UPDATE_NOW;
+	INT_PTR ret_code = IDC_UPDATE_NOW;
 
 	// Get the cached 'checkin' style if possible
 	CString checkin_style = theApp.GetProfileString (CONFIG_KEY, CHECKIN_STYLE_VALUE, REG_NOT_CACHED);

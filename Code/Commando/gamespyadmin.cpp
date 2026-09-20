@@ -216,10 +216,10 @@ cGameSpyAdmin::Connect_To_Game_Server
 		GameInitMgrClass::Initialize_LAN();
 	}
 
-	WWASSERT(PTheGameData == NULL);
+	WWASSERT(PTheGameData == nullptr);
 	PTheGameData = cGameData::Create_Game_Of_Type(
 		IsCoopDirectConnect ? cGameData::GAME_TYPE_COOP_MISSION : cGameData::GAME_TYPE_CNC);
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	PTheGameData->Set_Ip_Address(GameHostIp);
 	PTheGameData->Set_Port(GameHostPort);
 	if (IsCoopDirectConnect) {
@@ -368,7 +368,7 @@ cGameSpyAdmin::Is_Nickname_Collision
 	WWASSERT(!nickname.Is_Empty());
 	WWASSERT(cNetwork::I_Am_Server());
 
-	bool collides = (cPlayerManager::Find_Player(nickname) != NULL);
+	bool collides = (cPlayerManager::Find_Player(nickname) != nullptr);
 	if (cNetwork::I_Am_Only_Server())
 	{
 		collides |= !nickname.Compare_No_Case(cNetInterface::Get_Nickname());

@@ -49,8 +49,8 @@
 //
 // Class statics
 //
-Render2DTextClass	*		cBandwidthGraph::PTextRenderer		= NULL;
-Font3DInstanceClass *	cBandwidthGraph::PFont					= NULL;
+Render2DTextClass	*		cBandwidthGraph::PTextRenderer		= nullptr;
+Font3DInstanceClass *	cBandwidthGraph::PFont					= nullptr;
 int							cBandwidthGraph::BandwidthScaler		= 50000;
 float							cBandwidthGraph::YPosition				= 0;
 float							cBandwidthGraph::BarHeight				= 0;
@@ -73,9 +73,9 @@ cBandwidthGraph::Onetime_Init
 
 	bool can_render = ConsoleBox.Is_Exclusive() ? false : true;
 	if (can_render) {
-		WWASSERT(WW3DAssetManager::Get_Instance() != NULL);
+		WWASSERT(WW3DAssetManager::Get_Instance() != nullptr);
    	PFont = WW3DAssetManager::Get_Instance()->Get_Font3DInstance("FONT6x8.TGA");
-   	WWASSERT(PFont != NULL);
+   	WWASSERT(PFont != nullptr);
 		PFont->Set_Mono_Spaced();
 		SET_REF_OWNER(PFont);
 
@@ -99,16 +99,16 @@ cBandwidthGraph::Onetime_Shutdown
 )
 {
 	WWDEBUG_SAY(("cBandwidthGraph::Onetime_Close\n"));
-	if (PTextRenderer != NULL)
+	if (PTextRenderer != nullptr)
 	{
 		delete PTextRenderer;
-		PTextRenderer = NULL;
+		PTextRenderer = nullptr;
 	}
 
-	if (PFont != NULL)
+	if (PFont != nullptr)
 	{
 		PFont->Release_Ref();
-		PFont = NULL;
+		PFont = nullptr;
 	}
 }
 
@@ -124,10 +124,10 @@ cBandwidthGraph::Bandwidth_Graph
 	bool				is_loading
 )
 {
-	if (PTextRenderer == NULL) {
+	if (PTextRenderer == nullptr) {
 		return;
 	}
-	WWASSERT(PTextRenderer != NULL);
+	WWASSERT(PTextRenderer != nullptr);
 
 	float x1 = 0;
 	float x2 = bps / (float) BandwidthScaler * BarWidth;
@@ -154,7 +154,6 @@ cBandwidthGraph::Bandwidth_Graph
 	//
 	if (target_bps >= 0)
 	{
-		StringClass text;
    	text.Format("%d", target_bps);
 		PTextRenderer->Set_Location(Vector2(245, YPosition));
 		PTextRenderer->Draw_Text(text);
@@ -218,11 +217,11 @@ cBandwidthGraph::Think
 
 	PacketManager.Update_Stats();
 
-	if (PTextRenderer == NULL) {
+	if (PTextRenderer == nullptr) {
 		return;
 	}
 
-	WWASSERT(PTextRenderer != NULL);
+	WWASSERT(PTextRenderer != nullptr);
 
 	PTextRenderer->Reset();
 
@@ -275,7 +274,7 @@ cBandwidthGraph::Think
 	//
 	// Server bandwidth
 	//
-	if (cNetwork::PServerConnection != NULL)
+	if (cNetwork::PServerConnection != nullptr)
 	{
 		text.Format("s->c*");
 		bps = PacketManager.Get_Total_Compressed_Bandwidth_Out();
@@ -286,11 +285,11 @@ cBandwidthGraph::Think
 		bps = PacketManager.Get_Total_Compressed_Bandwidth_In();
 		Bandwidth_Graph(text, bps, -1, -1, -1.0f, false);
 
-	   for (int i = cNetwork::PServerConnection->Get_Min_RHost(); i <= cNetwork::PServerConnection->Get_Max_RHost(); i++)
+	   for (i = cNetwork::PServerConnection->Get_Min_RHost(); i <= cNetwork::PServerConnection->Get_Max_RHost(); i++)
 		{
 			cRemoteHost * p_rhost = cNetwork::Get_Server_Rhost(i);
 
-			if (p_rhost != NULL)
+			if (p_rhost != nullptr)
 			{
 				bool is_loading = p_rhost->Get_Flood();
 				text.Format("s->c%d", i);
@@ -327,10 +326,10 @@ cBandwidthGraph::Render
 		return;
 	}
 
-	if (PTextRenderer == NULL) {
+	if (PTextRenderer == nullptr) {
 		return;
 	}
 
-	WWASSERT(PTextRenderer != NULL);
+	WWASSERT(PTextRenderer != nullptr);
 	PTextRenderer->Render();
 }

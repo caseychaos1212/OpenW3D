@@ -59,11 +59,11 @@ DECLARE_SCRIPT(M00_C130_Dropoff_RMV, "ObjToCreate=:string")
 
 	void Created( GameObject * obj ) override
 	{
-		Commands->Set_Animation ( obj, "V_NOD_C-130E3.M_cargo-drop", 0 , NULL, 0.0f, -1.0f, false);
+		Commands->Set_Animation ( obj, "V_NOD_C-130E3.M_cargo-drop", 0 , nullptr, 0.0f, -1.0f, false);
 		int drop_frame;
 		drop_frame = 460;
 		float drop_time;
-		drop_time= ( float )drop_frame / 30.0;
+		drop_time= ( float )drop_frame / 30.0f;
 		Commands->Start_Timer( obj, this, drop_time, M00_TIMER_DROP_OBJECT_RMV );
 	}
 
@@ -247,8 +247,8 @@ DECLARE_SCRIPT(RMV_Camera_Behavior, "Angle:float, Alarm_ID=0:int, Is_Gun=0:int, 
 	{
 		float facing = Commands->Get_Facing(Owner());
 		Vector3 target = Commands->Get_Position(Owner());
-		target.X += cos(DEG_TO_RADF(facing)) * 10.0f;
-		target.Y += sin(DEG_TO_RADF(facing)) * 10.0f;
+		target.X += WWMath::Cos(DEG_TO_RADF(facing)) * 10.0f;
+		target.Y += WWMath::Sin(DEG_TO_RADF(facing)) * 10.0f;
 		target.Z -= 0.9f;
 		float angle = Get_Float_Parameter(0);
 		angle = WWMath::Clamp(angle, 0.0f, 360.0f);
@@ -284,8 +284,8 @@ DECLARE_SCRIPT(RMV_Camera_Behavior, "Angle:float, Alarm_ID=0:int, Is_Gun=0:int, 
 		float facing = Commands->Get_Facing(Owner());
 		angle = angle / 2;
 		Vector3 target = Commands->Get_Position(Owner());
-		target.X += cos(DEG_TO_RADF(facing)) * 10.0f;
-		target.Y += sin(DEG_TO_RADF(facing)) * 10.0f;
+		target.X += WWMath::Cos(DEG_TO_RADF(facing)) * 10.0f;
+		target.Y += WWMath::Sin(DEG_TO_RADF(facing)) * 10.0f;
 		target.Z -= 1.0f;
 		target -= Commands->Get_Position(Owner());
 		target.Rotate_Z(DEG_TO_RADF(angle));
@@ -526,8 +526,8 @@ DECLARE_SCRIPT(RMV_Transport_Evac, "Number:int, Nod=0:int")
 		sprintf(traj_anim, "XG_TransprtBone.XG_EV%d_PathA", number);
 		char trans_anim[40];
 		sprintf(trans_anim, "v_%s_trnspt.XG_EV%d_trnsA", (nod == 1) ? "NOD" : "GDI", number);
-		Commands->Set_Animation(traj, traj_anim, false, NULL, 0.0f, -1.0f, false);
-		Commands->Set_Animation(transport, trans_anim, false, NULL, 0.0f, -1.0f, false);
+		Commands->Set_Animation(traj, traj_anim, false, nullptr, 0.0f, -1.0f, false);
+		Commands->Set_Animation(transport, trans_anim, false, nullptr, 0.0f, -1.0f, false);
 		Commands->Attach_To_Object_Bone(transport, traj, "BN_Trajectory");
 		Commands->Start_Timer(obj, this, 280.0f / 30.0f, 0);
 
@@ -548,8 +548,8 @@ DECLARE_SCRIPT(RMV_Transport_Evac, "Number:int, Nod=0:int")
 			sprintf(traj_anim, "XG_TransprtBone.XG_EV%d_Pathloop", number);
 			char trans_anim[40];
 			sprintf(trans_anim, "v_%s_trnspt.XG_EV%d_trnsloop",(nod == 1) ? "NOD" : "GDI", number);
-			Commands->Set_Animation(traj, traj_anim, false, NULL, 0.0f, -1.0f, false);
-			Commands->Set_Animation(transport, trans_anim, false, NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation(traj, traj_anim, false, nullptr, 0.0f, -1.0f, false);
+			Commands->Set_Animation(transport, trans_anim, false, nullptr, 0.0f, -1.0f, false);
 			Commands->Start_Timer(obj, this, 94.0f / 30.0f, 1);
 		}
 		else if (timer_id == 1)
@@ -560,8 +560,8 @@ DECLARE_SCRIPT(RMV_Transport_Evac, "Number:int, Nod=0:int")
 				sprintf(traj_anim, "XG_TransprtBone.XG_EV%d_PathZ", number);
 				char trans_anim[40];
 				sprintf(trans_anim, "v_%s_trnspt.XG_EV%d_trnsz", (nod == 1) ? "NOD" : "GDI", number);
-				Commands->Set_Animation(traj, traj_anim, false, NULL, 0.0f, -1.0f, false);
-				Commands->Set_Animation(transport, trans_anim, false, NULL, 0.0f, -1.0f, false);
+				Commands->Set_Animation(traj, traj_anim, false, nullptr, 0.0f, -1.0f, false);
+				Commands->Set_Animation(transport, trans_anim, false, nullptr, 0.0f, -1.0f, false);
 				Commands->Start_Timer(obj, this, 231.0f / 30.0f, 2);
 			}
 			else
@@ -570,8 +570,8 @@ DECLARE_SCRIPT(RMV_Transport_Evac, "Number:int, Nod=0:int")
 				sprintf(traj_anim, "XG_TransprtBone.XG_EV%d_Pathloop", number);
 				char trans_anim[40];
 				sprintf(trans_anim, "v_%s_trnspt.XG_EV%d_trnsloop", (nod == 1) ? "NOD" : "GDI", number);
-				Commands->Set_Animation(traj, traj_anim, false, NULL, 0.0f, -1.0f, false);
-				Commands->Set_Animation(transport, trans_anim, false, NULL, 0.0f, -1.0f, false);
+				Commands->Set_Animation(traj, traj_anim, false, nullptr, 0.0f, -1.0f, false);
+				Commands->Set_Animation(transport, trans_anim, false, nullptr, 0.0f, -1.0f, false);
 				Commands->Start_Timer(obj, this, 94.0f / 30.0f, 1);
 			}
 		}

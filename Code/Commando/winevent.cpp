@@ -78,7 +78,7 @@ cWinEvent::Init(int winner, int loser, bool is_cycle_over)
 	Loser				= loser;
 	IsMapCycleOver	= is_cycle_over;
 
-	WWASSERT(The_Game() != NULL);
+	WWASSERT(The_Game() != nullptr);
 	HostedGameNumber = The_Game()->Get_Hosted_Game_Number();
 
 	Set_Object_Dirty_Bit(BIT_CREATION, true);
@@ -103,18 +103,18 @@ cWinEvent::Act(void)
 
 	WideStringClass win_text;
 
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	//if (The_Game()->Is_Team_Game()) {
 
 	WideStringClass champ_text;
 	champ_text.Format(
 		U_CHAR("%s %s"),
-		The_Game()->Get_Team_Word(),
-		cTeamManager::Get_Team_Name(Winner));
+		The_Game()->Get_Team_Word().Peek_Buffer(),
+		cTeamManager::Get_Team_Name(Winner).Peek_Buffer());
 
 	win_text.Format(
 		U_CHAR("%s %s"),
-		champ_text,
+		champ_text.Peek_Buffer(),
 		TRANSLATION(IDS_MP_WIN_FORMATTING));
 
 	/*
@@ -140,7 +140,7 @@ cWinEvent::Act(void)
 	//
 	//	Let the game know if the map cycle is over
 	//
-	if (The_Game () != NULL) {
+	if (The_Game () != nullptr) {
 		The_Game ()->Set_Is_Map_Cycle_Over (IsMapCycleOver);
 	}
 
@@ -152,7 +152,7 @@ void
 cWinEvent::Export_Creation(BitStreamClass & packet)
 {
 	WWASSERT(cNetwork::I_Am_Server());
-	WWASSERT(The_Game() != NULL);
+	WWASSERT(The_Game() != nullptr);
 
 	cNetEvent::Export_Creation(packet);
 
@@ -196,7 +196,7 @@ cWinEvent::Import_Creation(BitStreamClass & packet)
 	packet.Get(mvp_count);
 
 	//TSS092601
-	WWASSERT(The_Game() != NULL);
+	WWASSERT(The_Game() != nullptr);
 
 	//
 	// This is just causing no end of trouble so I'm going to simplify it.

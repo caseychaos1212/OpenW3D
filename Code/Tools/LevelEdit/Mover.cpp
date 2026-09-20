@@ -98,8 +98,8 @@ MoverClass::Get_Mouse_Ray
 	//
 	// Ensure the 'point' is correct for this mode (fullscreen/windowed)
 	//
-	float xpos = mouse_pos.x;
-	float ypos = mouse_pos.y;
+	float xpos = float(mouse_pos.x);
+	float ypos = float(mouse_pos.y);
 	::Constrain_Point_To_Aspect_Ratio (xpos, ypos);
 
 	// The 'end' of the ray is the world coordinates of the supplied point
@@ -298,7 +298,7 @@ MoverClass::Position_Nodes_Along_Ray
 	int index;
 	for (index = 0; index < list.Count (); index ++) {
 		PhysClass *phys_obj = list[index]->Peek_Physics_Obj ();
-		if (phys_obj != NULL) {
+		if (phys_obj != nullptr) {
 			phys_obj->Inc_Ignore_Counter();
 		}
 	}
@@ -307,7 +307,7 @@ MoverClass::Position_Nodes_Along_Ray
 	// Cast the ray into the world so we can stop the objects at whatever it hits
 	//
 	CastResultStruct res;
-	if (Cast_Ray (res, start, end, GAME_COLLISION_GROUP) != NULL) {
+	if (Cast_Ray (res, start, end, GAME_COLLISION_GROUP) != nullptr) {
 		position = start + (end - start) * res.Fraction;
 	}
 
@@ -321,7 +321,7 @@ MoverClass::Position_Nodes_Along_Ray
 		NodeClass *node = list[index];
 
 		PhysClass *phys_obj = node->Peek_Physics_Obj ();
-		if (phys_obj != NULL) {
+		if (phys_obj != nullptr) {
 
 			//
 			//	Move the node and turn collision back on
@@ -352,7 +352,7 @@ MoverClass::Position_Node_Along_Ray
 	Vector3 position (0, 0, 0);
 
 	PhysClass *phys_obj = node->Peek_Physics_Obj ();
-	if (phys_obj != NULL) {
+	if (phys_obj != nullptr) {
 
 		position = node->Get_Transform ().Get_Translation ();
 
@@ -363,7 +363,7 @@ MoverClass::Position_Node_Along_Ray
 		// Cast the ray into the world so we can stop the object at whatever it hits
 		//
 		CastResultStruct res;
-		if (Cast_Ray (res, start, end, GAME_COLLISION_GROUP) != NULL) {
+		if (Cast_Ray (res, start, end, GAME_COLLISION_GROUP) != nullptr) {
 
 			//
 			// Determine the new position based on whether or not the
@@ -377,7 +377,7 @@ MoverClass::Position_Node_Along_Ray
 			AABoxClass box;
 			RenderObjClass *model = phys_obj->Peek_Model ();
 			RenderObjClass *world_box = model->Get_Sub_Object_By_Name ("WORLDBOX");
-			if (world_box != NULL) {
+			if (world_box != nullptr) {
 				world_box->Get_Obj_Space_Bounding_Box (box);
 				MEMBER_RELEASE (world_box);
 			} else {
@@ -429,7 +429,7 @@ MoverClass::Calc_Ray_Intersection_XY
 		// Calculate the fraction of the distance along the ray where the
 		// Z value of the ray is the same as the Z value of the plane.
 		// This simulates an intersection of the ray with the x-y plane at depth 'z'.
-		double fraction = double(plane - ray_start.Z) / double(ray_end.Z - ray_start.Z);
+		float fraction = (plane - ray_start.Z) / (ray_end.Z - ray_start.Z);
 
 		// If the fraction is between 0 and 1, then the ray intersects the plane
 		if ((fraction >= 0) && (fraction <= 1.0F)) {
@@ -472,7 +472,7 @@ MoverClass::Calc_Ray_Intersection_XZ
 		// Calculate the fraction of the distance along the ray where the
 		// Y value of the ray is the same as the Y value of the plane.
 		// This simulates an intersection of the ray with the x-z plane at depth 'y'.
-		double fraction = double(plane - ray_start.Y) / double(ray_end.Y - ray_start.Y);
+		float fraction = (plane - ray_start.Y) / (ray_end.Y - ray_start.Y);
 
 		// If the fraction is between 0 and 1, then the ray intersects the plane
 		if ((fraction >= 0) && (fraction <= 1.0F)) {
@@ -515,7 +515,7 @@ MoverClass::Calc_Ray_Intersection_YZ
 		// Calculate the fraction of the distance along the ray where the
 		// X value of the ray is the same as the X value of the plane.
 		// This simulates an intersection of the ray with the y-z plane at depth 'x'.
-		double fraction = double(plane - ray_start.X) / double(ray_end.X - ray_start.X);
+		float fraction = (plane - ray_start.X) / (ray_end.X - ray_start.X);
 
 		// If the fraction is between 0 and 1, then the ray intersects the plane
 		if ((fraction >= 0) && (fraction <= 1.0F)) {
@@ -696,7 +696,7 @@ MoverClass::Move_Nodes (NODE_LIST &list, const Vector3 &tracking_point)
 		//
 		// Move the node
 		//
-		if (node != NULL) {
+		if (node != nullptr) {
 			node->Translate (new_pos - tracking_point);
 		}
 	}
@@ -732,15 +732,15 @@ MoverClass::Calc_New_Position
 	//
 	CPoint point;
 
-	if (mouse_pos == NULL) {
+	if (mouse_pos == nullptr) {
 		::GetCursorPos (&point);
 		::Get_Main_View()->ScreenToClient (&point);
 	} else {
 		point = (*mouse_pos);
 	}
 
-	float xpos = point.x;
-	float ypos = point.y;
+	float xpos = float(point.x);
+	float ypos = float(point.y);
 	::Constrain_Point_To_Aspect_Ratio (xpos, ypos);
 
 	//
@@ -987,11 +987,11 @@ MoverClass::Rotate_Nodes_Z
 		//
 		Matrix3D rotation_matrix (1);
 		if (restrict_rotation == false) {
-			rotation_matrix.Rotate_Z (DEG_TO_RAD (5.0F) * multiplier);
+			rotation_matrix.Rotate_Z (DEG_TO_RADF (5.0F) * multiplier);
 		} else if (multiplier > 0.0F) {
-			rotation_matrix.Rotate_Z ((float)DEG_TO_RAD (-90));
+			rotation_matrix.Rotate_Z (DEG_TO_RADF (-90));
 		} else {
-			rotation_matrix.Rotate_Z ((float)DEG_TO_RAD (90));
+			rotation_matrix.Rotate_Z (DEG_TO_RADF (90));
 		}
 
 		// Rotate the node
@@ -1168,7 +1168,7 @@ MoverClass::Translate_Node (NodeClass *node, const Vector3 &vector)
 		//phys_obj->Set_Position (tm.Get_Translation () + vector);
 
 		/*Phys3Class *phys3_obj = phys_obj->As_Phys3Class ();
-		if (phys3_obj != NULL) {
+		if (phys3_obj != nullptr) {
 			phys3_obj->Set_Velocity (vector);
 		}*/
 

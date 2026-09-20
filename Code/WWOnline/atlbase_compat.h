@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
 
 #include <atlbase.h>
 
@@ -108,7 +108,7 @@ inline HRESULT AtlAdvise(
         const IID& iid,
         LPDWORD pdw)
 {
-    if(pUnkCP == NULL) {
+    if(pUnkCP == nullptr) {
         return E_INVALIDARG;
     }
 
@@ -129,7 +129,7 @@ inline HRESULT AtlUnadvise(
         const IID& iid,
         DWORD dw)
 {
-    if (pUnkCP == NULL) {
+    if (pUnkCP == nullptr) {
         return E_INVALIDARG;
     }
 

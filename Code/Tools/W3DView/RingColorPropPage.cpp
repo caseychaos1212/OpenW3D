@@ -44,8 +44,8 @@ IMPLEMENT_DYNCREATE(RingColorPropPageClass, CPropertyPage)
 RingColorPropPageClass::RingColorPropPageClass (RingRenderObjClass *ring)
 	:	m_RenderObj (ring),
 		m_bValid (true),
-		m_ColorBar (NULL),
-		m_OpacityBar (NULL),
+		m_ColorBar (nullptr),
+		m_OpacityBar (nullptr),
 		CPropertyPage(RingColorPropPageClass::IDD)
 {
 	//{{AFX_DATA_INIT(RingColorPropPageClass)
@@ -104,7 +104,7 @@ RingColorPropPageClass::Initialize (void)
 	m_AlphaChannel.Reset ();
 	m_OrigAlphaChannel.Reset ();
 
-	if (m_RenderObj != NULL) {
+	if (m_RenderObj != nullptr) {
 
 		m_ColorChannel			= m_RenderObj->Get_Color_Channel ();
 		m_OrigColorChannel	= m_RenderObj->Get_Color_Channel ();
@@ -271,9 +271,9 @@ RingColorPropPageClass::OnNotify
 				if (Show_Color_Picker (&red, &green, &blue)) {
 					m_ColorBar->Modify_Point (	color_bar_hdr->key_index,
 														color_bar_hdr->position,
-														red,
-														green,
-														blue);
+														float(red),
+														float(green),
+														float(blue));
 
 					//
 					// Update the object

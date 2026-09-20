@@ -53,8 +53,8 @@ DynamicMeshModel::DynamicMeshModel(unsigned int max_polys, unsigned int max_vert
 	MeshGeometryClass(),
 	DynamicMeshPNum(0),
 	DynamicMeshVNum(0),
-	MatDesc(NULL),
-	MatInfo(NULL)
+	MatDesc(nullptr),
+	MatInfo(nullptr)
 {
 	MatInfo = NEW_REF(MaterialInfoClass, ());
 
@@ -69,8 +69,8 @@ DynamicMeshModel::DynamicMeshModel(unsigned int max_polys, unsigned int max_vert
 	MeshGeometryClass(),
 	DynamicMeshPNum(0),
 	DynamicMeshVNum(0),
-	MatDesc(NULL),
-	MatInfo(NULL)
+	MatDesc(nullptr),
+	MatInfo(nullptr)
 {
 	MatInfo = mat_info;
 	MatInfo->Add_Ref();
@@ -86,8 +86,8 @@ DynamicMeshModel::DynamicMeshModel(const DynamicMeshModel &src) :
 	MeshGeometryClass(src),
 	DynamicMeshPNum(src.DynamicMeshPNum),
 	DynamicMeshVNum(src.DynamicMeshVNum),
-	MatDesc(NULL),
-	MatInfo(NULL)
+	MatDesc(nullptr),
+	MatInfo(nullptr)
 {
 	// Copy the material info structure.
 	MatInfo = NEW_REF(MaterialInfoClass, (*(src.MatInfo)));
@@ -103,7 +103,7 @@ DynamicMeshModel::~DynamicMeshModel(void)
 {
 	if (MatDesc) {
 		delete MatDesc;
-		MatDesc = NULL;
+		MatDesc = nullptr;
 	}
 	REF_PTR_RELEASE(MatInfo);
 }
@@ -184,7 +184,7 @@ void DynamicMeshModel::Render(RenderInfoClass & /*rinfo*/)
 	** one texture channel, and the diffuse color channel (color0). If it does not contain all
 	** these components, the code will fail.
 	*/
-	DynamicVBAccessClass dynamic_vb(buffer_type,dynamic_fvf_type,DynamicMeshVNum);
+	DynamicVBAccessClass dynamic_vb(buffer_type,dynamic_fvf_type,static_cast<unsigned short>(DynamicMeshVNum));
 	const FVFInfoClass &fvf_info = dynamic_vb.FVF_Info();
 
 	{ // scope for lock
@@ -227,7 +227,7 @@ void DynamicMeshModel::Render(RenderInfoClass & /*rinfo*/)
 	/*
 	** Write index data to index buffers
 	*/
-	DynamicIBAccessClass dynamic_ib(buffer_type,DynamicMeshPNum * 3);
+	DynamicIBAccessClass dynamic_ib(static_cast<unsigned short>(buffer_type),static_cast<unsigned short>(DynamicMeshPNum * 3));
 	const TriIndex *tris = Get_Polygon_Array();
 
 	{ // scope for lock
@@ -261,7 +261,7 @@ void DynamicMeshModel::Render(RenderInfoClass & /*rinfo*/)
 		*/
 
 		// The vertex index range used
-		unsigned short min_vert_idx = DynamicMeshVNum - 1;
+		unsigned short min_vert_idx = static_cast<unsigned short>(DynamicMeshVNum - 1);
 		unsigned short max_vert_idx = 0;
 		unsigned short start_tri_idx = 0;
 		unsigned short cur_tri_idx = 0;
@@ -272,28 +272,28 @@ void DynamicMeshModel::Render(RenderInfoClass & /*rinfo*/)
 		bool material_changed = false;
 		bool shader_changed = false;
 
-		TextureClass **texture_array0 = NULL;
+		TextureClass **texture_array0 = nullptr;
 		TexBufferClass * tex_buf = MatDesc->Get_Texture_Array(pass, 0, false);
 		if (tex_buf) {
 			texture_array0 = tex_buf->Get_Array();
 		} else {
-			texture_array0 = NULL;
+			texture_array0 = nullptr;
 		}
 
-		TextureClass **texture_array1 = NULL;
+		TextureClass **texture_array1 = nullptr;
 		TexBufferClass * tex_buf1 = MatDesc->Get_Texture_Array(pass, 1, false);
 		if (tex_buf1) {
 			texture_array1 = tex_buf1->Get_Array();
 		} else {
-			texture_array1 = NULL;
+			texture_array1 = nullptr;
 		}
 
-		VertexMaterialClass **material_array = NULL;
+		VertexMaterialClass **material_array = nullptr;
 		MatBufferClass * mat_buf = MatDesc->Get_Material_Array(pass, false);
 		if (mat_buf) {
 			material_array = mat_buf->Get_Array();
 		} else {
-			material_array = NULL;
+			material_array = nullptr;
 		}
 		ShaderClass *shader_array = MatDesc->Get_Shader_Array(pass, false);
 
@@ -327,10 +327,10 @@ void DynamicMeshModel::Render(RenderInfoClass & /*rinfo*/)
 		// If no texture, shader or material arrays for this pass just draw and go to next pass
 		if (!texture_array0 && !texture_array1 && !material_array && !shader_array) {
 			if (buffer_type==BUFFER_TYPE_DYNAMIC_SORTING) {
-				SortingRendererClass::Insert_Triangles(sphere,0, DynamicMeshPNum, 0, DynamicMeshVNum);
+				SortingRendererClass::Insert_Triangles(sphere,0, static_cast<unsigned short>(DynamicMeshPNum), 0, static_cast<unsigned short>(DynamicMeshVNum));
 			}
 			else {
-				DX8Wrapper::Draw_Triangles(0, DynamicMeshPNum, 0, DynamicMeshVNum);
+				DX8Wrapper::Draw_Triangles(0, static_cast<unsigned short>(DynamicMeshPNum), 0, static_cast<unsigned short>(DynamicMeshVNum));
 			}
 			continue;
 		}
@@ -339,10 +339,10 @@ void DynamicMeshModel::Render(RenderInfoClass & /*rinfo*/)
 
 			// Add vertex indices of tri[cur_tri_idx] to min_vert_idx, max_vert_idx
 			const TriIndex &tri = tris[cur_tri_idx];
-			unsigned short min_idx = (unsigned short)MIN(MIN(tri.I, tri.J), tri.K);
-			unsigned short max_idx = (unsigned short)MAX(MAX(tri.I, tri.J), tri.K);
-			min_vert_idx = MIN(min_vert_idx, min_idx);
-			max_vert_idx = MAX(max_vert_idx, max_idx);
+			unsigned short min_idx = (unsigned short)std::min(std::min(tri.I, tri.J), tri.K);
+			unsigned short max_idx = (unsigned short)std::max(std::max(tri.I, tri.J), tri.K);
+			min_vert_idx = std::min(min_vert_idx, min_idx);
+			max_vert_idx = std::max(max_vert_idx, max_idx);
 
 			// Check the next triangle to see if the current run has ended.
 			unsigned short next_tri_idx = cur_tri_idx + 1;
@@ -377,7 +377,7 @@ void DynamicMeshModel::Render(RenderInfoClass & /*rinfo*/)
 						1 + max_vert_idx - min_vert_idx);
 				}
 				start_tri_idx = next_tri_idx;
-				min_vert_idx = DynamicMeshVNum - 1;
+				min_vert_idx = static_cast<unsigned short>(DynamicMeshVNum - 1);
 				max_vert_idx = 0;
 				if (texture_changed) DX8Wrapper::Set_Texture(0,texture_array0[next_tri_idx]);
 				if (texture1_changed) DX8Wrapper::Set_Texture(1,texture_array1[next_tri_idx]);
@@ -440,11 +440,11 @@ bool DynamicMeshClass::End_Vertex()
 	WWASSERT(VertCount < Model->Get_Vertex_Count());
 
 	// if we are a multi-material object record the material
-	int pass = Get_Pass_Count();
-	while (pass--) {
-		if (MultiVertexMaterial[pass]) {
-			VertexMaterialClass *mat = Peek_Material_Info()->Get_Vertex_Material(VertexMaterialIdx[pass]);
-			Model->Set_Material(VertCount, mat, pass);
+	int mvm_pass = Get_Pass_Count();
+	while (mvm_pass--) {
+		if (MultiVertexMaterial[mvm_pass]) {
+			VertexMaterialClass *mat = Peek_Material_Info()->Get_Vertex_Material(VertexMaterialIdx[mvm_pass]);
+			Model->Set_Material(VertCount, mat, mvm_pass);
 			REF_PTR_RELEASE(mat);
 		}
 
@@ -476,29 +476,29 @@ bool DynamicMeshClass::End_Vertex()
 		// set vertex indices
 		TriIndex *poly = &(Model->Get_Non_Const_Polygon_Array())[PolyCount];
 		if (TriMode == TRI_MODE_STRIPS) {
-			(*poly)[0] = VertCount-3;
-			(*poly)[1] = VertCount-2;
-			(*poly)[2] = VertCount-1;
+			(*poly)[0] = static_cast<unsigned short>(VertCount-3);
+			(*poly)[1] = static_cast<unsigned short>(VertCount-2);
+			(*poly)[2] = static_cast<unsigned short>(VertCount-1);
 
 			// for every other tri, reverse vertex order
 			if (Flip_Face()) {
-				(*poly)[1] = VertCount-1;
-				(*poly)[2] = VertCount-2;
+				(*poly)[1] = static_cast<unsigned short>(VertCount-1);
+				(*poly)[2] = static_cast<unsigned short>(VertCount-2);
 			}
 		} else {
-			(*poly)[0] = FanVertex;
-			(*poly)[1] = VertCount-2;
-			(*poly)[2] = VertCount-1;
+			(*poly)[0] = static_cast<unsigned short>(FanVertex);
+			(*poly)[1] = static_cast<unsigned short>(VertCount-2);
+			(*poly)[2] = static_cast<unsigned short>(VertCount-1);
 		}
 
 		// check each pass
-		int pass = Get_Pass_Count();
-		while (pass--) {
+		int mt_pass = Get_Pass_Count();
+		while (mt_pass--) {
 
 			// If we are multi texture
-			if (MultiTexture[pass]) {
-				TextureClass *tex = Peek_Material_Info()->Get_Texture(TextureIdx[pass]);
-				Model->Set_Texture(PolyCount, tex, pass);
+			if (MultiTexture[mt_pass]) {
+				TextureClass *tex = Peek_Material_Info()->Get_Texture(TextureIdx[mt_pass]);
+				Model->Set_Texture(PolyCount, tex, mt_pass);
 				REF_PTR_RELEASE(tex);
 			}
 		}
@@ -516,7 +516,7 @@ bool DynamicMeshClass::End_Vertex()
 **
 *******************************************************************/
 DynamicMeshClass::DynamicMeshClass(int max_poly, int max_vert) :
-	Model(NULL),
+	Model(nullptr),
 	PolyCount(0),
 	VertCount(0),
 	TriVertexCount(0),
@@ -542,7 +542,7 @@ DynamicMeshClass::DynamicMeshClass(int max_poly, int max_vert) :
 }
 
 DynamicMeshClass::DynamicMeshClass(int max_poly, int max_vert, MaterialInfoClass *mat_info) :
-	Model(NULL),
+	Model(nullptr),
 	PolyCount(0),
 	VertCount(0),
 	TriVertexCount(0),
@@ -569,7 +569,7 @@ DynamicMeshClass::DynamicMeshClass(int max_poly, int max_vert, MaterialInfoClass
 
 DynamicMeshClass::DynamicMeshClass(const DynamicMeshClass & src) :
 	RenderObjClass(src),
-	Model(NULL),
+	Model(nullptr),
 	PolyCount(src.PolyCount),
 	VertCount(src.VertCount),
 	TriVertexCount(src.TriVertexCount),

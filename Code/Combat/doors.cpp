@@ -368,7 +368,7 @@ void	DoorPhysClass::Timestep( float dt )
 		// then evaluate our state and determine if we need to
 		// do anything.
 		//
-		if ( AnimManager.Peek_Animation() != NULL ) {
+		if ( AnimManager.Peek_Animation() != nullptr ) {
 			Update_State( dt );
 		}
 
@@ -407,7 +407,7 @@ bool DoorPhysClass::Set_State( int new_state )
 				//	Open the door
 				//
 				AnimManager.Set_Animation_Mode( AnimCollisionManagerClass::ANIMATE_TARGET );
-				AnimManager.Set_Target_Frame( AnimManager.Peek_Animation()->Get_Num_Frames() - 1	);
+				AnimManager.Set_Target_Frame( float(AnimManager.Peek_Animation()->Get_Num_Frames() - 1)	);
 			}
 			break;
 
@@ -439,7 +439,7 @@ bool DoorPhysClass::Set_State( int new_state )
 				// Clients *must* see the opening - it's a guaranteed packet. ST - 1/15/2002 12:59PM
 				//
 				AnimManager.Set_Animation_Mode( AnimCollisionManagerClass::ANIMATE_TARGET );
-				AnimManager.Set_Target_Frame( AnimManager.Peek_Animation()->Get_Num_Frames() - 1	);
+				AnimManager.Set_Target_Frame( float(AnimManager.Peek_Animation()->Get_Num_Frames() - 1)	);
 			}
 			break;
 
@@ -645,7 +645,7 @@ int DoorPhysClass::Check_Door_Trigger( const OBBoxClass &trigger_zone )
 	SLNode<SoldierGameObj> *objnode;
 	for (	objnode = player_list->Head(); objnode; objnode = objnode->Next()) {
 		SoldierGameObj *soldier = objnode->Data();
-		if ( soldier != NULL ) {
+		if ( soldier != nullptr ) {
 
 			//
 			//	Is this player inside the trigger zone?
@@ -686,25 +686,25 @@ int DoorPhysClass::Check_Door_Trigger( const OBBoxClass &trigger_zone )
 #else
 
 	NonRefPhysListClass obj_list;
-	WWASSERT(PhysicsSceneClass::Get_Instance() != NULL);
+	WWASSERT(PhysicsSceneClass::Get_Instance() != nullptr);
 	PhysicsSceneClass::Get_Instance()->Collect_Objects(trigger_zone,false,true,&obj_list);
 	NonRefPhysListIterator it(&obj_list);
 
 	while (!it.Is_Done() && result == DOOR_OPEN_NOONE) {
 
 		CombatPhysObserverClass * observer = (CombatPhysObserverClass *)it.Peek_Obj()->Get_Observer();
-		//WWASSERT(observer != NULL);
+		//WWASSERT(observer != nullptr);
 		//if (observer->As_PhysicalGameObj()) {
-		if (observer != NULL && observer->As_PhysicalGameObj()) {
+		if (observer != nullptr && observer->As_PhysicalGameObj()) {
 			SoldierGameObj * soldier = observer->As_PhysicalGameObj()->As_SoldierGameObj();
 			VehicleGameObj * vehicle = observer->As_PhysicalGameObj()->As_VehicleGameObj();
 
 			//
 			// Check if this is a soldier who can open the door
 			//
-			if ((soldier != NULL) && soldier->Is_Human_Controlled()) {
+			if ((soldier != nullptr) && soldier->Is_Human_Controlled()) {
 
-				WWASSERT(Get_DoorPhysDef() != NULL);
+				WWASSERT(Get_DoorPhysDef() != nullptr);
 				if ( Get_DoorPhysDef()->LockCode == 0 ) {
 
 					result = DOOR_OPEN_OK;
@@ -724,8 +724,8 @@ int DoorPhysClass::Check_Door_Trigger( const OBBoxClass &trigger_zone )
 			//
 			// Check if this is a vehicle that is allowed to open the door
 			//
-			WWASSERT(Get_DoorPhysDef() != NULL);
-			if ((vehicle != NULL) && (Get_DoorPhysDef()->DoorOpensForVehicles)) {
+			WWASSERT(Get_DoorPhysDef() != nullptr);
+			if ((vehicle != nullptr) && (Get_DoorPhysDef()->DoorOpensForVehicles)) {
 
 				if ( Get_DoorPhysDef()->LockCode == 0 ) {
 
@@ -734,7 +734,7 @@ int DoorPhysClass::Check_Door_Trigger( const OBBoxClass &trigger_zone )
 				} else {
 
 					SoldierGameObj * driver = vehicle->Get_Driver();
-					if ((driver != NULL) && (Can_Unlock_Me(driver))) {
+					if ((driver != nullptr) && (Can_Unlock_Me(driver))) {
 						result = DOOR_OPEN_OK;
 						break;
 					} else {

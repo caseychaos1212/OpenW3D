@@ -202,7 +202,7 @@ ColorSelectionDialogClass::Paint_Color_Window (void)
 	m_ColorWindow.ReleaseDC (pdc);
 
 	// Let the window know it doesn't need to be repainted
-	m_ColorWindow.ValidateRect (NULL);
+	m_ColorWindow.ValidateRect (nullptr);
 	return;
 }
 
@@ -327,12 +327,12 @@ ColorSelectionDialogClass::Update_Sliders (int slider_id)
 	}
 
 	// Update the edit controls (and their spin controls)
-	float red_val = m_RedSlider.GetPos ();
-	float green_val = m_GreenSlider.GetPos ();
-	float blue_val = m_BlueSlider.GetPos ();
-	m_RedSpin.SetPos (red_val);
-	m_GreenSpin.SetPos (green_val);
-	m_BlueSpin.SetPos (blue_val);
+	float red_val = float(m_RedSlider.GetPos ());
+	float green_val = float(m_GreenSlider.GetPos ());
+	float blue_val = float(m_BlueSlider.GetPos ());
+	m_RedSpin.SetPos (int(red_val));
+	m_GreenSpin.SetPos (int(green_val));
+	m_BlueSpin.SetPos (int(blue_val));
 
 	// Record the selected color for later use
 	m_PaintColor.X = red_val / 255.00F;

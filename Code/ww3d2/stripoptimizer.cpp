@@ -197,7 +197,7 @@ void StripOptimizerClass::Optimize_Strip_Order (int* strips, int strip_count)
 
 		o = Copy_Strip(o, ss[bestIndex]);					// copy the strip
 		prev = ss[bestIndex];								// set to prev
-		ss[bestIndex] = NULL;								// mark as selected
+		ss[bestIndex] = nullptr;								// mark as selected
 	}
 
 //	WWASSERT((out+outSize)==o);							// HUH?
@@ -258,7 +258,7 @@ void StripOptimizerClass::Optimize_Triangle_Order (int *tris, int triangle_count
 	Tri* prev = t[0];
 
 	*o++ = *prev;
-	t[0] = NULL;
+	t[0] = nullptr;
 
 	for (;;)
 	{
@@ -284,7 +284,7 @@ void StripOptimizerClass::Optimize_Triangle_Order (int *tris, int triangle_count
 
 		*o++ = *t[bestIndex];
 		prev = t[bestIndex];
-		t[bestIndex] = NULL;
+		t[bestIndex] = nullptr;
 	}
 
 
@@ -346,7 +346,7 @@ int* StripOptimizerClass::Combine_Strips (const int* strips, int strip_count)
 
 	delete[] tmp;
 //	WWASSERT(check == (o-out-1));
-	*out = (o-out-1);						// set length
+	*out = int(o-out-1);						// set length
 	return out;
 }
 
@@ -497,7 +497,7 @@ namespace Strip
  *
  * Description:		Returns pointer to triangle with smallest connectivity
  *
- * Returns:			pointer to triangle with smallest connectivity or NULL
+ * Returns:			pointer to triangle with smallest connectivity or nullptr
  *					if the queue is empty
  *
  *****************************************************************************/
@@ -548,7 +548,7 @@ inline TriangleQueue::~TriangleQueue ()
  * Description:		Internal function for recalculating a triangle's
  *					connectivity
  *
- * Parameters:		t = pointer to triangle (non-NULL)
+ * Parameters:		t = pointer to triangle (non-nullptr)
  *
  *****************************************************************************/
 
@@ -585,7 +585,7 @@ inline void TriangleQueue::reinsert (Triangle* t)
  *
  * Description:		Removes a triangle from the queue
  *
- * Parameters:		t = pointer to triangle (non-NULL)
+ * Parameters:		t = pointer to triangle (non-nullptr)
  *
  *****************************************************************************/
 
@@ -923,10 +923,10 @@ int* Stripify::stripify  (const Vector3i* inTris, int N)
 			//--------------------------------------------------------------------
 
 			int		bestEdge	= -1;
-			int		bestWeight	= 0x7fffffff;
+			bestWeight	= 0x7fffffff;
 			bool	bestSwap	= false;
 
-			Vector3i nodeWeights = getTriangleNodeConnectivityWeights(queue, *next);
+			nodeWeights = getTriangleNodeConnectivityWeights(queue, *next);
 
 			for (i = 0; i < 3; i++)
 			if (next->m_neighbors[i])									// is there a neighbor?
@@ -994,7 +994,7 @@ int* Stripify::stripify  (const Vector3i* inTris, int N)
 //	printf ("total indices = %d\n",nLen);
 //	printf ("total swaps   = %d\n",nSwaps);
 
-	int		len		= o-out;											// allocation length
+	int		len		= int(o-out);											// allocation length
 	int*	rOut	= new int[len+1];
 
 	*rOut = strip_count;													// first entry is number of strips

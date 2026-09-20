@@ -72,53 +72,6 @@ void operator delete(void *p, size_t size) noexcept;
 #endif	//STEVES_NEW_CATCHER
 #endif	//_DEBUG
 
-// Provide a portable definition for __forceinline when not compiling with MSVC.
-#if !defined(_MSC_VER) && !defined(__forceinline)
-	#if defined(_WIN32) && (defined(__clang__) || defined(__GNUC__))
-		#define __forceinline inline [[msvc::forceinline]]
-	#elif defined(__GNUC__) || defined(__clang__)
-		#define __forceinline inline __attribute__((always_inline))
-	#else
-		#define __forceinline inline
-	#endif
-#endif
-
-// Jani: MSVC doesn't necessarily inline code with inline keyword. Using __forceinline results better inlining
-// and also prints out a warning if inlining wasn't possible. __forceinline is MSVC specific.
-#if defined(_MSC_VER)
-#define WWINLINE __forceinline
-#else
-#define WWINLINE inline
-#endif
-
-/*
-** Define the MIN and MAX macros.
-** NOTE: Joe used to #include <minmax.h> in the various compiler header files.  This
-** header defines 'min' and 'max' macros which conflict with the surrender code so
-** I'm relpacing all occurances of 'min' and 'max with 'MIN' and 'MAX'.  For code which
-** is out of our domain (e.g. Max sdk) I'm declaring template functions for 'min' and 'max'
-*/
-
-#ifndef MAX
-#define MAX(a,b)            (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef MIN
-#define MIN(a,b)            (((a) < (b)) ? (a) : (b))
-#endif
-
-#if defined(_MSC_VER)
-/*
-**	Turn off some unneeded warnings.
-*/
-// "conversion from 'double' to 'float', possible loss of data" Yea, so what?
-#pragma warning(disable : 4244)
-#endif
-
-#ifndef	NULL
-	#define	NULL		0
-#endif
-
 /**********************************************************************
 **	This macro serves as a general way to determine the number of elements
 **	within an array.
@@ -133,31 +86,7 @@ void operator delete(void *p, size_t size) noexcept;
 
 
 #if !defined(_WIN32)
-#include <bit>
-#include <cstring>
 #include <alloca.h>
-
-#ifndef ZeroMemory
-#define ZeroMemory(Destination, Length) std::memset((Destination), 0, (Length))
-#endif
-
-#ifndef CopyMemory
-#define CopyMemory(Destination, Source, Length) std::memcpy((Destination), (Source), (Length))
-#endif
-
-#ifndef _rotl
-__forceinline unsigned long _rotl(unsigned long value, int shift)
-{
-	return std::rotl(value, shift);
-}
-#endif
-
-#ifndef _byteswap_ulong
-__forceinline unsigned int _byteswap_ulong(unsigned int value)
-{
-	return __builtin_bswap32(value);
-}
-#endif
 
 #ifndef _alloca
 #define _alloca(size) alloca(size)

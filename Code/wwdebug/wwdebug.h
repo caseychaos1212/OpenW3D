@@ -41,6 +41,9 @@
 #ifndef WWDEBUG_H
 #define WWDEBUG_H
 
+#include "debugbreak.h"
+#include "wwformat.h"
+
 // The macro MESSAGE allows user to put:
 // #pragma MESSAGE("Hello world")
 // anywhere in a source file.  The message:
@@ -82,9 +85,9 @@ ProfileFunc			WWDebug_Install_Profile_Stop_Handler(ProfileFunc func);
 /*
 ** Users should not call the following three functions directly!  Use the macros below instead...
 */
-void					WWDebug_Printf(const char * format,...);
-void					WWDebug_Printf_Warning(const char * format,...);
-void					WWDebug_Printf_Error(const char * format,...);
+void					WWDebug_Printf(const char * format,...) OPENW3D_PRINTF_VARARG_FUNC(1);
+void					WWDebug_Printf_Warning(const char * format,...) OPENW3D_PRINTF_VARARG_FUNC(1);
+void					WWDebug_Printf_Error(const char * format,...) OPENW3D_PRINTF_VARARG_FUNC(1);
 #ifdef WWDEBUG
 void					WWDebug_Assert_Fail(const char * expr,const char * file, int line);
 void					WWDebug_Assert_Fail_Print(const char * expr,const char * file, int line,const char * string);
@@ -141,9 +144,9 @@ void					WWDebug_DBWin32_Message_Handler( const char * message);
 ** the debugger...
 */
 #ifdef WWDEBUG
-#define WWDEBUG_BREAK							_asm int 0x03
+#define WWDEBUG_BREAK							debugbreak()
 #else
-#define WWDEBUG_BREAK							_asm int 0x03
+#define WWDEBUG_BREAK							debugbreak()
 #endif
 
 /*

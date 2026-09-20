@@ -813,12 +813,12 @@ void	Input::Update_Sliders( void )
 
 //	Debug_Say(( "Mouse %f %f\n", mouse_x, mouse_y ));
 
-	Sliders[ SLIDER_MOUSE_LEFT - FIRST_SLIDER ]				= MAX( -mouse_x , 0.0f );
-	Sliders[ SLIDER_MOUSE_RIGHT - FIRST_SLIDER ]				= MAX(  mouse_x , 0.0f );
-	Sliders[ SLIDER_MOUSE_UP - FIRST_SLIDER ]					= MAX( -mouse_y , 0.0f );
-	Sliders[ SLIDER_MOUSE_DOWN - FIRST_SLIDER ]				= MAX(  mouse_y , 0.0f );
-	Sliders[ SLIDER_MOUSE_WHEEL_FORWARD - FIRST_SLIDER ]	= MAX( -mouse_z , 0.0f );
-	Sliders[ SLIDER_MOUSE_WHEEL_BACKWARD - FIRST_SLIDER ]	= MAX(  mouse_z , 0.0f );
+	Sliders[ SLIDER_MOUSE_LEFT - FIRST_SLIDER ]				= std::max( -mouse_x , 0.0f );
+	Sliders[ SLIDER_MOUSE_RIGHT - FIRST_SLIDER ]				= std::max(  mouse_x , 0.0f );
+	Sliders[ SLIDER_MOUSE_UP - FIRST_SLIDER ]					= std::max( -mouse_y , 0.0f );
+	Sliders[ SLIDER_MOUSE_DOWN - FIRST_SLIDER ]				= std::max(  mouse_y , 0.0f );
+	Sliders[ SLIDER_MOUSE_WHEEL_FORWARD - FIRST_SLIDER ]	= std::max( -mouse_z , 0.0f );
+	Sliders[ SLIDER_MOUSE_WHEEL_BACKWARD - FIRST_SLIDER ]	= std::max(  mouse_z , 0.0f );
 
 	//
 	// Update joystick sliders
@@ -833,10 +833,10 @@ void	Input::Update_Sliders( void )
 		joystick_x = WWMath::Sign(joystick_x) * (WWMath::Fabs(joystick_x) - DEAD_ZONE) * 1.5f / (1.0f - DEAD_ZONE);
 	}
 
-	Sliders[ SLIDER_JOYSTICK_LEFT - FIRST_SLIDER ]	= MAX( -joystick_x , 0.0f );
-	Sliders[ SLIDER_JOYSTICK_RIGHT - FIRST_SLIDER ]	= MAX(  joystick_x , 0.0f );
-	Sliders[ SLIDER_JOYSTICK_UP - FIRST_SLIDER ]	= MAX( -joystick_y , 0.0f );
-	Sliders[ SLIDER_JOYSTICK_DOWN - FIRST_SLIDER ]	= MAX(  joystick_y , 0.0f );
+	Sliders[ SLIDER_JOYSTICK_LEFT - FIRST_SLIDER ]	= std::max( -joystick_x , 0.0f );
+	Sliders[ SLIDER_JOYSTICK_RIGHT - FIRST_SLIDER ]	= std::max(  joystick_x , 0.0f );
+	Sliders[ SLIDER_JOYSTICK_UP - FIRST_SLIDER ]	= std::max( -joystick_y , 0.0f );
+	Sliders[ SLIDER_JOYSTICK_DOWN - FIRST_SLIDER ]	= std::max(  joystick_y , 0.0f );
 	return ;
 }
 
@@ -1085,19 +1085,19 @@ float	Input::Get_Value( int function_index, int input, float /* clamp */ )
 
 		switch( FunctionKeyStates[ function_index ] & 0x0F ) {
 			case BUTTON_UP:
-				return (DirectInput::Get_Button_Value( input ) & BUTTON_BIT_HELD) ? 0.0 : 1.0;
+				return (DirectInput::Get_Button_Value( input ) & BUTTON_BIT_HELD) ? 0.0f : 1.0f;
 
 			case BUTTON_HIT:
-				return (DirectInput::Get_Button_Value( input ) & BUTTON_BIT_HIT) ? 1.0 : 0.0;
+				return (DirectInput::Get_Button_Value( input ) & BUTTON_BIT_HIT) ? 1.0f : 0.0f;
 
 			case BUTTON_RELEASE:
-				return (DirectInput::Get_Button_Value( input ) & BUTTON_BIT_RELEASED) ? 1.0 : 0.0;
+				return (DirectInput::Get_Button_Value( input ) & BUTTON_BIT_RELEASED) ? 1.0f : 0.0f;
 
 			case BUTTON_HELD:
-				return (DirectInput::Get_Button_Value( input ) & BUTTON_BIT_HELD) ? 1.0 : 0.0;
+				return (DirectInput::Get_Button_Value( input ) & BUTTON_BIT_HELD) ? 1.0f : 0.0f;
 
 			case BUTTON_DOUBLE:
-				return (DirectInput::Get_Button_Value( input ) & BUTTON_BIT_DOUBLE) ? 1.0 : 0.0;
+				return (DirectInput::Get_Button_Value( input ) & BUTTON_BIT_DOUBLE) ? 1.0f : 0.0f;
 		}
 	}
 
@@ -1148,7 +1148,7 @@ const char *Input::Get_Key_Name( short key_id )
 	}
 
 	Debug_Say(( "Could not find a name for key %d\n", key_id ));
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -1156,7 +1156,7 @@ const char *Input::Get_Key_Name( short key_id )
 */
 short	Input::Get_Key( const char *name )
 {
-	if (name != NULL && name[0] != 0) {
+	if (name != nullptr && name[0] != 0) {
 
 		//
 		// Check each button name
@@ -1279,14 +1279,14 @@ Input::Save_Configuration (const char *filename)
 		//	Get the name of the primary key that's mapped to this function
 		//
 		if (FunctionPrimaryKeys[index] != 0) {
-			pri_key = Get_Key_Name (FunctionPrimaryKeys[index]);
+			pri_key = Get_Key_Name (short(FunctionPrimaryKeys[index]));
 		}
 
 		//
 		//	Get the name of the secondary  key that's mapped to this function
 		//
 		if (FunctionSecondaryKeys[index] != 0) {
-			sec_key = Get_Key_Name (FunctionSecondaryKeys[index]);
+			sec_key = Get_Key_Name (short(FunctionSecondaryKeys[index]));
 		}
 
 		//
@@ -1308,7 +1308,7 @@ Input::Save_Configuration (const char *filename)
 	StringClass	config_filename;
 	config_filename.Format( "config/%s", filename );
 	FileClass *ini_file = _TheWritingFileFactory->Get_File (config_filename);
-	if (ini_file != NULL) {
+	if (ini_file != nullptr) {
 		ini_file->Open (FileClass::WRITE);
 		input_ini.Save (*ini_file);
 		_TheWritingFileFactory->Return_File (ini_file);
@@ -1511,7 +1511,7 @@ Input::Load_Configuration (const char *filename)
 	//	Try to load the INI file
 	//
 	INIClass	*input_ini = Get_INI (filename);
-	if (input_ini == NULL) {
+	if (input_ini == nullptr) {
 		Debug_Say(("Input::Load_Configuration - Unable to load %s\n", filename));
 		return ;
 	}

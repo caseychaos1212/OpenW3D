@@ -38,7 +38,7 @@ static char THIS_FILE[] = __FILE__;
 //	ImportTranslationDialogClass
 //
 ///////////////////////////////////////////////////////////////////////////
-ImportTranslationDialogClass::ImportTranslationDialogClass (CWnd* pParent /*=NULL*/)
+ImportTranslationDialogClass::ImportTranslationDialogClass (CWnd* pParent /*=nullptr*/)
 	:	IsForExport (false),
 		CDialog(ImportTranslationDialogClass::IDD, pParent)
 {
@@ -107,9 +107,9 @@ ImportTranslationDialogClass::OnOK (void)
 		//
 		//	Export the data
 		//
-		int lang_id = SendDlgItemMessage (IDC_LANG_COMBO, CB_GETCURSEL);
+		LRESULT lang_id = SendDlgItemMessage (IDC_LANG_COMBO, CB_GETCURSEL);
 		if (lang_id >= 0) {
-			StringsMgrClass::Export_For_Translation (Filename, lang_id);
+			StringsMgrClass::Export_For_Translation (Filename, uint32(lang_id));
 		}
 
 	} else {
@@ -117,9 +117,9 @@ ImportTranslationDialogClass::OnOK (void)
 		//
 		//	Import the data
 		//
-		int lang_id = SendDlgItemMessage (IDC_LANG_COMBO, CB_GETCURSEL);
+		LRESULT lang_id = SendDlgItemMessage (IDC_LANG_COMBO, CB_GETCURSEL);
 		if (lang_id >= 0) {
-			StringsMgrClass::Import_From_Translation (Filename, lang_id);
+			StringsMgrClass::Import_From_Translation (Filename, uint32(lang_id));
 		}
 	}
 

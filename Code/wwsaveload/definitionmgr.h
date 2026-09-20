@@ -136,7 +136,7 @@ private:
 	//	Private methods
 	/////////////////////////////////////////////////////////////////////
 	static void						Prepare_Definition_Array (void);
-	static int __cdecl			fnCompareDefinitionsCallback (const void *elem1, const void *elem2);
+	static int fnCompareDefinitionsCallback (const void *elem1, const void *elem2);
 
 	/////////////////////////////////////////////////////////////////////
 	//	Static member data
@@ -175,7 +175,7 @@ DefinitionMgrClass::Contains_Data (void) const
 inline DefinitionClass *
 DefinitionMgrClass::Get_First (void)
 {
-	DefinitionClass *definition = NULL;
+	DefinitionClass *definition = nullptr;
 	if (_DefinitionCount > 0) {
 		definition = _SortedDefinitionArray[0];
 	}

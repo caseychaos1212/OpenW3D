@@ -86,9 +86,9 @@ MultiLineTextCtrlClass::MultiLineTextCtrlClass (void)	:
 //////////////////////////////////////////////////////////////////////
 MultiLineTextCtrlClass::~MultiLineTextCtrlClass (void)
 {
-	ScrollBarCtrl.Set_Advise_Sink (NULL);
+	ScrollBarCtrl.Set_Advise_Sink (nullptr);
 
-	if (Parent != NULL) {
+	if (Parent != nullptr) {
 		Parent->Remove_Control (&ScrollBarCtrl);
 	}
 	return ;
@@ -143,7 +143,7 @@ MultiLineTextCtrlClass::Create_Text_Renderer (void)
 	//	Handy macro
 	//
 	#define COPY_LINE(dest,	src_start, src_end)	\
-			if (src_end == NULL) {						\
+			if (src_end == nullptr) {						\
 				dest = src_start;							\
 			} else {											\
 				size_t bytes	= ((char *)src_end - (char *)src_start);	\
@@ -159,14 +159,14 @@ MultiLineTextCtrlClass::Create_Text_Renderer (void)
 	//
 	const unichar_t *text_start = TextRenderer.Find_Row_Start (Title, ScrollPos);
 	const unichar_t *text_end	= TextRenderer.Find_Row_Start (Title, ScrollPos+RowsPerPage);
-	if (text_start != NULL) {
+	if (text_start != nullptr) {
 
 		//
 		//	Should we draw the text centered?
 		//
 		if ((Style & ES_CENTER) == ES_CENTER) {
 
-			float char_height = TextRenderer.Peek_Font ()->Get_Char_Height ();
+			float char_height = float(TextRenderer.Peek_Font ()->Get_Char_Height ());
 			RectClass text_rect = ClientRect;
 
 			//
@@ -187,10 +187,10 @@ MultiLineTextCtrlClass::Create_Text_Renderer (void)
 				//
 				TextRenderer.Set_Wrapping_Width (0);
 				StyleMgrClass::Render_Text (text, &TextRenderer, text_rect, true, true, StyleMgrClass::CENTER_JUSTIFY, IsEnabled, false);
-				text_rect.Top = int (text_rect.Top + char_height);
+				text_rect.Top = WWMath::Trunc (text_rect.Top + char_height);
 				TextRenderer.Set_Wrapping_Width (ClientRect.Width ());
 
-				if (line_end == NULL) {
+				if (line_end == nullptr) {
 					break;
 				}
 
@@ -258,16 +258,16 @@ MultiLineTextCtrlClass::Update_Client_Rect (void)
 	//
 	ClientRect = Rect;
 	ClientRect.Inflate (Vector2 (-5.0F * StyleMgrClass::Get_X_Scale (), -3.75F * StyleMgrClass::Get_Y_Scale ()));
-	ClientRect.Left	= int(ClientRect.Left);
-	ClientRect.Top		= int(ClientRect.Top);
-	ClientRect.Right	= int(ClientRect.Right);
-	ClientRect.Bottom	= int(ClientRect.Bottom);
+	ClientRect.Left	= WWMath::Trunc(ClientRect.Left);
+	ClientRect.Top		= WWMath::Trunc(ClientRect.Top);
+	ClientRect.Right	= WWMath::Trunc(ClientRect.Right);
+	ClientRect.Bottom	= WWMath::Trunc(ClientRect.Bottom);
 
 	//
 	//	Determine how many rows we can fit on one page
 	//
-	float char_height = TextRenderer.Peek_Font ()->Get_Char_Height ();
-	RowsPerPage			= ClientRect.Height () / char_height;
+	float char_height = float(TextRenderer.Peek_Font ()->Get_Char_Height ());
+	RowsPerPage			= int(ClientRect.Height () / char_height);
 	IsInitialized		= true;
 
 	//
@@ -326,7 +326,7 @@ MultiLineTextCtrlClass::Update_Scroll_Bar_Visibility (void)
 		if (needs_scrollbar) {
 			new_right = ScrollBarCtrl.Get_Window_Rect ().Left;
 			IsScrollBarDisplayed = true;
-		} else if (Parent != NULL) {
+		} else if (Parent != nullptr) {
 			new_right = ScrollBarCtrl.Get_Window_Rect ().Right;
 			IsScrollBarDisplayed = false;
 		}
@@ -337,10 +337,10 @@ MultiLineTextCtrlClass::Update_Scroll_Bar_Visibility (void)
 		Rect.Right = new_right;
 		ClientRect = Rect;
 		ClientRect.Inflate (Vector2 (-5.0F * StyleMgrClass::Get_X_Scale (), -3.75F * StyleMgrClass::Get_Y_Scale ()));
-		ClientRect.Left	= int(ClientRect.Left);
-		ClientRect.Top		= int(ClientRect.Top);
-		ClientRect.Right	= int(ClientRect.Right);
-		ClientRect.Bottom	= int(ClientRect.Bottom);
+		ClientRect.Left	= WWMath::Trunc(ClientRect.Left);
+		ClientRect.Top		= WWMath::Trunc(ClientRect.Top);
+		ClientRect.Right	= WWMath::Trunc(ClientRect.Right);
+		ClientRect.Bottom	= WWMath::Trunc(ClientRect.Bottom);
 
 
 		Calculate_Row_Count ();
@@ -445,7 +445,7 @@ MultiLineTextCtrlClass::On_VScroll (ScrollBarCtrlClass *, int , int new_position
 void
 MultiLineTextCtrlClass::On_Mouse_Wheel (int direction)
 {
-	int lineoffset = direction * MouseWheelIncrement;
+	int lineoffset = int(direction * MouseWheelIncrement);
 
 	Set_Scroll_Pos (ScrollPos + lineoffset);
 	return ;

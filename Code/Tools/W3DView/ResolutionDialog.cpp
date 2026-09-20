@@ -42,7 +42,7 @@ static char THIS_FILE[] = __FILE__;
 // ResolutionDialogClass
 //
 /////////////////////////////////////////////////////////////////////////////
-ResolutionDialogClass::ResolutionDialogClass(CWnd* pParent /*=NULL*/)
+ResolutionDialogClass::ResolutionDialogClass(CWnd* pParent /*=nullptr*/)
 	: CDialog(ResolutionDialogClass::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(ResolutionDialogClass)
@@ -188,7 +188,7 @@ ResolutionDialogClass::OnOK (void)
 		//
 		//	Index into the resolution list for this device...
 		//
-		int index = m_ListCtrl.GetItemData (list_index);
+		int index = int(m_ListCtrl.GetItemData (list_index));
 		if (index >= 0) {
 
 			//

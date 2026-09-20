@@ -235,6 +235,8 @@ void SceneClass::Render(RenderInfoClass & rinfo)
 			DX8Wrapper::Set_DX8_Render_State(D3DRS_DEPTHBIAS,*reinterpret_cast<unsigned*>(&depthbias));
 			Customized_Render(rinfo);
 			break;
+		case EXTRA_PASS_DISABLE:
+			break;
 		}
 
 		WW3D::Enable_Texturing(old_enable);
@@ -354,7 +356,7 @@ SimpleSceneClass::~SimpleSceneClass(void)
 void SimpleSceneClass::Remove_All_Render_Objects(void)
 {
 	RenderObjClass * obj;
-	while ( ( obj = RenderList.Remove_Head() ) != NULL ) {
+	while ( ( obj = RenderList.Remove_Head() ) != nullptr ) {
 		SceneClass::Remove_Render_Object(obj);
 		obj->Release_Ref();							// remove head gets a ref
 	}
@@ -546,13 +548,13 @@ void SimpleSceneClass::Customized_Render(RenderInfoClass & rinfo)
 
 	// apply only the first four lights in the scene
 	// derived classes should use light environment
-	WWASSERT(rinfo.light_environment==NULL);
+	WWASSERT(rinfo.light_environment==nullptr);
 	int count=0;
 	// Turn off lights in case we have none
-	DX8Wrapper::Set_Light(0,NULL);
-	DX8Wrapper::Set_Light(1,NULL);
-	DX8Wrapper::Set_Light(2,NULL);
-	DX8Wrapper::Set_Light(3,NULL);
+	DX8Wrapper::Set_Light(0,nullptr);
+	DX8Wrapper::Set_Light(1,nullptr);
+	DX8Wrapper::Set_Light(2,nullptr);
+	DX8Wrapper::Set_Light(3,nullptr);
 	for (it.First(&LightList); !it.Is_Done(); it.Next())
 	{
 		if (count<4)

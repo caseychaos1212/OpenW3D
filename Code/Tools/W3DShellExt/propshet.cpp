@@ -38,7 +38,7 @@ extern	HINSTANCE g_DllInstance; // Handle to this DLL itself.
 //          ***********   F U N C T I O N S  *********************
 
 ///////////////////////////////////////
-UINT CALLBACK W3DPageCallback(HWND hWnd,
+UINT CALLBACK W3DPageCallback(HWND /*hWnd*/,
                 UINT uMessage,
                 LPPROPSHEETPAGE  ppsp){
     switch(uMessage){
@@ -57,7 +57,7 @@ UINT CALLBACK W3DPageCallback(HWND hWnd,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ShowHideControls(HWND hDlg, bool show){
 	HWND hControl = GetWindow(hDlg, GW_CHILD);
-	while(hControl != NULL){
+	while(hControl != nullptr){
 		ShowWindow(hControl,show?SW_SHOW:SW_HIDE);
 		hControl = GetWindow(hControl, GW_HWNDNEXT);
 	}
@@ -80,14 +80,13 @@ void GetItemName(ChunkItem *pItem, int id_of_interest, void* pInfo, int sizeof_s
 	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-BOOL CALLBACK AnimPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lParam){
-	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLong(hDlg, DWL_USER);
-	UINT iIndex=0;
+INT_PTR CALLBACK AnimPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lParam){
+	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLongPtr(hDlg, DWLP_USER);
 	LPCSHELLEXT lpcs;
 	char buf[MAX_PATH];
     switch (uMessage){
 		case WM_INITDIALOG:{
-            SetWindowLong(hDlg, DWL_USER, lParam);
+            SetWindowLongPtr(hDlg, DWLP_USER, lParam);
             psp = (LPPROPSHEETPAGE)lParam;
             lpcs = (LPCSHELLEXT)psp->lParam;
 				if(!lpcs->m_FileInMemory){
@@ -112,7 +111,7 @@ BOOL CALLBACK AnimPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lPa
 					SetDlgItemText(hDlg, IDC_HNAME, pAnim->HierarchyName);
 					SetDlgItemInt(hDlg, IDC_NUMFRAMES, pAnim->NumFrames,false);
 					//FrameRate
-					sprintf(buf,"%i fps",pAnim->FrameRate,false);
+					sprintf(buf,"%i fps",pAnim->FrameRate);
 					SetDlgItemText(hDlg, IDC_FRAMERATE, buf);
 					//SetDlgItemInt(hDlg, IDC_FRAMERATE, pAnim->FrameRate,false);
 					//version
@@ -203,14 +202,13 @@ void SetDlgMeshParams(HWND hDlg, W3dMeshHeader3Struct*pInfo){
 	SetDlgItemText(hDlg, IDC_VERSION, msg);
 }
 //==========================================================================================================
-BOOL CALLBACK MeshPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lParam){
-	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLong(hDlg, DWL_USER);
-	UINT iIndex=0;
+INT_PTR CALLBACK MeshPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lParam){
+	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLongPtr(hDlg, DWLP_USER);
 	LPCSHELLEXT lpcs;
 
     switch (uMessage){
 		case WM_INITDIALOG:{
-            SetWindowLong(hDlg, DWL_USER, lParam);
+            SetWindowLongPtr(hDlg, DWLP_USER, lParam);
             psp = (LPPROPSHEETPAGE)lParam;
             lpcs = (LPCSHELLEXT)psp->lParam;
 				if(!lpcs->m_FileInMemory){
@@ -235,11 +233,11 @@ BOOL CALLBACK MeshPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lPa
 					char pTextureInfo[MAX_TEXUTRE_NAME_LEN * MAX_MESH];
 					id_of_interest = W3D_CHUNK_TEXTURE_NAME;
 					int found_textures(0);
-					int sizeof_struct = MAX_TEXUTRE_NAME_LEN;
+					int sizeof_tex_struct = MAX_TEXUTRE_NAME_LEN;
 					ptr = pData->Chunks.GetHeadPosition();
 					while(ptr){
 						ChunkItem *pItem = pData->Chunks.GetNext(ptr);
-						GetItemName(pItem, id_of_interest, (void*)pTextureInfo, sizeof_struct, found_textures );
+						GetItemName(pItem, id_of_interest, (void*)pTextureInfo, sizeof_tex_struct, found_textures );
 					}
 					for(int t_count(0); t_count < found_textures; t_count ++){
 						if(lpcs->NotAdded(&(pTextureInfo[t_count*MAX_TEXUTRE_NAME_LEN]))){
@@ -299,14 +297,13 @@ BOOL CALLBACK MeshPageDlgProc(HWND hDlg,UINT uMessage, WPARAM wParam, LPARAM lPa
 }
 
 /////////////////////////////////////////////////////////////
-BOOL CALLBACK PreviewPageDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM lParam){
+INT_PTR CALLBACK PreviewPageDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM lParam){
 
-	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLong(hDlg, DWL_USER);
-    UINT iIndex(0);
+	LPPROPSHEETPAGE psp=(LPPROPSHEETPAGE)GetWindowLongPtr(hDlg, DWLP_USER);
     LPCSHELLEXT lpcs;
     switch (uMessage){
 		case WM_INITDIALOG:{
-            SetWindowLong(hDlg, DWL_USER, lParam);
+            SetWindowLongPtr(hDlg, DWLP_USER, lParam);
             psp = (LPPROPSHEETPAGE)lParam;
             lpcs = (LPCSHELLEXT)psp->lParam;
 				if(!lpcs->m_FileInMemory){
@@ -357,9 +354,10 @@ STDMETHODIMP CShellExt::AddPages(LPFNADDPROPSHEETPAGE lpfnAddPage,	//Pointer to 
 	 m_FileInMemory = false;
     PROPSHEETPAGE psp;
     HPROPSHEETPAGE hpage;
-    FORMATETC fmte = {CF_HDROP,(DVTARGETDEVICE FAR *)NULL,DVASPECT_CONTENT,-1, TYMED_HGLOBAL };
+    FORMATETC fmte = {CF_HDROP,(DVTARGETDEVICE FAR *)nullptr,DVASPECT_CONTENT,-1, TYMED_HGLOBAL };
     STGMEDIUM medium;
 	HRESULT hres = 0;
+	memset(&medium, 0, sizeof(medium));
 //	char buf[MAX_PATH];
 	if (m_pDataObj){  //Paranoid check, m_pDataObj should have something by now...
        hres = m_pDataObj->GetData(&fmte, &medium);
@@ -423,8 +421,8 @@ STDMETHODIMP CShellExt::AddPages(LPFNADDPROPSHEETPAGE lpfnAddPage,	//Pointer to 
     return NOERROR;
 }
 //  PURPOSE: Called by the shell only for Control Panel property sheet
-STDMETHODIMP CShellExt::ReplacePage(UINT uPageID,									//ID of page to be replaced
-                                    LPFNADDPROPSHEETPAGE lpfnReplaceWith,  //Pointer to the Shell's Replace function
-                                    LPARAM lParam){									//Passed as second parameter to lpfnReplaceWith
+STDMETHODIMP CShellExt::ReplacePage(UINT /*uPageID*/,									//ID of page to be replaced
+                                    LPFNADDPROPSHEETPAGE /*lpfnReplaceWith*/,  //Pointer to the Shell's Replace function
+                                    LPARAM /*lParam*/){									//Passed as second parameter to lpfnReplaceWith
     return E_FAIL;//we don't support this function.  It should never be
 }

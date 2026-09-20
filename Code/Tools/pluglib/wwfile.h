@@ -40,6 +40,7 @@
 #ifndef WWFILE_Hx
 #define WWFILE_Hx
 
+#include "wwformat.h"
 #ifdef _UNIX
 #include "osdep.h"
 #endif
@@ -55,10 +56,6 @@
 #define SEEK_SET					0	// Seek from start of file.
 #define SEEK_CUR					1	// Seek relative from current location.
 #define SEEK_END					2	// Seek from end of file.
-#endif
-
-#ifndef NULL
-	#define	NULL	0
 #endif
 
 
@@ -90,7 +87,7 @@ class FileClass
 		virtual void Close(void) = 0;
 		virtual unsigned int Get_Date_Time(void) {return(0);}
 		virtual bool Set_Date_Time(unsigned int ) {return(false);}
-		virtual void Error(int error, int canretry = false, char const * filename=NULL) = 0;
+		virtual void Error(int error, int canretry = false, char const * filename=nullptr) = 0;
 		virtual void * Get_File_Handle(void) { return reinterpret_cast<void *>(-1); }
 		virtual void Bias(int start, int length=-1) = 0;
 
@@ -100,13 +97,13 @@ class FileClass
 		}
 
 		// this form uses a stack buffer of PRINTF_BUFFER_SIZE
-		int Printf(char *str, ...);
+		int Printf(char *str, ...) OPENW3D_PRINTF_VARARG_FUNC(2);
 
 		// this form uses the supplied buffer if PRINTF_BUFFER_SIZE is expected to be too small.
-		int Printf(char *buffer, int bufferSize, char *str, ...);
+		int Printf(char *buffer, int bufferSize, char *str, ...) OPENW3D_PRINTF_VARARG_FUNC(4);
 
 		// this form uses the stack buffer but will prepend any output with the indicated number of tab characters '\t'
-		int Printf_Indented(unsigned depth, char *str, ...);
+		int Printf_Indented(unsigned depth, char *str, ...) OPENW3D_PRINTF_VARARG_FUNC(3);
 
 };
 

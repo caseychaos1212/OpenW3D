@@ -381,7 +381,7 @@ void PhysicsSceneClass::Load_LDD_Variables(ChunkLoadClass & cload)
 			OBSOLETE_MICRO_CHUNK(PSCENE_DD_VARIABLE_DYNAMICPOLYBUDGET);
 			OBSOLETE_MICRO_CHUNK(PSCENE_DD_VARIABLE_STATICPOLYBUDGET);
 			default:
-				WWDEBUG_SAY(("Unhandled Micro Chunk: 0x%x in file &s, line %d\n",cload.Cur_Micro_Chunk_ID(),__FILE__,__LINE__));
+				WWDEBUG_SAY(("Unhandled Micro Chunk: 0x%x in file %s, line %d\n",cload.Cur_Micro_Chunk_ID(),__FILE__,__LINE__));
 		}
 		cload.Close_Micro_Chunk();
 	}
@@ -397,11 +397,11 @@ void PhysicsSceneClass::Save_Static_Objects(ChunkSaveClass & csave)
 	for (it.First(); !it.Is_Done(); it.Next()) {
 
 		PhysClass * obj = it.Peek_Obj();
-		WWASSERT(obj != NULL);
+		WWASSERT(obj != nullptr);
 
 		if ((obj) && (obj->Is_Dont_Save_Enabled() == false)) {
 			StaticPhysClass * staticobj = obj->As_StaticPhysClass();
-			WWASSERT(staticobj != NULL);
+			WWASSERT(staticobj != nullptr);
 
 			if (staticobj) {
 				/*
@@ -435,9 +435,9 @@ void PhysicsSceneClass::Load_Static_Objects(ChunkLoadClass & cload)
 			** Load the object
 			*/
 			cload.Open_Chunk();
-			StaticPhysClass * obj = NULL;
+			StaticPhysClass * obj = nullptr;
 			PersistFactoryClass * fact = SaveLoadSystemClass::Find_Persist_Factory(cload.Cur_Chunk_ID());
-			WWASSERT(fact != NULL);
+			WWASSERT(fact != nullptr);
 			if (fact) {
 				obj = (StaticPhysClass *)fact->Load(cload);
 			}
@@ -479,11 +479,11 @@ void PhysicsSceneClass::Save_Static_Lights(ChunkSaveClass & csave)
 	for (it.First(); !it.Is_Done(); it.Next()) {
 
 		PhysClass * obj = it.Peek_Obj();
-		WWASSERT(obj != NULL);
+		WWASSERT(obj != nullptr);
 
 		if (obj) {
 			LightPhysClass * lightobj = obj->As_LightPhysClass();
-			WWASSERT(lightobj != NULL);
+			WWASSERT(lightobj != nullptr);
 
 			if (lightobj) {
 				csave.Begin_Chunk(PSCENE_SO_CHUNK_STATIC_LIGHT);
@@ -510,9 +510,9 @@ void PhysicsSceneClass::Load_Static_Lights(ChunkLoadClass & cload)
 			** Load the object
 			*/
 			cload.Open_Chunk();
-			LightPhysClass * obj = NULL;
+			LightPhysClass * obj = nullptr;
 			PersistFactoryClass * fact = SaveLoadSystemClass::Find_Persist_Factory(cload.Cur_Chunk_ID());
-			WWASSERT(fact != NULL);
+			WWASSERT(fact != nullptr);
 			if (fact) {
 				obj = (LightPhysClass *)fact->Load(cload);
 			}
@@ -536,7 +536,7 @@ void PhysicsSceneClass::Load_Static_Lights(ChunkLoadClass & cload)
 			obj->Release_Ref();
 
 		} else {
-			WWDEBUG_SAY(("Unhandled Chunk: 0x%x in file &s, line %d\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
+			WWDEBUG_SAY(("Unhandled Chunk: 0x%x in file %s, line %d\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 			cload.Close_Chunk();
 		}
 	}
@@ -544,7 +544,7 @@ void PhysicsSceneClass::Load_Static_Lights(ChunkLoadClass & cload)
 
 void PhysicsSceneClass::Load_Sun_Light(ChunkLoadClass & cload)
 {
-	WWASSERT(SunLight != NULL);
+	WWASSERT(SunLight != nullptr);
 	IOSunLightStruct sun;
 	cload.Read(&sun,sizeof(sun));
 
@@ -560,7 +560,7 @@ void PhysicsSceneClass::Load_Sun_Light(ChunkLoadClass & cload)
 
 void PhysicsSceneClass::Save_Sun_Light(ChunkSaveClass & csave)
 {
-	WWASSERT(SunLight != NULL);
+	WWASSERT(SunLight != nullptr);
 	IOSunLightStruct sun;
 	memset(&sun,0,sizeof(sun));
 
@@ -588,7 +588,7 @@ void PhysicsSceneClass::Save_Dynamic_Objects(ChunkSaveClass & csave)
 	for (it.First(); !it.Is_Done(); it.Next()) {
 
 		PhysClass * obj = it.Peek_Obj();
-		WWASSERT(obj != NULL);
+		WWASSERT(obj != nullptr);
 
 		if ((obj) && (obj->Is_Dont_Save_Enabled() == false)) {
 			csave.Begin_Chunk(PSCENE_DD_CHUNK_DYNAMIC_OBJECT);
@@ -611,9 +611,9 @@ void PhysicsSceneClass::Load_Dynamic_Objects(ChunkLoadClass & cload)
 			** Load the object
 			*/
 			cload.Open_Chunk();
-			PhysClass * obj = NULL;
+			PhysClass * obj = nullptr;
 			PersistFactoryClass * fact = SaveLoadSystemClass::Find_Persist_Factory(cload.Cur_Chunk_ID());
-			WWASSERT(fact != NULL);
+			WWASSERT(fact != nullptr);
 			if (fact) {
 				obj = (PhysClass *)fact->Load(cload);
 			}
@@ -637,7 +637,7 @@ void PhysicsSceneClass::Load_Dynamic_Objects(ChunkLoadClass & cload)
 			obj->Release_Ref();
 
 		} else {
-			WWDEBUG_SAY(("Unhandled Chunk: 0x%x in file &s, line %d\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
+			WWDEBUG_SAY(("Unhandled Chunk: 0x%x in file %s, line %d\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 			cload.Close_Chunk();
 		}
 	}
@@ -688,7 +688,7 @@ void PhysicsSceneClass::Load_Static_Object_States(ChunkLoadClass & cload)
 
 		cload.Open_Chunk();
 		WWASSERT(cload.Cur_Chunk_ID()==PSCENE_DD_CHUNK_STATIC_OBJECT_STATE);
-		if (sphys != NULL) {
+		if (sphys != nullptr) {
 			sphys->Load_State(cload);
 			sphys->Release_Ref();
 		} else {
@@ -725,5 +725,5 @@ StaticPhysClass * PhysicsSceneClass::Get_Static_Object_By_ID(uint32 id)
 		}
 		it.Next();
 	}
-	return NULL;
+	return nullptr;
 }

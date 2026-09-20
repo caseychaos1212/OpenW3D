@@ -171,7 +171,7 @@ SoldierObserverClass::SoldierObserverClass( void ) :
 	StateTimer( 0 ),
 	HomeRadius( 9999999 ),
 	ActionTimer( 0 ),
-	CoverPosition( NULL ),
+	CoverPosition( nullptr ),
 	CoveredAttack( false ),
 	LastEvent( SOLDIER_AI_RELAXED_IDLE ),
 	ConversationTimer( WWMath::Random_Float( 1.0F, 10.0F ) ),
@@ -194,9 +194,9 @@ SoldierObserverClass::~SoldierObserverClass( void )
 */
 void	SoldierObserverClass::Release_Cover_Position( void )
 {
-	if ( CoverPosition != NULL ) {
+	if ( CoverPosition != nullptr ) {
 		CoverManager::Release_Cover( CoverPosition );
-		CoverPosition = NULL;
+		CoverPosition = nullptr;
 	}
 }
 
@@ -259,7 +259,7 @@ bool	SoldierObserverClass::Save (ChunkSaveClass &csave)
 			WRITE_MICRO_CHUNK( csave, MICROCHUNKID_LAST_WEAPON_INDEX, LastWeaponIndex );
 		csave.End_Chunk();
 
-		if ( EnemyObject != NULL ) {
+		if ( EnemyObject != nullptr ) {
 			csave.Begin_Chunk( CHUNKID_ENEMY_OBJ_REF );
 			EnemyObject.Save( csave );
 			csave.End_Chunk();
@@ -342,9 +342,9 @@ void	SoldierObserverClass::Detach( GameObject * obj )
 	//	Clear the soldier's internal innate observer pointer
 	//
 	SmartGameObj *smart_game_obj = obj->As_SmartGameObj();
-	if ( smart_game_obj != NULL ) {
+	if ( smart_game_obj != nullptr ) {
 		SoldierGameObj *soldier = smart_game_obj->As_SoldierGameObj();
-		if ( soldier != NULL ) {
+		if ( soldier != nullptr ) {
 			if ( soldier->Get_Innate_Observer () == this ) {
 				soldier->Clear_Innate_Observer();
 			}
@@ -359,7 +359,7 @@ void SoldierObserverClass::Created( GameObject* obj )
 {
 	SmartGameObj* smart = obj->As_SmartGameObj();
 
-	WWASSERT( smart != NULL );
+	WWASSERT( smart != nullptr );
 
 //	Debug_Say(("Innate soldier [%d] created\n", obj->Get_ID()));
 
@@ -407,9 +407,9 @@ void SoldierObserverClass::Destroyed(GameObject* /* obj */)
 void SoldierObserverClass::Timer_Expired(GameObject* obj, int timer_id)
 {
 	SmartGameObj* smart = obj->As_SmartGameObj();
-	WWASSERT( smart != NULL );
+	WWASSERT( smart != nullptr );
 	SoldierGameObj* soldier = smart->As_SoldierGameObj();
-	WWASSERT(soldier != NULL);
+	WWASSERT(soldier != nullptr);
 
 	if (timer_id == THINK_ID) {
 		obj->Start_Observer_Timer( Get_ID(), THINK_RATE, THINK_ID );
@@ -432,16 +432,16 @@ void SoldierObserverClass::Damaged(GameObject* obj, GameObject* damager, float /
 	}
 
 	SmartGameObj* smart = obj->As_SmartGameObj();
-	WWASSERT( smart != NULL );
+	WWASSERT( smart != nullptr );
 	SoldierGameObj* soldier = smart->As_SoldierGameObj();
-	WWASSERT(soldier != NULL);
+	WWASSERT(soldier != nullptr);
 
 	if (soldier->Is_Innate_Enabled(SOLDIER_INNATE_EVENT_BULLET_HEARD)) {
 //Debug_Say(( "Damaged\n" ));
 		Vector3 pos;
 		soldier->Get_Position( &pos );
 
-		if ( damager != NULL ) {
+		if ( damager != nullptr ) {
 			if ( FreeRandom.Get_Float() < 0.8 ) {		// 80% chance of knowing the source
 				damager->Get_Position( &pos );
 			}
@@ -453,7 +453,7 @@ void SoldierObserverClass::Damaged(GameObject* obj, GameObject* damager, float /
 	// If I am attacking an object, and I am damaged by a closer object, switch targets
 	if ( State == SOLDIER_AI_ENEMY_SEEN ) {
 		GameObject * enemy = EnemyObject;
-		if ( damager != NULL && enemy != damager ) {
+		if ( damager != nullptr && enemy != damager ) {
 
 			Vector3 my_pos;
 			soldier->Get_Position( &my_pos );
@@ -488,12 +488,12 @@ void SoldierObserverClass::Sound_Heard(GameObject* obj, const CombatSound& sound
 	}
 
 	SmartGameObj* smart = obj->As_SmartGameObj();
-	WWASSERT( smart != NULL );
+	WWASSERT( smart != nullptr );
 	SoldierGameObj* soldier = smart->As_SoldierGameObj();
-	WWASSERT(soldier != NULL);
+	WWASSERT(soldier != nullptr);
 
-	PhysicalGameObj * creator = NULL;
-	if ( sound.Creator != NULL ) {
+	PhysicalGameObj * creator = nullptr;
+	if ( sound.Creator != nullptr ) {
 		creator = sound.Creator->As_PhysicalGameObj();
 	}
 
@@ -517,7 +517,7 @@ void SoldierObserverClass::Sound_Heard(GameObject* obj, const CombatSound& sound
 
 		case SOUND_TYPE_GUNSHOT:
 			// Don't hear friendly
-			if ( (creator == NULL) || !soldier->Is_Teammate( creator ) ) {
+			if ( (creator == nullptr) || !soldier->Is_Teammate( creator ) ) {
 				if (soldier->Is_Innate_Enabled(SOLDIER_INNATE_EVENT_GUNSHOT_HEARD)) {
 					state_changed = Set_State(soldier, SOLDIER_AI_GUNSHOT_HEARD, sound.Position);
 				}
@@ -525,7 +525,7 @@ void SoldierObserverClass::Sound_Heard(GameObject* obj, const CombatSound& sound
 		break;
 
 		case SOUND_TYPE_FOOTSTEPS:
-			if ( (creator == NULL) || !soldier->Is_Teammate( creator ) ) {
+			if ( (creator == nullptr) || !soldier->Is_Teammate( creator ) ) {
 				if (soldier->Is_Innate_Enabled(SOLDIER_INNATE_EVENT_FOOTSTEP_HEARD)) {
 //Debug_Say(( "Heard Footsteps\n" ));
 					state_changed = Set_State(soldier, SOLDIER_AI_FOOTSTEPS_HEARD, sound.Position);
@@ -556,13 +556,13 @@ void SoldierObserverClass::Enemy_Seen(GameObject* obj, GameObject* enemy)
 	// only see the enemy if it has health
 	WWASSERT( enemy );
 	PhysicalGameObj * p_enemy = enemy->As_PhysicalGameObj();
-	if ( p_enemy == NULL || p_enemy->Get_Defense_Object()->Get_Health() <= 0 ) {
+	if ( p_enemy == nullptr || p_enemy->Get_Defense_Object()->Get_Health() <= 0 ) {
 //		Debug_Say(( "I see dead people\n" ));
 		return;
 	}
 
 	GameObject * curr_enemy = EnemyObject;
-	if ( curr_enemy != NULL && curr_enemy != enemy ) {
+	if ( curr_enemy != nullptr && curr_enemy != enemy ) {
 		// take the closer enemy
 		Vector3	old_pos;
 		curr_enemy->Get_Position( &old_pos );
@@ -581,9 +581,9 @@ void SoldierObserverClass::Enemy_Seen(GameObject* obj, GameObject* enemy)
 	}
 
 	SmartGameObj* smart = obj->As_SmartGameObj();
-	WWASSERT( smart != NULL );
+	WWASSERT( smart != nullptr );
 	SoldierGameObj* soldier = smart->As_SoldierGameObj();
-	WWASSERT(soldier != NULL);
+	WWASSERT(soldier != nullptr);
 
 //	Debug_Say(("Innate soldier [%d] seen enemy [%d]\n", obj->Get_ID(), enemy->Get_ID()));
 
@@ -611,7 +611,7 @@ void SoldierObserverClass::Action_Complete( GameObject * /* obj */, int action_i
 {
 	if ( action_id == INNATE_ACTION_ID ) {
 		SubStateString += "\nComplete";
-	//	ActionTimer = MIN( ActionTimer, 10 );		// When he completes, only stay in the action state for 5 more seconds
+	//	ActionTimer = std::min( ActionTimer, 10 );		// When he completes, only stay in the action state for 5 more seconds
 
 		// if I had an enemy target, who was just killed...
 		PhysicalGameObj* enemy = (PhysicalGameObj*)EnemyObject.Get_Ptr();
@@ -619,7 +619,7 @@ void SoldierObserverClass::Action_Complete( GameObject * /* obj */, int action_i
 			if ( enemy->Get_Defense_Object()->Get_Health() <= 0 ) {
 	//			Debug_Say(( "Target dead, moving on\n" ));
 				StateTimer = 100000;	// Leave current state
-				EnemyObject = NULL;
+				EnemyObject = nullptr;
 			}
 		}
 
@@ -629,10 +629,10 @@ void SoldierObserverClass::Action_Complete( GameObject * /* obj */, int action_i
 		{
 			if ( complete_reason == ACTION_COMPLETE_PATH_BAD_DEST ) {
 				// Pick a new action within 1 to 2 seconds
-				ActionTimer = MIN( ActionTimer, WWMath::Random_Float( 1.0F, 2.0F ) );
+				ActionTimer = std::min( ActionTimer, WWMath::Random_Float( 1.0F, 2.0F ) );
 			} else {
 				// Pick a new action within 2 to 3 seconds
-				ActionTimer = MIN( ActionTimer, WWMath::Random_Float( 2.0F, 3.0F ) );
+				ActionTimer = std::min( ActionTimer, WWMath::Random_Float( 2.0F, 3.0F ) );
 			}
 
 			if ( State > SOLDIER_AI_ALERT_IDLE ) {
@@ -746,10 +746,10 @@ bool SoldierObserverClass::Set_State( SoldierGameObj * soldier, int state, const
 			AlertPosition = location;
 		}
 
-		if ( enemy != NULL ) {
+		if ( enemy != nullptr ) {
 			EnemyObject = enemy->As_PhysicalGameObj();
 		} else {
-			EnemyObject = NULL;
+			EnemyObject = nullptr;
 		}
 		Think(soldier, (State != old_state) );
 	}
@@ -872,9 +872,9 @@ void SoldierObserverClass::Notify_Neighbors_Enemy( SoldierGameObj * soldier, Gam
 
 void SoldierObserverClass::Poked( GameObject * obj, GameObject * poker )
 {
-	if ( obj != NULL && obj->As_PhysicalGameObj() != NULL ) {
+	if ( obj != nullptr && obj->As_PhysicalGameObj() != nullptr ) {
 		PhysicalGameObj *physical_obj = obj->As_PhysicalGameObj();
-		if ( physical_obj->As_SoldierGameObj() != NULL ) {
+		if ( physical_obj->As_SoldierGameObj() != nullptr ) {
 
 			bool face_poker = false;
 
@@ -909,7 +909,7 @@ void SoldierObserverClass::Poked( GameObject * obj, GameObject * poker )
 			duration += WWMath::Random_Float( 0.5F, 2.0F );
 
 			PhysicalGameObj *physical_poker_obj = poker->As_PhysicalGameObj();
-			if ( physical_poker_obj != NULL ) {
+			if ( physical_poker_obj != nullptr ) {
 
 				//
 				//	Get the position of the player who poked us
@@ -941,7 +941,7 @@ void SoldierObserverClass::Poked( GameObject * obj, GameObject * poker )
 void SoldierObserverClass::Think( SoldierGameObj * soldier, bool is_new_state )
 {
 	WWPROFILE( "SoldierObserver Think" );
-	WWASSERT( soldier != NULL );
+	WWASSERT( soldier != nullptr );
 
 	//
 	//	We can't switch states if the soldier is "busy".  Busy usually
@@ -1014,7 +1014,7 @@ void	SoldierObserverClass::Get_Information( StringClass & string )
 	string += "-----------\n";
 	temp.Format( "State: %s\n", SoldierAIStateNames[ State ] );
 	string += temp;
-	temp.Format( "Sub: %s\n", SubStateString );
+	temp.Format( "Sub: %s\n", SubStateString.Peek_Buffer() );
 	string += temp;
 	if ( IsStationary ) {
 		string += "Stationary\n";
@@ -1027,7 +1027,7 @@ void	SoldierObserverClass::Get_Information( StringClass & string )
 	string += temp;
 	temp.Format( "Act Time: %f\n", ActionTimer );
 	string += temp;
-	if ( CoverPosition != NULL ) {
+	if ( CoverPosition != nullptr ) {
 		temp.Format( "Has Cover Pos\n" );
 		string += temp;
 	}
@@ -1044,7 +1044,7 @@ void	SoldierObserverClass::Reset_Conversation_Timer( void )
 ***********************************************************************************************/
 void SoldierObserverClass::State_Act( SoldierGameObj * soldier, bool is_new_state )
 {
-	WWASSERT( soldier != NULL );
+	WWASSERT( soldier != nullptr );
 
 	switch (State) {
 
@@ -1245,7 +1245,7 @@ void SoldierObserverClass::State_Act_Gunshot_Heard( SoldierGameObj * soldier )
 */
 void	SoldierObserverClass::State_Act_Attack( SoldierGameObj * soldier )
 {
-	WWASSERT( soldier != NULL );
+	WWASSERT( soldier != nullptr );
 
 	soldier->Get_Human_State()->Raise_Weapon();		// Keep the gun up
 
@@ -1268,7 +1268,7 @@ void	SoldierObserverClass::State_Act_Attack( SoldierGameObj * soldier )
 	PhysicalGameObj* enemy = (PhysicalGameObj*)EnemyObject.Get_Ptr();
 //	WWASSERT( soldier != enemy );
 
-	if ( enemy == NULL ) {
+	if ( enemy == nullptr ) {
 		StateTimer = 100000;	// Leave this state
 		return;
 	}
@@ -1283,7 +1283,7 @@ void	SoldierObserverClass::State_Act_Attack( SoldierGameObj * soldier )
 	Vector3 current_position;
 	soldier->Get_Position(&current_position);
 
-	if ( CoverPosition != NULL ) {
+	if ( CoverPosition != nullptr ) {
 		if ( CoveredAttack == true ) {
 			SubStateString = "Return to Cover";
 			Vector3 cover_position = CoverPosition->Get_Transform().Get_Translation();
@@ -1293,7 +1293,7 @@ void	SoldierObserverClass::State_Act_Attack( SoldierGameObj * soldier )
 			done = true;
 		} else if ( FreeRandom.Get_Float() < Get_Effective_Aggressiveness(Aggressiveness) ) {
 
-			if ( soldier->Get_Weapon() != NULL ) {
+			if ( soldier->Get_Weapon() != nullptr ) {
 				/*
 				** Start a covered attack.
 				** Pick an attack point, and go there, attacking at the target
@@ -1308,7 +1308,7 @@ void	SoldierObserverClass::State_Act_Attack( SoldierGameObj * soldier )
 		}
 	}
 
-	if ( CoverPosition != NULL ) {
+	if ( CoverPosition != nullptr ) {
 		if ( !CoverManager::Is_Cover_Safe( CoverPosition, enemy_pos ) ) {
 			Release_Cover_Position();
 			CoveredAttack = false;
@@ -1327,7 +1327,7 @@ void	SoldierObserverClass::State_Act_Attack( SoldierGameObj * soldier )
 	if ( !done && ( FreeRandom.Get_Float() < take_cover_probability ) && !IsStationary ) {		// 25% chance of not finding cover
 		Release_Cover_Position();		// Give us the option of selecting our current spot
 		CoverEntryClass * cover = CoverManager::Request_Cover(current_position, enemy_pos, effective_range);
-		if (cover != NULL) {					// Yes, take it
+		if (cover != nullptr) {					// Yes, take it
 			SubStateString = "Take Cover";
 			CoverPosition = cover;
 			Vector3 cover_position = cover->Get_Transform().Get_Translation();
@@ -1383,15 +1383,15 @@ void	SoldierObserverClass::State_Act_Attack( SoldierGameObj * soldier )
 ***********************************************************************************************/
 void SoldierObserverClass::Action_Reset( SoldierGameObj * soldier )
 {
-	WWASSERT( soldier != NULL );
-	soldier->Get_Action()->Reset( StatePriorities[ State ] );
+	WWASSERT( soldier != nullptr );
+	soldier->Get_Action()->Reset( float(StatePriorities[ State ]) );
 }
 
 void SoldierObserverClass::Action_Face_Location( SoldierGameObj * soldier, const Vector3 & location, SoldierAIState ai_state, bool crouched )
 {
-	WWASSERT( soldier != NULL );
+	WWASSERT( soldier != nullptr );
 	ActionParamsStruct parameters;
-	parameters.Set_Basic( Get_ID(), StatePriorities[ State ], INNATE_ACTION_ID, ai_state );
+	parameters.Set_Basic( Get_ID(), float(StatePriorities[ State ]), INNATE_ACTION_ID, ai_state );
 	parameters.Set_Face_Location( location, 2 );
 	parameters.MoveCrouched = crouched;
    soldier->Get_Action()->Face_Location( parameters );
@@ -1399,22 +1399,22 @@ void SoldierObserverClass::Action_Face_Location( SoldierGameObj * soldier, const
 
 void SoldierObserverClass::Action_Goto_Location( SoldierGameObj * soldier, const Vector3 & location, SoldierAIState ai_state, float speed, float distance, bool crouched )
 {
-	WWASSERT( soldier != NULL );
+	WWASSERT( soldier != nullptr );
 	Vector3	move_position = location;
 	Stay_Within_Home( soldier, &move_position, &distance );
 	ActionParamsStruct parameters;
-	parameters.Set_Basic( Get_ID(), StatePriorities[ State ], INNATE_ACTION_ID, ai_state );
+	parameters.Set_Basic( Get_ID(), float(StatePriorities[ State ]), INNATE_ACTION_ID, ai_state );
 	parameters.Set_Movement( move_position, speed, distance, crouched );
    soldier->Get_Action()->Goto( parameters );
 }
 
 void SoldierObserverClass::Action_Goto_Location_Facing( SoldierGameObj * soldier, const Vector3 & location, SoldierAIState ai_state, const Vector3 & facing_pos, float speed, float distance, bool crouched )
 {
-	WWASSERT( soldier != NULL );
+	WWASSERT( soldier != nullptr );
 	Vector3	move_position = location;
 	Stay_Within_Home( soldier, &move_position, &distance );
 	ActionParamsStruct parameters;
-	parameters.Set_Basic( Get_ID(), StatePriorities[ State ], INNATE_ACTION_ID, ai_state );
+	parameters.Set_Basic( Get_ID(), float(StatePriorities[ State ]), INNATE_ACTION_ID, ai_state );
 	parameters.Set_Movement( move_position, speed, distance, crouched );
 	parameters.ForceFacing = true;
 	parameters.FaceLocation = facing_pos;
@@ -1424,7 +1424,7 @@ void SoldierObserverClass::Action_Goto_Location_Facing( SoldierGameObj * soldier
 void SoldierObserverClass::Action_Attack_Object( SoldierGameObj * soldier, PhysicalGameObj * enemy, float range,
 																	bool kneel, const Vector3 & move_location, float arrived_distance )
 {
-	WWASSERT( soldier != NULL );
+	WWASSERT( soldier != nullptr );
 	Vector3	move_position = move_location;
 	Stay_Within_Home( soldier, &move_position, &arrived_distance );
 
@@ -1432,9 +1432,9 @@ void SoldierObserverClass::Action_Attack_Object( SoldierGameObj * soldier, Physi
 		arrived_distance = 10000;
 	}
 
-	if ( enemy != NULL && soldier->Get_Weapon() != NULL ) {
+	if ( enemy != nullptr && soldier->Get_Weapon() != nullptr ) {
 		ActionParamsStruct parameters;
-		parameters.Set_Basic( Get_ID(), StatePriorities[ State ], INNATE_ACTION_ID, AI_STATE_COMBAT );
+		parameters.Set_Basic( Get_ID(), float(StatePriorities[ State ]), INNATE_ACTION_ID, AI_STATE_COMBAT );
 		parameters.Set_Movement( move_position, RUN_SPEED, arrived_distance, kneel );
 		parameters.Set_Attack( enemy, range, FreeRandom.Get_Float(2), true );
 		parameters.AttackCrouched = kneel;
@@ -1452,9 +1452,9 @@ void SoldierObserverClass::Action_Attack_Object( SoldierGameObj * soldier, Physi
 
 void SoldierObserverClass::Action_Dive( SoldierGameObj * soldier, const Vector3 & location )
 {
-	WWASSERT( soldier != NULL );
+	WWASSERT( soldier != nullptr );
 	ActionParamsStruct parameters;
-	parameters.Set_Basic( Get_ID(), StatePriorities[ State ], INNATE_ACTION_ID, AI_STATE_SEARCH );
+	parameters.Set_Basic( Get_ID(), float(StatePriorities[ State ]), INNATE_ACTION_ID, AI_STATE_SEARCH );
 	parameters.MoveLocation = location;
 	soldier->Get_Action()->Dive( parameters );
 }
@@ -1475,7 +1475,7 @@ void SoldierObserverClass::Stay_Within_Home( SoldierGameObj * soldier, Vector3 *
 
 bool SoldierObserverClass::Take_Cover( SoldierGameObj * soldier, bool force_face, const Vector3 & face_pos )
 {
-	if ( CoverPosition != NULL ) {
+	if ( CoverPosition != nullptr ) {
 		if ( !CoverManager::Is_Cover_Safe( CoverPosition, AlertPosition ) ) {
 			Release_Cover_Position();
 		}
@@ -1488,7 +1488,7 @@ bool SoldierObserverClass::Take_Cover( SoldierGameObj * soldier, bool force_face
 		Vector3 current_position;
 		soldier->Get_Position(&current_position);
 		CoverEntryClass * cover = CoverManager::Request_Cover(current_position, AlertPosition, cover_range);	// Can we find a cover spot?
-		if (cover != NULL) {					// Yes, take it
+		if (cover != nullptr) {					// Yes, take it
 			SubStateString = "Take Cover";
 			CoverPosition = cover;
 			Vector3 cover_position = cover->Get_Transform().Get_Translation();

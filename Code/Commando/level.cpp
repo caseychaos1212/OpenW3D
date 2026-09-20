@@ -53,16 +53,16 @@
 */
 void		LevelManager::Release_Level( void )
 {
-WWPROFILE( "Release Level" );
-	SaveGameManager::Set_Map_Filename( NULL );
+WWPROFILENAMED( "Release Level", top );
+	SaveGameManager::Set_Map_Filename( nullptr );
 	ConversationMgrClass::Reset_Active_Conversations ();
 
 	//
 	// Stop (and free) any currently playing sounds
 	//
-   WWASSERT(WWAudioClass::Get_Instance() != NULL);
+   WWASSERT(WWAudioClass::Get_Instance() != nullptr);
    SoundSceneClass *sound_scene = WWAudioClass::Get_Instance ()->Get_Sound_Scene ();
-	if( sound_scene != NULL ) {
+	if( sound_scene != nullptr ) {
 		sound_scene->Flush_Scene ();
 	}
 

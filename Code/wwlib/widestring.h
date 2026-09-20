@@ -114,8 +114,8 @@ public:
 	bool			Is_Empty (void) const;
 
 	void			Erase (int start_index, int char_count);
-	int __cdecl  Format (const unichar_t *format, ...);
-	int __cdecl  Format_Args (const unichar_t *format, va_list arg_list );
+	int  Format (const unichar_t *format, ...);
+	int  Format_Args (const unichar_t *format, va_list arg_list );
 	bool			Convert_From (const char *text);
 	bool			Convert_To (StringClass &string);
 	bool			Convert_To (StringClass &string) const;
@@ -127,7 +127,7 @@ public:
 	bool Is_ANSI(void);
 
 	unichar_t *		Get_Buffer (int new_length);
-	unichar_t *		Peek_Buffer (void);
+	unichar_t *		Peek_Buffer (void) const;
 
 	////////////////////////////////////////////////////////////
 	//	Static methods
@@ -558,7 +558,7 @@ WideStringClass::Get_Buffer (int new_length)
 //	Peek_Buffer
 ///////////////////////////////////////////////////////////////////
 inline unichar_t *
-WideStringClass::Peek_Buffer (void)
+WideStringClass::Peek_Buffer (void) const
 {
 	return m_Buffer;
 }

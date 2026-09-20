@@ -99,7 +99,7 @@ bool Get_W3D_Dependencies (const char *w3d_filename, StringList &files)
 		file->Open();
 		if ( ! file->Is_Open()) {
 			_TheFileFactory->Return_File(file);
-			file=NULL;
+			file=nullptr;
 			return false;
 		}
 	} else {
@@ -121,7 +121,7 @@ bool Get_W3D_Dependencies (const char *w3d_filename, StringList &files)
 	// Close the file.
 	file->Close();
 	_TheFileFactory->Return_File(file);
-	file=NULL;
+	file=nullptr;
 
 	// Sort the set of filenames, and remove any duplicates.
 	files.sort();
@@ -265,7 +265,7 @@ static void Scan_Mesh_Textures (ChunkLoadClass &cload, StringList &files, const 
 				// We're interested in the TEXTURE_NAME sub-chunk.
 				if (cload.Cur_Chunk_ID() == W3D_CHUNK_TEXTURE_NAME)
 				{
-					// This chunk's data is a NULL-terminated string
+					// This chunk's data is a nullptr-terminated string
 					// which is the texture filename. Read it and
 					// add it to the list of files referred to.
 					char texture[_MAX_PATH];
@@ -523,7 +523,7 @@ static void Get_W3D_Name (const char *filename, char *w3d_name)
 	// Copy all characters from start to end (excluding 'end')
 	// into the w3d_name buffer. Then capitalize the string.
 	memset(w3d_name, 0, W3D_NAME_LEN);	// blank out the buffer
-	int num_chars = end - start;
+	int num_chars = int(end - start);
 	strncpy(w3d_name, start, num_chars < W3D_NAME_LEN ? num_chars : W3D_NAME_LEN-1);
     openw3d::string_to_upper(w3d_name);
 }

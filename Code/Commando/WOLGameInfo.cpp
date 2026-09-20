@@ -43,6 +43,7 @@
 #include "modpackagemgr.h"
 #include <cstdio>
 #include <algorithm>
+#include <cinttypes>
 
 using namespace WWOnline;
 
@@ -230,7 +231,7 @@ void WOLGameInfo::ImportFromGame(const cGameData& theGame)
 	mClanID2 = theGame.Get_Clan(1);
 
 	const unichar_t* password = theGame.Get_Password();
-	mIsPassworded = ((password != NULL) && (u_strlen(password) > 0));
+	mIsPassworded = ((password != nullptr) && (u_strlen(password) > 0));
 	mIsLaddered   = theGame.IsLaddered.Get();
 	mIsQuickmatch = theGame.Is_QuickMatch_Server();
 	mIsDedicated  = theGame.IsDedicated.Get();
@@ -287,9 +288,9 @@ void WOLGameInfo::ImportFromChannel(const RefPtr<ChannelData>& channel)
 
 	const char* exInfo = channel->GetExtraInfo();
 
-	if ((exInfo == NULL) || (exInfo && (strlen(exInfo) != 36)))
+	if ((exInfo == nullptr) || (exInfo && (strlen(exInfo) != 36)))
 		{
-		WWDEBUG_SAY(("WOLERROR: Channel ExInfo NULL or wrong size\n"));
+		WWDEBUG_SAY(("WOLERROR: Channel ExInfo nullptr or wrong size\n"));
 		mIsDataValid = false;
 		return;
 		}
@@ -298,16 +299,16 @@ void WOLGameInfo::ImportFromChannel(const RefPtr<ChannelData>& channel)
 	mIsDataValid = true;
 
 	// Extract ExInfo settings
-	unsigned int fileCRC = 0;
-	unsigned int version = 0;
-	unsigned int clanID1 = 0;
-	unsigned int clanID2 = 0;
+	uint32_t fileCRC = 0;
+	uint32_t version = 0;
+	uint32_t clanID1 = 0;
+	uint32_t clanID2 = 0;
 	unsigned char gameType = 0;
 	unsigned char gameFlags1 = 0;
 	unsigned char gameFlags2 = 0;
 	unsigned char modMapIndex = 0;
 
-	int count = sscanf(exInfo, "%08lX%08lX%08lX%08lX%c%c%c%c", &version, &fileCRC,
+	int count = sscanf(exInfo, "%08" SCNx32 "%08" SCNx32 "%08" SCNx32 "%08" SCNx32 "%c%c%c%c", &version, &fileCRC,
 			&clanID1, &clanID2, &gameType, &gameFlags1, &gameFlags2, &modMapIndex);
 
 	// There should be 8 parameters in the exinfo
@@ -317,7 +318,7 @@ void WOLGameInfo::ImportFromChannel(const RefPtr<ChannelData>& channel)
 		mIsDataValid = false;
 		}
 
-	if (version != unsigned(cNetwork::Get_Exe_Key())) {
+	if (version != cNetwork::Get_Exe_Key()) {
 		mIsDataValid = false;
 		return;
 	}
@@ -401,14 +402,14 @@ void WOLGameInfo::ImportFromChannel(const RefPtr<ChannelData>& channel)
 
 	const char* topic = channel->GetTopic();
 
-	if (topic == NULL)
+	if (topic == nullptr)
 		{
-		WWDEBUG_SAY(("WOLERROR: Channel Topic is NULL\n"));
+		WWDEBUG_SAY(("WOLERROR: Channel Topic is nullptr\n"));
 		mIsDataValid = false;
 		}
 
 	// Quickmatch settings are marked by a pipe '|' character
-	mIsQuickmatch = (strchr(topic, '|') != NULL);
+	mIsQuickmatch = (strchr(topic, '|') != nullptr);
 
 	// Extract game title from topic
 	unsigned int titleLength = (topic[0] - 0x20);
@@ -502,7 +503,7 @@ void WOLGameInfo::ExportToChannel(const RefPtr<ChannelData>& channel)
 			{
 			ModPackageClass& package = ModPackageMgrClass::Get_Current_Package();
 			fileCRC = package.Get_CRC();
-			modMapIndex = package.Get_Map_Index(mMapName);
+			modMapIndex = static_cast<unsigned char>(package.Get_Map_Index(mMapName));
 			}
 		else
 			{
@@ -514,8 +515,8 @@ void WOLGameInfo::ExportToChannel(const RefPtr<ChannelData>& channel)
 
 		// WARNING: The channels ExInfo field has a maximum size of 40 bytes.
 		char exInfo[41];
-		sprintf(exInfo, "%08lX%08lX%08lX%08lX%c%c%c%c", mVersion, fileCRC,
-				mClanID1, mClanID2, (0x30 + mGameType), gameFlags1, gameFlags2, modMapIndex);
+		sprintf(exInfo, "%08" PRIX32 "%08X%08X%08X%c%c%c%c", mVersion, fileCRC,
+				mClanID1, mClanID2, ('0' + mGameType), gameFlags1, gameFlags2, modMapIndex);
 
 		channel->SetExtraInfo(exInfo);
 
@@ -571,7 +572,7 @@ void WOLGameInfo::ExportToChannel(const RefPtr<ChannelData>& channel)
 bool WOLGameInfo::IsValidGameChannel(const RefPtr<ChannelData>& channel)
 	{
 	WOLGameInfo gameInfo(channel);
-	return (gameInfo.IsDataValid() && (gameInfo.mVersion == (unsigned int)cNetwork::Get_Exe_Key()));
+	return (gameInfo.IsDataValid() && (gameInfo.mVersion == cNetwork::Get_Exe_Key()));
 	}
 
 
@@ -642,7 +643,7 @@ bool WOLGameInfo::CanUserJoin(const RefPtr<UserData>& user)
 		return false;
 		}
 
-	if (mVersion != (unsigned int)cNetwork::Get_Exe_Key())
+	if (mVersion != cNetwork::Get_Exe_Key())
 		{
 		return false;
 		}

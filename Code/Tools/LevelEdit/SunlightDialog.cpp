@@ -40,8 +40,8 @@ static char THIS_FILE[] = __FILE__;
 // SunlightDialogClass dialog
 
 
-SunlightDialogClass::SunlightDialogClass(CWnd* pParent /*=NULL*/)
-	:	m_pSunlight (NULL),
+SunlightDialogClass::SunlightDialogClass(CWnd* pParent /*=nullptr*/)
+	:	m_pSunlight (nullptr),
 		CDialog(SunlightDialogClass::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(SunlightDialogClass)
@@ -91,7 +91,7 @@ SunlightDialogClass::OnInitDialog (void)
 	CDialog::OnInitDialog ();
 
 	m_pSunlight = ::Get_Scene_Editor ()->Get_Sun_Light ();
-	ASSERT (m_pSunlight != NULL);
+	ASSERT (m_pSunlight != nullptr);
 	m_pSunlight->Get_Diffuse (&m_Color);
 
 	::Get_Scene_Editor ()->Get_Sun_Light_Orientation (&m_Yaw, &m_Pitch);
@@ -103,9 +103,9 @@ SunlightDialogClass::OnInitDialog (void)
 	m_PitchSlider.SetRange (0, 90);
 	m_IntensitySlider.SetRange (0, 100);
 
-	m_YawSlider.SetPos ((int)(RAD_TO_DEG (m_Yaw) + 0.5F));
-	m_PitchSlider.SetPos ((int)(RAD_TO_DEG (m_Pitch) + 0.5F));
-	m_IntensitySlider.SetPos ((m_Intensity * 100));
+	m_YawSlider.SetPos ((int)(RAD_TO_DEGF (m_Yaw) + 0.5F));
+	m_PitchSlider.SetPos ((int)(RAD_TO_DEGF (m_Pitch) + 0.5F));
+	m_IntensitySlider.SetPos ((int)(m_Intensity * 100));
 
 	::SetDlgItemFloat (m_hWnd, IDC_YAW_EDIT, (float)m_YawSlider.GetPos ());
 	::SetDlgItemFloat (m_hWnd, IDC_PITCH_EDIT, (float)m_PitchSlider.GetPos ());
@@ -127,14 +127,14 @@ SunlightDialogClass::OnHScroll
 )
 {
 	if (pScrollBar == GetDlgItem (IDC_YAW_SLIDER)) {
-		m_Yaw = DEG_TO_RAD ((float)m_YawSlider.GetPos ());
+		m_Yaw = DEG_TO_RADF ((float)m_YawSlider.GetPos ());
 		::Get_Scene_Editor ()->Set_Sun_Light_Orientation (m_Yaw, m_Pitch);
 		::Get_Scene_Editor ()->Update_Lighting ();
 		::SetDlgItemFloat (m_hWnd, IDC_YAW_EDIT, (float)m_YawSlider.GetPos ());
 		::Get_Scene_Editor ()->Update_Lighting ();
 
 	} else if (pScrollBar == GetDlgItem (IDC_PITCH_SLIDER)) {
-		m_Pitch = DEG_TO_RAD ((float)m_PitchSlider.GetPos ());
+		m_Pitch = DEG_TO_RADF ((float)m_PitchSlider.GetPos ());
 		::Get_Scene_Editor ()->Set_Sun_Light_Orientation (m_Yaw, m_Pitch);
 		::Get_Scene_Editor ()->Update_Lighting ();
 		::SetDlgItemFloat (m_hWnd, IDC_PITCH_EDIT, (float)m_PitchSlider.GetPos ());
@@ -163,9 +163,9 @@ SunlightDialogClass::OnHScroll
 void
 SunlightDialogClass::OnColor (void)
 {
-	int red		= m_Color.X * 255;
-	int green	= m_Color.Y * 255;
-	int blue		= m_Color.Z * 255;
+	int red		= int(m_Color.X * 255);
+	int green	= int(m_Color.Y * 255);
+	int blue		= int(m_Color.Z * 255);
 
 	//
 	// Display a dialog to the user that will allow them to select a color
@@ -183,7 +183,7 @@ SunlightDialogClass::OnColor (void)
 		//
 		// Repaint the views
 		//
-		::InvalidateRect (::GetDlgItem (m_hWnd, IDC_BK_COLOR), NULL, true);
+		::InvalidateRect (::GetDlgItem (m_hWnd, IDC_BK_COLOR), nullptr, true);
 		::Get_Scene_Editor ()->Update_Lighting ();
 		::Refresh_Main_View ();
 	}
@@ -241,7 +241,7 @@ void
 SunlightDialogClass::OnUpdatePitchEdit (void)
 {
 	float pitch_deg	= ::GetDlgItemFloat (m_hWnd, IDC_PITCH_EDIT);
-	m_Pitch				= DEG_TO_RAD (pitch_deg);
+	m_Pitch				= DEG_TO_RADF (pitch_deg);
 	::Get_Scene_Editor ()->Set_Sun_Light_Orientation (m_Yaw, m_Pitch);
 	::Get_Scene_Editor ()->Update_Lighting ();
 	m_PitchSlider.SetPos ((int)pitch_deg);
@@ -264,7 +264,7 @@ SunlightDialogClass::OnKillfocusPitchEdit (void)
 		pitch_deg = 90.0F;
 		::SetDlgItemFloat (m_hWnd, IDC_PITCH_EDIT, pitch_deg);
 
-		m_Pitch = DEG_TO_RAD (pitch_deg);
+		m_Pitch = DEG_TO_RADF (pitch_deg);
 		::Get_Scene_Editor ()->Set_Sun_Light_Orientation (m_Yaw, m_Pitch);
 		::Get_Scene_Editor ()->Update_Lighting ();
 		::Refresh_Main_View ();
@@ -287,7 +287,7 @@ SunlightDialogClass::OnKillfocusYawEdit (void)
 		yaw_deg = 360.0F;
 		::SetDlgItemFloat (m_hWnd, IDC_YAW_EDIT, yaw_deg);
 
-		m_Yaw = DEG_TO_RAD (yaw_deg);
+		m_Yaw = DEG_TO_RADF (yaw_deg);
 		::Get_Scene_Editor ()->Set_Sun_Light_Orientation (m_Yaw, m_Pitch);
 		::Get_Scene_Editor ()->Update_Lighting ();
 		::Refresh_Main_View ();
@@ -305,7 +305,7 @@ void
 SunlightDialogClass::OnUpdateYawEdit (void)
 {
 	float yaw_deg = ::GetDlgItemFloat (m_hWnd, IDC_YAW_EDIT);
-	m_Yaw = DEG_TO_RAD (yaw_deg);
+	m_Yaw = DEG_TO_RADF (yaw_deg);
 	::Get_Scene_Editor ()->Set_Sun_Light_Orientation (m_Yaw, m_Pitch);
 	::Get_Scene_Editor ()->Update_Lighting ();
 	m_YawSlider.SetPos ((int)yaw_deg);

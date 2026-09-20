@@ -179,6 +179,7 @@ public:
 	WW3DErrorType					Load_W3D (ChunkLoadClass &cload);
 	WW3DErrorType					Save_W3D (ChunkSaveClass &csave);
 	const char *					Get_Name (void) const					{ return Name; }
+	const AudibleSoundDefinitionClass *Peek_Sound_Definition (void) const	{ return &Definition; }
 	void								Set_Name (const char *name)			{ Name = name; }
 	SoundRenderObjDefClass *	Clone (void) const						{ return NEW_REF( SoundRenderObjDefClass, (*this) ); }
 
@@ -230,7 +231,7 @@ public:
 	//	Public constructors/destructors
 	///////////////////////////////////////////////////////////
 	SoundRenderObjPrototypeClass (SoundRenderObjDefClass *def)
-		: Definition (NULL)													{ Set_Definition (def); }
+		: Definition (nullptr)													{ Set_Definition (def); }
 	virtual ~SoundRenderObjPrototypeClass (void)						{ REF_PTR_RELEASE (Definition); }
 
 	///////////////////////////////////////////////////////////
@@ -272,4 +273,3 @@ extern SoundRenderObjLoaderClass		_SoundRenderObjLoader;
 
 
 #endif //__SOUNDROBJ_H
-

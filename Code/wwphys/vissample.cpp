@@ -151,6 +151,8 @@ Matrix3D VisSampleClass::Get_Camera_Transform(VisDirType direction_index) const
 	case VIS_DOWN:
 		view.Rotate_X(DEG_TO_RADF(-90.0f));
 		break;
+	case VIS_DIRECTIONS:
+		break;
 	}
 
 	if (!(DirectionBits & VIS_DONT_RECENTER)) {
@@ -238,7 +240,7 @@ bool VisSampleClass::Save(ChunkSaveClass &chunk_save) const
 	bool retval = false;
 
 	PERSISTENT_VIS_SAMPLE_INFO info;
-	::memset (&info, 0, sizeof (info));
+	::memset (static_cast<void *>(&info), 0, sizeof (info));
 
 	//
 	//	Copy the sample information into the object

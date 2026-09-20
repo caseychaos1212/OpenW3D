@@ -58,7 +58,7 @@ DECLARE_SCRIPT(MX0_MissionStart_DME, "") //1200001
 
 	void Created (GameObject * /* obj */) override
 	{
-		Commands->Select_Weapon (STAR, NULL );
+		Commands->Select_Weapon (STAR, nullptr );
 		engineer1 = engineer2 = eng_num = count = sniper_1 = sniper_2 = curr_conv7 = 0;
 		SniperNotify = false;
 
@@ -286,7 +286,7 @@ DECLARE_SCRIPT(MX0_MissionStart_DME, "") //1200001
 
 		if (type == COUNTER)
 		{
-			count = param;
+			count = int(param);
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (engineer1), COUNT_UP, count, 0.0f );
 			Commands->Send_Custom_Event( obj, Commands->Find_Object (engineer2), COUNT_UP, count, 0.0f );
 		}
@@ -295,12 +295,12 @@ DECLARE_SCRIPT(MX0_MissionStart_DME, "") //1200001
 		{
 			if (eng_num == 0)
 			{
-				engineer1 = param;
+				engineer1 = int(param);
 				eng_num++;
 			}
 			else
 			{
-				engineer2 = param;
+				engineer2 = int(param);
 			}
 		}
 
@@ -621,7 +621,7 @@ DECLARE_SCRIPT (MX0_Engineer1, "Damage_multiplier:float")
 	{
 		if (type == CROUCH_WANDER)
 		{
-			GameObject * sniper1 = Commands->Find_Object (param);
+			GameObject * sniper1 = Commands->Find_Object (int(param));
 
 			Commands->Unlock_Soldier_Facing (obj);
 
@@ -681,12 +681,12 @@ DECLARE_SCRIPT (MX0_Engineer1, "Damage_multiplier:float")
 
 		if (type == COUNT_UP)
 		{
-			count = param;
+			count = int(param);
 		}
 
 		if (type == LEAD)
 		{
-			point_id = param;
+			point_id = int(param);
 
 			ActionParamsStruct params;
 
@@ -895,7 +895,7 @@ DECLARE_SCRIPT (MX0_Engineer2, "Damage_multiplier:float")
 	{
 		if (type == CROUCH_WANDER)
 		{
-			sniper_1 = param;
+			sniper_1 = int(param);
 			Commands->Start_Timer (obj, this, 5.0f, CROUCH_GOTO);
 		}
 
@@ -917,7 +917,7 @@ DECLARE_SCRIPT (MX0_Engineer2, "Damage_multiplier:float")
 			Commands->Set_Facing ( obj, angle );
 
 			Commands->Action_Reset(obj, 100);
-			Commands->Set_Animation (obj, "H_A_A0A0_L53", false, NULL, 0.0F, -1.0F, true );
+			Commands->Set_Animation (obj, "H_A_A0A0_L53", false, nullptr, 0.0F, -1.0F, true );
 
 			/*ActionParamsStruct params;
 			params.Set_Basic( this, 98, DOING_ANIMATION );
@@ -938,12 +938,12 @@ DECLARE_SCRIPT (MX0_Engineer2, "Damage_multiplier:float")
 
 		if (type == COUNT_UP)
 		{
-			count = param;
+			count = int(param);
 		}
 
 		if (type == LEAD)
 		{
-			point_id = param;
+			point_id = int(param);
 
 			ActionParamsStruct params;
 
@@ -999,12 +999,12 @@ DECLARE_SCRIPT(MX0_Engineer_Goto, "GotoDest1:int, GotoDest2:int, Count:int")
 	{
 		if (type == RETURN_ENGINEER1)
 		{
-			Commands->Send_Custom_Event( obj, Commands->Find_Object (param), LEAD, Get_Int_Parameter("GotoDest1"), 0.0f );
+			Commands->Send_Custom_Event( obj, Commands->Find_Object (int(param)), LEAD, Get_Int_Parameter("GotoDest1"), 0.0f );
 		}
 
 		if (type == RETURN_ENGINEER2)
 		{
-			Commands->Send_Custom_Event( obj, Commands->Find_Object (param), LEAD, Get_Int_Parameter("GotoDest2"), 0.0f );
+			Commands->Send_Custom_Event( obj, Commands->Find_Object (int(param)), LEAD, Get_Int_Parameter("GotoDest2"), 0.0f );
 		}
 	}
 
@@ -1044,12 +1044,12 @@ DECLARE_SCRIPT(MX0_Engineer_Goto2, "GotoDest1:int, GotoDest2:int, Count:int")
 	{
 		if (type == RETURN_ENGINEER1)
 		{
-			Commands->Send_Custom_Event( obj, Commands->Find_Object (param), LEAD, Get_Int_Parameter("GotoDest1"), 0.0f );
+			Commands->Send_Custom_Event( obj, Commands->Find_Object (int(param)), LEAD, Get_Int_Parameter("GotoDest1"), 0.0f );
 		}
 
 		if (type == RETURN_ENGINEER2)
 		{
-			Commands->Send_Custom_Event( obj, Commands->Find_Object (param), LEAD, Get_Int_Parameter("GotoDest2"), 0.0f );
+			Commands->Send_Custom_Event( obj, Commands->Find_Object (int(param)), LEAD, Get_Int_Parameter("GotoDest2"), 0.0f );
 		}
 
 		if (type == SEND_EM)
@@ -1245,7 +1245,7 @@ DECLARE_SCRIPT (MX0_SniperAction, "FaceObj:int")
 
 	void Damaged( GameObject * obj, GameObject * damager, float /* amount */ ) override
 	{
-		Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", NULL);
+		Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", nullptr);
 
 		if ( Commands->Is_A_Star(damager) )
 		{
@@ -1260,7 +1260,7 @@ DECLARE_SCRIPT (MX0_SniperAction, "FaceObj:int")
 		}
 		else
 		{
-			Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", NULL);
+			Commands->Apply_Damage(obj, 10000.0f, "Blamokiller", nullptr);
 		}
 	}
 
@@ -1453,7 +1453,7 @@ DECLARE_SCRIPT(MX0_GDI_ORCA, "" )
 			// "Eagle Base, we must be close. There's a NOD Harvester here..."
 			const char *conv_name = ("MX0_A03_02");
 			int conv_id = Commands->Create_Conversation (conv_name, 0, 0, true);
-			Commands->Join_Conversation(NULL, conv_id, true, true, true);
+			Commands->Join_Conversation(nullptr, conv_id, true, true, true);
 			Commands->Start_Conversation (conv_id, 1);
 			Commands->Monitor_Conversation (obj, conv_id);
 
@@ -1476,7 +1476,7 @@ DECLARE_SCRIPT(MX0_GDI_ORCA, "" )
 			// "Orca6: "Orca 6 to Eagle Base. I have visual on the harvester. Starting my run, now."
 			const char *conv_name = ("MX0_A03_03");
 			int conv_id = Commands->Create_Conversation (conv_name, 0, 0, true);
-			Commands->Join_Conversation(NULL, conv_id, true, true, true);
+			Commands->Join_Conversation(nullptr, conv_id, true, true, true);
 			Commands->Start_Conversation (conv_id, 1);
 		}
 
@@ -1493,7 +1493,7 @@ DECLARE_SCRIPT(MX0_GDI_ORCA, "" )
 			// "Trooper1: Woah. "That Rocked!" Orca6: "This is Orca 6 -- bingo Fuel. Returning to Base..."
 			int conv_id = Commands->Create_Conversation ( "MX0_A03_04" , 0, 0, true);
 			Commands->Join_Conversation(Trooper_One, conv_id, false, false, true);
-			Commands->Join_Conversation(NULL, conv_id, true, true, true);
+			Commands->Join_Conversation(nullptr, conv_id, true, true, true);
 			Commands->Start_Conversation (conv_id, 2);
 
 			// start Trooper1 attacking Buggie.
@@ -1511,7 +1511,7 @@ DECLARE_SCRIPT(MX0_GDI_ORCA, "" )
 
 		if ( type == M00_SEND_OBJECT_ID )
 		{
-			Trooper_One_Id  = param;
+			Trooper_One_Id  = int(param);
 		}
 	}
 };
@@ -1986,7 +1986,6 @@ DECLARE_SCRIPT (MX0_A03_CONTROLLER_DAK, "" )
 			{
 				if (Trooper_One)
 				{
-					GameObject *Trooper_One = Commands->Find_Object( Trooper_One_Id );
 					// Trooper1: "Nice! That'll cost 'em!"
 					int conv_id = Commands->Create_Conversation ( "MX0_A03_08" , 0, 0, true);
 					Commands->Join_Conversation( Trooper_One, conv_id, false, false, true);
@@ -2114,7 +2113,7 @@ DECLARE_SCRIPT ( MX0_A03_HUMVEE, "" ) // moves humvee
 
 		const char *conv_name = ("MX0_A03_01");
 		int conv_id = Commands->Create_Conversation (conv_name, 0, 0, true);
-		Commands->Join_Conversation(NULL, conv_id, true, true, true);
+		Commands->Join_Conversation(nullptr, conv_id, true, true, true);
 		Commands->Start_Conversation (conv_id, 1);
 
 		// set first movement.
@@ -2321,7 +2320,7 @@ DECLARE_SCRIPT ( MX0_A03_NOD_TROOPER_TIB_DEATH, "" )
 	{
 		if ( type == M00_SEND_OBJECT_ID )
 		{
-			Trooper_One_Id  = param;
+			Trooper_One_Id  = int(param);
 		}
 	}
 
@@ -2356,7 +2355,7 @@ DECLARE_SCRIPT ( MX0_A03_NOD_HARVESTER, "" )
 	{
 		if ( obj )
 		{
-			Commands->Set_Animation( obj, "V_NOD_HRVSTR.V_NOD_HRVSTR", false, NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation( obj, "V_NOD_HRVSTR.V_NOD_HRVSTR", false, nullptr, 0.0f, -1.0f, false);
 		}
 	}
 
@@ -2403,7 +2402,7 @@ DECLARE_SCRIPT ( MX0_A03_NOD_HARVESTER, "" )
 			// Commands->Debug_Message( "***** DAK ***** Orcastrike: Damaging harvester.\n" );
 			// float health = Commands->Get_Health( obj );
 			// float damage = health / param;
-			Commands->Apply_Damage( obj, 200, "EXPLOSIVE", NULL );
+			Commands->Apply_Damage( obj, 200, "EXPLOSIVE", nullptr );
 		}
 	}
 	void Killed( GameObject *obj, GameObject * /* killer */ ) override
@@ -2584,7 +2583,7 @@ DECLARE_SCRIPT( MX0_A03_FIRST_PLAYER_ZONE, "" )
 	{
 		if ( type == M00_SEND_OBJECT_ID )
 		{
-			Trooper_One_Id  = param;
+			Trooper_One_Id  = int(param);
 		}
 	}
 };
@@ -2669,7 +2668,7 @@ DECLARE_SCRIPT ( MX0_A03_END_ZONE, "" )
 
 		if ( type == M00_SEND_OBJECT_ID )
 		{
-			Trooper_One_Id  = param;
+			Trooper_One_Id  = int(param);
 		}
 	}
 };

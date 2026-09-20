@@ -12,10 +12,15 @@ endif()
 
 project(commando LANGUAGES C CXX)
 
+include(CTest)
+
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 # This file handles extra settings wanted/needed for different compilers.
 include(compilers)
+
+# This file allows embedding resources
+include(embed)
 
 # Set where the build results will end up
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}" CACHE PATH "Where to output archives")
@@ -47,21 +52,23 @@ cmake_dependent_option(W3D_BUILD_OPTION_WEBBROWSER "Build OpenW3D with webbrowse
 add_feature_info(BrowserBuild W3D_BUILD_OPTION_WEBBROWSER "Build OpenW3D with webbrowser")
 
 # Do we want to build with ffmpeg for audio/video decoding?
-option(W3D_BUILD_OPTION_FFMPEG "Build with ffmpeg." ON)
+cmake_dependent_option(W3D_BUILD_OPTION_FFMPEG "Build with ffmpeg." ON WIN32 ON)
 add_feature_info(FFMpegBuild W3D_BUILD_OPTION_FFMPEG "Build OpenW3D with FFMpeg")
 
 # Do we want to build with OpenAL/ffmpeg for audio playback?
 cmake_dependent_option(W3D_BUILD_OPTION_OPENAL "Build with openal." ON W3D_BUILD_OPTION_FFMPEG OFF)
 add_feature_info(OpenALBuild W3D_BUILD_OPTION_OPENAL "Build OpenW3D with OpenAL")
 
+# Do we want to build with freetype for font rendering?
+cmake_dependent_option(W3D_BUILD_OPTION_FREETYPE "Build with freetype." OFF WIN32 ON)
+add_feature_info(FreetypeBuild W3D_BUILD_OPTION_FREETYPE "Build OpenW3D with freetype")
+
+option(W3D_BUILD_QT_TOOLS "Build Qt-based GUI tools." OFF)
+add_feature_info(QtTools W3D_BUILD_QT_TOOLS "Build Qt front-end tools")
+
 if(NOT WIN32)
-    add_compile_definitions(__cdecl=)
-    add_compile_definitions(__stdcall=)
-    add_compile_definitions(_stdcall=)
     add_compile_definitions(stricmp=strcasecmp)
     add_compile_definitions(strnicmp=strncasecmp)
-    add_compile_definitions(wcsnicmp=wcsncasecmp)
-    add_compile_definitions(wcsicmp=wcscasecmp)
 endif()
 
 include(FetchContent)
@@ -72,27 +79,49 @@ endif()
 
 if(W3D_BUILD_OPTION_SDL3)
     include(sdl3)
-    add_compile_definitions(-DOPENW3D_SDL3=1)
+    add_compile_definitions(OPENW3D_SDL3=1)
 elseif(WIN32)
-    add_compile_definitions(-DOPENW3D_WIN32=1)
+    add_compile_definitions(OPENW3D_WIN32=1)
 else()
     message(FATAL_ERROR "Invalid backend")
 endif()
 
-add_compile_definitions(-DWEBBROWSER_ENABLED=$<BOOL:${W3D_BUILD_OPTION_WEBBROWSER}>)
+add_compile_definitions(WEBBROWSER_ENABLED=$<BOOL:${W3D_BUILD_OPTION_WEBBROWSER}>)
 
 if(W3D_BUILD_OPTION_OPENAL)
     include(openal)
 endif()
 
+if(W3D_BUILD_OPTION_FREETYPE)
+    include(freetype)
+endif()
+
+if(W3D_BUILD_QT_TOOLS)
+    if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+        message(FATAL_ERROR "Qt tooling is only supported for 64-bit builds. Configure with a 64-bit generator or set W3D_BUILD_QT_TOOLS=OFF.")
+    endif()
+    set(CMAKE_AUTOMOC ON)
+    set(CMAKE_AUTOUIC ON)
+    set(CMAKE_AUTORCC ON)
+    include(qt_tools)
+endif()
+
 if(WIN32)
     # Do we want to build with bink for video decoding?
-    cmake_dependent_option(W3D_BUILD_OPTION_BINK "Build with bink." ON NOT W3D_BUILD_OPTION_FFMPEG OFF)
+    cmake_dependent_option(W3D_BUILD_OPTION_BINK "Build with bink." ON "NOT W3D_BUILD_OPTION_FFMPEG" OFF)
     add_feature_info(BinkBuild W3D_BUILD_OPTION_BINK "Build OpenW3D with Bink")
 
     if(W3D_BUILD_OPTION_BINK)
         include(bink)
         target_compile_definitions(binkstub INTERFACE W3D_HAS_BINK)
+    endif()
+
+    # Do we want to build with miles for audio playback?
+    cmake_dependent_option(W3D_BUILD_OPTION_MILES "Build with miles." ON "NOT W3D_BUILD_OPTION_OPENAL" OFF)
+    add_feature_info(MilesBuild W3D_BUILD_OPTION_MILES "Build OpenW3D with Miles Audio")
+
+    if(W3D_BUILD_OPTION_MILES)
+        include(miles)
     endif()
 
     option(W3D_BUILD_OPTION_ICU "Build with ICU." OFF)

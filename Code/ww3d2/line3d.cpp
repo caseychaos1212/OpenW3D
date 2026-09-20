@@ -258,7 +258,7 @@ void Line3DClass::Render(RenderInfoClass & /*rinfo*/)
 	}
 
 	DX8Wrapper::Set_Shader(Shader);
-	DX8Wrapper::Set_Texture(0,NULL);
+	DX8Wrapper::Set_Texture(0,nullptr);
 	VertexMaterialClass *vm=VertexMaterialClass::Get_Preset(VertexMaterialClass::PRELIT_DIFFUSE);
 	DX8Wrapper::Set_Material(vm);
 	REF_PTR_RELEASE(vm);
@@ -269,15 +269,15 @@ void Line3DClass::Render(RenderInfoClass & /*rinfo*/)
 	{
 		DynamicVBAccessClass::WriteLockClass Lock(&vb);
 		const FVFInfoClass &fi=vb.FVF_Info();
-		unsigned char *vb=(unsigned char*)Lock.Get_Formatted_Vertex_Array();
+		unsigned char *fva=(unsigned char*)Lock.Get_Formatted_Vertex_Array();
 		int i;
 		unsigned int color=DX8Wrapper::Convert_Color(Color);
 
 		for (i=0; i<8; i++)
 		{
-			*(Vector3*)(vb+fi.Get_Location_Offset())=vert[i];
-			*(unsigned int*)(vb+fi.Get_Diffuse_Offset())=color;
-			vb+=fi.Get_FVF_Size();
+			*(Vector3*)(fva+fi.Get_Location_Offset())=vert[i];
+			*(unsigned int*)(fva+fi.Get_Diffuse_Offset())=color;
+			fva+=fi.Get_FVF_Size();
 		}
 	}
 

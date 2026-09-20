@@ -77,7 +77,7 @@ bool DlgMPConnect::DoDialog(int teamChoice, unsigned int clanID)
 		popup->Release_Ref();
 		}
 
-	return (popup != NULL);
+	return (popup != nullptr);
 	}
 
 
@@ -101,7 +101,7 @@ DlgMPConnect::DlgMPConnect(int teamChoice, unsigned int clanID) :
 		PopupDialogClass(GetRenegadeDialog(RenegadeDialogID::IDD_MULTIPLAY_CONNECTING)),
 		mTeamChoice(teamChoice),
 		mClanID(clanID),
-		mTheGame(NULL),
+		mTheGame(nullptr),
 		mFailed(false)
 	{
 	WWDEBUG_SAY(("DlgMPConnect: Instantiated\n"));
@@ -238,7 +238,7 @@ void DlgMPConnect::On_Periodic(void)
 	{
 	PopupDialogClass::On_Periodic();
 
-	if (mTheGame != NULL)
+	if (mTheGame != nullptr)
 		{
 		CoopDebugLog::Log("DlgMPConnect::On_Periodic has game type=%d map=%s",
 			mTheGame->Get_Game_Type(), mTheGame->Get_Map_Name().Peek_Buffer());
@@ -276,7 +276,7 @@ void DlgMPConnect::On_Periodic(void)
 		else
 			{
 			CoopDebugLog::Log("DlgMPConnect::On_Periodic invalid settings");
-			WWDEBUG_SAY(("ERROR: %s\n", (const unichar_t*)outMsg));
+			WWDEBUG_SAY(("ERROR: %S\n", outMsg.Peek_Buffer()));
 			}
 
 		// Release the keep alive reference (this will delete this object)

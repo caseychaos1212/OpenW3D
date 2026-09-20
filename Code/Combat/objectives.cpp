@@ -68,7 +68,7 @@ const Vector3 & Objective::Type_To_Base_Color( void )
 {
 	static Vector3 color (1.0F, 1.0F, 1.0F);
 
-	if ( HUDGlobalSettingsDef::Get_Instance() != NULL ) {
+	if ( HUDGlobalSettingsDef::Get_Instance() != nullptr ) {
 		switch ( Type ) {
 			case ObjectiveManager::TYPE_PRIMARY:
 				color = HUDGlobalSettingsDef::Get_Instance()->Get_Primary_Objective_Color();
@@ -159,7 +159,7 @@ Objective::Objective( void ) :
 
 Objective::~Objective( void )
 {
-	Set_Object( NULL );
+	Set_Object( nullptr );
 }
 
 int	Objective::Radar_Blip_Color_Type( void )
@@ -170,7 +170,7 @@ int	Objective::Radar_Blip_Color_Type( void )
 void	Objective::Set_Object( PhysicalGameObj * object )
 {
 	PhysicalGameObj * obj = (PhysicalGameObj*)Object.Get_Ptr();
-	if ( obj != NULL ) {
+	if ( obj != nullptr ) {
 		obj->Reset_Radar_Blip_Shape_Type();
 		obj->Reset_Radar_Blip_Color_Type();
 	}
@@ -181,7 +181,7 @@ void	Objective::Set_Object( PhysicalGameObj * object )
 void	Objective::Update_Object_Blip( void )
 {
 	PhysicalGameObj * obj = (PhysicalGameObj*)Object.Get_Ptr();
-	if ( obj != NULL ) {
+	if ( obj != nullptr ) {
 		if ( Status == ObjectiveManager::STATUS_IS_PENDING ) {
 			obj->Set_Radar_Blip_Shape_Type( RadarManager::BLIP_SHAPE_TYPE_OBJECTIVE );
 			obj->Set_Radar_Blip_Color_Type( Radar_Blip_Color_Type() );
@@ -194,7 +194,7 @@ void	Objective::Update_Object_Blip( void )
 
 Vector3	Objective::Get_Position( void )
 {
-	if ( Object.Get_Ptr() != NULL ) {
+	if ( Object.Get_Ptr() != nullptr ) {
 		Vector3 pos;
 		Object.Get_Ptr()->Get_Position( &pos );
 		return pos;
@@ -245,7 +245,7 @@ bool	Objective::Save( ChunkSaveClass & csave )
 	csave.End_Chunk();
 
 
-	if ( Object.Get_Ptr() != NULL ) {
+	if ( Object.Get_Ptr() != nullptr ) {
 		csave.Begin_Chunk( CHUNKID_OBJECT );
 		Object.Save( csave );
 		csave.End_Chunk();
@@ -315,7 +315,7 @@ Objective * ObjectiveManager::Find_Objective( int id )
 			return ObjectiveList[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -419,7 +419,7 @@ bool	ObjectiveManager::Load( ChunkLoadClass &cload )
 */
 void	ObjectiveManager::Add_Objective( int id, int type, int status, int short_description_id, int long_description_id, const char * description_sound_filename )
 {
-	if ( Find_Objective( id ) != NULL ) {
+	if ( Find_Objective( id ) != nullptr ) {
 		Debug_Say(( "Adding a duplicate Objective ID\n" ));
 		return;
 	}
@@ -440,13 +440,13 @@ void	ObjectiveManager::Add_Objective( int id, int type, int status, int short_de
 	if ( status != ObjectiveManager::STATUS_HIDDEN ) {
 		WideStringClass message;
 		WideStringClass description = TranslateDBClass::Get_String( short_description_id );
-		message.Format( TRANSLATE (IDS_OBJ_NEW_OBJ), objective->Type_To_Name(), description );
+		message.Format( TRANSLATE (IDS_OBJ_NEW_OBJ), objective->Type_To_Name(), description.Peek_Buffer() );
 		CombatManager::Get_Message_Window ()->Add_Message (message, objective->Type_To_Base_Color());
 
 		HUDClass::Add_Objective( type );
 	}
 
-	const char * preset_name = NULL;
+	const char * preset_name = nullptr;
 	switch ( type ) {
 		case ObjectiveManager::TYPE_PRIMARY:	preset_name = "EVA_Primary_Add"; break;
 		case ObjectiveManager::TYPE_SECONDARY:	preset_name = "EVA_Secondary_Add"; break;
@@ -466,7 +466,7 @@ void	ObjectiveManager::Add_Objective( int id, int type, int status, int short_de
 void	ObjectiveManager::Remove_Objective( int id )
 {
 	Objective * objective = Find_Objective( id );
-	if ( objective != NULL ) {
+	if ( objective != nullptr ) {
 		Notify_Coop_Sync( COOP_SYNC_REMOVE, objective, id );
 
 #if 01
@@ -491,7 +491,7 @@ void	ObjectiveManager::Remove_Objective( int id )
 void	ObjectiveManager::Set_Objective_Status( int id, int status )
 {
 	Objective * objective = Find_Objective( id );
-	if ( objective != NULL ) {
+	if ( objective != nullptr ) {
 
 		bool is_unhiding =	(objective->Status == ObjectiveManager::STATUS_HIDDEN) &&
 									(status != ObjectiveManager::STATUS_HIDDEN);
@@ -499,11 +499,11 @@ void	ObjectiveManager::Set_Objective_Status( int id, int status )
 		objective->Status = status;
 
 		if ( status == STATUS_FAILED ) {
-			DIAG_LOG(( "OBFA", "%d; %s", id, objective->Status_To_Name() ));
+			DIAG_LOG(( "OBFA", "%d; %S", id, objective->Status_To_Name() ));
 		}
 
 		if ( status == STATUS_ACCOMPLISHED ) {
-			DIAG_LOG(( "OBCO", "%d; %s", id, objective->Status_To_Name() ));
+			DIAG_LOG(( "OBCO", "%d; %S", id, objective->Status_To_Name() ));
 		}
 
 		objective->Update_Object_Blip();
@@ -520,7 +520,7 @@ void	ObjectiveManager::Set_Objective_Status( int id, int status )
 		WideStringClass message;
 		if (is_unhiding && (status != ObjectiveManager::STATUS_ACCOMPLISHED)) {
 			WideStringClass description = TranslateDBClass::Get_String( objective->ShortDescriptionID );
-			message.Format( TRANSLATE (IDS_OBJ_NEW_OBJ), objective->Type_To_Name(), description );
+			message.Format( TRANSLATE (IDS_OBJ_NEW_OBJ), objective->Type_To_Name(), description.Peek_Buffer() );
 
 			HUDClass::Add_Objective( objective->Type );
 		} else {
@@ -545,7 +545,7 @@ void	ObjectiveManager::Set_Objective_Status( int id, int status )
 void	ObjectiveManager::Change_Objective_Type( int id, int type )
 {
 	Objective * objective = Find_Objective( id );
-	if ( objective != NULL ) {
+	if ( objective != nullptr ) {
 		objective->Type = type;
 		objective->Update_Object_Blip();
 		//DebugManager::Display_Text( "Mission objective priority changed\n", objective->Type_To_Color () );
@@ -562,8 +562,8 @@ void	ObjectiveManager::Change_Objective_Type( int id, int type )
 void	ObjectiveManager::Set_Objective_Radar_Blip( int id, Vector3 position )
 {
 	Objective * objective = Find_Objective( id );
-	if ( objective != NULL ) {
-		objective->Set_Object( NULL );
+	if ( objective != nullptr ) {
+		objective->Set_Object( nullptr );
 		objective->Position = position;
 		objective->DrawBlip = true;
 		Notify_Coop_Sync( COOP_SYNC_RADAR_BLIP, objective, id );
@@ -575,7 +575,7 @@ void	ObjectiveManager::Set_Objective_Radar_Blip( int id, Vector3 position )
 void	ObjectiveManager::Set_Objective_Radar_Blip( int id, PhysicalGameObj * object )
 {
 	Objective * objective = Find_Objective( id );
-	if ( objective != NULL ) {
+	if ( objective != nullptr ) {
 		objective->Set_Object( object );
 		Notify_Coop_Sync( COOP_SYNC_RADAR_BLIP, objective, id );
 	} else {
@@ -588,10 +588,10 @@ void	ObjectiveManager::Set_Objective_Radar_Blip( int id, PhysicalGameObj * objec
 //	fnCompareObjectivesCallback
 //
 ////////////////////////////////////////////////////////////////
-int __cdecl ObjectiveManager::ObjectiveSortCallback( const void *elem1, const void *elem2 )
+int ObjectiveManager::ObjectiveSortCallback( const void *elem1, const void *elem2 )
 {
-   WWASSERT (elem1 != NULL);
-   WWASSERT (elem2 != NULL);
+   WWASSERT (elem1 != nullptr);
+   WWASSERT (elem2 != nullptr);
    Objective *objective1 = *((Objective **)elem1);
    Objective *objective2 = *((Objective **)elem2);
 
@@ -626,7 +626,7 @@ void	ObjectiveManager::Sort_Objectives( void )
 void	ObjectiveManager::Set_Objective_HUD_Info( int id, float priority, const char * texture_name, int message_id )
 {
 	Objective * objective = Find_Objective( id );
-	if ( objective != NULL ) {
+	if ( objective != nullptr ) {
 		objective->HUDPriority = priority;
 		objective->HUDPogTextureName = texture_name;
 		objective->HUDMessageStringID = message_id;
@@ -644,7 +644,7 @@ void	ObjectiveManager::Set_Objective_HUD_Info( int id, float priority, const cha
 void	ObjectiveManager::Set_Objective_HUD_Info( int id, float priority, const char * texture_name, int message_id, const Vector3 & position )
 {
 	Objective * objective = Find_Objective( id );
-	if ( objective != NULL ) {
+	if ( objective != nullptr ) {
 		objective->HUDPriority = priority;
 		objective->HUDPogTextureName = texture_name;
 		objective->HUDMessageStringID = message_id;

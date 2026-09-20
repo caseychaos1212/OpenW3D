@@ -173,12 +173,12 @@ DecalGeneratorClass::DecalGeneratorClass(uint32 id,DecalSystemClass * system) :
 	System(system),
 	BackfaceVal(0.0f),
 	ApplyToTranslucentMeshes(false),
-	Material(NULL)
+	Material(nullptr)
 {
 	Material = NEW_REF(MaterialPassClass,());
 
-	WWASSERT(System != NULL);
-	WWASSERT(Material != NULL);
+	WWASSERT(System != nullptr);
+	WWASSERT(Material != nullptr);
 }
 
 
@@ -275,12 +275,12 @@ void DecalGeneratorClass::Set_Mesh_Transform(const Matrix3D & mesh_transform)
 	if (WW3D::Is_Texturing_Enabled()) {
 		float texsize = 64.0f;
 		TextureClass * tex = Material->Peek_Texture();
-		WWASSERT(tex != NULL);
+		WWASSERT(tex != nullptr);
 		if (tex) {
 //			SurfaceClass::SurfaceDescription surface_desc;
 //			tex->Get_Level_Description(surface_desc);
 //			texsize = surface_desc.Width;
-			texsize = tex->Get_Width();
+			texsize = float(tex->Get_Width());
 		}
 
 		Mapper->Set_Texture_Transform(mesh_to_texture,texsize);
@@ -394,10 +394,10 @@ void MultiFixedPoolDecalSystemClass::Clear_All_Decals(void)
 MultiFixedPoolDecalSystemClass::LogicalDecalClass & MultiFixedPoolDecalSystemClass::find_logical_decal(uint32 pool_id, uint32 slot_id)
 {
 	assert(pool_id < PoolCount);
-	pool_id = MIN(pool_id, PoolCount);
+	pool_id = std::min(pool_id, PoolCount);
 	LogicalDecalPoolClass & pool = Pools[pool_id];
 	assert(slot_id < pool.Size);
-	slot_id = MIN(slot_id, pool.Size);
+	slot_id = std::min(slot_id, pool.Size);
 	return pool.Array[slot_id];
 }
 

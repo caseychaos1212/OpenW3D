@@ -56,6 +56,7 @@
 #include "wwmemlog.h"
 #include "seglinerenderer.h"
 #include "textureloader.h"
+#include <algorithm>
 
 
 // Singletons.
@@ -75,8 +76,8 @@ unsigned											  BackgroundMgrClass::_LightningOverrideCount;
 unsigned											  BackgroundMgrClass::_SkyTintOverrideCount;
 bool												  BackgroundMgrClass::_Dirty;
 
-SkyClass											 *BackgroundMgrClass::_Sky		= NULL;
-DazzleRenderObjClass							 *BackgroundMgrClass::_Dazzle	= NULL;
+SkyClass											 *BackgroundMgrClass::_Sky		= nullptr;
+DazzleRenderObjClass							 *BackgroundMgrClass::_Dazzle	= nullptr;
 
 static Random2Class _RandomNumber (0x1f855092);
 
@@ -112,21 +113,21 @@ HazeClass::HazeClass (float radius)
 
 	// Define vertices.
 	VertexArray = new Vector3 [VertexCount];
-	WWASSERT (VertexArray != NULL);
+	WWASSERT (VertexArray != nullptr);
 	v = 0;
 	for (segment = 0; segment < segmentcount; segment++) {
 		latitude = segment * twopioosegmentcount;
 		for (row = 0; row < RowCount + 1; row++) {
-			x = radius * sinf (longitude [row]) * cosf (latitude);
-			y = radius * sinf (longitude [row]) * sinf (latitude);
-			z = radius * cosf (longitude [row]);
+			x = radius * WWMath::Sin (longitude [row]) * WWMath::Cos (latitude);
+			y = radius * WWMath::Sin (longitude [row]) * WWMath::Sin (latitude);
+			z = radius * WWMath::Cos (longitude [row]);
 			VertexArray [v].Set (x, y, z);
 			v++;
 		}
 	}
 
 	// Define triangles.
-	IndexBuffer = NEW_REF (DX8IndexBufferClass, (TriangleCount * VERTICES_PER_TRIANGLE));
+	IndexBuffer = NEW_REF (DX8IndexBufferClass, (static_cast<unsigned short>(TriangleCount * VERTICES_PER_TRIANGLE)));
 	{
 		DX8IndexBufferClass::WriteLockClass lock (IndexBuffer);
 		unsigned short *indices = lock.Get_Index_Array();
@@ -138,19 +139,19 @@ HazeClass::HazeClass (float radius)
 
 				// Is this not the last segment?
 				if (segment < segmentcount - 1) {
-					indices [i + 0] = v;
-					indices [i + 1] = v + RowCount + 1;
-					indices [i + 2] = v + RowCount + 2;
-					indices [i + 3] = v + RowCount + 2;
-					indices [i + 4] = v + 1;
-					indices [i + 5] = v;
+					indices [i + 0] = static_cast<unsigned short>(v);
+					indices [i + 1] = static_cast<unsigned short>(v + RowCount + 1);
+					indices [i + 2] = static_cast<unsigned short>(v + RowCount + 2);
+					indices [i + 3] = static_cast<unsigned short>(v + RowCount + 2);
+					indices [i + 4] = static_cast<unsigned short>(v + 1);
+					indices [i + 5] = static_cast<unsigned short>(v);
 				} else {
-					indices [i + 0] = v;
-					indices [i + 1] = row;
-					indices [i + 2] = row + 1;
-					indices [i + 3] = row + 1;
-					indices [i + 4] = v + 1;
-					indices [i + 5] = v;
+					indices [i + 0] = static_cast<unsigned short>(v);
+					indices [i + 1] = static_cast<unsigned short>(row);
+					indices [i + 2] = static_cast<unsigned short>(row + 1);
+					indices [i + 3] = static_cast<unsigned short>(row + 1);
+					indices [i + 4] = static_cast<unsigned short>(v + 1);
+					indices [i + 5] = static_cast<unsigned short>(v);
 				}
 				v += RowCount + 1;
 				i += 6;
@@ -166,7 +167,7 @@ HazeClass::HazeClass (float radius)
 	Shader.Set_Cull_Mode (ShaderClass::CULL_MODE_DISABLE);
 
 	DiffuseArray = new unsigned [VertexCount];
-	WWASSERT (DiffuseArray != NULL);
+	WWASSERT (DiffuseArray != nullptr);
 
 	Configure (white, white, 1.0f);
 }
@@ -328,7 +329,7 @@ void HazeClass::Render()
 
 		// Copy the vertices into a dynamic vertex buffer.
 		// NOTE: Vertex normals and UV's are uninitialized.
-		DynamicVBAccessClass dynamicvb (BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, VertexCount);
+		DynamicVBAccessClass dynamicvb (BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, static_cast<unsigned short>(VertexCount));
 		{
 			DynamicVBAccessClass::WriteLockClass lock (&dynamicvb);
 			VertexFormatXYZNDUV2 *vertex = lock.Get_Formatted_Vertex_Array();
@@ -346,7 +347,7 @@ void HazeClass::Render()
 		DX8Wrapper::Set_Shader (Shader);
 		DX8Wrapper::Set_Index_Buffer (IndexBuffer, 0);
 		DX8Wrapper::Set_Vertex_Buffer (dynamicvb);
-		DX8Wrapper::Draw_Triangles (0, TriangleCount, 0, VertexCount);
+		DX8Wrapper::Draw_Triangles (0, static_cast<unsigned short>(TriangleCount), 0, static_cast<unsigned short>(VertexCount));
 	}
 }
 
@@ -371,10 +372,10 @@ StarfieldClass::StarfieldClass (float /* extent */, unsigned starcount)
 	TriangleCount = starcount;
 
 	VertexArray = new Vector3 [VertexCount];
-	WWASSERT (VertexArray != NULL);
+	WWASSERT (VertexArray != nullptr);
 
 	// Define triangles.
-	IndexBuffer = NEW_REF (DX8IndexBufferClass, (VertexCount));
+	IndexBuffer = NEW_REF (DX8IndexBufferClass, (static_cast<unsigned short>(VertexCount)));
 	{
 		DX8IndexBufferClass::WriteLockClass lock (IndexBuffer);
 		unsigned short *indices = lock.Get_Index_Array();
@@ -399,7 +400,7 @@ StarfieldClass::StarfieldClass (float /* extent */, unsigned starcount)
 	#endif
 
 	DiffuseArray = new unsigned [VertexCount];
-	WWASSERT (DiffuseArray != NULL);
+	WWASSERT (DiffuseArray != nullptr);
 
 	Configure (Vector3 (1.0f, 0.0f, 0.0f), 1.0f, 1.0f, white, white, 0.0f);
 }
@@ -516,7 +517,7 @@ void StarfieldClass::Configure()
 	const float		maxradius					= 0.90f;
 	const unsigned	intensityrandomness		= 16;
 	const float		oointensityrandomness	= 1.0f / intensityrandomness;
-	const float		theta							= sinf (WWMATH_PI / 36);
+	const float		theta							= WWMath::Sin (WWMATH_PI / 36);
 
 	Matrix3D		 m0;
 	unsigned		 t;
@@ -558,8 +559,8 @@ void StarfieldClass::Configure()
 
 				m1.Look_At (d * Length, d * Length * 2.0f, 0.0f);
 
-				r = pow (r, 10) * maxradius;
-				r = MAX (r, minradius);
+				r = WWMath::Pow (r, 10) * maxradius;
+				r = std::max (r, minradius);
 				VertexArray [ActiveVertexCount]		= m1 * Vector3 (-r, -r, 0.0f);
 				VertexArray [ActiveVertexCount + 1] = m1 * Vector3 (-r, +r, 0.0f);
 				VertexArray [ActiveVertexCount + 2] = m1 * Vector3 (+r, -r, 0.0f);
@@ -612,8 +613,8 @@ void StarfieldClass::Render()
 			// Emulate flickering stars by attenuating some randomly selected diffuse alphas.
 			alpha	= Alpha * flickeralpha;
 			f	   = flickercount * (((float) ActiveTriangleCount) / TriangleCount);
-			frac  = f - floorf (f);
-			activeflickercount = (frac < 0.5f) ? floorf (f) : floorf (f) + 1;
+			frac  = f - WWMath::Floor (f);
+			activeflickercount = unsigned((frac < 0.5f) ? WWMath::Floor (f) : WWMath::Floor (f) + 1);
 			for (i = 0; i < activeflickercount; i++) {
 				triangleindices [i] = _RandomNumber (0, ActiveTriangleCount - 1);
 				v = triangleindices [i] * VERTICES_PER_TRIANGLE;
@@ -628,17 +629,17 @@ void StarfieldClass::Render()
 
 		// Copy the vertices into a dynamic vertex buffer.
 		// NOTE: Vertex normals and stage 1 UV's are uninitialized.
-		DynamicVBAccessClass dynamicvb (BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, ActiveVertexCount);
+		DynamicVBAccessClass dynamicvb (BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, static_cast<unsigned short>(ActiveVertexCount));
 		{
 			const float	texcoordarray [VERTICES_PER_TRIANGLE][2] = {{0.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 0.0f}};
 
 			DynamicVBAccessClass::WriteLockClass lock (&dynamicvb);
 			VertexFormatXYZNDUV2 *vertex = lock.Get_Formatted_Vertex_Array();
 
-			for (unsigned v = 0; v < ActiveVertexCount; v += VERTICES_PER_TRIANGLE) {
+			for (v = 0; v < ActiveVertexCount; v += VERTICES_PER_TRIANGLE) {
 				for (unsigned t = 0; t < VERTICES_PER_TRIANGLE; t++) {
 
-					unsigned i = v + t;
+					i = v + t;
 
 					vertex->x		 = VertexArray [i].X;
 					vertex->y		 = VertexArray [i].Y;
@@ -656,7 +657,7 @@ void StarfieldClass::Render()
 		DX8Wrapper::Set_Shader (Shader);
 		DX8Wrapper::Set_Index_Buffer (IndexBuffer, 0);
 		DX8Wrapper::Set_Vertex_Buffer (dynamicvb);
-		DX8Wrapper::Draw_Triangles (0, ActiveTriangleCount, 0, ActiveVertexCount);
+		DX8Wrapper::Draw_Triangles (0, static_cast<unsigned short>(ActiveTriangleCount), 0, static_cast<unsigned short>(ActiveVertexCount));
 
 		// Restore alphas for those stars that were modified prior to rendering.
 		for (i = 0; i < activeflickercount; i++) {
@@ -688,11 +689,11 @@ SkyObjectClass::SkyObjectClass (ShaderClass shader)
 	const Vector3 white (1.0f, 1.0f, 1.0f);
 
 	VertexArray = new Vector3 [VertexCount];
-	WWASSERT (VertexArray != NULL);
+	WWASSERT (VertexArray != nullptr);
 
 	// Define triangles.
 	// NOTE: For simplicity, assume that there are exactly 8 vertices and 6 triangles.
-	IndexBuffer = NEW_REF (DX8IndexBufferClass, (TriangleCount * VERTICES_PER_TRIANGLE));
+	IndexBuffer = NEW_REF (DX8IndexBufferClass, (static_cast<unsigned short>(TriangleCount * VERTICES_PER_TRIANGLE)));
 	{
 		static const unsigned short _indices [] = {0, 4, 5, 5, 1, 0, 1, 5, 6, 6, 2, 1, 2, 6, 7, 7, 3, 2};
 
@@ -711,15 +712,15 @@ SkyObjectClass::SkyObjectClass (ShaderClass shader)
 	Shader.Set_Src_Blend_Func (ShaderClass::SRCBLEND_SRC_ALPHA);
 	Shader.Set_Cull_Mode (ShaderClass::CULL_MODE_DISABLE);
 
-	Texture = NULL;
+	Texture = nullptr;
 
 	// Define texture coordinates.
 	// NOTE: Must be in clockwise order.
 	TexCoordArray = new Vector2 [VertexCount];
-	WWASSERT (TexCoordArray != NULL);
+	WWASSERT (TexCoordArray != nullptr);
 
 	DiffuseArray = new unsigned [VertexCount];
-	WWASSERT (DiffuseArray != NULL);
+	WWASSERT (DiffuseArray != nullptr);
 
 	Configure (Vector3 (1.0f, 0.0f, 0.0f), 1.0f, 1.0f, white);
 }
@@ -948,7 +949,7 @@ void SkyObjectClass::Render()
 
 		// Copy the vertices into the dynamic vertex buffer.
 		// NOTE: Vertex normals and stage 1 UV's are uninitialized.
-		DynamicVBAccessClass dynamicvb (BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, VertexCount);
+		DynamicVBAccessClass dynamicvb (BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, static_cast<unsigned short>(VertexCount));
 		{
 			DynamicVBAccessClass::WriteLockClass lock (&dynamicvb);
 			VertexFormatXYZNDUV2 *vertex = lock.Get_Formatted_Vertex_Array();
@@ -969,7 +970,7 @@ void SkyObjectClass::Render()
 		DX8Wrapper::Set_Shader (Shader);
 		DX8Wrapper::Set_Index_Buffer (IndexBuffer, 0);
 		DX8Wrapper::Set_Vertex_Buffer (dynamicvb);
-		DX8Wrapper::Draw_Triangles (0, TriangleCount, 0, VertexCount);
+		DX8Wrapper::Draw_Triangles (0, static_cast<unsigned short>(TriangleCount), 0, static_cast<unsigned short>(VertexCount));
 	}
 }
 
@@ -994,7 +995,7 @@ CloudLayerClass::CloudLayerClass (float maxdistance, const char *texturename, co
 
 	const float		radius				  = maxdistance;
 	const float		maxlongitude		  = WWMATH_PI / 15;
-	const float		oosinmaxlongitude	  = 1.0f / sinf (maxlongitude);
+	const float		oosinmaxlongitude	  = 1.0f / WWMath::Sin (maxlongitude);
 	const float		oorowcount			  = 1.0f / RowCount;
 	const unsigned	segmentcount		  = 16;
 	const float		twopioosegmentcount = (1.0f / segmentcount) * 2.0f * WWMATH_PI;
@@ -1011,22 +1012,22 @@ CloudLayerClass::CloudLayerClass (float maxdistance, const char *texturename, co
 
 	// Define vertices.
 	VertexArray = new Vector3 [VertexCount];
-	WWASSERT (VertexArray != NULL);
+	WWASSERT (VertexArray != nullptr);
 	v = 0;
 	for (segment = 0; segment < segmentcount; segment++) {
 		latitude = segment * twopioosegmentcount;
 		for (row = 0; row < RowCount + 1; row++) {
-			longitude = (sinf (row * oorowcount * maxlongitude) * oosinmaxlongitude) * row * oorowcount * maxlongitude;
-			x = radius * sinf (longitude) * cosf (latitude);
-			y = radius * sinf (longitude) * sinf (latitude);
-			z = radius * (cosf (longitude) - cosf (maxlongitude));
+			longitude = (WWMath::Sin (row * oorowcount * maxlongitude) * oosinmaxlongitude) * row * oorowcount * maxlongitude;
+			x = radius * WWMath::Sin (longitude) * WWMath::Cos (latitude);
+			y = radius * WWMath::Sin (longitude) * WWMath::Sin (latitude);
+			z = radius * (WWMath::Cos (longitude) - WWMath::Cos (maxlongitude));
 			VertexArray [v].Set (x, y, z);
 			v++;
 		}
 	}
 
 	// Define triangles.
-	IndexBuffer = NEW_REF (DX8IndexBufferClass, (TriangleCount * VERTICES_PER_TRIANGLE));
+	IndexBuffer = NEW_REF (DX8IndexBufferClass, (static_cast<unsigned short>(TriangleCount * VERTICES_PER_TRIANGLE)));
 	{
 		DX8IndexBufferClass::WriteLockClass lock (IndexBuffer);
 		unsigned short *indices = lock.Get_Index_Array();
@@ -1038,19 +1039,19 @@ CloudLayerClass::CloudLayerClass (float maxdistance, const char *texturename, co
 
 				// Is this not the last segment?
 				if (segment < segmentcount - 1) {
-					indices [i + 0] = v;
-					indices [i + 1] = v + RowCount + 1;
-					indices [i + 2] = v + RowCount + 2;
-					indices [i + 3] = v + RowCount + 2;
-					indices [i + 4] = v + 1;
-					indices [i + 5] = v;
+					indices [i + 0] = static_cast<unsigned short>(v);
+					indices [i + 1] = static_cast<unsigned short>(v + RowCount + 1);
+					indices [i + 2] = static_cast<unsigned short>(v + RowCount + 2);
+					indices [i + 3] = static_cast<unsigned short>(v + RowCount + 2);
+					indices [i + 4] = static_cast<unsigned short>(v + 1);
+					indices [i + 5] = static_cast<unsigned short>(v);
 				} else {
-					indices [i + 0] = v;
-					indices [i + 1] = row;
-					indices [i + 2] = row + 1;
-					indices [i + 3] = row + 1;
-					indices [i + 4] = v + 1;
-					indices [i + 5] = v;
+					indices [i + 0] = static_cast<unsigned short>(v);
+					indices [i + 1] = static_cast<unsigned short>(row);
+					indices [i + 2] = static_cast<unsigned short>(row + 1);
+					indices [i + 3] = static_cast<unsigned short>(row + 1);
+					indices [i + 4] = static_cast<unsigned short>(v + 1);
+					indices [i + 5] = static_cast<unsigned short>(v);
 				}
 				v += RowCount + 1;
 				i += 6;
@@ -1074,9 +1075,9 @@ CloudLayerClass::CloudLayerClass (float maxdistance, const char *texturename, co
 
 	// Define texture UV's.
 	TexCoordArray = new Vector2 [VertexCount];
-	WWASSERT (TexCoordArray != NULL);
+	WWASSERT (TexCoordArray != nullptr);
 
-	scale = tilefactor / (radius * sinf (maxlongitude));
+	scale = tilefactor / (radius * WWMath::Sin (maxlongitude));
 	for (v = 0; v < VertexCount; v++) {
 		if (rotate) {
 			TexCoordArray [v] = Vector2 (VertexArray [v].Y, VertexArray [v].X) * scale;
@@ -1094,7 +1095,7 @@ CloudLayerClass::CloudLayerClass (float maxdistance, const char *texturename, co
 	Velocity	*= tilefactor;
 
 	DiffuseArray = new unsigned [VertexCount];
-	WWASSERT (DiffuseArray != NULL);
+	WWASSERT (DiffuseArray != nullptr);
 
 	WarmColor		  = white;
 	ColdColor		  = white;
@@ -1302,7 +1303,7 @@ void CloudLayerClass::Render()
 
 		// Copy the vertices into the dynamic vertex buffer.
 		// NOTE: Vertex normals and stage 1 UV's are uninitialized.
-		DynamicVBAccessClass dynamicvb (BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, VertexCount);
+		DynamicVBAccessClass dynamicvb (BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, static_cast<unsigned short>(VertexCount));
 		{
 			DynamicVBAccessClass::WriteLockClass lock (&dynamicvb);
 			VertexFormatXYZNDUV2 *vertex = lock.Get_Formatted_Vertex_Array();
@@ -1323,7 +1324,7 @@ void CloudLayerClass::Render()
 		DX8Wrapper::Set_Shader (Shader);
 		DX8Wrapper::Set_Index_Buffer (IndexBuffer, 0);
 		DX8Wrapper::Set_Vertex_Buffer (dynamicvb);
-		DX8Wrapper::Draw_Triangles (0, TriangleCount, 0, VertexCount);
+		DX8Wrapper::Draw_Triangles (0, static_cast<unsigned short>(TriangleCount), 0, static_cast<unsigned short>(VertexCount));
 	}
 }
 
@@ -1359,25 +1360,25 @@ SkyGlowClass::SkyGlowClass (float radius)
 	TriangleCount = segmentcount * (RowCount * 2);
 
 	MinZ = 0.0f;
-	MaxZ = radius * cosf (longitude [0]);
+	MaxZ = radius * WWMath::Cos (longitude [0]);
 
 	// Define vertices.
 	VertexArray = new Vector3 [VertexCount];
-	WWASSERT (VertexArray != NULL);
+	WWASSERT (VertexArray != nullptr);
 	v = 0;
 	for (segment = 0; segment < segmentcount; segment++) {
 		latitude = segment * twopioosegmentcount;
 		for (row = 0; row < RowCount + 1; row++) {
-			x = radius * sinf (longitude [row]) * cosf (latitude);
-			y = radius * sinf (longitude [row]) * sinf (latitude);
-			z = radius * cosf (longitude [row]);
+			x = radius * WWMath::Sin (longitude [row]) * WWMath::Cos (latitude);
+			y = radius * WWMath::Sin (longitude [row]) * WWMath::Sin (latitude);
+			z = radius * WWMath::Cos (longitude [row]);
 			VertexArray [v].Set (x, y, z);
 			v++;
 		}
 	}
 
 	// Define triangles.
-	IndexBuffer = NEW_REF (DX8IndexBufferClass, (TriangleCount * VERTICES_PER_TRIANGLE));
+	IndexBuffer = NEW_REF (DX8IndexBufferClass, (static_cast<unsigned short>(TriangleCount * VERTICES_PER_TRIANGLE)));
 	{
 		DX8IndexBufferClass::WriteLockClass lock (IndexBuffer);
 		unsigned short *indices = lock.Get_Index_Array();
@@ -1389,19 +1390,19 @@ SkyGlowClass::SkyGlowClass (float radius)
 
 				// Is this not the last segment?
 				if (segment < segmentcount - 1) {
-					indices [i + 0] = v;
-					indices [i + 1] = v + RowCount + 1;
-					indices [i + 2] = v + RowCount + 2;
-					indices [i + 3] = v + RowCount + 2;
-					indices [i + 4] = v + 1;
-					indices [i + 5] = v;
+					indices [i + 0] = static_cast<unsigned short>(v);
+					indices [i + 1] = static_cast<unsigned short>(v + RowCount + 1);
+					indices [i + 2] = static_cast<unsigned short>(v + RowCount + 2);
+					indices [i + 3] = static_cast<unsigned short>(v + RowCount + 2);
+					indices [i + 4] = static_cast<unsigned short>(v + 1);
+					indices [i + 5] = static_cast<unsigned short>(v);
 				} else {
-					indices [i + 0] = v;
-					indices [i + 1] = row;
-					indices [i + 2] = row + 1;
-					indices [i + 3] = row + 1;
-					indices [i + 4] = v + 1;
-					indices [i + 5] = v;
+					indices [i + 0] = static_cast<unsigned short>(v);
+					indices [i + 1] = static_cast<unsigned short>(row);
+					indices [i + 2] = static_cast<unsigned short>(row + 1);
+					indices [i + 3] = static_cast<unsigned short>(row + 1);
+					indices [i + 4] = static_cast<unsigned short>(v + 1);
+					indices [i + 5] = static_cast<unsigned short>(v);
 				}
 				v += RowCount + 1;
 				i += 6;
@@ -1417,7 +1418,7 @@ SkyGlowClass::SkyGlowClass (float radius)
 	Shader.Set_Cull_Mode (ShaderClass::CULL_MODE_DISABLE);
 
 	DiffuseArray = new unsigned [VertexCount];
-	WWASSERT (DiffuseArray != NULL);
+	WWASSERT (DiffuseArray != nullptr);
 
 	Configure (Vector2 (1.0f, 0.0f), white, 1.0f);
 }
@@ -1526,7 +1527,7 @@ void SkyGlowClass::Render()
 
 		// Copy the vertices into a dynamic vertex buffer.
 		// NOTE: Vertex normals and UV's are uninitialized.
-		DynamicVBAccessClass dynamicvb (BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, VertexCount);
+		DynamicVBAccessClass dynamicvb (BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, static_cast<unsigned short>(VertexCount));
 		{
 			DynamicVBAccessClass::WriteLockClass lock (&dynamicvb);
 			VertexFormatXYZNDUV2 *vertex = lock.Get_Formatted_Vertex_Array();
@@ -1544,7 +1545,7 @@ void SkyGlowClass::Render()
 		DX8Wrapper::Set_Shader (Shader);
 		DX8Wrapper::Set_Index_Buffer (IndexBuffer, 0);
 		DX8Wrapper::Set_Vertex_Buffer (dynamicvb);
-		DX8Wrapper::Draw_Triangles (0, TriangleCount, 0, VertexCount);
+		DX8Wrapper::Draw_Triangles (0, static_cast<unsigned short>(TriangleCount), 0, static_cast<unsigned short>(VertexCount));
 	}
 }
 
@@ -1562,11 +1563,11 @@ void SkyGlowClass::Render()
  *   09/15/00    IML : Created.                                                                *
  *=============================================================================================*/
 LightningBoltClass::LightningBoltClass (int branchcount, Matrix3D &m, float length, float childlength, float width, float amplitude)
-	: Branches (NULL)
+	: Branches (nullptr)
 {
 	const int		 randomness					  = 100;
 	const float		 oorandomness				  = 1.0f / randomness;
-	const unsigned  maxvertexcount			  = MAX (2, length * 0.5f);
+	const unsigned  maxvertexcount			  = std::max (2u, unsigned(length * 0.5f));
 	const float		 oomaxvertexcountminusone = 1.0f / (maxvertexcount - 1);
 	const char		*texturename				  = "LightningBolt.tga";
 
@@ -1623,13 +1624,13 @@ LightningBoltClass::LightningBoltClass (int branchcount, Matrix3D &m, float leng
 		float	minlength, maxlength, w, a;
 
 		Branches = new BranchStruct [BranchCount];
-		WWASSERT (Branches != NULL);
+		WWASSERT (Branches != nullptr);
 		oobranchcount = 1.0f / BranchCount;
 		branchrandomness = vertexcount / (BranchCount * 2);
-		lbbranchcount = BranchCount * branchfactor;
+		lbbranchcount = int(BranchCount * branchfactor);
 		minlength = childlength * minlengthfactor;
 		maxlength = childlength * maxlengthfactor;
-		w = MAX (minwidth, width * widthfactor);
+		w = std::max (minwidth, width * widthfactor);
 		a = amplitude * amplitudefactor;
 		for (int b = 0; b < BranchCount; b++) {
 
@@ -1640,7 +1641,7 @@ LightningBoltClass::LightningBoltClass (int branchcount, Matrix3D &m, float leng
 			angle = WWMath::Lerp (minbranchangle, maxbranchangle, _RandomNumber (0, randomness) * oorandomness);
 			if ((b & 0x1) == 0) angle = -angle;
 			l = WWMath::Lerp (minlength, maxlength, _RandomNumber (0, randomness) * oorandomness);
-			v = MIN (((int) vertexcount) - 1, b * oobranchcount * (((int) vertexcount) - 1) + _RandomNumber (0, +branchrandomness));
+			v = unsigned(std::min (((int) vertexcount) - 1, int(b * oobranchcount * (((int) vertexcount) - 1) + _RandomNumber (0, +branchrandomness))));
 			m0.Translate (localvertex [v] - localvertex [0]);
 			m0.Rotate_Z (angle);
 
@@ -1648,10 +1649,10 @@ LightningBoltClass::LightningBoltClass (int branchcount, Matrix3D &m, float leng
 			if (m0.Get_Translation().Z > 0.0f) {
 				Branches [b].LightningBolt = NEW_REF (LightningBoltClass, (lbbranchcount, m0, l, l, w, a));
 			} else {
-				Branches [b].LightningBolt = NULL;
+				Branches [b].LightningBolt = nullptr;
 			}
 
-			WWASSERT (Branches != NULL);
+			WWASSERT (Branches != nullptr);
 		}
 	}
 
@@ -1681,7 +1682,7 @@ LightningBoltClass::~LightningBoltClass()
 		REF_PTR_RELEASE (Branches [b].LightningBolt);
 	}
 
-	if (Branches != NULL) {
+	if (Branches != nullptr) {
 		delete Branches;
 	}
 }
@@ -1704,7 +1705,7 @@ void LightningBoltClass::Set_Visibility (bool visible, bool recurse)
 	VisibilityClass::Set_Visibility (visible);
 	if (recurse) {
 		for (int b = 0; b < BranchCount; b++) {
-			if (Branches [b].LightningBolt != NULL) {
+			if (Branches [b].LightningBolt != nullptr) {
 				Branches [b].LightningBolt->Set_Visibility (visible, recurse);
 			}
 		}
@@ -1728,7 +1729,7 @@ void LightningBoltClass::Configure (Vector3 &color)
 {
 	Set_Color (color);
 	for (int b = 0; b < BranchCount; b++) {
-		if (Branches [b].LightningBolt != NULL) {
+		if (Branches [b].LightningBolt != nullptr) {
 			Branches [b].LightningBolt->Configure (color);
 		}
 	}
@@ -1751,7 +1752,7 @@ void LightningBoltClass::Set_Transform (Matrix3D &t)
 {
 	((SegmentedLineClass*) this)->Set_Transform (t);
 	for (int b = 0; b < BranchCount; b++) {
-		if (Branches [b].LightningBolt != NULL) {
+		if (Branches [b].LightningBolt != nullptr) {
 			Branches [b].LightningBolt->Set_Transform (t);
 		}
 	}
@@ -1784,7 +1785,7 @@ void LightningBoltClass::Render (RenderInfoClass &rinfo)
 			DX8Wrapper::Set_Transform (D3DTS_WORLD, t);
 		}
 		for (int b = 0; b < BranchCount; b++) {
-			if (Branches [b].LightningBolt != NULL) {
+			if (Branches [b].LightningBolt != nullptr) {
 				Branches [b].LightningBolt->Render (rinfo);
 			}
 		}
@@ -1843,39 +1844,39 @@ LightningClass::LightningClass (float extent, float startdistance, float enddist
 	unsigned	majorsampleindex, minorsampleindex;
 
 	Distance			  = WWMath::Lerp (startdistance, enddistance, _RandomNumber (0, randomness) * oorandomness);
-	ThunderDelayTime = WWMath::Lerp ((float) minthunderdelaytime, (float) maxthunderdelaytime, Distance);
+	ThunderDelayTime = unsigned(WWMath::Lerp ((float) minthunderdelaytime, (float) maxthunderdelaytime, Distance));
 
 	LightningGlow = new SkyGlowClass (extent);
-	WWASSERT (LightningGlow != NULL);
+	WWASSERT (LightningGlow != nullptr);
 
-	branchcount = WWMath::Lerp ((float) maxbranchcount, (float) minbranchcount, Distance);
+	branchcount = unsigned(WWMath::Lerp ((float) maxbranchcount, (float) minbranchcount, Distance));
 	latitude = heading + (0.5f * WWMATH_PI) + (_RandomNumber (- ((int) randomness), ((int) randomness)) * oorandomness * WWMATH_PI * distribution);
-	x = cosf (latitude);
-	y = sinf (latitude);
+	x = WWMath::Cos (latitude);
+	y = WWMath::Sin (latitude);
 	Direction.Set (x, y);
 	d.Set (x, y, 0.0f);
 	longitude = WWMath::Lerp (minlongitude, maxlongitude, Distance);
-	x = sinf (longitude) * cosf (latitude);
-	y = sinf (longitude) * sinf (latitude);
-	z = cosf (longitude);
+	x = WWMath::Sin (longitude) * WWMath::Cos (latitude);
+	y = WWMath::Sin (longitude) * WWMath::Sin (latitude);
+	z = WWMath::Cos (longitude);
 	o.Set (x, y, z);
 	m.Look_At (o * extent, (o + d) * extent, 0.0f);
 	theta   = (WWMATH_PI * 0.5f) - longitude;
-	childlength = extent * sinf (theta);
-	length = childlength + extent * cosf (theta) * tanf (bufferangle);
+	childlength = extent * WWMath::Sin (theta);
+	length = childlength + extent * WWMath::Cos (theta) * WWMath::Tan (bufferangle);
 	width	 = WWMath::Lerp (maxwidth, minwidth, Distance);
 	LightningBolt = NEW_REF (LightningBoltClass, (branchcount, m, length, childlength, width, amplitude));
-	WWASSERT (LightningBolt != NULL);
+	WWASSERT (LightningBolt != nullptr);
 
 	LightningSource = new SkyObjectClass (ShaderClass::_PresetAdditive2DShader);
-	WWASSERT (LightningSource != NULL);
+	WWASSERT (LightningSource != nullptr);
 	lightningsourcewidth  = WWMath::Lerp (maxlightningsourcewidth,  minlightningsourcewidth,  Distance);
 	lightningsourceheight = WWMath::Lerp (maxlightningsourceheight, minlightningsourceheight, Distance);
 	LightningSource->Configure (o, extent, lightningsourcewidth, lightningsourceheight);
 	LightningSource->Set_Texture (lightningsourcetexturename);
 
 	ThunderPosition	= o * (extent * Distance);
-	majorsampleindex	= MIN ((unsigned) (Distance * majorsamplecount), majorsamplecount - 1);
+	majorsampleindex	= std::min ((unsigned) (Distance * majorsamplecount), majorsamplecount - 1);
 	minorsampleindex	= _RandomNumber (0, minorsamplecount - 1);
 	ThunderSampleName = _thundersamplename [majorsampleindex][minorsampleindex];
 }
@@ -1939,10 +1940,10 @@ bool LightningClass::Update (Matrix3D &t, Vector3 &additivecolor, SoundEnvironme
   		unsigned phase;
   		Vector3	color;
 
-  		phase = (((float) Time) / lightningtime) * (phasecount + 1);
-  		phase = MIN (phase, phasecount);
+  		phase = unsigned((((float) Time) / lightningtime) * (phasecount + 1));
+  		phase = std::min (phase, phasecount);
 
-  		additivecolor = blue * _intensities [phase] * MAX (1.0f - Distance, minglowintensity);
+  		additivecolor = blue * _intensities [phase] * std::max (1.0f - Distance, minglowintensity);
 		LightningGlow->Configure (Direction, additivecolor, coldintensity);
 		additivecolor *= coldintensity;
 
@@ -1977,8 +1978,8 @@ bool LightningClass::Update (Matrix3D &t, Vector3 &additivecolor, SoundEnvironme
 
   				AudibleSoundClass *sound;
 
-  				sound = WWAudioClass::Get_Instance()->Create_Sound (ThunderSampleName, NULL, 0, CLASSID_PSEUDO3D);
-  				if (sound != NULL) {
+  				sound = WWAudioClass::Get_Instance()->Create_Sound (ThunderSampleName, nullptr, 0, CLASSID_PSEUDO3D);
+  				if (sound != nullptr) {
 
   					Matrix3D	m (t);
 
@@ -2045,18 +2046,18 @@ WarBlitzClass::WarBlitzClass (float extent, float startdistance, float enddistan
 	Vector2 position;
 
 	Distance			 = WWMath::Lerp (startdistance, enddistance, _RandomNumber (0, randomness) * oorandomness);
-	SampleDelayTime = WWMath::Lerp ((float) minsampledelaytime, (float) maxsampledelaytime, Distance);
+	SampleDelayTime = unsigned(WWMath::Lerp ((float) minsampledelaytime, (float) maxsampledelaytime, Distance));
 
 	latitude = heading + (0.5f * WWMATH_PI) + (_RandomNumber (- ((int) randomness), ((int) randomness)) * oorandomness * WWMATH_PI * distribution);
-	x = cosf (latitude);
-	y = sinf (latitude);
+	x = WWMath::Cos (latitude);
+	y = WWMath::Sin (latitude);
 	Direction.Set (x, y);
 
 	position = Direction * (extent * Distance);
 	SamplePosition.Set (position.X, position.Y, 0.0f);
 
 	WarBlitzGlow = new SkyGlowClass (extent);
-	WWASSERT (WarBlitzGlow != NULL);
+	WWASSERT (WarBlitzGlow != nullptr);
 }
 
 
@@ -2108,9 +2109,9 @@ bool WarBlitzClass::Update (Matrix3D &t, Vector3 &additivecolor)
 
   		unsigned phase;
 
-  		phase = (((float) Time) / warblitztime) * (phasecount + 1);
-  		phase = MIN (phase, phasecount);
-  		additivecolor = red * _intensities [phase] * MAX (1.0f - Distance, minglowintensity);
+  		phase = unsigned((((float) Time) / warblitztime) * (phasecount + 1));
+  		phase = std::min (phase, phasecount);
+  		additivecolor = red * _intensities [phase] * std::max (1.0f - Distance, minglowintensity);
 		WarBlitzGlow->Configure (Direction, additivecolor, coldintensity);
 
   	} else {
@@ -2124,8 +2125,8 @@ bool WarBlitzClass::Update (Matrix3D &t, Vector3 &additivecolor)
 
 			 	AudibleSoundClass *sound;
 
-  				sound = WWAudioClass::Get_Instance()->Create_Sound (samplename, NULL, 0, CLASSID_PSEUDO3D);
-  				if (sound != NULL) {
+  				sound = WWAudioClass::Get_Instance()->Create_Sound (samplename, nullptr, 0, CLASSID_PSEUDO3D);
+  				if (sound != nullptr) {
 
   					Matrix3D	m (t);
 
@@ -2188,7 +2189,7 @@ SkyClass::SkyClass (SoundEnvironmentClass *soundenvironment)
 	  LightningEndDistance (1.0f),
 	  LightningHeading (0.0f),
 	  LightningDistribution (0.5f),
-	  SoundEnvironment (NULL),
+	  SoundEnvironment (nullptr),
 	  WarBlitzIntensity (0.0f),
 	  WarBlitzStartDistance (0.0f),
 	  WarBlitzEndDistance (1.0f),
@@ -2197,44 +2198,44 @@ SkyClass::SkyClass (SoundEnvironmentClass *soundenvironment)
 {
 	const unsigned starcount = 200;
 
-	WWASSERT (soundenvironment != NULL);
+	WWASSERT (soundenvironment != nullptr);
 	REF_PTR_SET (SoundEnvironment, soundenvironment);
 	SoundEnvironment->Add_User();
 
 	Haze = new HazeClass (Extent);
-	WWASSERT (Haze != NULL);
+	WWASSERT (Haze != nullptr);
 
 	Starfield = new StarfieldClass (Extent, starcount);
-	WWASSERT (Starfield != NULL);
+	WWASSERT (Starfield != nullptr);
 
 	Sun = new SkyObjectClass (ShaderClass::_PresetAdditive2DShader);
-	WWASSERT (Sun != NULL);
+	WWASSERT (Sun != nullptr);
 	Sun->Set_Texture ("Sun.tga");
 
 	SunHalo = new SkyObjectClass (ShaderClass::_PresetAdditive2DShader);
-	WWASSERT (SunHalo != NULL);
+	WWASSERT (SunHalo != nullptr);
 	SunHalo->Set_Texture ("SunHalo.tga");
 
 	Moon = new SkyObjectClass (ShaderClass::_PresetAlpha2DShader);
-	WWASSERT (Moon != NULL);
+	WWASSERT (Moon != nullptr);
 	Set_Moon_Type (MOON_TYPE_FULL);
 
 	MoonHalo = new SkyObjectClass (ShaderClass::_PresetAdditive2DShader);
-	WWASSERT (MoonHalo != NULL);
+	WWASSERT (MoonHalo != nullptr);
 	MoonHalo->Set_Texture ("MoonHalo.tga");
 
 	CloudLayer0 = new CloudLayerClass (Extent, "CloudLayer.tga", Vector2 (0.0030f, 0.0006f), 1.2f, false);
-	WWASSERT (CloudLayer0 != NULL);
+	WWASSERT (CloudLayer0 != nullptr);
 
 	CloudLayer1 = new CloudLayerClass (Extent, "CloudLayer.tga", Vector2 (0.0050f, 0.0010f), 0.8f, true);
-	WWASSERT (CloudLayer1 != NULL);
+	WWASSERT (CloudLayer1 != nullptr);
 
 	for (unsigned l = 0; l < LIGHTNING_COUNT; l++) {
-		Lightning [l]			  = NULL;
+		Lightning [l]			  = nullptr;
 		LightningCountdown [l] = Lightning_Delay();
 	}
 
-	WarBlitz				= NULL;
+	WarBlitz				= nullptr;
 	WarBlitzCountdown = War_Blitz_Delay();
 }
 
@@ -2254,9 +2255,9 @@ SkyClass::SkyClass (SoundEnvironmentClass *soundenvironment)
 SkyClass::~SkyClass()
 {
 	// Clean-up.
-	if (WarBlitz != NULL) delete WarBlitz;
+	if (WarBlitz != nullptr) delete WarBlitz;
 	for (unsigned l = 0; l < LIGHTNING_COUNT; l++) {
-		if (Lightning [l] != NULL) delete Lightning [l];
+		if (Lightning [l] != nullptr) delete Lightning [l];
 	}
 	delete CloudLayer1;
 	delete CloudLayer0;
@@ -2701,10 +2702,10 @@ Vector3 SkyClass::Interpolate_Color (const unsigned char colortable [][3], unsig
 	Vector3  color;
 
 	// Clamp the interpolant to the index range of the color table.
-	interpolant = MIN (MAX (0.0f, interpolant), colorcount);
+	interpolant = std::clamp(interpolant, 0.0f, float(colorcount));
 	if (interpolant == colorcount) interpolant = 0.0f;
 
-	lowerindex = floorf (interpolant);
+	lowerindex = unsigned(WWMath::Floor (interpolant));
 	upperindex = (lowerindex + 1) % colorcount;
 
 	lowercolor = Vector3 (colortable [lowerindex][0] * ooucharmax, colortable [lowerindex][1] * ooucharmax, colortable [lowerindex][2] * ooucharmax);
@@ -2736,10 +2737,11 @@ float SkyClass::Interpolate_Scalar (const unsigned char scalartable [], unsigned
 	float		lowervalue, uppervalue, alpha;
 
 	// Clamp the interpolant to the index range of the color table.
-	interpolant = MIN (MAX (0.0f, interpolant), scalarcount);
-	if (interpolant == scalarcount) interpolant = 0.0f;
+	interpolant = std::clamp(interpolant, 0.0f, float(scalarcount));
 
-	lowerindex = floorf (interpolant);
+	if (interpolant == float(scalarcount)) interpolant = 0.0f;
+
+	lowerindex = unsigned(WWMath::Floor (interpolant));
 	upperindex = (lowerindex + 1) % scalarcount;
 
 	lowervalue = scalartable [lowerindex] * ooucharmax;
@@ -2826,17 +2828,17 @@ void SkyClass::Update (SceneClass *mainscene, const Vector3 &cameraposition)
 		if (LightningCountdown [l] <= 0) {
 
 			LightningCountdown [l] = Lightning_Delay();
-			if (Lightning [l] == NULL) {
+			if (Lightning [l] == nullptr) {
 
 				// Is lightning enabled?
 				if (LightningIntensity > 0.0f) {
 					Lightning [l] = new LightningClass (Extent, LightningStartDistance, LightningEndDistance, LightningHeading, LightningDistribution);
-					WWASSERT (Lightning [l] != NULL);
+					WWASSERT (Lightning [l] != nullptr);
 				}
 			}
 		}
 
-		if (Lightning [l] != NULL) {
+		if (Lightning [l] != nullptr) {
 
 			Vector3 lightningcolor;
 
@@ -2844,7 +2846,7 @@ void SkyClass::Update (SceneClass *mainscene, const Vector3 &cameraposition)
 
 				// Lightning has played out - so remove it.
 				delete Lightning [l];
-				Lightning [l] = NULL;
+				Lightning [l] = nullptr;
 
 			} else {
 				colorsum += lightningcolor;
@@ -2859,17 +2861,17 @@ void SkyClass::Update (SceneClass *mainscene, const Vector3 &cameraposition)
 	if (WarBlitzCountdown <= 0) {
 
 		WarBlitzCountdown = War_Blitz_Delay();
-		if (WarBlitz == NULL) {
+		if (WarBlitz == nullptr) {
 
 			// Is war blitz enabled?
 			if (WarBlitzIntensity > 0.0f) {
 				WarBlitz = new WarBlitzClass (Extent, WarBlitzStartDistance, WarBlitzEndDistance, WarBlitzHeading, WarBlitzDistribution);
-				WWASSERT (WarBlitz != NULL);
+				WWASSERT (WarBlitz != nullptr);
 			}
 		}
 	}
 
-	if (WarBlitz != NULL) {
+	if (WarBlitz != nullptr) {
 
 		Vector3 warblitzcolor;
 
@@ -2877,7 +2879,7 @@ void SkyClass::Update (SceneClass *mainscene, const Vector3 &cameraposition)
 
 			// War blitz has played out - so remove it.
 			delete WarBlitz;
-			WarBlitz = NULL;
+			WarBlitz = nullptr;
 
 		} else {
 			colorsum += warblitzcolor;
@@ -2917,9 +2919,9 @@ void SkyClass::Render (RenderInfoClass &rinfo)
 	CloudLayer1->Render();
 	Sun->Render();
 	for (unsigned l = 0; l < LIGHTNING_COUNT; l++) {
-		if (Lightning [l] != NULL) Lightning [l]->Render (rinfo);
+		if (Lightning [l] != nullptr) Lightning [l]->Render (rinfo);
 	}
-	if (WarBlitz != NULL) WarBlitz->Render (rinfo);
+	if (WarBlitz != nullptr) WarBlitz->Render (rinfo);
 }
 
 
@@ -3121,9 +3123,9 @@ BackgroundMgrClass::BackgroundMgrClass()
  *=============================================================================================*/
 void BackgroundMgrClass::Init (SimpleSceneClass *renderscene, SoundEnvironmentClass *soundenvironment, bool render_available)
 {
-	WWASSERT (renderscene != NULL);
-	WWASSERT (_Sky == NULL);
-	WWASSERT (_Dazzle == NULL);
+	WWASSERT (renderscene != nullptr);
+	WWASSERT (_Sky == nullptr);
+	WWASSERT (_Dazzle == nullptr);
 
 	if (render_available) {
 		_Sky = NEW_REF (SkyClass, (soundenvironment));
@@ -3188,8 +3190,8 @@ void BackgroundMgrClass::Reset()
  *=============================================================================================*/
 void BackgroundMgrClass::Shutdown()
 {
-	//WWASSERT (_Dazzle != NULL);
-	//WWASSERT (_Sky != NULL);
+	//WWASSERT (_Dazzle != nullptr);
+	//WWASSERT (_Sky != nullptr);
 	if (_Dazzle) {
 		_Dazzle->Remove();
 		REF_PTR_RELEASE (_Dazzle);
@@ -3695,12 +3697,12 @@ void BackgroundMgrClass::Update (PhysicsSceneClass *mainscene, CameraClass *came
 	float	  cloudcover, gloominess;
 	float	  intensity, dazzleintensity, lensflareintensity;
 
-	if (_Sky == NULL) return;
+	if (_Sky == nullptr) return;
 
-	WWASSERT (mainscene != NULL);
-	WWASSERT (camera != NULL);
-	WWASSERT (_Sky != NULL);
-	WWASSERT (_Dazzle != NULL);
+	WWASSERT (mainscene != nullptr);
+	WWASSERT (camera != nullptr);
+	WWASSERT (_Sky != nullptr);
+	WWASSERT (_Dazzle != nullptr);
 
 	if (Is_Dirty()) {
 		_Sky->Set_Time_Of_Day (_Hours, _Minutes);
@@ -3771,7 +3773,7 @@ void BackgroundMgrClass::Update (PhysicsSceneClass *mainscene, CameraClass *came
 	if (intensity < minlensflareintensity) {
 		lensflareintensity = 0.0f;
 	} else {
-	  	lensflareintensity = MIN (maxlensflareintensity, intensity);
+	  	lensflareintensity = std::min (maxlensflareintensity, intensity);
 	}
 	_Dazzle->Set_Dazzle_Color (dazzlecolor);
 	_Dazzle->Set_Lensflare_Intensity (lensflareintensity);

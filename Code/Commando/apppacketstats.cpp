@@ -47,10 +47,10 @@
 //
 // Class statics
 //
-DWORD				cAppPacketStats::PacketsSent[];
-DWORD				cAppPacketStats::BitsSent[];
-DWORD				cAppPacketStats::BitsSentTier[][PACKET_TIER_COUNT];
-DWORD				cAppPacketStats::ObjectTally[];
+unsigned int	cAppPacketStats::PacketsSent[];
+unsigned int	cAppPacketStats::BitsSent[];
+unsigned int	cAppPacketStats::BitsSentTier[][PACKET_TIER_COUNT];
+unsigned int	cAppPacketStats::ObjectTally[];
 StringClass		cAppPacketStats::WorkingString;
 
 //-----------------------------------------------------------------------------
@@ -76,11 +76,11 @@ cAppPacketStats::Dump_Diagnostics
 	WWDEBUG_SAY(("\n"));
 	WWDEBUG_SAY(("---------------------------------------------------------\n"));
 	WWDEBUG_SAY(("cAppPacketStats::Dump_Diagnostics:\n"));
-	WWDEBUG_SAY(("%s\n", Get_Heading()));
+	WWDEBUG_SAY(("%s\n", Get_Heading().Peek_Buffer()));
 
 	for (BYTE i = 0; i < APPPACKETTYPE_COUNT; i++)
 	{
-		WWDEBUG_SAY(("%s\n", Get_Description(i)));
+		WWDEBUG_SAY(("%s\n", Get_Description(i).Peek_Buffer()));
 	}
 
 	WWDEBUG_SAY(("\n"));
@@ -106,7 +106,7 @@ void
 cAppPacketStats::Increment_Bits_Sent
 (
 	BYTE	app_packet_type,
-	DWORD	bits
+	unsigned int	bits
 )
 {
 	WWASSERT(app_packet_type != APPPACKETTYPE_ALL && app_packet_type < APPPACKETTYPE_COUNT);
@@ -121,9 +121,9 @@ cAppPacketStats::Increment_Bits_Sent
 void
 cAppPacketStats::Increment_Bits_Sent_Tier
 (
-	BYTE					app_packet_type,
+	BYTE				app_packet_type,
 	PACKET_TIER_ENUM	tier,
-	DWORD					bits
+	unsigned int		bits
 )
 {
 	WWASSERT(app_packet_type != APPPACKETTYPE_ALL && app_packet_type < APPPACKETTYPE_COUNT);
@@ -135,7 +135,7 @@ cAppPacketStats::Increment_Bits_Sent_Tier
 }
 
 //-----------------------------------------------------------------------------
-DWORD
+unsigned int
 cAppPacketStats::Get_Packets_Sent
 (
 	BYTE app_packet_type
@@ -147,7 +147,7 @@ cAppPacketStats::Get_Packets_Sent
 }
 
 //-----------------------------------------------------------------------------
-DWORD
+unsigned int
 cAppPacketStats::Get_Bits_Sent
 (
 	BYTE	app_packet_type
@@ -159,7 +159,7 @@ cAppPacketStats::Get_Bits_Sent
 }
 
 //-----------------------------------------------------------------------------
-DWORD
+unsigned int
 cAppPacketStats::Get_Bits_Sent_Tier
 (
 	BYTE					app_packet_type,
@@ -264,11 +264,11 @@ cAppPacketStats::Interpret_Type
 		ADD_CASE(APPPACKETTYPE_ALL);
 
 		default:
-         break;
-   }
+    	break;
+  }
 
-	return "ERROR";
 	DIE;
+	return "ERROR";
 }
 
 //-----------------------------------------------------------------------------
@@ -286,7 +286,7 @@ cAppPacketStats::Update_Object_Tally
 	{
 		NetworkObjectClass * p_object = NetworkObjectMgrClass::Get_Object(index);
 
-		if (p_object != NULL)
+		if (p_object != nullptr)
 		{
 			BYTE type = p_object->Get_App_Packet_Type();
 			WWASSERT(type < APPPACKETTYPE_ALL);
@@ -305,7 +305,7 @@ cAppPacketStats::Update_Object_Tally
 }
 
 //-----------------------------------------------------------------------------
-DWORD
+unsigned int
 cAppPacketStats::Get_Object_Tally
 (
 	BYTE app_packet_type
@@ -352,7 +352,7 @@ cAppPacketStats::Get_Description
 	WWASSERT(type < APPPACKETTYPE_COUNT);
 
 	float num_bytes = BitsSent[type] / 8.0f;
-	DWORD average_bytes = 0;
+	unsigned int average_bytes = 0;
 	if (PacketsSent[type] > 0)
 	{
 		average_bytes = cMathUtil::Round(num_bytes / (float) PacketsSent[type]);
@@ -374,13 +374,13 @@ cAppPacketStats::Get_Description
 	//
 	// Tier percentages
 	//
-	DWORD t0 = 0;
-	DWORD t1 = 0;
-	DWORD t2 = 0;
-	DWORD t3 = 0;
+	unsigned int t0 = 0;
+	unsigned int t1 = 0;
+	unsigned int t2 = 0;
+	unsigned int t3 = 0;
 	if (BitsSent[type] > 0)
 	{
-		float bits = BitsSent[type];
+		float bits = float(BitsSent[type]);
 
 		t0 = cMathUtil::Round(100 * (BitsSentTier[type][0] / bits));
 		t1 = cMathUtil::Round(100 * (BitsSentTier[type][1] / bits));

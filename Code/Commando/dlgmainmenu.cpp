@@ -71,7 +71,7 @@
 ////////////////////////////////////////////////////////////////
 //	Static member initialization
 ////////////////////////////////////////////////////////////////
-MainMenuDialogClass *	MainMenuDialogClass::_TheInstance	= NULL;
+MainMenuDialogClass *	MainMenuDialogClass::_TheInstance	= nullptr;
 bool MainMenuDialogClass::Animated = true;
 
 ////////////////////////////////////////////////////////////////
@@ -81,9 +81,9 @@ bool MainMenuDialogClass::Animated = true;
 ////////////////////////////////////////////////////////////////
 MainMenuDialogClass::MainMenuDialogClass (void)	:
 	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MENU_MAIN)),
-	TitleTransModel (NULL),
-	LogoModel (NULL),
-	GizmoModel (NULL),
+	TitleTransModel (nullptr),
+	LogoModel (nullptr),
+	GizmoModel (nullptr),
 	IsStartingPractice (false)
 {
 	LogoModel			= WW3DAssetManager::Get_Instance ()->Create_Render_Obj ("IF_RENLOGO");
@@ -96,13 +96,13 @@ MainMenuDialogClass::MainMenuDialogClass (void)	:
 	}
 
 
-	if (TitleTransModel != NULL && GizmoModel != NULL && Animated) {
+	if (TitleTransModel != nullptr && GizmoModel != nullptr && Animated) {
 
 		//
 		//	Play the gizmo animation
 		//
 		HAnimClass *gizmo_anim = WW3DAssetManager::Get_Instance ()->Get_HAnim ("IF_EVAGIZMO.IF_EVAGIZMO");
-		if (gizmo_anim != NULL) {
+		if (gizmo_anim != nullptr) {
 			GizmoModel->Set_Animation (gizmo_anim, 0.0F, RenderObjClass::ANIM_MODE_LOOP);
 			REF_PTR_RELEASE (gizmo_anim);
 		}
@@ -124,11 +124,11 @@ MainMenuDialogClass::MainMenuDialogClass (void)	:
 ////////////////////////////////////////////////////////////////
 MainMenuDialogClass::~MainMenuDialogClass (void)
 {
-	if (TitleTransModel != NULL) {
+	if (TitleTransModel != nullptr) {
 		TitleTransModel->Remove ();
 	}
 
-	if (LogoModel != NULL) {
+	if (LogoModel != nullptr) {
 		LogoModel->Remove ();
 	}
 
@@ -147,7 +147,7 @@ MainMenuDialogClass::~MainMenuDialogClass (void)
 void
 MainMenuDialogClass::On_Menu_Activate (bool onoff)
 {
-	if (TitleTransModel != NULL) {
+	if (TitleTransModel != nullptr) {
 
 		//
 		//	Either add or remove the logo from the scene
@@ -155,7 +155,7 @@ MainMenuDialogClass::On_Menu_Activate (bool onoff)
 		if (onoff) {
 
 			// Put the logo pack into the scene when reactivated.
-			if (LogoModel && LogoModel->Peek_Scene() == NULL) {
+			if (LogoModel && LogoModel->Peek_Scene() == nullptr) {
 				if (MenuBackDropClass *backdrop = Get_BackDrop()) {
 					backdrop->Peek_Scene()->Add_Render_Object(LogoModel);
 				}
@@ -172,7 +172,7 @@ MainMenuDialogClass::On_Menu_Activate (bool onoff)
 			//
 			//	Remove the logo from the screen
 			//
-			if (LogoModel != NULL) {
+			if (LogoModel != nullptr) {
 				LogoModel->Remove ();
 			}
 		}
@@ -201,13 +201,13 @@ MainMenuDialogClass::On_Init_Dialog (void)
 #endif
 
 #ifndef BETACLIENT
-	if (Get_Dlg_Item (IDC_BETA_TEST_TEXT) != NULL) {
+	if (Get_Dlg_Item (IDC_BETA_TEST_TEXT) != nullptr) {
 		Get_Dlg_Item (IDC_BETA_TEST_TEXT)->Show (false);
 	}
 #endif
 
 	ImageCtrlClass *image_ctrl = (ImageCtrlClass *)Get_Dlg_Item (IDC_IMAGE);
-	if (image_ctrl != NULL) {
+	if (image_ctrl != nullptr) {
 		image_ctrl->Set_Texture ("ESRB_RATING.TGA");
 	}
 
@@ -223,12 +223,12 @@ MainMenuDialogClass::On_Init_Dialog (void)
 DialogTransitionClass *
 MainMenuDialogClass::Get_Transition_In (DialogBaseClass *prev_dlg)
 {
-	MainMenuTransitionClass *transition = NULL;
+	MainMenuTransitionClass *transition = nullptr;
 
 	//
 	//	Add the transition model to the scene
 	//
-	if (TitleTransModel != NULL && TitleTransModel->Peek_Scene () == NULL) {
+	if (TitleTransModel != nullptr && TitleTransModel->Peek_Scene () == nullptr) {
 		if (MenuBackDropClass *backdrop = Get_BackDrop ()) {
 			backdrop->Peek_Scene ()->Add_Render_Object (TitleTransModel);
 		}
@@ -237,7 +237,7 @@ MainMenuDialogClass::Get_Transition_In (DialogBaseClass *prev_dlg)
 	//
 	//	Add the logo to the screen
 	//
-	if (LogoModel != NULL && LogoModel->Peek_Scene () == NULL) {
+	if (LogoModel != nullptr && LogoModel->Peek_Scene () == nullptr) {
 		if (MenuBackDropClass *backdrop = Get_BackDrop ()) {
 			backdrop->Peek_Scene ()->Add_Render_Object (LogoModel);
 		}
@@ -246,7 +246,7 @@ MainMenuDialogClass::Get_Transition_In (DialogBaseClass *prev_dlg)
 	//
 	//	We only want to transition between menu dialogs
 	//
-	if (prev_dlg == NULL ||
+	if (prev_dlg == nullptr ||
 			(prev_dlg != QuitVerificationDialogClass::Get_Instance () &&
 			 prev_dlg != DlgWOLWait::Get_Instance ()))
 	{
@@ -278,13 +278,13 @@ MainMenuDialogClass::Get_Transition_In (DialogBaseClass *prev_dlg)
 DialogTransitionClass *
 MainMenuDialogClass::Get_Transition_Out (DialogBaseClass *next_dlg)
 {
-	MainMenuTransitionClass *transition = NULL;
+	MainMenuTransitionClass *transition = nullptr;
 
 	//
 	//	We only want to transition between menu dialogs
 	//
 	if (	IsStartingPractice == false &&
-			(next_dlg == NULL || next_dlg->As_MenuDialogClass () != NULL))
+			(next_dlg == nullptr || next_dlg->As_MenuDialogClass () != nullptr))
 	{
 		transition = new MainMenuTransitionClass;
 		transition->Set_Model (TitleTransModel);
@@ -317,7 +317,7 @@ MainMenuDialogClass::Choose_Skirmish_Map (void)
 	DynamicVectorClass<StringClass>	map_list;
 	WIN32_FIND_DATAA find_info	= { 0 };
 	BOOL keep_going				= true;
-	HANDLE file_find				= NULL;
+	HANDLE file_find				= nullptr;
 	StringClass file_filter;
 
 	//
@@ -393,7 +393,7 @@ MainMenuDialogClass::On_Command (int ctrl_id, int message_id, unsigned int param
 				//
 				// We will cycle on the same map until they get tired of practicing.
 				//
-				WWASSERT(The_Game() != NULL);
+				WWASSERT(The_Game() != nullptr);
 				The_Game()->Set_Map_Cycle(0, mapname);
 
 				GameInitMgrClass::Start_Game(mapname, -1, 0);
@@ -464,7 +464,7 @@ MainMenuDialogClass::Display (void)
 	//
 	//	Create the dialog if necessary, otherwise simply bring it to the front
 	//
-	if (_TheInstance == NULL) {
+	if (_TheInstance == nullptr) {
 
 		//
 		//	Create the dialog
@@ -477,12 +477,12 @@ MainMenuDialogClass::Display (void)
 		if (Animated) {
 
 			if (MenuBackDropClass *backdrop = dialog->Get_BackDrop ()) {
-				if (backdrop->Peek_Model () == NULL) {
+				if (backdrop->Peek_Model () == nullptr) {
 					backdrop->Set_Model ("IF_BACK01");
 					backdrop->Set_Animation ("IF_BACK01.IF_BACK01");
 
 					/*RenderObjClass *model = WW3DAssetManager::Get_Instance ()->Create_Render_Obj ("IF_RENLOGO");
-					if (model != NULL) {
+					if (model != nullptr) {
 						backdrop->Peek_Scene ()->Add_Render_Object(model);
 					}*/
 				}
@@ -528,7 +528,7 @@ MainMenuDialogClass::Update_Version_Number (void)
 	WideStringClass build_number(BuildInfoClass::Get_Build_Number_String(), true);
 	WideStringClass build_initials(BuildInfoClass::Get_Builder_Initials(), true);
 	WideStringClass build_date(BuildInfoClass::Get_Build_Date_String(), true);
-	version_string.Format (U_CHAR("v%d.%.3d %s-%s %s"), (version_major >> 16), (version_major & 0xFFFF), build_initials, build_number, build_date);
+	version_string.Format (U_CHAR("v%d.%.3d %s-%s %s"), (version_major >> 16), (version_major & 0xFFFF), build_initials.Peek_Buffer(), build_number.Peek_Buffer(), build_date.Peek_Buffer());
 	Set_Dlg_Item_Text (IDC_VERSION_STATIC, version_string);
 }
 

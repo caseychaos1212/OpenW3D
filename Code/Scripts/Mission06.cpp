@@ -74,9 +74,9 @@ DECLARE_SCRIPT(M06_Objective_Controller, "") // 100018
 
 		// EVA - Give me a position on the scientists.\n
 		const char *conv_name = ("M06_CON059");
-		int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
+		int conv_id = Commands->Create_Conversation (conv_name, 100, 200.0f, false);
 		Commands->Join_Conversation(STAR, conv_id, false, true, true);
-		Commands->Join_Conversation(NULL, conv_id, false, true, true);
+		Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 		Commands->Start_Conversation (conv_id, 300601);
 		Commands->Monitor_Conversation (obj, conv_id);
 
@@ -98,7 +98,7 @@ DECLARE_SCRIPT(M06_Objective_Controller, "") // 100018
 		// Hack War Room Computer
 		case 601:
 			{
-				Commands->Add_Objective(601, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M06_02, NULL, IDS_Enc_Obj_Primary_M06_02);
+				Commands->Add_Objective(601, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M06_02, nullptr, IDS_Enc_Obj_Primary_M06_02);
 				object = Commands->Find_Object(106952);
 				if(object)
 				{
@@ -110,7 +110,7 @@ DECLARE_SCRIPT(M06_Objective_Controller, "") // 100018
 		// Rescue Scientists
 		case 603:
 			{
-				Commands->Add_Objective(603, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M06_01, NULL, IDS_Enc_Obj_Primary_M06_01);
+				Commands->Add_Objective(603, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M06_01, nullptr, IDS_Enc_Obj_Primary_M06_01);
 				object = Commands->Find_Object(101010);
 				if(object)
 				{
@@ -122,7 +122,7 @@ DECLARE_SCRIPT(M06_Objective_Controller, "") // 100018
 		// Eliminate Mendoza
 		case 604:
 			{
-				Commands->Add_Objective(604, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M06_04, NULL, IDS_Enc_Obj_Primary_M06_04);
+				Commands->Add_Objective(604, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M06_04, nullptr, IDS_Enc_Obj_Primary_M06_04);
 			//	object = Commands->Find_Object(mendoza_id);
 				object = Commands->Find_Object(108275);
 				if(object)
@@ -135,7 +135,7 @@ DECLARE_SCRIPT(M06_Objective_Controller, "") // 100018
 		// Rescue Resistance
 		case 605:
 			{
-				Commands->Add_Objective(605, OBJECTIVE_TYPE_TERTIARY, OBJECTIVE_STATUS_HIDDEN, IDS_Enc_ObjTitle_Hidden_M06_02, NULL, IDS_Enc_Obj_Hidden_M06_02);
+				Commands->Add_Objective(605, OBJECTIVE_TYPE_TERTIARY, OBJECTIVE_STATUS_HIDDEN, IDS_Enc_ObjTitle_Hidden_M06_02, nullptr, IDS_Enc_Obj_Hidden_M06_02);
 				object = Commands->Find_Object(101016);
 
 			}
@@ -143,19 +143,19 @@ DECLARE_SCRIPT(M06_Objective_Controller, "") // 100018
 		// Release GDI prisoner
 		case 607:
 			{
-				Commands->Add_Objective(607, OBJECTIVE_TYPE_TERTIARY, OBJECTIVE_STATUS_HIDDEN, IDS_Enc_ObjTitle_Hidden_M06_03, NULL, IDS_Enc_Obj_Hidden_M06_03);
+				Commands->Add_Objective(607, OBJECTIVE_TYPE_TERTIARY, OBJECTIVE_STATUS_HIDDEN, IDS_Enc_ObjTitle_Hidden_M06_03, nullptr, IDS_Enc_Obj_Hidden_M06_03);
 			}
 			break;
 		// Plunder Raveshaw's hidden cache
 		case 608:
 			{
-				Commands->Add_Objective(608, OBJECTIVE_TYPE_TERTIARY, OBJECTIVE_STATUS_HIDDEN, IDS_Enc_ObjTitle_Hidden_M06_04, NULL, IDS_Enc_Obj_Hidden_M06_04);
+				Commands->Add_Objective(608, OBJECTIVE_TYPE_TERTIARY, OBJECTIVE_STATUS_HIDDEN, IDS_Enc_ObjTitle_Hidden_M06_04, nullptr, IDS_Enc_Obj_Hidden_M06_04);
 			}
 			break;
 		// Deactivate alarm system
 		case 609:
 			{
-				Commands->Add_Objective(609, OBJECTIVE_TYPE_SECONDARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Hidden_M06_01, NULL, IDS_Enc_Obj_Hidden_M06_01);
+				Commands->Add_Objective(609, OBJECTIVE_TYPE_SECONDARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Hidden_M06_01, nullptr, IDS_Enc_Obj_Hidden_M06_01);
 				Vector3 star_pos = Commands->Get_Position(STAR);
 				Vector3 greenhouse_alarm = Commands->Get_Position(Commands->Find_Object(101548));
 				Vector3 shower_alarm = Commands->Get_Position(Commands->Find_Object(101549));
@@ -187,14 +187,14 @@ DECLARE_SCRIPT(M06_Objective_Controller, "") // 100018
 		// Alarm State: Stand Down
 		case 610:
 			{
-				Commands->Add_Objective(610, OBJECTIVE_TYPE_SECONDARY, OBJECTIVE_STATUS_HIDDEN, 1000, NULL, 0);
+				Commands->Add_Objective(610, OBJECTIVE_TYPE_SECONDARY, OBJECTIVE_STATUS_HIDDEN, 1000, nullptr, 0);
 			}
 			break;
 		// Escape Chateau with Dr. Sydney Mobius
 		case 611:
 			{
 				Commands->Set_HUD_Help_Text ( IDS_M11DSGN_DSGN1007I1DSGN_TXT, TEXT_COLOR_OBJECTIVE_PRIMARY );
-				Commands->Add_Objective(611, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M06_03, NULL, IDS_Enc_Obj_Primary_M06_03);
+				Commands->Add_Objective(611, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M06_03, nullptr, IDS_Enc_Obj_Primary_M06_03);
 				object = Commands->Find_Object(101527);
 				if(object)
 				{
@@ -210,7 +210,7 @@ DECLARE_SCRIPT(M06_Objective_Controller, "") // 100018
 	{
 		if(type == M06_MENDOZA_ID)
 		{
-			mendoza_id = param;
+			mendoza_id = int(param);
 
 		}
 		if(type == 666 && param == 666)
@@ -331,8 +331,8 @@ DECLARE_SCRIPT(M06_WarRoom_Computer, "")
 		{
 			// Data decryption complete. Internal computer systems indicate Dr. Ignatio Mobius is located beneath the Chateau. Access is gained through the dining hall.\n
 			const char *conv_name = ("M06_CON001");
-			int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
-			Commands->Join_Conversation(NULL, conv_id, true, true, true);
+			int conv_id = Commands->Create_Conversation (conv_name, 100, 200.0f, false);
+			Commands->Join_Conversation(nullptr, conv_id, true, true, true);
 			Commands->Join_Conversation(STAR, conv_id, false, true, true);
 			Commands->Start_Conversation (conv_id, 300603);
 			Commands->Monitor_Conversation (obj, conv_id);
@@ -495,12 +495,12 @@ DECLARE_SCRIPT(M06_Sydney_Mobius, "")
 				//	Create and position Mendoza
 				//
 				GameObject *mendoza = Commands->Create_Object ("Mendoza Boss", Vector3 (-40.572F, 28.942F, 1.605F));
-				if (mendoza != NULL) {
+				if (mendoza != nullptr) {
 					Commands->Set_Facing (mendoza, -50.0F);
 				}
 
 		//		GameObject *mendoza = Commands->Create_Object ("Nod_FlameThrower_3Boss", Vector3 (-40.572F, 28.942F, 1.605F));
-		//		if (mendoza != NULL) {
+		//		if (mendoza != nullptr) {
 		//			Commands->Set_Facing (mendoza, -50.0F);
 		//			Commands->Attach_Script(mendoza, "M06_Mendoza", "");
 		//		}
@@ -523,7 +523,7 @@ DECLARE_SCRIPT(M06_Sydney_Mobius, "")
 		}
 		if(type == M06_MOVE_SYDNEY && !dont_move)
 		{
-			current_move_loc = param;
+			current_move_loc = int(param);
 			if(current_move_loc == 12)
 			{
 				poke_id = 4;
@@ -581,7 +581,7 @@ DECLARE_SCRIPT(M06_Sydney_Mobius, "")
 			{
 				// Don't leave me here!\n
 				const char *conv_name = ("M06_CON005");
-				int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
+				int conv_id = Commands->Create_Conversation (conv_name, 100, 200.0f, false);
 				Commands->Join_Conversation(obj, conv_id, false, true, true);
 				Commands->Start_Conversation (conv_id, 1);
 				Commands->Monitor_Conversation (obj, conv_id);
@@ -597,7 +597,7 @@ DECLARE_SCRIPT(M06_Sydney_Mobius, "")
 			{
 				// Wait for me!\n
 				const char *conv_name = ("M06_CON006");
-				int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
+				int conv_id = Commands->Create_Conversation (conv_name, 100, 200.0f, false);
 				Commands->Join_Conversation(obj, conv_id, false, true, true);
 				Commands->Start_Conversation (conv_id, 1);
 				Commands->Monitor_Conversation (obj, conv_id);
@@ -629,7 +629,7 @@ DECLARE_SCRIPT(M06_MidtroB_Explosion_Controller, "Loc0_ID=0:int, Loc1_ID=0:int, 
 			explode_loc[2] = Get_Int_Parameter("Loc2_ID");
 			explode_loc[3] = Get_Int_Parameter("Loc3_ID");
 			explode_loc[4] = Get_Int_Parameter("Loc4_ID");
-			Commands->Create_Explosion("Chateau_Explosions_Twiddler", Commands->Get_Position(Commands->Find_Object(explode_loc[param])), NULL);
+			Commands->Create_Explosion("Chateau_Explosions_Twiddler", Commands->Get_Position(Commands->Find_Object(explode_loc[param])), nullptr);
 		}
 	}
 };
@@ -808,8 +808,8 @@ DECLARE_SCRIPT(M06_Destruction_Stub, "")
 			distance *= 3;
 			Vector3 pos = Commands->Get_Position(STAR);
 			float facing = Commands->Get_Facing(STAR);
-			float a = cos(DEG_TO_RADF(facing)) * distance;
-			float b = sin(DEG_TO_RADF(facing)) * distance;
+			float a = WWMath::Cos(DEG_TO_RADF(facing)) * distance;
+			float b = WWMath::Sin(DEG_TO_RADF(facing)) * distance;
 			Vector3 explode_loc = pos + Vector3(a, b, 0.0f);
 
 			Commands->Create_Explosion("Chateau_Explosions_Twiddler", explode_loc, obj);
@@ -868,7 +868,7 @@ DECLARE_SCRIPT(M06_GDI_Prisoner, "")
 		{
 			// Thank for the release. I've got a Nod officer I've got to hunt down.\n
 			const char *conv_name = ("M06_CON008");
-			int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
+			int conv_id = Commands->Create_Conversation (conv_name, 100, 200.0f, false);
 			Commands->Join_Conversation(obj, conv_id, false, true, true);
 			Commands->Join_Conversation(poker, conv_id, false, true, true);
 			Commands->Start_Conversation (conv_id, 300607);
@@ -1022,8 +1022,8 @@ DECLARE_SCRIPT(M06_Civ_Prisoner, "")
 
 				Vector3 pos = Commands->Get_Position(obj);
 				float facing = Commands->Get_Facing(obj);
-				float a = cos(DEG_TO_RADF(facing)) * 1.5;
-				float b = sin(DEG_TO_RADF(facing)) * 1.5;
+				float a = WWMath::Cos(DEG_TO_RADF(facing)) * 1.5f;
+				float b = WWMath::Sin(DEG_TO_RADF(facing)) * 1.5f;
 				Vector3 powerup_loc = pos + Vector3(a, b, 0.5f);
 				Commands->Create_Object("POW_Health_100", powerup_loc);
 				Commands->Enable_HUD_Pokable_Indicator( obj, false );
@@ -1116,7 +1116,7 @@ DECLARE_SCRIPT(M06_Enable_Guard_Tower, "")
 			// Warning: Nod Security Measures Detected.\n
 	//		const char *conv_name = ("M06_CON010");
 	//		int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
-	//		Commands->Join_Conversation(NULL, conv_id, true, true, true);
+	//		Commands->Join_Conversation(nullptr, conv_id, true, true, true);
 	//		Commands->Join_Conversation(STAR, conv_id, true, true, true);
 	//		Commands->Start_Conversation (conv_id, 300606);
 	//		Commands->Monitor_Conversation (obj, conv_id);
@@ -1205,7 +1205,7 @@ DECLARE_SCRIPT(M06_Gate_Guards, "Soldier_ID=0:int")
 	void Sound_Heard(GameObject* /*obj*/, const CombatSound & sound) override
 	{
 
-		if ( sound.Type == M06_DISABLE_TOWER_SPAWN )
+		if ( static_cast<int>(sound.Type) == M06_DISABLE_TOWER_SPAWN )
 		{
 			disable_tower_spawn = true;
 		}
@@ -1264,7 +1264,7 @@ DECLARE_SCRIPT(M06_Gate_Guards, "Soldier_ID=0:int")
 			int random = Get_Int_Random(0, 5);
 
 			int conv_id = Commands->Create_Conversation (conv_name[random], 0, 0, true);
-			Commands->Join_Conversation(NULL, conv_id, false, true, true);
+			Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 			Commands->Start_Conversation (conv_id, 1);*/
 
 			switch(soldier_id)
@@ -1411,12 +1411,12 @@ DECLARE_SCRIPT(M06_Alarm_Controller, "")
 		{
 			Commands->Send_Custom_Event (obj, sender, M06_ALARMED, alarm_sounded, 0.0f);
 		}
-		if((type == M06_STAND_DOWN)) // && (alarm_sounded) && !stand_down)
+		if(type == M06_STAND_DOWN) // && (alarm_sounded) && !stand_down)
 		{
 			stand_down = true;
 			Commands->Start_Timer (obj, this, 0.0f, STAND_DOWN);
 		}
-		if((type == M06_SOUND_ALARM) && (!alarm_sounded))
+		if(type == M06_SOUND_ALARM && (!alarm_sounded))
 		{
 			alarm_sounded = true;
 			Commands->Create_Sound ( "M06_Alarm", Vector3 (0,0,0), obj);
@@ -1445,14 +1445,14 @@ DECLARE_SCRIPT(M06_Alarm_Controller, "")
 	void Timer_Expired(GameObject * obj, int timer_id ) override
 	{
 
-		if((timer_id == STAND_DOWN)) // && (alarm_sounded) && (alarmed))
+		if(timer_id == STAND_DOWN) // && (alarm_sounded) && (alarmed))
 		{
 			if(alarm_sounded)
 			{
 				// Stand down general alarm. Intruder alert canceled.\n
 				const char *conv_name = ("M06_CON018");
 				int conv_id = Commands->Create_Conversation (conv_name, 0, 0, true);
-				Commands->Join_Conversation(NULL, conv_id, false, true, true);
+				Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 				Commands->Join_Conversation(Commands->Get_A_Star(Vector3(0.0f,0.0f,0.0f)), conv_id, false, true, true);
 				Commands->Start_Conversation (conv_id, 300000);
 				Commands->Monitor_Conversation (obj, conv_id);
@@ -1653,7 +1653,7 @@ DECLARE_SCRIPT(M06_Alarm_Behavior, "Alarm_Enemy_Seen=0.0:float, Alarm_Damaged=0.
 	{
 
 
-		if ( sound.Type == M06_SOUND_ALARM_ON )
+		if ( static_cast<int>(sound.Type) == M06_SOUND_ALARM_ON )
 		{
 			alarmed = true;
 			sound_alarm = false;
@@ -1663,13 +1663,13 @@ DECLARE_SCRIPT(M06_Alarm_Behavior, "Alarm_Enemy_Seen=0.0:float, Alarm_Damaged=0.
 
 
 		}
-		if ( sound.Type == M06_SOUND_ALARM_OFF )
+		if ( static_cast<int>(sound.Type) == M06_SOUND_ALARM_OFF )
 		{
 			alarmed = false;
 			attacking_havoc = false;
 			Commands->Action_Reset ( obj, 100 );
 		}
-		if ( sound.Type == M06_ATTACK_HAVOC_SOUND )
+		if ( static_cast<int>(sound.Type) == M06_ATTACK_HAVOC_SOUND )
 		{
 
 			havoc_id = Commands->Get_ID(sound.Creator);
@@ -1678,7 +1678,7 @@ DECLARE_SCRIPT(M06_Alarm_Behavior, "Alarm_Enemy_Seen=0.0:float, Alarm_Damaged=0.
 
 		}
 
-		if (((sound.Type == SOUND_TYPE_GUNSHOT) || (sound.Type == SOUND_TYPE_BULLET_HIT)) && (!hear_footsteps))
+		if (((static_cast<int>(sound.Type) == SOUND_TYPE_GUNSHOT) || (static_cast<int>(sound.Type) == SOUND_TYPE_BULLET_HIT)) && (!hear_footsteps))
 		{
 			hear_footsteps = true;
 			Commands->Innate_Soldier_Enable_Footsteps_Heard(obj, true);
@@ -1934,11 +1934,11 @@ DECLARE_SCRIPT(M06_Tower_Patrol, "Waypath_ID=0:int, Waypath_Loc:Vector3")
 	void Sound_Heard(GameObject* /*obj*/, const CombatSound & sound) override
 	{
 
-		if ( sound.Type == M06_DISABLE_TOWER_SPAWN )
+		if ( static_cast<int>(sound.Type) == M06_DISABLE_TOWER_SPAWN )
 		{
 			disable_tower_spawn = true;
 		}
-		if ( sound.Type == M06_CHATEAU_DESTRUCTION )
+		if ( static_cast<int>(sound.Type) == M06_CHATEAU_DESTRUCTION )
 		{
 			chateau_destruction = true;
 		}
@@ -1961,7 +1961,7 @@ DECLARE_SCRIPT(M06_Tower_Patrol, "Waypath_ID=0:int, Waypath_Loc:Vector3")
 			if(random < 6)
 			{
 				int conv_id = Commands->Create_Conversation (conv_name[random], 0, 0, true);
-				Commands->Join_Conversation(NULL, conv_id, false, true, true);
+				Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 				Commands->Start_Conversation (conv_id, 1);
 			}
 		}
@@ -2041,11 +2041,11 @@ DECLARE_SCRIPT(M06_Courtyard_Patrol, "Waypath_ID=0:int, Waypath_Loc:Vector3")
 	void Sound_Heard(GameObject* /*obj*/, const CombatSound & sound) override
 	{
 
-		if ( sound.Type == M06_DISABLE_COURTYARD_SPAWN )
+		if ( static_cast<int>(sound.Type) == M06_DISABLE_COURTYARD_SPAWN )
 		{
 			disable_courtyard_spawn = true;
 		}
-		if ( sound.Type == M06_CHATEAU_DESTRUCTION )
+		if ( static_cast<int>(sound.Type) == M06_CHATEAU_DESTRUCTION )
 		{
 			chateau_destruction = true;
 		}
@@ -2066,7 +2066,7 @@ DECLARE_SCRIPT(M06_Courtyard_Patrol, "Waypath_ID=0:int, Waypath_Loc:Vector3")
 			if(random < 5)
 			{
 				int conv_id = Commands->Create_Conversation (conv_name[random], 0, 0, true);
-				Commands->Join_Conversation(NULL, conv_id, false, true, true);
+				Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 				Commands->Start_Conversation (conv_id, 1);
 			}
 		}
@@ -2146,11 +2146,11 @@ DECLARE_SCRIPT(M06_Hedgemaze_Patrol, "Waypath_ID=0:int, Waypath_Loc:Vector3")
 	void Sound_Heard(GameObject* /*obj*/, const CombatSound & sound) override
 	{
 
-		if ( sound.Type == M06_DISABLE_HEDGEMAZE_SPAWN )
+		if ( static_cast<int>(sound.Type) == M06_DISABLE_HEDGEMAZE_SPAWN )
 		{
 			disable_hedgemaze_spawn = true;
 		}
-		if ( sound.Type == M06_CHATEAU_DESTRUCTION )
+		if ( static_cast<int>(sound.Type) == M06_CHATEAU_DESTRUCTION )
 		{
 			chateau_destruction = true;
 		}
@@ -2170,7 +2170,7 @@ DECLARE_SCRIPT(M06_Hedgemaze_Patrol, "Waypath_ID=0:int, Waypath_Loc:Vector3")
 			if(random < 4)
 			{
 				int conv_id = Commands->Create_Conversation (conv_name[random], 0, 0, true);
-				Commands->Join_Conversation(NULL, conv_id, false, true, true);
+				Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 				Commands->Start_Conversation (conv_id, 1);
 			}
 		}
@@ -2360,11 +2360,11 @@ DECLARE_SCRIPT(M06_Barracks_Patrol, "")
 	void Sound_Heard(GameObject* /*obj*/, const CombatSound & sound) override
 	{
 
-		if ( sound.Type == M06_DISABLE_BARRACKS_SPAWN )
+		if ( static_cast<int>(sound.Type) == M06_DISABLE_BARRACKS_SPAWN )
 		{
 			disable_barracks_spawn = true;
 		}
-		if ( sound.Type == M06_CHATEAU_DESTRUCTION )
+		if ( static_cast<int>(sound.Type) == M06_CHATEAU_DESTRUCTION )
 		{
 			chateau_destruction = true;
 		}
@@ -2391,8 +2391,8 @@ DECLARE_SCRIPT(M06_Barracks_Patrol, "")
 		{
 			Vector3 pos = Commands->Get_Position(obj);
 			float facing = Commands->Get_Facing(obj);
-			float a = cos(DEG_TO_RADF(facing)) * 1.5;
-			float b = sin(DEG_TO_RADF(facing)) * 1.5;
+			float a = WWMath::Cos(DEG_TO_RADF(facing)) * 1.5f;
+			float b = WWMath::Sin(DEG_TO_RADF(facing)) * 1.5f;
 			Vector3 powerup_loc = pos + Vector3(a, b, 0.5f);
 			Commands->Create_Object("M06_Barracks_Powerups_Twiddler", powerup_loc);
 
@@ -2441,7 +2441,7 @@ DECLARE_SCRIPT(M06_Barracks_Patrol, "")
 			if(random < 5)
 			{
 				int conv_id = Commands->Create_Conversation (conv_name[random], 0, 0, true);
-				Commands->Join_Conversation(NULL, conv_id, false, true, true);
+				Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 				Commands->Start_Conversation (conv_id, 1);
 			}
 		}
@@ -2687,7 +2687,7 @@ DECLARE_SCRIPT(M06_Interior_Controller, "")
 					// Contact lost with patrols.  Reserve patrols to your assigned areas.  Chem units to standby.\n
 					const char * conv_name = ("M06_CON035");
 					int conv_id = Commands->Create_Conversation (conv_name, 0, 0, true);
-					Commands->Join_Conversation(NULL, conv_id, false, true, true);
+					Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 					Commands->Start_Conversation (conv_id, 1);
 
 					// Disable initial interior spawns
@@ -2716,7 +2716,7 @@ DECLARE_SCRIPT(M06_Interior_Controller, "")
 					// Additional patrols lost, brothers.  Chem units to stations.\n
 					const char * conv_name = ("M06_CON036");
 					int conv_id = Commands->Create_Conversation (conv_name, 0, 0, true);
-					Commands->Join_Conversation(NULL, conv_id, false, true, true);
+					Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 					Commands->Start_Conversation (conv_id, 1);
 
 					// Enable grade 3 patrols
@@ -2760,7 +2760,7 @@ DECLARE_SCRIPT(M06_Interior_Controller, "")
 				{
 
 					const char * conv_name;
-					conv_name = NULL;
+					conv_name = nullptr;
 
 					if((dead_loc.X < 12.0f) && (dead_loc.Y < -22.0f) && (dead_loc.Z >= 5.0f))
 					{
@@ -2803,10 +2803,10 @@ DECLARE_SCRIPT(M06_Interior_Controller, "")
 						conv_name = ("M06_CON044");
 					}
 
-					if(conv_name != NULL)
+					if(conv_name != nullptr)
 					{
 						int conv_id = Commands->Create_Conversation (conv_name, 0, 0, true);
-						Commands->Join_Conversation(NULL, conv_id, false, true, true);
+						Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 						Commands->Start_Conversation (conv_id, 1);
 					}
 				}
@@ -2836,7 +2836,7 @@ DECLARE_SCRIPT(M06_Apply_Damage, "")
 
 		if(timer_id == APPLY_DAMAGE)
 		{
-			Commands->Apply_Damage( obj, 10000.0f, "STEEL", NULL);
+			Commands->Apply_Damage( obj, 10000.0f, "STEEL", nullptr);
 		}
 	}
 };
@@ -3192,7 +3192,7 @@ DECLARE_SCRIPT(M06_Alarm_Engineer, "")
 	{
 		ActionParamsStruct params;
 
-		if (( sound.Type == M06_FIX_ALARM ) && (!fixing_alarm))
+		if (( static_cast<int>(sound.Type) == M06_FIX_ALARM ) && (!fixing_alarm))
 		{
 			fixing_alarm = true;
 			broken_alarm_id = Commands->Get_ID(sound.Creator);
@@ -3359,7 +3359,7 @@ DECLARE_SCRIPT(M06_Havoc_DLS, "")
 	void Sound_Heard(GameObject* obj, const CombatSound & sound) override
 	{
 
-		if ( sound.Type == M06_SOUND_ALARM_ON )
+		if ( static_cast<int>(sound.Type) == M06_SOUND_ALARM_ON )
 		{
 			if(!alarmed)
 			{
@@ -3372,7 +3372,7 @@ DECLARE_SCRIPT(M06_Havoc_DLS, "")
 
 
 		}
-		if ( sound.Type == M06_SOUND_ALARM_OFF )
+		if ( static_cast<int>(sound.Type) == M06_SOUND_ALARM_OFF )
 		{
 			alarmed = false;
 			attacking_havoc = 0;
@@ -3453,9 +3453,9 @@ DECLARE_SCRIPT(M06_Resistance_Raider_DLS, "")
 	{
 		Commands->Set_Innate_Is_Stationary(obj, true);
 
-		Commands->Set_Animation(obj, "S_A_HUMAN.H_A_601A", true, NULL, 0.0f, -1.0f, false);
+		Commands->Set_Animation(obj, "S_A_HUMAN.H_A_601A", true, nullptr, 0.0f, -1.0f, false);
 
-		Commands->Apply_Damage( obj, 25.0f, "STEEL", NULL);
+		Commands->Apply_Damage( obj, 25.0f, "STEEL", nullptr);
 		talking = false;
 		Commands->Enable_HUD_Pokable_Indicator( obj, true );
 
@@ -3470,7 +3470,7 @@ DECLARE_SCRIPT(M06_Resistance_Raider_DLS, "")
 			talking = true;
 			// Looks like you're bleedin'.\n
 			const char *conv_name = ("M06_CON045");
-			int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
+			int conv_id = Commands->Create_Conversation (conv_name, 100, 200.0f, false);
 			Commands->Join_Conversation(STAR, conv_id, false, true, true);
 			Commands->Join_Conversation(obj, conv_id, false, true, true);
 			Commands->Start_Conversation (conv_id, 100823);
@@ -3484,12 +3484,12 @@ DECLARE_SCRIPT(M06_Resistance_Raider_DLS, "")
 	{
 		if(action_id == 100823 && reason == ACTION_COMPLETE_CONVERSATION_ENDED)
 		{
-			Commands->Apply_Damage( obj, 10000.0f, "STEEL", NULL);
+			Commands->Apply_Damage( obj, 10000.0f, "STEEL", nullptr);
 
 			Vector3 pos = Commands->Get_Position(obj);
 			float facing = Commands->Get_Facing(obj);
-			float a = cos(DEG_TO_RADF(facing)) * 1.5;
-			float b = sin(DEG_TO_RADF(facing)) * 1.5;
+			float a = WWMath::Cos(DEG_TO_RADF(facing)) * 1.5f;
+			float b = WWMath::Sin(DEG_TO_RADF(facing)) * 1.5f;
 			Vector3 powerup_loc = pos + Vector3(a, b, 0.5f);
 			Commands->Create_Object("POW_GrenadeLauncher_Player", powerup_loc);
 
@@ -3545,8 +3545,8 @@ DECLARE_SCRIPT(M06_Assistance_Farmer_DLS, "")
 		{
 			Vector3 pos = Commands->Get_Position(obj);
 			float facing = Commands->Get_Facing(obj);
-			float a = cos(DEG_TO_RADF(facing)) * 1.5;
-			float b = sin(DEG_TO_RADF(facing)) * 1.5;
+			float a = WWMath::Cos(DEG_TO_RADF(facing)) * 1.5f;
+			float b = WWMath::Sin(DEG_TO_RADF(facing)) * 1.5f;
 			Vector3 powerup_loc = pos + Vector3(a, b, 0.5f);
 			Commands->Create_Object("POW_GrenadeLauncher_Player", powerup_loc);
 
@@ -3585,8 +3585,8 @@ DECLARE_SCRIPT(M06_Assistance_Farmer_DLS, "")
 
 			Vector3 pos = Commands->Get_Position(obj);
 			float facing = Commands->Get_Facing(obj);
-			float a = cos(DEG_TO_RADF(facing)) * 1.5;
-			float b = sin(DEG_TO_RADF(facing)) * 1.5;
+			float a = WWMath::Cos(DEG_TO_RADF(facing)) * 1.5f;
+			float b = WWMath::Sin(DEG_TO_RADF(facing)) * 1.5f;
 			Vector3 powerup_loc = pos + Vector3(a, b, 0.5f);
 			Commands->Create_Object("tw_POW00_Health", powerup_loc);
 
@@ -4069,7 +4069,7 @@ DECLARE_SCRIPT(M06_WarRoom_Officer_DLS, "")
 			// Do not patronize me, when are you going to move the scientists to the Research Facility?\n
 		//	const char *conv_name = ("M06_CON051");
 		//	int conv_id = Commands->Create_Conversation (conv_name, INNATE_PRIORITY_ENEMY_SEEN - 5, 0, true);
-		//	Commands->Join_Conversation(NULL, conv_id, false, true, true);
+		//	Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 		//	Commands->Join_Conversation(obj, conv_id, false, true, true);
 		//	Commands->Start_Conversation (conv_id, 300123);
 		//	Commands->Monitor_Conversation (obj, conv_id);
@@ -4904,7 +4904,7 @@ DECLARE_SCRIPT(M06_Flyover_Controller, "")  // 100018
 		ActionParamsStruct params;
 		if(type == M06_FLYOVER_COMPLETE && flyovers)
 		{
-			last = param;
+			last = int(param);
 
 			static constexpr const char *flyover_files[11] =
 			{
@@ -5049,8 +5049,8 @@ DECLARE_SCRIPT(M06_Drop_Thunder_Squad, "")
 
 			// This is Nod Helo Delta 14.  We are hot dropping a squad of Black Hand at your doorstep, be advised they are on the ground only long enough to re-equip, skip the standard check in.  Raveshaw's orders.\n
 			const char *conv_name = ("M06_CON057");
-			int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
-			Commands->Join_Conversation(NULL, conv_id, true, true, true);
+			int conv_id = Commands->Create_Conversation (conv_name, 100, 200.0f, false);
+			Commands->Join_Conversation(nullptr, conv_id, true, true, true);
 			Commands->Join_Conversation(STAR, conv_id, false, true, true);
 			Commands->Start_Conversation (conv_id, 300603);
 			Commands->Monitor_Conversation (obj, conv_id);
@@ -5342,11 +5342,11 @@ DECLARE_SCRIPT(M06_Collapse_Zone, "Zone_ID=0:int")
 
 					GameObject * l6_fallfire01 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_fallfire01, "L6_fallfire01" );
-					Commands->Set_Animation(l6_fallfire01, "L6_Fallfire01.L6_Fallfire01", true, NULL, 0.0f, -1.0f, false);
+					Commands->Set_Animation(l6_fallfire01, "L6_Fallfire01.L6_Fallfire01", true, nullptr, 0.0f, -1.0f, false);
 
 					GameObject * l6_floorfire01 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_floorfire01, "L6_floorfire01" );
-					Commands->Set_Animation(l6_floorfire01, "L6_floorfire01.L6_floorfire01", true, NULL, 0.0f, -1.0f, false);
+					Commands->Set_Animation(l6_floorfire01, "L6_floorfire01.L6_floorfire01", true, nullptr, 0.0f, -1.0f, false);
 				}
 				break;
 			// Staircase leading out of crypt and hallway immediately up that staircase
@@ -5360,11 +5360,11 @@ DECLARE_SCRIPT(M06_Collapse_Zone, "Zone_ID=0:int")
 
 					GameObject * l6_fallfire02 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_fallfire02, "L6_fallfire02" );
-					Commands->Set_Animation(l6_fallfire02, "L6_Fallfire02.L6_Fallfire02", true, NULL, 0.0f, -1.0f, false);
+					Commands->Set_Animation(l6_fallfire02, "L6_Fallfire02.L6_Fallfire02", true, nullptr, 0.0f, -1.0f, false);
 
 					GameObject * l6_floorfire02 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_floorfire02, "L6_floorfire02" );
-					Commands->Set_Animation(l6_floorfire02, "L6_floorfire02.L6_floorfire02", true, NULL, 0.0f, -1.0f, false);
+					Commands->Set_Animation(l6_floorfire02, "L6_floorfire02.L6_floorfire02", true, nullptr, 0.0f, -1.0f, false);
 
 					GameObject * l6_falldust04 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_falldust04, "L6_falldust04" );
@@ -5420,7 +5420,7 @@ DECLARE_SCRIPT(M06_Collapse_Zone, "Zone_ID=0:int")
 
 					GameObject * l6_fallfire03 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_fallfire03, "L6_fallfire03" );
-					Commands->Set_Animation(l6_fallfire03, "L6_Fallfire03.L6_Fallfire03", true, NULL, 0.0f, -1.0f, false);
+					Commands->Set_Animation(l6_fallfire03, "L6_Fallfire03.L6_Fallfire03", true, nullptr, 0.0f, -1.0f, false);
 
 					GameObject * l6_falldust09 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_falldust09, "L6_falldust09" );
@@ -5449,7 +5449,7 @@ DECLARE_SCRIPT(M06_Collapse_Zone, "Zone_ID=0:int")
 
 					GameObject * l6_floorfire06 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_floorfire06, "L6_floorfire06" );
-					Commands->Set_Animation(l6_floorfire06, "L6_floorfire06.L6_floorfire06", true, NULL, 0.0f, -1.0f, false);
+					Commands->Set_Animation(l6_floorfire06, "L6_floorfire06.L6_floorfire06", true, nullptr, 0.0f, -1.0f, false);
 
 					GameObject * l6_falldust18 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_falldust18, "L6_falldust18" );
@@ -5472,18 +5472,18 @@ DECLARE_SCRIPT(M06_Collapse_Zone, "Zone_ID=0:int")
 
 					GameObject * l6_floorfire04 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_floorfire04, "L6_floorfire04" );
-					Commands->Set_Animation(l6_floorfire04, "L6_floorfire04.L6_floorfire04", true, NULL, 0.0f, -1.0f, false);
+					Commands->Set_Animation(l6_floorfire04, "L6_floorfire04.L6_floorfire04", true, nullptr, 0.0f, -1.0f, false);
 
 					GameObject * l6_floorfire05 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_floorfire05, "L6_floorfire05" );
-					Commands->Set_Animation(l6_floorfire05, "L6_floorfire04.L6_floorfire05", true, NULL, 0.0f, -1.0f, false);
+					Commands->Set_Animation(l6_floorfire05, "L6_floorfire04.L6_floorfire05", true, nullptr, 0.0f, -1.0f, false);
 
 					GameObject * l6_falldust15 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_falldust15, "L6_falldust15" );
 
 					GameObject * l6_fallfire05 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_fallfire05, "L6_fallfire05" );
-					Commands->Set_Animation(l6_fallfire05, "L6_Fallfire05.L6_Fallfire05", true, NULL, 0.0f, -1.0f, false);
+					Commands->Set_Animation(l6_fallfire05, "L6_Fallfire05.L6_Fallfire05", true, nullptr, 0.0f, -1.0f, false);
 
 					GameObject * l6_falldust14 = Commands->Create_Object("Invisible_Object", Vector3(0.0f, 0.0f, 0.0f) );
 					Commands->Set_Model ( l6_falldust14, "L6_falldust14" );
@@ -5596,7 +5596,7 @@ DECLARE_SCRIPT (M06_Clear_For_Mendoza, "")
 	void Sound_Heard(GameObject* obj, const CombatSound & sound) override
 	{
 
-		if ( sound.Type == M06_CLEAR_FOR_MENDOZA )
+		if ( static_cast<int>(sound.Type) == M06_CLEAR_FOR_MENDOZA )
 		{
 			Commands->Destroy_Object(obj);
 		}
@@ -5646,8 +5646,8 @@ DECLARE_SCRIPT(M06_Enable_Alarm_Objective, "")
 
 			// Warning: Nod Security Measures Detected.
 			const char *conv_name = ("M06_CON060");
-			int conv_id = Commands->Create_Conversation (conv_name, 100.0f, 200.0f, false);
-			Commands->Join_Conversation(NULL, conv_id, false, true, true);
+			int conv_id = Commands->Create_Conversation (conv_name, 100, 200.0f, false);
+			Commands->Join_Conversation(nullptr, conv_id, false, true, true);
 			Commands->Start_Conversation (conv_id, 300609);
 			Commands->Monitor_Conversation (obj, conv_id);
 		}

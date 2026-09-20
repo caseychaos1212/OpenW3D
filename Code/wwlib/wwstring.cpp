@@ -73,7 +73,7 @@ StringClass::Get_String (size_t length, bool is_temp)
 		return;
 	}
 
-	char *string = NULL;
+	char *string = nullptr;
 
 	//
 	//	Should we attempt to use a temp buffer for this string?
@@ -93,8 +93,7 @@ StringClass::Get_String (size_t length, bool is_temp)
 		//	Try to find an available temporary buffer
 		//
 		// TODO: Don't loop, there are better ways
-		unsigned mask=1;
-		for (int index = 0; index < MAX_TEMP_STRING; index ++, mask<<=1) {
+		for (int index = 0; index < MAX_TEMP_STRING; index ++) {
 			unsigned mask=1<<index;
 			if (!(ReservedMask&mask)) {
 				ReservedMask|=mask;
@@ -114,7 +113,7 @@ StringClass::Get_String (size_t length, bool is_temp)
 		}
 	}
 
-	if (string == NULL) {
+	if (string == nullptr) {
 
 		//
 		//	Allocate a new string as necessary
@@ -208,7 +207,7 @@ StringClass::Free_String (void)
 			//
 			FastCriticalSectionClass::LockClass m(m_Mutex);
 
-			unsigned index=(buffer_base - temp_base) / MAX_TEMP_BYTES;
+			unsigned index=unsigned(buffer_base - temp_base) / MAX_TEMP_BYTES;
 			unsigned mask=1<<index;
 			ReservedMask&=~mask;
 		}
@@ -236,7 +235,7 @@ StringClass::Free_String (void)
 //	Format
 //
 ///////////////////////////////////////////////////////////////////
-int __cdecl
+int 
 StringClass::Format_Args (const char *format, va_list arg_list )
 {
 	//
@@ -249,7 +248,7 @@ StringClass::Format_Args (const char *format, va_list arg_list )
 	//	Format the string
 	//
 
-	retval = vsnprintf (temp_buffer, 512, format, arg_list);
+	retval = u_vsnprintf_n (temp_buffer, sizeof(temp_buffer), format, arg_list);
 
 	//
 	//	Copy the string into our buffer
@@ -265,7 +264,7 @@ StringClass::Format_Args (const char *format, va_list arg_list )
 //	Format
 //
 ///////////////////////////////////////////////////////////////////
-int __cdecl
+int 
 StringClass::Format (const char *format, ...)
 {
 	va_list arg_list;
@@ -280,7 +279,7 @@ StringClass::Format (const char *format, ...)
 	//
 	//	Format the string
 	//
-	retval = vsnprintf (temp_buffer, 512, format, arg_list);
+	retval = u_vsnprintf_n (temp_buffer, sizeof(temp_buffer), format, arg_list);
 
 	//
 	//	Copy the string into our buffer
@@ -309,45 +308,19 @@ StringClass::Release_Resources (void)
 ///////////////////////////////////////////////////////////////////
 bool StringClass::Copy_Wide (const unichar_t *source)
 {
-	if (source != NULL) {
-#ifdef W3D_USING_ICU
-		int32_t length;
-		UErrorCode error = U_ZERO_ERROR;
-		u_strToUTF8(nullptr, 0, &length, source, -1, &error);
+	if (source != nullptr) {
+		size_t length = u_wstomb(nullptr, source, 0);
 
-		if (length > 0) {
-			++length; // Add space for null termination as ICU does not include that in calculated length.
-			error = U_ZERO_ERROR;
-			u_strToUTF8(Get_Buffer(length), length, nullptr, source, -1, &error);
+		if (length > 0 && length != size_t(-1)) {
+			length = u_wstomb(Get_Buffer(length), source, length);
 
-			if (U_SUCCESS(error)) {
+			if (length > 0 && length != size_t(-1)) {
 				Store_Length(length - 1);
 				return (true);
 			}
 		}
 
-		WWDEBUG_SAY(("Conversion from utf-16 to utf-8 failed"));
-#else
-		int  length;
-
-		length = WideCharToMultiByte (CP_UTF8, 0 , source, -1, nullptr, 0, nullptr, nullptr);
-		if (length > 0) {
-
-			size_t buffer_length = static_cast<size_t>(length);
-
-			// Convert.
-			length = WideCharToMultiByte(CP_UTF8, 0, source, -1, Get_Buffer(buffer_length), length, nullptr, nullptr);
-
-			// Update length.
-			Store_Length(buffer_length - 1);
-		}
-
-		if(length <= 0) {
-			WWDEBUG_SAY(("Conversion from utf-16 to utf-8 failed"));
-		}
-
-		return (length > 0);
-#endif
+		WWDEBUG_SAY(("Conversion from utf-16 to utf-8 failed\n"));
 	}
 
 	// Failure.

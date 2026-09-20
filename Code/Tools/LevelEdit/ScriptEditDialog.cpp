@@ -37,10 +37,10 @@ static char THIS_FILE[] = __FILE__;
 // ScriptEditDialogClass
 //
 /////////////////////////////////////////////////////////////////////////////
-ScriptEditDialogClass::ScriptEditDialogClass(CWnd* pParent /*=NULL*/)
+ScriptEditDialogClass::ScriptEditDialogClass(CWnd* pParent /*=nullptr*/)
 	:	m_CurrentParamType (PARAM_TYPE_STRING),
 		m_CurrentParamIndex (0),
-		m_ValueVector3Dlg (NULL),
+		m_ValueVector3Dlg (nullptr),
 		CDialog(ScriptEditDialogClass::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(ScriptEditDialogClass)
@@ -106,12 +106,12 @@ ScriptEditDialogClass::OnInitDialog (void)
 	//
 	for (int index = 0; index < ScriptMgrClass::Get_Count (); index ++) {
 		EditScriptClass *script = ScriptMgrClass::Get_Script (index);
-		if (script != NULL) {
+		if (script != nullptr) {
 
 			//
 			// Add this script to the combobox
 			//
-			int item_index = SendDlgItemMessage (IDC_SCRIPT_NAME, CB_ADDSTRING, 0, (LPARAM)script->Get_Name ());
+			LRESULT item_index = SendDlgItemMessage (IDC_SCRIPT_NAME, CB_ADDSTRING, 0, (LPARAM)script->Get_Name ());
 			SendDlgItemMessage (IDC_SCRIPT_NAME, CB_SETITEMDATA, (WPARAM)item_index, (LPARAM)script);
 
 			//
@@ -130,9 +130,9 @@ ScriptEditDialogClass::OnInitDialog (void)
 	CRect rect;
 	m_ValueStringEdit.GetWindowRect (&rect);
 	ScreenToClient (&rect);
-	m_ValueNumberEdit.SetWindowPos (NULL, rect.left, rect.top, rect.Width (), rect.Height (), SWP_NOZORDER);
-	m_ValueListCombo.SetWindowPos (NULL, rect.left, rect.top, rect.Width (), rect.Height () * 10, SWP_NOZORDER);
-	m_ValueBoolCheck.SetWindowPos (NULL, rect.left, rect.top, rect.Width (), rect.Height (), SWP_NOZORDER);
+	m_ValueNumberEdit.SetWindowPos (nullptr, rect.left, rect.top, rect.Width (), rect.Height (), SWP_NOZORDER);
+	m_ValueListCombo.SetWindowPos (nullptr, rect.left, rect.top, rect.Width (), rect.Height () * 10, SWP_NOZORDER);
+	m_ValueBoolCheck.SetWindowPos (nullptr, rect.left, rect.top, rect.Width (), rect.Height (), SWP_NOZORDER);
 	m_ValueNumberSpin.SetRange32 (-1000000, 1000000);
 	m_ValueNumberSpin.SetBuddy (&m_ValueNumberEdit);
 
@@ -184,9 +184,9 @@ void
 ScriptEditDialogClass::Switch_Value_Control_Type (void)
 {
 	// Get the parameter index and use it to determine the new combo type
-	int index = SendDlgItemMessage (IDC_PARAM_NAME_COMBO, CB_GETCURSEL);
+	LRESULT index = SendDlgItemMessage (IDC_PARAM_NAME_COMBO, CB_GETCURSEL);
 	if (index != CB_ERR) {
-		Switch_Value_Control_Type (index);
+		Switch_Value_Control_Type (int(index));
 	}
 
 	return ;
@@ -422,7 +422,7 @@ ScriptEditDialogClass::OnSelChangeParamNameCombo (void)
 	Save_Current_Value ();
 
 	// Get the parameter index
-	m_CurrentParamIndex = SendDlgItemMessage (IDC_PARAM_NAME_COMBO, CB_GETCURSEL);
+	m_CurrentParamIndex = int(SendDlgItemMessage (IDC_PARAM_NAME_COMBO, CB_GETCURSEL));
 	if (m_CurrentParamIndex != CB_ERR) {
 
 		// Reset the dialog controls to reflect this parameter
@@ -443,10 +443,10 @@ void
 ScriptEditDialogClass::OnSelChangeScriptName (void)
 {
 	// Get the current selection
-	int index = SendDlgItemMessage (IDC_SCRIPT_NAME, CB_GETCURSEL);
+	LRESULT index = SendDlgItemMessage (IDC_SCRIPT_NAME, CB_GETCURSEL);
 	if (index != CB_ERR) {
 		EditScriptClass *script = (EditScriptClass *)SendDlgItemMessage (IDC_SCRIPT_NAME, CB_GETITEMDATA, index);
-		if (script != NULL) {
+		if (script != nullptr) {
 			m_Script = (*script);
 
 			// Fill the parameter's combobox with param names

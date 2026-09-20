@@ -17,24 +17,6 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/***********************************************************************************************
- ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
- ***********************************************************************************************
- *                                                                                             *
- *                 Project Name : WWAudio                                                      *
- *                                                                                             *
- *                     $Archive:: /Commando/Code/WWAudio/SoundBuffer.h                        $*
- *                                                                                             *
- *                       Author:: Patrick Smith                                                *
- *                                                                                             *
- *                     $Modtime:: 8/17/01 11:12a                                              $*
- *                                                                                             *
- *                    $Revision:: 7                                                           $*
- *                                                                                             *
- *---------------------------------------------------------------------------------------------*
- * Functions:                                                                                  *
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
 #if defined(_MSC_VER)
 #pragma once
 #endif

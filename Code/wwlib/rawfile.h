@@ -48,16 +48,6 @@
 
 // #include	"win.h"
 
-#ifdef _UNIX
-#include <stdio.h>
-#include "osdep.h"
-  #define	NULL_HANDLE	 	NULL
-  #define	HANDLE_TYPE		FILE*
-#else
-  #define	NULL_HANDLE		INVALID_HANDLE_VALUE
-  #define	HANDLE_TYPE		HANDLE
-#endif
-
 #include	"wwfile.h"
 #include "wwstring.h"
 
@@ -110,11 +100,11 @@ class RawFileClass : public FileClass
 		virtual void Close(void) override;
 		virtual unsigned int Get_Date_Time(void) override;
 		virtual bool Set_Date_Time(unsigned int datetime) override;
-		virtual void Error(int error, int canretry = false, char const * filename=NULL) override;
+		virtual void Error(int error, int canretry = false, char const * filename=nullptr) override;
 		virtual void Bias(int start, int length=-1) override;
-		virtual void * Get_File_Handle(void) override { return Handle;  }
+		virtual HANDLE_TYPE Get_File_Handle(void) override { return Handle;  }
 
-		virtual void	Attach (void *handle, int rights=READ);
+		virtual void	Attach (HANDLE_TYPE handle, int rights=READ);
 		virtual void	Detach (void);
 
 		/*
@@ -141,11 +131,7 @@ class RawFileClass : public FileClass
 		/*
 		**	This is the low level DOS handle. A -1 indicates an empty condition.
 		*/
-		#ifdef _UNIX
-			FILE*  Handle;
-		#else
-			void * Handle;
-		#endif
+		HANDLE_TYPE Handle;
 
 		StringClass Filename;
 
@@ -169,11 +155,11 @@ class RawFileClass : public FileClass
  * RawFileClass::File_Name -- Returns with the filename associate with the file object.        *
  *                                                                                             *
  *    Use this routine to determine what filename is associated with this file object. If no   *
- *    filename has yet been assigned, then this routing will return NULL.                      *
+ *    filename has yet been assigned, then this routing will return nullptr.                      *
  *                                                                                             *
  * INPUT:   none                                                                               *
  *                                                                                             *
- * OUTPUT:  Returns with a pointer to the file name associated with this file object or NULL   *
+ * OUTPUT:  Returns with a pointer to the file name associated with this file object or nullptr   *
  *          if one doesn't exist.                                                              *
  *                                                                                             *
  * WARNINGS:   none                                                                            *

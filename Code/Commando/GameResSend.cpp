@@ -98,21 +98,18 @@ void SendGameResults(unsigned int gameID, cGameData* theGame, SList<cPlayer>* pl
 
 	// Version of executable.
 	char filename[MAX_PATH];
-	GetModuleFileNameA(NULL, filename, sizeof(filename));
+	GetModuleFileNameA(nullptr, filename, sizeof(filename));
 	VS_FIXEDFILEINFO version;
 	GetVersionInfo(filename, &version);
 	stats.Add_Field("VERS", (unsigned int)version.dwFileVersionMS);
 
 	// Executable build date
-	FILETIME createTime;
-	GetFileCreationTime(filename, &createTime);
-
-	SYSTEMTIME time;
-	FileTimeToSystemTime(&createTime, &time);
+	FileCreationTime time;
+	GetFileCreationTime(filename, &time);
 
 	char buildDate[20];
 	sprintf(buildDate, "%02d/%02d/%04d %02d:%02d:%02d",
-		time.wMonth, time.wDay, time.wYear, time.wHour, time.wMinute, time.wSecond);
+		time.month, time.day, time.year, time.hour, time.minute, time.second);
 	stats.Add_Field("DATE", buildDate);
 
 	// Proocessor information
@@ -291,20 +288,20 @@ void SendGameResults(unsigned int gameID, cGameData* theGame, SList<cPlayer>* pl
 
 	unsigned int packetSize = 0;
 	unsigned int sig_offset = 0;
-	unsigned char* packet = stats.Create_Comms_Packet(packetSize, NULL, sig_offset);
+	unsigned char* packet = stats.Create_Comms_Packet(packetSize, nullptr, sig_offset);
 
-	WWDEBUG_SAY(("Sending game results packet. Size = %lu\n", packetSize));
+	WWDEBUG_SAY(("Sending game results packet. Size = %u\n", packetSize));
 
 #if(0)
 #ifdef _DEBUG
-	HANDLE file = CreateFileA("GameRes.dat", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS,
-			FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE file = CreateFileA("GameRes.dat", GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS,
+			FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (INVALID_HANDLE_VALUE != file)
 		{
 		// Write generic contents
 		DWORD written;
-		WriteFile(file, packet, packetSize, &written, NULL);
+		WriteFile(file, packet, packetSize, &written, nullptr);
 		CloseHandle(file);
 		}
 	else
@@ -380,7 +377,7 @@ void AddPlayerStats(GameResPacket& stats, cPlayer* player, WOL::Locale locale,
 		stats.Add_Field("TEAM", team);
 
 		// Score and other information
-		unsigned int score = (unsigned int)std::max<int>(player->Get_Score(), 0);
+		unsigned int score = unsigned(std::max(player->Get_Score(), 0.0f));
 		stats.Add_Field("PSCR", score);
 
 		stats.Add_Field("PPTS",	(int)player->Get_Ladder_Points());

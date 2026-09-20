@@ -23,12 +23,13 @@ jobs:
             cmake-args: -GNinja -DCMAKE_BUILD_TYPE=Release
             shell: pwsh
             arch: x86
-            options: "/W4;/WX;/wd4840;/wd4456;/wd4702"
+            options: "/W4;/WX"
           - name: MSVC x64
             os: windows-latest
             cmake-args: -GNinja -DCMAKE_BUILD_TYPE=Release
             shell: pwsh
             arch: x64
+            options: "/W4;/WX"
           - name: MinGW x86
             os: windows-latest
             cmake-args: -DW3D_BUILD_OPTION_FFMPEG=ON -GNinja -DCMAKE_BUILD_TYPE=Release
@@ -44,6 +45,14 @@ jobs:
             msys2: true
             msys2-msystem: mingw64
             msys2-env: mingw-w64-x86_64
+            shell: msys2 {0}
+          - name: MinGW clang x64
+            os: windows-latest
+            cmake-args: -DW3D_BUILD_OPTION_FFMPEG=ON -GNinja -DCMAKE_BUILD_TYPE=Release
+            build-args: --target combat combate renegade renegadeserver ww3d2e wwaudioe wwphyse
+            msys2: true
+            msys2-msystem: clang64
+            msys2-env: mingw-w64-clang-x86_64
             shell: msys2 {0}
           - name: MinGW x64 SDL3
             os: windows-latest
@@ -63,6 +72,7 @@ jobs:
                --target
                scripts
                bandtest
+               scontrol
                wwsaveload
                wwmath
                wwutil
@@ -100,6 +110,8 @@ jobs:
     - name: 'Set up DXVK for Linux'
       if: ${{ !!matrix.linux }}
       run: |
+        sudo apt update -qq > /dev/null
+        sudo apt install -qq libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libopenal-dev libfreetype-dev > /dev/null
         wget --no-verbose \
           -O /tmp/dxvk-native.tar.gz \
           "https://github.com/doitsujin/dxvk/releases/download/v2.7.1/dxvk-native-2.7.1-steamrt-sniper.tar.gz"

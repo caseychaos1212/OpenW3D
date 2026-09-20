@@ -97,7 +97,7 @@ public:
 		ACTION_IN_PROGRESS,
 	} ActResult;
 
-	ActionCodeClass( void ) : Action( NULL )	  		{}
+	ActionCodeClass( void ) : Action( nullptr )	  		{}
 	virtual ~ActionCodeClass( void )				  		{}
 
 	/*
@@ -136,7 +136,7 @@ public:
 	virtual	void	Init( ActionClass * action )
 	{
 		WWASSERT( action );
-		WWASSERT( Action == NULL );
+		WWASSERT( Action == nullptr );
 		Action = action;
 
 		//
@@ -144,13 +144,13 @@ public:
 		//
 		if ( Action->Get_Parameters().AIState != NO_AI_STATE_CHANGE ) {
 			SmartGameObj *	obj = Action->Get_Action_Obj();
-			if ( obj != NULL ) {
+			if ( obj != nullptr ) {
 
 				//
 				//	Check to ensure this is really a soldier
 				//
 				SoldierGameObj * soldier = obj->As_SoldierGameObj();
-				if ( soldier != NULL ) {
+				if ( soldier != nullptr ) {
 					soldier->Set_AI_State( Action->Get_Parameters().AIState );
 				}
 			}
@@ -159,8 +159,8 @@ public:
 
 	virtual	void	Modify_Parameters( const SafeActionParamsStruct & /* parameters */, bool /* modify_move */, bool /* modify_attack */ ) {}
 
-	virtual	void	Set_Action( ActionClass * action )	{ WWASSERT( action ); WWASSERT( Action == NULL ); Action = action; }
-	virtual	void	Shutdown( void )						{ Action = NULL; }
+	virtual	void	Set_Action( ActionClass * action )	{ WWASSERT( action ); WWASSERT( Action == nullptr ); Action = action; }
+	virtual	void	Shutdown( void )						{ Action = nullptr; }
 	virtual	ActResult	Act( void )			  			{ return ACTION_IN_PROGRESS; }
 	virtual	bool	Is_Animating( void )					{ return false; }
 	virtual	bool	Is_Busy( void )						{ return false; }
@@ -242,7 +242,7 @@ public:
 		SmartGameObj *	obj = Action->Get_Action_Obj();
 
 		// If we're in a vehicle, use the input function VEHICLE_TURN_LEFT...
-		if ((obj->As_SoldierGameObj() != NULL) && (obj->As_SoldierGameObj()->Get_Vehicle() != NULL)) {
+		if ((obj->As_SoldierGameObj() != nullptr) && (obj->As_SoldierGameObj()->Get_Vehicle() != nullptr)) {
 			amount = Input::Get_Amount( INPUT_FUNCTION_VEHICLE_TURN_LEFT ) - Input::Get_Amount( INPUT_FUNCTION_VEHICLE_TURN_RIGHT );
 		} else {
 			amount = Input::Get_Amount( INPUT_FUNCTION_TURN_LEFT ) - Input::Get_Amount( INPUT_FUNCTION_TURN_RIGHT );
@@ -414,26 +414,26 @@ public:
 
 		SmartGameObj *	obj = Action->Get_Action_Obj();
 
-		WWASSERT( obj->Get_Anim_Control() != NULL );
+		WWASSERT( obj->Get_Anim_Control() != nullptr );
 		obj->Set_Animation( action->Get_Parameters().SafeAnimationName, action->Get_Parameters().AnimationLooping );
 	}
 
 	virtual	void	Shutdown( void ) override
 	{
 		SmartGameObj *	obj = Action->Get_Action_Obj();
-		WWASSERT( obj->Get_Anim_Control() != NULL );
+		WWASSERT( obj->Get_Anim_Control() != nullptr );
 //		WWASSERT( obj->Get_Anim_Control()->Get_Animation_Name()[0] != 0 );
-		obj->Set_Animation( NULL, false );
+		obj->Set_Animation( nullptr, false );
 		ActionCodeClass::Shutdown();
 	}
 
 	virtual	ActResult	Act( void ) override
 	{
 		SmartGameObj *	obj = Action->Get_Action_Obj();
-		WWASSERT( obj->Get_Anim_Control() != NULL );
+		WWASSERT( obj->Get_Anim_Control() != nullptr );
 
 		if ( obj->Get_Anim_Control()->Get_Animation_Name()[0] == 0 ) {
-			Debug_Say(( "Not playing an anim when we should be playing %s\n", Action->Get_Parameters().SafeAnimationName ));
+			Debug_Say(( "Not playing an anim when we should be playing %s\n", Action->Get_Parameters().SafeAnimationName.Peek_Buffer() ));
 			Action->Done( ACTION_COMPLETE_NORMAL );
 			return ACTION_DONE;
 		}
@@ -554,8 +554,8 @@ public:
 	{
 		SmartGameObj *transport = game_obj;
 
-		if (	game_obj->As_SoldierGameObj() != NULL  &&
-				game_obj->As_SoldierGameObj()->Get_Profile_Vehicle() != NULL ) {
+		if (	game_obj->As_SoldierGameObj() != nullptr  &&
+				game_obj->As_SoldierGameObj()->Get_Profile_Vehicle() != nullptr ) {
 			transport = game_obj->As_SoldierGameObj()->Get_Profile_Vehicle();
 		}
 
@@ -587,7 +587,7 @@ public:
 		// Zero out the relative distance in the z axis (if necessary)
 		//
 		SoldierGameObj * soldier = obj->As_SoldierGameObj();
-		if ( soldier == NULL || soldier->Is_On_Ladder() == false) {
+		if ( soldier == nullptr || soldier->Is_On_Ladder() == false) {
 			move.Z = 0;
 		}
 
@@ -602,7 +602,7 @@ public:
 
 		// Special case for soldier moving
 		if ( soldier && soldier->Is_On_Ladder() ) {
-			obj->Set_Analog_Control( ControlClass::ANALOG_MOVE_FORWARD, (move[2] >= 0) ? 1 : -1 );		// Could we make this move up?
+			obj->Set_Analog_Control( ControlClass::ANALOG_MOVE_FORWARD, (move[2] >= 0) ? 1.0f : -1.0f );		// Could we make this move up?
 		}
 	}
 
@@ -614,13 +614,13 @@ public:
 		//	Should the vehicle AI code take over?
 		SmartGameObj *transport_obj = Peek_Transport_Object( obj );
 		VehicleGameObj *vehicle = transport_obj->As_VehicleGameObj ();
-		if ( vehicle != NULL ) {
+		if ( vehicle != nullptr ) {
 
 			bool retval = false;
 			if (vehicle->Is_Aircraft ()) {
 				Pilot.Set_Speed_Factor( Action->Get_Parameters().MoveSpeed );
 
-				if ( Action->Get_Parameters().AttackObject != NULL ) {
+				if ( Action->Get_Parameters().AttackObject != nullptr ) {
 					Vector3 target_pos;
 					Action->Get_Parameters().AttackObject->Get_Position( &target_pos );
 					Pilot.Set_Target( &target_pos );
@@ -750,8 +750,8 @@ public:
 	GotoActionCodeClass( void ) :
 		UseMoveObject( false ),
 		FirstCall( true ),
-		PathSolver( NULL ),
-		Path( NULL )
+		PathSolver( nullptr ),
+		Path( nullptr )
 	{
 	}
 
@@ -782,7 +782,7 @@ public:
 			BaseActionCodeClass::Save( csave );
 		csave.End_Chunk();
 
-		if ( Path != NULL ) {
+		if ( Path != nullptr ) {
 			csave.Begin_Chunk( CHUNKID_PATH );
 				Path->Save( csave );
 			csave.End_Chunk();
@@ -820,7 +820,7 @@ public:
 
 							case MICROCHUNKID_PATH_SOLVE_PTR:
 								LOAD_MICRO_CHUNK( cload, PathSolver );
-								if (PathSolver != NULL) {
+								if (PathSolver != nullptr) {
 									REQUEST_REF_COUNTED_POINTER_REMAP( (RefCountClass **)&PathSolver );
 								}
 								break;
@@ -862,9 +862,9 @@ public:
 		//
 		//	Return the path we got from the manager
 		//
-		if ( PathSolver != NULL ) {
+		if ( PathSolver != nullptr ) {
 			PathMgrClass::Return_Path_Object( PathSolver );
-			PathSolver = NULL;
+			PathSolver = nullptr;
 		}
 
 		return ;
@@ -881,7 +881,7 @@ public:
 			soldier_obj->Look_At( Action->Get_Parameters().LookLocation, Action->Get_Parameters().LookDuration );
 		}
 
-		UseMoveObject = (Action->Get_Parameters().MoveObjectRef.Get_Ptr() != NULL);
+		UseMoveObject = (Action->Get_Parameters().MoveObjectRef.Get_Ptr() != nullptr);
 	}
 
 	virtual void	Shutdown( void ) override
@@ -889,9 +889,9 @@ public:
 		//
 		//	Return the path we got from the manager
 		//
-		if (PathSolver != NULL) {
+		if (PathSolver != nullptr) {
 			PathMgrClass::Return_Path_Object (PathSolver);
-			PathSolver = NULL;
+			PathSolver = nullptr;
 		}
 
 		Release_Path();
@@ -904,9 +904,9 @@ public:
 		//
 		//	Return the path we got from the manager
 		//
-		if (PathSolver != NULL) {
+		if (PathSolver != nullptr) {
 			PathMgrClass::Return_Path_Object (PathSolver);
-			PathSolver = NULL;
+			PathSolver = nullptr;
 		}
 
 		Release_Path();
@@ -947,7 +947,7 @@ public:
 		//
 		//	Make sure we have a valid path object to follow
 		//
-		if ( Path == NULL ) {
+		if ( Path == nullptr ) {
 			Prepare_Path();
 			Vector3 curr_pos;
 			Action->Get_Action_Obj()->Get_Position( &curr_pos );
@@ -956,7 +956,7 @@ public:
 		}
 
 		ActResult result = ACTION_IN_PROGRESS;
-		if ( Path != NULL ) {
+		if ( Path != nullptr ) {
 			result = Traverse_Path ();
 		}
 
@@ -974,7 +974,7 @@ public:
 		//
 		//	Allocate a path object (if necessary)
 		//
-		if ( Path == NULL ) {
+		if ( Path == nullptr ) {
 			Path = new PathClass;
 		}
 
@@ -1012,9 +1012,9 @@ public:
 		//
 		//	Check to make sure we aren't trying to drive a "simple" vehicle around
 		//
-		if (	transport_obj != NULL && transport_obj->As_VehicleGameObj () != NULL &&
-				transport_obj->Peek_Physical_Object () != NULL &&
-				transport_obj->Peek_Physical_Object ()->As_MoveablePhysClass () == NULL )
+		if (	transport_obj != nullptr && transport_obj->As_VehicleGameObj () != nullptr &&
+				transport_obj->Peek_Physical_Object () != nullptr &&
+				transport_obj->Peek_Physical_Object ()->As_MoveablePhysClass () == nullptr )
 		{
 			//
 			//	Warn the user that they are trying to drive a non-driveable object
@@ -1033,10 +1033,10 @@ public:
 		//	Lookup the waypath object
 		//
 		WaypathClass *waypath = PathfindClass::Get_Instance()->Find_Waypath( Action->Get_Parameters().WaypathID );
-		if ( waypath == NULL ) {
+		if ( waypath == nullptr ) {
 			Debug_Say (("Warning!  Waypath %d does not exist.\n", Action->Get_Parameters().WaypathID));
 		}
-		WWASSERT( waypath != NULL );
+		WWASSERT( waypath != nullptr );
 
 		//
 		//	Initialize the path
@@ -1052,7 +1052,7 @@ public:
 		//	Determine which game object will actually be doing the moving along the path
 		//
 		SmartGameObj *transport_obj = Peek_Transport_Object( Action->Get_Action_Obj() );
-		WWASSERT( transport_obj != NULL );
+		WWASSERT( transport_obj != nullptr );
 
 		//
 		//	Determine the turn radius
@@ -1060,7 +1060,7 @@ public:
 		float turn_radius					= 0;
 		VehicleGameObj *vehicle_obj	= transport_obj->As_VehicleGameObj();
 
-		if ( vehicle_obj != NULL ) {
+		if ( vehicle_obj != nullptr ) {
 			turn_radius = vehicle_obj->Get_Turn_Radius();
 		}
 
@@ -1068,7 +1068,7 @@ public:
 		//	Dig out the physics object that will be moving along the path
 		//
 		MoveablePhysClass *phys_obj = transport_obj->Peek_Physical_Object()->As_MoveablePhysClass();
-		if (phys_obj != NULL) {
+		if (phys_obj != nullptr) {
 
 			//
 			//	Configure the path-traverser object
@@ -1076,14 +1076,14 @@ public:
 			path_obj.Initialize( *phys_obj );
 			path_obj.Set_Max_Speed( transport_obj->Get_Max_Speed () );
 			path_obj.Set_Turn_Radius( turn_radius );
-			path_obj.Set_Flag( PathObjectClass::IS_VEHICLE, bool(vehicle_obj != NULL) );
+			path_obj.Set_Flag( PathObjectClass::IS_VEHICLE, bool(vehicle_obj != nullptr) );
 		}
 
 		//
 		//	Pass the key information onto the path object
 		//
 		SoldierGameObj *soldier = Action->Get_Action_Obj()->As_SoldierGameObj();
-		if ( soldier != NULL ) {
+		if ( soldier != nullptr ) {
 			path_obj.Set_Key_Ring( soldier->Get_Key_Ring () );
 		}
 
@@ -1095,7 +1095,7 @@ public:
 		//
 		//	Get a new path object from the manager (if necessary)
 		//
-		if (PathSolver == NULL) {
+		if (PathSolver == nullptr) {
 			PathSolver = PathMgrClass::Request_Path_Object();
 		}
 
@@ -1191,7 +1191,7 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 		//
 		SmartGameObj *obj			= Action->Get_Action_Obj();
 		SoldierGameObj *soldier	= obj->As_SoldierGameObj();
-		if( soldier != NULL ) {
+		if( soldier != nullptr ) {
 			if ( soldier->Is_On_Ladder() ) {
 				Path->Set_Movement_Directions( PathClass::MOVE_Z );
 			}
@@ -1228,7 +1228,7 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 					//
 					//	Don't allow any movement if something is in our way
 					//
-					if ( soldier == NULL || soldier->Is_Soldier_Blocked( curr_pos ) == false ) {
+					if ( soldier == nullptr || soldier->Is_Soldier_Blocked( curr_pos ) == false ) {
 						if ( Move_To_Absolute( next_pos ) ) {
 							act_result = Arrived();
 						}
@@ -1242,6 +1242,9 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 				/*case PathClass::STATE_PATH_COMPLETE:
 					act_result = Arrived();
 					break;					*/
+
+				default:
+					break;
 			}
 
 		} else {
@@ -1273,7 +1276,7 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 				//	Initialize the action object that will be responsible for
 				// controlling this action
 				//
-				PathAction.Initialize( PathActionClass::TYPE_LADDER, Path, obj, NULL );
+				PathAction.Initialize( PathActionClass::TYPE_LADDER, Path, obj, nullptr );
 				PathAction.Set_Ladder_Index( Path->Get_Action_Mechanism() );
 			}
 			break;
@@ -1285,16 +1288,16 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 				//
 				uint32 mechanism_id	= Path->Get_Action_Mechanism();
 				StaticPhysClass *mechanism = PhysicsSceneClass::Get_Instance ()->Find_Static_Object( mechanism_id );
-				if (mechanism != NULL) {
+				if (mechanism != nullptr) {
 
 					PathActionClass::TYPE type = PathActionClass::TYPE_UNKNOWN;
 
 					//
 					//	Determine what type of mechanism this is
 					//
-					if( mechanism->As_ElevatorPhysClass () != NULL ) {
+					if( mechanism->As_ElevatorPhysClass () != nullptr ) {
 						type = PathActionClass::TYPE_ELEVATOR;
-					} else if( mechanism->As_DoorPhysClass () != NULL ) {
+					} else if( mechanism->As_DoorPhysClass () != nullptr ) {
 						type = PathActionClass::TYPE_DOOR;
 					}
 
@@ -1320,7 +1323,7 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 				//	Instruct the physics object to jump to this point
 				//
 				HumanPhysClass *human_phys_obj = obj->Peek_Physical_Object()->As_HumanPhysClass ();
-				if( human_phys_obj != NULL ) {
+				if( human_phys_obj != nullptr ) {
 					human_phys_obj->Jump_To_Point( dest_pos );
 				}
 
@@ -1328,9 +1331,12 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 				//	Initialize the action object that will be responsible for
 				// controlling this action
 				//
-				PathAction.Initialize( PathActionClass::TYPE_JUMPING, Path, obj, NULL );
+				PathAction.Initialize( PathActionClass::TYPE_JUMPING, Path, obj, nullptr );
 			}
 			break;
+
+			default:
+				break;
 		}
 
 		return ACTION_IN_PROGRESS;
@@ -1400,7 +1406,7 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 		//
 		if ( is_finished ) {
 			PathMgrClass::Return_Path_Object( PathSolver );
-			PathSolver = NULL;
+			PathSolver = nullptr;
 		}
 
 		return act_result;
@@ -1419,7 +1425,7 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 			act_result = Process_Action();
 		} else {
 
-			if( PathSolver != NULL ) {
+			if( PathSolver != nullptr ) {
 
 				//
 				//	Try to find a path to the destination
@@ -1427,14 +1433,14 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 				act_result = Solve_Path();
 			}
 
-			if( PathSolver == NULL) {
-				if( Path != NULL ) {
+			if( PathSolver == nullptr) {
+				if( Path != nullptr ) {
 
 					//
 					//	Move along the path we found
 					//
 					act_result = Traverse_Path();
-				} else if ( PathSolver == NULL ){
+				} else if ( PathSolver == nullptr ){
 
 					//
 					//	Unable to solve path...
@@ -1467,7 +1473,7 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 		//
 		//	Get the distance remaining from the path object (if possible)
 		//
-		if ( Path != NULL ) {
+		if ( Path != nullptr ) {
 			dist_to_goal = Path->Get_Remaining_Path_Length();
 		} else {
 			dist_to_goal = BaseActionCodeClass::Get_Distance_From_Goal();
@@ -1483,7 +1489,7 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 	{
 		ScriptableGameObj *target	= Action->Get_Parameters().MoveObjectRef.Get_Ptr();
 
-		if ( target == NULL ) {		// If the target is gone
+		if ( target == nullptr ) {		// If the target is gone
 //			Debug_Say(( "No Movement Target\n" ));
 //			Move_Target_Gone();
 //			Action->Reset( Action->Get_Parameters().Priority );		// Stop current Command	(this may get this deleted!)
@@ -1497,8 +1503,8 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 
 		if ( FirstCall == false ) {
 			SmartGameObj *	obj = Action->Get_Action_Obj();
-			SoldierGameObj * soldier = NULL;
-			if ( target->As_PhysicalGameObj() != NULL ) {
+			SoldierGameObj * soldier = nullptr;
+			if ( target->As_PhysicalGameObj() != nullptr ) {
 				soldier = target->As_PhysicalGameObj()->As_SoldierGameObj();
 			}
 
@@ -1513,7 +1519,7 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 			float target_move_dist	= (target_pos - TargetPrevPos).Length ();
 			float to_target_dist		= (curr_pos - target_pos).Length ();
 			if (	to_target_dist > 0 &&
-					(soldier == NULL || (soldier->Is_Airborne () == false && PathAction.Get_State () == PathActionClass::STATE_FINISHED)))
+					(soldier == nullptr || (soldier->Is_Airborne () == false && PathAction.Get_State () == PathActionClass::STATE_FINISHED)))
 			{
 				//	Get the ratio of the distance the target has moved relative
 				// to the distance we are from the target.
@@ -1530,7 +1536,7 @@ Clip_Point (Vector3 *point, const AABoxClass &box)
 		WWPROFILE( "Goto Act" );
 		SoldierGameObj * soldier = Action->Get_Action_Obj()->As_SoldierGameObj();
 		ScriptableGameObj * look_obj = Action->Get_Parameters().LookObjectRef.Get_Ptr();
-		if ( soldier != NULL && look_obj != NULL ) {
+		if ( soldier != nullptr && look_obj != nullptr ) {
 			Vector3 pos;
 			look_obj->Get_Position( &pos );
 			pos.Z += 1;	// Offset bullseye
@@ -1791,7 +1797,7 @@ public:
 	virtual	void	Init( ActionClass * action ) override
 	{
 		GotoActionCodeClass::Init( action );
-		UseAttackObject = (Action->Get_Parameters().AttackObjectRef.Get_Ptr() != NULL);
+		UseAttackObject = (Action->Get_Parameters().AttackObjectRef.Get_Ptr() != nullptr);
 		IsBlocked = action->Get_Parameters().AttackCheckBlocked;
 		CheckBlockedTimer = 0;
 		WanderPos = Vector3(0,0,0);
@@ -1803,13 +1809,13 @@ public:
 //			Debug_Say(( "Attack Arrived %d\n", HasArrived ));
 			HasArrived = true;
 			SoldierGameObj	* obj = Action->Get_Action_Obj()->As_SoldierGameObj();
-			if ( obj != NULL ) {
+			if ( obj != nullptr ) {
 				int observer_id = Action->Get_Parameters ().ObserverID;
 				if ( observer_id != 0 ) {
 					const GameObjObserverList & observer_list = obj->Get_Observers();
 					for( int index = 0; index < observer_list.Count(); index++ ) {
 						if ( observer_list[ index ]->Get_ID() == observer_id ) {
-							observer_list[ index ]->Custom( obj, CUSTOM_EVENT_ATTACK_ARRIVED, Action->Get_Parameters().ActionID, NULL );
+							observer_list[ index ]->Custom( obj, CUSTOM_EVENT_ATTACK_ARRIVED, Action->Get_Parameters().ActionID, nullptr );
 						}
 					}
 				}
@@ -1822,7 +1828,7 @@ public:
 	// Attack the given absolute position, return nothing
 	void	Attack_Absolute( Vector3 & abs_pos )
 	{
-		WWPROFILE( "Attack Absolute" );
+		WWPROFILENAMED( "Attack Absolute", top );
 		IsAttacking = true;
 
 		float range = Action->Get_Parameters().AttackRange;
@@ -1892,7 +1898,7 @@ public:
 
 				// cast a ray from muzzle to target
 				PhysicalGameObj * hit_obj = weapon->Cast_Weapon( abs_pos );
-				if ( hit_obj != NULL ) {
+				if ( hit_obj != nullptr ) {
 					if ( UseAttackObject ) {
 						PhysicalGameObj * target = (PhysicalGameObj *)Action->Get_Parameters().AttackObjectRef.Get_Ptr();
 						IsBlocked = ( hit_obj != target );
@@ -1915,7 +1921,7 @@ public:
 		// Update Weapons Dynamic Error
 		if ( weapon ) {
 			if ( Action->Get_Parameters().AttackCheckBlocked != false ) {
-				range = MIN( range, weapon->Get_Range() );	// dont fire if not in range
+				range = std::min( range, weapon->Get_Range() );	// dont fire if not in range
 			}
 		}
 
@@ -1975,7 +1981,7 @@ public:
 		//
 		//	Reset some of the internal flags
 		//
-		UseAttackObject	= (parameters.AttackObjectRef.Get_Ptr() != NULL);
+		UseAttackObject	= (parameters.AttackObjectRef.Get_Ptr() != nullptr);
 		IsBlocked			= false;
 		CheckBlockedTimer	= 0;
 		return ;
@@ -1996,16 +2002,16 @@ public:
 		//
 		//	Only "do" the attack if the attack state is currently active
 		//
-		if ( Action != NULL && Action->Get_Parameters().AttackActive ) {
+		if ( Action != nullptr && Action->Get_Parameters().AttackActive ) {
 			Vector3 set_target;
 			result = Process_Attack(&set_target);
 
-			if ( Action != NULL && Action->Get_Parameters().AttackFaceTarget) {
+			if ( Action != nullptr && Action->Get_Parameters().AttackFaceTarget) {
 				Pilot.Set_Target (&set_target);
 			}
 
 		} else {
-			Pilot.Set_Target (NULL);
+			Pilot.Set_Target (nullptr);
 		}
 
 		return result;
@@ -2023,7 +2029,7 @@ public:
 		Vector3	target_pos = Action->Get_Parameters().AttackLocation;
 
 		WeaponClass * weapon = obj->Get_Weapon();
-		if ( weapon == NULL ) {
+		if ( weapon == nullptr ) {
 			Action->Done( ACTION_COMPLETE_NORMAL );		// Stop current Command	(this may get this deleted!)
 			return ACTION_DONE;
 		}
@@ -2036,10 +2042,10 @@ public:
 			if ( target ) {
 				if ( target->Get_Defense_Object()->Get_Health() <= 0 ) {
 //					Debug_Say(( "Attack target dead\n" ));
-					target = NULL;
+					target = nullptr;
 				}
 			}
-			if ( target == NULL ) {		// If the target is gone or dead
+			if ( target == nullptr ) {		// If the target is gone or dead
 
 				static int count = 0;
 				if (count++ < 20) {
@@ -2053,7 +2059,7 @@ public:
 			// Goto our target's location
 			target_pos = target->Get_Bullseye_Position();
 
-			if ( target->As_SoldierGameObj() != NULL && target->As_SoldierGameObj()->Peek_Human_Phys() != NULL ) {
+			if ( target->As_SoldierGameObj() != nullptr && target->As_SoldierGameObj()->Peek_Human_Phys() != nullptr ) {
 				Vector3 vel;
 				target->As_SoldierGameObj()->Peek_Human_Phys()->Get_Velocity( &vel );
 				vel *= TimeManager::Get_Frame_Seconds();
@@ -2064,7 +2070,7 @@ public:
 		// If not moving, use attack crouch
 		if ( !IsMoving ) {
 			SoldierGameObj	* soldier = Action->Get_Action_Obj()->As_SoldierGameObj();
-			if ( soldier != NULL ) {
+			if ( soldier != nullptr ) {
 #if 0
 				if ( soldier->Is_Crouched() != Action->Get_Parameters().AttackCrouched ) {
 					soldier->Set_Boolean_Control( ControlClass::BOOLEAN_CROUCH );
@@ -2084,7 +2090,7 @@ public:
 			WanderTimer -= TimeManager::Get_Frame_Seconds();
 			SoldierGameObj	* soldier = Action->Get_Action_Obj()->As_SoldierGameObj();
 
-			if ( !IsMoving && WanderTimer <= 0 && soldier != NULL && Action->Get_Parameters().AttackWanderAllowed ) {
+			if ( !IsMoving && WanderTimer <= 0 && soldier != nullptr && Action->Get_Parameters().AttackWanderAllowed ) {
 				WWPROFILE( "Wander" );
 
 				Vector3 rel_pos;
@@ -2215,7 +2221,7 @@ public:
 		}
 
 		EndTime = TimeManager::Get_Seconds() +
-			MAX(action->Get_Parameters().FaceDuration, Action->Get_Parameters().LookDuration);
+			std::max(action->Get_Parameters().FaceDuration, Action->Get_Parameters().LookDuration);
 	}
 
 	virtual	ActResult	Act( void ) override
@@ -2225,7 +2231,7 @@ public:
 		// Look at the moving object
 		SoldierGameObj * soldier = Action->Get_Action_Obj()->As_SoldierGameObj();
 		ScriptableGameObj * look_obj = Action->Get_Parameters().LookObjectRef.Get_Ptr();
-		if ( soldier != NULL && look_obj != NULL ) {
+		if ( soldier != nullptr && look_obj != nullptr ) {
 			Vector3 pos;
 			look_obj->Get_Position( &pos );
 			pos.Z += 1;	// Offset bullseye
@@ -2282,7 +2288,7 @@ public:
 	};
 
 	ConversationActionCodeClass( void )	:
-		Conversation( NULL ),
+		Conversation( nullptr ),
 		State( STATE_WALKING_TO_START_POS ),
 		OriginalPos( 0, 0, 0 )
 	{
@@ -2318,9 +2324,9 @@ public:
 			//
 			//	Only save the conversation ptr if it exists in the manager
 			//
-			if (Conversation != NULL) {
+			if (Conversation != nullptr) {
 				ConversationClass *conv = ConversationMgrClass::Find_Conversation (Conversation->Get_ID ());
-				if (conv != NULL) {
+				if (conv != nullptr) {
 
 					//
 					//	Save the conversation pointer
@@ -2356,7 +2362,7 @@ public:
 								//
 								//	Fixup the pointer
 								//
-								if (Conversation != NULL) {
+								if (Conversation != nullptr) {
 									REQUEST_REF_COUNTED_POINTER_REMAP( (RefCountClass **)&Conversation );
 								}
 								break;
@@ -2386,7 +2392,7 @@ public:
 		//	Stop this action.  Note:  The following call may cause the
 		// object to be deleted...
 		//
-		if ( Action != NULL ) {
+		if ( Action != nullptr ) {
 			Action->Done( ACTION_COMPLETE_NORMAL );
 		}
 
@@ -2400,9 +2406,9 @@ public:
 		OriginalPos.Set( 0, 0, 0 );
 
 		SmartGameObj *obj = action->Get_Action_Obj();
-		if ( obj != NULL ) {
+		if ( obj != nullptr ) {
 			SoldierGameObj *soldier = obj->As_SoldierGameObj ();
-			if( soldier != NULL ) {
+			if( soldier != nullptr ) {
 
 
 				//
@@ -2424,7 +2430,7 @@ public:
 				//
 				soldier->Get_Position( &OriginalPos );
 
-				if ( Conversation != NULL ) {
+				if ( Conversation != nullptr ) {
 					OratorClass *orator_info = Conversation->Get_Orator_Information( soldier );
 
 					//
@@ -2461,7 +2467,7 @@ public:
 		//
 		//	Release our hold on the conversation (but don't terminate it)
 		//
-		if ( Conversation != NULL ) {
+		if ( Conversation != nullptr ) {
 			//Conversation->Stop_Conversation ();
 			REF_PTR_RELEASE( Conversation );
 		}
@@ -2473,9 +2479,9 @@ public:
 	virtual	ActResult	Act( void ) override
 	{
 		SmartGameObj *obj = Action->Get_Action_Obj();
-		if ( obj != NULL ) {
+		if ( obj != nullptr ) {
 			SoldierGameObj *soldier = obj->As_SoldierGameObj ();
-			if( soldier != NULL ) {
+			if( soldier != nullptr ) {
 
 				if( State == STATE_WALKING_TO_START_POS ) {
 					GotoActionCodeClass::Act();
@@ -2484,7 +2490,7 @@ public:
 					//
 					//	Check to see if the conversation has finished yet
 					//
-					if ( Conversation == NULL || Conversation->Is_Finished () ) {
+					if ( Conversation == nullptr || Conversation->Is_Finished () ) {
 						State ++;
 
 						//
@@ -2506,13 +2512,13 @@ public:
 		//	Have we timed out yet?
 		//
 		ActResult result = ACTION_IN_PROGRESS;
-		if ( Conversation == NULL || Conversation->Is_Finished () ) {
+		if ( Conversation == nullptr || Conversation->Is_Finished () ) {
 
 			//
 			//	Stop this action.  Note:  The following call may cause the
 			// object to be deleted...
 			//
-			if ( Action != NULL ) {
+			if ( Action != nullptr ) {
 				Action->Done( ACTION_COMPLETE_NORMAL );
 			}
 			result = ACTION_DONE;
@@ -2523,18 +2529,18 @@ public:
 
 	virtual	ActResult	Arrived (void) override
 	{
-		if ( Conversation != NULL && State == STATE_WALKING_TO_START_POS ) {
+		if ( Conversation != nullptr && State == STATE_WALKING_TO_START_POS ) {
 
 			//
 			//	Let the conversation object know this soldier has arrived
 			//
 			SmartGameObj *obj = Action->Get_Action_Obj();
-			if ( obj != NULL ) {
+			if ( obj != nullptr ) {
 				SoldierGameObj *soldier = obj->As_SoldierGameObj();
-				if( soldier != NULL ) {
+				if( soldier != nullptr ) {
 
 					OratorClass *orator_info = Conversation->Get_Orator_Information( soldier );
-					if ( orator_info != NULL ) {
+					if ( orator_info != nullptr ) {
 						orator_info->Set_Flag( OratorClass::FLAG_TEMP_DONT_FACE, false );
 					}
 
@@ -2654,7 +2660,7 @@ public:
 		//
 		SmartGameObj *obj			= action->Get_Action_Obj();
 		VehicleGameObj *vehicle	= obj->As_VehicleGameObj();
-		if ( vehicle != NULL && vehicle->Get_Turn_Radius() == 0 ) {
+		if ( vehicle != nullptr && vehicle->Get_Turn_Radius() == 0 ) {
 			State = STATE_DRIVING_TO_SIDE;
 		}
 
@@ -2712,7 +2718,7 @@ public:
 			//	Lookup the vehicle's turn radius
 			//
 			float turn_radius = 2.0F;
-			if ( vehicle != NULL ) {
+			if ( vehicle != nullptr ) {
 				turn_radius = vehicle->Get_Turn_Radius();
 			}
 
@@ -2787,7 +2793,7 @@ public:
 			SmartGameObj *obj			= Action->Get_Action_Obj();
 			VehicleGameObj *vehicle	= obj->As_VehicleGameObj();
 			float turn_radius = 2.0F;
-			if ( vehicle != NULL ) {
+			if ( vehicle != nullptr ) {
 				turn_radius = vehicle->Get_Turn_Radius();
 			}
 
@@ -2830,7 +2836,7 @@ public:
 				const GameObjObserverList & observer_list = obj->Get_Observers();
 				for( int index = 0; index < observer_list.Count(); index++ ) {
 					if ( observer_list[ index ]->Get_ID() == observer_id ) {
-						observer_list[ index ]->Custom( obj, CUSTOM_EVENT_DOCK_BACKING_IN, 0, NULL );
+						observer_list[ index ]->Custom( obj, CUSTOM_EVENT_DOCK_BACKING_IN, 0, nullptr );
 					}
 				}
 			}
@@ -3001,19 +3007,19 @@ bool	SafeActionParamsStruct::Save( ChunkSaveClass & csave )
 		WRITE_MICRO_CHUNK( csave, MICROCHUNKID_ACTIVE_CONVERSATION_ID,	ActiveConversationID	);
 	csave.End_Chunk();
 
-	if ( MoveObjectRef != NULL ) {
+	if ( MoveObjectRef != nullptr ) {
 		csave.Begin_Chunk( CHUNKID_MOVE_OBJECT );
 		MoveObjectRef.Save( csave );
 		csave.End_Chunk();
 	}
 
-	if ( AttackObjectRef != NULL ) {
+	if ( AttackObjectRef != nullptr ) {
 		csave.Begin_Chunk( CHUNKID_ATTACK_OBJECT );
 		AttackObjectRef.Save( csave );
 		csave.End_Chunk();
 	}
 
-	if ( LookObjectRef != NULL ) {
+	if ( LookObjectRef != nullptr ) {
 		csave.Begin_Chunk( CHUNKID_LOOK_OBJECT );
 		LookObjectRef.Save( csave );
 		csave.End_Chunk();
@@ -3103,23 +3109,23 @@ bool	SafeActionParamsStruct::Load( ChunkLoadClass &cload )
 **
 */
 ActionClass::ActionClass( SmartGameObj *obj ) :
-	ActionCode( NULL ),
+	ActionCode( nullptr ),
 	ActCount( 0 ),
 	IsPaused( false )
 {
-	WWASSERT( obj != NULL );
+	WWASSERT( obj != nullptr );
 	ActionObj = obj;
 }
 
 ActionClass::~ActionClass( void )
 {
-	Set_Action_Code( NULL );
+	Set_Action_Code( nullptr );
 	Delete_Action_Code();
 }
 
 void	ActionClass::Set_Action_Code( ActionCodeClass * code )
 {
-	if ( ActionCode != NULL ) {
+	if ( ActionCode != nullptr ) {
 		ActionCode->Shutdown();
 		Register_Action_Code_Deletion( ActionCode );
 	}
@@ -3133,20 +3139,20 @@ void	ActionClass::Set_Action_Code( ActionCodeClass * code )
 void	ActionClass::Done( int reason )
 {
 	Parameters.Priority = 0;		// reset
-	if ( ActionCode != NULL ) {
-		Set_Action_Code( NULL );
+	if ( ActionCode != nullptr ) {
+		Set_Action_Code( nullptr );
 		Notify_Completed( Parameters.ObserverID, Parameters.ActionID, reason );	// Notify the observer
 	}
 }
 
 bool	ActionClass::Is_Acting( void )
 {
-	return ( ActionCode != NULL );
+	return ( ActionCode != nullptr );
 }
 
 bool	ActionClass::Is_Animating( void )
 {
-	if ( ActionCode != NULL ) {
+	if ( ActionCode != nullptr ) {
 		return ActionCode->Is_Animating();
 	}
 	return false;
@@ -3156,7 +3162,7 @@ bool	ActionClass::Modify( const ActionParamsStruct & parameters, bool modify_mov
 {
 	bool retval = false;
 
-	if ( ActionCode != NULL ) {
+	if ( ActionCode != nullptr ) {
 		SafeActionParamsStruct safe_params;
 		safe_params = parameters;
 		ActionCode->Modify_Parameters( safe_params, modify_move, modify_attack );
@@ -3197,7 +3203,7 @@ bool	ActionClass::Request_Action( ActionCodeClass * action, const ActionParamsSt
 		int old_observer_id = 0;
 		int old_action_id = 0;
 
-		if ( ActionCode != NULL ) {
+		if ( ActionCode != nullptr ) {
 			old_action_completed = true;
 			old_observer_id = Parameters.ObserverID;
 			old_action_id = Parameters.ActionID;
@@ -3211,7 +3217,7 @@ bool	ActionClass::Request_Action( ActionCodeClass * action, const ActionParamsSt
 		return true;
 	} else {
 		Notify_Completed( parameters.ObserverID, parameters.ActionID, ACTION_COMPLETE_LOW_PRIORITY );
-		if ( action != NULL ) {
+		if ( action != nullptr ) {
 			delete action;
 		}
 		return false;
@@ -3283,7 +3289,7 @@ void	ActionClass::Act( void )
 
 		ActionObj->Clear_Control();
 
-		if ( ActionCode != NULL ) {
+		if ( ActionCode != nullptr ) {
 			WWPROFILE( "Action Code" );
 			_ActionActCalls++;
 			ActionCode->Act();
@@ -3295,13 +3301,13 @@ void	ActionClass::Act( void )
 
 bool	ActionClass::Is_Active( void )
 {
-	return ( ActionCode != NULL );
+	return ( ActionCode != nullptr );
 }
 
 bool	ActionClass::Is_Busy( void )
 {
 	bool retval = false;
-	if ( ActionCode != NULL ) {
+	if ( ActionCode != nullptr ) {
 		retval = ActionCode->Is_Busy();
 	}
 
@@ -3319,7 +3325,7 @@ enum	{
 
 bool	ActionClass::Save( ChunkSaveClass & csave )
 {
-	if ( ActionCode != NULL ) {
+	if ( ActionCode != nullptr ) {
 		csave.Begin_Chunk( CHUNKID_ACTION_CODE );
 			csave.Begin_Chunk( ActionCode->Get_Factory().Chunk_ID() );
 				ActionCode->Get_Factory().Save( csave, ActionCode );
@@ -3347,7 +3353,7 @@ bool	ActionClass::Load( ChunkLoadClass &cload )
 					PersistFactoryClass * factory = SaveLoadSystemClass::Find_Persist_Factory( cload.Cur_Chunk_ID() );
 					if ( factory ) {
 						ActionCode = (ActionCodeClass *)factory->Load( cload );
-						WWASSERT( ActionCode != NULL );
+						WWASSERT( ActionCode != nullptr );
 						ActionCode->Set_Action( this );
 					}
 					cload.Close_Chunk();
@@ -3375,7 +3381,7 @@ void	ActionClass::Begin_Hibernation( void )
 	//
 	//	Let the action code know we are entering hibernation
 	//
-	if ( ActionCode != NULL ) {
+	if ( ActionCode != nullptr ) {
 		ActionCode->Begin_Hibernation();
 	}
 
@@ -3387,7 +3393,7 @@ void	ActionClass::End_Hibernation( void )
 	//
 	//	Let the action code know we are coming out of hibernation
 	//
-	if ( ActionCode != NULL ) {
+	if ( ActionCode != nullptr ) {
 		ActionCode->End_Hibernation();
 	}
 

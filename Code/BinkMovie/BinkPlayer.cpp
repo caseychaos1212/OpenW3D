@@ -34,7 +34,7 @@ BINKMovieClass::BINKMovieClass(const char* filename, const char* subtitlename, F
 	Bink(0),
 	FrameChanged(true),
 	TicksPerFrame(0),
-	SubTitleManager(NULL)
+	SubTitleManager(nullptr)
 {
 	// Load the whole file so we can use our own file IO to access it.
 	file_auto_ptr file(_TheFileFactory, filename);
@@ -43,7 +43,7 @@ BINKMovieClass::BINKMovieClass(const char* filename, const char* subtitlename, F
 
 	Bink = BinkOpen(&FileBuffer[0], BINKFROMMEMORY);
 
-	if (Bink == NULL) {
+	if (Bink == nullptr) {
 		return;
 	}
 
@@ -134,7 +134,7 @@ BINKMovieClass::BINKMovieClass(const char* filename, const char* subtitlename, F
 
 BINKMovieClass::~BINKMovieClass()
 {
-	if (Bink == NULL) {
+	if (Bink == nullptr) {
 		return;
 	}
 
@@ -248,7 +248,7 @@ void BINKMovieClass::Render()
 		Renderer.Set_Texture(TextureInfos[t].Texture);
 		Renderer.Set_Coordinate_Range(RectClass(0.0f, 0.0f, 1.0f, 1.0f));//Bink->Width,Bink->Height));
 
-		RectClass rect(TextureInfos[t].TextureLocX, TextureInfos[t].TextureLocY, TextureInfos[t].TextureWidth, TextureInfos[t].TextureHeight);
+		RectClass rect(float(TextureInfos[t].TextureLocX), float(TextureInfos[t].TextureLocY), float(TextureInfos[t].TextureWidth), float(TextureInfos[t].TextureHeight));
 		Renderer.Add_Quad(TextureInfos[t].Rect, TextureInfos[t].UV, 0xffffffff);
 		Renderer.Render();
 	}

@@ -90,7 +90,7 @@ bool DlgDownload::DoDialog(const unichar_t* title, const DownloadList& files, bo
 			popup->Release_Ref();
 			}
 
-		return (popup != NULL);
+		return (popup != nullptr);
 		}
 
 	return false;
@@ -408,8 +408,8 @@ void DlgDownload::UpdateProgress(DownloadEvent& event)
 				{
 				ConsoleBox.Print("\nDownload complete\n");
 				}
-			WWDEBUG_SAY(("DlgDownload: Successful '%s' Elapsed time: %ld ms\n",
-				download->GetFilename(), (TIMEGETTIME() - mStartTime)));
+			WWDEBUG_SAY(("DlgDownload: Successful '%s' Elapsed time: %d ms\n",
+				download->GetFilename(), static_cast<unsigned int>(TIMEGETTIME() - mStartTime)));
 
 			mDownloading = false;
 			break;
@@ -475,15 +475,15 @@ void PrintableSize(unsigned int size, WideStringClass& printable)
 	{
 	float value = ((float)size / (float)(1024 * 1024));
 
-	if (value >= 1.0)
+	if (value >= 1.0f)
 		{
 		printable.Format(TRANSLATE(IDS_MENU_TRANSFER_MB_FORMAT), value);
 		return;
 		}
 
-	value = ((float)size / 1024.0);
+	value = ((float)size / 1024.0f);
 
-	if (value >= 1.0)
+	if (value >= 1.0f)
 		{
 		printable.Format(TRANSLATE(IDS_MENU_TRANSFER_KB_FORMAT), value);
 		return;

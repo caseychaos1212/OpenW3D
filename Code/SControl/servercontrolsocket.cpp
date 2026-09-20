@@ -45,6 +45,11 @@
 #include	"servercontrolsocket.h"
 #include "systimer.h"
 #include <algorithm>
+#include <thread>
+
+#ifdef _WIN32
+typedef int socklen_t;
+#endif
 
 /*
 ** All instances are tracked here.
@@ -138,7 +143,7 @@ bool ServerControlSocketClass::Open(int port, bool loopback, unsigned int ip)
 	if (Socket == INVALID_SOCKET) {
 		return(false);
 	}
-	DebugString(("ServerControlSocketClass - Socket %d opened OK\n", Socket));
+	DebugString(("ServerControlSocketClass - Socket %d opened OK\n", static_cast<int>(Socket)));
 
 	/*
 	** Bind our UDP socket to our UDP port number
@@ -155,8 +160,8 @@ bool ServerControlSocketClass::Open(int port, bool loopback, unsigned int ip)
 	}
 
 	DebugString(("ServerControlSocketClass - About to bind the UDP socket to port %d\n", port));
-	if (bind (Socket, (LPSOCKADDR)&addr, sizeof(addr) ) == SOCKET_ERROR) {
-		DebugString(("ServerControlSocketClass - bind failed with error code %d\n", WSAGetLastError()));
+	if (bind (Socket, (sockaddr*)&addr, sizeof(addr) ) == SOCKET_ERROR) {
+		DebugString(("ServerControlSocketClass - bind failed with error code %d\n", LAST_ERROR));
 		Close();
 		return(false);
 	}
@@ -220,7 +225,7 @@ bool ServerControlSocketClass::Open(int port, bool loopback, unsigned int ip)
 void ServerControlSocketClass::Close(void)
 {
 	if (Socket != INVALID_SOCKET) {
-		DebugString(("ServerControlSocketClass - Closing socket %d bound to port %d\n", Socket, Port));
+		DebugString(("ServerControlSocketClass - Closing socket %d bound to port %d\n", static_cast<int>(Socket), Port));
 		if (closesocket(Socket) != 0) {
 			DebugString(("ServerControlSocketClass - closesocket failed with error code %d\n", LAST_ERROR));
 		}
@@ -315,7 +320,7 @@ void ServerControlSocketClass::Discard_Out_Buffers(void)
 void ServerControlSocketClass::Clear_Socket_Error(void)
 {
 	unsigned int error_code;
-	int length = 4;
+	socklen_t length = sizeof(error_code);
 
 	if (Socket != INVALID_SOCKET) {
 		getsockopt (Socket, SOL_SOCKET, SO_ERROR, (char*)&error_code, &length);
@@ -347,7 +352,7 @@ void ServerControlSocketClass::Write(void *buffer, int buffer_len, void *address
 	** Create a temporary holding area for the packet.
 	*/
 	WinsockBufferType *packet = (WinsockBufferType*) Get_New_Out_Buffer();
-	fw_assert (packet != NULL);
+	fw_assert (packet != nullptr);
 
 	/*
 	** Copy the packet into the holding buffer.
@@ -414,9 +419,9 @@ int ServerControlSocketClass::Read(void *buffer, int buffer_len, void *address, 
 	}
 
 	WinsockBufferType *packet = InBuffers[packetnum];
-	fw_assert(packet != NULL);
+	fw_assert(packet != nullptr);
 
-	if (packet == NULL) {
+	if (packet == nullptr) {
 		return(0);
 	}
 
@@ -492,9 +497,9 @@ int ServerControlSocketClass::Peek(void *buffer, int buffer_len, void *address, 
 	}
 
 	WinsockBufferType *packet = InBuffers[packetnum];
-	fw_assert(packet != NULL);
+	fw_assert(packet != nullptr);
 
-	if (packet == NULL) {
+	if (packet == nullptr) {
 		return(0);
 	}
 
@@ -624,7 +629,7 @@ bool ServerControlSocketClass::Passes_CRC_Check(WinsockBufferType *packet)
  *=============================================================================================*/
 void *ServerControlSocketClass::Get_New_Out_Buffer(void)
 {
-	WinsockBufferType *buffer = NULL;
+	WinsockBufferType *buffer = nullptr;
 	int pos;
 
 	fw_assert (OutBuffersUsed <= SERVER_CONTROL_MAX_STATIC_BUFFERS);
@@ -656,7 +661,7 @@ void *ServerControlSocketClass::Get_New_Out_Buffer(void)
 		}
 	}
 
-	fw_assert (buffer != NULL);
+	fw_assert (buffer != nullptr);
 	return (buffer);
 }
 
@@ -677,7 +682,7 @@ void *ServerControlSocketClass::Get_New_Out_Buffer(void)
  *=============================================================================================*/
 void *ServerControlSocketClass::Get_New_In_Buffer(void)
 {
-	WinsockBufferType *buffer = NULL;
+	WinsockBufferType *buffer = nullptr;
 	int pos;
 
 	fw_assert (InBuffersUsed <= SERVER_CONTROL_MAX_STATIC_BUFFERS);
@@ -709,7 +714,7 @@ void *ServerControlSocketClass::Get_New_In_Buffer(void)
 		}
 	}
 
-	fw_assert (buffer != NULL);
+	fw_assert (buffer != nullptr);
 	return (buffer);
 }
 
@@ -733,7 +738,7 @@ void ServerControlSocketClass::Service(void)
 {
 	u_long bytes;
 	struct sockaddr_in addr;
-	int addr_len;
+	socklen_t addr_len;
 	WinsockBufferType *packet;
 	int result;
 	unsigned int timeout_check = TIMEGETTIME();
@@ -748,7 +753,7 @@ void ServerControlSocketClass::Service(void)
 			break;
 		}
 		times++;
-		Sleep(0);
+		std::this_thread::yield();
 
 		/*
 		**
@@ -778,7 +783,7 @@ void ServerControlSocketClass::Service(void)
 				** Call recvfrom function to get the outstanding packet.
 				*/
 				addr_len = sizeof(addr);
-				result = recvfrom(Socket, (char*)ReceiveBuffer, sizeof(ReceiveBuffer), 0, (LPSOCKADDR)&addr, &addr_len);
+				result = recvfrom(Socket, (char*)ReceiveBuffer, sizeof(ReceiveBuffer), 0, (sockaddr*)&addr, &addr_len);
 
 				/*
 				** See if we got an error.
@@ -793,7 +798,7 @@ void ServerControlSocketClass::Service(void)
 					** Create a new holding buffer to store this packet in.
 					*/
 					packet = (WinsockBufferType*) Get_New_In_Buffer();
-					fw_assert (packet != NULL);
+					fw_assert (packet != nullptr);
 
 					/*
 					** Store the packet into the holding buffer.
@@ -864,7 +869,7 @@ void ServerControlSocketClass::Service(void)
 			break;
 		}
 		times++;
-		Sleep(0);
+		std::this_thread::yield();
 
 		/*
 		** Get a pointer to the first packet.
@@ -888,7 +893,7 @@ void ServerControlSocketClass::Service(void)
 		/*
 		** Send it.
 		*/
-		result = sendto(Socket, ((char const *)packet->Buffer) - sizeof(packet->CRC), packet->BufferLen + sizeof(packet->CRC), 0, (LPSOCKADDR)&addr, sizeof (addr));
+		result = sendto(Socket, ((char const *)packet->Buffer) - sizeof(packet->CRC), packet->BufferLen + sizeof(packet->CRC), 0, (const sockaddr*)&addr, sizeof (addr));
 
 		if (result == SOCKET_ERROR){
 			if (LAST_ERROR != WSAEWOULDBLOCK) {
@@ -900,7 +905,7 @@ void ServerControlSocketClass::Service(void)
 				** No more room for outgoing packets.
 				*/
 				DebugString(("ServerControlSocketClass - sendto returned WSAEWOULDBLOCK\n"));
-				Sleep(0);
+				std::this_thread::yield();
 			}
 			break;
 		}

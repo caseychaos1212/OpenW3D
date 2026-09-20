@@ -304,12 +304,12 @@ bool	SoldierGameObj::DisplayDebugBoxForGhostCollision = false;
 
 //------------------------------------------------------------------------------------
 SoldierGameObj::SoldierGameObj() :
-	WeaponRenderModel( NULL ),
-	BackWeaponRenderModel( NULL ),
-	BackFlagRenderModel( NULL ),
-	WeaponAnimControl( NULL ),
-	TransitionCompletionData( NULL ),
-	Vehicle( NULL ),
+	WeaponRenderModel( nullptr ),
+	BackWeaponRenderModel( nullptr ),
+	BackFlagRenderModel( nullptr ),
+	WeaponAnimControl( nullptr ),
+	TransitionCompletionData( nullptr ),
+	Vehicle( nullptr ),
 	LegFacing( 0 ),
 	SyncLegs( false ),
 	LastLegMode( 0 ),
@@ -319,7 +319,7 @@ SoldierGameObj::SoldierGameObj() :
 	HeadLookAngle( 0,0,0 ),
 	HeadLookAngleTimer( 0 ),
 	InnateEnableBits( 0xFFFFFFFF ),
-	InnateObserver( NULL ),
+	InnateObserver( nullptr ),
 //	FlameTimer( 0 ),
 	SpecialDamageMode(ArmorWarheadManager::SPECIAL_DAMAGE_TYPE_NONE),
 	SpecialDamageTimer( 0 ),
@@ -327,18 +327,18 @@ SoldierGameObj::SoldierGameObj() :
 	KeyRing( 0 ),
 	InFlyMode( false ),
 	IsVisible( true ),
-	CurrentSpeech( NULL ),
+	CurrentSpeech( nullptr ),
 	AIState( AI_STATE_IDLE ),
-	SpeechAnim( NULL ),
-	HeadModel( NULL ),
-	EmotIconModel( NULL ),
+	SpeechAnim( nullptr ),
+	HeadModel( nullptr ),
+	EmotIconModel( nullptr ),
 	EmotIconTimer( 0 ),
 	LadderUpMask( false ),
 	LadderDownMask( false ),
-	SpecialDamageEffect( NULL ),
-	HealingEffect( NULL ),
+	SpecialDamageEffect( nullptr ),
+	HealingEffect( nullptr ),
 	ReloadingTilt(0),
-	WaterWake(NULL),
+	WaterWake(nullptr),
 	WeaponChanged( false )
 {
 	// All Humans need a HuamnAnimControl
@@ -352,13 +352,13 @@ SoldierGameObj::SoldierGameObj() :
 //------------------------------------------------------------------------------------
 SoldierGameObj::~SoldierGameObj()
 {
-	if ( HealingEffect != NULL ) {
+	if ( HealingEffect != nullptr ) {
 		Peek_Human_Phys()->Remove_Effect_From_Me( HealingEffect );
 		REF_PTR_RELEASE( HealingEffect );
 	}
 
 	Set_Special_Damage_Mode( ArmorWarheadManager::SPECIAL_DAMAGE_TYPE_NONE );
-	Set_Emot_Icon (NULL, 0);
+	Set_Emot_Icon (nullptr, 0);
 
 	REF_PTR_RELEASE( HeadModel );
 	REF_PTR_RELEASE( SpeechAnim );
@@ -368,26 +368,26 @@ SoldierGameObj::~SoldierGameObj()
 		CombatManager::On_Soldier_Death(this);
 	}
 
-	Set_Weapon_Model( NULL );
+	Set_Weapon_Model( nullptr );
 
-	if ( BackWeaponRenderModel != NULL ) {
+	if ( BackWeaponRenderModel != nullptr ) {
 		Peek_Model()->Remove_Sub_Object(BackWeaponRenderModel);
 		BackWeaponRenderModel->Release_Ref();
-		BackWeaponRenderModel = NULL;
+		BackWeaponRenderModel = nullptr;
 	}
 
-	if ( BackFlagRenderModel != NULL ) {
+	if ( BackFlagRenderModel != nullptr ) {
 		Peek_Model()->Remove_Sub_Object(BackFlagRenderModel);
 		BackFlagRenderModel->Release_Ref();
-		BackFlagRenderModel = NULL;
+		BackFlagRenderModel = nullptr;
 	}
 
-	if ( WeaponAnimControl != NULL ) {
+	if ( WeaponAnimControl != nullptr ) {
 		delete WeaponAnimControl;
-		WeaponAnimControl = NULL;
+		WeaponAnimControl = nullptr;
 	}
 
-	if (Vehicle != NULL) {
+	if (Vehicle != nullptr) {
       // Remove myself from the vehicle !
 		Vehicle->Remove_Occupant(this);
 	}
@@ -400,9 +400,9 @@ SoldierGameObj::~SoldierGameObj()
 
 	Reset_RenderObjs();
 
-	if (WaterWake != NULL) {
+	if (WaterWake != nullptr) {
 		SurfaceEffectsManager::Destroy_Persistant_Emitter( WaterWake );
-		WaterWake = NULL;
+		WaterWake = nullptr;
 	}
 
 	return ;
@@ -439,11 +439,11 @@ void	SoldierGameObj::Copy_Settings( const SoldierGameObjDef & definition )
 
 	// All characters force their heads and hands to use the same LOD level as their body.
 	RenderObjClass * model = Peek_Human_Phys()->Peek_Model();
-	if (model != NULL) {
+	if (model != nullptr) {
 		model->Set_Sub_Objects_Match_LOD(true);
 	}
 
-	if (	InnateObserver == NULL &&
+	if (	InnateObserver == nullptr &&
 			Get_Definition().UseInnateBehavior &&
 			Is_Controlled_By_Me () == false ) {
 		InnateObserver = new SoldierObserverClass;
@@ -472,15 +472,15 @@ void	SoldierGameObj::Prepare_Speech_Framework( void )
 	//
 	//	Make sure we have an allocated animation to use for speech
 	//
-	if ( SpeechAnim == NULL) {
+	if ( SpeechAnim == nullptr) {
 		HeadModel = Find_Head_Model();
 
 		//
 		//	Dig out the skeleton name for the head model
 		//
-		if (HeadModel != NULL) {
+		if (HeadModel != nullptr) {
 			const HTreeClass *htree = HeadModel->Get_HTree ();
-			if (htree != NULL) {
+			if (htree != nullptr) {
 				StringClass skeleton_name = htree->Get_Name ();
 
 				//
@@ -511,23 +511,23 @@ void	SoldierGameObj::Re_Init( const SoldierGameObjDef & definition )
 	//
 	//	Reset the weapon model
 	//
-	Set_Weapon_Model( NULL );
+	Set_Weapon_Model( nullptr );
 
-	if ( BackWeaponRenderModel != NULL ) {
+	if ( BackWeaponRenderModel != nullptr ) {
 		Peek_Model()->Remove_Sub_Object(BackWeaponRenderModel);
 		BackWeaponRenderModel->Release_Ref();
-		BackWeaponRenderModel = NULL;
+		BackWeaponRenderModel = nullptr;
 	}
 
-	if ( BackFlagRenderModel != NULL ) {
+	if ( BackFlagRenderModel != nullptr ) {
 		Peek_Model()->Remove_Sub_Object(BackFlagRenderModel);
 		BackFlagRenderModel->Release_Ref();
-		BackFlagRenderModel = NULL;
+		BackFlagRenderModel = nullptr;
 	}
 
-	if ( WeaponAnimControl != NULL ) {
+	if ( WeaponAnimControl != nullptr ) {
 		delete WeaponAnimControl;
-		WeaponAnimControl = NULL;
+		WeaponAnimControl = nullptr;
 	}
 
 	//
@@ -646,7 +646,7 @@ bool	SoldierGameObj::Save( ChunkSaveClass & csave )
 		WRITE_MICRO_CHUNK( csave, MICROCHUNKID_SYNC_LEGS, SyncLegs );
 		WRITE_MICRO_CHUNK( csave, MICROCHUNKID_KEY_RING, KeyRing );
 //		WRITE_MICRO_CHUNK( csave, MICROCHUNKID_FORCE_FACING, ForceFacing );
-		if ( Vehicle != NULL ) {
+		if ( Vehicle != nullptr ) {
 			WRITE_MICRO_CHUNK_PTR( csave, MICROCHUNKID_VEHICLE, Vehicle );
 		}
 		csave.Begin_Micro_Chunk( MICROCHUNKID_ANIMATION_NAME );
@@ -695,7 +695,7 @@ bool	SoldierGameObj::Save( ChunkSaveClass & csave )
 		csave.End_Chunk();
 	}
 
-	if ( SpecialDamageDamager.Get_Ptr() != NULL ) {
+	if ( SpecialDamageDamager.Get_Ptr() != nullptr ) {
 		csave.Begin_Chunk( CHUNKID_SPECIAL_DAMAGE_DAMAGER );
 		SpecialDamageDamager.Save( csave );
 		csave.End_Chunk();
@@ -710,7 +710,7 @@ bool	SoldierGameObj::Load( ChunkLoadClass &cload )
 	char anim_string[80];
 	int dialog_index = 0;
 
-	WWASSERT( Vehicle == NULL );
+	WWASSERT( Vehicle == nullptr );
 
 	while (cload.Open_Chunk()) {
 		switch(cload.Cur_Chunk_ID()) {
@@ -742,7 +742,7 @@ bool	SoldierGameObj::Load( ChunkLoadClass &cload )
 
 						case MICROCHUNKID_INNATE_OBSERVER_PTR:
 							cload.Read( &InnateObserver, sizeof (InnateObserver) );
-							if ( InnateObserver != NULL ) {
+							if ( InnateObserver != nullptr ) {
 								REQUEST_POINTER_REMAP( (void **)&InnateObserver );
 							}
 							break;
@@ -768,13 +768,13 @@ bool	SoldierGameObj::Load( ChunkLoadClass &cload )
 					}
 					cload.Close_Micro_Chunk();
 				}
-				if ( Vehicle != NULL ) {
+				if ( Vehicle != nullptr ) {
 					REQUEST_POINTER_REMAP( (void **)&Vehicle );
 				}
 				break;
 
 			case CHUNKID_WEAPON_ANIM:
-				Set_Weapon_Animation( NULL );	// Get the anim control built
+				Set_Weapon_Animation( nullptr );	// Get the anim control built
 				WeaponAnimControl->Load( cload );
 				break;
 
@@ -786,8 +786,8 @@ bool	SoldierGameObj::Load( ChunkLoadClass &cload )
 				cload.Open_Chunk();
 				PersistFactoryClass * factory;
 				factory = SaveLoadSystemClass::Find_Persist_Factory(cload.Cur_Chunk_ID());
-				WWASSERT(factory != NULL);
-				if (factory != NULL) {
+				WWASSERT(factory != nullptr);
+				if (factory != nullptr) {
 					RenderObjClass * robj = (RenderObjClass *)factory->Load(cload);
 					Add_RenderObj( robj );
 					robj->Release_Ref();
@@ -796,7 +796,7 @@ bool	SoldierGameObj::Load( ChunkLoadClass &cload )
 				break;
 
 			case CHUNKID_TRANSITION_COMPLETION_DATA:
-				WWASSERT( TransitionCompletionData == NULL );
+				WWASSERT( TransitionCompletionData == nullptr );
 				TransitionCompletionData = new TransitionCompletionDataStruct();
 				TransitionCompletionData->Load( cload );
 				break;
@@ -813,7 +813,7 @@ bool	SoldierGameObj::Load( ChunkLoadClass &cload )
 		cload.Close_Chunk();
 	}
 
-	if ( WeaponRenderModel != NULL ) {
+	if ( WeaponRenderModel != nullptr ) {
 		REQUEST_REF_COUNTED_POINTER_REMAP( (RefCountClass **)&WeaponRenderModel );
 	}
 
@@ -830,7 +830,7 @@ void	SoldierGameObj::On_Post_Load( void )
 
 	SmartGameObj::On_Post_Load();
 
-	if ( Peek_Model() && (WeaponRenderModel != NULL) ) {
+	if ( Peek_Model() && (WeaponRenderModel != nullptr) ) {
 		Peek_Model()->Add_Sub_Object_To_Bone( WeaponRenderModel, GUN_BONE_NAME );
 	}
 
@@ -840,7 +840,7 @@ void	SoldierGameObj::On_Post_Load( void )
 	Update_Back_Gun();
 
 	// Hide if in vehicle
-	if ( Is_In_Vehicle() && Peek_Model() != NULL ) {
+	if ( Is_In_Vehicle() && Peek_Model() != nullptr ) {
 		Peek_Model()->Set_Hidden( true );
 	}
 
@@ -858,13 +858,13 @@ CollisionReactionType SoldierGameObj::Collision_Occurred(const CollisionEventCla
 //	Debug_Say(( "Soldier Collision %p %p\n", this, event.OtherObj ));
 
 	// Detect squishing...
-	if ( event.OtherObj != NULL && event.OtherObj->Get_Observer() != NULL ) {
+	if ( event.OtherObj != nullptr && event.OtherObj->Get_Observer() != nullptr ) {
 		PhysicalGameObj * obj = ((CombatPhysObserverClass *)event.OtherObj->Get_Observer())->As_PhysicalGameObj();
 		if ( obj && obj->As_VehicleGameObj() ) {
 //			if ( !Is_Teammate( obj ) ) {		// never squish teammates
 			if ( Is_Enemy( obj ) ) {		// only squish enemies
 				Vector3 vel;
-				if ( event.OtherObj->As_MoveablePhysClass() != NULL ) {
+				if ( event.OtherObj->As_MoveablePhysClass() != nullptr ) {
 					event.OtherObj->As_MoveablePhysClass()->Get_Velocity( &vel );
 
 					Vector3 my_pos;
@@ -879,16 +879,16 @@ CollisionReactionType SoldierGameObj::Collision_Occurred(const CollisionEventCla
 						if ( HumanState.Get_State() != HumanStateClass::DEATH ) {
 							// We need to pick a better warhead to damage with
 							SmartGameObj * damager = obj->As_VehicleGameObj()->Get_Driver();
-							if ( damager == NULL ) {
+							if ( damager == nullptr ) {
 								damager = obj->As_VehicleGameObj();
 							}
 							OffenseObjectClass offense( 10000, 1, damager );
-							Apply_Damage_Extended( offense, 10000.0f, vel, NULL );
+							Apply_Damage_Extended( offense, 10000.0f, vel, nullptr );
 							// Play the squish sound
 
 							// Stats
-							if (( obj->As_VehicleGameObj()->Get_Driver() != NULL ) &&
-								( obj->As_VehicleGameObj()->Get_Driver()->Get_Player_Data() != NULL ) ) {
+							if (( obj->As_VehicleGameObj()->Get_Driver() != nullptr ) &&
+								( obj->As_VehicleGameObj()->Get_Driver()->Get_Player_Data() != nullptr ) ) {
 								obj->As_VehicleGameObj()->Get_Driver()->Get_Player_Data()->Stats_Add_Squish();
 							}
 						}
@@ -957,7 +957,7 @@ void	SoldierGameObj::Export_Rare( BitStreamClass &packet )
 */
 void	SoldierGameObj::Import_Rare( BitStreamClass &packet )
 {
-	Set_Weapon_Model (NULL);
+	Set_Weapon_Model (nullptr);
 	// If we are changing to the same def, the above line made us lose our weapon model, and we won't get it back.
 	// The next line makes us get it back.
  	Get_Weapon_Bag()->Force_Changed();
@@ -982,7 +982,7 @@ void	SoldierGameObj::Import_Rare( BitStreamClass &packet )
 		//
 		//	Did we find the right definition?
 		//
-		if (definition != NULL && definition->Get_Class_ID() == CLASSID_GAME_OBJECT_DEF_SOLDIER) {
+		if (definition != nullptr && definition->Get_Class_ID() == CLASSID_GAME_OBJECT_DEF_SOLDIER) {
 			SoldierGameObjDef *soldier_def = reinterpret_cast<SoldierGameObjDef *> (definition);
 
 			//
@@ -1007,7 +1007,7 @@ void	SoldierGameObj::Export_Occasional( BitStreamClass &packet )
 	//
 #if 0 //(gth) moving this back to Frequent to fix the game, re-optimize later...
 	WeaponClass * p_weapon = Get_Weapon();
-   bool has_weapon = (p_weapon != NULL);
+   bool has_weapon = (p_weapon != nullptr);
    packet.Add(has_weapon);
    if (has_weapon) {
 		packet.Add(p_weapon->Get_ID());
@@ -1015,7 +1015,7 @@ void	SoldierGameObj::Export_Occasional( BitStreamClass &packet )
    }
 #endif
 
-	WWASSERT(WeaponBag != NULL);
+	WWASSERT(WeaponBag != nullptr);
 	WeaponBag->Export_Weapon_List(packet);
 
 	//packet.Add(CtfTeamFlag, BITPACK_CTF_TEAM_FLAG);
@@ -1041,11 +1041,11 @@ void	SoldierGameObj::Import_Occasional( BitStreamClass &packet )
 
 		int weapon_id = packet.Get(weapon_id);
 		int rounds = packet.Get(rounds);
-		if ((Get_Weapon() == NULL) || (weapon_id != Get_Weapon()->Get_ID())) {
+		if ((Get_Weapon() == nullptr) || (weapon_id != Get_Weapon()->Get_ID())) {
 			WeaponBag->Select_Weapon_ID(weapon_id);
 		}
 
-		if (Get_Weapon() != NULL) {
+		if (Get_Weapon() != nullptr) {
 			// If this weapon is currently being fired, ignore the server rounds count packet
 			// This should help the jittery rounds count
 			if ( !Get_Weapon()->Is_Triggered() ) {
@@ -1054,7 +1054,7 @@ void	SoldierGameObj::Import_Occasional( BitStreamClass &packet )
 		}
 
    } else {
-		if (Get_Weapon() != NULL) {
+		if (Get_Weapon() != nullptr) {
 			Get_Weapon_Bag()->Deselect();
 		}
 	}
@@ -1063,7 +1063,7 @@ void	SoldierGameObj::Import_Occasional( BitStreamClass &packet )
 	//
 	// Weapon list
 	//
-	WWASSERT(WeaponBag != NULL);
+	WWASSERT(WeaponBag != nullptr);
 	WeaponBag->Import_Weapon_List(packet);
 
 
@@ -1101,7 +1101,7 @@ void SoldierGameObj::Export_Frequent(BitStreamClass & packet)
 	// (gth) moved this back into frequent to fix the game, re-optimize later
 	//
 	WeaponClass * p_weapon = Get_Weapon();
-   bool has_weapon = (p_weapon != NULL);
+   bool has_weapon = (p_weapon != nullptr);
    packet.Add(has_weapon);
    if (has_weapon) {
 		packet.Add(p_weapon->Get_ID());
@@ -1186,11 +1186,11 @@ void	SoldierGameObj::Import_Frequent( BitStreamClass & packet )
 
 		int weapon_id = packet.Get(weapon_id);
 		int rounds = packet.Get(rounds);
-		if ((Get_Weapon() == NULL) || (weapon_id != Get_Weapon()->Get_ID())) {
+		if ((Get_Weapon() == nullptr) || (weapon_id != Get_Weapon()->Get_ID())) {
 			WeaponBag->Select_Weapon_ID(weapon_id);
 		}
 
-		if (Get_Weapon() != NULL) {
+		if (Get_Weapon() != nullptr) {
 			// If this weapon is currently being fired, ignore the server rounds count packet
 			// This should help the jittery rounds count
 			if ( !Get_Weapon()->Is_Triggered() ) {
@@ -1199,7 +1199,7 @@ void	SoldierGameObj::Import_Frequent( BitStreamClass & packet )
 		}
 
    } else {
-		if (Get_Weapon() != NULL) {
+		if (Get_Weapon() != nullptr) {
 			Get_Weapon_Bag()->Deselect();
 		}
 	}
@@ -1226,7 +1226,7 @@ void	SoldierGameObj::Import_Frequent( BitStreamClass & packet )
 
 	// Bump Z up to the top of the possible values due to packing
 	// we assume the max error is half of the resolution
-	float max_error = cEncoderList::Get_Encoder_Type_Entry( BITPACK_WORLD_POSITION_Z ).Get_Resolution() / 2.0f;
+	float max_error = float(cEncoderList::Get_Encoder_Type_Entry( BITPACK_WORLD_POSITION_Z ).Get_Resolution() / 2.0);
 	sc_position.Z += max_error;
 
 	Interpret_Sc_Position_Data(sc_position);
@@ -1333,117 +1333,100 @@ void SoldierGameObj::Export_State_Cs(BitStreamClass & packet)
 //-----------------------------------------------------------------------------
 int SoldierGameObj::Check(void)
 {
-Matrix3D tm(1);
 #define	UNINITIALLIZED_CRC	0x78629140
 	static int crc = UNINITIALLIZED_CRC;
-tm.Rotate_X( 1.4f );
 	if ( crc == UNINITIALLIZED_CRC ) {
-		const char * filelist[] = {
-		"laif`wp-gga",								//"objects.ddb",
-		"bqnlq-jmj",								//"armor.ini",
-		"almfp-jmj",								//"bones.ini",
-		"pvqeb`ffeef`wp-jmj",					//"surfaceeffects.ini",
-		"`bnfqbp-jmj",								//"cameras.ini",
-		"`\\mlg\\nd\\o3-t0g",						//"c_nod_mg_l0.w3d",
-		"`\\mlg\\qh\\o3-t0g",						//"c_nod_rk_l0.w3d",
-		"`\\mlg\\eo\\o3-t0g",						//"c_nod_fl_l0.w3d",
-		"`\\mlg\\fm\\o3-t0g",						//"c_nod_en_l0.w3d",
-		"`\\mlg\\ndl\\o3-t0g",						//"c_nod_mgo_l0.w3d",
-		"`\\mlg\\qhl\\o3-t0g",						//"c_nod_rko_l0.w3d",
-		"`\\mlg\\`kfnw\\o3-t0g",					//"c_nod_chemt_l0.w3d",
-		"`\\mlg\\pmjsfq\\o3-t0g",					//"c_nod_sniper_l0.w3d",
-		"`\\mlg\\qplog\\o3-t0g",					//"c_nod_rsold_l0.w3d",
-		"`\\mlg\\pwowk\\o3-t0g",					//"c_nod_stlth_l0.w3d",
-		"`\\mlg\\pbhv\\o3-t0g",						//"c_nod_saku_l0.w3d",
-		"`\\mlg\\pbhv1\\o3-t0g",					//"c_nod_saku2_l0.w3d",
-		"`\\mlg\\qbu\\o3-t0g",						//"c_nod_rav_l0.w3d",
-		"`\\mlg\\nqbu\\o3-t0g",						//"c_nod_mrav_l0.w3d",
-		"`\\mlg\\ngy\\o3-t0g",						//"c_nod_mdz_l0.w3d",
-		"`\\mlg\\ngy1\\o3-t0g",						//"c_nod_mdz2_l0.w3d",
-		"`\\mlg\\w`\\o3-t0g",						//"c_nod_tc_l0.w3d",
-		"`\\mlg\\nvwbmw\\o3-t0g",					//"c_nod_mutant_l0.w3d",
-		"`\\mlg\\npog\\o3-t0g",						//"c_nod_msld_l0.w3d",
-		"`\\mlg\\pplog\\o3-t0g",					//"c_nod_ssold_l0.w3d",
-		"`\\mlg\\sfwn\\o3-t0g",						//"c_nod_petm_l0.w3d",
-		"`\\mlg\\hbmf\\o3-t0g",						//"c_nod_kane_l0.w3d",
-		"`\\dgj\\nd\\o3-t0g",						//"c_gdi_mg_l0.w3d",
-		"`\\dgj\\qh\\o3-t0g",						//"c_gdi_rk_l0.w3d",
-		"`\\dgj\\dq\\o3-t0g",						//"c_gdi_gr_l0.w3d",
-		"`\\dgj\\fm\\o3-t0g",						//"c_gdi_en_l0.w3d",
-		"`\\dgj\\ndl\\o3-t0g",						//"c_gdi_mgo_l0.w3d",
-		"`\\dgj\\qhl\\o3-t0g",						//"c_gdi_rko_l0.w3d",
-		"`\\dgj\\pzg\\o3-t0g",						//"c_gdi_syd_l0.w3d",
-		"`\\dgj\\gfbg\\o3-t0g",						//"c_gdi_dead_l0.w3d",
-		"`\\dgj\\dvm\\o3-t0g",						//"c_gdi_gun_l0.w3d",
-		"`\\dgj\\sw`k\\o3-t0g",						//"c_gdi_ptch_l0.w3d",
-		"`\\kbul`\\o3-t0g",							//"c_havoc_l0.w3d",
-		"`\\kbul`m\\o3-t0g",						//"c_havocn_l0.w3d",
-		"`\\kbul`t\\o3-t0g",						//"c_havocw_l0.w3d",
-		"`\\kbul`g\\o3-t0g",						//"c_havocd_l0.w3d",
-		"`\\dgj\\pzg\\o3-t0g",						//"c_gdi_syd_l0.w3d",
-		"`\\dgj\\pzg1\\o3-t0g",						//"c_gdi_syd2_l0.w3d",
-		"`\\dgj\\nlaj\\o3-t0g",						//"c_gdi_mobi_l0.w3d",
-		"`\\dgj\\klwt\\o3-t0g",						//"c_gdi_hotw_l0.w3d",
-		"`\\dgj\\ow\\o3-t0g",						//"c_gdi_lt_l0.w3d",
-		"`\\mlg\\sfwq\\o3-t0g",						//"c_nod_petr_l0.w3d",
-		"`\\oldbm\\o3-t0g",							//"c_logan_l0.w3d",
-		"`\\dgj\\ol`hf\\o3-t0g",					//"c_gdi_locke_l0.w3d",
-		"u\\mlg\\avddz-t0g",						//"v_nod_buggy.w3d",
-		"u\\mlg\\bs`\\n-t0g",						//"v_nod_apc_m.w3d",
-		"u\\mlg\\bqwoqz-t0g",						//"v_nod_artlry.w3d",
-		"u\\mlg\\eobnf-t0g",						//"v_nod_flame.w3d",
-		"u\\mlg\\owbmh-t0g",						//"v_nod_ltank.w3d",
-		"u\\mlg\\pwowk-t0g",						//"v_nod_stlth.w3d",
-		"u\\mlg\\wqmpsw\\n-t0g",					//"v_nod_trnspt_m.w3d",
-		"u\\mlg\\bsb`kf\\n-t0g",					//"v_nod_apache_m.w3d",
-		"u\\`kbnfoflm-t0g",						//"v_chameleon.w3d",
-		"u\\dgj\\kvnuff-t0g",						//"v_gdi_humvee.w3d",
-		"u\\dgj\\bs`\\n-t0g",						//"v_gdi_apc_m.w3d",
-		"u\\dgj\\nqop-t0g",							//"v_gdi_mrls.w3d",
-		"u\\dgj\\nfgwmh-t0g",						//"v_gdi_medtnk.w3d",
-		"u\\dgj\\nbnnwk-t0g",						//"v_gdi_mammth.w3d",
-		"u\\sj`hvs32-t0g",							//"v_pickup01.w3d",
-		"u\\pfgbm32-t0g",							//"v_sedan01.w3d",
-		"u\\dgj\\lq`b\\n-t0g",						//"v_gdi_orca_m.w3d",
-		"u\\dgj\\wqmpsw\\n-t0g",					//"v_gdi_trnspt_m.w3d",
-
+		static const char * const filelist[] = {
+			"objects.ddb",
+			"armor.ini",
+			"bones.ini",
+			"surfaceeffects.ini",
+			"cameras.ini",
+			"c_nod_mg_l0.w3d",
+			"c_nod_rk_l0.w3d",
+			"c_nod_fl_l0.w3d",
+			"c_nod_en_l0.w3d",
+			"c_nod_mgo_l0.w3d",
+			"c_nod_rko_l0.w3d",
+			"c_nod_chemt_l0.w3d",
+			"c_nod_sniper_l0.w3d",
+			"c_nod_rsold_l0.w3d",
+			"c_nod_stlth_l0.w3d",
+			"c_nod_saku_l0.w3d",
+			"c_nod_saku2_l0.w3d",
+			"c_nod_rav_l0.w3d",
+			"c_nod_mrav_l0.w3d",
+			"c_nod_mdz_l0.w3d",
+			"c_nod_mdz2_l0.w3d",
+			"c_nod_tc_l0.w3d",
+			"c_nod_mutant_l0.w3d",
+			"c_nod_msld_l0.w3d",
+			"c_nod_ssold_l0.w3d",
+			"c_nod_petm_l0.w3d",
+			"c_nod_kane_l0.w3d",
+			"c_gdi_mg_l0.w3d",
+			"c_gdi_rk_l0.w3d",
+			"c_gdi_gr_l0.w3d",
+			"c_gdi_en_l0.w3d",
+			"c_gdi_mgo_l0.w3d",
+			"c_gdi_rko_l0.w3d",
+			"c_gdi_syd_l0.w3d",
+			"c_gdi_dead_l0.w3d",
+			"c_gdi_gun_l0.w3d",
+			"c_gdi_ptch_l0.w3d",
+			"c_havoc_l0.w3d",
+			"c_havocn_l0.w3d",
+			"c_havocw_l0.w3d",
+			"c_havocd_l0.w3d",
+			"c_gdi_syd_l0.w3d",
+			"c_gdi_syd2_l0.w3d",
+			"c_gdi_mobi_l0.w3d",
+			"c_gdi_hotw_l0.w3d",
+			"c_gdi_lt_l0.w3d",
+			"c_nod_petr_l0.w3d",
+			"c_logan_l0.w3d",
+			"c_gdi_locke_l0.w3d",
+			"v_nod_buggy.w3d",
+			"v_nod_apc_m.w3d",
+			"v_nod_artlry.w3d",
+			"v_nod_flame.w3d",
+			"v_nod_ltank.w3d",
+			"v_nod_stlth.w3d",
+			"v_nod_trnspt_m.w3d",
+			"v_nod_apache_m.w3d",
+			"v_chameleon.w3d",
+			"v_gdi_humvee.w3d",
+			"v_gdi_apc_m.w3d",
+			"v_gdi_mrls.w3d",
+			"v_gdi_medtnk.w3d",
+			"v_gdi_mammth.w3d",
+			"v_pickup01.w3d",
+			"v_sedan01.w3d",
+			"v_gdi_orca_m.w3d",
+			"v_gdi_trnspt_m.w3d",
 		};
-#define	NUM_CRC_FILES	(sizeof(	filelist ) / sizeof( filelist[0] ) )
 		crc = 0;
-tm.Rotate_Y( 2.8f );
-		for ( int i = 0; i < NUM_CRC_FILES; i++ ) {
-			StringClass name = filelist[i];
-			// Obfuscate name
-			char * n = &name[0];
-			while ( *n ) *n++ ^= 0x3;
-tm.Rotate_Z( 3.6f );
+		for ( int i = 0; i < ARRAY_SIZE(filelist); i++ ) {
+			const char * name = filelist[i];
 //			Debug_Say(( "		\"%s\",\n", name ));
 			FileClass * file = _TheFileFactory->Get_File( name );
-tm.Pre_Rotate_X( 0.3f );
 			if ( file && file->Is_Available() ) {
 				size_t size = file->Size();
-tm.Pre_Rotate_Y( 0.4f );
 				file->Open();
-tm.Pre_Rotate_Z( 0.5f );
 				while ( size > 0 ) {
 					unsigned char buffer[ 4096 ];
 					const size_t chunk = std::min<size_t>(size, sizeof(buffer));
-tm.Translate_X( 3.1f );
 					const int amount = file->Read(buffer, static_cast<int>(chunk));
-tm.Translate_Y( 4.6f );
 			if (amount <= 0) {
 				break;
 					}
 					crc = CRC_Memory( buffer, amount, crc );
-tm.Translate_Z( 8.2f );
 					size -= static_cast<size_t>(amount);
 				}
 				file->Close();
 			} else {
 //				Debug_Say(( "***%s not found\n", name ));
 			}
-
-tm.Rotate_X( 1.4f );
 		}
 	}
 	return crc;
@@ -1513,7 +1496,7 @@ void SoldierGameObj::Interpret_Sc_State_Data(
 			} else {
 				// take the new state
 				if (state == HumanStateClass::TRANSITION) {
-					Start_Transition_Animation( trans_name, NULL );
+					Start_Transition_Animation( trans_name, nullptr );
 					AnimationName = trans_name;
 				} else if (state == HumanStateClass::ANIMATION) {
 					AnimationName = trans_name;
@@ -1547,23 +1530,23 @@ int SoldierGameObj::Tally_Vis_Visible_Soldiers( void )
 	Get_Position(&position);
 	position.Z += 1.5f;
 
-	WWASSERT(COMBAT_SCENE != NULL);
+	WWASSERT(COMBAT_SCENE != nullptr);
 	VisTableClass * pvs = COMBAT_SCENE->Get_Vis_Table(position);
 
-	if (pvs != NULL) {
+	if (pvs != nullptr) {
 
 		retcode = 0;
 
 		for (
 			SLNode<SmartGameObj> * smart_objnode = GameObjManager::Get_Smart_Game_Obj_List()->Head();
-			smart_objnode != NULL;
+			smart_objnode != nullptr;
 			smart_objnode = smart_objnode->Next()) {
 
 			SoldierGameObj * p_soldier = smart_objnode->Data()->As_SoldierGameObj();
-			if (p_soldier != NULL) {
+			if (p_soldier != nullptr) {
 
 				PhysClass * phys_obj	= p_soldier->Peek_Physical_Object();
-				if (phys_obj != NULL && pvs->Get_Bit(phys_obj->Get_Vis_Object_ID())) {
+				if (phys_obj != nullptr && pvs->Get_Bit(phys_obj->Get_Vis_Object_ID())) {
 					retcode++;
 				}
 			}
@@ -1579,9 +1562,9 @@ bool SoldierGameObj::Is_In_Elevator( void )
 	HumanPhysClass	* p_human_phys = Peek_Human_Phys();
 
 	return
-		p_human_phys != NULL &&
-		p_human_phys->Peek_Carrier_Object() != NULL &&
-		p_human_phys->Peek_Carrier_Object()->As_ElevatorPhysClass() != NULL;
+		p_human_phys != nullptr &&
+		p_human_phys->Peek_Carrier_Object() != nullptr &&
+		p_human_phys->Peek_Carrier_Object()->As_ElevatorPhysClass() != nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -1653,7 +1636,7 @@ void SoldierGameObj::Apply_Control( void )
 
 		if (	CombatManager::I_Am_Server() )		// Server authoritative
 //		if (	CombatManager::I_Am_Server() ||
-//				(Is_Controlled_By_Me() && TransitionCompletionData == NULL) )
+//				(Is_Controlled_By_Me() && TransitionCompletionData == nullptr) )
 		{
 			if ( Control.Get_Boolean( ControlClass::BOOLEAN_ACTION ) ) {
 				TransitionManager::Check( this, true );
@@ -1718,10 +1701,10 @@ void SoldierGameObj::Apply_Control( void )
 		}
 
 		if ( LadderUpMask ) {
-			up_down = MIN( up_down, 0 );
+			up_down = std::min( up_down, 0.0f );
 		}
 		if ( LadderDownMask ) {
-			up_down = MAX( up_down, 0 );
+			up_down = std::max( up_down, 0.0f );
 		}
 
 		// when on ladder, clear all velocity
@@ -1900,7 +1883,7 @@ void SoldierGameObj::Apply_Control( void )
 			DefenseObjectClass * defense = Get_Defense_Object();
 			const char * weapon_name = "";
 			int ammo = 0;
-			if ( Get_Weapon() != NULL )  {
+			if ( Get_Weapon() != nullptr )  {
 				weapon_name = Get_Weapon()->Get_Definition()->Get_Name();
 				ammo = Get_Weapon()->Get_Total_Rounds();
 			}
@@ -1940,7 +1923,7 @@ void SoldierGameObj::Apply_Control( void )
 			DefenseObjectClass * defense = Get_Defense_Object();
 			const char * weapon_name = "";
 			int ammo = 0;
-			if ( Get_Weapon() != NULL )  {
+			if ( Get_Weapon() != nullptr )  {
 				weapon_name = Get_Weapon()->Get_Definition()->Get_Name();
 				ammo = Get_Weapon()->Get_Total_Rounds();
 			}
@@ -2030,7 +2013,7 @@ void SoldierGameObj::Apply_Control( void )
 
 
 	if (	CombatManager::I_Am_Server() ||
-			(Is_Controlled_By_Me() && TransitionCompletionData == NULL) )
+			(Is_Controlled_By_Me() && TransitionCompletionData == nullptr) )
 	{
 		bool action_triggered = Control.Get_Boolean( ControlClass::BOOLEAN_ACTION );
 
@@ -2048,9 +2031,9 @@ void SoldierGameObj::Apply_Control( void )
 				//
 //				DamageableGameObj *damageable_target = HUDInfo::Get_Weapon_Target_Object();
 				DamageableGameObj *damageable_target = HUDInfo::Get_Info_Object();
-				if ( damageable_target != NULL ) {
+				if ( damageable_target != nullptr ) {
 					PhysicalGameObj *physical_target = damageable_target->As_PhysicalGameObj();
-					if ( physical_target != NULL ) {
+					if ( physical_target != nullptr ) {
 						Vector3 target_pos;
 						physical_target->Get_Position( &target_pos );
 						Vector3 my_pos;
@@ -2084,7 +2067,7 @@ void SoldierGameObj::Apply_Control( void )
 								//
 								//	Check for player terminal access
 								//
-								if ( physical_target->As_SimpleGameObj () != NULL ) {
+								if ( physical_target->As_SimpleGameObj () != nullptr ) {
 
 									//
 									//	Is this a player terminal?
@@ -2328,7 +2311,7 @@ SyncLegs = true;
 			tm.Translate( Vector3( offset, 0.3f, 0 ) );
 
 			bool allow_emitters = !Is_Stealthed();
-			SurfaceEffectsManager::Apply_Effect( ground_type, my_type, tm, NULL, this, true, allow_emitters);
+			SurfaceEffectsManager::Apply_Effect( ground_type, my_type, tm, nullptr, this, true, allow_emitters);
 			LastLegMode = leg_mode;
 		}
 
@@ -2343,7 +2326,7 @@ static const char * _profile_name = "Soldier Think";
 //------------------------------------------------------------------------------------
 void	SoldierGameObj::Think( void )
 {
-	{	WWPROFILE( _profile_name );
+	{	WWPROFILENAMED( _profile_name, top );
 
 		if ( this == COMBAT_STAR ) {
 			_shake_delay -= TimeManager::Get_Frame_Seconds();
@@ -2351,7 +2334,7 @@ void	SoldierGameObj::Think( void )
 		}
 		/*
 		ActionClass * p_action = Get_Action();
-		WWASSERT(p_action != NULL);
+		WWASSERT(p_action != nullptr);
 		*/
 
 		//
@@ -2384,11 +2367,11 @@ void	SoldierGameObj::Think( void )
 		}
 
 		// Stats
-		if ( Get_Player_Data() != NULL ) {
+		if ( Get_Player_Data() != nullptr ) {
 			WWPROFILE("Stats");
 			Get_Player_Data()->Stats_Add_Game_Time( TimeManager::Get_Frame_Seconds() );
 			Get_Player_Data()->Stats_Set_Final_Health( Get_Defense_Object()->Get_Health() );
-			if ( Get_Vehicle() != NULL ) {
+			if ( Get_Vehicle() != nullptr ) {
 				Get_Player_Data()->Stats_Add_Vehicle_Time( TimeManager::Get_Frame_Seconds() );
 			}
 		}
@@ -2406,7 +2389,7 @@ void	SoldierGameObj::Think( void )
 		// In CTF a flag-bearer may not be permitted to use weapons
 		// This code will deselect the weapon if that is the case.
 		//
-		if (CombatManager::I_Am_Server() && Get_Weapon() != NULL &&
+		if (CombatManager::I_Am_Server() && Get_Weapon() != nullptr &&
 			!CombatManager::Is_Firing_Enabled(this)) {
 			Get_Weapon_Bag()->Deselect();
 		}
@@ -2430,7 +2413,7 @@ void	SoldierGameObj::Think( void )
 	}
 
 {
-	WWPROFILE( _profile_name );
+	WWPROFILENAMED( _profile_name, top );
 
 	if ( CombatManager::I_Am_Server() ) {
 		WWPROFILE("Handle C4");
@@ -2490,9 +2473,9 @@ void	SoldierGameObj::Think( void )
 			StringClass explosion_name = ArmorWarheadManager::Get_Special_Damage_Explosion( SpecialDamageMode );
 			if ( !explosion_name.Is_Empty() ) {
 				ExplosionDefinitionClass * def = (ExplosionDefinitionClass *)DefinitionMgrClass::Find_Typed_Definition( explosion_name, CLASSID_DEF_EXPLOSION );
-				if ( def != NULL) {
+				if ( def != nullptr) {
 					Vector3 pos = Get_Bullseye_Position();
-					ExplosionManager::Create_Explosion_At( def->Get_ID(), pos, NULL );
+					ExplosionManager::Create_Explosion_At( def->Get_ID(), pos, nullptr );
 				}
 			}
 		}
@@ -2539,11 +2522,11 @@ void	SoldierGameObj::Think( void )
 	// ClientOnlys doen't handle TRANSITION_COMPLETE
 	if ( !CombatManager::I_Am_Only_Client() || Is_Controlled_By_Me()) {
 		if ( Get_State() == HumanStateClass::TRANSITION_COMPLETE ) {
-			if ( TransitionCompletionData != NULL ) {
+			if ( TransitionCompletionData != nullptr ) {
 	//			Debug_Say(( "Ended Transition %p\n", Transition ));
 				// We just completed a transition, notify
 				TransitionInstanceClass::End( this, TransitionCompletionData );
-				TransitionCompletionData = NULL;
+				TransitionCompletionData = nullptr;
 			} else {
 	//			Debug_Say(( "Ended Unknown Transition %p\n", Transition ));
 				HumanState.Set_State( HumanStateClass::UPRIGHT );
@@ -2562,12 +2545,12 @@ void	SoldierGameObj::Think( void )
 			//
 			//	Remove the emoticon
 			//
-			if ( EmotIconModel != NULL && EmotIconModel->Is_In_Scene() ) {
+			if ( EmotIconModel != nullptr && EmotIconModel->Is_In_Scene() ) {
 				EmotIconModel->Remove();
 				REF_PTR_RELEASE( EmotIconModel );
 			}
 
-		} else if ( EmotIconModel != NULL  ) {
+		} else if ( EmotIconModel != nullptr  ) {
 
 			//
 			//	Put the icon over the soldier's head
@@ -2588,9 +2571,9 @@ void	SoldierGameObj::Think( void )
 		//
 		//	Change the facial animation
 		//
-		if ( HeadModel != NULL ) {
+		if ( HeadModel != nullptr ) {
 			// Don't stop a playing script animation
-			if ( ( HeadModel->Peek_Animation() == NULL ) ||
+			if ( ( HeadModel->Peek_Animation() == nullptr ) ||
 				  (HeadModel->Peek_Animation() == SpeechAnim ) ) {
 				SpeechAnim->Generate_Idle_Animation( 20, 0.5F );
 				HeadModel->Set_Animation( SpeechAnim, 0, RenderObjClass::ANIM_MODE_LOOP );
@@ -2705,17 +2688,17 @@ void	SoldierGameObj::Post_Think( void )
 		update_weapon = true;
 	}
 
-	if ( ( Get_Weapon() != NULL ) && ( Get_Weapon()->Is_Model_Update_Needed() ) ) {
+	if ( ( Get_Weapon() != nullptr ) && ( Get_Weapon()->Is_Model_Update_Needed() ) ) {
 		update_weapon = true;
 		Get_Weapon()->Reset_Model_Update();			// reset model update needed
 	}
 
 
 	if ( update_weapon ) {
-		if ( Get_Weapon() != NULL ) {
+		if ( Get_Weapon() != nullptr ) {
 			Set_Weapon_Model( Get_Weapon()->Get_Model_Name() );
 		} else {
-			Set_Weapon_Model( NULL );
+			Set_Weapon_Model( nullptr );
 		}
 	}
 
@@ -2731,7 +2714,7 @@ void	SoldierGameObj::Post_Think( void )
 
 	Handle_Head_look();
 
-	if ( Get_Weapon() != NULL && Get_State() == HumanStateClass::ON_FIRE ) {
+	if ( Get_Weapon() != nullptr && Get_State() == HumanStateClass::ON_FIRE ) {
 		Get_Weapon()->Set_Primary_Triggered( false );
 		Get_Weapon()->Set_Secondary_Triggered( false );
 	}
@@ -2747,7 +2730,7 @@ void	SoldierGameObj::Post_Think( void )
 const Matrix3D & SoldierGameObj::Get_Muzzle( int /* index */ )
 {
 	static Matrix3D _muzzle(1);
-	if ( WeaponRenderModel != NULL ) {
+	if ( WeaponRenderModel != nullptr ) {
 		Matrix3D true_muzzle = WeaponRenderModel->Get_Bone_Transform( "muzzlea0" );
 		Vector3 muzzle_pos = true_muzzle.Get_Translation();
 		_muzzle.Obj_Look_At( muzzle_pos, Get_Targeting_Pos(), 0 );
@@ -2849,7 +2832,7 @@ Clamp_Angle (float angle, float min_angle, float max_angle)
 
 void	SoldierGameObj::Handle_Head_look( void )
 {
-	if ( Peek_Model ()->Get_HTree () == NULL ) {
+	if ( Peek_Model ()->Get_HTree () == nullptr ) {
 		return ;
 	}
 
@@ -2900,7 +2883,7 @@ void	SoldierGameObj::Handle_Head_look( void )
 				//	Get the transform that has been used to modify the head bone...
 				//
 				const HTreeClass *htree = Peek_Model()->Get_HTree();
-				WWASSERT( htree != NULL );
+				WWASSERT( htree != nullptr );
 
 				Matrix3D bone_control_tm( 1 );
 				htree->Get_Bone_Control( head_bone, bone_control_tm );
@@ -2973,8 +2956,8 @@ void	SoldierGameObj::Handle_Head_look( void )
 			}
 		}
 
-#define	HEAD_TURN_RATE		(DEG_TO_RAD( 360 )/2)
-#define	HEAD_TILT_RATE		(DEG_TO_RAD( 180 )/2)
+		constexpr float HEAD_TURN_RATE = (DEG_TO_RADF( 360 )/2);
+		constexpr float HEAD_TILT_RATE = (DEG_TO_RADF( 180 )/2);
 		float max_turn = HEAD_TURN_RATE * TimeManager::Get_Frame_Seconds();
 		float max_tilt = HEAD_TILT_RATE * TimeManager::Get_Frame_Seconds();
 		HeadRotation.X += WWMath::Clamp( (desired_head_rotation.X - HeadRotation.X), -max_turn, max_turn );
@@ -3001,7 +2984,7 @@ void	SoldierGameObj::Handle_Head_look( void )
 //------------------------------------------------------------------------------------
 void	SoldierGameObj::Set_Blended_Animation( const char *animation_name, bool looping, float frame_offset, bool play_backwards )
 {
-	if ( animation_name == NULL ) {
+	if ( animation_name == nullptr ) {
 		HumanState.Stop_Scripted_Animation();
 		return;
 	}
@@ -3014,9 +2997,9 @@ void	SoldierGameObj::Set_Blended_Animation( const char *animation_name, bool loo
 
 	if ( play_backwards ) {
 		HAnimClass *anim = Get_Anim_Control()->Peek_Animation();
-		if ( anim != NULL ) {
+		if ( anim != nullptr ) {
 			int frame_count = anim->Get_Num_Frames();
-			Get_Anim_Control()->Set_Mode( ANIM_MODE_TARGET, frame_count - 1 );
+			Get_Anim_Control()->Set_Mode( ANIM_MODE_TARGET, float(frame_count - 1) );
 			Get_Anim_Control()->Set_Target_Frame( 0 );
 		}
 	}
@@ -3028,7 +3011,7 @@ void	SoldierGameObj::Set_Blended_Animation( const char *animation_name, bool loo
 //------------------------------------------------------------------------------------
 void	SoldierGameObj::Set_Animation( const char *animation_name, bool looping, float /* start_frame */ )
 {
-	if ( animation_name == NULL ) {
+	if ( animation_name == nullptr ) {
 //		Debug_Say(( "Stoping Scripted Human Animation\n" ));
 		HumanState.Stop_Scripted_Animation();
 // FIX		AnimControl->UnLock_Animation();
@@ -3046,7 +3029,7 @@ void	SoldierGameObj::Set_Animation( const char *animation_name, bool looping, fl
 void	SoldierGameObj::Start_Transition_Animation( const char * anim_name, TransitionCompletionDataStruct *data )
 {
 //	Debug_Say(( "Starting Human Transition Animation %s\n", anim_name ));
-	//WWASSERT( TransitionCompletionData == NULL );
+	//WWASSERT( TransitionCompletionData == nullptr );
 	TransitionCompletionData = data;
 	AnimationName = anim_name;
 	HumanState.Start_Transition_Animation( anim_name, false );
@@ -3055,21 +3038,21 @@ void	SoldierGameObj::Start_Transition_Animation( const char * anim_name, Transit
 //------------------------------------------------------------------------------------
 void SoldierGameObj::Set_Weapon_Model( const char *model_name )
 {
-	if ( WeaponRenderModel != NULL ) {		// remove old gun model
-		if ( Peek_Model() != NULL ) {
+	if ( WeaponRenderModel != nullptr ) {		// remove old gun model
+		if ( Peek_Model() != nullptr ) {
 			Peek_Model()->Remove_Sub_Object(WeaponRenderModel);		// Clean the bone
 		}
 		WeaponRenderModel->Release_Ref();
-		WeaponRenderModel = NULL;
+		WeaponRenderModel = nullptr;
 	}
 
-	if ( (model_name != NULL) && (*model_name != 0) ) {
+	if ( (model_name != nullptr) && (*model_name != 0) ) {
 		//Debug_Say(( "Updating soldier Weapon model to %s!!!\n", model_name ));
 
 		StringClass stripped_name(true);
 		Get_Render_Obj_Name_From_Filename( stripped_name, model_name );
 		WeaponRenderModel = SoldierGameObj::Find_RenderObj( stripped_name );
-		if ( WeaponRenderModel == NULL ) {
+		if ( WeaponRenderModel == nullptr ) {
 			WeaponRenderModel = Create_Render_Obj_From_Filename( model_name );
 			WWASSERT( WeaponRenderModel );
 			SET_REF_OWNER( WeaponRenderModel );
@@ -3080,7 +3063,7 @@ void SoldierGameObj::Set_Weapon_Model( const char *model_name )
 
 		// Create and add new gun model
 
-		if ( Peek_Model() != NULL ) {
+		if ( Peek_Model() != nullptr ) {
 			if ( WeaponRenderModel->Get_Container() != Peek_Model() ) {
 				Peek_Model()->Add_Sub_Object_To_Bone( WeaponRenderModel, GUN_BONE_NAME );
 			}
@@ -3094,16 +3077,16 @@ void SoldierGameObj::Set_Weapon_Model( const char *model_name )
 //------------------------------------------------------------------------------------
 void SoldierGameObj::Set_Weapon_Animation( const char *anim_name )
 {
-	if ( WeaponAnimControl == NULL ) {
+	if ( WeaponAnimControl == nullptr ) {
 		WeaponAnimControl = new SimpleAnimControlClass;
-		if (WeaponRenderModel != NULL ) {
+		if (WeaponRenderModel != nullptr ) {
 			// Update Anim Control
 			WeaponAnimControl->Set_Model( WeaponRenderModel );
 		}
 	}
-	if ( WeaponAnimControl != NULL ) {
+	if ( WeaponAnimControl != nullptr ) {
 //		Debug_Say(( "Updating soldier gun anim to \"%s\"!!!\n", anim_name ));
-		if ( ( anim_name != NULL ) && ( *anim_name != 0 ) ) {
+		if ( ( anim_name != nullptr ) && ( *anim_name != 0 ) ) {
 			WeaponAnimControl->Set_Animation( anim_name );
 		}
 	}
@@ -3111,34 +3094,34 @@ void SoldierGameObj::Set_Weapon_Animation( const char *anim_name )
 
 void SoldierGameObj::Set_Back_Weapon_Model( const char *model_name )
 {
-	if ( BackWeaponRenderModel != NULL ) {		// remove old gun model
-		if (Peek_Model() != NULL ) {
+	if ( BackWeaponRenderModel != nullptr ) {		// remove old gun model
+		if (Peek_Model() != nullptr ) {
 			Peek_Model()->Remove_Sub_Object(BackWeaponRenderModel);
 		}
 		BackWeaponRenderModel->Release_Ref();
-		BackWeaponRenderModel = NULL;
+		BackWeaponRenderModel = nullptr;
 	}
 
-	if ( (model_name != NULL) && (*model_name != 0) ) {
+	if ( (model_name != nullptr) && (*model_name != 0) ) {
 
 		// Create and add back gun model
 		StringClass stripped_name(true);
 		Get_Render_Obj_Name_From_Filename( stripped_name, model_name );
 		BackWeaponRenderModel = SoldierGameObj::Find_RenderObj( stripped_name );
-		if ( BackWeaponRenderModel == NULL ) {
+		if ( BackWeaponRenderModel == nullptr ) {
 			BackWeaponRenderModel = Create_Render_Obj_From_Filename( model_name );
 //			WWASSERT( BackWeaponRenderModel );
-			if ( BackWeaponRenderModel != NULL ) {
+			if ( BackWeaponRenderModel != nullptr ) {
 				SET_REF_OWNER( BackWeaponRenderModel );
 				Add_RenderObj( BackWeaponRenderModel );
 				BackWeaponRenderModel->Release_Ref();
 			}
 		}
 
-		if ( BackWeaponRenderModel != NULL ) {
+		if ( BackWeaponRenderModel != nullptr ) {
 			BackWeaponRenderModel->Add_Ref();
 
-			if (Peek_Model() != NULL ) {
+			if (Peek_Model() != nullptr ) {
 				Peek_Model()->Add_Sub_Object_To_Bone( BackWeaponRenderModel, BACK_GUN_BONE_NAME );
 			}
 		} else {
@@ -3150,19 +3133,19 @@ void SoldierGameObj::Set_Back_Weapon_Model( const char *model_name )
 void SoldierGameObj::Set_Back_Flag_Model(const char *model_name,
 	const Vector3 & /* tint */)
 {
-	if ( BackFlagRenderModel != NULL ) {		// remove old gun model
-		if (Peek_Model() != NULL ) {
+	if ( BackFlagRenderModel != nullptr ) {		// remove old gun model
+		if (Peek_Model() != nullptr ) {
 			Peek_Model()->Remove_Sub_Object(BackFlagRenderModel);
 		}
 		BackFlagRenderModel->Release_Ref();
-		BackFlagRenderModel = NULL;
+		BackFlagRenderModel = nullptr;
 	}
 
-	if ( (model_name != NULL) && (*model_name != 0) ) {
+	if ( (model_name != nullptr) && (*model_name != 0) ) {
 
 		// Create and add back gun model
 		BackFlagRenderModel = Create_Render_Obj_From_Filename( model_name );
-		if ( BackFlagRenderModel != NULL ) {
+		if ( BackFlagRenderModel != nullptr ) {
 			SET_REF_OWNER( BackFlagRenderModel );
 
 			/*
@@ -3170,7 +3153,7 @@ void SoldierGameObj::Set_Back_Flag_Model(const char *model_name,
 			Tint(BackFlagRenderModel, tint);
 			*/
 
-			if (Peek_Model() != NULL ) {
+			if (Peek_Model() != nullptr ) {
 				Peek_Model()->Add_Sub_Object_To_Bone( BackFlagRenderModel, BACK_GUN_BONE_NAME );
 			}
 		} else {
@@ -3187,7 +3170,7 @@ void	SoldierGameObj::Update_Back_Gun( void )
 	if ( next_weapon && ( next_weapon != Get_Weapon() ) ) {
 		Set_Back_Weapon_Model( next_weapon->Get_Back_Model_Name() );
 	} else {
-		Set_Back_Weapon_Model( NULL );
+		Set_Back_Weapon_Model( nullptr );
 	}
 }
 
@@ -3211,7 +3194,7 @@ float		SoldierGameObj::Get_Weapon_Length( void )
 //------------------------------------------------------------------------------------
 bool	SoldierGameObj::Internal_Set_Targeting( const Vector3 & target_pos, bool do_tilt )
 {
-	WWPROFILE( "Soldier Set Targeting" );
+	WWPROFILENAMED( "Soldier Set Targeting", top );
 
 	if ( CombatManager::Is_Skeleton_Slider_Demo_Enabled() ) {
 		return false;
@@ -3228,13 +3211,13 @@ bool	SoldierGameObj::Internal_Set_Targeting( const Vector3 & target_pos, bool do
 	}
 
 	if ( Get_State() == HumanStateClass::IN_VEHICLE ) {
-		if ( Vehicle != NULL ) {
+		if ( Vehicle != nullptr ) {
 			if ( Vehicle->Get_Driver_Is_Gunner() ) {
 				if ( Vehicle->Get_Driver() == this ) {
 					Vehicle->Set_Targeting( target_pos );
 				}
 			} else {
-				if ( Vehicle->Get_Driver() == this && Vehicle->Get_Gunner() == NULL ) {
+				if ( Vehicle->Get_Driver() == this && Vehicle->Get_Gunner() == nullptr ) {
 					Vehicle->Set_Targeting( target_pos );
 				} else if ( Vehicle->Get_Gunner() == this ) {
 					Vehicle->Set_Targeting( target_pos );
@@ -3295,7 +3278,7 @@ bool	SoldierGameObj::Internal_Set_Targeting( const Vector3 & target_pos, bool do
 
 	if ( Is_Human_Controlled() && Get_State() != HumanStateClass::IN_VEHICLE ) {
 
-#define		TILT_DOWN_SPEED		4.0
+		constexpr float TILT_DOWN_SPEED = 4.0f;
 		float direction = -1;
 		if ( Get_Weapon() && Get_Weapon()->Is_Reloading() ) {
 			direction = 1;
@@ -3327,7 +3310,7 @@ bool	SoldierGameObj::Set_Targeting( const Vector3 & target_pos, bool do_tilt )
 	//
 	//	Don't do the targetting if we are locked on an object
 	//
-	if ( FacingObject == NULL ) {
+	if ( FacingObject == nullptr ) {
 		retval = Internal_Set_Targeting( target_pos, do_tilt );
 	}
 
@@ -3337,13 +3320,13 @@ bool	SoldierGameObj::Set_Targeting( const Vector3 & target_pos, bool do_tilt )
 //------------------------------------------------------------------------------------
 RenderObjClass *	SoldierGameObj::Find_Head_Model( void )
 {
-	RenderObjClass *head_model = NULL;
+	RenderObjClass *head_model = nullptr;
 
 	//
 	//	Get a pointer to the HLod this object is using
 	//
 	RenderObjClass *model = Peek_Model ();
-	if ( model != NULL && model->Class_ID () == RenderObjClass::CLASSID_HLOD ) {
+	if ( model != nullptr && model->Class_ID () == RenderObjClass::CLASSID_HLOD ) {
 		HLodClass *lod = reinterpret_cast<HLodClass *> ( model );
 
 		//
@@ -3357,9 +3340,9 @@ RenderObjClass *	SoldierGameObj::Find_Head_Model( void )
 		//
 		for (int index = 0; index < obj_count; index ++) {
 			RenderObjClass *render_obj = lod->Get_Sub_Object_On_Bone ( index, bone_index );
-			if (render_obj != NULL) {
+			if (render_obj != nullptr) {
 				const HTreeClass *htree = render_obj->Get_HTree();
-				if ( htree != NULL ) {
+				if ( htree != nullptr ) {
 
 					//
 					//	Is this really a head model?
@@ -3386,7 +3369,7 @@ void	SoldierGameObj::Set_Emot_Icon ( const char *model_name, float duration )
 	//
 	//	Free the old emot icon
 	//
-	if ( EmotIconModel != NULL ) {
+	if ( EmotIconModel != nullptr ) {
 
 		if ( EmotIconModel->Is_In_Scene() ) {
 			EmotIconModel->Remove ();
@@ -3398,13 +3381,13 @@ void	SoldierGameObj::Set_Emot_Icon ( const char *model_name, float duration )
 	//
 	//	Try to load the new emot icon model
 	//
-	if ( model_name != NULL ) {
+	if ( model_name != nullptr ) {
 
 		//
 		//	Create the new model
 		//
 		EmotIconModel = ::Create_Render_Obj_From_Filename( model_name );
-		if ( EmotIconModel != NULL ) {
+		if ( EmotIconModel != nullptr ) {
 
 			//
 			//	Determine what the animation name for the model is
@@ -3417,7 +3400,7 @@ void	SoldierGameObj::Set_Emot_Icon ( const char *model_name, float duration )
 			//	Animate the model
 			//
 			HAnimClass *anim = WW3DAssetManager::Get_Instance ()->Get_HAnim( anim_name );
-			if ( anim != NULL ) {
+			if ( anim != nullptr ) {
 				EmotIconModel->Set_Animation( anim, 0.0F, RenderObjClass::ANIM_MODE_LOOP );
 				REF_PTR_RELEASE( anim );
 			}
@@ -3472,7 +3455,7 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 	//	Lookup the translation object from the strings database
 	//
 	TDBObjClass *translate_obj = TranslateDBClass::Find_Object( text_id );
-	if (translate_obj != NULL) {
+	if (translate_obj != nullptr) {
 
 		const unichar_t *string		= translate_obj->Get_String ();
 		int sound_def_id			= (int)translate_obj->Get_Sound_ID ();
@@ -3482,7 +3465,7 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 		//	If this soldier was still talking from a previos call, then
 		// kill the old sound
 		//
-		if ( speaker != NULL ) {
+		if ( speaker != nullptr ) {
 			speaker->Stop_Current_Speech();
 		}
 
@@ -3496,13 +3479,13 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 			//	Create the sound object
 			//
 			AudibleSoundClass *speech = WWAudioClass::Get_Instance ()->Create_Sound( sound_def_id );
-			if ( speech != NULL ) {
+			if ( speech != nullptr ) {
 				duration = (speech->Get_Duration() / 1000.0F);
 
 				//
 				//	Return the sound object to the caller as necessary
 				//
-				if ( sound_obj_to_return != NULL ) {
+				if ( sound_obj_to_return != nullptr ) {
 					(*sound_obj_to_return) = speech;
 					(*sound_obj_to_return)->Add_Ref();
 				}
@@ -3511,7 +3494,7 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 				//	Either play the sound at the speaker's location
 				// or just play it as a 2D sample.
 				//
-				if ( speaker != NULL ) {
+				if ( speaker != nullptr ) {
 					speech->Set_Transform( speaker->Get_Transform() );
 					speech->Add_To_Scene();
 					display_text = (speech->Is_Sound_Culled() == false);
@@ -3527,7 +3510,7 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 			//
 			//	Update the speaker's internal sound object pointer
 			//
-			if ( speaker != NULL ) {
+			if ( speaker != nullptr ) {
 				speaker->CurrentSpeech = speech;
 			} else {
 				REF_PTR_RELEASE (speech);
@@ -3537,7 +3520,7 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 		//
 		//	Check to see if this string is commented out.
 		//
-		if( string != NULL && string[0] == U_CHAR('/') && string[1] == U_CHAR('/') ) {
+		if( string != nullptr && string[0] == U_CHAR('/') && string[1] == U_CHAR('/') ) {
 			string			+= 2;
 			display_text	= false;
 		}
@@ -3545,7 +3528,7 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 		//
 		//	Display the text on the screen
 		//
-		if ( display_text && string != NULL && string[0] != 0 ) {
+		if ( display_text && string != nullptr && string[0] != 0 ) {
 			float message_duration = std::max( duration, 5.0F );
 			CombatManager::Get_Message_Window ()->Add_Message( string, Vector3 (1, 1, 1),
 																speaker, message_duration );
@@ -3554,15 +3537,15 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 		//
 		//	Play the facial animation (if one exists)
 		//
-		if ( speaker != NULL && speaker->HeadModel != NULL) {
-			HAnimClass *head_anim = NULL;
+		if ( speaker != nullptr && speaker->HeadModel != nullptr) {
+			HAnimClass *head_anim = nullptr;
 
 			//
 			//	Dig out the skeleton name for the head model
 			//
 			StringClass anim_root_name;
 			const HTreeClass *htree = speaker->HeadModel->Get_HTree ();
-			if (htree != NULL) {
+			if (htree != nullptr) {
 				anim_root_name = htree->Get_Name ();
 				anim_root_name += ".";
 			}
@@ -3571,13 +3554,13 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 			//	Determine if we should use a pre-canned animation, or
 			// if we should build one dynamically
 			//
-			if ( anim_name == NULL || anim_name[0] == 0 ) {
+			if ( anim_name == nullptr || anim_name[0] == 0 ) {
 
 				//
 				//	Build an animation dynamically
 				//
 				const char *english_string = translate_obj->Get_English_String();
-				if ( english_string != NULL && english_string[0] != 0 ) {
+				if ( english_string != nullptr && english_string[0] != 0 ) {
 					if (speaker->SpeechAnim->Generate_Animation( english_string, duration )) {
 						head_anim = speaker->SpeechAnim;
 					}
@@ -3607,7 +3590,7 @@ float SoldierGameObj::Say_Dynamic_Dialogue
 			//
 			//	Play the animation on the head model (if one exists)
 			//
-			if ( speaker->HeadModel != NULL && head_anim != NULL ) {
+			if ( speaker->HeadModel != nullptr && head_anim != nullptr ) {
 				speaker->HeadModel->Set_Animation( head_anim, 0, RenderObjClass::ANIM_MODE_ONCE );
 			}
 		}
@@ -3623,12 +3606,12 @@ void	SoldierGameObj::Stop_Current_Speech( void )
 	//
 	//	Kill the current sound we are making (speech, scream, grunt, etc)
 	//
-	if ( CurrentSpeech != NULL ) {
+	if ( CurrentSpeech != nullptr ) {
 		GenerateIdleFacialAnimTimer = 0;
 		CurrentSpeech->Stop();
 		CurrentSpeech->Remove_From_Scene();
 		CurrentSpeech->Release_Ref();
-		CurrentSpeech = NULL;
+		CurrentSpeech = nullptr;
 	}
 
 	return ;
@@ -3653,14 +3636,14 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 		SmartGameObj::Apply_Damage_Extended( damager, scale, direction, collision_box_name );
 
 		// Add electric effect
-		if ( HealingEffect == NULL ) {
+		if ( HealingEffect == nullptr ) {
 			HealingEffect = CombatMaterialEffectManager::Get_Health_Effect();
-			if ( HealingEffect != NULL ) {
+			if ( HealingEffect != nullptr ) {
 				Peek_Human_Phys()->Add_Effect_To_Me( HealingEffect );
 			}
 		}
 
-		if ( HealingEffect != NULL ) {
+		if ( HealingEffect != nullptr ) {
 			HealingEffect->Set_Target_Parameter(0.495f);	// go almost halfway
 		}
 
@@ -3680,7 +3663,7 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 	// Ambush Kill
 	if ( ( Get_AI_State() == AI_STATE_IDLE ) || ( Get_AI_State() == AI_STATE_SECONDARY_IDLE ) ) {
 		// Only ambush if there is an owner to the damage, and the target is human controlled
-		if ( damager.Get_Owner() != NULL && !Is_Human_Controlled() ) {
+		if ( damager.Get_Owner() != nullptr && !Is_Human_Controlled() ) {
 			scale *= AMBUSH_DAMAGE_SCALE;
 			ambushed = true;
 //			Debug_Say(( "Ambush Damage!!\n" ));
@@ -3694,7 +3677,7 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 	int ouch_type = Get_Ouch_Type( direction, collision_box_name );
 
 	// Stats
-	PlayerDataClass * damager_data = NULL;
+	PlayerDataClass * damager_data = nullptr;
 	if ( damager.Get_Owner() && damager.Get_Owner()->As_SoldierGameObj() ) {
 		damager_data = damager.Get_Owner()->As_SoldierGameObj()->Get_Player_Data();
 	}
@@ -3705,20 +3688,20 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 		switch( ouch_type ) {
 			case HumanStateClass::HEAD_FROM_BEHIND:
 			case HumanStateClass::HEAD_FROM_FRONT:
-				if ( Get_Player_Data() != NULL ) {
+				if ( Get_Player_Data() != nullptr ) {
 					Get_Player_Data()->Stats_Add_Head_Hit();
 				}
-				if ( damager_data != NULL ) {
+				if ( damager_data != nullptr ) {
 					damager_data->Stats_Add_Head_Shot();
 				}
 				break;
 
 			case HumanStateClass::TORSO_FROM_BEHIND:
 			case HumanStateClass::TORSO_FROM_FRONT:
-				if ( Get_Player_Data() != NULL ) {
+				if ( Get_Player_Data() != nullptr ) {
 					Get_Player_Data()->Stats_Add_Torso_Hit();
 				}
-				if ( damager_data != NULL ) {
+				if ( damager_data != nullptr ) {
 					damager_data->Stats_Add_Torso_Shot();
 				}
 				break;
@@ -3727,10 +3710,10 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 			case HumanStateClass::LEFT_ARM_FROM_FRONT:
 			case HumanStateClass::RIGHT_ARM_FROM_BEHIND:
 			case HumanStateClass::RIGHT_ARM_FROM_FRONT:
-				if ( Get_Player_Data() != NULL ) {
+				if ( Get_Player_Data() != nullptr ) {
 					Get_Player_Data()->Stats_Add_Arm_Hit();
 				}
-				if ( damager_data != NULL ) {
+				if ( damager_data != nullptr ) {
 					damager_data->Stats_Add_Arm_Shot();
 				}
 				break;
@@ -3739,19 +3722,19 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 			case HumanStateClass::LEFT_LEG_FROM_FRONT:
 			case HumanStateClass::RIGHT_LEG_FROM_BEHIND:
 			case HumanStateClass::RIGHT_LEG_FROM_FRONT:
-				if ( Get_Player_Data() != NULL ) {
+				if ( Get_Player_Data() != nullptr ) {
 					Get_Player_Data()->Stats_Add_Leg_Hit();
 				}
-				if ( damager_data != NULL ) {
+				if ( damager_data != nullptr ) {
 					damager_data->Stats_Add_Leg_Shot();
 				}
 				break;
 
 			case HumanStateClass::GROIN:
-				if ( Get_Player_Data() != NULL ) {
+				if ( Get_Player_Data() != nullptr ) {
 					Get_Player_Data()->Stats_Add_Crotch_Hit();
 				}
-				if ( damager_data != NULL ) {
+				if ( damager_data != nullptr ) {
 					damager_data->Stats_Add_Crotch_Shot();
 				}
 				break;
@@ -3761,7 +3744,7 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 	//	Determine what (if any) dialogue to say
 	int dialogue_id = -1;
 	ArmedGameObj *damage_owner = damager.Get_Owner();
-	if( damage_owner != NULL ) {
+	if( damage_owner != nullptr ) {
 
 		//	Were we injured by a friend or foe?
 		if ( Is_Enemy( damage_owner ) ) {
@@ -3774,9 +3757,9 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 	float health_before = Get_Defense_Object()->Get_Health();
 	float armor_before = Get_Defense_Object()->Get_Shield_Strength();
 
-	if ( collision_box_name != NULL ) {
+	if ( collision_box_name != nullptr ) {
 		const char * start = ::strchr( collision_box_name, '.' );
-		if ( start != NULL ) {
+		if ( start != nullptr ) {
 			start++;
 			float bone_scale = BonesManager::Get_Bone_Damage_Scale( start );
 			scale *= bone_scale;
@@ -3816,12 +3799,12 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 				weapon_name = damager.Get_Owner()->Get_Weapon()->Get_Definition()->Get_Name();
 			}
 		}
-		const char * body_part = ( collision_box_name != NULL ) ? collision_box_name : "";
+		const char * body_part = ( collision_box_name != nullptr ) ? collision_box_name : "";
 		float armor = Get_Defense_Object()->Get_Shield_Strength();
 	   DIAG_LOG(( "DRCE", "%s; %d; %s; %1.2f; %1.2f; %1.2f; %1.2f; %1.2f", weapon_name, hitter_id, body_part, armor, health, pos.X, pos.Y, pos.Z ));
 	}
 
-	if (( damager.Get_Owner() == COMBAT_STAR ) && ( COMBAT_STAR != NULL )) {
+	if (( damager.Get_Owner() == COMBAT_STAR ) && ( COMBAT_STAR != nullptr )) {
 		Vector3 pos;
 		COMBAT_STAR->Get_Position( &pos );
 		const char * weapon_name = "";
@@ -3831,7 +3814,7 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 			ammo = COMBAT_STAR->Get_Weapon()->Get_Total_Rounds();
 		}
 		int hittee_id = Get_ID();
-		const char * body_part = ( collision_box_name != NULL ) ? collision_box_name : "";
+		const char * body_part = ( collision_box_name != nullptr ) ? collision_box_name : "";
 		float armor = Get_Defense_Object()->Get_Shield_Strength();
 		Vector3 victim_pos;
 		Get_Position( &victim_pos );
@@ -3879,7 +3862,7 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 		if ( FreeRandom.Get_Float() < probability ) {
 			// if skin is not impervious to the damage
 			int skin = Get_Defense_Object()->Get_Skin();
-			ArmorWarheadManager::SpecialDamageType special_damage = ArmorWarheadManager::Get_Special_Damage_Type( warhead );
+			special_damage = ArmorWarheadManager::Get_Special_Damage_Type( warhead );
 			if ( !ArmorWarheadManager::Is_Skin_Impervious( special_damage, skin ) ) {
 				Set_Special_Damage_Mode( special_damage, damager.Get_Owner() );
 			}
@@ -3915,8 +3898,8 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 
 		// Check for creating visceroids
 		if ( IS_MISSION ) {
-			int warhead = damager.Get_Warhead();
-			float visceroid_probability = ArmorWarheadManager::Get_Visceroid_Probability( warhead );
+			int viceroid_warhead = damager.Get_Warhead();
+			float visceroid_probability = ArmorWarheadManager::Get_Visceroid_Probability( viceroid_warhead );
 			if ( !Is_Human_Controlled() && visceroid_probability != 0 ) {
 				if ( FreeRandom.Get_Float() < visceroid_probability ) {
 
@@ -3925,7 +3908,7 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 					if ( ::stricmp( Get_Definition().Get_Name(), VISCEROID_NAME ) != 0 ) {
 						// Create a visceroid
 						PhysicalGameObj * vis = ObjectLibraryManager::Create_Object( VISCEROID_NAME );
-						if ( vis != NULL ) {
+						if ( vis != nullptr ) {
 							vis->Set_Transform( Get_Transform() );
 							vis->Start_Observers ();
 							Set_Delete_Pending();		// Kill me
@@ -3939,7 +3922,7 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 		Enable_Hibernation( false );
 
 		// Stats
-		SoldierGameObj * damager_owner = NULL;
+		SoldierGameObj * damager_owner = nullptr;
 		if ( damager.Get_Owner() && damager.Get_Owner()->As_SoldierGameObj() ) {
 			damager_owner = damager.Get_Owner()->As_SoldierGameObj();
 		}
@@ -3979,7 +3962,7 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 				//	Lookup the global death sound
 				//
 				GlobalSettingsDef *global_settings = GlobalSettingsDef::Get_Global_Settings ();
-				if (global_settings != NULL) {
+				if (global_settings != nullptr) {
 					death_sound_id = global_settings->Get_Death_Sound_ID();
 				}
 			}
@@ -4013,9 +3996,9 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 			//
 			//	Queue the guy who killed us...
 			//
-			if (	damage_owner != NULL &&
+			if (	damage_owner != nullptr &&
 					damage_owner != this &&
-					damage_owner->As_SoldierGameObj () != NULL )
+					damage_owner->As_SoldierGameObj () != nullptr )
 			{
 				SoldierGameObj *our_killer = damage_owner->As_SoldierGameObj  ();
 
@@ -4039,7 +4022,7 @@ void	SoldierGameObj::Apply_Damage_Extended( const OffenseObjectClass & damager, 
 		}
 	}
 
-	if( CurrentSpeech == NULL && dialogue_id >= 0 ) {
+	if( CurrentSpeech == nullptr && dialogue_id >= 0 ) {
 		Say_Dialogue( dialogue_id );
 	}
 }
@@ -4087,7 +4070,7 @@ void	SoldierGameObj::Enter_Vehicle( VehicleGameObj * vehicle, const char * anim_
 	AnimationName = anim_name;
 	HumanState.Force_Animation( anim_name, false );
 
-	if ( this == COMBAT_STAR && vehicle != NULL ) {
+	if ( this == COMBAT_STAR && vehicle != nullptr ) {
 		Vector3 pos;
 		Vehicle->Get_Position( &pos );
 		int ammo = 0;
@@ -4102,7 +4085,7 @@ void	SoldierGameObj::Enter_Vehicle( VehicleGameObj * vehicle, const char * anim_
 //------------------------------------------------------------------------------------
 void	SoldierGameObj::Exit_Vehicle( void )
 {
-	if ( this == COMBAT_STAR && Vehicle  != NULL ) {
+	if ( this == COMBAT_STAR && Vehicle  != nullptr ) {
 		Vector3 pos;
 		Vehicle->Get_Position( &pos );
 		int ammo = 0;
@@ -4113,17 +4096,17 @@ void	SoldierGameObj::Exit_Vehicle( void )
 		DIAG_LOG(( "EXVE", "%1.2f; %1.2f; %1.2f; %1.2f; %1.2f; %d", pos.X, pos.Y, pos.Z, defense->Get_Shield_Strength(), defense->Get_Health(), ammo ));
 	}
 
-	Vehicle = NULL;
+	Vehicle = nullptr;
 	HumanState.Set_State( HumanStateClass::UPRIGHT );
 }
 
 void	SoldierGameObj::Exit_Destroyed_Vehicle( int seat_num, const Vector3 & vehicle_pos )
 {
-	Vehicle = NULL;
+	Vehicle = nullptr;
 	HumanState.Set_State( HumanStateClass::UPRIGHT );
 
 	Vector3 extent = Peek_Human_Phys()->Get_Collision_Box().Extent;
-	float width = MAX( extent.X, extent.Y ) * 1.1f;
+	float width = std::max( extent.X, extent.Y ) * 1.1f;
 
 	if ( Peek_Model() ) {
 		Peek_Model()->Set_Hidden( false );
@@ -4193,7 +4176,7 @@ void SoldierGameObj::Give_All_Weapons(void)
 
 	// For all weapon defs with the AGiveWeaponsWeapon checked, Give It!
 	for ( WeaponDefinitionClass *weapon_def = (WeaponDefinitionClass *)DefinitionMgrClass::Get_First( CLASSID_DEF_WEAPON );
-			weapon_def != NULL;
+			weapon_def != nullptr;
 			weapon_def = (WeaponDefinitionClass *)DefinitionMgrClass::Get_Next( weapon_def, CLASSID_DEF_WEAPON ) ) {
 		if ( weapon_def->AGiveWeaponsWeapon ) {
 			WeaponBag->Add_Weapon( weapon_def->Get_Name(), -1 );
@@ -4209,13 +4192,13 @@ VehicleGameObj	*	SoldierGameObj::Get_Profile_Vehicle( void )
 	}
 
 	if (( Get_State() == HumanStateClass::TRANSITION ) &&
-		( TransitionCompletionData != NULL )) {
+		( TransitionCompletionData != nullptr )) {
 		if ( TransitionCompletionData->Type == TransitionDataClass::VEHICLE_ENTER ) {
 			return (VehicleGameObj *)TransitionCompletionData->Vehicle.Get_Ptr();
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 bool	SoldierGameObj::Use_Ladder_View( void )
@@ -4225,7 +4208,7 @@ bool	SoldierGameObj::Use_Ladder_View( void )
 	}
 
 	if (( Get_State() == HumanStateClass::TRANSITION ) &&
-		( TransitionCompletionData != NULL )) {
+		( TransitionCompletionData != nullptr )) {
 		if (( TransitionCompletionData->Type == TransitionDataClass::LADDER_ENTER_TOP ) ||
 			 ( TransitionCompletionData->Type == TransitionDataClass::LADDER_ENTER_BOTTOM )) {
 			return true;
@@ -4255,7 +4238,7 @@ void SoldierGameObj::Set_Model(const char *model_name)
 
 Vector3	SoldierGameObj::Get_Bullseye_Position( void )
 {
-	if ( Get_Vehicle() != NULL ) {
+	if ( Get_Vehicle() != nullptr ) {
 		return Get_Vehicle()->Get_Bullseye_Position();
 	}
 
@@ -4274,7 +4257,7 @@ Vector3	SoldierGameObj::Get_Bullseye_Position( void )
 
 bool SoldierGameObj::Can_See(SoldierGameObj * p_soldier)
 {
-	WWASSERT(p_soldier != NULL);
+	WWASSERT(p_soldier != nullptr);
 
 	Vector3 ray_start = Get_Bullseye_Position();
 	Vector3 ray_end = p_soldier->Get_Bullseye_Position();	// This may a big high
@@ -4290,25 +4273,25 @@ bool SoldierGameObj::Can_See(SoldierGameObj * p_soldier)
 	CastResultStruct result;
 	PhysRayCollisionTestClass raytest(ray, &result,
 		BULLET_COLLISION_GROUP, COLLISION_TYPE_PHYSICAL);
-	WWASSERT(COMBAT_SCENE != NULL);
+	WWASSERT(COMBAT_SCENE != nullptr);
 { WWPROFILE( "Cast Ray" );
 	COMBAT_SCENE->Cast_Ray(raytest);
 }
 
 	bool can_see = false;
 
-	if (raytest.CollidedPhysObj != NULL) {
-		SmartGameObj * p_blocker = NULL;
+	if (raytest.CollidedPhysObj != nullptr) {
+		SmartGameObj * p_blocker = nullptr;
 
-		if ( raytest.CollidedPhysObj->Get_Observer() != NULL ) {
+		if ( raytest.CollidedPhysObj->Get_Observer() != nullptr ) {
 			PhysicalGameObj * p_obj = ((CombatPhysObserverClass *)raytest.CollidedPhysObj->Get_Observer())->As_PhysicalGameObj();
-			if ( p_obj != NULL ) {
+			if ( p_obj != nullptr ) {
 				p_blocker = p_obj->As_SmartGameObj();
 			}
 		}
 
 
-		if (p_blocker != NULL && p_blocker->Get_Control_Owner() ==
+		if (p_blocker != nullptr && p_blocker->Get_Control_Owner() ==
 			p_soldier->Get_Control_Owner()) {
 			can_see = true;
 		}
@@ -4328,17 +4311,17 @@ void	SoldierGameObj::Adjust_Skeleton( float height, float width )
 		return;
 	}
 
-	HTreeClass	* tree_base = NULL;
-	HTreeClass	* tree_tall = NULL;
-	HTreeClass	* tree_wide = NULL;
+	HTreeClass	* tree_base = nullptr;
+	HTreeClass	* tree_tall = nullptr;
+	HTreeClass	* tree_wide = nullptr;
 
-	if ( tree_base == NULL ) {
+	if ( tree_base == nullptr ) {
 		tree_base = WW3DAssetManager::Get_Instance()->Get_HTree( "s_a_human" );
 		tree_tall = WW3DAssetManager::Get_Instance()->Get_HTree( "s_a_tall" );
 		tree_wide = WW3DAssetManager::Get_Instance()->Get_HTree( "s_a_wide" );
 	}
 
-	if ( ( tree_base != NULL ) && ( tree_tall != NULL ) && ( tree_wide != NULL ) ) {
+	if ( ( tree_base != nullptr ) && ( tree_tall != nullptr ) && ( tree_wide != nullptr ) ) {
 
 		HTreeClass *tree = HTreeClass::Create_Interpolated( tree_base, tree_tall, tree_wide,
 																			 height, width );
@@ -4363,7 +4346,7 @@ void SoldierGameObj::Set_Ctf_Team_Flag(int team)
 	Set_Object_Dirty_Bit( NetworkObjectClass::BIT_OCCASIONAL, true );
 
 	if (team == NO_FLAG) {
-		Set_Back_Flag_Model(NULL);
+		Set_Back_Flag_Model(nullptr);
 	} else {
 		//Set_Back_Flag_Model("O_Flag.w3d", Get_Team_Color());
 		Set_Back_Flag_Model("O_Flag.w3d", Get_Color_For_Team(team));
@@ -4392,7 +4375,7 @@ SoldierObserverClass	*	SoldierGameObj::Get_Innate_Controller( void )
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //------------------------------------------------------------------------------------
@@ -4470,7 +4453,7 @@ void SoldierGameObj::Get_Description(StringClass & description)
 	description += line;
 
 	WeaponClass	* p_weapon = Get_Weapon();
-	if (p_weapon != NULL) {
+	if (p_weapon != nullptr) {
 		line.Format("WEAP:  %s\n", p_weapon->Get_Name());
 		description += line;
 
@@ -4485,7 +4468,7 @@ void SoldierGameObj::Get_Description(StringClass & description)
 	description += line;
 
 	HumanPhysClass * p_human_phys = Peek_Human_Phys();
-	if (p_human_phys != NULL) {
+	if (p_human_phys != nullptr) {
 		line.Format("FACE:  %-5.2f\n", p_human_phys->Get_Facing());
 		description += line;
 	}
@@ -4497,10 +4480,10 @@ void SoldierGameObj::Get_Description(StringClass & description)
 	line += "\n";
 	description += line;
 
-	line.Format("ANIM:  %s\n", AnimationName);
+	line.Format("ANIM:  %s\n", AnimationName.Peek_Buffer());
 	description += line;
 
-   if (Vehicle != NULL) {
+   if (Vehicle != nullptr) {
 		line.Format("VEH:   %d\n", Vehicle->Get_ID());
 		description += line;
    }
@@ -4530,7 +4513,7 @@ void SoldierGameObj::Get_Description(StringClass & description)
 	description += line;
 
 	ActionClass * p_action = Get_Action();
-	if (p_action != NULL)
+	if (p_action != nullptr)
 	{
 		line.Format("ACTCT: %d\n", p_action->Get_Act_Count());
 		description += line;
@@ -4593,7 +4576,7 @@ void	SoldierGameObj::Set_Special_Damage_Mode( ArmorWarheadManager::SpecialDamage
 			}
 		}
 
-		if ( SpecialDamageEffect != NULL ) {
+		if ( SpecialDamageEffect != nullptr ) {
 			SpecialDamageEffect->Set_Target_Parameter(0);
 			SpecialDamageEffect->Enable_Remove_On_Complete(true);
 			REF_PTR_RELEASE( SpecialDamageEffect );
@@ -4606,7 +4589,7 @@ void	SoldierGameObj::Set_Special_Damage_Mode( ArmorWarheadManager::SpecialDamage
 			}
 		}
 
-		SpecialDamageDamager = NULL;
+		SpecialDamageDamager = nullptr;
 
 	} else {
 
@@ -4629,7 +4612,7 @@ void	SoldierGameObj::Set_Special_Damage_Mode( ArmorWarheadManager::SpecialDamage
 				if ( _SpecialDamageEmitters[emitter].Mode == mode ) {
 					RenderObjClass * ro = WW3DAssetManager::Get_Instance()->Create_Render_Obj(
 																		_SpecialDamageEmitters[emitter].EmitterName );
-					if ( ro != NULL ) {
+					if ( ro != nullptr ) {
 						Peek_Model()->Add_Sub_Object_To_Bone( ro, _SpecialDamageEmitters[emitter].BoneName );
 						ro->Release_Ref();
 					}
@@ -4638,9 +4621,9 @@ void	SoldierGameObj::Set_Special_Damage_Mode( ArmorWarheadManager::SpecialDamage
 
 			// Add electric effect
 			if ( mode == ArmorWarheadManager::SPECIAL_DAMAGE_TYPE_ELECTRIC ) {
-				WWASSERT( SpecialDamageEffect == NULL );
+				WWASSERT( SpecialDamageEffect == nullptr );
 				SpecialDamageEffect = CombatMaterialEffectManager::Get_Electrocution_Effect();
-				if ( SpecialDamageEffect != NULL ) {
+				if ( SpecialDamageEffect != nullptr ) {
 					SpecialDamageEffect->Set_Target_Parameter(0.49f);	// go almost halfway
 					Peek_Human_Phys()->Add_Effect_To_Me( SpecialDamageEffect );
 				}
@@ -4666,7 +4649,7 @@ void SoldierGameObj::Perturb_Position(float max_perturb)
 	Vector3 initial_position;
 	Get_Position(&initial_position);
 	Vector3 new_position;
-	WWASSERT(Peek_Human_Phys() != NULL);
+	WWASSERT(Peek_Human_Phys() != nullptr);
 	bool succeeded = Peek_Human_Phys()->Find_Teleport_Location(
 		initial_position, max_perturb, &new_position);
 	if (succeeded) {
@@ -4705,7 +4688,7 @@ void	SoldierGameObj::Set_AI_State( SoldierAIState state )
 		//	Kill the conversation (if necessary)
 		//
 		if (	state >= AI_STATE_SEARCH && state > AIState &&
-				ActiveConversation != NULL &&
+				ActiveConversation != nullptr &&
 				ActiveConversation->Is_Interruptable ())
 		{
 			ActiveConversation->Stop_Conversation (ACTION_COMPLETE_CONVERSATION_INTERRUPTED);
@@ -4735,7 +4718,7 @@ RenderObjClass *	SoldierGameObj::Find_RenderObj( const char * name )
 			return RenderObjList[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 void	SoldierGameObj::Reset_RenderObjs( void )
@@ -4817,7 +4800,7 @@ void SoldierGameObj::Change_Flag_Status(int ctf_team_flag)
 		//
 		// We dropped a flag
 		//
-		WWASSERT(WWAudioClass::Get_Instance() != NULL);
+		WWASSERT(WWAudioClass::Get_Instance() != nullptr);
 		WWAudioClass::Get_Instance()->Create_Instant_Sound("Drop_Flag", Get_Transform());
 
 		float speed_factor = 100 / (float) CombatManager::Get_Max_Speed_Pc(this);
@@ -4829,7 +4812,7 @@ void SoldierGameObj::Change_Flag_Status(int ctf_team_flag)
 		//
 		// We picked up a flag
 		//
-		WWASSERT(WWAudioClass::Get_Instance() != NULL);
+		WWASSERT(WWAudioClass::Get_Instance() != nullptr);
 		WWAudioClass::Get_Instance()->Create_Instant_Sound("Pick_Up_Flag", Get_Transform());
 
 		Set_Ctf_Team_Flag(ctf_team_flag);
@@ -4926,7 +4909,7 @@ void SoldierGameObj::Interpret_Sc_Position_Data(Vector3 & sc_position)
 						parameters.Priority = 1;
 						parameters.MoveLocation = sc_position;
 						parameters.MoveArrivedDistance = 0.1f;
-						WWASSERT(Get_Action() != NULL);
+						WWASSERT(Get_Action() != nullptr);
 						Get_Action()->Goto(parameters);
 					//}
 				}
@@ -4956,7 +4939,7 @@ void	SoldierGameObj::Think_Pathfind( void )
 		Get_Position(&current_position);
 
 		ActionClass * p_action = Get_Action();
-		WWASSERT(p_action != NULL);
+		WWASSERT(p_action != nullptr);
 
 		const Vector3 height_offset(0, 0, 0.9f);
 
@@ -4966,7 +4949,7 @@ void	SoldierGameObj::Think_Pathfind( void )
 		//
 		// We can only pop if he is not presently in the camera fulcrum.
 		//
-		if (p_action->MovementAction != NULL &&
+		if (p_action->MovementAction != nullptr &&
          !CombatManager::Is_In_Camera_Frustrum(from_position)) {
 
 			if (!CombatManager::Is_In_Camera_Frustrum(to_position)) {
@@ -4975,7 +4958,7 @@ void	SoldierGameObj::Think_Pathfind( void )
 				// all the way there.
 				//
 				Set_Position(p_action->MovementLocation);
-				p_action->Set_Movement(NULL);
+				p_action->Set_Movement(nullptr);
 			} else {
 
 				//
@@ -5014,7 +4997,7 @@ void	SoldierGameObj::Think_Pathfind( void )
 						is_finished = true;
 					}
 
-				} while ((p_action->MovementAction != NULL) && !is_finished);
+				} while ((p_action->MovementAction != nullptr) && !is_finished);
 			}
       }
 	}
@@ -5035,7 +5018,7 @@ void SoldierGameObj::Think_Pathfind(void)
 		Get_Position(&current_position);
 
 		ActionClass * p_action = Get_Action();
-		WWASSERT(p_action != NULL);
+		WWASSERT(p_action != nullptr);
 
 		ActionParamsStruct parameters = p_action->Get_Parameters();
 
@@ -5084,7 +5067,7 @@ void SoldierGameObj::Think_Pathfind(void)
 
 void	SoldierGameObj::Update_Healing_Effect( void )
 {
-	if ( HealingEffect != NULL ) {
+	if ( HealingEffect != nullptr ) {
 
 		if (( HealingEffect->Get_Target_Parameter() >= 0.49f ) &&
 			( HealingEffect->Get_Parameter() >= 0.49f ) ) {
@@ -5144,17 +5127,17 @@ bool	SoldierGameObj::Is_Safe_To_Disable_Ghost_Collision( const Vector3 &curr_pos
 	NonRefPhysListIterator it (&obj_list);
 	for (it.First(); !it.Is_Done(); it.Next()) {
 		PhysClass *phys_obj = it.Peek_Obj ();
-		PhysicalGameObj *game_obj = NULL;
+		PhysicalGameObj *game_obj = nullptr;
 
-		if ( phys_obj->As_HumanPhysClass () && phys_obj->Get_Observer() != NULL ) {
+		if ( phys_obj->As_HumanPhysClass () && phys_obj->Get_Observer() != nullptr ) {
 			game_obj = ((CombatPhysObserverClass *)phys_obj->Get_Observer())->As_PhysicalGameObj();
 		}
 
 		//
 		//	Is this a living soldier?
 		//
-		if (	game_obj != NULL && game_obj != this &&
-				game_obj->As_SoldierGameObj() != NULL &&
+		if (	game_obj != nullptr && game_obj != this &&
+				game_obj->As_SoldierGameObj() != nullptr &&
 				game_obj->As_SoldierGameObj()->Is_Destroyed () == false)
 		{
 			Vector3 block_pos;
@@ -5185,7 +5168,7 @@ bool	SoldierGameObj::Is_Soldier_Blocked( const Vector3 &curr_pos )
 	//
 	//	Only do this for soldiers who meet our criteria
 	//
-	if (	(Get_Action () != NULL && Get_Action ()->Is_Busy ()) ||
+	if (	(Get_Action () != nullptr && Get_Action ()->Is_Busy ()) ||
 			Is_Destroyed () || (IS_SOLOPLAY == false))
 	{
 		return false;
@@ -5215,17 +5198,17 @@ bool	SoldierGameObj::Is_Soldier_Blocked( const Vector3 &curr_pos )
 	NonRefPhysListIterator it (&obj_list);
 	for (it.First(); !it.Is_Done(); it.Next()) {
 		PhysClass *phys_obj = it.Peek_Obj ();
-		PhysicalGameObj *game_obj = NULL;
+		PhysicalGameObj *game_obj = nullptr;
 
-		if ( phys_obj->As_HumanPhysClass () && phys_obj->Get_Observer() != NULL ) {
+		if ( phys_obj->As_HumanPhysClass () && phys_obj->Get_Observer() != nullptr ) {
 			game_obj = ((CombatPhysObserverClass *)phys_obj->Get_Observer())->As_PhysicalGameObj();
 		}
 
 		//
 		//	Is this a living soldier?
 		//
-		if (	game_obj != NULL && game_obj != this &&
-				game_obj->As_SoldierGameObj() != NULL &&
+		if (	game_obj != nullptr && game_obj != this &&
+				game_obj->As_SoldierGameObj() != nullptr &&
 				game_obj->As_SoldierGameObj()->Is_Destroyed () == false)
 		{
 			Vector3 block_pos;
@@ -5262,7 +5245,7 @@ bool	SoldierGameObj::Is_Soldier_Blocked( const Vector3 &curr_pos )
 							Vector3 delta_vector = block_pos - curr_pos;
 							delta_vector.Normalize ();
 							SoldierGameObj *soldier = game_obj->As_SoldierGameObj ();
-							if (soldier->Peek_Human_Phys () != NULL) {
+							if (soldier->Peek_Human_Phys () != nullptr) {
 								soldier->Peek_Human_Phys ()->Collide (delta_vector * TimeManager::Get_Frame_Seconds ());
 							}
 						}*/
@@ -5304,7 +5287,7 @@ void	SoldierGameObj::Lock_Facing( PhysicalGameObj * game_obj, bool turn_body )
 	//
 	//	Stop facing if there's nothing to look at
 	//
-	if ( game_obj == NULL ) {
+	if ( game_obj == nullptr ) {
 		Cancel_Look_At();
 	}
 
@@ -5314,7 +5297,7 @@ void	SoldierGameObj::Lock_Facing( PhysicalGameObj * game_obj, bool turn_body )
 
 void	SoldierGameObj::Update_Locked_Facing( void )
 {
-	if ( FacingObject != NULL ) {
+	if ( FacingObject != nullptr ) {
 
 		//
 		//	Get the position of the object we're "looking" at.
@@ -5325,7 +5308,7 @@ void	SoldierGameObj::Update_Locked_Facing( void )
 		//
 		//	If the object is a soldier, then look at his head
 		//
-		if ( FacingObject.Get_Ptr ()->As_PhysicalGameObj ()->As_SoldierGameObj () != NULL ) {
+		if ( FacingObject.Get_Ptr ()->As_PhysicalGameObj ()->As_SoldierGameObj () != nullptr ) {
 			const float SOLDIER_HEIGHT = 1.7F;
 			pos.Z += SOLDIER_HEIGHT;
 		}

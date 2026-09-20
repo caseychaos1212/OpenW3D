@@ -65,7 +65,7 @@
 //struct CONTEXT;
 //#define TEMP_CONTEXT_DEFINE
 //#endif
-//int Stack_Walk(void **return_addresses, int num_addresses, CONTEXT *context = NULL);
+//int Stack_Walk(void **return_addresses, int num_addresses, CONTEXT *context = nullptr);
 //#ifdef TEMP_CONTEXT_DEFINE
 //#undef CONTEXT
 //#endif
@@ -134,10 +134,10 @@ public:
 
 
 	static	void	Display( char const *buffer );
-	static	void	Display_Script( char const *text, ... );
-	static	void	Display_Network_Admin( char const *text, ... );
-	static	void	Display_Network_Basic( char const *text, ... );
-	static	void	Display_Network_Prolific( char const *text, ... );
+	static	void	Display_Script( char const *text, ... ) OPENW3D_PRINTF_VARARG_FUNC(1);
+	static	void	Display_Network_Admin( char const *text, ... ) OPENW3D_PRINTF_VARARG_FUNC(1);
+	static	void	Display_Network_Basic( char const *text, ... ) OPENW3D_PRINTF_VARARG_FUNC(1);
+	static	void	Display_Network_Prolific( char const *text, ... ) OPENW3D_PRINTF_VARARG_FUNC(1);
 
 	/*
 	** Debug Options

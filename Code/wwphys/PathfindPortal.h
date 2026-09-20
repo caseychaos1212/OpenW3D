@@ -77,7 +77,7 @@ public:
 		:	m_DestSector1 ((uint16)-1),
 			m_DestSector2 ((uint16)-1),
 			m_HeapLocation (0),
-			m_ClosedListPtr (NULL),
+			m_ClosedListPtr (nullptr),
 			m_ID (0)									{}
 
 	virtual ~PathfindPortalClass (void)		{}
@@ -85,8 +85,8 @@ public:
 	////////////////////////////////////////////////////////////////////
 	//	RTTI
 	////////////////////////////////////////////////////////////////////
-	virtual PathfindActionPortalClass *		As_PathfindActionPortalClass (void) { return NULL; }
-	virtual PathfindWaypathPortalClass *	As_PathfindWaypathPortalClass (void) { return NULL; }
+	virtual PathfindActionPortalClass *		As_PathfindActionPortalClass (void) { return nullptr; }
+	virtual PathfindWaypathPortalClass *	As_PathfindWaypathPortalClass (void) { return nullptr; }
 
 	////////////////////////////////////////////////////////////////////
 	//	Public methods
@@ -173,9 +173,9 @@ PathfindPortalClass::Add_Dest_Sector (int sector_index)
 	WWASSERT (sector_index != -1);
 
 	if (m_DestSector1 == (uint16)-1) {
-		m_DestSector1 = sector_index;
+		m_DestSector1 = uint16(sector_index);
 	} else {
-		m_DestSector2 = sector_index;
+		m_DestSector2 = uint16(sector_index);
 	}
 
 	return ;
@@ -270,9 +270,9 @@ public:
 	////////////////////////////////////////////////////////////////////
 	PathfindActionPortalClass (void)
 		:	m_Destination (0, 0, 0),
-			m_EntranceSector (NULL),
-			m_ExitPortal (NULL),
-			m_EnterPortal (NULL),
+			m_EntranceSector (nullptr),
+			m_ExitPortal (nullptr),
+			m_EnterPortal (nullptr),
 			m_MechanismID (0),
 			m_ActionID (PathClass::ACTION_NONE)		{ }
 

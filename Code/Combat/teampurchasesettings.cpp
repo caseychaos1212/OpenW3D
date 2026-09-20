@@ -121,10 +121,12 @@ TeamPurchaseSettingsDefClass::TeamPurchaseSettingsDefClass (void)	:
 	NAMED_EDITABLE_PARAM (TeamPurchaseSettingsDefClass, ParameterClass::TYPE_INT,				BeaconCost, "Beacon Cost");
 
 	#ifdef PARAM_EDITING_ON
+	{
 		GenericDefParameterClass *param = new GenericDefParameterClass (&BeaconDefinitionID);
 		param->Set_Class_ID (CLASSID_GAME_OBJECTS);
 		param->Set_Name ("Beacon Object");
 		GENERIC_EDITABLE_PARAM (TeamPurchaseSettingsDefClass, param)
+	}
 	#endif //PARAM_EDITING_ON
 
 	//
@@ -175,7 +177,7 @@ TeamPurchaseSettingsDefClass::~TeamPurchaseSettingsDefClass (void)
 	//	Remove this entry from the static array
 	//
 	if (Team < TEAM_COUNT) {
-		DefinitionArray[Team] = NULL;
+		DefinitionArray[Team] = nullptr;
 	}
 
 	return ;
@@ -215,7 +217,7 @@ PersistClass *
 TeamPurchaseSettingsDefClass::Create (void) const
 {
 	WWASSERT (0);
-	return NULL;
+	return nullptr;
 }
 
 
@@ -365,7 +367,7 @@ TeamPurchaseSettingsDefClass::Load_Variables (ChunkLoadClass &cload)
 const unichar_t *
 TeamPurchaseSettingsDefClass::Get_Enlisted_Name (int index)
 {
-	const unichar_t *retval = NULL;
+	const unichar_t *retval = nullptr;
 
 	//
 	//	Return the translated string...

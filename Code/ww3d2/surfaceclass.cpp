@@ -103,6 +103,9 @@ unsigned int SurfaceClass::PixelSize(const SurfaceClass::SurfaceDescription &sd)
 	case WW3D_FORMAT_A4L4:
 		size=1;
 		break;
+	default:
+		WWASSERT(0 && "Unexpected format");
+		break;
 	}
 
 	return size;
@@ -126,27 +129,27 @@ void SurfaceClass::Convert_Pixel(Vector3 &rgb, const SurfaceClass::SurfaceDescri
 		{
 			unsigned short tmp;
 			tmp=*(unsigned short*)&pixel[0];
-			rgb.X=((tmp&0x0f00)>>4);   // R
-			rgb.Y=((tmp&0x00f0));		// G
-			rgb.Z=((tmp&0x000f)<<4);	// B
+			rgb.X=float((tmp&0x0f00)>>4);   // R
+			rgb.Y=float((tmp&0x00f0));		// G
+			rgb.Z=float((tmp&0x000f)<<4);	// B
 		}
 		break;
 	case WW3D_FORMAT_A1R5G5B5:
 		{
 			unsigned short tmp;
 			tmp=*(unsigned short*)&pixel[0];
-			rgb.X=(tmp>>7)&0xf8; // R
-			rgb.Y=(tmp>>2)&0xf8; // G
-			rgb.Z=(tmp<<3)&0xf8; // B
+			rgb.X=float((tmp>>7)&0xf8); // R
+			rgb.Y=float((tmp>>2)&0xf8); // G
+			rgb.Z=float((tmp<<3)&0xf8); // B
 		}
 		break;
 	case WW3D_FORMAT_R5G6B5:
 		{
 			unsigned short tmp;
 			tmp=*(unsigned short*)&pixel[0];
-			rgb.X=(tmp>>8)&0xf8;
-			rgb.Y=(tmp>>3)&0xfc;
-			rgb.Z=(tmp<<3)&0xf8;
+			rgb.X=float((tmp>>8)&0xf8);
+			rgb.Y=float((tmp>>3)&0xfc);
+			rgb.Z=float((tmp<<3)&0xf8);
 		}
 		break;
 
@@ -214,7 +217,7 @@ void SurfaceClass::Convert_Pixel(unsigned char * pixel,const SurfaceClass::Surfa
 **                             SurfaceClass
 *************************************************************************/
 SurfaceClass::SurfaceClass(unsigned width, unsigned height, WW3DFormat format, SurfaceClass::PoolType pool):
-	D3DSurface(NULL),
+	D3DSurface(nullptr),
 	SurfaceFormat(format)
 {
 	WWASSERT(width);
@@ -235,7 +238,7 @@ SurfaceClass::SurfaceClass(unsigned width, unsigned height, WW3DFormat format, S
 }
 
 SurfaceClass::SurfaceClass(const char *filename):
-	D3DSurface(NULL)
+	D3DSurface(nullptr)
 {
 	D3DSurface = DX8Wrapper::_Create_DX8_Surface(filename);
 	SurfaceDescription desc;
@@ -244,7 +247,7 @@ SurfaceClass::SurfaceClass(const char *filename):
 }
 
 SurfaceClass::SurfaceClass(IDirect3DSurface9 *d3d_surface)	:
-	D3DSurface (NULL)
+	D3DSurface (nullptr)
 {
 	Attach (d3d_surface);
 	SurfaceDescription desc;
@@ -256,14 +259,14 @@ SurfaceClass::~SurfaceClass(void)
 {
 	if (D3DSurface) {
 		D3DSurface->Release();
-		D3DSurface = NULL;
+		D3DSurface = nullptr;
 	}
 }
 
 void SurfaceClass::Get_Description(SurfaceDescription &surface_desc)
 {
 	D3DSURFACE_DESC d3d_desc;
-	::ZeroMemory(&d3d_desc, sizeof(D3DSURFACE_DESC));
+	memset(&d3d_desc, 0, sizeof(D3DSURFACE_DESC));
 	DX8_ErrorCode(D3DSurface->GetDesc(&d3d_desc));
 	surface_desc.Format = D3DFormat_To_WW3DFormat(d3d_desc.Format);
 	surface_desc.Height = d3d_desc.Height;
@@ -273,7 +276,7 @@ void SurfaceClass::Get_Description(SurfaceDescription &surface_desc)
 void * SurfaceClass::Lock(int * pitch)
 {
 	D3DLOCKED_RECT lock_rect;
-	::ZeroMemory(&lock_rect, sizeof(D3DLOCKED_RECT));
+	memset(&lock_rect, 0, sizeof(D3DLOCKED_RECT));
 	DX8_ErrorCode(D3DSurface->LockRect(&lock_rect, 0, 0));
 	*pitch = lock_rect.Pitch;
 	return (void *)lock_rect.pBits;
@@ -308,7 +311,7 @@ void SurfaceClass::Clear()
 	unsigned int size=PixelSize(sd);
 
 	D3DLOCKED_RECT lock_rect;
-	::ZeroMemory(&lock_rect, sizeof(D3DLOCKED_RECT));
+	memset(&lock_rect, 0, sizeof(D3DLOCKED_RECT));
 	DX8_ErrorCode(D3DSurface->LockRect(&lock_rect,0,0));
 	unsigned int i;
 	unsigned char *mem=(unsigned char *) lock_rect.pBits;
@@ -347,7 +350,7 @@ void SurfaceClass::Copy(const unsigned char *other)
 	unsigned int size=PixelSize(sd);
 
 	D3DLOCKED_RECT lock_rect;
-	::ZeroMemory(&lock_rect, sizeof(D3DLOCKED_RECT));
+	memset(&lock_rect, 0, sizeof(D3DLOCKED_RECT));
 	DX8_ErrorCode(D3DSurface->LockRect(&lock_rect,0,0));
 	unsigned int i;
 	unsigned char *mem=(unsigned char *) lock_rect.pBits;
@@ -386,7 +389,7 @@ void SurfaceClass::Copy(Vector2i &min,Vector2i &max, const unsigned char *other)
 	unsigned int size=PixelSize(sd);
 
 	D3DLOCKED_RECT lock_rect;
-	::ZeroMemory(&lock_rect, sizeof(D3DLOCKED_RECT));
+	memset(&lock_rect, 0, sizeof(D3DLOCKED_RECT));
 	RECT rect;
 	rect.left=min.I;
 	rect.right=max.I;
@@ -437,7 +440,7 @@ unsigned char *SurfaceClass::CreateCopy(int *width,int *height,int*size,bool fli
 	unsigned char *other=new unsigned char [sd.Height*sd.Width*mysize];
 
 	D3DLOCKED_RECT lock_rect;
-	::ZeroMemory(&lock_rect, sizeof(D3DLOCKED_RECT));
+	memset(&lock_rect, 0, sizeof(D3DLOCKED_RECT));
 	DX8_ErrorCode(D3DSurface->LockRect(&lock_rect,0,D3DLOCK_READONLY));
 	unsigned int i;
 	unsigned char *mem=(unsigned char *) lock_rect.pBits;
@@ -516,7 +519,7 @@ void SurfaceClass::Copy(
 		if (dest.right>int(sd.Width)) dest.right=int(sd.Width);
 		if (dest.bottom>int(sd.Height)) dest.bottom=int(sd.Height);
 
-		DX8_ErrorCode(D3DXLoadSurfaceFromSurface(D3DSurface,NULL,&dest,other->D3DSurface,NULL,&src,D3DX_FILTER_NONE,0));
+		DX8_ErrorCode(D3DXLoadSurfaceFromSurface(D3DSurface,nullptr,&dest,other->D3DSurface,nullptr,&src,D3DX_FILTER_NONE,0));
 	}
 }
 
@@ -558,7 +561,7 @@ void SurfaceClass::Stretch_Copy(
 	dest.top=dsty;
 	dest.bottom=dsty+dstheight;
 
-	DX8_ErrorCode(D3DXLoadSurfaceFromSurface(D3DSurface,NULL,&dest,other->D3DSurface,NULL,&src,D3DX_FILTER_TRIANGLE ,0));
+	DX8_ErrorCode(D3DXLoadSurfaceFromSurface(D3DSurface,nullptr,&dest,other->D3DSurface,nullptr,&src,D3DX_FILTER_TRIANGLE ,0));
 }
 
 /***********************************************************************************************
@@ -596,9 +599,9 @@ void SurfaceClass::FindBB(Vector2i *min,Vector2i*max)
 	}
 
 	D3DLOCKED_RECT lock_rect;
-	::ZeroMemory(&lock_rect, sizeof(D3DLOCKED_RECT));
+	memset(&lock_rect, 0, sizeof(D3DLOCKED_RECT));
 	RECT rect;
-	::ZeroMemory(&rect, sizeof(RECT));
+	memset(&rect, 0, sizeof(RECT));
 
 	rect.bottom=max->J;
 	rect.top=min->J;
@@ -621,10 +624,10 @@ void SurfaceClass::FindBB(Vector2i *min,Vector2i*max)
 			unsigned char myalpha=alpha[size-1];
 			myalpha=(myalpha>>(8-alphabits)) & mask;
 			if (myalpha) {
-				realmin.I = MIN(realmin.I, x);
-				realmax.I = MAX(realmax.I, x);
-				realmin.J = MIN(realmin.J, y);
-				realmax.J = MAX(realmax.J, y);
+				realmin.I = std::min(realmin.I, x);
+				realmax.I = std::max(realmax.I, x);
+				realmin.J = std::min(realmin.J, y);
+				realmax.J = std::max(realmax.J, y);
 			}
 		}
 	}
@@ -674,9 +677,9 @@ bool SurfaceClass::Is_Transparent_Column(unsigned int column)
 	unsigned int size=PixelSize(sd);
 
 	D3DLOCKED_RECT lock_rect;
-	::ZeroMemory(&lock_rect, sizeof(D3DLOCKED_RECT));
+	memset(&lock_rect, 0, sizeof(D3DLOCKED_RECT));
 	RECT rect;
-	::ZeroMemory(&rect, sizeof(RECT));
+	memset(&rect, 0, sizeof(RECT));
 
 	rect.bottom=sd.Height;
 	rect.top=0;
@@ -728,9 +731,9 @@ void SurfaceClass::Get_Pixel(Vector3 &rgb, int x,int y)
 	y = std::min(y,(int)sd.Height - 1);
 
 	D3DLOCKED_RECT lock_rect;
-	::ZeroMemory(&lock_rect, sizeof(D3DLOCKED_RECT));
+	memset(&lock_rect, 0, sizeof(D3DLOCKED_RECT));
 	RECT rect;
-	::ZeroMemory(&rect, sizeof(RECT));
+	memset(&rect, 0, sizeof(RECT));
 
 	rect.bottom=y+1;
 	rect.top=y;
@@ -765,7 +768,7 @@ void SurfaceClass::Attach (IDirect3DSurface9 *surface)
 	//
 	//	Lock a reference onto the object
 	//
-	if (D3DSurface != NULL) {
+	if (D3DSurface != nullptr) {
 		D3DSurface->AddRef ();
 	}
 
@@ -793,11 +796,11 @@ void SurfaceClass::Detach (void)
 	//
 	//	Release the hold we have on the D3D object
 	//
-	if (D3DSurface != NULL) {
+	if (D3DSurface != nullptr) {
 		D3DSurface->Release ();
 	}
 
-	D3DSurface = NULL;
+	D3DSurface = nullptr;
 	return ;
 }
 
@@ -824,9 +827,9 @@ void SurfaceClass::DrawPixel(const unsigned int x,const unsigned int y, unsigned
 	unsigned int size=PixelSize(sd);
 
 	D3DLOCKED_RECT lock_rect;
-	::ZeroMemory(&lock_rect, sizeof(D3DLOCKED_RECT));
+	memset(&lock_rect, 0, sizeof(D3DLOCKED_RECT));
 	RECT rect;
-	::ZeroMemory(&rect, sizeof(RECT));
+	memset(&rect, 0, sizeof(RECT));
 
 	rect.bottom=y+1;
 	rect.top=y;
@@ -878,9 +881,9 @@ void SurfaceClass::DrawHLine(const unsigned int y,const unsigned int x1, const u
 	unsigned int size=PixelSize(sd);
 
 	D3DLOCKED_RECT lock_rect;
-	::ZeroMemory(&lock_rect, sizeof(D3DLOCKED_RECT));
+	memset(&lock_rect, 0, sizeof(D3DLOCKED_RECT));
 	RECT rect;
-	::ZeroMemory(&rect, sizeof(RECT));
+	memset(&rect, 0, sizeof(RECT));
 
 	rect.bottom=y+1;
 	rect.top=y;
@@ -942,7 +945,8 @@ bool SurfaceClass::Is_Monochrome(void)
 		case WW3D_FORMAT_L8:
 		case WW3D_FORMAT_A4L4:
 			return true;
-		break;
+		default:
+			break;
 	}
 
 	int pitch,size;

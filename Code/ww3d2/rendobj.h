@@ -192,7 +192,7 @@ public:
 	virtual int						Class_ID(void)	const															{ return CLASSID_UNKNOWN; }
 	virtual const char *			Get_Name(void) const															{ return "UNNAMED"; }
 	virtual void					Set_Name(const char * /*name*/)												{ }
-	virtual const char *			Get_Base_Model_Name (void) const											{ return NULL; }
+	virtual const char *			Get_Base_Model_Name (void) const											{ return nullptr; }
 	virtual void					Set_Base_Model_Name (const char */*name*/)									{ }
 	virtual int						Get_Num_Polys(void) const													{ return 0; }
 
@@ -243,13 +243,13 @@ public:
 	virtual void					Notify_Removed(SceneClass * scene);
 
 	virtual int						Get_Num_Sub_Objects(void) const											{ return 0; }
-	virtual RenderObjClass *	Get_Sub_Object(int /*index*/) const											{ return NULL; }
+	virtual RenderObjClass *	Get_Sub_Object(int /*index*/) const											{ return nullptr; }
 	virtual int						Add_Sub_Object(RenderObjClass * /*subobj*/)								{ return 0; }
 	virtual int						Remove_Sub_Object(RenderObjClass * /*robj*/)								{ return 0; }
 	virtual RenderObjClass *	Get_Sub_Object_By_Name(const char * name) const;
 
 	virtual int						Get_Num_Sub_Objects_On_Bone(int /*boneindex*/) const					{ return 0; }
-	virtual RenderObjClass *	Get_Sub_Object_On_Bone(int /*index*/,int /*boneindex*/)	const				{ return NULL; }
+	virtual RenderObjClass *	Get_Sub_Object_On_Bone(int /*index*/,int /*boneindex*/)	const				{ return nullptr; }
 	virtual int						Get_Sub_Object_Bone_Index(RenderObjClass * /*subobj*/)	const 		{ return 0; }
 	virtual int						Add_Sub_Object_To_Bone(RenderObjClass * /*subobj*/,int /*bone_index*/)	{ return 0; }
 	virtual int						Add_Sub_Object_To_Bone(RenderObjClass * subobj,const char * bname);
@@ -278,9 +278,9 @@ public:
 															float /*percentage*/)											{ }
 	virtual void					Set_Animation( HAnimComboClass * /*anim_combo*/)							{ }
 
-	virtual HAnimClass *			Peek_Animation( void )														{ return NULL; }
+	virtual HAnimClass *			Peek_Animation( void )														{ return nullptr; }
 	virtual int						Get_Num_Bones(void)															{ return 0; }
-	virtual const char *			Get_Bone_Name(int /*bone_index*/)												{ return NULL; }
+	virtual const char *			Get_Bone_Name(int /*bone_index*/)												{ return nullptr; }
 	virtual int						Get_Bone_Index(const char * /*bonename*/)									{ return 0; }
 	virtual const Matrix3D &	Get_Bone_Transform(const char * /*bonename*/)    						{ return Get_Transform(); }
 	virtual const Matrix3D &	Get_Bone_Transform(int /*boneindex*/)      								{ return Get_Transform(); }
@@ -288,7 +288,7 @@ public:
 	virtual void					Release_Bone(int /*bindex*/)													{ }
 	virtual bool					Is_Bone_Captured(int /*bindex*/) const										{ return false; }
 	virtual void					Control_Bone(int /*bindex*/,const Matrix3D & /*objtm*/,bool /*world_space_translation*/ = false)						{ }
-	virtual const HTreeClass *	Get_HTree(void) const														{ return NULL; }
+	virtual const HTreeClass *	Get_HTree(void) const														{ return nullptr; }
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Render Object Interface - Collision Detection
@@ -369,7 +369,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Render Object Interface - Attributes, Options, Properties, etc
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	virtual MaterialInfoClass * Get_Material_Info(void) 													{ return NULL; }
+	virtual MaterialInfoClass * Get_Material_Info(void) 													{ return nullptr; }
 	virtual void					Set_User_Data(void *value, bool /*recursive*/ = false)					{ User_Data = value; };
 	virtual void *					Get_User_Data()																{ return User_Data; };
 	virtual int						Get_Num_Snap_Points(void)													{ return 0; }
@@ -401,7 +401,7 @@ public:
 	virtual int						Get_Collision_Type(void) const											{ return (Bits & COLLISION_TYPE_MASK); }
 	virtual void					Set_Collision_Type(int type)												{ Bits &= ~COLLISION_TYPE_MASK; Bits |= (type & COLLISION_TYPE_MASK) | COLLISION_TYPE_ALL; }
    virtual bool					Is_Complete(void)																{ return false; }
-	virtual bool					Is_In_Scene(void)																{ return Scene != NULL; }
+	virtual bool					Is_In_Scene(void)																{ return Scene != nullptr; }
 	virtual float					Get_Native_Screen_Size(void) const										{ return NativeScreenSize; }
 	virtual void					Set_Native_Screen_Size(float screensize)								{ NativeScreenSize = screensize; }
 
@@ -471,7 +471,7 @@ protected:
 	friend class RenderObjProxyClass;
 };
 
-WWINLINE const SphereClass & RenderObjClass::Get_Bounding_Sphere(void) const
+inline const SphereClass & RenderObjClass::Get_Bounding_Sphere(void) const
 {
 	if (!(Bits & BOUNDING_VOLUMES_VALID)) {
 		Update_Cached_Bounding_Volumes();
@@ -479,7 +479,7 @@ WWINLINE const SphereClass & RenderObjClass::Get_Bounding_Sphere(void) const
 	return CachedBoundingSphere;
 }
 
-WWINLINE const AABoxClass & RenderObjClass::Get_Bounding_Box(void) const
+inline const AABoxClass & RenderObjClass::Get_Bounding_Box(void) const
 {
 	if (!(Bits & BOUNDING_VOLUMES_VALID)) {
 		Update_Cached_Bounding_Volumes();
@@ -499,7 +499,7 @@ WWINLINE const AABoxClass & RenderObjClass::Get_Bounding_Box(void) const
  * HISTORY:                                                               *
  *   09/22/1997 PWG : Created.                                            *
  *========================================================================*/
-WWINLINE float Bound_Degrees(float angle)
+inline float Bound_Degrees(float angle)
 {
 	while (angle > 359) angle -= 360;
 	while (angle < 0) angle += 360;
@@ -521,40 +521,40 @@ WWINLINE float Bound_Degrees(float angle)
  * HISTORY:                                                                                    *
  *   2/25/99    GTH : Created.                                                                 *
  *=============================================================================================*/
-WWINLINE const Matrix3D & RenderObjClass::Get_Transform(void) const
+inline const Matrix3D & RenderObjClass::Get_Transform(void) const
 {
 	Validate_Transform();
 	return Transform;
 }
 
-WWINLINE const Matrix3D & RenderObjClass::Get_Transform(bool &is_transform_identity) const
+inline const Matrix3D & RenderObjClass::Get_Transform(bool &is_transform_identity) const
 {
 	Validate_Transform();
 	is_transform_identity=IsTransformIdentity;
 	return Transform;
 }
 
-WWINLINE bool RenderObjClass::Is_Transform_Identity() const
+inline bool RenderObjClass::Is_Transform_Identity() const
 {
 	Validate_Transform();
 	return IsTransformIdentity;
 }
 
 // Warning: Be sure to call this function only if the transform is known to be valid!
-WWINLINE const Matrix3D & RenderObjClass::Get_Transform_No_Validity_Check(void) const
+inline const Matrix3D & RenderObjClass::Get_Transform_No_Validity_Check(void) const
 {
 	return Transform;
 }
 
 // Warning: Be sure to call this function only if the transform is known to be valid!
-WWINLINE const Matrix3D & RenderObjClass::Get_Transform_No_Validity_Check(bool& is_transform_identity) const
+inline const Matrix3D & RenderObjClass::Get_Transform_No_Validity_Check(bool& is_transform_identity) const
 {
 	is_transform_identity=IsTransformIdentity;
 	return Transform;
 }
 
 // Warning: Be sure to call this function only if the transform is known to be valid!
-WWINLINE bool RenderObjClass::Is_Transform_Identity_No_Validity_Check() const
+inline bool RenderObjClass::Is_Transform_Identity_No_Validity_Check() const
 {
 	return IsTransformIdentity;
 }

@@ -42,6 +42,21 @@
 #include "dx8wrapper.h"
 #include <algorithm>
 
+#ifdef OPENW3D_FREETYPE_BUILD
+// freeetype implementation adapted from https://github.com/Fighter19/CnC_Generals_Zero_Hour/commit/e99e2dcf0a61169363f09897dc0748705256ae58
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_SFNT_NAMES_H
+#include FT_TRUETYPE_IDS_H
+
+std::unordered_map<std::string, std::string> FontCharsClass::FontFiles;
+
+static void LogFtError([[maybe_unused]] const char *text, [[maybe_unused]] FT_Error error)
+{
+    WWDEBUG_SAY(("%s: %s\n", text, FT_Error_String(error)));
+}
+#endif
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 //	Local constants
@@ -63,18 +78,18 @@ const int CHAR_BUFFER_LEN		= 32768;
 //
 ////////////////////////////////////////////////////////////////////////////////////
 Render2DSentenceClass::Render2DSentenceClass (void) :
-	Font (NULL),
+	Font (nullptr),
 	Location (0.0F,0.0F),
 	Cursor (0.0F,0.0F),
 	TextureOffset (0, 0),
 	TextureStartX (0),
-	CurSurface (NULL),
+	CurSurface (nullptr),
 	CurrTextureSize (0),
 	MonoSpaced (false),
 	IsClippedEnabled (false),
 	ClipRect (0, 0, 0, 0),
 	BaseLocation (0, 0),
-	LockedPtr (NULL),
+	LockedPtr (nullptr),
 	LockedStride (0),
 	TextureSizeHint (0),
 	WrapWidth (0),
@@ -141,9 +156,9 @@ Render2DSentenceClass::Reset (void)
 	//
 	//	Make sure we unlock the current surface (if necessary)
 	//
-	if (LockedPtr != NULL) {
+	if (LockedPtr != nullptr) {
 		CurSurface->Unlock ();
-		LockedPtr = NULL;
+		LockedPtr = nullptr;
 	}
 
 	//
@@ -287,7 +302,7 @@ Render2DSentenceClass::Get_Text_Extents (const unichar_t *text)
 		return(temp);
 	}
 
-	Vector2 extent (0, Font->Get_Char_Height());
+	Vector2 extent (0, float(Font->Get_Char_Height()));
 
 	while (*text) {
 		unichar_t ch = *text++;
@@ -317,11 +332,11 @@ Render2DSentenceClass::Find_Row_Start( const unichar_t * text, int row_index )
 		return text;
 	}
 
-	const unichar_t *retval = NULL;
+	const unichar_t *retval = nullptr;
 
 	float max_x_pos	= 0;
 	float x_pos			= 0;
-	float y_pos			= Font->Get_Char_Height ();
+	float y_pos			= float(Font->Get_Char_Height ());
 
 	int row_counter = 0;
 
@@ -339,7 +354,7 @@ Render2DSentenceClass::Find_Row_Start( const unichar_t * text, int row_index )
 			//	Find the width of the next word
 			//
 			const unichar_t *word	= text;
-			float word_width = Font->Get_Char_Spacing (ch);
+			float word_width = float(Font->Get_Char_Spacing (ch));
 			while ((*word != 0) && ((*word > U_CHAR(' ')) && !IS_BREAK_CHAR (*word))) {
 				word_width += Font->Get_Char_Spacing (*word++);
 			}
@@ -397,7 +412,7 @@ Render2DSentenceClass::Get_Formatted_Text_Extents (const unichar_t *text, int *r
 
 	float max_x_pos	= 0;
 	float x_pos			= 0;
-	float y_pos			= Font->Get_Char_Height ();
+	float y_pos			= float(Font->Get_Char_Height ());
 
 	int row_counter = 0;
 
@@ -415,7 +430,7 @@ Render2DSentenceClass::Get_Formatted_Text_Extents (const unichar_t *text, int *r
 			//	Find the width of the next word
 			//
 			const unichar_t *word	= text;
-			float word_width = Font->Get_Char_Spacing (ch);
+			float word_width = float(Font->Get_Char_Spacing (ch));
 			while ((*word != 0) && ((*word > U_CHAR(' ')) && !IS_BREAK_CHAR (*word))) {
 				word_width += Font->Get_Char_Spacing (*word++);
 			}
@@ -456,7 +471,7 @@ Render2DSentenceClass::Get_Formatted_Text_Extents (const unichar_t *text, int *r
 	//
 	//	Return the row count to the caller (if necessary)
 	//
-	if (row_count != NULL) {
+	if (row_count != nullptr) {
 		(*row_count) = row_counter + 1;
 	}
 
@@ -518,9 +533,9 @@ Render2DSentenceClass::Build_Textures (void)
 	//
 	//	Make sure we unlock the current surface
 	//
-	if (LockedPtr != NULL) {
+	if (LockedPtr != nullptr) {
 		CurSurface->Unlock ();
-		LockedPtr = NULL;
+		LockedPtr = nullptr;
 	}
 
 	//
@@ -552,7 +567,7 @@ Render2DSentenceClass::Build_Textures (void)
 		//
 		//	Copy the contents of the texture from the surface
 		//
-		DX8Wrapper::_Copy_DX8_Rects (curr_surface->Peek_D3D_Surface (), NULL, 0, texture_surface->Peek_D3D_Surface (), NULL);
+		DX8Wrapper::_Copy_DX8_Rects (curr_surface->Peek_D3D_Surface (), nullptr, 0, texture_surface->Peek_D3D_Surface (), nullptr);
 		REF_PTR_RELEASE (texture_surface);
 
 		//
@@ -586,8 +601,8 @@ Render2DSentenceClass::Build_Textures (void)
 void
 Render2DSentenceClass::Draw_Sentence (uint32 color)
 {
-	Render2DClass *curr_renderer	= NULL;
-	SurfaceClass *curr_surface		= NULL;
+	Render2DClass *curr_renderer	= nullptr;
+	SurfaceClass *curr_surface		= nullptr;
 
 	DrawExtents.Set (0, 0, 0, 0);
 
@@ -745,7 +760,7 @@ Render2DSentenceClass::Record_Sentence_Chunk (void)
 	//
 	int width = TextureOffset.I - TextureStartX;
 	if (width > 0) {
-		float char_height = Font->Get_Char_Height ();
+		float char_height = float(Font->Get_Char_Height ());
 
 		//
 		//	Build a structure that contains enough information
@@ -758,9 +773,9 @@ Render2DSentenceClass::Record_Sentence_Chunk (void)
 		sentence_data.ScreenRect.Right	= Cursor.X + width;
 		sentence_data.ScreenRect.Top		= Cursor.Y;
 		sentence_data.ScreenRect.Bottom	= Cursor.Y + char_height;
-		sentence_data.UVRect.Left			= TextureStartX;
-		sentence_data.UVRect.Top			= TextureOffset.J;
-		sentence_data.UVRect.Right			= TextureOffset.I;
+		sentence_data.UVRect.Left			= float(TextureStartX);
+		sentence_data.UVRect.Top			= float(TextureOffset.J);
+		sentence_data.UVRect.Right			= float(TextureOffset.I);
 		sentence_data.UVRect.Bottom		= TextureOffset.J + char_height;
 
 		//
@@ -784,9 +799,9 @@ Render2DSentenceClass::Allocate_New_Surface (const unichar_t *text)
 	//
 	//	Unlock the last surface (if necessary)
 	//
-	if (LockedPtr != NULL) {
+	if (LockedPtr != nullptr) {
 		CurSurface->Unlock ();
-		LockedPtr = NULL;
+		LockedPtr = nullptr;
 	}
 
 	//
@@ -847,7 +862,7 @@ Render2DSentenceClass::Allocate_New_Surface (const unichar_t *text)
 	//	Create the new surface
 	//
 	CurSurface = NEW_REF (SurfaceClass, (CurrTextureSize, CurrTextureSize, WW3D_FORMAT_A4R4G4B4, SurfaceClass::POOL_SYSTEMMEM));
-	WWASSERT (CurSurface != NULL);
+	WWASSERT (CurSurface != nullptr);
 	CurSurface->Add_Ref ();
 
 	//
@@ -874,7 +889,7 @@ Render2DSentenceClass::Allocate_New_Surface (const unichar_t *text)
 void
 Render2DSentenceClass::Build_Sentence (const unichar_t *text)
 {
-	if (text == NULL) {
+	if (text == nullptr) {
 		return ;
 	}
 
@@ -891,22 +906,22 @@ Render2DSentenceClass::Build_Sentence (const unichar_t *text)
 	//
 	//	Ensure we have a surface to start with
 	//
-	if (CurSurface == NULL) {
+	if (CurSurface == nullptr) {
 		Allocate_New_Surface (text);
 	}
 
-	float char_height = Font->Get_Char_Height ();
+	float char_height = float(Font->Get_Char_Height ());
 
 	//
 	//	Loop over all the characters in the string
 	//
-	while (text != NULL) {
+	while (text != nullptr) {
 		unichar_t ch = *text++;
 
 		//
 		//	Determine how much horizontal space this character requires
 		//
-		float char_spacing = Font->Get_Char_Spacing (ch);
+		float char_spacing = float(Font->Get_Char_Spacing (ch));
 
 		bool exceeded_texture_width	= ((TextureOffset.I + char_spacing) >= CurrTextureSize);
 		bool encountered_break_char	= (IS_BREAK_CHAR (ch) || ch == U_CHAR('\n') || ch == 0 || ch == U_CHAR('\t'));
@@ -962,7 +977,7 @@ Render2DSentenceClass::Build_Sentence (const unichar_t *text)
 				break;
 			} else if (ch == U_CHAR('\t')) {
 				float tab_spacing = (char_spacing * TabStop);
-				float tab_pos = (floor(Cursor.X / tab_spacing) * tab_spacing);
+				float tab_pos = (WWMath::Floor(Cursor.X / tab_spacing) * tab_spacing);
 				Cursor.X = (tab_pos + tab_spacing);
 			}
 
@@ -972,7 +987,7 @@ Render2DSentenceClass::Build_Sentence (const unichar_t *text)
 			if (exceeded_texture_width) {
 				TextureStartX		= 0;
 				TextureOffset.I	= TextureStartX;
-				TextureOffset.J	+= char_height;
+				TextureOffset.J	+= int(char_height);
 
 				//
 				//	Did the text extent completely off the texture?
@@ -988,9 +1003,9 @@ Render2DSentenceClass::Build_Sentence (const unichar_t *text)
 			//
 			//	Ensure the surface is locked
 			//
-			if (LockedPtr == NULL) {
+			if (LockedPtr == nullptr) {
 				LockedPtr = (uint16 *)CurSurface->Lock (&LockedStride);
-				WWASSERT (LockedPtr != NULL);
+				WWASSERT (LockedPtr != nullptr);
 			}
 
 			//
@@ -1002,7 +1017,7 @@ Render2DSentenceClass::Build_Sentence (const unichar_t *text)
 			//	Blit the character to the surface
 			//
 			Font->Blit_Char (ch, LockedPtr, LockedStride, TextureOffset.I, TextureOffset.J);
-			TextureOffset.I += char_spacing;
+			TextureOffset.I += int(char_spacing);
 		}
 	}
 
@@ -1028,22 +1043,36 @@ void	Render2DSentenceClass::Force_Alpha( float alpha )
 //
 ////////////////////////////////////////////////////////////////////////////////////
 FontCharsClass::FontCharsClass (void) :
-	OldGDIFont(	NULL ),
-	OldGDIBitmap( NULL ),
-	GDIFont( NULL ),
-	GDIBitmap( NULL ),
-	GDIBitmapBits ( NULL ),
-	MemDC( NULL ),
+#ifdef OPENW3D_FREETYPE_BUILD
+	CharAscent(0),
+	PixelOverlap(0),
+	FtLibrary(	nullptr ),
+	FtFace(	nullptr ),
+#elif defined _WIN32
+	OldGDIFont(	nullptr ),
+	OldGDIBitmap( nullptr ),
+	GDIFont( nullptr ),
+	GDIBitmap( nullptr ),
+	GDIBitmapBits ( nullptr ),
+	MemDC( nullptr ),
+#endif
 	CurrPixelOffset( 0 ),
 	PointSize( 0 ),
 	CharHeight( 0 ),
-	UnicodeCharArray( NULL ),
+	UnicodeCharArray( nullptr ),
 	FirstUnicodeChar( 0xFFFF ),
 	LastUnicodeChar( 0 ),
 	IsBold (false),
 	BufferList(sizeof(PreAllocatedBufferList)/sizeof(uint16*),PreAllocatedBufferList)
 {
 	::memset( ASCIICharArray, 0, sizeof (ASCIICharArray) );
+
+#ifdef OPENW3D_FREETYPE_BUILD
+	FT_Error error = FT_Init_FreeType(&FtLibrary);
+	if (error != FT_Err_Ok) {
+		WWDEBUG_SAY(("Failed to initialize freetype library\n"));
+	}
+#endif
 	return ;
 }
 
@@ -1059,8 +1088,11 @@ FontCharsClass::~FontCharsClass (void)
 		delete [] BufferList[i];
 	}
 	BufferList.Reset_Active();
-
+#ifdef OPENW3D_FREETYPE_BUILD
+	Free_Freetype_Font();
+#elif defined _WIN32
 	Free_GDI_Font();
+#endif
 	Free_Character_Arrays();
 	return ;
 }
@@ -1074,7 +1106,7 @@ FontCharsClass::~FontCharsClass (void)
 const FontCharsClass::CharDataStruct *
 FontCharsClass::Get_Char_Data (unichar_t ch)
 {
-	const CharDataStruct *retval = NULL;
+	const CharDataStruct *retval = nullptr;
 
 	if ( ch < 256 ) {
 		retval = ASCIICharArray[ch];
@@ -1086,8 +1118,12 @@ FontCharsClass::Get_Char_Data (unichar_t ch)
 	//
 	//	If the character wasn't found, then add it to our list
 	//
-	if ( retval == NULL ) {
+	if ( retval == nullptr ) {
+#ifdef OPENW3D_FREETYPE_BUILD
+		retval = Store_Freetype_Char( ch );
+#elif defined _WIN32
 		retval = Store_GDI_Char( ch );
+#endif
 	}
 
 	WWASSERT( retval->Value == ch );
@@ -1104,7 +1140,7 @@ int
 FontCharsClass::Get_Char_Width (unichar_t ch)
 {
 	const CharDataStruct	* data = Get_Char_Data( ch );
-	if ( data != NULL ) {
+	if ( data != nullptr ) {
 		return data->Width;
 	}
 
@@ -1121,7 +1157,7 @@ int
 FontCharsClass::Get_Char_Spacing (unichar_t ch)
 {
 	const CharDataStruct	* data = Get_Char_Data( ch );
-	if ( data != NULL ) {
+	if ( data != nullptr ) {
 		if ( data->Width != 0 ) {
 			return data->Width + 1;
 		}
@@ -1140,7 +1176,7 @@ void
 FontCharsClass::Blit_Char (unichar_t ch, uint16 *dest_ptr, int dest_stride, int x, int y)
 {
 	const CharDataStruct	* data = Get_Char_Data( ch );
-	if ( data != NULL && data->Width != 0 ) {
+	if ( data != nullptr && data->Width != 0 ) {
 
 		//
 		//	Setup the src and destination pointers
@@ -1163,7 +1199,80 @@ FontCharsClass::Blit_Char (unichar_t ch, uint16 *dest_ptr, int dest_stride, int 
 	return ;
 }
 
+#ifdef OPENW3D_FREETYPE_BUILD
+const FontCharsClass::CharDataStruct *FontCharsClass::Store_Freetype_Char(unichar_t ch)
+{
+    WWASSERT_PRINT(FtFace != nullptr, "FreetypeFace not initialized");
+    FT_UInt glyph_index = FT_Get_Char_Index(FtFace, ch);
+    // load glyph image into the slot (erase previous one)
+    FT_Error error = FT_Load_Glyph(FtFace, glyph_index, FT_LOAD_DEFAULT);
+    if (error) {
+        WWDEBUG_SAY(("Failed to load character(%i) from font\n", ch));
+        return nullptr;
+    }
+    // convert to an anti-aliased bitmap
+    error = FT_Render_Glyph(FtFace->glyph, FT_RENDER_MODE_NORMAL);
+    if (error) {
+			WWDEBUG_SAY(("Failed to render character(%i) from font\n", ch));
+			return nullptr;
+    }
+    int x_pos = 0;
+    if (ch == 'W') {
+        x_pos = 1;
+    }
+    unsigned int char_width = FtFace->glyph->advance.x >> 6;
+    // Sometimes for some reason the bitmap is wider than the advancement.
+    // This does not work with this font rendering approach
+    if (char_width < FtFace->glyph->bitmap.width + FtFace->glyph->bitmap_left) {
+        char_width = FtFace->glyph->bitmap.width + FtFace->glyph->bitmap_left;
+    }
+    char_width += PixelOverlap + x_pos;
 
+		//
+		//	Get a pointer to the surface that this character should use
+		//
+    Update_Current_Buffer(char_width);
+    uint16* curr_buffer_p = BufferList[BufferList.Count () - 1];
+		curr_buffer_p += CurrPixelOffset;
+    // We might need a memset
+
+    int x_offset = FtFace->glyph->bitmap_left;
+    int descent = (CharHeight - CharAscent) / 2;
+    int y_offset = (CharHeight - FtFace->glyph->bitmap_top) - descent ;
+
+    // Render the bitmap
+    unsigned int cols_to_render = std::min(FtFace->glyph->bitmap.width + x_offset, char_width) - x_offset;
+    unsigned int rows_to_render = std::min(FtFace->glyph->bitmap.rows + y_offset, (unsigned int)CharHeight) - y_offset;
+    for (unsigned int row = 0; row < rows_to_render; row++) {
+        int index = row * FtFace->glyph->bitmap.pitch;
+        int dst_index = (y_offset + row) * char_width;
+        for (unsigned int col = 0u; col < cols_to_render; col++) {
+            uint8_t pixel_value = FtFace->glyph->bitmap.buffer[index + col];
+            uint16_t pixel_color = 0;
+
+            if (pixel_value != 0) {
+                pixel_color = 0x0FFF;
+            }
+
+            curr_buffer_p[dst_index + x_offset + col] = pixel_color | ((pixel_value >> 4) << 12);
+        }
+    }
+
+    CharDataStruct *char_data = new CharDataStruct;
+    char_data->Value = ch;
+    char_data->Width = (int16_t)char_width;
+    char_data->Buffer = BufferList[BufferList.Count () - 1] + CurrPixelOffset;
+
+    if (ch < 256) {
+        ASCIICharArray[ch] = char_data;
+    } else {
+        UnicodeCharArray[ch - FirstUnicodeChar] = char_data;
+    }
+
+    CurrPixelOffset += (char_width * CharHeight);
+    return char_data;
+}
+#elif defined _WIN32
 ////////////////////////////////////////////////////////////////////////////////////
 //
 //	Store_GDI_Char
@@ -1195,7 +1304,7 @@ FontCharsClass::Store_GDI_Char (unichar_t ch)
 	//	Draw the character into the memory DC
 	//
 	RECT rect = { 0, 0, width, height };
-	::ExtTextOutW( MemDC, x_pos, 0, ETO_OPAQUE, &rect, reinterpret_cast<wchar_t *>(&ch), 1, NULL);
+	::ExtTextOutW( MemDC, x_pos, 0, ETO_OPAQUE, &rect, reinterpret_cast<wchar_t *>(&ch), 1, nullptr);
 
 	//
 	//	Get a pointer to the surface that this character should use
@@ -1245,7 +1354,7 @@ FontCharsClass::Store_GDI_Char (unichar_t ch)
 	//
 	CharDataStruct *char_data	= new CharDataStruct;
 	char_data->Value				= ch;
-	char_data->Width				= char_size.cx;
+	char_data->Width				= short(char_size.cx);
 	char_data->Buffer				= BufferList[BufferList.Count () - 1] + CurrPixelOffset;
 
 	//
@@ -1267,7 +1376,7 @@ FontCharsClass::Store_GDI_Char (unichar_t ch)
 	//
 	return char_data;
 }
-
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1296,6 +1405,7 @@ FontCharsClass::Update_Current_Buffer (int char_width)
 	//
 	if (needs_new_buffer) {
 		uint16 *new_buffer = new uint16[CHAR_BUFFER_LEN];
+		memset(new_buffer, 0, sizeof(uint16) * CHAR_BUFFER_LEN);
 		BufferList.Add( new_buffer );
 		CurrPixelOffset = 0;
 	}
@@ -1303,6 +1413,153 @@ FontCharsClass::Update_Current_Buffer (int char_width)
 	return ;
 }
 
+#ifdef OPENW3D_FREETYPE_BUILD
+void FontCharsClass::Add_Font(const char *filename)
+{
+	FT_Library lib;
+	FT_Face face;
+	FT_Init_FreeType(&lib);
+	FT_Error error = FT_Init_FreeType(&lib);
+
+	if (error != FT_Err_Ok) {
+		WWDEBUG_SAY(("Failed to initialize freetype library\n"));
+	}
+
+	error = FT_New_Face(lib, filename, 0, &face);
+	if (error != FT_Err_Ok) {
+			LogFtError("Failed to load Freetype face from file", error);
+			FT_Done_FreeType(lib);
+			return;
+	}
+	
+	
+	FT_UInt name_count = FT_Get_Sfnt_Name_Count(face);
+	std::string font_name;
+
+	// get family
+	for (unsigned i = 0; i < name_count; ++i) {
+		FT_SfntName name;
+		FT_Get_Sfnt_Name(face, i, &name);
+
+		if(name.name_id == TT_NAME_ID_FONT_FAMILY && *name.string != '\0') {
+			font_name.append(
+				reinterpret_cast<char *>(name.string),
+				name.string_len);
+			break;
+		}
+	}
+
+	WWDEBUG_SAY(("Loaded font called '%s' from file at '%s'\n", font_name.c_str(), filename));
+	
+	auto it = FontFiles.find(font_name);
+
+	if (it == FontFiles.end()) {
+		FontFiles[font_name] = filename;
+	}
+
+	FT_Done_Face(face);
+	FT_Done_FreeType(lib);
+}
+
+void FontCharsClass::Remove_Font(const char *filename)
+{
+	for (auto &it : FontFiles) {
+		if (it.second == filename) {
+			FontFiles.erase(it.first);
+			return;
+		}
+	}
+}
+
+bool FontCharsClass::Locate_Font_FontConfig(const char *font_name, StringClass &font_file_path)
+{
+	font_file_path = FontFiles[font_name].c_str();
+	WWDEBUG_SAY(("Found font file '%s' for font '%s\n", font_file_path.Peek_Buffer(), font_name));
+	if (!font_file_path.Is_Empty()) {
+		return true;
+	}
+
+    return false;
+}
+
+bool FontCharsClass::Locate_Font(const char *font_name, StringClass &font_file_path)
+{
+    return Locate_Font_FontConfig(font_name, font_file_path);
+}
+
+void FontCharsClass::Create_Freetype_Font(const char *font_name)
+{
+	//
+	//	Calculate the height of the font in logical units
+	//
+	const int dotsPerInch = 96; // always use 96.	jba.
+	int font_height = FT_MulDiv (PointSize, dotsPerInch, 72);
+	PixelOverlap = (-font_height)/8;
+
+	// Sanity check in case of perversion. :)
+	if (PixelOverlap<0) PixelOverlap = 0;
+	if (PixelOverlap>4) PixelOverlap = 4;
+
+	//
+	//	Locate the font
+	//
+	StringClass font_file_path;
+	if (!Locate_Font(font_name, font_file_path)) {
+			WWDEBUG_SAY(("Failed to locate font: %s\n", font_name));
+			font_name = "Arial";
+			WWDEBUG_SAY(("Trying '%s' as a fallback\n", font_name));
+			if (!Locate_Font(font_name, font_file_path)) {
+					WWDEBUG_SAY(("Failed to find fallback font: %s\n", font_name));
+					return;
+			}
+	}
+
+	//
+	//	Create the Freetype font
+	//
+	FT_Error error = FT_New_Face(FtLibrary, font_file_path, 0, &FtFace);
+	if (error != FT_Err_Ok) {
+			LogFtError("Failed to load Freetype face from file", error);
+			return;
+	}
+
+	error = FT_Set_Pixel_Sizes(FtFace, 0, font_height);
+	if (error != FT_Err_Ok) {
+			LogFtError("Failed to set character size", error);
+			return;
+	}
+
+	// Use the same metric calculation as Wine does in their GDI emulation layer
+	// See https://github.com/NVIDIA/winex_lgpl/blob/master/winex/dlls/gdi/freetype.c#L3027
+	if (FT_IS_SCALABLE(FtFace)) {
+			CharAscent = FT_MulFix(FtFace->ascender, FtFace->size->metrics.y_scale) >> 6;
+			int descent = -FT_MulFix(FtFace->descender, FtFace->size->metrics.y_scale) >> 6;
+			CharHeight = CharAscent + descent;
+	} else {
+			WWDEBUG_SAY(("Require a scalable font. Font=%s\n", font_name));
+	}
+}
+
+void FontCharsClass::Free_Freetype_Font()
+{
+	if (FtFace != nullptr) {
+			FT_Done_Face(FtFace);
+	}
+	if (FtLibrary != nullptr) {
+			FT_Done_FreeType(FtLibrary);
+	}
+}
+#elif defined _WIN32
+
+void FontCharsClass::Add_Font(const char *filename)
+{
+	::AddFontResourceA(filename);
+}
+
+void FontCharsClass::Remove_Font(const char *filename)
+{
+	::RemoveFontResourceA(filename);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1312,7 +1569,7 @@ FontCharsClass::Update_Current_Buffer (int char_width)
 void
 FontCharsClass::Create_GDI_Font (const char *font_name)
 {
-	HDC screen_dc = ::GetDC (NULL);
+	HDC screen_dc = ::GetDC (nullptr);
 
 	//
 	//	Calculate the height of the font in logical units
@@ -1380,13 +1637,13 @@ FontCharsClass::Create_GDI_Font (const char *font_name)
 													(const BITMAPINFO *)&bitmap_info,
 													DIB_RGB_COLORS,
 													(void **)&GDIBitmapBits,
-													NULL,
+													nullptr,
 													0L);
 
 	//
 	//	Create a device context we can select the font and bitmap into
 	//
-	MemDC = ::CreateCompatibleDC (NULL);
+	MemDC = ::CreateCompatibleDC (nullptr);
 
 	//
 	//	Now select the BMP and font into the DC
@@ -1406,7 +1663,7 @@ FontCharsClass::Create_GDI_Font (const char *font_name)
 	//
 	// Release our temporary screen DC
 	//
-	::ReleaseDC (NULL, screen_dc);
+	::ReleaseDC (nullptr, screen_dc);
 	return ;
 }
 
@@ -1423,33 +1680,33 @@ FontCharsClass::Free_GDI_Font (void)
 	//	Select the old font back into the DC and delete
 	// our font object
 	//
-	if ( GDIFont != NULL ) {
+	if ( GDIFont != nullptr ) {
 		::SelectObject( MemDC, OldGDIFont );
 		::DeleteObject( GDIFont );
-		GDIFont = NULL;
+		GDIFont = nullptr;
 	}
 
 	//
 	//	Select the old bitmap back into the DC and delete
 	// our bitmap object
 	//
-	if ( GDIBitmap != NULL ) {
+	if ( GDIBitmap != nullptr ) {
 		::SelectObject( MemDC, OldGDIBitmap );
 		::DeleteObject( GDIBitmap );
-		GDIBitmap = NULL;
+		GDIBitmap = nullptr;
 	}
 
 	//
 	//	Delete our memory DC
 	//
-	if ( MemDC != NULL ) {
+	if ( MemDC != nullptr ) {
 		::DeleteDC( MemDC );
-		MemDC = NULL;
+		MemDC = nullptr;
 	}
 
 	return ;
 }
-
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1474,7 +1731,11 @@ FontCharsClass::Initialize_GDI_Font (const char *font_name, int point_size, bool
 	//
 	//	Create the actual font object
 	//
+#ifdef OPENW3D_FREETYPE_BUILD
+	Create_Freetype_Font (font_name);
+#elif defined _WIN32
 	Create_GDI_Font (font_name);
+#endif
 	return ;
 }
 
@@ -1538,7 +1799,7 @@ FontCharsClass::Grow_Unicode_Array (unichar_t ch)
 	//
 	//	Copy the contents of the old array into the new array
 	//
-	if ( UnicodeCharArray != NULL ) {
+	if ( UnicodeCharArray != nullptr ) {
 		int start_offset	= (FirstUnicodeChar - first_index);
 		int old_count		= (LastUnicodeChar - FirstUnicodeChar) + 1;
 		::memcpy (&new_array[start_offset], UnicodeCharArray, sizeof (CharDataStruct *) * old_count);
@@ -1547,7 +1808,7 @@ FontCharsClass::Grow_Unicode_Array (unichar_t ch)
 		//	Delete the old array
 		//
 		delete [] UnicodeCharArray;
-		UnicodeCharArray = NULL;
+		UnicodeCharArray = nullptr;
 	}
 
 	FirstUnicodeChar	= first_index;
@@ -1565,7 +1826,7 @@ FontCharsClass::Grow_Unicode_Array (unichar_t ch)
 void
 FontCharsClass::Free_Character_Arrays (void)
 {
-	if ( UnicodeCharArray != NULL ) {
+	if ( UnicodeCharArray != nullptr ) {
 
 		int count = (LastUnicodeChar - FirstUnicodeChar) + 1;
 
@@ -1573,9 +1834,9 @@ FontCharsClass::Free_Character_Arrays (void)
 		//	Delete each member of the unicode array
 		//
 		for (int index = 0; index < count; index ++) {
-			if ( UnicodeCharArray[index] != NULL ) {
+			if ( UnicodeCharArray[index] != nullptr ) {
 				delete UnicodeCharArray[index];
-				UnicodeCharArray[index] = NULL;
+				UnicodeCharArray[index] = nullptr;
 			}
 		}
 
@@ -1583,16 +1844,16 @@ FontCharsClass::Free_Character_Arrays (void)
 		//	Delete the array itself
 		//
 		delete [] UnicodeCharArray;
-		UnicodeCharArray = NULL;
+		UnicodeCharArray = nullptr;
 	}
 
 	//
 	//	Delete each member of the ascii character array
 	//
 	for (int index = 0; index < 256; index ++) {
-		if ( ASCIICharArray[index] != NULL ) {
+		if ( ASCIICharArray[index] != nullptr ) {
 			delete ASCIICharArray[index];
-			ASCIICharArray[index] = NULL;
+			ASCIICharArray[index] = nullptr;
 		}
 	}
 

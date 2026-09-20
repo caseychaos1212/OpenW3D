@@ -91,7 +91,7 @@ void Stop_Main_Loop(int exitCode)
 
 void _Game_Main_Loop_Loop(void)
 {
-	WWPROFILE( "Main Loop" );
+	WWPROFILENAMED( "Main Loop", top );
 
 	unsigned int time1 = TIMEGETTIME();
 	const bool log_coop_frame = Should_Log_Coop_Frame();
@@ -123,7 +123,7 @@ void _Game_Main_Loop_Loop(void)
 	if (log_coop_frame) {
 		CoopDebugLog::Log("MainLoop pathfind start camera=%p", COMBAT_CAMERA);
 	}
-   if (COMBAT_CAMERA != NULL) {
+   if (COMBAT_CAMERA != nullptr) {
 		Vector3 camera_pos = COMBAT_CAMERA->Get_Position();
 		PathMgrClass::Resolve_Paths( camera_pos );
 	}
@@ -203,7 +203,7 @@ void _Game_Main_Loop_Loop(void)
 	// If the following assert hits it may indicate that your
 	// working directory pathname got cleared in the project settings.
 	//
-	WWASSERT(GameModeManager::Find("Combat") != NULL);
+	WWASSERT(GameModeManager::Find("Combat") != nullptr);
 
 	if (!GameModeManager::Find("Combat")->Is_Active()) {
 		if (log_coop_frame) {

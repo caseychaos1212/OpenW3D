@@ -74,8 +74,8 @@ const ORATOR_UI_INFO ORATOR_CTRLS[ORATOR_MAX] =
 // EditConversationDialogClass
 //
 /////////////////////////////////////////////////////////////////////////////
-EditConversationDialogClass::EditConversationDialogClass(CWnd* pParent /*=NULL*/)
-	:	m_Conversation (NULL),
+EditConversationDialogClass::EditConversationDialogClass(CWnd* pParent /*=nullptr*/)
+	:	m_Conversation (nullptr),
 		CDialog(EditConversationDialogClass::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(EditConversationDialogClass)
@@ -138,7 +138,7 @@ EditConversationDialogClass::OnInitDialog (void)
 	//
 	//	Create a new conversation if we don't already have one to edit
 	//
-	if (m_Conversation == NULL) {
+	if (m_Conversation == nullptr) {
 		m_Conversation = new ConversationClass;
 
 		OratorClass orator;
@@ -189,7 +189,7 @@ EditConversationDialogClass::OnInitDialog (void)
 			//
 			//	Add this orator type to the combobox
 			//
-			int item_index = SendDlgItemMessage (combobox_id, CB_ADDSTRING, 0, (LPARAM)type_name);
+			LRESULT item_index = SendDlgItemMessage (combobox_id, CB_ADDSTRING, 0, (LPARAM)type_name);
 			SendDlgItemMessage (combobox_id, CB_SETITEMDATA, (WPARAM)item_index, (LPARAM)type_id);
 		}
 
@@ -342,7 +342,7 @@ EditConversationDialogClass::OnDblclkRemarkList
 			//	Update the text entry in the list control
 			//
 			TDBObjClass *translate_obj = TranslateDBClass::Find_Object (remark->Get_Text_ID ());
-			if (translate_obj != NULL) {
+			if (translate_obj != nullptr) {
 				m_ListCtrl.SetItemText (sel_index, COL_REMARK, translate_obj->Get_English_String ());
 			}
 		}
@@ -395,7 +395,7 @@ EditConversationDialogClass::OnOK (void)
 	//
 	//	Read the state this conversation is active for
 	//
-	int ai_state = SendDlgItemMessage (IDC_STATE_COMBO, CB_GETCURSEL);
+	LRESULT ai_state = SendDlgItemMessage (IDC_STATE_COMBO, CB_GETCURSEL);
 	if (ai_state != CB_ERR) {
 		m_Conversation->Set_AI_State (SoldierAIState(ai_state));
 	}
@@ -540,7 +540,7 @@ EditConversationDialogClass::Add_Entry (const ConversationRemarkClass &remark, i
 		//	Lookup the text to display for this remark
 		//
 		TDBObjClass *translate_obj = TranslateDBClass::Find_Object (remark.Get_Text_ID ());
-		if (translate_obj != NULL) {
+		if (translate_obj != nullptr) {
 			m_ListCtrl.SetItemText (item_index, COL_REMARK, translate_obj->Get_English_String ());
 
 			//
@@ -690,7 +690,7 @@ EditConversationDialogClass::Update_Remarks (int orator_index)
 			//
 			//	Remove this entry if it was made by the orator in question
 			//
-			if (remark != NULL && remark->Get_Orator_ID () == orator_index) {
+			if (remark != nullptr && remark->Get_Orator_ID () == orator_index) {
 				m_ListCtrl.DeleteItem (index);
 				index --;
 				item_count --;
@@ -732,7 +732,7 @@ EditConversationDialogClass::Update_Player_Type_Combos (int orator_index)
 		//
 		//	Get the current selection
 		//
-		int curr_sel = SendDlgItemMessage (ORATOR_CTRLS[orator_index].combo_id, CB_GETCURSEL);
+		LRESULT curr_sel = SendDlgItemMessage (ORATOR_CTRLS[orator_index].combo_id, CB_GETCURSEL);
 
 		//
 		//	Update all the combo boxes to reflect the current selection
@@ -755,17 +755,17 @@ EditConversationDialogClass::Update_Player_Type_Combos (int orator_index)
 int
 EditConversationDialogClass::Get_Orator_Type (int orator_index)
 {
-	int retval = -1;
+	LRESULT retval = -1;
 
 	//
 	//	Get the current selection
 	//
-	int curr_sel = SendDlgItemMessage (ORATOR_CTRLS[orator_index].combo_id, CB_GETCURSEL);
+	LRESULT curr_sel = SendDlgItemMessage (ORATOR_CTRLS[orator_index].combo_id, CB_GETCURSEL);
 	if (curr_sel >= 0) {
 		retval = SendDlgItemMessage (ORATOR_CTRLS[orator_index].combo_id, CB_GETITEMDATA, (WPARAM)curr_sel);
 	}
 
-	return retval;
+	return int(retval);
 }
 
 
@@ -787,7 +787,7 @@ EditConversationDialogClass::OnDeleteitemRemarkList
 	//
 	//	Lookup the associated remark object
 	//
-	ConversationRemarkClass *remark = NULL;
+	ConversationRemarkClass *remark = nullptr;
 	remark = (ConversationRemarkClass *)m_ListCtrl.GetItemData (pNMListView->iItem);
 
 	//
@@ -813,13 +813,13 @@ EditConversationDialogClass::Find_Combobox_Entry (int orator_type)
 	//	Loop over all the entries in the combobox until we've found
 	// the one that's associated with the given orator type
 	//
-	int count = SendDlgItemMessage (IDC_ORATOR1_COMBO, CB_GETCOUNT);
+	LRESULT count = SendDlgItemMessage (IDC_ORATOR1_COMBO, CB_GETCOUNT);
 	for (int index = 0; index < count; index ++) {
 
 		//
 		//	Is this the orator we are looking for?
 		//
-		int item_data = SendDlgItemMessage (IDC_ORATOR1_COMBO, CB_GETITEMDATA, (WPARAM)index);
+		LRESULT item_data = SendDlgItemMessage (IDC_ORATOR1_COMBO, CB_GETITEMDATA, (WPARAM)index);
 		if (item_data == orator_type) {
 			retval = index;
 			break;

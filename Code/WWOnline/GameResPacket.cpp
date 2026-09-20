@@ -106,7 +106,7 @@ GameResPacket::GameResPacket(unsigned char* curbuf)
 	mReserved = ntohs(*(unsigned short*)curbuf);
 	curbuf += sizeof(mReserved);
 
-	mHead = NULL;
+	mHead = nullptr;
 
 	// Calculate the remaining size so that we can loop through the
 	// packets and extract them.
@@ -119,7 +119,7 @@ GameResPacket::GameResPacket(unsigned char* curbuf)
 		GameResField* field = new GameResField;
 
 		// Copy the adjusted header into the buffer and then advance the buffer
-		memcpy(field, curbuf, GAMERESFIELD_HEADER_SIZE);
+		memcpy(static_cast<void *>(field), curbuf, GAMERESFIELD_HEADER_SIZE);
 		curbuf += GAMERESFIELD_HEADER_SIZE;
 		remaining_size -= GAMERESFIELD_HEADER_SIZE;
 
@@ -259,7 +259,7 @@ GameResField *GameResPacket::Find_Field(char *id)
 			return current;
 		}
 
-	return NULL;
+	return nullptr;
 	}
 
 

@@ -160,11 +160,11 @@ cGameDataCnc::Soldier_Added (SoldierGameObj *soldier)
 	//
 	//	Give the soldier some starting credits
 	//
-	if (	soldier != NULL &&
-			soldier->Get_Player_Data() != NULL &&
+	if (	soldier != nullptr &&
+			soldier->Get_Player_Data() != nullptr &&
 			soldier->Get_Player_Data()->Get_Game_Time () == 0)
 	{
-		soldier->Get_Player_Data ()->Set_Money (StartingCredits);
+		soldier->Get_Player_Data ()->Set_Money (float(StartingCredits));
 	}
 
 	return ;
@@ -225,10 +225,10 @@ void cGameDataCnc::Base_Destruction_Score_Tweaking(void)
 	WWASSERT(cNetwork::I_Am_Server());
 
 	cTeam * p_nod = cTeamManager::Find_Team(PLAYERTYPE_NOD);
-	WWASSERT(p_nod != NULL);
+	WWASSERT(p_nod != nullptr);
 
 	cTeam * p_gdi = cTeamManager::Find_Team(PLAYERTYPE_GDI);
-	WWASSERT(p_gdi != NULL);
+	WWASSERT(p_gdi != nullptr);
 
 	float nod_score = p_nod->Get_Score();
 	float gdi_score = p_gdi->Get_Score();
@@ -301,7 +301,7 @@ void cGameDataCnc::Load_From_Server_Config(void)
 	cGameData::Load_From_Server_Config(Get_Ini_Filename());
 
    INIClass * p_ini = Get_INI(Get_Ini_Filename());
-   WWASSERT(p_ini != NULL);
+   WWASSERT(p_ini != nullptr);
 
    bool				b;
    int				i;
@@ -344,7 +344,7 @@ void cGameDataCnc::Save_To_Server_Config(void)
 	cGameData::Save_To_Server_Config(Get_Ini_Filename());
 
    INIClass * p_ini = Get_INI(Get_Ini_Filename());
-   WWASSERT(p_ini != NULL);
+   WWASSERT(p_ini != nullptr);
 
 
 	p_ini->Put_Bool(	INI_SECTION_NAME, "IsFriendlyFirePermitted",	IsFriendlyFirePermitted.Get());
@@ -366,7 +366,7 @@ void cGameDataCnc::Show_My_Money(void)
 {
 	if (cNetwork::I_Am_Client()) {
 		cPlayer * p_player = cNetwork::Get_My_Player_Object();
-		if (p_player != NULL) {
+		if (p_player != nullptr) {
 			WideStringClass text(0,true);
 			text.Format(U_CHAR("%s: %d"),
 				TRANSLATION(IDS_MP_MONEY), (int) p_player->Get_Money());
@@ -435,7 +435,7 @@ void cGameDataCnc::Get_Description(WideStringClass & description)
 
 
 
-#define PRINT_CONFIG_ERROR	ConsoleBox.Print("File %s - Error:\r\n\t ", Get_Ini_Filename());
+#define PRINT_CONFIG_ERROR	ConsoleBox.Print("File %s - Error:\r\n\t ", Get_Ini_Filename().Peek_Buffer());
 
 //-----------------------------------------------------------------------------
 bool cGameDataCnc::Is_Valid_Settings(WideStringClass& outMsg, bool check_as_server)

@@ -39,7 +39,7 @@ IMPLEMENT_DYNCREATE(EmitterLinePropPageClass, CPropertyPage)
 
 EmitterLinePropPageClass::EmitterLinePropPageClass() :
 	CPropertyPage(EmitterLinePropPageClass::IDD),
-	m_pEmitterList(NULL),
+	m_pEmitterList(nullptr),
 	m_bValid(true),
 	m_MappingMode(W3D_EMITTER_RENDER_MODE_TRI_PARTICLES),
 	m_MergeIntersections(false),
@@ -92,7 +92,7 @@ END_MESSAGE_MAP()
 void
 EmitterLinePropPageClass::Initialize (void)
 {
-	if (m_pEmitterList != NULL) {
+	if (m_pEmitterList != nullptr) {
 
 		//
 		// Read the settings from the emitter
@@ -154,7 +154,7 @@ BOOL EmitterLinePropPageClass::OnApply()
 	m_UPerSec = ::GetDlgItemFloat (m_hWnd, IDC_UPERSEC_EDIT);
 	m_VPerSec = ::GetDlgItemFloat (m_hWnd, IDC_VPERSEC_EDIT);
 
-	m_MappingMode = SendDlgItemMessage (IDC_MAPMODE_COMBO, CB_GETCURSEL);
+	m_MappingMode = int(SendDlgItemMessage (IDC_MAPMODE_COMBO, CB_GETCURSEL));
 	m_MergeIntersections = !!SendDlgItemMessage (IDC_MERGE_INTERSECTIONS_CHECK, BM_GETCHECK);
 	m_EndCaps = !!SendDlgItemMessage (IDC_END_CAPS_CHECK, BM_GETCHECK);
 	m_DisableSorting = !!SendDlgItemMessage (IDC_DISABLE_SORTING_CHECK, BM_GETCHECK);
@@ -220,7 +220,7 @@ BOOL EmitterLinePropPageClass::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* p
 	//	Update the spinner control if necessary
 	//
 	NMHDR *pheader = (NMHDR *)lParam;
-	if ((pheader != NULL) && (pheader->code == UDN_DELTAPOS)) {
+	if ((pheader != nullptr) && (pheader->code == UDN_DELTAPOS)) {
 		LPNMUPDOWN pupdown = (LPNMUPDOWN)lParam;
 		::Update_Spinner_Buddy (pheader->hwndFrom, pupdown->iDelta);
 		SetModified ();

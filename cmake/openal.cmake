@@ -1,1 +1,1 @@
-find_package(OpenAL CONFIG REQUIRED)
+find_package(OpenAL REQUIRED)

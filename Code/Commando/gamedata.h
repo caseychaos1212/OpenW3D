@@ -51,8 +51,8 @@
 #include "DlgMPTeamSelect.h"
 #include <wwlib/Signaler.h>
 
-const int		MAX_PASSWORD_SIZE			= 16;				//including NULL
-const int		MAX_MAPNAME_SIZE			= 28;				//including NULL
+const int		MAX_PASSWORD_SIZE			= 16;				//including nullptr
+const int		MAX_MAPNAME_SIZE			= 28;				//including nullptr
 const LPCSTR	SERVER_CONFIG_PREFIX		= "svrcfg_";
 const int		MAX_MOTD_LENGTH			= 100;
 #define MAX_CLAN_SLOTS 2
@@ -130,7 +130,7 @@ class	cGameData :
 		bool				Set_Time_Limit_Minutes(int time_limit_minutes);
 		void				Set_Radar_Mode(RadarModeEnum mode);
 		void				Set_Intermission_Time_Seconds(int time);
-		void				Set_Version_Number(int version_number) {VersionNumber = version_number;}
+		void				Set_Version_Number(uint32_t version_number) {VersionNumber = version_number;}
 		bool				Set_Current_Players(int current_players);
 		void				Set_Ip_Address(unsigned int ip_address);
 		void				Set_Port(int port);
@@ -158,7 +158,7 @@ class	cGameData :
 		int				Get_Max_Players(void)				const	{return MaxPlayers;}
 		int				Get_Time_Limit_Minutes(void)		const {return TimeLimitMinutes;}
 		int				Get_Intermission_Time_Seconds(void) const {return IntermissionTimeSeconds;}
-		int				Get_Version_Number(void)			const {return VersionNumber;}
+		uint32_t			Get_Version_Number(void)			const {return VersionNumber;}
 		int				Get_Current_Players(void)			const	{return CurrentPlayers;}
 		unsigned int				Get_Ip_Address(void)					const	{return IpAddress;}
 		int				Get_Port(void)							const	{return Port;}
@@ -198,7 +198,7 @@ class	cGameData :
 		void	Set_Is_Map_Cycle_Over (bool onoff)	{ IsMapCycleOver = onoff; }
 		bool	Do_Maps_Loop (void)						{ return DoMapsLoop; }
 		void	Set_Do_Maps_Loop (bool onoff)			{ DoMapsLoop = onoff; }
-		bool	Is_Map_Valid(char **filename = NULL);
+		bool	Is_Map_Valid(char **filename = nullptr);
 
 
 		//
@@ -209,10 +209,10 @@ class	cGameData :
 		virtual bool	Is_Skirmish(void)					const	{return false;}
 		virtual bool	Is_Cnc(void)						const	{return false;}
 
-		virtual cGameDataSinglePlayer *		As_Single_Player(void)		{return NULL;}
-		virtual cGameDataCoopMission *		As_Coop_Mission(void)		{return NULL;}
-		virtual cGameDataSkirmish *			As_Skirmish(void)				{return NULL;}
-		virtual cGameDataCnc *					As_Cnc(void)					{return NULL;}
+		virtual cGameDataSinglePlayer *		As_Single_Player(void)		{return nullptr;}
+		virtual cGameDataCoopMission *		As_Coop_Mission(void)		{return nullptr;}
+		virtual cGameDataSkirmish *			As_Skirmish(void)				{return nullptr;}
+		virtual cGameDataCnc *					As_Cnc(void)					{return nullptr;}
 
 		virtual int		Get_Min_Players(void) const {return 2;}
 		int				Choose_Available_Team(int preference);
@@ -362,7 +362,7 @@ class	cGameData :
 		int					MaxPlayers;
 		int					TimeLimitMinutes;
 		int					IntermissionTimeSeconds;
-		int					VersionNumber; // for now use exe byte size
+		uint32_t				VersionNumber; // for now use exe byte size
 		bool					DoExeVersionsMatch;
 		bool					DoStringVersionsMatch;
 		unsigned int					IpAddress; // hosting address
@@ -434,8 +434,8 @@ extern cGameDataCnc *					The_Cnc_Game(void);
 
 		//virtual bool	Is_Deathmatch(void)				const	{return false;}
 		//virtual bool	Is_Team_Deathmatch(void)		const	{return false;}
-		//virtual cGameDataDeathMatch *			As_Deathmatch(void)			{return NULL;}
-		//virtual cGameDataTeamDeathMatch *	As_Team_Deathmatch(void)	{return NULL;}
+		//virtual cGameDataDeathMatch *			As_Deathmatch(void)			{return nullptr;}
+		//virtual cGameDataTeamDeathMatch *	As_Team_Deathmatch(void)	{return nullptr;}
 		//static const char* Get_Game_Type_Name(GameTypeEnum type);
 		//virtual bool	Is_Editable_Reload_Map(void)		const	{return false;}
 		//virtual bool	Is_Editable_Max_Players(void)		const	{return false;}

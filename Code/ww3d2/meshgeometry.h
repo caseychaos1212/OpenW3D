@@ -128,7 +128,7 @@ public:
 	void							Set_Flag(FlagsType flag,bool onoff)						{ if (onoff) {	Flags |= flag;	} else {	Flags &= ~flag; } }
 	int							Get_Flag(FlagsType flag)									{ return Flags & flag; }
 
-	void							Set_Sort_Level(int level)									{ SortLevel = level; }
+	void							Set_Sort_Level(int level)									{ SortLevel = char(level); }
 	int							Get_Sort_Level(void) const									{ return SortLevel; }
 
 	int							Get_Polygon_Count(void) const								{ return PolyCount; }
@@ -148,7 +148,7 @@ public:
 	void							Get_Bounding_Sphere(SphereClass * set_sphere);
 
 	// exposed culling support
-	bool							Has_Cull_Tree(void)											{ return CullTree != NULL; }
+	bool							Has_Cull_Tree(void)											{ return CullTree != nullptr; }
 
 	void							Generate_Rigid_APT(const Vector3 & view_dir, SimpleDynVecClass<uint32> & apt);
 	void							Generate_Rigid_APT(const OBBoxClass & local_box, SimpleDynVecClass<uint32> & apt);
@@ -262,7 +262,7 @@ inline uint32 * MeshGeometryClass::get_shade_indices(bool create)
 	if (VertexShadeIdx) {
 		return VertexShadeIdx->Get_Array();
 	}
-	return NULL;
+	return nullptr;
 }
 
 inline uint16 * MeshGeometryClass::get_bone_links(bool create)
@@ -273,7 +273,7 @@ inline uint16 * MeshGeometryClass::get_bone_links(bool create)
 	if (VertexBoneLink) {
 		return VertexBoneLink->Get_Array();
 	}
-	return NULL;
+	return nullptr;
 }
 
 inline uint8 MeshGeometryClass::Get_Poly_Surface_Type(int poly_index) const

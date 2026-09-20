@@ -243,11 +243,11 @@ private:
 ** _MemLogMutex - handle to the mutex used to arbtirate access to the logging data structures
 ** _MemLogLockCounter - count of the active mutex locks.
 */
-static MemLogClass *				_TheMemLog = NULL;
+static MemLogClass *				_TheMemLog = nullptr;
 static bool							_MemLogAllocated = false;
 
 #if MEMLOG_USE_MUTEX
-static void *						_MemLogMutex = NULL;
+static void *						_MemLogMutex = nullptr;
 static int							_MemLogLockCounter = 0;
 #endif
 
@@ -263,12 +263,12 @@ volatile unsigned					_MemLogSemaphore = 0;
 /*
 ** Use this code to get access to the mutex...
 */
-WWINLINE void * Get_Mem_Log_Mutex(void)
+void * Get_Mem_Log_Mutex(void)
 {
 #if MEMLOG_USE_MUTEX
 
-	if (_MemLogMutex == NULL) {
-		_MemLogMutex=CreateMutexA(NULL,false,NULL);
+	if (_MemLogMutex == nullptr) {
+		_MemLogMutex=CreateMutexA(nullptr,false,nullptr);
 		WWASSERT(_MemLogMutex);
 	}
 	return _MemLogMutex;
@@ -286,7 +286,7 @@ WWINLINE void * Get_Mem_Log_Mutex(void)
 #endif
 }
 
-WWINLINE void Lock_Mem_Log_Mutex(void)
+void Lock_Mem_Log_Mutex(void)
 {
 #if MEMLOG_USE_MUTEX
 
@@ -329,7 +329,7 @@ WWINLINE void Lock_Mem_Log_Mutex(void)
 #endif
 }
 
-WWINLINE void Unlock_Mem_Log_Mutex(void)
+void Unlock_Mem_Log_Mutex(void)
 {
 #if MEMLOG_USE_MUTEX
 
@@ -523,7 +523,7 @@ MemLogClass * WWMemoryLogClass::Get_Log(void)
 {
 	MemLogMutexLockClass lock;
 
-	if (_TheMemLog == NULL) {
+	if (_TheMemLog == nullptr) {
 		//assert(!_MemLogAllocated);
 		_TheMemLog = new MemLogClass;
 
@@ -560,12 +560,12 @@ MemLogClass * WWMemoryLogClass::Get_Log(void)
  * HISTORY:                                                                                    *
  *   6/13/2001 8:55PM ST : Created                                                             *
  *=============================================================================================*/
-void __cdecl WWMemoryLogClass::Release_Log(void)
+void WWMemoryLogClass::Release_Log(void)
 {
 	MemLogMutexLockClass lock;
 	if (_TheMemLog) {
 		delete _TheMemLog;
-		_TheMemLog = NULL;
+		_TheMemLog = nullptr;
 	}
 }
 
@@ -651,7 +651,7 @@ void * WWMemoryLogClass::Allocate_Memory(size_t size)
 		WWASSERT(size <= static_cast<size_t>(std::numeric_limits<unsigned int>::max() - sizeof(MemoryLogStruct)));
 		void * ptr = ALLOC_MEMORY(size + sizeof(MemoryLogStruct));
 
-		if (ptr != NULL) {
+		if (ptr != nullptr) {
 			/*
 			** Record this allocation
 			*/

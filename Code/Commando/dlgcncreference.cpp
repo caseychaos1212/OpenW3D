@@ -66,7 +66,7 @@
 ////////////////////////////////////////////////////////////////
 //	Static member initialization
 ////////////////////////////////////////////////////////////////
-CnCReferenceMenuClass *	CnCReferenceMenuClass::_TheInstance				= NULL;
+CnCReferenceMenuClass *	CnCReferenceMenuClass::_TheInstance				= nullptr;
 DWORD							CnCReferenceMenuClass::LastSuicideTimeMs		= 0;
 DWORD							CnCReferenceMenuClass::LastChangeTeamTimeMs	= 0;
 
@@ -76,7 +76,7 @@ DWORD							CnCReferenceMenuClass::LastChangeTeamTimeMs	= 0;
 //
 ////////////////////////////////////////////////////////////////
 CnCReferenceMenuClass::CnCReferenceMenuClass (void)	:
-	OldBackdrop (NULL),
+	OldBackdrop (nullptr),
 	Timer (0.5F),
 	MenuDialogClass (GetRenegadeDialog(RenegadeDialogID::IDD_MENU_CNC_REFERENCE))
 {
@@ -92,7 +92,7 @@ CnCReferenceMenuClass::CnCReferenceMenuClass (void)	:
 ////////////////////////////////////////////////////////////////
 CnCReferenceMenuClass::~CnCReferenceMenuClass (void)
 {
-	_TheInstance = NULL;
+	_TheInstance = nullptr;
 	return ;
 }
 
@@ -182,11 +182,11 @@ CnCReferenceMenuClass::On_Destroy (void)
 	//
 	//	Restore the old backdrop
 	//
-	if (OldBackdrop != NULL) {
+	if (OldBackdrop != nullptr) {
 		OldBackdrop = Replace_BackDrop (OldBackdrop);
-		if (OldBackdrop != NULL) {
+		if (OldBackdrop != nullptr) {
 			delete OldBackdrop;
-			OldBackdrop = NULL;
+			OldBackdrop = nullptr;
 		}
 	}
 
@@ -230,7 +230,7 @@ CnCReferenceMenuClass::On_Command (int ctrl_id, int message_id, unsigned int par
 				//
 				// Play a custom SFX for feedback
 				//
-				WWASSERT(WWAudioClass::Get_Instance() != NULL);
+				WWASSERT(WWAudioClass::Get_Instance() != nullptr);
 				WWAudioClass::Get_Instance()->Create_Instant_Sound("Committed_Suicide", Matrix3D(1));
 			}
 
@@ -257,7 +257,7 @@ CnCReferenceMenuClass::On_Command (int ctrl_id, int message_id, unsigned int par
 			//
 			// Play a custom SFX for feedback
 			//
-			WWASSERT(WWAudioClass::Get_Instance() != NULL);
+			WWASSERT(WWAudioClass::Get_Instance() != nullptr);
 			WWAudioClass::Get_Instance()->Create_Instant_Sound("Changed_Team", Matrix3D(1));
 
 			GameInitMgrClass::Continue_Game();
@@ -301,7 +301,7 @@ CnCReferenceMenuClass::Display (void)
 	//
 	//	Create the dialog if necessary, otherwise simply bring it to the front
 	//
-	if (_TheInstance == NULL) {
+	if (_TheInstance == nullptr) {
 
 		//
 		//	Create the dialog
@@ -340,11 +340,11 @@ CnCReferenceMenuClass::On_Menu_Activate (bool onoff)
 		//
 		//	Restore the old backdrop
 		//
-		if (OldBackdrop != NULL) {
+		if (OldBackdrop != nullptr) {
 			OldBackdrop = Replace_BackDrop (OldBackdrop);
-			if (OldBackdrop != NULL) {
+			if (OldBackdrop != nullptr) {
 				delete OldBackdrop;
-				OldBackdrop = NULL;
+				OldBackdrop = nullptr;
 			}
 		}
 	}
@@ -372,10 +372,10 @@ CnCReferenceMenuClass::On_Frame_Update (void)
 		cNetwork::I_Am_Client();
 
 	bool is_suicide_enabled =
-		The_Game() != NULL &&
+		The_Game() != nullptr &&
 		!IS_MISSION &&
 		cNetwork::I_Am_Client();// &&
-		//GameModeManager::Find("Combat") != NULL &&
+		//GameModeManager::Find("Combat") != nullptr &&
 		//GameModeManager::Find("Combat")->Is_Active();
 
 	bool can_suicide_now = is_coop_respawn_enabled ?
@@ -392,12 +392,12 @@ CnCReferenceMenuClass::On_Frame_Update (void)
 	// Enable or disable the change teams button
 	//
 	bool is_team_change_enabled =
-		The_Game() != NULL &&
+		The_Game() != nullptr &&
 		!IS_MISSION &&
 		cNetwork::I_Am_Client() &&
 		The_Game()->IsTeamChangingAllowed.Is_True() &&
-		(!(GameModeManager::Find("WOL") != NULL && GameModeManager::Find("WOL")->Is_Active()) || The_Game()->IsLaddered.Is_False());// &&
-		//GameModeManager::Find("Combat") != NULL &&
+		(!(GameModeManager::Find("WOL") != nullptr && GameModeManager::Find("WOL")->Is_Active()) || The_Game()->IsLaddered.Is_False());// &&
+		//GameModeManager::Find("Combat") != nullptr &&
 		//GameModeManager::Find("Combat")->Is_Active();
 
 	bool is_coop_character_enabled =
@@ -515,10 +515,10 @@ CnCReferenceMenuClass::Exit_Game (void)
 
 	/*
 	bool is_suicide_enabled =
-		The_Game() != NULL &&
+		The_Game() != nullptr &&
 		!IS_MISSION &&
 		cNetwork::I_Am_Client() &&
-		GameModeManager::Find("Combat") != NULL &&
+		GameModeManager::Find("Combat") != nullptr &&
 		GameModeManager::Find("Combat")->Is_Active();
 
 	//Get_Dlg_Item (IDC_OPTIONS_MULTIPLAY_SUICIDE)->Enable (is_suicide_enabled);
@@ -528,12 +528,12 @@ CnCReferenceMenuClass::Exit_Game (void)
 	// Enable or disable the change teams button
 	//
 	bool is_team_change_enabled =
-		The_Game() != NULL &&
+		The_Game() != nullptr &&
 		!IS_MISSION &&
 		cNetwork::I_Am_Client() &&
 		The_Game()->IsTeamChangingAllowed.Is_True() &&
-		(!(GameModeManager::Find("WOL") != NULL && GameModeManager::Find("WOL")->Is_Active()) || The_Game()->IsLaddered.Is_False()) &&
-		GameModeManager::Find("Combat") != NULL &&
+		(!(GameModeManager::Find("WOL") != nullptr && GameModeManager::Find("WOL")->Is_Active()) || The_Game()->IsLaddered.Is_False()) &&
+		GameModeManager::Find("Combat") != nullptr &&
 		GameModeManager::Find("Combat")->Is_Active();
 
 	Get_Dlg_Item (IDC_OPTIONS_MULTIPLAY_CHANGE_TEAMS)->Enable (is_team_change_enabled);

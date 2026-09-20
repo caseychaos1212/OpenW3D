@@ -53,11 +53,11 @@ DialogControlClass::DialogControlClass (void)	:
 	ClientRect (0, 0, 0, 0),
 	Style (0),
 	ID (0),
-	Parent (NULL),
+	Parent (nullptr),
 	HasFocus (false),
 	IsDirty (true),
 	WantsFocus (true),
-	AdviseSink (NULL),
+	AdviseSink (nullptr),
 	IsEnabled (true),
 	IsVisible (true),
 	IsEmbedded (false),
@@ -81,7 +81,7 @@ DialogControlClass::~DialogControlClass (void)
 	//	Remove the input focus if this control has it
 	//
 	if (DialogMgrClass::Get_Focus () == this) {
-		DialogMgrClass::Set_Focus (NULL);
+		DialogMgrClass::Set_Focus (nullptr);
 	}
 
 	return ;
@@ -154,10 +154,10 @@ DialogControlClass::Set_Window_Pos (const Vector2 &pos)
 	//
 	//	Recalculate the window's bounding rectangle
 	//
-	Rect.Left	= (int)pos.X;
-	Rect.Top		= (int)pos.Y;
-	Rect.Right	= (int)(Rect.Left + width);
-	Rect.Bottom	= (int)(Rect.Top + height);
+	Rect.Left	= WWMath::Trunc(pos.X);
+	Rect.Top		= WWMath::Trunc(pos.Y);
+	Rect.Right	= WWMath::Trunc(Rect.Left + width);
+	Rect.Bottom	= WWMath::Trunc(Rect.Top + height);
 
 	//
 	//	Let the control recalculate anything it needs
@@ -202,7 +202,7 @@ DialogControlClass::Enable (bool onoff)
 		//	Remove the focus (if necessary)
 		//
 		if (IsEnabled == false && DialogMgrClass::Get_Focus () == this) {
-			DialogMgrClass::Set_Focus (NULL);
+			DialogMgrClass::Set_Focus (nullptr);
 		}
 	}
 

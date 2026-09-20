@@ -101,7 +101,7 @@ DECLARE_SCRIPT ( DAK_Fire_Gas_Elec_Death_DAK, "DeathType:string" )
 				Commands->Action_Play_Animation( obj, params );
 
 				// begin DeathType damage
-				Commands->Apply_Damage( obj, 1.0f, Get_Parameter( "DeathType" ), NULL );
+				Commands->Apply_Damage( obj, 1.0f, Get_Parameter( "DeathType" ), nullptr );
 			}
 		}
 		else
@@ -115,7 +115,7 @@ DECLARE_SCRIPT ( DAK_Fire_Gas_Elec_Death_DAK, "DeathType:string" )
 		if((action_id == 1) && (reason == ACTION_COMPLETE_NORMAL))
 		{
 			// animation is complete. kill obj.
-			Commands->Apply_Damage (obj, 10000.0f, "Blamokiller", NULL);
+			Commands->Apply_Damage (obj, 10000.0f, "Blamokiller", nullptr);
 		}
 
 	}
@@ -135,7 +135,7 @@ DECLARE_SCRIPT(DAK_Vehicle_Regen_DAK, "" )
 			// check to see if health needs to be regenerated.
 			if ( Commands->Get_Health ( obj ) < Commands->Get_Max_Health ( obj ) )
 			{
-				Commands->Apply_Damage (obj, -10, "RegenHealth", NULL);
+				Commands->Apply_Damage (obj, -10, "RegenHealth", nullptr);
 			}
 			// restart the timer
 			Commands->Send_Custom_Event ( obj, obj, 0, 0, 5 );
@@ -147,8 +147,9 @@ DECLARE_SCRIPT(DAK_Electric_Death_DAK, "" )
 {
 	void Created ( GameObject *obj ) override
 	{
-		int time = Commands->Get_Random(1, 3);
-		Commands->Send_Custom_Event ( obj, obj, 0, 0, time );
+		// TODO Why is this casting like this to round rather than calling Get_Random_Int?
+		int time = int(Commands->Get_Random(1, 3));
+		Commands->Send_Custom_Event ( obj, obj, 0, 0, float(time) );
 	}
 
 	void Damaged (GameObject *obj, GameObject * /*damager*/, float /*amount*/ ) override
@@ -167,12 +168,12 @@ DECLARE_SCRIPT(DAK_Electric_Death_DAK, "" )
 
 			Commands->Attach_Script (new_object, "DAK_Electric_Death_DAK", "");
 
-			Commands->Apply_Damage (obj, 10, "Electric", NULL);
+			Commands->Apply_Damage (obj, 10, "Electric", nullptr);
 		}
 
 		if ( type == 1 ) // apply next ammount of electric damage.
 		{
-			Commands->Apply_Damage (obj, 10, "Electric", NULL);
+			Commands->Apply_Damage (obj, 10, "Electric", nullptr);
 		}
 	}
 };
@@ -191,7 +192,7 @@ DECLARE_SCRIPT( M00_BUILDING_EXPLODE_NO_DAMAGE_DAK, "" )
 {
 	void Killed( GameObject *obj, GameObject * /*killer*/ ) override
 	{
-		//Commands->Create_Explosion ( "Building_Explode_No_Damage", position, NULL );
+		//Commands->Create_Explosion ( "Building_Explode_No_Damage", position, nullptr );
 		Commands->Shake_Camera( Commands->Get_Position( obj ), 25, 0.1f, 4.0f );
 	}
 };

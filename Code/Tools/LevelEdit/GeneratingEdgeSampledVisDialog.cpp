@@ -68,10 +68,10 @@ static UINT fnGeneratingVisDialogThread (DWORD_PTR dwparam1, DWORD_PTR dwparam2,
 // GeneratingEdgeSampledVisDialogClass
 //
 /////////////////////////////////////////////////////////////////////////////
-GeneratingEdgeSampledVisDialogClass::GeneratingEdgeSampledVisDialogClass(CWnd* pParent /*=NULL*/)
+GeneratingEdgeSampledVisDialogClass::GeneratingEdgeSampledVisDialogClass(CWnd* pParent /*=nullptr*/)
 	:	m_IsCancelled (false),
 		m_IsFinished (false),
-		m_ProgressObj (NULL),
+		m_ProgressObj (nullptr),
 		m_StartTime (0),
 		m_FarmMode (false),
 		CDialog(GeneratingEdgeSampledVisDialogClass::IDD, pParent)
@@ -80,7 +80,7 @@ GeneratingEdgeSampledVisDialogClass::GeneratingEdgeSampledVisDialogClass(CWnd* p
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
 
-	Create (GeneratingEdgeSampledVisDialogClass::IDD, NULL);
+	Create (GeneratingEdgeSampledVisDialogClass::IDD, nullptr);
 
 	//
 	//	Determine the section of the status file
@@ -146,7 +146,7 @@ GeneratingEdgeSampledVisDialogClass::OnInitDialog (void)
 	//
 	//	Start the timer
 	//
-	SetTimer (777, 1000, NULL);
+	SetTimer (777, 1000, nullptr);
 
 	//
 	//	Record the time at operation start
@@ -190,7 +190,7 @@ GeneratingEdgeSampledVisDialogClass::OnCancel (void)
 	//
 	//	Stop the vis generation process
 	//
-	if (m_ProgressObj != NULL) {
+	if (m_ProgressObj != nullptr) {
 		m_ProgressObj->Request_Cancel ();
 		Update_Stats ();
 	}
@@ -212,14 +212,14 @@ GeneratingEdgeSampledVisDialogClass::OnCancel (void)
 void
 GeneratingEdgeSampledVisDialogClass::Update_Stats (void)
 {
-	if (m_ProgressObj != NULL) {
+	if (m_ProgressObj != nullptr) {
 
 		//
 		//	Update the simple text controls
 		//
 		SetDlgItemInt (IDC_TOTAL_EDGE_COUNT,		m_ProgressObj->Get_Total_Edge_Count ());
 		SetDlgItemInt (IDC_TOTAL_SAMPLE_COUNT,		m_ProgressObj->Get_Total_Sample_Count ());
-		SetDlgItemInt (IDC_AVG_SAMPLES_PER_NODE,	m_ProgressObj->Get_Average_Samples_Per_Node ());
+		SetDlgItemInt (IDC_AVG_SAMPLES_PER_NODE,	int(m_ProgressObj->Get_Average_Samples_Per_Node ()));
 		SetDlgItemInt (IDC_EDGE_COUNT,				m_ProgressObj->Get_Current_Node_Edge_Count ());
 		SetDlgItemInt (IDC_SAMPLE_COUNT,				m_ProgressObj->Get_Current_Node_Sample_Count ());
 
@@ -229,7 +229,7 @@ GeneratingEdgeSampledVisDialogClass::Update_Stats (void)
 		int processed		= m_ProgressObj->Get_Processed_Node_Count ();
 		int total			= m_ProgressObj->Get_Node_Count ();
 		float percent		= static_cast<float>(processed) / static_cast<float>(total);
-		m_ProgressCtrl.SetPos (percent * 100);
+		m_ProgressCtrl.SetPos (int(percent * 100));
 
 		//
 		//	Update the status text
@@ -303,8 +303,8 @@ GeneratingEdgeSampledVisDialogClass::Display (void)
 	//
 	//	Create the dialog on a separate thread
 	//
-	GeneratingEdgeSampledVisDialogClass *dialog = NULL;
-	::Create_UI_Thread (fnGeneratingVisDialogThread, 0, (DWORD_PTR)&dialog, 0, NULL, NULL);
+	GeneratingEdgeSampledVisDialogClass *dialog = nullptr;
+	::Create_UI_Thread (fnGeneratingVisDialogThread, 0, (DWORD_PTR)&dialog, 0, nullptr, nullptr);
 	return dialog;
 }
 
@@ -359,7 +359,7 @@ fnGeneratingVisDialogThread
 	//	Return the dialog object to the caller
 	//
 	GeneratingEdgeSampledVisDialogClass **return_val = (GeneratingEdgeSampledVisDialogClass **)dwparam2;
-	if (return_val != NULL) {
+	if (return_val != nullptr) {
 		(*return_val) = dialog;
 	}
 

@@ -134,8 +134,8 @@ void HermiteSpline3DClass::Evaluate_Derivative(float time,Vector3 * set_val)
 	// if we're outside the range, return the value for the start or end...
 	float min_time = Keys[0].Time;
 	float max_time = Keys[Keys.Count() - 1].Time;
-	time = MAX(time, min_time);
-	time = MIN(time, max_time);
+	time = std::max(time, min_time);
+	time = std::min(time, max_time);
 
 	// if the tangents are marked dirty, give derived classes a chance to recompute them
 	if (TangentsDirty) {
@@ -258,7 +258,7 @@ bool HermiteSpline3DClass::Load(ChunkLoadClass &cload)
 				break;
 
 			default:
-				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",__FILE__,__LINE__));
+				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 				break;
 		}
 		cload.Close_Chunk();
@@ -425,7 +425,7 @@ bool HermiteSpline1DClass::Load(ChunkLoadClass &cload)
 				break;
 
 			default:
-				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",__FILE__,__LINE__));
+				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 				break;
 		}
 		cload.Close_Chunk();

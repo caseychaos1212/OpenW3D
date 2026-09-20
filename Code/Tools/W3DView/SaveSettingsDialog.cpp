@@ -40,7 +40,7 @@ static char THIS_FILE[] = __FILE__;
 //
 //  CSaveSettingsDialog
 //
-CSaveSettingsDialog::CSaveSettingsDialog (CWnd* pParent /*=NULL*/)
+CSaveSettingsDialog::CSaveSettingsDialog (CWnd* pParent /*=nullptr*/)
 	: CDialog(CSaveSettingsDialog::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CSaveSettingsDialog)
@@ -100,7 +100,7 @@ void
 CSaveSettingsDialog::OnBrowseButton (void)
 {
 	 TCHAR szFileName[MAX_PATH];
-	 ::GetModuleFileName (NULL, szFileName, sizeof (szFileName));
+	 ::GetModuleFileName (nullptr, szFileName, sizeof (szFileName));
 	 LPTSTR pszPath = ::strrchr (szFileName, '\\');
 	 if (pszPath)
 	 {
@@ -231,9 +231,9 @@ CSaveSettingsDialog::FixOKEnableState (void)
 {
     // Determine which (if any) checkboxes are checked
     int iValidSel = 0;
-    iValidSel += SendDlgItemMessage (IDC_LIGHTING_CHECKBOX, BM_GETCHECK);
-    iValidSel += SendDlgItemMessage (IDC_BACKGROUND_CHECKBOX, BM_GETCHECK);
-    iValidSel += SendDlgItemMessage (IDC_CAMERA_CHECKBOX, BM_GETCHECK);
+    iValidSel += int(SendDlgItemMessage (IDC_LIGHTING_CHECKBOX, BM_GETCHECK));
+    iValidSel += int(SendDlgItemMessage (IDC_BACKGROUND_CHECKBOX, BM_GETCHECK));
+    iValidSel += int(SendDlgItemMessage (IDC_CAMERA_CHECKBOX, BM_GETCHECK));
 
     // Is the dialog in a valid state?
     if ((iValidSel > 0) &&

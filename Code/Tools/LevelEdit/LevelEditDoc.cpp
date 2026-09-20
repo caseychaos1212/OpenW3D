@@ -39,7 +39,7 @@
 #include "regkeys.h"
 #include "editorassetmgr.h"
 #include "_assetmgr.h"
-#include "rcfile.h"
+#include "wrcfile.h"
 #include "editorini.h"
 #include "updateassetsdialog.h"
 #include "filelocations.h"
@@ -109,7 +109,7 @@ END_MESSAGE_MAP()
 //	CLevelEditDoc
 //
 CLevelEditDoc::CLevelEditDoc (void)
-	:	m_pScene (NULL),
+	:	m_pScene (nullptr),
 		m_bPerformanceSampling (false),
 		m_DisplayPathWeb (false),
 		m_DisplayFullPaths (false),
@@ -165,7 +165,7 @@ bool
 CLevelEditDoc::Initialize_VSS (void)
 {
 	bool retval = false;
-	ASSERT (m_pFileMgr != NULL);
+	ASSERT (m_pFileMgr != nullptr);
 
 #ifdef PUBLIC_EDITOR_VER
 	m_pFileMgr->Initialize_VSS ("");
@@ -183,7 +183,7 @@ CLevelEditDoc::Initialize_VSS (void)
 	if (::GetEnvironmentVariable ("SSUSER", user_name, sizeof (user_name)) == 0) {
 
 		// Let the user know they need to setup this variable
-		::Message_Box (NULL,
+		::Message_Box (nullptr,
 							IDS_NOVSSUSER_MSG,
 							IDS_NOVSS_TITLE,
 							MB_ICONERROR | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
@@ -201,7 +201,7 @@ CLevelEditDoc::Initialize_VSS (void)
 		if (!blogon_success) {
 
 			// If we were unsuccessful, let the user know
-			::Message_Box (NULL,
+			::Message_Box (nullptr,
 								IDS_NOVSS_MSG,
 								IDS_NOVSS_TITLE,
 								MB_ICONERROR | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
@@ -214,7 +214,7 @@ CLevelEditDoc::Initialize_VSS (void)
 	if (m_pFileMgr->Is_VSS_Read_Only ()) {
 
 		// Let the user know they are in read-only mode
-		::Message_Box (NULL,
+		::Message_Box (nullptr,
 							IDS_VSS_READONLY_MSG,
 							IDS_NOVSS_TITLE,
 							MB_ICONEXCLAMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
@@ -247,8 +247,8 @@ CLevelEditDoc::Change_Base_Path (void)
 	// Ask the user to pick a base path
 	CString base_path;
 	if (::Browse_For_Folder (base_path,
-									 NULL,
-									 NULL,
+									 nullptr,
+									 nullptr,
 									 "Please select a location to keep your models.  A subdir named Assets will be created automatically.")) {
 
 		// Concat the Assets subdir onto the path
@@ -385,8 +385,8 @@ CLevelEditDoc::Update_Asset_Tree (void)
 	EditorINIClass *pini = _pThe3DAssetManager->Get_INI (path);
 
 	// Were we successful in getting a pointer to the INI file?
-	ASSERT (pini != NULL);
-	if (pini != NULL) {
+	ASSERT (pini != nullptr);
+	if (pini != nullptr) {
 
 		// Determine what the last time we updated was and when the
 		// last time the database was modified
@@ -400,7 +400,7 @@ CLevelEditDoc::Update_Asset_Tree (void)
 			TCHAR comments[512];
 			pini->Get_TextBlock ("Comments", comments, sizeof (comments));
 			for (LPSTR newline = ::strchr (comments, '|');
-			     newline != NULL;
+			     newline != nullptr;
 				  newline = ::strchr (newline, '|'))
 			{
 				newline[0] = '\r';
@@ -437,7 +437,7 @@ CLevelEditDoc::Update_Asset_Tree (void)
 			// if they want to update now.
 			//
 			//if (::Is_Silent_Mode () == false) {
-				UpdateAssetsDialogClass dialog (CString (comments), directory_list, update_all, NULL);
+				UpdateAssetsDialogClass dialog (CString (comments), directory_list, update_all, nullptr);
 				if (dialog.DoModal () == IDOK) {
 
 					// Remember that we've updated ourselves
@@ -522,7 +522,7 @@ CLevelEditDoc::OnNewDocument (void)
 	//	Reset the overlap-sphere page
 	//
 	OverlapPageClass *form = ::Get_Overlap_Form ();
-	if (form != NULL) {
+	if (form != nullptr) {
 		form->Reset_Tree ();
 	}
 
@@ -530,7 +530,7 @@ CLevelEditDoc::OnNewDocument (void)
 	//	Reset the conversation page
 	//
 	ConversationPageClass *conversation_form = ::Get_Conversation_Form ();
-	if (conversation_form != NULL) {
+	if (conversation_form != nullptr) {
 		conversation_form->Reload_Data ();
 	}
 
@@ -586,7 +586,7 @@ CLevelEditDoc::Do_Version_Check (void)
 	// with and older version
 	//
 	if (Check_Editor_Version () == false) {
-		if (Message_Box (NULL, IDS_VERSION_ERROR_MSG, IDS_VERSION_ERROR_TITLE, MB_ICONEXCLAMATION | MB_OKCANCEL | MB_SETFOREGROUND | MB_SYSTEMMODAL) == IDCANCEL) {
+		if (Message_Box (nullptr, IDS_VERSION_ERROR_MSG, IDS_VERSION_ERROR_TITLE, MB_ICONEXCLAMATION | MB_OKCANCEL | MB_SETFOREGROUND | MB_SYSTEMMODAL) == IDCANCEL) {
 
 			//
 			//	Just for kicks, exit the process pretty violently
@@ -648,23 +648,23 @@ CLevelEditDoc::Preload_Tool_Assets (void)
 	//
 	// Load the tool-art models into the asset manager
 	//
-	ResourceFileClass way_start (NULL, "WayStart.w3d");
-	ResourceFileClass way_mid (NULL, "WayMid.w3d");
-	ResourceFileClass way_end (NULL, "WayStop.w3d");
-	ResourceFileClass way_r (NULL, "Way_R.w3d");
-	ResourceFileClass way_g (NULL, "Way_G.w3d");
-	ResourceFileClass way_b (NULL, "Way_B.w3d");
-	ResourceFileClass point_light (NULL, "PointLight.w3d");
-	ResourceFileClass speaker1 (NULL, "Speaker.w3d");
-	ResourceFileClass speaker2 (NULL, "Speaker2.w3d");
-	ResourceFileClass body_box (NULL, "BODYBOX.W3D");
-	ResourceFileClass camera_model (NULL, "CAMERA.W3D");
-	ResourceFileClass grid_model (NULL, "GRID.W3D");
-	ResourceFileClass trans_box_model (NULL, "TRANSBOX.W3D");
-	ResourceFileClass dummy_model (NULL, "DUMMY.W3D");
-	ResourceFileClass cover_spot_model (NULL, "COVERSPOT.W3D");
-	ResourceFileClass building_model (NULL, "BUILDINGICON.W3D");
-	ResourceFileClass carmarker_model (NULL, "CARMARKER.W3D");
+	WinResourceFileClass way_start ("WayStart.w3d");
+	WinResourceFileClass way_mid ("WayMid.w3d");
+	WinResourceFileClass way_end ("WayStop.w3d");
+	WinResourceFileClass way_r ("Way_R.w3d");
+	WinResourceFileClass way_g ("Way_G.w3d");
+	WinResourceFileClass way_b ("Way_B.w3d");
+	WinResourceFileClass point_light ("PointLight.w3d");
+	WinResourceFileClass speaker1 ("Speaker.w3d");
+	WinResourceFileClass speaker2 ("Speaker2.w3d");
+	WinResourceFileClass body_box ("BODYBOX.W3D");
+	WinResourceFileClass camera_model ("CAMERA.W3D");
+	WinResourceFileClass grid_model ("GRID.W3D");
+	WinResourceFileClass trans_box_model ("TRANSBOX.W3D");
+	WinResourceFileClass dummy_model ("DUMMY.W3D");
+	WinResourceFileClass cover_spot_model ("COVERSPOT.W3D");
+	WinResourceFileClass building_model ("BUILDINGICON.W3D");
+	WinResourceFileClass carmarker_model ("CARMARKER.W3D");
 	WW3DAssetManager::Get_Instance()->Load_3D_Assets (way_start);
 	WW3DAssetManager::Get_Instance()->Load_3D_Assets (way_mid);
 	WW3DAssetManager::Get_Instance()->Load_3D_Assets (way_end);
@@ -723,10 +723,10 @@ CLevelEditDoc::Preload_Human_Data (void)
 	//	Force load the commando model
 	//
 	PresetClass *preset = PresetMgrClass::Find_Typed_Preset (CLASSID_GAME_OBJECT_DEF_SOLDIER, "Commando");
-	if (preset != NULL) {
+	if (preset != nullptr) {
 		preset->Load_All_Assets ();
 		SoldierGameObj *soldier = (SoldierGameObj *)preset->Get_Definition ()->Create ();
-		if (soldier != NULL) {
+		if (soldier != nullptr) {
 			soldier->Set_Delete_Pending ();
 		}
 	}
@@ -743,7 +743,7 @@ CLevelEditDoc::Preload_Human_Data (void)
 void
 CLevelEditDoc::Init_Scene (void)
 {
-	if (m_pScene == NULL) {
+	if (m_pScene == nullptr) {
 
 		// Ensure we have the latest core files
 		Update_Core_Files ();
@@ -840,7 +840,7 @@ CLevelEditDoc::OnOpenDocument (LPCTSTR path)
 	//	Reload the conversation page
 	//
 	ConversationPageClass *conversation_form = ::Get_Conversation_Form ();
-	if (conversation_form != NULL) {
+	if (conversation_form != nullptr) {
 		conversation_form->Reload_Data ();
 	}
 

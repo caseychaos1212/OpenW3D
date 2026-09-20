@@ -28,13 +28,13 @@
 
 DDSFileClass::DDSFileClass(const char* name,unsigned reduction_factor)
 	:
-	DDSMemory(NULL),
+	DDSMemory(nullptr),
 	Width(0),
 	Height(0),
 	FullWidth(0),
 	FullHeight(0),
-	LevelSizes(NULL),
-	LevelOffsets(NULL),
+	LevelSizes(nullptr),
+	LevelOffsets(nullptr),
 	MipLevels(0),
 	ReductionFactor(reduction_factor),
 	Format(WW3D_FORMAT_UNKNOWN),
@@ -62,7 +62,7 @@ DDSFileClass::DDSFileClass(const char* name,unsigned reduction_factor)
 	// Verify the structure size matches the read size
 	if (read_bytes!=SurfaceDesc.Size) {
 		StringClass tmp(0,true);
-		tmp.Format("File %s loading failed.\nTried to read %d bytes, got %d. (SurfDesc.size=%d)\n",name,sizeof(LegacyDDSURFACEDESC2),read_bytes,SurfaceDesc.Size);
+		tmp.Format("File %s loading failed.\nTried to read %d bytes, got %d. (SurfDesc.size=%d)\n",name,(int)sizeof(LegacyDDSURFACEDESC2),read_bytes,SurfaceDesc.Size);
 		WWASSERT_PRINT(0,tmp);
 		return;
 	}
@@ -165,6 +165,9 @@ unsigned DDSFileClass::Calculate_DXTC_Surface_Size(unsigned width, unsigned heig
 	case WW3D_FORMAT_DXT5:
 		level_size*=16;
 		break;
+	default:
+		WWASSERT(0 && "Unexpected DDS Texture format");
+		break;
 	}
 	return level_size;
 }
@@ -227,7 +230,7 @@ void DDSFileClass::Copy_Level_To_Surface(unsigned level,IDirect3DSurface9* d3d_s
 
 	// First lock the surface
 	D3DLOCKED_RECT locked_rect;
-	DX8_ErrorCode(d3d_surface->LockRect(&locked_rect,NULL,0));
+	DX8_ErrorCode(d3d_surface->LockRect(&locked_rect,nullptr,0));
 
 	Copy_Level_To_Surface(
 		level,
@@ -307,7 +310,7 @@ void DDSFileClass::Copy_Level_To_Surface(
 
 // ----------------------------------------------------------------------------
 
-WWINLINE static unsigned RGB565_To_ARGB8888(unsigned short rgb)
+inline static unsigned RGB565_To_ARGB8888(unsigned short rgb)
 {
 	unsigned rgba=0;
 	rgba|=unsigned(rgb&0x001f)<<3;
@@ -318,7 +321,7 @@ WWINLINE static unsigned RGB565_To_ARGB8888(unsigned short rgb)
 
 // ----------------------------------------------------------------------------
 
-WWINLINE static unsigned Combine_Colors(unsigned col1, unsigned col2, unsigned rel)
+inline static unsigned Combine_Colors(unsigned col1, unsigned col2, unsigned rel)
 {
 	const unsigned R_B_MASK=0x00ff00ff;
 	const unsigned G_MASK=0x0000ff00;
@@ -476,6 +479,9 @@ unsigned DDSFileClass::Get_Pixel(unsigned level,unsigned x,unsigned y) const
 			case 3: return Combine_Colors(col0,col1,85)|alpha_value;
 			}
 		}
+		break;
+	default:
+		WWASSERT(0 && "Unexpected DDS Texture format");
 		break;
 	}
 	return 0xffffffff;
@@ -694,6 +700,9 @@ bool DDSFileClass::Get_4x4_Block(
 			return contains_alpha!=0xff;	// Alpha block... DXT5 should only be used when the image needs alpha
 													// but for now check anyway...
 		}
+	default:
+		WWASSERT(0 && "Unexpected DDS Texture format");
+		break;
 	}
 	return false;
 

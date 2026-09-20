@@ -88,9 +88,9 @@
 // static data members
 Vector3 PointGroupClass::_TriVertexLocationOrientationTable[256][3];
 Vector3 PointGroupClass::_QuadVertexLocationOrientationTable[256][4];
-Vector2 *PointGroupClass::_TriVertexUVFrameTable[5] = { NULL, NULL, NULL, NULL, NULL};
-Vector2 *PointGroupClass::_QuadVertexUVFrameTable[5] = { NULL, NULL, NULL, NULL, NULL};
-VertexMaterialClass *PointGroupClass::PointMaterial=NULL;
+Vector2 *PointGroupClass::_TriVertexUVFrameTable[5] = { nullptr, nullptr, nullptr, nullptr, nullptr};
+Vector2 *PointGroupClass::_QuadVertexUVFrameTable[5] = { nullptr, nullptr, nullptr, nullptr, nullptr};
+VertexMaterialClass *PointGroupClass::PointMaterial=nullptr;
 
 // This array has vertex locations for screenspace mode - calculated to cover exactly 1x1 and 2x2 pixels.
 Vector3 PointGroupClass::_ScreenspaceVertexLocationSizeTable[2][3] =
@@ -131,15 +131,15 @@ SortingIndexBufferClass		*SortingTris, *SortingQuads;	// Sorting index buffers.
  *   11/17/1998 NH  : Created.                                            *
  *========================================================================*/
 PointGroupClass::PointGroupClass(void) :
-	PointLoc(NULL),
-	PointDiffuse(NULL),
-	APT(NULL),
-	PointSize(NULL),
-	PointOrientation(NULL),
-	PointFrame(NULL),
+	PointLoc(nullptr),
+	PointDiffuse(nullptr),
+	APT(nullptr),
+	PointSize(nullptr),
+	PointOrientation(nullptr),
+	PointFrame(nullptr),
 	PointCount(0),
 	FrameRowColumnCountLog2(0),
-	Texture(NULL),
+	Texture(nullptr),
 	Flags(0),
 	Shader(ShaderClass::_PresetAdditiveSpriteShader),
 	PointMode(TRIS),
@@ -171,31 +171,31 @@ PointGroupClass::~PointGroupClass(void)
 {
 	if (PointLoc) {
 		PointLoc->Release_Ref();
-		PointLoc = NULL;
+		PointLoc = nullptr;
 	}
 	if (PointDiffuse) {
 		PointDiffuse->Release_Ref();
-		PointDiffuse=NULL;
+		PointDiffuse=nullptr;
 	}
 	if (APT) {
 		APT->Release_Ref();
-		APT = NULL;
+		APT = nullptr;
 	}
 	if (PointSize) {
 		PointSize->Release_Ref();
-		PointSize = NULL;
+		PointSize = nullptr;
 	}
 	if (PointOrientation) {
 		PointOrientation->Release_Ref();
-		PointOrientation = NULL;
+		PointOrientation = nullptr;
 	}
 	if (PointFrame) {
 		PointFrame->Release_Ref();
-		PointFrame = NULL;
+		PointFrame = nullptr;
 	}
 	if (Texture) {
 		REF_PTR_RELEASE(Texture);
-		Texture = NULL;
+		Texture = nullptr;
 	}
 }
 
@@ -230,7 +230,7 @@ PointGroupClass & PointGroupClass::operator = (const PointGroupClass & that)
  * WARNINGS:                                                              *
  *                                                                        *
  * NOTES:	colors, alphas, APT, sizes, orientations and frames are       *
- *          optional. active_point_count can also be used with a NULL apt.*
+ *          optional. active_point_count can also be used with a nullptr apt.*
  *          In this case active_point_count is ignored if it is -1        *
  *          (default value) and otherwise it indicates the first N active *
  *          points in the arrays.                                         *
@@ -608,7 +608,7 @@ TextureClass * PointGroupClass::Peek_Texture(void)
  * WARNINGS:	the primary gradient will be set to MODULATE/DISABLE in    *
  * 				the shader depending on whether a color or alpha array was *
  * 				passed in Set_Point_Arrays. also, texturing will be        *
- * 				enabled or disabled dependent on whether a non-NULL        *
+ * 				enabled or disabled dependent on whether a non-nullptr        *
  * 				texture was set.                                           *
  *					these will override the primary gradient/texturing         *
  *					settings in the given shader.                              *
@@ -676,7 +676,7 @@ unsigned char PointGroupClass::Get_Frame_Row_Column_Count_Log2(void)
  *========================================================================*/
 void PointGroupClass::Set_Frame_Row_Column_Count_Log2(unsigned char frccl2)
 {
-	FrameRowColumnCountLog2 = MIN(frccl2, 4);
+	FrameRowColumnCountLog2 = std::min(frccl2, (unsigned char)4);
 }
 
 /**************************************************************************
@@ -744,11 +744,11 @@ void PointGroupClass::Render(RenderInfoClass &/*rinfo*/)
 	static VectorClass<Vector3>		transformed_loc;		// transformed point locations
 
 	// Pointers which point into existing buffers (member or static):
-	Vector3 *current_loc = NULL;
-	Vector4 *current_diffuse = NULL;
-	float *current_size = NULL;
-	unsigned char *current_orient = NULL;
-	unsigned char *current_frame = NULL;
+	Vector3 *current_loc = nullptr;
+	Vector4 *current_diffuse = nullptr;
+	float *current_size = nullptr;
+	unsigned char *current_orient = nullptr;
+	unsigned char *current_frame = nullptr;
 
 	// If there is a color or alpha array enable gradient in shader - otherwise disable.
    float value_255 = 0.9961f;	//254 / 255
@@ -765,7 +765,7 @@ void PointGroupClass::Render(RenderInfoClass &/*rinfo*/)
 		Shader.Set_Primary_Gradient(ShaderClass::GRADIENT_DISABLE);
 	}
 
-	// If Texture is non-NULL enable texturing in shader - otherwise disable.
+	// If Texture is non-nullptr enable texturing in shader - otherwise disable.
 	if (Texture) {
 		Shader.Set_Texturing(ShaderClass::TEXTURING_ENABLE);
 	} else {
@@ -891,8 +891,8 @@ void PointGroupClass::Render(RenderInfoClass &/*rinfo*/)
 	current = 0;
 	while (current<vnum)
 	{
-		delta=MIN(vnum-current,MAX_VB_SIZE);
-		DynamicVBAccessClass PointVerts (sort ? BUFFER_TYPE_DYNAMIC_SORTING : BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, delta);
+		delta=std::min(vnum-current, MAX_VB_SIZE);
+		DynamicVBAccessClass PointVerts (sort ? BUFFER_TYPE_DYNAMIC_SORTING : BUFFER_TYPE_DYNAMIC_DX8, dynamic_fvf_type, static_cast<unsigned short>(delta));
 
 		// Copy in the data to the VB
 		{
@@ -920,9 +920,9 @@ void PointGroupClass::Render(RenderInfoClass &/*rinfo*/)
 		DX8Wrapper::Set_Index_Buffer (indexbuffer, 0);
 		DX8Wrapper::Set_Vertex_Buffer (PointVerts);
 		if (sort) {
-			SortingRendererClass::Insert_Triangles (0, delta / verticesperprimitive, 0, delta);
+			SortingRendererClass::Insert_Triangles (0, static_cast<unsigned short>(delta / verticesperprimitive), 0, static_cast<unsigned short>(delta));
 		} else {
-			DX8Wrapper::Draw_Triangles (0, delta / verticesperprimitive, 0, delta);
+			DX8Wrapper::Draw_Triangles (0, static_cast<unsigned short>(delta / verticesperprimitive), 0, static_cast<unsigned short>(delta));
 		}
 
 		current+=delta;
@@ -1161,8 +1161,8 @@ void PointGroupClass::Update_Arrays(
    			float y_scale = (VPYMax - VPYMin) / yres;
 
 				Vector3 scaled_locs[2][3];
-				for (int i = 0; i < 2; i++) {
-					for (int j = 0; j < 3; j++) {
+				for (i = 0; i < 2; i++) {
+					for (j = 0; j < 3; j++) {
 						scaled_locs[i][j].X = _ScreenspaceVertexLocationSizeTable[i][j].X * x_scale;
 						scaled_locs[i][j].Y = _ScreenspaceVertexLocationSizeTable[i][j].Y * y_scale;
 						scaled_locs[i][j].Z = _ScreenspaceVertexLocationSizeTable[i][j].Z;
@@ -1195,8 +1195,8 @@ void PointGroupClass::Update_Arrays(
    			float y_scale = (VPYMax - VPYMin) / yres;
 
 				Vector3 scaled_locs[2][3];
-				for (int i = 0; i < 2; i++) {
-					for (int j = 0; j < 3; j++) {
+				for (i = 0; i < 2; i++) {
+					for (j = 0; j < 3; j++) {
 						scaled_locs[i][j].X = _ScreenspaceVertexLocationSizeTable[i][j].X * x_scale;
 						scaled_locs[i][j].Y = _ScreenspaceVertexLocationSizeTable[i][j].Y * y_scale;
 						scaled_locs[i][j].Z = _ScreenspaceVertexLocationSizeTable[i][j].Z;
@@ -1232,23 +1232,23 @@ void PointGroupClass::Update_Arrays(
 		if (PointMode != QUADS) {
 			// Modes with three vertices per point:
 			Vector2 *uv_ptr = _TriVertexUVFrameTable[FrameRowColumnCountLog2];
-			int vert = 0;
-			for (int i = 0; i < active_points; i++) {
+			int fill_vert = 0;
+			for (i = 0; i < active_points; i++) {
 				int uv_idx = (point_frame[i] & frame_mask) * 3;
-				vertex_uv[vert++] = uv_ptr[uv_idx + 0];
-				vertex_uv[vert++] = uv_ptr[uv_idx + 1];
-				vertex_uv[vert++] = uv_ptr[uv_idx + 2];
+				vertex_uv[fill_vert++] = uv_ptr[uv_idx + 0];
+				vertex_uv[fill_vert++] = uv_ptr[uv_idx + 1];
+				vertex_uv[fill_vert++] = uv_ptr[uv_idx + 2];
 			}
 		} else {
 			// Modes with four vertices per point:
 			Vector2 *uv_ptr = _QuadVertexUVFrameTable[FrameRowColumnCountLog2];
-			int vert = 0;
-			for (int i = 0; i < active_points; i++) {
+			int fill_vert = 0;
+			for (i = 0; i < active_points; i++) {
 				int uv_idx = (point_frame[i] & frame_mask) * 4;
-				vertex_uv[vert++] = uv_ptr[uv_idx + 0];
-				vertex_uv[vert++] = uv_ptr[uv_idx + 1];
-				vertex_uv[vert++] = uv_ptr[uv_idx + 2];
-				vertex_uv[vert++] = uv_ptr[uv_idx + 3];
+				vertex_uv[fill_vert++] = uv_ptr[uv_idx + 0];
+				vertex_uv[fill_vert++] = uv_ptr[uv_idx + 1];
+				vertex_uv[fill_vert++] = uv_ptr[uv_idx + 2];
+				vertex_uv[fill_vert++] = uv_ptr[uv_idx + 3];
 			}
 		}
 
@@ -1259,21 +1259,21 @@ void PointGroupClass::Update_Arrays(
 		if (PointMode != QUADS) {
 			// Modes with three vertices per point:
 			Vector2 *uv_ptr = _TriVertexUVFrameTable[FrameRowColumnCountLog2] + ((DefaultPointFrame & frame_mask) * 3);
-			int vert = 0;
-			for (int i = 0; i < active_points; i++) {
-				vertex_uv[vert++] = uv_ptr[0];
-				vertex_uv[vert++] = uv_ptr[1];
-				vertex_uv[vert++] = uv_ptr[2];
+			int fill_vert = 0;
+			for (i = 0; i < active_points; i++) {
+				vertex_uv[fill_vert++] = uv_ptr[0];
+				vertex_uv[fill_vert++] = uv_ptr[1];
+				vertex_uv[fill_vert++] = uv_ptr[2];
 			}
 		} else {
 			// Modes with four vertices per point:
 			Vector2 *uv_ptr = _QuadVertexUVFrameTable[FrameRowColumnCountLog2] + ((DefaultPointFrame & frame_mask) * 4);
-			int vert = 0;
-			for (int i = 0; i < active_points; i++) {
-				vertex_uv[vert++] = uv_ptr[0];
-				vertex_uv[vert++] = uv_ptr[1];
-				vertex_uv[vert++] = uv_ptr[2];
-				vertex_uv[vert++] = uv_ptr[3];
+			int fill_vert = 0;
+			for (i = 0; i < active_points; i++) {
+				vertex_uv[fill_vert++] = uv_ptr[0];
+				vertex_uv[fill_vert++] = uv_ptr[1];
+				vertex_uv[fill_vert++] = uv_ptr[2];
+				vertex_uv[fill_vert++] = uv_ptr[3];
 			}
 		}
 

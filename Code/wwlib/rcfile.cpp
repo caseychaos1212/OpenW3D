@@ -38,16 +38,23 @@
 #include "rcfile.h"
 #include <stdlib.h>
 #include <string.h>
+#ifdef OPENW3D_SDL3
+#include <string>
+#include <unordered_map>
+#endif
 
-const char * RESOURCE_FILE_TYPE_NAME = "File";
+#if defined(OPENW3D_WIN32)
+static constexpr char RESOURCE_FILE_TYPE_NAME[] = "File";
+#endif
 
 
+#ifdef OPENW3D_WIN32
 ResourceFileClass::ResourceFileClass(HMODULE hmodule, char const *filename) :
-	ResourceName(NULL),
-	hModule(NULL),
-	FileBytes(NULL),
-	FilePtr(NULL),
-	EndOfFile(NULL)
+	ResourceName(nullptr),
+	hModule(nullptr),
+	FileBytes(nullptr),
+	FilePtr(nullptr),
+	EndOfFile(nullptr)
 {
 	Set_Name(filename);
 	HRSRC hresource = FindResourceA(hmodule,ResourceName,RESOURCE_FILE_TYPE_NAME);
@@ -63,6 +70,31 @@ ResourceFileClass::ResourceFileClass(HMODULE hmodule, char const *filename) :
 		}
 	}
 }
+#endif
+
+#if defined(OPENW3D_WIN32)
+ResourceFileClass::ResourceFileClass(char const *filename) :
+	ResourceFileClass(nullptr, filename)
+{
+}
+#elif defined(OPENW3D_SDL3)
+ResourceFileClass::ResourceFileClass(char const *filename) :
+	ResourceName(nullptr),
+	FileBytes(nullptr),
+	FilePtr(nullptr),
+	EndOfFile(nullptr)
+{
+	Set_Name(filename);
+	if (const auto & pair = Static_Resources.find(ResourceName); pair != Static_Resources.end()) {
+
+		FileBytes = static_cast<const unsigned char *>(pair->second.data);
+		FilePtr = FileBytes;
+		EndOfFile = FileBytes + pair->second.size;
+	}
+}
+#else
+#error "Not implemented"
+#endif
 
 ResourceFileClass::~ResourceFileClass(void)
 {
@@ -74,7 +106,7 @@ char const * ResourceFileClass::Set_Name(char const *filename)
 {
 	if (ResourceName) {
 		free(ResourceName);
-		ResourceName = NULL;
+		ResourceName = nullptr;
 	}
 	if (filename) {
 		ResourceName = strdup(filename);
@@ -87,7 +119,7 @@ int ResourceFileClass::Read(void *buffer, int size)
 	if (!FilePtr) return 0;
 
 	if (FilePtr + size > EndOfFile) {
-		size = EndOfFile - FilePtr;
+		size = int(EndOfFile - FilePtr);
 	}
 	memcpy(buffer,FilePtr,size);
 	FilePtr += size;
@@ -117,12 +149,12 @@ int ResourceFileClass::Seek(int pos, int dir)
 		FilePtr = FileBytes;
 	}
 
-	return FilePtr - FileBytes;
+	return int(FilePtr - FileBytes);
 }
 
 int ResourceFileClass::Size(void)
 {
-	return EndOfFile - FileBytes;
+	return int(EndOfFile - FileBytes);
 }
 
 void ResourceFileClass::Error(int /*error*/, int /*canretry*/, char const * /*filename*/)

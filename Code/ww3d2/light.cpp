@@ -556,7 +556,7 @@ WW3DErrorType LightClass::Save_W3D(ChunkSaveClass & csave)
 	if (Get_Flag(NEAR_ATTENUATION)) {
 		csave.Begin_Chunk(W3D_CHUNK_NEAR_ATTENUATION);
 
-		double start,end;
+		float start,end;
 		Get_Near_Attenuation_Range(start,end);
 
 		W3dLightAttenuationStruct atten;
@@ -571,7 +571,7 @@ WW3DErrorType LightClass::Save_W3D(ChunkSaveClass & csave)
 	if (Get_Flag(FAR_ATTENUATION)) {
 		csave.Begin_Chunk(W3D_CHUNK_FAR_ATTENUATION);
 
-		double start,end;
+		float start,end;
 		Get_Far_Attenuation_Range(start,end);
 
 		W3dLightAttenuationStruct atten;
@@ -670,7 +670,7 @@ bool LightClass::Load (ChunkLoadClass &cload)
 				break;
 
 			default:
-				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",__FILE__,__LINE__));
+				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 				break;
 		}
 		cload.Close_Chunk();

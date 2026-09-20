@@ -95,7 +95,7 @@ void ScoreScreenGameModeClass::Save_Stats( void )
 
 	if ( COMBAT_STAR ) {
 		PlayerDataClass * player_data = COMBAT_STAR->Get_Player_Data();
-		if ( player_data != NULL ) {
+		if ( player_data != nullptr ) {
 			_SSStats_play_time = player_data->Get_Game_Time();
 			_SSStats_building_destroyed = player_data->Get_Building_Destroyed();
 			_SSStats_vehicles_destroyed = player_data->Get_Vehiclies_Destroyed();
@@ -116,7 +116,7 @@ void ScoreScreenGameModeClass::Save_Stats( void )
 	}
 
 
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	_SSStats_mission_number = cGameData::Get_Mission_Number_From_Map_Name( _SSStats_map_name );
 
 	// Oh, this is just terrible!!!  Byon
@@ -402,7 +402,7 @@ int	ScoreScreenDialogClass::Get_Time_To_Finish_Stars( void )
 		stars = 5;
 	}
 
-	int minutes = time;
+	int minutes = int(time);
 	WideStringClass wtime;
 	wtime.Format( TRANSLATE( IDS_SS_HOURS_MINUTES ), minutes / 60, minutes % 60 );
 	Set_Dlg_Item_Text( IDC_SCORE_SCREEN_PLAYTIME, wtime );

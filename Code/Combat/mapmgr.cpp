@@ -94,7 +94,7 @@ MapMgrClass::Get_Map_Texture_Filename (StringClass &filename)
 	//
 	filename = MapTextureName;
 	const char *dir_delimiter			= ::strrchr (MapTextureName, '\\');
-	if (dir_delimiter != NULL) {
+	if (dir_delimiter != nullptr) {
 		filename = (dir_delimiter + 1);
 	}
 
@@ -115,7 +115,7 @@ MapMgrClass::Set_Map_Texture (const char *filename)
 	//
 	StringClass filename_only	= filename;
 	const char *dir_delimiter			= ::strrchr (filename, '\\');
-	if (dir_delimiter != NULL) {
+	if (dir_delimiter != nullptr) {
 		filename_only = (dir_delimiter + 1);
 	}
 
@@ -123,7 +123,7 @@ MapMgrClass::Set_Map_Texture (const char *filename)
 	//	Load the texture
 	//
 	TextureClass *texture = WW3DAssetManager::Get_Instance ()->Get_Texture (filename_only, TextureClass::MIP_LEVELS_1);
-	if (texture != NULL) {
+	if (texture != nullptr) {
 
 		//
 		//	Get the dimensions of the texture
@@ -132,8 +132,8 @@ MapMgrClass::Set_Map_Texture (const char *filename)
 //		texture->Get_Level_Description (surface_desc);
 //		MapSize.X = surface_desc.Width;
 //		MapSize.Y = surface_desc.Height;
-		MapSize.X = texture->Get_Width();
-		MapSize.Y = texture->Get_Height();
+		MapSize.X = float(texture->Get_Width());
+		MapSize.Y = float(texture->Get_Height());
 
 		//
 		//	Release our hold on the texture

@@ -71,7 +71,7 @@ ListIconMgrClass::Add_Icon (const char *texture_name)
 		//	Load the texture
 		//
 		TextureClass *texture = WW3DAssetManager::Get_Instance ()->Get_Texture (texture_name, TextureClass::MIP_LEVELS_1);
-		if (texture != NULL) {
+		if (texture != nullptr) {
 
 			//
 			//	Create a new renderer and assign it the texture
@@ -171,8 +171,8 @@ ListIconMgrClass::Render_Icon (const RectClass &clip_rect, const char *texture_n
 		RectClass rect;
 		rect.Left			= clip_rect.Left;
 		rect.Right			= clip_rect.Left + icon_size_x;
-		rect.Top				= int (clip_rect.Center ().Y - (icon_size_y * 0.5F));
-		rect.Bottom			= int (clip_rect.Center ().Y + (icon_size_y * 0.5F));
+		rect.Top				= WWMath::Trunc (clip_rect.Center ().Y - (icon_size_y * 0.5F));
+		rect.Bottom			= WWMath::Trunc (clip_rect.Center ().Y + (icon_size_y * 0.5F));
 		Renderers[index]->Add_Quad (rect);
 	}
 

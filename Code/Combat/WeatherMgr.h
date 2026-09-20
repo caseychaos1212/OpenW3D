@@ -147,7 +147,7 @@ class WeatherSystemClass : public RenderObjClass
 	protected:
 
 		static constexpr int VERTICES_PER_TRIANGLE = 3;
-		static constexpr int MAX_IB_PARTICLE_COUNT = 2048;
+		static constexpr unsigned MAX_IB_PARTICLE_COUNT = 2048;
 		static constexpr int MAX_AGE					 = 1000000;
 
 		struct RayStruct : public AutoPoolClass <RayStruct, GROWTH_STEP>
@@ -188,7 +188,7 @@ class WeatherSystemClass : public RenderObjClass
 		float Spawn_Count (float time) {return (ParticleDensity * EmitterSize * EmitterSize * time);}
 		bool	Can_Spawn (const RayStruct *rayptr) {return (rayptr->EndPosition.Z < EmitterPosition.Z);}
 
-		bool Spawn (RayStruct *suppliedrayptr = NULL);
+		bool Spawn (RayStruct *suppliedrayptr = nullptr);
 		void Kill (ParticleStruct *particleptr);
 
 		PhysicsSceneClass						*Scene;						// The scene that contains the weather system.

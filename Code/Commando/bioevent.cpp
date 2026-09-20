@@ -112,7 +112,7 @@ cBioEvent::Act(void)
 			player_node = player_node->Next()) {
 
 			cPlayer * p_player = player_node->Data();
-			WWASSERT(p_player != NULL);
+			WWASSERT(p_player != nullptr);
 
 			cNetwork::Send_Object_Update(p_player, SenderId);
 		}
@@ -124,27 +124,27 @@ cBioEvent::Act(void)
 			WideStringClass new_nickname;
 			int count = 1;
 			do {
-				new_nickname.Format(U_CHAR("%s(%d)"), Nickname, count++);
+				new_nickname.Format(U_CHAR("%s(%d)"), Nickname.Peek_Buffer(), count++);
 			} while (cGameSpyAdmin::Is_Nickname_Collision(new_nickname));
 
 			Nickname = new_nickname;
 		}
 
 		cPlayer * p_player = cGod::Create_Player(SenderId, Nickname, TeamChoice, ClanID);
-		WWASSERT(p_player != NULL);
+		WWASSERT(p_player != nullptr);
 
 		if (!IS_SOLOPLAY) {
 			//
 			// Record his IP address for diagnostic purposes
 			//
-			WWASSERT(cNetwork::Get_Server_Rhost(SenderId) != NULL);
+			WWASSERT(cNetwork::Get_Server_Rhost(SenderId) != nullptr);
 			struct sockaddr_in & address = cNetwork::Get_Server_Rhost(SenderId)->Get_Address();
 			p_player->Set_Ip_Address(address.sin_addr.s_addr);
 
 			//
 			// Tell the remote host object to expect a lot of temporary extra bandwidth.
 			//
-			if (cNetwork::PServerConnection != NULL) {
+			if (cNetwork::PServerConnection != nullptr) {
 				cNetwork::PServerConnection->Set_Rhost_Expect_Packet_Flood(p_player->Get_Id(), true);
 			}
 

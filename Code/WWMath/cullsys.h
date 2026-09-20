@@ -61,11 +61,11 @@ class FrustumClass;
 class CullLinkClass
 {
 public:
-	WWINLINE CullLinkClass(CullSystemClass * system)								{ System = system; WWASSERT(System); }
-	virtual ~CullLinkClass(void)												{ WWASSERT(System == NULL); }
+	CullLinkClass(CullSystemClass * system)								{ System = system; WWASSERT(System); }
+	virtual ~CullLinkClass(void)												{ WWASSERT(System == nullptr); }
 
-	WWINLINE void					Set_Culling_System(CullSystemClass * sys)		{ System = sys; }
-	WWINLINE CullSystemClass * Get_Culling_System(void)							{ return System; }
+	void					Set_Culling_System(CullSystemClass * sys)		{ System = sys; }
+	CullSystemClass * Get_Culling_System(void)							{ return System; }
 
 protected:
 	CullSystemClass * System;
@@ -91,7 +91,7 @@ public:
 	** object will automatically be updated in whatever culling system it is currently
 	** contained in (if any)
 	*/
-	WWINLINE const AABoxClass & Get_Cull_Box(void) const							{ return CullBox; }
+	const AABoxClass & Get_Cull_Box(void) const							{ return CullBox; }
 	void								Set_Cull_Box(const AABoxClass & box,bool just_loaded = false);
 
 	/*
@@ -100,20 +100,20 @@ public:
 	*/
 	void								Set_Culling_System(CullSystemClass * sys);
 	CullSystemClass *				Get_Culling_System(void) const;
-	WWINLINE void					Set_Cull_Link(CullLinkClass * c)					{ CullLink = c; }
-	WWINLINE CullLinkClass *	Get_Cull_Link(void) const							{ return CullLink; }
+	void					Set_Cull_Link(CullLinkClass * c)					{ CullLink = c; }
+	CullLinkClass *	Get_Cull_Link(void) const							{ return CullLink; }
 
 private:
 
-	WWINLINE void					Set_Next_Collected(CullableClass * c)			{ NextCollected = c; }
-	WWINLINE CullableClass *	Get_Next_Collected(void)							{ return NextCollected; }
+	void					Set_Next_Collected(CullableClass * c)			{ NextCollected = c; }
+	CullableClass *	Get_Next_Collected(void)							{ return NextCollected; }
 
 	/*
 	** Culling Data
 	** Each object can be linked into various types of culling systems.
 	** Each culling system can use its own linkage data structure (derived
 	** from CullLinkClass) to keep track of the object.  The CullData pointer
-	** will point to one of the culling link objects and NULL
+	** will point to one of the culling link objects and nullptr
 	** if its not in any system.
 	*/
 	CullLinkClass *				CullLink;

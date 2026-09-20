@@ -1252,9 +1252,9 @@ DECLARE_SCRIPT(M00_Trigger_Timer_Expired_RAD, "Start_Now=0:int, Receive_Type=15:
 			{
 				GameObject* target_obj;
 				int target_id;
-				int min_delay;
-				int max_delay;
-				int delay_value;
+				float min_delay;
+				float max_delay;
+				float delay_value;
 
 				target_id = Get_Int_Parameter("Target_ID");
 
@@ -1363,7 +1363,7 @@ DECLARE_SCRIPT(M00_Trigger_State_Sequence_RAD, "Start_Now=0:int, Receive_Type:in
 			{
 				// Adjust to this numbered state.
 
-				state_num = param;
+				state_num = int(param);
 
 				if (state_num > Get_Int_Parameter("Num_States"))
 				{

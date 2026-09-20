@@ -82,7 +82,7 @@ void CCDKeyAuth::auth_callback(int /* gameid */, int localid, int authenticated,
 	WWDEBUG_SAY(("CDKeyAuth -- %d:%d:%s\n", localid, authenticated, errmsg));
 
 	cPlayer * p_player = cPlayerManager::Find_Player(localid);
-	if (p_player != NULL) {
+	if (p_player != nullptr) {
 
 		if (!authenticated) //doh.. bad!
 		{
@@ -119,7 +119,7 @@ void CCDKeyAuth::AuthenticateUser(int localid, ULONG ip, char *challenge, char *
 	// Take the response from our challenge that we sent to the client
 	// and send it off to the Authserver along with the original challenge
 
-	gcd_authenticate_user(CGameSpyQnR::cdkey_id, localid, ip, challenge, authstring, CCDKeyAuth::auth_callback, NULL, NULL);
+	gcd_authenticate_user(CGameSpyQnR::cdkey_id, localid, ip, challenge, authstring, CCDKeyAuth::auth_callback, nullptr, nullptr);
 
 }
 
@@ -149,7 +149,7 @@ void CCDKeyAuth::AuthSerial(const char *challenge, StringClass &resp) {
 	*outb = 0;
 
 	// MD5 Hash Here.
-	MD5Digest((BYTE *)cdkey, strlen(cdkey), md5hash);
+	MD5Digest((BYTE *)cdkey, unsigned(strlen(cdkey)), md5hash);
 
 	// hashserial, challenge, outbuf
 	gcd_compute_response(cdkey, (char *)challenge, response, CDResponseMethod_NEWAUTH);

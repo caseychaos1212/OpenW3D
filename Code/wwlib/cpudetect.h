@@ -45,6 +45,7 @@
 
 #include "always.h"
 #include "wwstring.h"
+#include <stdint.h>
 
 #if defined(__i386__) || defined(__i486__) || defined(__i586__) || defined(__i686__) ||defined( __i386) || defined(_M_IX86)
 #define CPU_X86 1
@@ -173,7 +174,7 @@ public:
 
 	// Note that processor speed is only calculated at start and could change during execution, so
 	// this number is not to be relied on!
-	inline static int Get_Processor_Speed() { return ProcessorSpeed; }
+	inline static uint64_t Get_Processor_Speed() { return ProcessorSpeed; }
 	inline static int64_t Get_Processor_Ticks_Per_Second() { return ProcessorTicksPerSecond; }	// Ticks per second
 	inline static double Get_Inv_Processor_Ticks_Per_Second() { return InvProcessorTicksPerSecond; }	// 1.0 / Ticks per second
 
@@ -200,12 +201,14 @@ public:
 	static unsigned Get_L1_Instruction_Trace_Cache_Set_Associative() { return L1InstructionTraceCacheSetAssociative; }
 
 	// System memory
-	static unsigned Get_Total_Physical_Memory() { return TotalPhysicalMemory; }
-	static unsigned Get_Available_Physical_Memory() { return AvailablePhysicalMemory; }
-	static unsigned Get_Total_Page_File_Size() { return TotalPageMemory; }
-	static unsigned Get_Available_Page_File_Size() { return AvailablePageMemory; }
-	static unsigned Get_Total_Virtual_Memory() { return TotalVirtualMemory; }
-	static unsigned Get_Available_Virtual_Memory() { return AvailableVirtualMemory; }
+	static uint64_t Get_Total_Physical_Memory() { return TotalPhysicalMemory; }
+#if defined(OPENW3D_WIN32)
+	static uint64_t Get_Available_Physical_Memory() { return AvailablePhysicalMemory; }
+	static uint64_t Get_Total_Page_File_Size() { return TotalPageMemory; }
+	static uint64_t Get_Available_Page_File_Size() { return AvailablePageMemory; }
+	static uint64_t Get_Total_Virtual_Memory() { return TotalVirtualMemory; }
+	static uint64_t Get_Available_Virtual_Memory() { return AvailableVirtualMemory; }
+#endif
 
 	static unsigned Get_Processor_Type() { return ProcessorType; }
 
@@ -253,7 +256,7 @@ private:
 	static int ProcessorFamily;
 	static int ProcessorModel;
 	static int ProcessorRevision;
-	static int ProcessorSpeed;
+	static uint64_t ProcessorSpeed;
 	static int64_t ProcessorTicksPerSecond;	// Ticks per second
 	static double InvProcessorTicksPerSecond;	// 1.0 / Ticks per second
 
@@ -285,18 +288,22 @@ private:
 	static unsigned L1InstructionTraceCacheSize;
 	static unsigned L1InstructionTraceCacheSetAssociative;
 
-	static unsigned TotalPhysicalMemory;
-	static unsigned AvailablePhysicalMemory;
-	static unsigned TotalPageMemory;
-	static unsigned AvailablePageMemory;
-	static unsigned TotalVirtualMemory;
-	static unsigned AvailableVirtualMemory;
+	static uint64_t TotalPhysicalMemory;
+	static uint64_t AvailablePhysicalMemory;
+	static uint64_t TotalPageMemory;
+	static uint64_t AvailablePageMemory;
+	static uint64_t TotalVirtualMemory;
+	static uint64_t AvailableVirtualMemory;
 
+#ifdef OPENW3D_WIN32
 	static unsigned OSVersionNumberMajor;
 	static unsigned OSVersionNumberMinor;
 	static unsigned OSVersionBuildNumber;
 	static unsigned OSVersionPlatformId;
 	static StringClass OSVersionExtraInfo;
+#elif defined(OPENW3D_SDL3)
+	static StringClass PlatformName;
+#endif
 
 	static bool HasCPUIDInstruction;
 	static bool HasRDTSCInstruction;

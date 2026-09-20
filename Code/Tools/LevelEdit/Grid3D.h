@@ -56,11 +56,11 @@ class Grid3DClass
 		////////////////////////////////////////////////////////////////////
 		Grid3DClass (void)
 			:	m_GridSize (0, 0, 0),
-				m_Grid (NULL)				{ }
+				m_Grid (nullptr)				{ }
 
 		Grid3DClass (const Vector3 &grid_size, const T &inital_value)
 			:	m_GridSize (0, 0, 0),
-				m_Grid (NULL)				{ Create_Grid (grid_size, inital_value); }
+				m_Grid (nullptr)				{ Create_Grid (grid_size, inital_value); }
 
 		virtual ~Grid3DClass (void)	{ Free_Grid (); }
 
@@ -78,13 +78,13 @@ class Grid3DClass
 
 		// Information methods
 		Vector3			Get_Grid_Size (void) const { return m_GridSize; }
-		int				Get_Cells_X (void) const { return m_GridSize.X; }
-		int				Get_Cells_Y (void) const { return m_GridSize.Y; }
-		int				Get_Cells_Z (void) const { return m_GridSize.Z; }
+		int				Get_Cells_X (void) const { return int(m_GridSize.X); }
+		int				Get_Cells_Y (void) const { return int(m_GridSize.Y); }
+		int				Get_Cells_Z (void) const { return int(m_GridSize.Z); }
 
 		// 'Flat' methods, for enumerating every cell
 		T &				Get_At_Flat (int index)		{ return m_Grid[index]; }
-		int				Get_Flat_Size (void) const	{ return (m_GridSize.X * m_GridSize.Y * m_GridSize.Z); }
+		int				Get_Flat_Size (void) const	{ return int(m_GridSize.X * m_GridSize.Y * m_GridSize.Z); }
 
 	protected:
 
@@ -121,7 +121,7 @@ Grid3DClass<T>::Create_Grid (const Vector3 &grid_size, const T &inital_value)
 	//
 	//	Allocate a flat array we can index into like a 3-D grid
 	//
-	int flat_size = m_GridSize.X * m_GridSize.Y * m_GridSize.Z;
+	int flat_size = int(m_GridSize.X * m_GridSize.Y * m_GridSize.Z);
 	WWASSERT ((flat_size * sizeof (T)) < 16000000L);
 	m_Grid = new T[flat_size];
 
@@ -145,9 +145,9 @@ template<class T>
 inline void
 Grid3DClass<T>::Free_Grid (void)
 {
-	if (m_Grid != NULL) {
+	if (m_Grid != nullptr) {
 		delete m_Grid;
-		m_Grid = NULL;
+		m_Grid = nullptr;
 	}
 
 	m_GridSize.Set (0, 0, 0);
@@ -164,7 +164,7 @@ template<class T>
 inline int
 Grid3DClass<T>::Cell_Coord_To_Index (int x, int y, int z)
 {
-	return (x + (y * m_GridSize.X) + (z * m_GridSize.X * m_GridSize.Y));
+	return int(x + (y * m_GridSize.X) + (z * m_GridSize.X * m_GridSize.Y));
 }
 
 
@@ -177,7 +177,7 @@ template<class T>
 inline T &
 Grid3DClass<T>::Get_At (int x, int y, int z)
 {
-	WWASSERT (m_Grid != NULL);
+	WWASSERT (m_Grid != nullptr);
 	WWASSERT ((x < m_GridSize.X) && (y < m_GridSize.Y) && (z < m_GridSize.Z));
 
 	return m_Grid[Cell_Coord_To_Index (x, y, z)];
@@ -193,7 +193,7 @@ template<class T>
 inline void
 Grid3DClass<T>::Set_At (int x, int y, int z, const T &value)
 {
-	WWASSERT (m_Grid != NULL);
+	WWASSERT (m_Grid != nullptr);
 	WWASSERT ((x < m_GridSize.X) && (y < m_GridSize.Y) && (z < m_GridSize.Z));
 
 	m_Grid[Cell_Coord_To_Index (x, y, z)] = value;

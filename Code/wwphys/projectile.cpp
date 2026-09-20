@@ -213,7 +213,7 @@ void ProjectileClass::Integrate(float dt)
 
 void ProjectileClass::Timestep(float dt)
 {
-	WWPROFILE("Projectile::Timestep");
+	WWPROFILENAMED("Projectile::Timestep", top);
 	const int MAX_BUMPS = 5;
 
 	if (Is_User_Control_Enabled()) {
@@ -229,7 +229,7 @@ void ProjectileClass::Timestep(float dt)
 
 	if ( CollidesOnMove ) {
 
-		WWPROFILE("Move and Collide");
+		WWPROFILENAMED("Move and Collide", mid);
 
 		/*
 		** Repeat until we eat all of the time
@@ -241,7 +241,7 @@ void ProjectileClass::Timestep(float dt)
 		/*
 		** This is that last object we choose to ignore
 		*/
-		PhysClass	*blocker = NULL;
+		PhysClass	*blocker = nullptr;
 
 		while ((remaining_time > 0.0f) && (bumps < MAX_BUMPS) && (BounceCount >= 0)) {
 
@@ -301,7 +301,7 @@ void ProjectileClass::Timestep(float dt)
 					/*
 					** Notify the parties involved
 					*/
-					WWASSERT(raytest.CollidedPhysObj != NULL);
+					WWASSERT(raytest.CollidedPhysObj != nullptr);
 
 					CollisionReactionType reaction = COLLISION_REACTION_DEFAULT;
 
@@ -347,7 +347,7 @@ void ProjectileClass::Timestep(float dt)
 						** We were requested to fly through.  Mark the current blocker as ignore
 						** so we collide with him no more this pass
 						*/
-						Integrate(0.02*timestep);
+						Integrate(0.02f*timestep);
 
 						if ( blocker ) {	 // Stop ignoring the last blocker
 							blocker->Dec_Ignore_Counter();
@@ -550,14 +550,14 @@ ProjectileDefClass::ProjectileDefClass(void) :
 #ifdef PARAM_EDITING_ON
 	// make our parameters editable!
 	EDITABLE_PARAM(ProjectileDefClass, ParameterClass::TYPE_BOOL, CollidesOnMove);
-
+	{
 	EnumParameterClass *param = new EnumParameterClass(&OrientationMode);
 	param->Set_Name ("OrientationMode");
 	param->Add_Value("ALIGNED",ProjectileClass::ORIENTATION_ALIGNED);
 	param->Add_Value("FIXED",ProjectileClass::ORIENTATION_FIXED);
 	param->Add_Value("TUMBLE",ProjectileClass::ORIENTATION_TUMBLING);
 	GENERIC_EDITABLE_PARAM(ProjectileDefClass,param)
-
+	}
 	FLOAT_EDITABLE_PARAM(ProjectileDefClass, TumbleAxis.X, 0.0f, 10.0f);
 	FLOAT_EDITABLE_PARAM(ProjectileDefClass, TumbleAxis.Y, 0.0f, 10.0f);
 	FLOAT_EDITABLE_PARAM(ProjectileDefClass, TumbleAxis.Z, 0.0f, 10.0f);

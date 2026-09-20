@@ -137,7 +137,7 @@ class FastAllocatorGeneral;  //Allocates and deletes items of any size. Can use 
 template<class T, int nStackCount, int bConstruct=1>
 class StackAllocator{
 public:
-   StackAllocator() : mnAllocCount(-1), mpTHeap(NULL){}
+   StackAllocator() : mnAllocCount(-1), mpTHeap(nullptr){}
   ~StackAllocator(){
       if(mnAllocCount != -1){ //If there is anything to do...
          if(mpTHeap)
@@ -167,7 +167,7 @@ public:
                   new(pTArray)T; //Use the placement operator new. This simply calls the constructor
                   ++pTArray;     //of T with 'this' set to the input address. Note that we don't put
                }                 //a '()' after the T this is because () causes trivial types like int
-            }                    //and class* to be assigned zero/NULL. We don't want that.
+            }                    //and class* to be assigned zero/nullptr. We don't want that.
             return (T*)mTArray;
          } //Else the request is too big. So let's use (the slower) operator new.
          return (mpTHeap = new T[nCount]); //The compiler will call the constructors here.
@@ -189,7 +189,7 @@ public:
       }
       else if(pT == mpTHeap){ //If the allocation came from our heap...
          delete[] mpTHeap;    //The compiler will call the destructors here.
-         mpTHeap      = NULL; //We clear these out so that we can possibly
+         mpTHeap      = nullptr; //We clear these out so that we can possibly
          mnAllocCount = -1;   //  use the allocator again.
       }
       else //Else the allocation came from the external heap.
@@ -198,7 +198,7 @@ public:
 
 protected:
    int  mnAllocCount;                     //Count of objects allocated. -1 means that nothing is allocated. We don't use zero because zero is a legal allocation count in C++.
-   T*   mpTHeap;                          //This is normally NULL, but gets used of the allocation request is too high.
+   T*   mpTHeap;                          //This is normally nullptr, but gets used of the allocation request is too high.
    char mTArray[nStackCount*sizeof(T)];   //This is our stack memory.
 };
 ///////////////////////////////////////////////////////////////////////////////
@@ -253,7 +253,7 @@ protected:
 //
 // ----------------------------------------------------------------------------
 
-WWINLINE void* FastFixedAllocator::Alloc()
+inline void* FastFixedAllocator::Alloc()
 {
 	TotalAllocationCount++;
 	TotalAllocatedSize+=esize;
@@ -271,7 +271,7 @@ WWINLINE void* FastFixedAllocator::Alloc()
 //
 // ----------------------------------------------------------------------------
 
-WWINLINE void FastFixedAllocator::Free(void* pAlloc)
+inline void FastFixedAllocator::Free(void* pAlloc)
 {
 	TotalAllocationCount--;
 	TotalAllocatedSize-=esize;
@@ -286,7 +286,7 @@ WWINLINE void FastFixedAllocator::Free(void* pAlloc)
 //
 // ----------------------------------------------------------------------------
 
-WWINLINE FastFixedAllocator::FastFixedAllocator(unsigned int n) : esize(1), TotalHeapSize(0), TotalAllocatedSize(0), TotalAllocationCount(0)
+inline FastFixedAllocator::FastFixedAllocator(unsigned int n) : esize(1), TotalHeapSize(0), TotalAllocatedSize(0), TotalAllocationCount(0)
 {
    head   = 0;
    chunks = 0;
@@ -299,7 +299,7 @@ WWINLINE FastFixedAllocator::FastFixedAllocator(unsigned int n) : esize(1), Tota
 //
 // ----------------------------------------------------------------------------
 
-WWINLINE FastFixedAllocator::~FastFixedAllocator()
+inline FastFixedAllocator::~FastFixedAllocator()
 {
    Chunk* n = chunks;
    while(n){
@@ -315,7 +315,7 @@ WWINLINE FastFixedAllocator::~FastFixedAllocator()
 //
 // ----------------------------------------------------------------------------
 
-WWINLINE void FastFixedAllocator::Init(unsigned int n)
+inline void FastFixedAllocator::Init(unsigned int n)
 {
    esize = (n<sizeof(Link*) ? sizeof(Link*) : n);
 }
@@ -326,7 +326,7 @@ WWINLINE void FastFixedAllocator::Init(unsigned int n)
 //
 // ----------------------------------------------------------------------------
 
-WWINLINE void FastFixedAllocator::grow()
+inline void FastFixedAllocator::grow()
 {
    Chunk* n = new Chunk;
    n->next  = chunks;
@@ -386,7 +386,7 @@ protected:
 };
 ///////////////////////////////////////////////////////////////////////////////
 
-WWINLINE unsigned FastAllocatorGeneral::Get_Total_Heap_Size()
+inline unsigned FastAllocatorGeneral::Get_Total_Heap_Size()
 {
 	int size=AllocatedWithMalloc;
 	for (int i=0;i<MAX_ALLOC_SIZE/ALLOC_STEP;++i) {
@@ -396,7 +396,7 @@ WWINLINE unsigned FastAllocatorGeneral::Get_Total_Heap_Size()
 	return size;
 }
 
-WWINLINE unsigned FastAllocatorGeneral::Get_Total_Allocated_Size()
+inline unsigned FastAllocatorGeneral::Get_Total_Allocated_Size()
 {
 	int size=AllocatedWithMalloc;
 	for (int i=0;i<MAX_ALLOC_SIZE/ALLOC_STEP;++i) {
@@ -406,7 +406,7 @@ WWINLINE unsigned FastAllocatorGeneral::Get_Total_Allocated_Size()
 	return size;
 }
 
-WWINLINE unsigned FastAllocatorGeneral::Get_Total_Allocation_Count()
+inline unsigned FastAllocatorGeneral::Get_Total_Allocation_Count()
 {
 	int count=AllocatedWithMallocCount;
 	for (int i=0;i<MAX_ALLOC_SIZE/ALLOC_STEP;++i) {
@@ -422,7 +422,7 @@ WWINLINE unsigned FastAllocatorGeneral::Get_Total_Allocation_Count()
 //
 // ----------------------------------------------------------------------------
 
-WWINLINE void* FastAllocatorGeneral::Alloc(size_t n)
+inline void* FastAllocatorGeneral::Alloc(size_t n)
 {
    void* pMemory;
 	static int re_entrancy=0;
@@ -470,7 +470,7 @@ WWINLINE void* FastAllocatorGeneral::Alloc(size_t n)
 //
 // ----------------------------------------------------------------------------
 
-WWINLINE void FastAllocatorGeneral::Free(void* pAlloc)
+inline void FastAllocatorGeneral::Free(void* pAlloc)
 {
    if (pAlloc) {
       unsigned int* n = ((unsigned int*)pAlloc)-1; //Subtract four bytes and the count is stored there.
@@ -496,11 +496,11 @@ WWINLINE void FastAllocatorGeneral::Free(void* pAlloc)
 }
 
 //ANSI C requires:
-//  (1) realloc(NULL, newsize) is equivalent to malloc(newsize).
-//  (2) realloc(pblock, 0) is equivalent to free(pblock) (except that NULL is returned).
+//  (1) realloc(nullptr, newsize) is equivalent to malloc(newsize).
+//  (2) realloc(pblock, 0) is equivalent to free(pblock) (except that nullptr is returned).
 //  (3) if the realloc() fails, the object pointed to by pblock is left unchanged.
 //
-WWINLINE void* FastAllocatorGeneral::Realloc(void* pAlloc, size_t n){
+inline void* FastAllocatorGeneral::Realloc(void* pAlloc, size_t n){
    if(n){
 		WWASSERT(n <= std::numeric_limits<unsigned int>::max());
       void* const pNewAlloc = Alloc(n);      //Allocate the new memory. This never fails.
@@ -512,7 +512,7 @@ WWINLINE void* FastAllocatorGeneral::Realloc(void* pAlloc, size_t n){
       return pNewAlloc;
    }
    Free(pAlloc);
-   return NULL;
+   return nullptr;
 }
 
 extern FastAllocatorGeneral* generalAllocator;
@@ -549,7 +549,7 @@ extern FastAllocatorGeneral* generalAllocator;
 
       T*            address(T& t)       const             { return (&t); } //These two are slightly strange but
       const  T*     address(const T& t) const             { return (&t); } //required functions. Just do it.
-      static T*     allocate(size_t n, const void* =NULL) { return (T*)generalAllocator->Alloc(n*sizeof(T)); }
+      static T*     allocate(size_t n, const void* =nullptr) { return (T*)generalAllocator->Alloc(n*sizeof(T)); }
       static void   construct(T* ptr, const T& value)     { new(ptr) T(value); }
       static void   deallocate(void* ptr, size_t /*n*/)   { generalAllocator->Free(ptr); }
       static void   destroy(T* ptr)                       { ptr->~T(); }
@@ -591,7 +591,7 @@ extern FastAllocatorGeneral* generalAllocator;
      pointer address(reference x) const             { return &x; }
      const_pointer address(const_reference x) const { return &x; }
 
-     T* allocate(size_type n, const void* = NULL) { return n != 0 ? static_cast<T*>(generalAllocator->Alloc(n*sizeof(T))) : NULL; }
+     T* allocate(size_type n, const void* = nullptr) { return n != 0 ? static_cast<T*>(generalAllocator->Alloc(n*sizeof(T))) : nullptr; }
      void deallocate(pointer p, size_type n)      { generalAllocator->Free(p); }
      size_type max_size() const                   { return size_t(-1) / sizeof(T); }
      void construct(pointer p, const T& val)      { new(p) T(val); }
@@ -600,9 +600,9 @@ extern FastAllocatorGeneral* generalAllocator;
 #endif
 
 template<class T>
-WWINLINE bool operator==(const FastSTLAllocator<T>&, const FastSTLAllocator<T>&) { return true;  }
+inline bool operator==(const FastSTLAllocator<T>&, const FastSTLAllocator<T>&) { return true;  }
 template<class T>
-WWINLINE bool operator!=(const FastSTLAllocator<T>&, const FastSTLAllocator<T>&) { return false; }
+inline bool operator!=(const FastSTLAllocator<T>&, const FastSTLAllocator<T>&) { return false; }
 ///////////////////////////////////////////////////////////////////////////////
 
 

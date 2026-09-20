@@ -91,10 +91,10 @@ void CAnimReportPage::FillListControl()
 	// Get the current render object and it's HTree. If it doesn't have
 	// an HTree, then it's not animating and we're not interested.
 	RenderObjClass *robj = ::GetCurrentDocument()->GetDisplayedObject();
-	if (robj == NULL)
+	if (robj == nullptr)
 		return;
 	const HTreeClass *htree = robj->Get_HTree();
-	if (htree == NULL)
+	if (htree == nullptr)
 		return;
 
 	// Get a sorted array of animations that affect the currently active object.
@@ -163,7 +163,7 @@ void CAnimReportPage::FillListControl()
 			{
 				// Add motion channel info to the appropriate column.
 				char channels[6];	// strlen("XYZQV")+1
-				ZeroMemory(channels, sizeof(channels));
+				memset(channels, 0, sizeof(channels));
 				MakeChannelStr(j, pAnim, channels);
 				m_AnimReport.SetItem(idx, i+1, LVIF_TEXT, channels, 0,0,0,0);
 			}

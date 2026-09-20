@@ -310,7 +310,7 @@ void SlaveMasterClass::Wait_For_Slave_Shutdown(void)
 					if (SlaveServers[i].ProcessInfo) {
 						WWDEBUG_SAY(("Terminating process %d due to timeout\n", SlaveServers[i].ProcessInfo->Pid()));
 						if (!SlaveServers[i].ProcessInfo->Kill()) {
-							WWDEBUG_SAY(("Failed to get process handle for termination - error code %d\n", GetLastError()));
+							WWDEBUG_SAY(("Failed to get process handle for termination - error code 0x%lx\n", GetLastError()));
 						}
 						num_running++;
 					}
@@ -343,7 +343,7 @@ SlaveServerClass *SlaveMasterClass::Get_Slave(int index)
 	if (index >= 0 && index <NumSlaveServers) {
 		return(&SlaveServers[index]);
 	}
-	return(NULL);
+	return(nullptr);
 }
 
 
@@ -434,7 +434,7 @@ void SlaveMasterClass::Load(void)
 		SlaveServers[i].Enable = reg.Get_Bool(entry, false);
 
 		sprintf(entry, "%s%d", KEY_SLAVE_PORT, i);
-		SlaveServers[i].Port = reg.Get_Int(entry, false);
+		SlaveServers[i].Port = static_cast<unsigned short>(reg.Get_Int(entry, false));
 
 		sprintf(entry, "%s%d", KEY_SLAVE_BANDWIDTH, i);
 		SlaveServers[i].Bandwidth = reg.Get_Int(entry, false);
@@ -574,7 +574,7 @@ void SlaveMasterClass::Startup_Slaves(void)
 							char dir[_MAX_DIR];
 							char path[_MAX_PATH];
 							GetModuleFileNameA(ProgramInstance, path_to_exe, sizeof(path_to_exe));
-							_splitpath(path_to_exe, drive, dir, NULL, NULL);
+							_splitpath(path_to_exe, drive, dir, nullptr, nullptr);
 #ifdef FREEDEDICATEDSERVER
 							_makepath(path, drive, dir, "renegadeserver", "exe");
 #else  //FREEDEDICATEDSERVER
@@ -609,7 +609,7 @@ void SlaveMasterClass::Startup_Slaves(void)
 								}
 
 							} else {
-								WWDEBUG_SAY(("Failed to start slave process - error code %d\n", GetLastError()));
+								WWDEBUG_SAY(("Failed to start slave process - error code 0x%lx\n", GetLastError()));
 								SlaveServers[i].IsRunning = false;
 							}
 						}
@@ -643,8 +643,8 @@ void SlaveMasterClass::Shutdown_Slaves(void)
 {
 	if (!SlaveMode) {
 		char password[64] = DEFAULT_SERVER_CONTROL_PASSWORD;
-		RegistryClass reg(APPLICATION_SUB_KEY_NAME_NET_SERVER_CONTROL);
-		reg.Get_String(SERVER_CONTROL_PASSWORD_KEY, password, sizeof(password), password);
+		RegistryClass control_reg(APPLICATION_SUB_KEY_NAME_NET_SERVER_CONTROL);
+		control_reg.Get_String(SERVER_CONTROL_PASSWORD_KEY, password, sizeof(password), password);
 
 		for (int i=0 ; i<NumSlaveServers ; i++) {
 			if (SlaveServers[i].IsRunning) {
@@ -703,8 +703,8 @@ bool SlaveMasterClass::Shutdown_Slave(char *slave_login)
 {
 	if (!SlaveMode && slave_login) {
 		char password[64] = DEFAULT_SERVER_CONTROL_PASSWORD;
-		RegistryClass reg(APPLICATION_SUB_KEY_NAME_NET_SERVER_CONTROL);
-		reg.Get_String(SERVER_CONTROL_PASSWORD_KEY, password, sizeof(password), password);
+		RegistryClass control_reg(APPLICATION_SUB_KEY_NAME_NET_SERVER_CONTROL);
+		control_reg.Get_String(SERVER_CONTROL_PASSWORD_KEY, password, sizeof(password), password);
 
 		for (int i=0 ; i<NumSlaveServers ; i++) {
 			if (SlaveServers[i].IsRunning && stricmp(slave_login, SlaveServers[i].NickName) == 0) {
@@ -809,9 +809,9 @@ void SlaveMasterClass::Create_Registry_Copies(void)
 	/*
 	** Make sure the Process ID isn't set in our base registry. It's shouldn't be unless I ran with the --slave command during dev.
 	*/
-	RegistryClass reg(APPLICATION_SUB_KEY_NAME);
-	if (reg.Is_Valid()) {
-		reg.Delete_Value("ProcessId");
+	RegistryClass app_reg(APPLICATION_SUB_KEY_NAME);
+	if (app_reg.Is_Valid()) {
+		app_reg.Delete_Value("ProcessId");
 	}
 
 	RegistryClass::Save_Registry(RegistryFileName, APPLICATION_SUB_KEY_NAME);
@@ -883,7 +883,7 @@ void SlaveMasterClass::Create_Registry_Copies(void)
 				}
 				slave_port += i;
 				slave_port++;
-				SlaveServers[i].ControlPort = slave_port;
+				SlaveServers[i].ControlPort = static_cast<unsigned short>(slave_port);
 				reg.Set_Int(SERVER_CONTROL_PORT_KEY, slave_port);
 
 				/*

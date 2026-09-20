@@ -323,7 +323,7 @@ ScrollBarCtrlClass::Update_Client_Rect (void)
 	//	Snap the rect to the alloted size
 	//
 	if (Rect.Right >= 0.0f) {
-		Rect.Left = int(Rect.Right - Width);
+		Rect.Left = WWMath::Trunc(Rect.Right - Width);
 	} else {
 		Rect.Right = (Rect.Left + Width);
 	}
@@ -348,18 +348,18 @@ ScrollBarCtrlClass::Update_Client_Rect (void)
 	//
 	//	Update the top button's bounding rectangle
 	//
-	TopButtonRect.Left	= int(ClientRect.Left + (ClientRect.Width () / 2) - (button_width / 2));
-	TopButtonRect.Top		= int(ClientRect.Top - (BUTTON_V_OFFSET * ScaleY));
-	TopButtonRect.Right	= int(TopButtonRect.Left + button_width);
-	TopButtonRect.Bottom	= int(TopButtonRect.Top + button_height);
+	TopButtonRect.Left	= WWMath::Trunc(ClientRect.Left + (ClientRect.Width () / 2) - (button_width / 2));
+	TopButtonRect.Top		= WWMath::Trunc(ClientRect.Top - (BUTTON_V_OFFSET * ScaleY));
+	TopButtonRect.Right	= WWMath::Trunc(TopButtonRect.Left + button_width);
+	TopButtonRect.Bottom	= WWMath::Trunc(TopButtonRect.Top + button_height);
 
 	//
 	//	Update the bottom button's bounding rectangle
 	//
-	BottomButtonRect.Left	= int(ClientRect.Left + (ClientRect.Width () / 2) - (button_width / 2));
-	BottomButtonRect.Top		= int(ClientRect.Bottom - button_height + (BUTTON_V_OFFSET * ScaleY));
-	BottomButtonRect.Right	= int(BottomButtonRect.Left + button_width);
-	BottomButtonRect.Bottom	= int(BottomButtonRect.Top + button_height);
+	BottomButtonRect.Left	= WWMath::Trunc(ClientRect.Left + (ClientRect.Width () / 2) - (button_width / 2));
+	BottomButtonRect.Top		= WWMath::Trunc(ClientRect.Bottom - button_height + (BUTTON_V_OFFSET * ScaleY));
+	BottomButtonRect.Right	= WWMath::Trunc(BottomButtonRect.Left + button_width);
+	BottomButtonRect.Bottom	= WWMath::Trunc(BottomButtonRect.Top + button_height);
 
 	//
 	//	Adjust the rectangle to include the top and bottom buttons
@@ -741,11 +741,11 @@ ScrollBarCtrlClass::Set_Pos (int pos, bool send_notify)
 		//	Notify the advise sink(s)
 		//
 		if (send_notify) {
-			if (Parent != NULL) {
+			if (Parent != nullptr) {
 				Parent->On_VScroll (this, Get_ID (), CurrPos);
 			}
 
-			if (AdviseSink != NULL) {
+			if (AdviseSink != nullptr) {
 				AdviseSink->On_VScroll (this, Get_ID (), CurrPos);
 			}
 		}
@@ -773,15 +773,15 @@ ScrollBarCtrlClass::Update_Thumb_Rect (void)
 	//
 
 	if (IsSmallBMPMode) {
-		ThumbRect.Left		= int(ClientRect.Left + (ClientRect.Width () / 2) - (ThumbWidth / 2));
-		ThumbRect.Right	= int(ThumbRect.Left + ThumbWidth);
+		ThumbRect.Left		= WWMath::Trunc(ClientRect.Left + (ClientRect.Width () / 2) - (ThumbWidth / 2));
+		ThumbRect.Right	= WWMath::Trunc(ThumbRect.Left + ThumbWidth);
 	} else {
 		ThumbRect.Right	= ClientRect.Right - 1;
 		ThumbRect.Left		= ThumbRect.Right - ThumbWidth;
 	}
 
-	ThumbRect.Top		= int(TopButtonRect.Bottom + (TrackRect.Height () * percent));
-	ThumbRect.Bottom	= int(ThumbRect.Top + ThumbHeight);
+	ThumbRect.Top		= WWMath::Trunc(TopButtonRect.Bottom + (TrackRect.Height () * percent));
+	ThumbRect.Bottom	= WWMath::Trunc(ThumbRect.Top + ThumbHeight);
 	return ;
 }
 

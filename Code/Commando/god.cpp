@@ -710,9 +710,9 @@ void cGod::Think(void)
 	WWASSERT(cNetwork::I_Am_Server());
 
 	//if (The_Game()->IsIntermission.Is_True()) {
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	if (The_Game()->IsIntermission.Is_True() ||
-		 cPlayerManager::Get_Player_Object_List()->Head() == NULL) {
+		 cPlayerManager::Get_Player_Object_List()->Head() == nullptr) {
 		return;
 	}
 
@@ -728,7 +728,7 @@ void cGod::Think(void)
 
 	if ( State == GOD_STATE_SINGLE_INIT ) {
 
-		WWASSERT( cPlayerManager::Get_Player_Object_List()->Head() != NULL );
+		WWASSERT( cPlayerManager::Get_Player_Object_List()->Head() != nullptr );
 		// Create a Commando for the Player
 		SoldierGameObj * soldier = Create_Commando( cPlayerManager::Get_Player_Object_List()->Head()->Data() );
 
@@ -760,13 +760,13 @@ void cGod::Think(void)
 	// This code may need to get cleaned up
 	if ( State == GOD_STATE_SINGLE_RUNNING ) {
 		//If we just loaded, we may have a play and a solder, but they will not be linked.
-		if (cPlayerManager::Get_Player_Object_List() != NULL &&
-			 cPlayerManager::Get_Player_Object_List()->Head() != NULL ) {
+		if (cPlayerManager::Get_Player_Object_List() != nullptr &&
+			 cPlayerManager::Get_Player_Object_List()->Head() != nullptr ) {
 
 			cPlayer * p_player = cPlayerManager::Get_Player_Object_List()->Head()->Data();
-			if ( p_player != NULL ) {
+			if ( p_player != nullptr ) {
 		   		SmartGameObj * p_soldier = GameObjManager::Find_Soldier_Of_Client_ID(p_player->Get_Id());
-				if ( p_soldier && p_player->Get_GameObj() == NULL ) {
+				if ( p_soldier && p_player->Get_GameObj() == nullptr ) {
 					// Remap
 					p_soldier->Set_Player_Data( p_player );
 					Debug_Say(( "Fixing up player data after load\n" ));
@@ -788,7 +788,7 @@ void cGod::Think(void)
 			objnode = objnode->Next()) {
 
 			cPlayer * p_player = objnode->Data();
-			WWASSERT(p_player != NULL);
+			WWASSERT(p_player != nullptr);
 
 			if (p_player->Get_Is_Active().Is_False()) {
 				continue;
@@ -800,7 +800,7 @@ void cGod::Think(void)
 
 			SmartGameObj * p_soldier = GameObjManager::Find_Soldier_Of_Client_ID(p_player->Get_Id());
 
-			if (p_soldier == NULL) {
+			if (p_soldier == nullptr) {
 				//
 				// A disembodied player... give him a body
 				//
@@ -824,7 +824,7 @@ cPlayer * cGod::Create_Player(int client_id, const WideStringClass & name,
 {
 	WWMEMLOG(MEM_NETWORK);
 	WWASSERT(cNetwork::I_Am_Server());
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	WWASSERT(cPlayerManager::Count() < The_Game()->Get_Max_Players());
 
    //
@@ -832,7 +832,7 @@ cPlayer * cGod::Create_Player(int client_id, const WideStringClass & name,
 	//
 	cPlayer * p_player = cPlayerManager::Find_Player(name);
 
-	if (p_player != NULL) {
+	if (p_player != nullptr) {
 		//
 		// I think this can happen when a player crashes out and then rejoins
 		// before the server breaks his connection...
@@ -844,9 +844,9 @@ cPlayer * cGod::Create_Player(int client_id, const WideStringClass & name,
 
 	bool is_new = false;
 
-	if (p_player == NULL) {
+	if (p_player == nullptr) {
       p_player = new cPlayer();
-      WWASSERT(p_player != NULL);
+      WWASSERT(p_player != nullptr);
 		is_new = true;
 
 		p_player->Set_Name(name);
@@ -889,7 +889,7 @@ cPlayer * cGod::Create_Player(int client_id, const WideStringClass & name,
 //-----------------------------------------------------------------------------
 void cGod::Create_Ai_Player(void)
 {
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	WWASSERT(cPlayerManager::Count() < The_Game()->Get_Max_Players());
    WWASSERT(cNetwork::I_Am_Server());
 
@@ -913,20 +913,20 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
    WWASSERT(cNetwork::I_Am_Server());
 	WWASSERT(player_type >= PLAYERTYPE_NEUTRAL && player_type <= PLAYERTYPE_LAST);
 
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	if (IS_COOP_MISSION) {
 		CoopDebugLog::Log("cGod::Create_Commando begin client_id=%d player_type=%d", client_id, player_type);
 	}
 
 	if (IS_COOP_MISSION && prefer_ally_spawn && player_type == PLAYERTYPE_GDI) {
 		SoldierGameObj * ally = Find_Living_Coop_Ally(client_id);
-		if (ally != NULL && Is_Hostile_Near_Soldier(ally)) {
+		if (ally != nullptr && Is_Hostile_Near_Soldier(ally)) {
 			if (!Is_Coop_Respawn_Waiting_For(client_id, ally)) {
 				CoopDebugLog::Log("cGod::Create_Commando ally spawn blocked by nearby hostile client_id=%d ally_net_id=%d",
 					client_id, ally->Get_Network_ID());
 			}
 			Set_Coop_Respawn_Waiting(client_id, ally);
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -939,11 +939,11 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
 
 #ifndef MULTIPLAYERDEMO
 		SpawnerClass * p_spawner = SpawnManager::Get_Primary_Spawner();
-		if (p_spawner != NULL) {
+		if (p_spawner != nullptr) {
 			const DynamicVectorClass<int>	& def_list = p_spawner->Get_Definition().Get_Spawn_Definition_ID_List();
 			WWASSERT(def_list.Count() >= 1);
 			PhysicalGameObjDef * p_def = (PhysicalGameObjDef *)DefinitionMgrClass::Find_Definition(def_list[0]);
-			if (p_def != NULL) {
+			if (p_def != nullptr) {
 				preset_name.Format("%s", p_def->Get_Name());
 			}
 		}
@@ -969,15 +969,15 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
 
 	WWASSERT(!preset_name.Is_Empty());
 	PhysicalGameObj * p_phys_obj = ObjectLibraryManager::Create_Object(preset_name);
-	WWASSERT(p_phys_obj != NULL);
+	WWASSERT(p_phys_obj != nullptr);
 	if (IS_COOP_MISSION) {
 		CoopDebugLog::Log("cGod::Create_Commando object created client_id=%d preset=%s object=%p net_id=%d",
-			client_id, preset_name.Peek_Buffer(), p_phys_obj, p_phys_obj != NULL ? p_phys_obj->Get_Network_ID() : 0);
+			client_id, preset_name.Peek_Buffer(), p_phys_obj, p_phys_obj != nullptr ? p_phys_obj->Get_Network_ID() : 0);
 	}
 
 	SoldierGameObj * p_soldier = p_phys_obj->As_SoldierGameObj();
-	WWASSERT(p_soldier != NULL);
-	WWASSERT(p_soldier->Peek_Physical_Object() != NULL);
+	WWASSERT(p_soldier != nullptr);
+	WWASSERT(p_soldier->Peek_Physical_Object() != nullptr);
 
 	if (!coop_model_preset.Is_Empty()) {
 		StringClass coop_model_name;
@@ -1075,7 +1075,7 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
 
 	if (cNetwork::I_Am_Client() && client_id == cNetwork::Get_My_Id()) {
 		ActionParamsStruct parameters;
-		WWASSERT(p_soldier->Get_Action() != NULL);
+		WWASSERT(p_soldier->Get_Action() != nullptr);
 		p_soldier->Get_Action()->Follow_Input(parameters);
 		CombatManager::Set_The_Star(p_soldier);
 
@@ -1097,7 +1097,7 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
 SoldierGameObj * cGod::Create_Commando(cPlayer * p_player, bool prefer_ally_spawn)
 {
    WWASSERT(cNetwork::I_Am_Server());
-	WWASSERT(p_player != NULL);
+	WWASSERT(p_player != nullptr);
 
 	int client_id		= p_player->Get_Id();
 	int player_type	= p_player->Get_Player_Type();
@@ -1180,13 +1180,13 @@ void cGod::Create_Grunt(Vector3 & pos)
 
 	int client_id		= SmartGameObj::SERVER_CONTROL_OWNER;
 
-	WWASSERT(PTheGameData != NULL);
-	int player_type	= The_Game()->Choose_Player_Type(NULL, -1, true);
+	WWASSERT(PTheGameData != nullptr);
+	int player_type	= The_Game()->Choose_Player_Type(nullptr, -1, true);
 	//int model_num		= rand() % NUM_MP_PLAYABLE_MODELS;
 
 	SoldierGameObj * p_soldier = Create_Commando(
 		client_id, player_type/*, model_num*/);
-	WWASSERT(p_soldier != NULL);
+	WWASSERT(p_soldier != nullptr);
 
 	p_soldier->Set_Position(pos);
 	p_soldier->Perturb_Position();
@@ -1200,7 +1200,7 @@ void cGod::Reinitialize_Ai_On_Star(void)
 
 	SmartGameObj * p_my_soldier = GameObjManager::Find_Soldier_Of_Client_ID(cNetwork::Get_My_Id());
 
-	if (p_my_soldier != NULL) {
+	if (p_my_soldier != nullptr) {
 
 		//
 		// Remove any innate observers
@@ -1214,10 +1214,10 @@ void cGod::Reinitialize_Ai_On_Star(void)
 		}
 
 		cPlayer * p_player = cNetwork::Get_My_Player_Object();
-		WWASSERT(p_player != NULL);
+		WWASSERT(p_player != nullptr);
 
 		ActionParamsStruct parameters;
-		WWASSERT(p_my_soldier->Get_Action() != NULL);
+		WWASSERT(p_my_soldier->Get_Action() != nullptr);
 		p_my_soldier->Get_Action()->Follow_Input(parameters);
 
 		CombatManager::Set_Is_Star_Determining_Target(true);
@@ -1294,7 +1294,7 @@ void cGod::Restart( void )
 		//	Reset the player's stats
 		//
 		cPlayer *player_info = cPlayerManager::Get_Player_Object_List()->Head()->Data();
-		if ( player_info != NULL ) {
+		if ( player_info != nullptr ) {
 			player_info->Stats_Reset();
 		}
 

@@ -78,7 +78,7 @@ IMEManager* IMEManager::Create(HWND hwnd)
 			}
 		}
 
-	return NULL;
+	return nullptr;
 	}
 
 
@@ -99,9 +99,9 @@ IMEManager* IMEManager::Create(HWND hwnd)
 ******************************************************************************/
 
 IMEManager::IMEManager() :
-		mHWND(NULL),
-		mHIMC(NULL),
-		mDisabledHIMC(NULL),
+		mHWND(nullptr),
+		mHIMC(nullptr),
+		mDisabledHIMC(nullptr),
 		mDisableCount(0),
 		mCodePage(CP_ACP),
 		mIMEProperties(0),
@@ -168,7 +168,7 @@ IMEManager::~IMEManager()
 
 bool IMEManager::FinalizeCreate(HWND hwnd)
 	{
-	if (hwnd == NULL)
+	if (hwnd == nullptr)
 		{
 		return false;
 		}
@@ -182,7 +182,7 @@ bool IMEManager::FinalizeCreate(HWND hwnd)
 	// Create new input context for the specified window.
 	mHIMC = ImmCreateContext();
 
-	if (mHIMC == NULL)
+	if (mHIMC == nullptr)
 		{
 		return false;
 		}
@@ -333,7 +333,7 @@ void IMEManager::Disable(void)
 	if (1 == mDisableCount)
 		{
 		WWDEBUG_SAY(("IMEManager: Disabled\n"));
-		mDisabledHIMC = ImmAssociateContext(mHWND, NULL);
+		mDisabledHIMC = ImmAssociateContext(mHWND, nullptr);
 
 		IMEEvent action(IME_DISABLED, this);
 		NotifyObservers(action);
@@ -367,7 +367,7 @@ void IMEManager::Enable(void)
 			{
 			WWDEBUG_SAY(("IMEManager: Enabled\n"));
 			ImmAssociateContext(mHWND, mDisabledHIMC);
-			mDisabledHIMC = NULL;
+			mDisabledHIMC = nullptr;
 
 			IMEEvent action(IME_ENABLED, this);
 			NotifyObservers(action);
@@ -464,7 +464,7 @@ bool IMEManager::ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 		// Sent when composition status has changed in response to a keystroke.
 		case WM_IME_COMPOSITION:
-			DoComposition(wParam, lParam);
+			DoComposition(int(wParam), int(lParam));
 			break;
 
 		// Sent when composition has closed.
@@ -686,11 +686,11 @@ LRESULT IMEManager::IMENotify(WPARAM wParam, LPARAM lParam)
 						{
 						if (conversionMode & _convModes[flgidx].flag)
 							{
-							WWDEBUG_SAY((_convModes[flgidx].ondesc));
+							WWDEBUG_SAY(("%s", _convModes[flgidx].ondesc));
 							}
 						else
 							{
-							WWDEBUG_SAY((_convModes[flgidx].offdesc));
+							WWDEBUG_SAY(("%s", _convModes[flgidx].offdesc));
 							}
 
 						flgidx++;
@@ -741,11 +741,11 @@ LRESULT IMEManager::IMENotify(WPARAM wParam, LPARAM lParam)
 						{
 						if (sentenceMode & _sModes[flgidx].flag)
 							{
-							WWDEBUG_SAY((_sModes[flgidx].ondesc));
+							WWDEBUG_SAY(("%s", _sModes[flgidx].ondesc));
 							}
 						else
 							{
-							WWDEBUG_SAY((_sModes[flgidx].offdesc));
+							WWDEBUG_SAY(("%s", _sModes[flgidx].offdesc));
 							}
 
 						flgidx++;
@@ -762,17 +762,17 @@ LRESULT IMEManager::IMENotify(WPARAM wParam, LPARAM lParam)
 
 		// Open the candidate window (lParam = candidate flags)
 		case IMN_OPENCANDIDATE:
-			OpenCandidate(lParam);
+			OpenCandidate(int(lParam));
 			break;
 
 		// Close the candidate window. (lParam = candidate flags)
 		case IMN_CLOSECANDIDATE:
-			CloseCandidate(lParam);
+			CloseCandidate(int(lParam));
 			break;
 
 		// Changing the contents of the candidate window (lParam = candidate flags)
 		case IMN_CHANGECANDIDATE:
-			ChangeCandidate(lParam);
+			ChangeCandidate(int(lParam));
 			break;
 
 		// Candidate processing is finished; moving the candidate window
@@ -815,7 +815,7 @@ HKL IMEManager::InputLanguageChangeRequest(HKL hkl)
 	WWDEBUG_SAY(("IMEManager: Input language change request\n"));
 
 	// Get the number of Keyboard layouts available to the system
-	UINT numLayouts = GetKeyboardLayoutList(0, NULL);
+	UINT numLayouts = GetKeyboardLayoutList(0, nullptr);
 
 	if (numLayouts)
 		{
@@ -852,7 +852,7 @@ HKL IMEManager::InputLanguageChangeRequest(HKL hkl)
 			}
 		}
 
-	return NULL;
+	return nullptr;
 	}
 
 
@@ -890,7 +890,7 @@ void IMEManager::InputLanguageChanged(HKL hkl)
 	// Get IME description
 	if (mUseUnicode)
 		{
-		UINT descSize = ImmGetDescriptionW(hkl, NULL, 0);
+		UINT descSize = ImmGetDescriptionW(hkl, nullptr, 0);
 		++descSize;
 		unichar_t* descPtr = mIMEDescription.Get_Buffer(descSize);
 
@@ -898,7 +898,7 @@ void IMEManager::InputLanguageChanged(HKL hkl)
 		}
 	else
 		{
-		UINT descSize = ImmGetDescriptionA(hkl, NULL, 0);
+		UINT descSize = ImmGetDescriptionA(hkl, nullptr, 0);
 		++descSize;
 
 		StringClass desc((int)descSize, true);
@@ -920,7 +920,7 @@ void IMEManager::InputLanguageChanged(HKL hkl)
 	#endif
 
 	WWDEBUG_SAY(("IMEManager: Language Changed - LangID = %04X, CodePage = %d, Description: '%S'\n",
-			mLangID, mCodePage, mIMEDescription));
+			mLangID, mCodePage, mIMEDescription.Peek_Buffer()));
 
 	WWDEBUG_SAY(("IMEManager: Properties - %s%s%s%s%s\n",
 			mIMEProperties & IME_PROP_AT_CARET ? "At Caret" : "",
@@ -1441,7 +1441,7 @@ int IMEManager::ReadCursorPos(HIMC imc)
 	{
 	if (mUseUnicode)
 		{
-		int cursorPos = ImmGetCompositionStringW(imc, GCS_CURSORPOS, NULL, 0);
+		int cursorPos = ImmGetCompositionStringW(imc, GCS_CURSORPOS, nullptr, 0);
 		return (cursorPos & 0x0000FFFF);
 		}
 
@@ -1456,7 +1456,7 @@ int IMEManager::ReadCursorPos(HIMC imc)
 
 	string[size] = 0;
 
-	int cursorPos = ImmGetCompositionString(imc, GCS_CURSORPOS, NULL, 0);
+	int cursorPos = ImmGetCompositionString(imc, GCS_CURSORPOS, nullptr, 0);
 	cursorPos = (cursorPos & 0x0000FFFF);
 
 	// Convert multibyte character position in unicode position.
@@ -1647,7 +1647,7 @@ unsigned int IMEManager::GetGuideline(unichar_t* outString, int length)
 
 	if (imc)
 		{
-		level = ImmGetGuideLineA(imc, GGL_LEVEL, NULL, 0);
+		level = ImmGetGuideLineA(imc, GGL_LEVEL, nullptr, 0);
 
 		if ((GL_LEVEL_NOGUIDELINE != level) && outString)
 			{
@@ -1789,7 +1789,7 @@ int IMEManager::ConvertAttrForUnicode(unsigned char* mbcs, unsigned char* attr)
 		mbsPtr = _mbsinc(mbsPtr);
 		}
 
-	return (attrPtr - attr);
+	return int(attrPtr - attr);
 	}
 
 
@@ -1837,7 +1837,7 @@ int IMEManager::ConvertClauseForUnicode(unsigned char* mbcs, int length, unsigne
 	clause[index] = static_cast<unsigned long>(_mbslen(mbcs));
 	++index;
 
-	return (&clause[index] - clause);
+	return int(&clause[index] - clause);
 	}
 
 } // namespace IME

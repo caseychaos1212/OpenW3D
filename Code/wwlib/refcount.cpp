@@ -40,7 +40,7 @@
 
 
 #include "refcount.h"
-#include <windows.h>
+#include "debugbreak.h"
 
 
 #ifndef NDEBUG
@@ -70,7 +70,7 @@ RefCountListClass			RefCountClass::ActiveRefList;
 RefCountClass *	RefCountClass::Add_Active_Ref(RefCountClass *obj)
 {
 	ActiveRefList.Add_Head(&(obj->ActiveRefNode));
-	obj->ActiveRefInfo.File = NULL;	// default to no debug information added.
+	obj->ActiveRefInfo.File = nullptr;	// default to no debug information added.
 	obj->ActiveRefInfo.Line = 0;
 	return obj;
 }
@@ -174,7 +174,7 @@ void RefCountClass::Add_Ref(void)
 
 	// See if programmer set break on for a specific address.
 	if (this == BreakOnReference) {
-		DebugBreak();  // trigger the debugger
+		debugbreak();  // trigger the debugger
 	}
 	Inc_Total_Refs(this);
 }
@@ -201,7 +201,7 @@ void	RefCountClass::Dec_Total_Refs(RefCountClass * obj)
 
 	// See if programmer set break on for a specific address.
 	if (obj == BreakOnReference) {
-		 DebugBreak();  // trigger the debugger
+		 debugbreak();  // trigger the debugger
 	}
 }
 

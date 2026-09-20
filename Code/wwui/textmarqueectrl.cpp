@@ -134,7 +134,7 @@ TextMarqueeCtrlClass::Create_Text_Renderer (void)
 	//
 	//	Calculate where to start rendering text
 	//
-	int ctrl_height		= ClientRect.Height ();
+	float ctrl_height		= WWMath::Trunc(ClientRect.Height ());
 	float start_height	= (ScrollPos - ctrl_height);
 
 	float curr_height		= 0;
@@ -177,7 +177,7 @@ TextMarqueeCtrlClass::Create_Text_Renderer (void)
 		//
 		//	Move down to the next row...
 		//
-		text_rect.Top = int(text_rect.Top + line.Height);
+		text_rect.Top = WWMath::Trunc(text_rect.Top + line.Height);
 	}
 
 	return ;
@@ -225,10 +225,10 @@ TextMarqueeCtrlClass::Update_Client_Rect (void)
 	//
 	ClientRect = Rect;
 	ClientRect.Inflate (Vector2 (-5.0F * StyleMgrClass::Get_X_Scale (), -3.75F * StyleMgrClass::Get_Y_Scale ()));
-	ClientRect.Left	= int(ClientRect.Left);
-	ClientRect.Top		= int(ClientRect.Top);
-	ClientRect.Right	= int(ClientRect.Right);
-	ClientRect.Bottom	= int(ClientRect.Bottom);
+	ClientRect.Left	= WWMath::Trunc(ClientRect.Left);
+	ClientRect.Top		= WWMath::Trunc(ClientRect.Top);
+	ClientRect.Right	= WWMath::Trunc(ClientRect.Right);
+	ClientRect.Bottom	= WWMath::Trunc(ClientRect.Bottom);
 
 	Set_Dirty ();
 	return ;
@@ -262,7 +262,7 @@ TextMarqueeCtrlClass::Set_Text (const unichar_t *title)
 	//
 	//	Add two blank pages
 	//
-	PixelHeight += ClientRect.Height () * 2;
+	PixelHeight += int(ClientRect.Height () * 2);
 	return ;
 }
 
@@ -285,7 +285,7 @@ TextMarqueeCtrlClass::Build_Credit_Lines (void)
 	//	Handy macro
 	//
 	#define COPY_LINE(dest,	src_start, src_end)	\
-			if (src_end == NULL) {						\
+			if (src_end == nullptr) {						\
 				dest = src_start;							\
 			} else {											\
 				size_t bytes	= src_end - src_start;	\
@@ -302,7 +302,7 @@ TextMarqueeCtrlClass::Build_Credit_Lines (void)
 	//	Build an array of formatted text lines
 	//
 	const unichar_t *text = Title;
-	while (text != NULL) {
+	while (text != nullptr) {
 
 		//
 		//	Scan this line for formatting information
@@ -320,7 +320,7 @@ TextMarqueeCtrlClass::Build_Credit_Lines (void)
 		//	Loop over all the lines of text and check for wrapping...
 		//
 		const unichar_t *line_start = renderer->Find_Row_Start (line.Text, 0);
-		while (line_start != NULL) {
+		while (line_start != nullptr) {
 
 			//
 			//	Lookup the start of the next line...
@@ -330,15 +330,15 @@ TextMarqueeCtrlClass::Build_Credit_Lines (void)
 			//
 			//	Copy this line of text into the control
 			//
-			WideStringClass text;
-			COPY_LINE (text, line_start, line_end);
+			WideStringClass text_str;
+			COPY_LINE (text_str, line_start, line_end);
 
 			//
 			//	Add this line to our list
 			//
 			CREDIT_LINE new_line (line);
-			new_line.Text		= text;
-			new_line.Height	= TextRenderers[new_line.FontIndex].Peek_Font ()->Get_Char_Height ();
+			new_line.Text		= text_str;
+			new_line.Height	= float(TextRenderers[new_line.FontIndex].Peek_Font ()->Get_Char_Height ());
 			CreditLines.Add (new_line);
 
 			//
@@ -416,7 +416,7 @@ TextMarqueeCtrlClass::Read_Tag (const unichar_t *text, CREDIT_LINE &line)
 					unichar_t *buffer = temp_buffer.Peek_Buffer ();
 					for (int color_index = 0; color_index < 3; color_index ++) {
 						unichar_t *comma_str  = ::u_strchr (buffer, U_CHAR(','));
-						if (comma_str != NULL) {
+						if (comma_str != nullptr) {
 							comma_str[0]			= 0;
 							u_sscanf_u(buffer, U_CHAR("%d"), &color[color_index]);
 							buffer					= &comma_str[1];
@@ -430,7 +430,8 @@ TextMarqueeCtrlClass::Read_Tag (const unichar_t *text, CREDIT_LINE &line)
 					//	Store the color
 					//
 					line.Color	= RGB_TO_INT32 ((uint8)color[0], (uint8)color[1], (uint8)color[2]);
-					retval		= index;
+					WWASSERT(index <= INT_MAX);
+					retval		= int(index);
 				}
 
 				break;
@@ -470,7 +471,7 @@ TextMarqueeCtrlClass::Read_Line (const unichar_t *text, CREDIT_LINE &line)
 		//	Check to see if this character ends the
 		//
 		if (ch == U_CHAR('\n') || ch == 0) {
-			int len = text - text_start;
+			int len = int(text - text_start);
 //			::strncpyW (line.Text.Get_Buffer (len + 1), text_start, len + 1);
 
 			unichar_t* buffer = line.Text.Get_Buffer(len + 1);
@@ -511,7 +512,7 @@ TextMarqueeCtrlClass::Read_Line (const unichar_t *text, CREDIT_LINE &line)
 void
 TextMarqueeCtrlClass::On_Frame_Update (void)
 {
-	float char_height = TextRenderers[0].Peek_Font ()->Get_Char_Height ();
+	float char_height = float(TextRenderers[0].Peek_Font ()->Get_Char_Height ());
 
 	//
 	//	Determine how many pixels to scroll

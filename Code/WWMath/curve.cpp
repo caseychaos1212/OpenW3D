@@ -142,10 +142,10 @@ void Curve3DClass::Get_Key(int i,Vector3 * set_point,float * set_t)
 {
 	assert(i >= 0);
 	assert(i < Keys.Count());
-	if (set_point != NULL) {
+	if (set_point != nullptr) {
 		*set_point = Keys[i].Point;
 	}
-	if (set_t != NULL) {
+	if (set_t != nullptr) {
 		*set_t = Keys[i].Time;
 	}
 }
@@ -253,7 +253,7 @@ bool Curve3DClass::Load(ChunkLoadClass & cload)
 				break;
 
 			default:
-				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",__FILE__,__LINE__));
+				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 				break;
 		}
 		cload.Close_Chunk();
@@ -313,7 +313,7 @@ bool LinearCurve3DClass::Load(ChunkLoadClass & cload)
 				break;
 
 			default:
-				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",__FILE__,__LINE__));
+				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 				break;
 		}
 		cload.Close_Chunk();
@@ -386,13 +386,13 @@ void Curve1DClass::Get_Key(int i,float * set_point,float * set_t,unsigned int * 
 {
 	assert(i >= 0);
 	assert(i < Keys.Count());
-	if (set_point != NULL) {
+	if (set_point != nullptr) {
 		*set_point = Keys[i].Point;
 	}
-	if (set_t != NULL) {
+	if (set_t != nullptr) {
 		*set_t = Keys[i].Time;
 	}
-	if (extra != NULL) {
+	if (extra != nullptr) {
 		*extra = Keys[i].Extra;
 	}
 }
@@ -524,7 +524,7 @@ bool Curve1DClass::Load(ChunkLoadClass & cload)
 				break;
 
 			default:
-				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",__FILE__,__LINE__));
+				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 				break;
 		}
 		cload.Close_Chunk();
@@ -583,7 +583,7 @@ bool LinearCurve1DClass::Load(ChunkLoadClass & cload)
 				break;
 
 			default:
-				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",__FILE__,__LINE__));
+				WWDEBUG_SAY(("Unhandled Chunk: 0x%X File: %s Line: %d\r\n",cload.Cur_Chunk_ID(),__FILE__,__LINE__));
 				break;
 		}
 		cload.Close_Chunk();

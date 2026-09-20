@@ -106,7 +106,7 @@ CHierarchyPropPage::OnInitDialog (void)
         if (pCHierarchy)
         {
             CString stringDesc;
-            stringDesc.Format (IDS_HIERARCHY_PROP_DESC, m_stringHierarchyName);
+            stringDesc.Format (IDS_HIERARCHY_PROP_DESC, static_cast<const TCHAR*>(m_stringHierarchyName));
 
             // Put the description onto the dialog
             SetDlgItemText (IDC_DESCRIPTION, stringDesc);
@@ -135,7 +135,7 @@ CHierarchyPropPage::OnInitDialog (void)
 
                     // Free this object
                     pCSubObject->Release_Ref ();
-                    pCSubObject = NULL;
+                    pCSubObject = nullptr;
                 }
             }
 
@@ -144,7 +144,7 @@ CHierarchyPropPage::OnInitDialog (void)
 
             // Free the object
             pCHierarchy->Release_Ref ();
-            pCHierarchy = NULL;
+            pCHierarchy = nullptr;
         }
 	}
 

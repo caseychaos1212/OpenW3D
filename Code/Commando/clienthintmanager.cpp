@@ -62,7 +62,7 @@ cClientHintManager::Think
 )
 {
 	if (cNetwork::I_Am_Server() ||
-		COMBAT_SCENE == NULL ||
+		COMBAT_SCENE == nullptr ||
 		cUserOptions::ClientHintFactor.Get() < 1)
 	{
 		//
@@ -77,7 +77,7 @@ cClientHintManager::Think
 
    SoldierGameObj * p_my_soldier = GameObjManager::Find_Soldier_Of_Client_ID(cNetwork::Get_My_Id());
 
-	if (p_my_soldier == NULL)
+	if (p_my_soldier == nullptr)
 	{
 		//
 		// Bail...
@@ -119,9 +119,9 @@ cClientHintManager::Think
 	int count = NetworkObjectMgrClass::Get_Object_Count();
 
 	NetworkObjectClass **object_list = (NetworkObjectClass **) _alloca((count * sizeof(NetworkObjectClass*)) + 128);
-	WWASSERT(object_list != NULL);
+	WWASSERT(object_list != nullptr);
 	SmartGameObj * player_ptr = GameObjManager::Find_Soldier_Of_Client_ID(cNetwork::Get_My_Id());
-	WWASSERT(player_ptr != NULL);
+	WWASSERT(player_ptr != nullptr);
 
 	//
 	// Traverse the vehicles and soldiers and gather data about update rates.
@@ -129,7 +129,7 @@ cClientHintManager::Think
 	for (int index = 0; index < count; index ++)
 	{
 		NetworkObjectClass * p_object = NetworkObjectMgrClass::Get_Object(index);
-		WWASSERT(p_object != NULL);
+		WWASSERT(p_object != nullptr);
 
 		BYTE type = p_object->Get_App_Packet_Type();
 
@@ -145,7 +145,7 @@ cClientHintManager::Think
 				// If vis data does exist then only proceed with this object if it is vis-visible.
 				//
 
-				if (pvs == NULL || vis_id == -1 || pvs->Get_Bit(vis_id))
+				if (pvs == nullptr || vis_id == -1 || pvs->Get_Bit(vis_id))
 				{
 					// Just add the object to the list on this pass.
 					object_list[num_objects++] = p_object;
@@ -186,7 +186,7 @@ cClientHintManager::Think
 		CoopDebugLog::Log("cClientHintManager::Think sorting objects count=%d total_net_objects=%d",
 			num_objects, count);
 	}
-	qsort(object_list, num_objects, sizeof(NetworkObjectClass *), (int (__cdecl *)(const void *,const void *)) &Priority_Compare);
+	qsort(object_list, num_objects, sizeof(NetworkObjectClass *), (int (*)(const void *,const void *)) &Priority_Compare);
 	if (IS_COOP_MISSION && cNetwork::I_Am_Only_Client()) {
 		CoopDebugLog::Log("cClientHintManager::Think sorting done count=%d", num_objects);
 	}
@@ -245,7 +245,7 @@ cClientHintManager::Think
 	if (most_broken_object_index != -1 && worst_percentage > 100 + (10.0f * hint_factor)) {
 		//NetworkObjectClass * p_object = NetworkObjectMgrClass::Get_Object(longest_delayed_index);
 		NetworkObjectClass * p_object = object_list[most_broken_object_index];
-		WWASSERT(p_object != NULL);
+		WWASSERT(p_object != nullptr);
 
 		cCsHint * p_hint = new cCsHint;
 		p_hint->Init(p_object->Get_Network_ID());
@@ -279,10 +279,10 @@ cClientHintManager::Think
 //
 // Qsort compare function for array of object pointers.
 //
-int __cdecl cClientHintManager::Priority_Compare(const void **object1, const void **object2)
+int cClientHintManager::Priority_Compare(const void **object1, const void **object2)
 {
-	WWASSERT(object1 != NULL);
-	WWASSERT(object2 != NULL);
+	WWASSERT(object1 != nullptr);
+	WWASSERT(object2 != nullptr);
 
 	NetworkObjectClass *n1 = (NetworkObjectClass*) *object1;
 	NetworkObjectClass *n2 = (NetworkObjectClass*) *object2;

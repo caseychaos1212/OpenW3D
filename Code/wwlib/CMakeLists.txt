@@ -18,7 +18,6 @@ set(WWLIB_SRC
     ini.cpp
     int.cpp
     jshell.cpp
-    LaunchWeb.cpp
     lzo.cpp
     lzo1x_c.cpp
     lzo1x_d.cpp
@@ -30,12 +29,14 @@ set(WWLIB_SRC
     mutex.cpp
     nstrdup.cpp
     openw3d.cpp
+    pathutil.cpp
     pipe.cpp
     pk.cpp
     ramfile.cpp
     random.cpp
     rawfile.cpp
     rcfile.cpp
+    rcfile_default.cpp
     readline.cpp
     realcrc.cpp
     refcount.cpp
@@ -88,7 +89,6 @@ set(WWLIB_SRC
     inisup.h
     int.h
     iostruct.h
-    LaunchWeb.h
     listnode.h
     lzo.h
     lzo1x.h
@@ -105,6 +105,7 @@ set(WWLIB_SRC
     nstrdup.h
     ntree.h
     openw3d.h
+    pathutil.h
     pipe.h
     pk.h
     point.h
@@ -151,7 +152,7 @@ set(WWLIB_SRC
 )
 
 if(TARGET ffmpeg)
-    list(APPEND WWLIB_SRC FFMpegFile.cpp FFMpegFile.h)
+    list(APPEND WWLIB_SRC FFmpegFile.cpp FFmpegFile.h)
 endif()
 
 if(TARGET icu)
@@ -166,11 +167,34 @@ add_library(wwlib STATIC)
 target_link_libraries(wwlib PRIVATE
     wwcommon
     wwutil
-    version
 )
 if(W3D_BUILD_OPTION_SDL3)
     target_link_libraries(wwlib PRIVATE SDL3::SDL3-shared)
     target_link_libraries(wwlib PUBLIC SDL3::Headers)
 endif()
+if(WIN32)
+    target_link_libraries(wwlib PRIVATE
+        version
+        winmm
+    )
+endif()
 
 target_sources(wwlib PRIVATE ${WWLIB_SRC})
+
+if(BUILD_TESTING)
+    add_executable(wwlib_mempool_tests
+        tests/MempoolTests.cpp
+    )
+
+    target_link_libraries(wwlib_mempool_tests PRIVATE
+        wwlib
+        wwdebug
+        wwcommon
+    )
+
+    target_include_directories(wwlib_mempool_tests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
+    add_test(NAME wwlib_mempool_tests COMMAND wwlib_mempool_tests)
+endif()

@@ -36,7 +36,7 @@ static char THIS_FILE[] = __FILE__;
 // MissingTranslationReportDialogClass dialog
 
 
-MissingTranslationReportDialogClass::MissingTranslationReportDialogClass(CWnd* pParent /*=NULL*/)
+MissingTranslationReportDialogClass::MissingTranslationReportDialogClass(CWnd* pParent /*=nullptr*/)
 	: CDialog(MissingTranslationReportDialogClass::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(MissingTranslationReportDialogClass)
@@ -92,9 +92,9 @@ MissingTranslationReportDialogClass::OnOK (void)
 	//
 	//	Import the data
 	//
-	int lang_id = SendDlgItemMessage (IDC_LANG_COMBO, CB_GETCURSEL);
+	LRESULT lang_id = SendDlgItemMessage (IDC_LANG_COMBO, CB_GETCURSEL);
 	if (lang_id >= 0) {
-		ReportMgrClass::Export_Missing_Translation_Report (Filename, lang_id);
+		ReportMgrClass::Export_Missing_Translation_Report (Filename, int(lang_id));
 	}
 
 	CDialog::OnOK();

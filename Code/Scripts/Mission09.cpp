@@ -119,7 +119,7 @@ DECLARE_SCRIPT(M09_Objective_Controller, "") // Object Controller id: 2000071
 
 		case 900:
 			{
-				Commands->Add_Objective(900, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M09_04, NULL, IDS_Enc_Obj_Primary_M09_04);
+				Commands->Add_Objective(900, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M09_04, nullptr, IDS_Enc_Obj_Primary_M09_04);
 
 				object = Commands->Find_Object(2000010);
 				if(object)
@@ -134,7 +134,7 @@ DECLARE_SCRIPT(M09_Objective_Controller, "") // Object Controller id: 2000071
 
 		case 901:
 			{
-				Commands->Add_Objective(901, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M09_01, NULL, IDS_Enc_Obj_Primary_M09_01);
+				Commands->Add_Objective(901, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M09_01, nullptr, IDS_Enc_Obj_Primary_M09_01);
 
 				object = Commands->Find_Object(2002239);
 				if(object)
@@ -147,7 +147,7 @@ DECLARE_SCRIPT(M09_Objective_Controller, "") // Object Controller id: 2000071
 		// New Primary Mission Objective: Escort Dr. Mobius to the Surface
 		case 902:
 			{
-				Commands->Add_Objective(902, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M09_02, NULL, IDS_Enc_Obj_Primary_M09_02);
+				Commands->Add_Objective(902, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M09_02, nullptr, IDS_Enc_Obj_Primary_M09_02);
 
 				object = Commands->Find_Object(2000955);
 				if(object)
@@ -160,7 +160,7 @@ DECLARE_SCRIPT(M09_Objective_Controller, "") // Object Controller id: 2000071
 		// New Primary Mission Objective: Escort Dr. Mobius to the Rendezvous Point
 		case 903:
 			{
-				Commands->Add_Objective(903, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M09_03, NULL, IDS_Enc_Obj_Primary_M09_03);
+				Commands->Add_Objective(903, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_Enc_ObjTitle_Primary_M09_03, nullptr, IDS_Enc_Obj_Primary_M09_03);
 
 				object = Commands->Find_Object(2000969);
 				if(object)
@@ -174,18 +174,18 @@ DECLARE_SCRIPT(M09_Objective_Controller, "") // Object Controller id: 2000071
 
 		case 904:
 			{
-				Commands->Add_Objective(904, OBJECTIVE_TYPE_TERTIARY, OBJECTIVE_STATUS_HIDDEN, IDS_Enc_ObjTitle_Hidden_M09_01, NULL, IDS_Enc_Obj_Hidden_M09_04);			}
+				Commands->Add_Objective(904, OBJECTIVE_TYPE_TERTIARY, OBJECTIVE_STATUS_HIDDEN, IDS_Enc_ObjTitle_Hidden_M09_01, nullptr, IDS_Enc_Obj_Hidden_M09_04);			}
 			break;/*
 		// New Hidden Mission Objective: Comandeer the NOD Stealth Tank.
 		case 905:
 			{
-				Commands->Add_Objective(905, OBJECTIVE_TYPE_TERTIARY, OBJECTIVE_STATUS_HIDDEN, IDS_M09_T02, NULL);
+				Commands->Add_Objective(905, OBJECTIVE_TYPE_TERTIARY, OBJECTIVE_STATUS_HIDDEN, IDS_M09_T02, nullptr);
 			}
 			break;
 		// New Hidden Mission Objective: Comandeer the NOD Stealth Tank.
 		case 906:
 			{
-				Commands->Add_Objective(906, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_M09_P05, NULL);
+				Commands->Add_Objective(906, OBJECTIVE_TYPE_PRIMARY, OBJECTIVE_STATUS_PENDING, IDS_M09_P05, nullptr);
 			}
 			break;*/
 		case 1000:
@@ -435,7 +435,7 @@ DECLARE_SCRIPT (M09_Mobius_Suit_Objective, "")
 		{
 			GameObject *mobius = Commands->Find_Object (2000010);
 
-			Commands->Set_Animation ( mobius, "h_a_a0a0_l26db", true, NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation ( mobius, "h_a_a0a0_l26db", true, nullptr, 0.0f, -1.0f, false);
 
 			const char *conv_name = ("IDS_M09_D11");
 			int conv_id = Commands->Create_Conversation (conv_name, 99, 200, false);
@@ -455,14 +455,14 @@ DECLARE_SCRIPT (M09_Mobius_Suit_Objective, "")
 			Commands->Give_PowerUp(mobius, "POW_LaserChaingun_AI", false);
 			Commands->Select_Weapon (mobius, "Weapon_LaserChaingun_Ai" );*/
 
-			//Commands->Set_Animation ( mobius, "h_a_a0a0_l26da", false, NULL, 0.0f, -1.0f, false);
+			//Commands->Set_Animation ( mobius, "h_a_a0a0_l26da", false, nullptr, 0.0f, -1.0f, false);
 		}
 
 		if(action_id == 901 && reason == ACTION_COMPLETE_CONVERSATION_ENDED)
 		{
 			GameObject *mobius = Commands->Find_Object (2000010);
 
-			Commands->Set_Animation ( mobius, "h_a_a0a0_l26dc", false, NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation ( mobius, "h_a_a0a0_l26dc", false, nullptr, 0.0f, -1.0f, false);
 
 			Commands->Send_Custom_Event (obj, Commands->Find_Object(2000071), 902, 3, 0.0f);
 		}
@@ -709,7 +709,7 @@ DECLARE_SCRIPT (M09_Animating_Mutant, "Animation=0:int")
 			params.Set_Basic( this, 99, MUTANT_GOTO );
 			//params.Set_Movement( loc, RUN, 0.25f );
 			params.Set_Movement( Vector3(0,0,0), RUN, 0.5f);
-			params.WaypathID = param;
+			params.WaypathID = int(param);
 
 			Commands->Action_Goto (obj, params);
 		}
@@ -1015,19 +1015,19 @@ DECLARE_SCRIPT (M09_Mobius_Follow, "")  //Mobius (Pre-Suit): 2000010
 			{
 			case 901:
 				{
-					objective_901 = param;
+					objective_901 = int(param);
 				}
 				break;
 
 			case 902:
 				{
-					objective_902 = param;
+					objective_902 = int(param);
 				}
 				break;
 
 			case 903:
 				{
-					objective_903 = param;
+					objective_903 = int(param);
 				}
 				break;
 			}
@@ -1039,23 +1039,23 @@ DECLARE_SCRIPT (M09_Mobius_Follow, "")  //Mobius (Pre-Suit): 2000010
 			ActionParamsStruct params;
 
 			params.Set_Basic( this, 99, 951 );
-			params.Set_Movement( Commands->Find_Object (param), 1.2f, 0.5f);
+			params.Set_Movement( Commands->Find_Object (int(param)), 1.2f, 0.5f);
 			Commands->Action_Goto( obj, params );
 		}
 
 		if (type == FOLLOW)
 		{
-			Follow_Function (obj, param);
+			Follow_Function (obj, int(param));
 		}
 
 		if (type == ELEVATOR_EXIT)
 		{
-			attack_path = param;
+			attack_path = int(param);
 
 			ActionParamsStruct params;
 
 			params.Set_Basic( this, INNATE_PRIORITY_ENEMY_SEEN + 5, MOBIUS_GOTO );
-			params.Set_Movement( Commands->Get_Position (Commands->Find_Object (param)), 1.2f, 0.8f );
+			params.Set_Movement( Commands->Get_Position (Commands->Find_Object (int(param))), 1.2f, 0.8f );
 			params.MovePathfind = false;
 
 			Commands->Action_Goto (obj, params);
@@ -1069,7 +1069,7 @@ DECLARE_SCRIPT (M09_Mobius_Follow, "")  //Mobius (Pre-Suit): 2000010
 			ActionParamsStruct params;
 
 			params.Set_Basic( this, 99, ELEV_WAYPOINT );
-			params.Set_Movement( Commands->Get_Position (Commands->Find_Object (param)), 1.2f, 1.0f);
+			params.Set_Movement( Commands->Get_Position (Commands->Find_Object (int(param))), 1.2f, 1.0f);
 
 			Commands->Action_Goto (obj, params);
 
@@ -1083,7 +1083,7 @@ DECLARE_SCRIPT (M09_Mobius_Follow, "")  //Mobius (Pre-Suit): 2000010
 			ActionParamsStruct params;
 
 			params.Set_Basic( this, 99, ELEV_WAYPOINT2 );
-			params.Set_Movement( Commands->Get_Position (Commands->Find_Object (param)), 1.2f, 1.0f);
+			params.Set_Movement( Commands->Get_Position (Commands->Find_Object (int(param))), 1.2f, 1.0f);
 
 			Commands->Action_Goto (obj, params);
 
@@ -1551,7 +1551,7 @@ DECLARE_SCRIPT (M09_Mutant_Damage_Mod_10, "")
 		{
 			current_health = Commands->Get_Health (obj);
 			float damage = ((last_health - current_health) + damage_tally);
-			float mod_damage = (damage * .10);
+			float mod_damage = (damage * .10f);
 			damage_tally += mod_damage;
 
 			Commands->Set_Health (obj, (last_health - mod_damage));
@@ -1585,7 +1585,7 @@ DECLARE_SCRIPT (M09_Mutant_Damage_Mod_50, "")
 		{
 			current_health = Commands->Get_Health (obj);
 			float damage = ((last_health - current_health) + damage_tally);
-			float mod_damage = (damage * .25);
+			float mod_damage = (damage * .25f);
 			damage_tally += mod_damage;
 
 			Commands->Set_Health (obj, (last_health - mod_damage));
@@ -1619,7 +1619,7 @@ DECLARE_SCRIPT (M09_Nod_Damage_Mod_10, "")
 		{
 			current_health = Commands->Get_Health (obj);
 			float damage = ((last_health - current_health) + damage_tally);
-			float mod_damage = (damage * .08);
+			float mod_damage = (damage * .08f);
 			damage_tally += mod_damage;
 
 			Commands->Set_Health (obj, (last_health - mod_damage));
@@ -1772,7 +1772,6 @@ DECLARE_SCRIPT (M09_Vehicle_Attack_01, "")
 			{
 				Commands->Action_Reset ( obj, 100 );
 				charge = true;
-				ActionParamsStruct params;
 				params.Set_Basic( this, INNATE_PRIORITY_ENEMY_SEEN + 5, 10 );
 				params.Set_Movement( STAR, 1.5f, 0 );
 				params.Set_Attack(STAR, 100.0f, 5.0f, true);
@@ -1790,7 +1789,6 @@ DECLARE_SCRIPT (M09_Vehicle_Attack_01, "")
 			charge = false;
 			charging = false;
 
-			ActionParamsStruct params;
 			params.Set_Basic( this, INNATE_PRIORITY_ENEMY_SEEN +5, 10 );
 			params.Set_Movement( Vector3(0,0,0), 1.0f, 0 );
 			params.WaypathID = 2000095;
@@ -2312,10 +2310,10 @@ DECLARE_SCRIPT(M09_Chinook_ParaDrop, "Preset:string")
 		GameObject *chinook_rail = Commands->Create_Object("Generic_Cinematic", loc);
 		Commands->Set_Model(chinook_rail, "X5D_Chinookfly");
 		Commands->Set_Facing(chinook_rail, facing);
-		Commands->Set_Animation(chinook_rail, "X5D_Chinookfly.X5D_Chinookfly", false, NULL, 0.0f, -1.0f, false);
+		Commands->Set_Animation(chinook_rail, "X5D_Chinookfly.X5D_Chinookfly", false, nullptr, 0.0f, -1.0f, false);
 		GameObject *chinook = Commands->Create_Object("Nod_Chinook", loc);
 		Commands->Set_Facing(chinook, facing);
-		Commands->Set_Animation(chinook, "v_nod_chinook.vf_nod_chinook", true, NULL, 0.0f, -1.0f, false);
+		Commands->Set_Animation(chinook, "v_nod_chinook.vf_nod_chinook", true, nullptr, 0.0f, -1.0f, false);
 		Commands->Attach_To_Object_Bone(chinook, chinook_rail, "BN_Chinook_1");
 
 		dead = false;
@@ -2360,7 +2358,7 @@ DECLARE_SCRIPT(M09_Chinook_ParaDrop, "Preset:string")
 				para1 = Commands->Create_Object("Generic_Cinematic", loc);
 				Commands->Set_Facing(para1, facing);
 				Commands->Set_Model(para1, "X5D_Parachute");
-				Commands->Set_Animation(para1, "X5D_Parachute.X5D_ParaC_1", false, NULL, 0.0f, -1.0f, false);
+				Commands->Set_Animation(para1, "X5D_Parachute.X5D_ParaC_1", false, nullptr, 0.0f, -1.0f, false);
 				Commands->Create_3D_Sound_At_Bone("parachute_open", para1, "ROOTTRANSFORM");
 				Commands->Attach_Script(para1, "M03_No_More_Parachute", "");
 			}
@@ -2372,7 +2370,7 @@ DECLARE_SCRIPT(M09_Chinook_ParaDrop, "Preset:string")
 				para2 = Commands->Create_Object("Generic_Cinematic", loc);
 				Commands->Set_Facing(para2, facing);
 				Commands->Set_Model(para2, "X5D_Parachute");
-				Commands->Set_Animation(para2, "X5D_Parachute.X5D_ParaC_2", false, NULL, 0.0f, -1.0f, false);
+				Commands->Set_Animation(para2, "X5D_Parachute.X5D_ParaC_2", false, nullptr, 0.0f, -1.0f, false);
 				Commands->Create_3D_Sound_At_Bone("parachute_open", para2, "ROOTTRANSFORM");
 				Commands->Attach_Script(para2, "M03_No_More_Parachute", "");
 			}
@@ -2384,7 +2382,7 @@ DECLARE_SCRIPT(M09_Chinook_ParaDrop, "Preset:string")
 				para3 = Commands->Create_Object("Generic_Cinematic", loc);
 				Commands->Set_Facing(para3, facing);
 				Commands->Set_Model(para3, "X5D_Parachute");
-				Commands->Set_Animation(para3, "X5D_Parachute.X5D_ParaC_3", false, NULL, 0.0f, -1.0f, false);
+				Commands->Set_Animation(para3, "X5D_Parachute.X5D_ParaC_3", false, nullptr, 0.0f, -1.0f, false);
 				Commands->Create_3D_Sound_At_Bone("parachute_open", para3, "ROOTTRANSFORM");
 				Commands->Attach_Script(para3, "M03_No_More_Parachute", "");
 			}
@@ -2396,7 +2394,7 @@ DECLARE_SCRIPT(M09_Chinook_ParaDrop, "Preset:string")
 			GameObject *box1 = Commands->Create_Object("Generic_Cinematic", loc);
 			Commands->Set_Model(box1, "X5D_Box01");
 			Commands->Set_Facing(box1, facing);
-			Commands->Set_Animation(box1, "X5D_Box01.X5D_Box01", false, NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation(box1, "X5D_Box01.X5D_Box01", false, nullptr, 0.0f, -1.0f, false);
 
 			GameObject *soldier1;
 			soldier1 = Commands->Create_Object_At_Bone(box1, preset, "Box01");
@@ -2406,7 +2404,7 @@ DECLARE_SCRIPT(M09_Chinook_ParaDrop, "Preset:string")
 			Commands->Attach_Script(soldier1, "M09_CheckpointA_Counter", "");
 
 			Commands->Attach_To_Object_Bone( soldier1, box1, "Box01" );
-			Commands->Set_Animation(soldier1, "s_a_human.H_A_X5D_ParaT_1", false, NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation(soldier1, "s_a_human.H_A_X5D_ParaT_1", false, nullptr, 0.0f, -1.0f, false);
 			out++;
 			if ((out - 1) == DIFFICULTY)
 			{
@@ -2422,7 +2420,7 @@ DECLARE_SCRIPT(M09_Chinook_ParaDrop, "Preset:string")
 			GameObject *box2 = Commands->Create_Object("Generic_Cinematic", loc);
 			Commands->Set_Model(box2, "X5D_Box02");
 			Commands->Set_Facing(box2, facing);
-			Commands->Set_Animation(box2, "X5D_Box02.X5D_Box02", false, NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation(box2, "X5D_Box02.X5D_Box02", false, nullptr, 0.0f, -1.0f, false);
 
 			GameObject *soldier2;
 			soldier2 = Commands->Create_Object_At_Bone(box2, preset, "Box02");
@@ -2431,7 +2429,7 @@ DECLARE_SCRIPT(M09_Chinook_ParaDrop, "Preset:string")
 
 			Commands->Attach_Script(soldier2, "M09_CheckpointA_Counter", "");
 
-			Commands->Set_Animation(soldier2, "s_a_human.H_A_X5D_ParaT_2", false, NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation(soldier2, "s_a_human.H_A_X5D_ParaT_2", false, nullptr, 0.0f, -1.0f, false);
 			Commands->Attach_To_Object_Bone( soldier2, box2, "Box02" );
 			out++;
 			if ((out - 1) == DIFFICULTY)
@@ -2448,7 +2446,7 @@ DECLARE_SCRIPT(M09_Chinook_ParaDrop, "Preset:string")
 			GameObject *box3 = Commands->Create_Object("Generic_Cinematic", loc);
 			Commands->Set_Model(box3, "X5D_Box03");
 			Commands->Set_Facing(box3, facing);
-			Commands->Set_Animation(box3, "X5D_Box03.X5D_Box03", false, NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation(box3, "X5D_Box03.X5D_Box03", false, nullptr, 0.0f, -1.0f, false);
 
 			GameObject *soldier3;
 			soldier3 = Commands->Create_Object_At_Bone(box3, preset, "Box03");
@@ -2457,7 +2455,7 @@ DECLARE_SCRIPT(M09_Chinook_ParaDrop, "Preset:string")
 
 			Commands->Attach_Script(soldier3, "M09_CheckpointA_Counter", "");
 
-			Commands->Set_Animation(soldier3, "s_a_human.H_A_X5D_ParaT_3", false, NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation(soldier3, "s_a_human.H_A_X5D_ParaT_3", false, nullptr, 0.0f, -1.0f, false);
 			Commands->Attach_To_Object_Bone( soldier3, box3, "Box03" );
 			out++;
 			if ((out - 1) == DIFFICULTY)
@@ -2601,7 +2599,7 @@ DECLARE_SCRIPT (M09_Explosion_Zone_Lab01, "")
 		{
 			already_entered = true;
 
-			Commands->Create_Explosion("Ground Explosions Twiddler", Vector3 (-102.560f, 483.462f ,-155.543f), NULL);
+			Commands->Create_Explosion("Ground Explosions Twiddler", Vector3 (-102.560f, 483.462f ,-155.543f), nullptr);
 			Commands->Start_Timer (obj, this, 1.0f, 100);
 		}
 	}
@@ -2631,7 +2629,7 @@ DECLARE_SCRIPT (M09_Explosion_Zone_Lab02, "")
 		{
 			already_entered = true;
 
-			Commands->Create_Explosion("Ground Explosions Twiddler", Vector3 (-6.151f, 494.846f ,-151.888f), NULL);
+			Commands->Create_Explosion("Ground Explosions Twiddler", Vector3 (-6.151f, 494.846f ,-151.888f), nullptr);
 			GameObject *blocker1;
 			blocker1 = Commands->Create_Object ( "M08_Rubble_Stub", Vector3 (-6.151f, 494.846f ,-151.888f));
 			Commands->Set_Facing ( blocker1, 60.0f );
@@ -2665,7 +2663,7 @@ DECLARE_SCRIPT (M09_Explosion_Zone_Tunnel01, "")
 
 			Commands->Send_Custom_Event (obj, Commands->Find_Object(2000071), SPAWN_LOC, INCREMENT, 0.0f);
 
-			Commands->Create_Explosion("Ground Explosions Twiddler", Vector3 (-70.356f, 475.905f ,-63.233f), NULL);
+			Commands->Create_Explosion("Ground Explosions Twiddler", Vector3 (-70.356f, 475.905f ,-63.233f), nullptr);
 			GameObject *blocker1;
 			blocker1 = Commands->Create_Object ( "M08_Rubble_Stub", Vector3 (-74.290f, 474.747f, -64.022f));
 			Commands->Set_Facing(blocker1, 90.0f);
@@ -2776,7 +2774,7 @@ DECLARE_SCRIPT (M09_Custom_Attack, "")
 
 			ActionParamsStruct params;
 			params.Set_Basic( this, INNATE_PRIORITY_ENEMY_SEEN + 5, 10 );
-			params.Set_Attack(Commands->Find_Object (param), 200.0f, 5.0f, true);
+			params.Set_Attack(Commands->Find_Object (int(param)), 200.0f, 5.0f, true);
 			params.AttackCheckBlocked = false;
 			params.AttackActive = true;
 			Commands->Action_Attack (obj, params);
@@ -3010,7 +3008,7 @@ DECLARE_SCRIPT (M09_Key_Controller_Zones, "")
 	{
 		if ( type == COUNT )
 		{
-			key_count = param;
+			key_count = int(param);
 		}
 	}
 };
@@ -3531,8 +3529,6 @@ DECLARE_SCRIPT (M09_Mutant_Attack, "Target_num:int")
 	{
 		target = Get_Int_Parameter ("Target_num");
 
-		ActionParamsStruct params;
-
 		if ( sound.Type == M09_INNATE_ENABLE )
 		{
 			Vector3 loc = Commands->Get_Position (Commands->Find_Object (target));
@@ -3638,7 +3634,7 @@ DECLARE_SCRIPT (M09_Waypath_Run, "Waypath_num:int, Attacker_num:int, Controller_
 	{
 		if (type == ATTACKER_CHECK)
 		{
-			mutant_id = param;
+			mutant_id = int(param);
 		}
 
 		if (type == DEAD_MUTANT)
@@ -3673,12 +3669,12 @@ DECLARE_SCRIPT (M09_Mutant_Encounter_Controller, "")
 	{
 		if (type == MUTANT_ATTACKER)
 		{
-			mutant_id = param;
+			mutant_id = int(param);
 		}
 
 		if (type == MUTANT_ATTACKEE)
 		{
-			attackee_id = param;
+			attackee_id = int(param);
 		}
 
 		if (type == ATTACKER_CHECK)
@@ -3915,7 +3911,7 @@ DECLARE_SCRIPT(M09_Evac_Transport, "")  //2000969
 			Commands->Set_Facing(bone, facing);
 			Commands->Attach_Script(bone, "M09_Evac_Bone", "");
 			Commands->Set_Model ( bone, "XG_TransprtBone" );
-			Commands->Set_Animation ( bone, "XG_TransprtBone.XG_EV2_PathA", false , NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation ( bone, "XG_TransprtBone.XG_EV2_PathA", false , nullptr, 0.0f, -1.0f, false);
 
 			GameObject * chinook = Commands->Create_Object_At_Bone( bone, "GDI_Transport_Helicopter", "XG_TransprtBone" );
 			GameObject * troop = Commands->Create_Object_At_Bone( bone, "GDI_RocketSoldier_2SF", "SPAWNER" );
@@ -3927,7 +3923,7 @@ DECLARE_SCRIPT(M09_Evac_Transport, "")  //2000969
 			Commands->Set_Facing(chinook, facing);
 			Commands->Attach_Script(chinook, "M09_Evac_Helicopter", param1);
 			Commands->Attach_To_Object_Bone ( chinook, bone, "BN_Trajectory" );
-			Commands->Set_Animation ( chinook, "v_GDI_trnspt.XG_EV2_trnsA", false , NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation ( chinook, "v_GDI_trnspt.XG_EV2_trnsA", false , nullptr, 0.0f, -1.0f, false);
 
 			Commands->Attach_Script(troop, "M09_Gunner", "");
 			Commands->Attach_Script(chinook, "M09_No_Obj_Damage", "");
@@ -3944,7 +3940,7 @@ DECLARE_SCRIPT(M09_Evac_Bone, "")
 	{
 		if (stricmp(anim, "XG_TransprtBone.XG_EV2_PathA") == 0)
 		{
-			Commands->Set_Animation ( obj, "XG_TransprtBone.XG_EV2_Pathloop", true , NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation ( obj, "XG_TransprtBone.XG_EV2_Pathloop", true , nullptr, 0.0f, -1.0f, false);
 		}
 
 	}
@@ -3962,7 +3958,7 @@ DECLARE_SCRIPT(M09_Evac_Helicopter, "Gunner:int")
 			Commands->Start_Timer (obj, this, 3.0f, COLLISION);
 
 			Commands->Send_Custom_Event (obj, Commands->Find_Object(gunner_id), GO, 0, 0.0f);
-			Commands->Set_Animation ( obj, "v_GDI_trnspt.XG_EV2_trnsloop", true , NULL, 0.0f, -1.0f, false);
+			Commands->Set_Animation ( obj, "v_GDI_trnspt.XG_EV2_trnsloop", true , nullptr, 0.0f, -1.0f, false);
 		}
 	}
 
@@ -3993,7 +3989,7 @@ DECLARE_SCRIPT(M09_Gunner, "")
 	{
 		if (type == GO)
 		{
-			Commands->Attach_To_Object_Bone( obj, NULL, NULL );
+			Commands->Attach_To_Object_Bone( obj, nullptr, nullptr );
 
 
 			//Commands->Enable_Collisions ( obj );
@@ -4261,7 +4257,7 @@ DECLARE_SCRIPT (M09_Ambient_Clutter, "")
 			exp_point [4] = 2006124;
 
 			int exp_num = Commands->Get_Random_Int (0, 5);
-			Commands->Create_Explosion("Air Explosions Twiddler", Commands->Get_Position (Commands->Find_Object (exp_point [exp_num])), NULL);
+			Commands->Create_Explosion("Air Explosions Twiddler", Commands->Get_Position (Commands->Find_Object (exp_point [exp_num])), nullptr);
 
 			float delayTimer = Commands->Get_Random ( 1, 5 );
 			Commands->Start_Timer(obj, this, (8.0f + delayTimer), AMB_EXPLOSION);
@@ -4318,7 +4314,7 @@ DECLARE_SCRIPT (M09_Destroy_Self_Zone, "")
 
 			const char *conv_name = ("IDS_M09_D13");
 			int conv_id = Commands->Create_Conversation (conv_name, 99, 200, false);
-			Commands->Join_Conversation(NULL, conv_id, false, false, true);
+			Commands->Join_Conversation(nullptr, conv_id, false, false, true);
 			Commands->Join_Conversation(mobius, conv_id, false, false, true);
 			Commands->Join_Conversation(STAR, conv_id, false, false, true);
 			Commands->Start_Conversation (conv_id, 900);
@@ -4411,7 +4407,7 @@ DECLARE_SCRIPT (M09_KeyCard_Zone, "")
 
 				/*const char *conv_name = ("IDS_M09_D13");
 				int conv_id = Commands->Create_Conversation (conv_name, 99, 200, false);
-				Commands->Join_Conversation(NULL, conv_id, false, false, true);
+				Commands->Join_Conversation(nullptr, conv_id, false, false, true);
 				Commands->Join_Conversation(mobius, conv_id, false, false, true);
 				Commands->Join_Conversation(STAR, conv_id, false, false, true);
 				Commands->Start_Conversation (conv_id, 900);
@@ -4684,7 +4680,7 @@ DECLARE_SCRIPT(M09_PSuitAnim, "")
 		params.Set_Animation ("S_A_HUMAN.H_A_X9C_SUIT", true);
 		Commands->Action_Play_Animation (obj, params);*/
 
-		Commands->Set_Animation ( obj, "S_A_HUMAN.H_A_X9C_SUIT", true, NULL, 0.0f, -1.0f, false );
+		Commands->Set_Animation ( obj, "S_A_HUMAN.H_A_X9C_SUIT", true, nullptr, 0.0f, -1.0f, false );
 	}
 
 	void Custom (GameObject *obj, int type, intptr_t /* param */, GameObject * /* sender */) override

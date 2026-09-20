@@ -44,9 +44,9 @@ IMPLEMENT_DYNCREATE(EmitterSizePropPageClass, CPropertyPage)
 //
 /////////////////////////////////////////////////////////////
 EmitterSizePropPageClass::EmitterSizePropPageClass (EmitterInstanceListClass * /* pemitter */)
-	:	m_pEmitterList (NULL),
+	:	m_pEmitterList (nullptr),
 		m_bValid (true),
-		m_SizeBar (NULL),
+		m_SizeBar (nullptr),
 		m_Lifetime (0),
 		CPropertyPage(EmitterSizePropPageClass::IDD)
 {
@@ -114,7 +114,7 @@ EmitterSizePropPageClass::Initialize (void)
 	SAFE_DELETE_ARRAY (m_CurrentSizes.KeyTimes);
 	SAFE_DELETE_ARRAY (m_CurrentSizes.Values);
 
-	if (m_pEmitterList != NULL) {
+	if (m_pEmitterList != nullptr) {
 		m_Lifetime = m_pEmitterList->Get_Lifetime ();
 		m_pEmitterList->Get_Size_Keyframes (m_OrigSizes);
 		m_pEmitterList->Get_Size_Keyframes (m_CurrentSizes);
@@ -217,7 +217,7 @@ EmitterSizePropPageClass::OnNotify
 	//	Update the spinner controls if necessary
 	//
 	NMHDR *pheader = (NMHDR *)lParam;
-	if ((pheader != NULL) && (pheader->code == UDN_DELTAPOS)) {
+	if ((pheader != nullptr) && (pheader->code == UDN_DELTAPOS)) {
 		LPNMUPDOWN pupdown = (LPNMUPDOWN)lParam;
 		::Update_Spinner_Buddy (pheader->hwndFrom, pupdown->iDelta);
 	}
@@ -248,9 +248,9 @@ EmitterSizePropPageClass::OnNotify
 					float new_max = size;
 					int count = m_SizeBar->Get_Point_Count ();
 					for (int index = 0; index < count; index ++) {
-						float size = m_SizeBar->Get_Graph_Percent (index) * m_MaxSize;
-						if (size > new_max) {
-							new_max = size;
+						float new_size = m_SizeBar->Get_Graph_Percent (index) * m_MaxSize;
+						if (new_size > new_max) {
+							new_max = new_size;
 						}
 					}
 
@@ -258,7 +258,7 @@ EmitterSizePropPageClass::OnNotify
 					//	Rescale the key frame points if necessary
 					//
 					if (new_max != m_MaxSize) {
-						int count = m_SizeBar->Get_Point_Count ();
+						count = m_SizeBar->Get_Point_Count ();
 						for (int index = 0; index < count; index ++) {
 							float percent = m_SizeBar->Get_Graph_Percent (index);
 							m_SizeBar->Set_Graph_Percent (index, (percent * m_MaxSize) / new_max);

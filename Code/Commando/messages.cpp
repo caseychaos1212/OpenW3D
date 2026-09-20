@@ -112,11 +112,11 @@ void cNetwork::Tell_Client_About_Dynamic_Objects
 
 if (cDevOptions::UseNewTCADO.Is_False()) {
 
-	WWPROFILE("TCADO");
+	WWPROFILENAMED("TCADO", top);
 
 	WWASSERT(client_id >= 0);
    WWASSERT(cNetwork::I_Am_Server());
-	if (Get_Server_Rhost(client_id) == NULL) {
+	if (Get_Server_Rhost(client_id) == nullptr) {
 		return;
 	}
 
@@ -129,7 +129,7 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 	}
 
 	int i;
-	VisTableClass *pvs = NULL;
+	VisTableClass *pvs = nullptr;
 	int count = 0;
 
 	{
@@ -162,7 +162,7 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 
 			NetworkObjectClass * p_object = NetworkObjectMgrClass::Get_Object(index);
 
-			if (p_object == NULL) {
+			if (p_object == nullptr) {
 				continue;
 			}
 
@@ -226,7 +226,7 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 								** Add the packet header.
 								*/
 								packet_size += cPacket::Get_Packet_Header_Size();
-								p_object->Set_Frequent_Update_Export_Size(packet_size);
+								p_object->Set_Frequent_Update_Export_Size(static_cast<unsigned char>(packet_size));
 							} else {
 								/*
 								** For some reason, some objects have a frequent bit set but there is no frequent update export.
@@ -373,7 +373,7 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 				}
 				temp_obj->Set_Update_Rate(client_id, (unsigned short) update_rate);
 				if (update_rate != infinity_update_rate) {
-					int bps = (1000.0f / update_rate) * temp_obj->Get_Frequent_Update_Export_Size();
+					int bps = int((1000.0f / update_rate) * temp_obj->Get_Frequent_Update_Export_Size());
 					total_bps += bps;
 				}
 			}
@@ -388,7 +388,8 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 			*/
 			float factor = 1.0;
 			if (total_bps) {
-				factor = avail_bytes_per_update / total_bps;
+				// TODO OmniBlade: This looks bugged, intended that division be floating point rather than integer?
+				factor = float(avail_bytes_per_update / total_bps);
 				if (factor < 0.00001f) {
 					factor = 0.00001f;
 				}
@@ -453,11 +454,11 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 
 	const unsigned char dirty_check = (NetworkObjectClass::BIT_FREQUENT ^ 0xffffffff) & (NetworkObjectClass::BIT_CREATION | NetworkObjectClass::BIT_RARE | NetworkObjectClass::BIT_OCCASIONAL);
 
-	WWPROFILE("TCADO");
+	WWPROFILENAMED("TCADO", top);
 
 	WWASSERT(client_id >= 0);
    WWASSERT(cNetwork::I_Am_Server());
-	if (Get_Server_Rhost(client_id) == NULL) {
+	if (Get_Server_Rhost(client_id) == nullptr) {
 		return;
 	}
 
@@ -475,7 +476,7 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 	r_host->Increment_Priority_Count();
 
 	int i;
-	VisTableClass *pvs = NULL;
+	VisTableClass *pvs = nullptr;
 	int count = 0;
 	bool global_packet_allowance_full = false;
 	NetworkObjectClass *temp_obj;
@@ -547,7 +548,7 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 
 			NetworkObjectClass * p_object = NetworkObjectMgrClass::Get_Object(index);
 
-			if (p_object == NULL) {
+			if (p_object == nullptr) {
 				continue;
 			}
 
@@ -624,7 +625,7 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 										hidden = true;
 									}
 									if (hidden) {
-										int distance = cPriority::Get_Object_Distance_2(dest_pos, p_object);
+										int distance = int(cPriority::Get_Object_Distance_2(dest_pos, p_object));
 										if (distance > min_vis_distance) {
 											/*
 											** Allow some very infrequent updates for distant, hidden objects on broadband connections.
@@ -678,7 +679,7 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 									** Add the packet header.
 									*/
 									packet_size += cPacket::Get_Packet_Header_Size();
-									p_object->Set_Frequent_Update_Export_Size(packet_size);
+									p_object->Set_Frequent_Update_Export_Size(static_cast<unsigned char>(packet_size));
 								} else {
 									/*
 									** For some reason, some objects have a frequent bit set but there is no frequent update export.
@@ -771,12 +772,12 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 					update_rate = (unsigned int)(((1.0f - pri) * spread) + ms_low);
 				} else {
 					if (pri > 0.009f) {
-						update_rate = min_update_rate;
+						update_rate = int(min_update_rate);
 					}
 				}
 				temp_obj->Set_Update_Rate(client_id, (unsigned short) update_rate);
 				if (update_rate != infinity_update_rate) {
-					int bps = (1000.0f / update_rate) * temp_obj->Get_Frequent_Update_Export_Size();
+					int bps = int((1000.0f / update_rate) * temp_obj->Get_Frequent_Update_Export_Size());
 					total_bps += bps;
 				}
 			}
@@ -791,7 +792,8 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 			*/
 			float factor = 1.0;
 			if (total_bps) {
-				factor = avail_bytes_per_update / total_bps;
+				// TODO OmniBlade: Looks bugged, should use floating point division rather than integer?
+				factor = float(avail_bytes_per_update / total_bps);
 				if (factor < 0.00001f) {
 					factor = 0.00001f;
 				}
@@ -864,7 +866,7 @@ void cNetwork::Tell_Server_About_Dynamic_Objects
 		//
 		//	Should we send update information for this object?
 		//
-		if (object != NULL && object->Is_Client_Dirty(0))
+		if (object != nullptr && object->Is_Client_Dirty(0))
 		{
 			//
 			//	Transmit the object's data to the server
@@ -887,7 +889,7 @@ void cNetwork::Tell_Client_About_Delete_Notifications(int client_id)
 	WWASSERT (client_id >= 0);
    WWASSERT (cNetwork::I_Am_Server ());
 
-	if (Get_Server_Rhost (client_id) == NULL) {
+	if (Get_Server_Rhost (client_id) == nullptr) {
 		return;
 	}
 
@@ -901,7 +903,7 @@ void cNetwork::Tell_Client_About_Delete_Notifications(int client_id)
 		//
 		//	Is this object going to be deleted soon?
 		//
-		if (object != NULL && object->Is_Delete_Pending ()) {
+		if (object != nullptr && object->Is_Delete_Pending ()) {
 
 			//
 			//	Does the local client need this information?
@@ -986,7 +988,7 @@ cNetwork::Send_Object_Update(NetworkObjectClass *object, int client_id)
 		//	Lookup the factory for this object
 		//
 		NetworkObjectFactoryClass *factory = NetworkObjectFactoryMgrClass::Find_Factory (net_classid);
-		WWASSERT (factory != NULL);
+		WWASSERT (factory != nullptr);
 
 		//
 		//	Store any data in the packet that's needed in order
@@ -1097,7 +1099,7 @@ cNetwork::Send_Object_Update(NetworkObjectClass *object, int client_id)
 		{
 			WWDEBUG_SAY(("WTF is this?\n"));
 		}
-		/**/
+		*/
 
 		//
 		// Record stats
@@ -1130,7 +1132,7 @@ void cNetwork::Intermission_Over_Processing(void)
 		objnode->Next()) {
 
 		cPlayer * p_player = objnode->Data();
-      WWASSERT(p_player != NULL);
+      WWASSERT(p_player != nullptr);
       Delete_Player_Objects(p_player->Get_Id());
 
 		if (p_player->Is_Human()) {
@@ -1153,7 +1155,7 @@ void cNetwork::Intermission_Over_Processing(void)
 		//
 		// If we have to quit out now then don't do a core restart.
 		//
-		if (The_Game () != NULL && The_Game ()->Is_Map_Cycle_Over () == false) {
+		if (The_Game () != nullptr && The_Game ()->Is_Map_Cycle_Over () == false) {
 			extern bool g_b_core_restart;
 			g_b_core_restart = true;
 			GameModeClass *game_mode = GameModeManager::Find("WOL");
@@ -1171,7 +1173,7 @@ void cNetwork::Intermission_Over_Processing(void)
 	//
 	// TSS092601
 	//
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	The_Game()->IsIntermission.Set(false);
 }
 
@@ -1186,7 +1188,7 @@ void cNetwork::End_Game_Test(void)
 		return;
 	}
 
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	if (The_Game()->IsIntermission.Is_True()) {
 
       if (The_Game()->Get_Intermission_Time_Remaining() < WWMATH_EPSILON) {
@@ -1227,7 +1229,7 @@ void cNetwork::Shared_Client_And_Server_Think(void)
 {
 	WWASSERT(I_Am_Client() || I_Am_Server());
 
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	The_Game()->Think();
 
 	Hibernation_Think();
@@ -1271,7 +1273,7 @@ bool cNetwork::Client_Think(void)
 	//
 	// Client reload if necessary
 	//
-	WWASSERT(PTheGameData != NULL);
+	WWASSERT(PTheGameData != nullptr);
 	if (I_Am_Only_Client() &&
 		 The_Game()->IsIntermission.Is_True() &&
 		 The_Game()->Get_Intermission_Time_Remaining() < WWMATH_EPSILON)
@@ -1322,7 +1324,7 @@ bool cNetwork::Client_Think(void)
 		CoopDebugLog::Log("cNetwork::Client_Think cClientHintManager::Think done");
 	}
 
-	WWASSERT(Receiver!= NULL);
+	WWASSERT(Receiver!= nullptr);
 	if (log_coop_client_think) {
 		CoopDebugLog::Log("cNetwork::Client_Think Receiver::Client_Update_Dynamic_Objects start receiver=%p", Receiver);
 	}
@@ -1348,8 +1350,8 @@ bool cNetwork::Client_Think(void)
 	if (!HaveDoneMotdDialog) {
 		if (I_Am_Only_Client()) {
 			if ((DlgMsgBox::Get_Current_Count() == 0)
-					&& GameModeManager::Find("Combat") != NULL && GameModeManager::Find("Combat")->Is_Active()
-					&& The_Game() != NULL && ::u_strlen(The_Game()->Get_Motd()) > 0) {
+					&& GameModeManager::Find("Combat") != nullptr && GameModeManager::Find("Combat")->Is_Active()
+					&& The_Game() != nullptr && ::u_strlen(The_Game()->Get_Motd()) > 0) {
 
 				DlgMsgBox::DoDialog(TRANSLATE (IDS_MENU_MOTD), The_Game()->Get_Motd());
 				HaveDoneMotdDialog = true;
@@ -1372,7 +1374,7 @@ VisTableClass * cNetwork::Peek_Temp_Vis_Table(void)
 {
 	bool alloc_new_table = false;
 
-	if (VisTable == NULL) {
+	if (VisTable == nullptr) {
 		alloc_new_table = true;
 	} else if (VisTable->Get_Bit_Count() != COMBAT_SCENE->Get_Vis_Table_Size()) {
 		alloc_new_table = true;
@@ -1383,7 +1385,7 @@ VisTableClass * cNetwork::Peek_Temp_Vis_Table(void)
 		VisTable = new VisTableClass(COMBAT_SCENE->Get_Vis_Table_Size(), 0);
 	}
 
-	WWASSERT(VisTable != NULL);
+	WWASSERT(VisTable != nullptr);
 	VisTable->Reset_All();
 	return VisTable;
 }
@@ -1391,7 +1393,7 @@ VisTableClass * cNetwork::Peek_Temp_Vis_Table(void)
 //-----------------------------------------------------------------------------
 void cNetwork::Hibernation_Think(void)
 {
-	if (COMBAT_SCENE != NULL) {
+	if (COMBAT_SCENE != nullptr) {
 
 		//
 		// The server can't let any player go into hibernation or updates will cease to be sent for that player.
@@ -1404,7 +1406,7 @@ void cNetwork::Hibernation_Think(void)
 
 				PhysicalGameObj * p_phys_go = p_objnode->Data()->As_PhysicalGameObj();
 
-				if (p_phys_go != NULL) {
+				if (p_phys_go != nullptr) {
 					p_phys_go->Reset_Hibernating();
 				}
 			}
@@ -1412,7 +1414,7 @@ void cNetwork::Hibernation_Think(void)
 
 
 			VisTableClass * p_vis_table = Peek_Temp_Vis_Table();
-			WWASSERT(p_vis_table != NULL);
+			WWASSERT(p_vis_table != nullptr);
 			DynamicVectorClass<Vector3> player_positions;
 
 			//
@@ -1423,10 +1425,10 @@ void cNetwork::Hibernation_Think(void)
 				p_smart_objnode;
 				p_smart_objnode = p_smart_objnode->Next()) {
 
-				WWASSERT(p_smart_objnode->Data() != NULL);
+				WWASSERT(p_smart_objnode->Data() != nullptr);
 				SoldierGameObj * p_soldier = p_smart_objnode->Data()->As_SoldierGameObj();
 
-				if (p_soldier != NULL && p_soldier->Has_Player()) {
+				if (p_soldier != nullptr && p_soldier->Has_Player()) {
 
 					Vector3 player_pos;
 					p_soldier->Get_Position(&player_pos);
@@ -1437,8 +1439,8 @@ void cNetwork::Hibernation_Think(void)
 
 					VisTableClass * p_player_pvs = COMBAT_SCENE->Get_Vis_Table(player_pos);
 
-					if (p_player_pvs == NULL) {
-						p_vis_table = NULL;
+					if (p_player_pvs == nullptr) {
+						p_vis_table = nullptr;
 						break;
 					} else {
 						p_vis_table->Merge(*p_player_pvs);
@@ -1461,10 +1463,10 @@ void cNetwork::Hibernation_Think(void)
 				p_objnode = p_objnode->Next()) {
 
 				PhysicalGameObj * p_phys_go = p_objnode->Data()->As_PhysicalGameObj();
-				if (p_phys_go != NULL) {
+				if (p_phys_go != nullptr) {
 					PhysClass * p_phys_obj = p_phys_go->Peek_Physical_Object();
-					if (p_phys_obj != NULL &&
-						(p_vis_table == NULL || p_vis_table->Get_Bit(p_phys_obj->Get_Vis_Object_ID()))) {
+					if (p_phys_obj != nullptr &&
+						(p_vis_table == nullptr || p_vis_table->Get_Bit(p_phys_obj->Get_Vis_Object_ID()))) {
 
 						// Only if within 300m of a relevant player.
 						#define		MIN_HIB_DISTANCE		300
@@ -1516,7 +1518,7 @@ bool cNetwork::Server_Think(void)
    //
 	// Update clients about dynamic & static objects
 	//
-	WWASSERT(Receiver!= NULL);
+	WWASSERT(Receiver!= nullptr);
 
 	//
 	// TSS121101
@@ -1562,13 +1564,13 @@ void cNetwork::Delete_Player_Objects(int client_id)
    //
 	SLNode<BaseGameObj> * objnode;
 	for (objnode = GameObjManager::Get_Game_Obj_List()->Head(); objnode; objnode = objnode->Next()) {
-		WWASSERT(objnode->Data() != NULL);
+		WWASSERT(objnode->Data() != nullptr);
       PhysicalGameObj * p_phys_obj = objnode->Data()->As_PhysicalGameObj();
-		if (p_phys_obj != NULL) {
+		if (p_phys_obj != nullptr) {
 
 		   SmartGameObj * p_smart_obj = p_phys_obj->As_SmartGameObj();
 
-         if (p_smart_obj != NULL &&
+         if (p_smart_obj != nullptr &&
             (p_smart_obj->Get_Control_Owner() == client_id))
 			{
 				//
@@ -1601,7 +1603,7 @@ void cNetwork::Cleanup_After_Client(int client_id)
 	// We need to special-case these new delete notifications or delete_pending
 	// will clear them first.
 	//
-	WWASSERT(Receiver!= NULL);
+	WWASSERT(Receiver!= nullptr);
 	Receiver->Server_Send_Delete_Notifications();
 
 	NetworkObjectMgrClass::Restore_Dirty_Bits(client_id);
@@ -1622,7 +1624,7 @@ void cNetwork::Remove_Player(int player_id)
 	// We can't remove the player structure because we wish to retain
 	// it for scoring etc
 	//
-	if (p_player != NULL) {
+	if (p_player != nullptr) {
 		p_player->Increment_Total_Time();
 		p_player->Set_Is_Active(false);
 
@@ -1631,7 +1633,7 @@ void cNetwork::Remove_Player(int player_id)
 		ConsoleBox.Print_Maybe("Player %s left the game\n", str.Peek_Buffer());
 	}
 
-	if (p_player != NULL && IS_MULTIPLAY) {
+	if (p_player != nullptr && IS_MULTIPLAY) {
 		Test_For_Team_Defaulting(p_player);
 	}
 }
@@ -1646,16 +1648,16 @@ void cNetwork::Test_For_Team_Defaulting(cPlayer * p_player)
 
 	WWDEBUG_SAY(("cNetwork::Test_For_Team_Defaulting\n"));
 
-	WWASSERT(p_player != NULL);
+	WWASSERT(p_player != nullptr);
 	WWASSERT(IS_MULTIPLAY);
 
 	int count_nod = cPlayerManager::Tally_Team_Size(PLAYERTYPE_NOD);
 	int count_gdi = cPlayerManager::Tally_Team_Size(PLAYERTYPE_GDI);
 
 	cTeam * p_team_nod = cTeamManager::Find_Team(PLAYERTYPE_NOD);
-	WWASSERT(p_team_nod != NULL);
+	WWASSERT(p_team_nod != nullptr);
 	cTeam * p_team_gdi = cTeamManager::Find_Team(PLAYERTYPE_GDI);
-	WWASSERT(p_team_gdi != NULL);
+	WWASSERT(p_team_gdi != nullptr);
 
 	float score_nod = p_team_nod->Get_Score();
 	float score_gdi = p_team_gdi->Get_Score();

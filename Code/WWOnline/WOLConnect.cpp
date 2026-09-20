@@ -70,7 +70,7 @@ RefPtr<ServerListWait> ServerListWait::Create(const RefPtr<Session>& session)
 	if (!session.IsValid())
 		{
 		WWDEBUG_SAY(("WOLERROR: WWOnline session not instantiated\n"));
-		return NULL;
+		return nullptr;
 		}
 
 	return new ServerListWait(session);
@@ -118,7 +118,7 @@ ServerListWait::ServerListWait(const RefPtr<Session>& session) :
 
 ServerListWait::~ServerListWait()
 	{
-	WWDEBUG_SAY(("WOL: ServerListWait End '%S'\n", mEndText));
+	WWDEBUG_SAY(("WOL: ServerListWait End '%S'\n", mEndText.Peek_Buffer()));
 	}
 
 
@@ -243,7 +243,7 @@ RefPtr<DisconnectWait> DisconnectWait::Create(const RefPtr<Session>& session)
 	if (!session.IsValid())
 		{
 		WWDEBUG_SAY(("WOLERROR: WWOnline session not instantiated\n"));
-		return NULL;
+		return nullptr;
 		}
 
 	return new DisconnectWait(session);
@@ -291,7 +291,7 @@ DisconnectWait::DisconnectWait(const RefPtr<Session>& session) :
 
 DisconnectWait::~DisconnectWait()
 	{
-	WWDEBUG_SAY(("WOL: DisconnectWait End '%S'\n", mEndText));
+	WWDEBUG_SAY(("WOL: DisconnectWait End '%S'\n", mEndText.Peek_Buffer()));
 	}
 
 
@@ -319,7 +319,7 @@ void DisconnectWait::WaitBeginning(void)
 	mSession->AddObserver(*static_cast<Observer<ServerError> *>(this));
 	mSession->AddObserver(*static_cast<Observer<ConnectionStatus> *>(this));
 
-	WWASSERT((mSession->GetChatObject() != NULL) && "DisconnectWait");
+	WWASSERT((mSession->GetChatObject() != nullptr) && "DisconnectWait");
 	HRESULT hr = mSession->GetChatObject()->RequestLogout();
 
 	if (SUCCEEDED(hr))
@@ -447,7 +447,7 @@ RefPtr<ConnectWait> ConnectWait::Create(const RefPtr<Session>& session,
 
 	if (!session.IsValid() || !server.IsValid() || !login.IsValid())
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	return new ConnectWait(session, server, login);
@@ -497,7 +497,7 @@ ConnectWait::ConnectWait(const RefPtr<Session>& session, const RefPtr<ServerData
 
 ConnectWait::~ConnectWait()
 	{
-	WWDEBUG_SAY(("WOL: ConnectWait End %S\n", mEndText));
+	WWDEBUG_SAY(("WOL: ConnectWait End %S\n", mEndText.Peek_Buffer()));
 	}
 
 
@@ -532,7 +532,7 @@ void ConnectWait::WaitBeginning(void)
 	u_wstomb((char*)server.login, (const unichar_t*)mLogin->GetNickname(), sizeof(server.login));
 	u_wstomb((char*)server.password, (const unichar_t*)mLogin->GetPassword(), sizeof(server.password));
 
-	WWASSERT((mSession->GetChatObject() != NULL) && "ConnectWait");
+	WWASSERT((mSession->GetChatObject() != nullptr) && "ConnectWait");
 	HRESULT hr = mSession->GetChatObject()->RequestConnection(&server, 20, !mLogin->IsPasswordEncrypted());
 
 	if (SUCCEEDED(hr))
@@ -653,7 +653,7 @@ RefPtr<ChannelListWait> ChannelListWait::Create(const RefPtr<Session>& session, 
 
 	if (!session.IsValid())
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	return new ChannelListWait(session, type);
@@ -702,7 +702,7 @@ ChannelListWait::ChannelListWait(const RefPtr<Session>& session, int type) :
 
 ChannelListWait::~ChannelListWait()
 	{
-	WWDEBUG_SAY(("WOL: ChannelListWait End %S\n", mEndText));
+	WWDEBUG_SAY(("WOL: ChannelListWait End %S\n", mEndText.Peek_Buffer()));
 	}
 
 
@@ -842,7 +842,7 @@ RefPtr<LeaveChannelWait> LeaveChannelWait::Create(const RefPtr<Session>& session
 
 	if (!session.IsValid())
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	return new LeaveChannelWait(session);
@@ -889,7 +889,7 @@ LeaveChannelWait::LeaveChannelWait(const RefPtr<Session>& session) :
 
 LeaveChannelWait::~LeaveChannelWait()
 	{
-	WWDEBUG_SAY(("WOL: LeaveChannelWait End %S\n", mEndText));
+	WWDEBUG_SAY(("WOL: LeaveChannelWait End %S\n", mEndText.Peek_Buffer()));
 	}
 
 
@@ -1053,7 +1053,7 @@ RefPtr<JoinChannelWait> JoinChannelWait::Create(const RefPtr<Session>& session,
 
 	if (!session.IsValid())
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	return new JoinChannelWait(session, channel, password);
@@ -1079,9 +1079,9 @@ RefPtr<JoinChannelWait> JoinChannelWait::Create(const RefPtr<Session>& session,
 	WWASSERT(session.IsValid() && "JoinChannelWait");
 	WWASSERT(channelName && "JoinChannelWait");
 
-	if (!session.IsValid() || (channelName == NULL))
+	if (!session.IsValid() || (channelName == nullptr))
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	return new JoinChannelWait(session, channelName, password, type);
@@ -1160,7 +1160,7 @@ JoinChannelWait::JoinChannelWait(const RefPtr<Session>& session,
 
 JoinChannelWait::~JoinChannelWait()
 	{
-	WWDEBUG_SAY(("WOL: JoinChannelWait End %S\n", mEndText));
+	WWDEBUG_SAY(("WOL: JoinChannelWait End %S\n", mEndText.Peek_Buffer()));
 	}
 
 
@@ -1328,7 +1328,7 @@ RefPtr<CreateChannelWait> CreateChannelWait::Create(const RefPtr<Session>& sessi
 
 	if (!session.IsValid())
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	return new CreateChannelWait(session, channel, password);
@@ -1379,7 +1379,7 @@ CreateChannelWait::CreateChannelWait(const RefPtr<Session>& session,
 
 CreateChannelWait::~CreateChannelWait()
 	{
-	WWDEBUG_SAY(("WOL: CreateChannelWait End %S\n", mEndText));
+	WWDEBUG_SAY(("WOL: CreateChannelWait End %S\n", mEndText.Peek_Buffer()));
 	}
 
 
@@ -1412,7 +1412,7 @@ void CreateChannelWait::WaitBeginning(void)
 	WOL::Channel& channel = mChannel->GetData();
 	u_wstomb((char*)channel.key, (const unichar_t*)mPassword, sizeof(channel.key));
 
-	WWASSERT((mSession->GetChatObject() != NULL) && "CreateChannelWait");
+	WWASSERT((mSession->GetChatObject() != nullptr) && "CreateChannelWait");
 	HRESULT hr = mSession->GetChatObject()->RequestChannelCreate(&channel);
 
 	if (FAILED(hr))
@@ -1531,7 +1531,7 @@ RefPtr<UserListWait> UserListWait::Create(const RefPtr<Session>& session)
 
 	if (!session.IsValid())
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	return new UserListWait(session);
@@ -1601,7 +1601,7 @@ UserListWait::UserListWait(const RefPtr<Session>& session) :
 
 UserListWait::~UserListWait()
 	{
-	WWDEBUG_SAY(("WOL: UserListWait End %S\n", mEndText));
+	WWDEBUG_SAY(("WOL: UserListWait End %S\n", mEndText.Peek_Buffer()));
 	}
 
 
@@ -1676,9 +1676,9 @@ RefPtr<GetUserWait> GetUserWait::Create(const RefPtr<Session>& session,
 	WWASSERT(session.IsValid() && "GetUserWait");
 	WWASSERT(userName && "GetUserWait");
 
-	if (!session.IsValid() || (userName == NULL))
+	if (!session.IsValid() || (userName == nullptr))
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	return new GetUserWait(session, userName);
@@ -1726,7 +1726,7 @@ GetUserWait::GetUserWait(const RefPtr<Session>& session, const unichar_t* userNa
 
 GetUserWait::~GetUserWait()
 	{
-	WWDEBUG_SAY(("WOL: GetUserWait End %S\n", mEndText));
+	WWDEBUG_SAY(("WOL: GetUserWait End %S\n", mEndText.Peek_Buffer()));
 	}
 
 
@@ -1825,9 +1825,9 @@ RefPtr<LocateUserWait> LocateUserWait::Create(const RefPtr<Session>& session,
 	WWASSERT(session.IsValid() && "LocateUserWait");
 	WWASSERT(userName && "LocateUserWait");
 
-	if (!session.IsValid() || (userName == NULL))
+	if (!session.IsValid() || (userName == nullptr))
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	return new LocateUserWait(session, userName);
@@ -1876,7 +1876,7 @@ LocateUserWait::LocateUserWait(const RefPtr<Session>& session, const unichar_t* 
 
 LocateUserWait::~LocateUserWait()
 	{
-	WWDEBUG_SAY(("WOL: LocateUserWait End '%S'\n", mEndText));
+	WWDEBUG_SAY(("WOL: LocateUserWait End '%S'\n", mEndText.Peek_Buffer()));
 	}
 
 
@@ -1990,7 +1990,7 @@ RefPtr<SendMsgWait> SendMsgWait::Create(const RefPtr<Session>& session, ChatMess
 
 	if (!session.IsValid())
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	return new SendMsgWait(session, message);
@@ -2039,7 +2039,7 @@ SendMsgWait::SendMsgWait(const RefPtr<Session>& session, ChatMessage& message) :
 
 SendMsgWait::~SendMsgWait()
 	{
-	WWDEBUG_SAY(("WOL: SendMsgWait End %S\n", mEndText));
+	WWDEBUG_SAY(("WOL: SendMsgWait End %S\n", mEndText.Peek_Buffer()));
 	}
 
 

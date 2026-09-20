@@ -47,7 +47,7 @@ int		BufferedFileClass::_DesiredBufferSize	=	1024*16;
  *=============================================================================================*/
 BufferedFileClass::BufferedFileClass(void) :
 	RawFileClass(),
-	Buffer( NULL ),
+	Buffer( nullptr ),
 	BufferSize( 0 ),
 	BufferAvailable( 0 ),
 	BufferOffset( 0 )
@@ -59,7 +59,7 @@ BufferedFileClass::BufferedFileClass(void) :
  *=============================================================================================*/
 BufferedFileClass::BufferedFileClass(char const * filename) :
 	RawFileClass( filename ),
-	Buffer( NULL ),
+	Buffer( nullptr ),
 	BufferSize( 0 ),
 	BufferAvailable( 0 ),
 	BufferOffset( 0 )
@@ -93,10 +93,10 @@ void BufferedFileClass::Close(void)
  *    the file. This condition can result in fewer bytes being read than requested. Determine  *
  *    this by examining the return value.                                                      *
  *                                                                                             *
- * INPUT:   buffer   -- Pointer to the buffer to read data into. If NULL is passed, no read    *
+ * INPUT:   buffer   -- Pointer to the buffer to read data into. If nullptr is passed, no read    *
  *                      is performed.                                                          *
  *                                                                                             *
- *          size     -- The number of bytes to read. If NULL is passed, then no read is        *
+ *          size     -- The number of bytes to read. If nullptr is passed, then no read is        *
  *                      performed.                                                             *
  *                                                                                             *
  * OUTPUT:  Returns with the number of bytes read into the buffer. If this number is less      *
@@ -134,11 +134,11 @@ int BufferedFileClass::Read(void * buffer, int size)
 	int desired_buffer_size = _DesiredBufferSize;
 
 	// If we need more than the buffer will hold, just read it
-	int amount = BufferSize;
-	if ( amount == 0 ) {
-		amount = desired_buffer_size;
+	int buffer_size = BufferSize;
+	if ( buffer_size == 0 ) {
+		buffer_size = desired_buffer_size;
 	}
-	if ( size > amount ) {
+	if ( size > buffer_size ) {
 		return BASECLASS::Read( buffer, size ) + read;
 	}
 
@@ -158,11 +158,11 @@ int BufferedFileClass::Read(void * buffer, int size)
 
 	// If there is anything in the buffer, copy it in.
 	if ( BufferAvailable > 0 ) {
-		int amount = std::min( size, BufferAvailable );
-		::memcpy( buffer, &Buffer[BufferOffset], amount );
-		BufferAvailable -= amount;
-		BufferOffset += amount;
-		read += amount;
+		int buffered = std::min( size, BufferAvailable );
+		::memcpy( buffer, &Buffer[BufferOffset], buffered );
+		BufferAvailable -= buffered;
+		BufferOffset += buffered;
+		read += buffered;
 	}
 
 	return read;
@@ -243,9 +243,9 @@ int BufferedFileClass::Seek(int pos, int dir)
 */
 void	BufferedFileClass::Reset_Buffer( void )
 {
-	if ( Buffer != NULL ) {
+	if ( Buffer != nullptr ) {
 		delete [] Buffer;
-		Buffer = NULL;
+		Buffer = nullptr;
 		BufferSize = 0;
 		BufferAvailable = 0;
 		BufferOffset = 0;

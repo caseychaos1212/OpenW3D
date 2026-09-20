@@ -176,7 +176,7 @@ void ConsoleModeClass::Init(void)
 			/*
 			** Set the text in the console title bar.
 			*/
-			Set_Title(NULL, NULL);
+			Set_Title(nullptr, nullptr);
 
 			/*
 			** Get an HWND for the console window.
@@ -322,7 +322,7 @@ void ConsoleModeClass::Print(char const * string, ...)
 		va_list va;
 
 		va_start(va, string);
-		vsprintf(&buffer[0], string, va);
+		u_vsnprintf_n(buffer, sizeof(buffer), string, va);
 		va_end(va);
 
 		/*
@@ -358,7 +358,7 @@ void ConsoleModeClass::Print_Maybe(char const * string, ...)
 		char buffer[8192];
 		va_list va;
 		va_start(va, string);
-		vsprintf(&buffer[0], string, va);
+		u_vsnprintf_n(buffer, sizeof(buffer), string, va);
 		va_end(va);
 		Log_To_Disk(buffer);
 
@@ -391,7 +391,7 @@ void ConsoleModeClass::Print_Maybe(char const * string, ...)
  *=============================================================================================*/
 void ConsoleModeClass::Static_Print_Maybe(char const * string, ...)
 {
-	ConsoleBox.Print_Maybe(string);
+	ConsoleBox.Print_Maybe("%s", string);
 }
 
 
@@ -420,7 +420,7 @@ void ConsoleModeClass::cprintf(char const * string, ...)
 
 		buffer[sizeof(buffer)-1] = 0;
 		va_start(va, string);
-		vsnprintf(&buffer[0], sizeof(buffer)-1, string, va);
+		u_vsnprintf_n(buffer, sizeof(buffer)-1, string, va);
 		va_end(va);
 
 		/*
@@ -508,9 +508,9 @@ void ConsoleModeClass::Log_To_Disk(const char *string)
 	if (ConsoleOutputHandle != INVALID_HANDLE_VALUE) {
 		if (ServerSettingsClass::Get_Disk_Log_Size() > 0) {
    		FILE *log_file = fopen(Get_Log_File_Name(), "at");
-   		if (log_file != NULL) {
+   		if (log_file != nullptr) {
 				char timestr[256] = "?";
-				GetTimeFormatA(LOCALE_SYSTEM_DEFAULT, TIME_FORCE24HOURFORMAT, NULL, "'['HH':'mm':'ss'] '", timestr, 255);
+				GetTimeFormatA(LOCALE_SYSTEM_DEFAULT, TIME_FORCE24HOURFORMAT, nullptr, "'['HH':'mm':'ss'] '", timestr, 255);
 			   fwrite(timestr, 1, strlen(timestr), log_file);
 			   fwrite(string, 1, strlen(string), log_file);
 			   fclose(log_file);
@@ -539,7 +539,7 @@ void ConsoleModeClass::Log_To_Disk(const char *string)
 void ConsoleModeClass::Think(void)
 {
 	static char string[256] = ">";
-	char key = 0;
+	int key = 0;
 	static char suggestion[256] = "";
 	static char last_suggestion[256] = "";
 	static char help[256] = "";
@@ -673,7 +673,7 @@ void ConsoleModeClass::Think(void)
 						Handle_Profile_Key(key);
 					} else {
 						if (key == 32 || isgraph(key)) {
-							string[Pos++] = key;
+							string[Pos++] = char(key);
 							last_suggestion[0] = 0;
 						}
 					}
@@ -923,7 +923,7 @@ void ConsoleModeClass::Update_Profile(StringClass profile_string)
 			/*
 			** Print out the profile info.
 			*/
-			Print(str);
+			Print("%s", str);
 
 			/*
 			** Move the cursor back up to the original position.

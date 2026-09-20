@@ -49,7 +49,7 @@ static StringClass VersionWarningString;
 // DriverVersionWarning dialog
 
 
-DriverVersionWarning::DriverVersionWarning(CWnd* pParent /*=NULL*/)
+DriverVersionWarning::DriverVersionWarning(CWnd* pParent /*=nullptr*/)
 	: CDialog(DriverVersionWarning::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(DriverVersionWarning)
@@ -111,7 +111,7 @@ static void Get_Driver_Version_Warning_String(StringClass& str, DX8Caps& caps)
 	format_string += "\n";
 
 	str.Format( format_string,
-		driver_name,
+		driver_name.Peek_Buffer(),
 		caps.Get_Driver_Build_Version()/100,
 		caps.Get_Driver_Build_Version()%100 );
 
@@ -153,9 +153,9 @@ void CheckDriverVersion()
 	int disabled = ini.Get_Int(W3D_SECTION_RENDER, "DriverVersionCheckDisabled", 0);
 	if (disabled>=87) return;
 
-	IDirect3D9* d3d=NULL;
+	IDirect3D9* d3d=nullptr;
 	D3DCAPS9 tmp_caps;
-	const D3DCAPS9* d3dcaps=NULL;
+	const D3DCAPS9* d3dcaps=nullptr;
 	D3DADAPTER_IDENTIFIER9 adapter_id;
 
 	VideoConfigDialogClass* video=VideoConfigDialogClass::Get_Instance();
@@ -185,7 +185,7 @@ void CheckDriverVersion()
 		int adapter_count = d3d->GetAdapterCount();
 		for (int adapter_index=0; adapter_index<adapter_count; adapter_index++) {
 			D3DADAPTER_IDENTIFIER9 id;
-			::ZeroMemory(&id, sizeof(D3DADAPTER_IDENTIFIER9));
+			memset(&id, 0, sizeof(D3DADAPTER_IDENTIFIER9));
 			HRESULT res = d3d->GetAdapterIdentifier(adapter_index,0/*D3DENUM_WHQL_LEVEL*/,&id);
 			// If device ok, check if it matches the currently set adapter name
 			if (res == D3D_OK) {
@@ -205,7 +205,7 @@ void CheckDriverVersion()
 			return;
 		}
 
-		::ZeroMemory(&adapter_id, sizeof(D3DADAPTER_IDENTIFIER9));
+		memset(&adapter_id, 0, sizeof(D3DADAPTER_IDENTIFIER9));
 		if (FAILED( d3d->GetAdapterIdentifier(
 			current_adapter_index,
 			0/*D3DENUM_WHQL_LEVEL*/,
@@ -220,7 +220,7 @@ void CheckDriverVersion()
 
 	DX8Caps caps(d3d,*d3dcaps,WW3D_FORMAT_UNKNOWN,adapter_id);
 	d3d->Release();
-	d3d=NULL;
+	d3d=nullptr;
 
 	// Beta message - remember to remove!
 /*	bool unknown_device=false;
@@ -302,10 +302,10 @@ void DriverVersionWarning::OnDisableDriverVersionDialogCheckbox()
 {
 	// TODO: Add your control notification handler code here
 
-	int is_disabled = SendDlgItemMessage (IDC_DISABLE_DRIVER_VERSION_DIALOG_CHECKBOX, BM_GETCHECK);
+	LRESULT is_disabled = SendDlgItemMessage (IDC_DISABLE_DRIVER_VERSION_DIALOG_CHECKBOX, BM_GETCHECK);
 	INIClass ini(W3D_CONF_FILE);
 
-	ini.Put_Int(W3D_SECTION_RENDER, "DriverVersionCheckDisabled", is_disabled ? 87 : 0);
+	ini.Put_Int(W3D_SECTION_RENDER, "DriverVersionCheckDisabled", is_disabled != 0 ? 87 : 0);
 	OpenW3D::Save_Config(ini);
 
 }

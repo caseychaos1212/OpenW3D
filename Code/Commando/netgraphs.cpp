@@ -68,18 +68,18 @@
 void cNetwork::Packet_Graph(Render2DTextClass * renderer, cMsgStatList * p_stat_list,
 	int watch_type, LPCSTR label)
 {
-	WWASSERT(renderer		!= NULL);
-	WWASSERT(p_stat_list	!= NULL);
-	WWASSERT(label	!= NULL);
+	WWASSERT(renderer		!= nullptr);
+	WWASSERT(p_stat_list	!= nullptr);
+	WWASSERT(label	!= nullptr);
 
-	GraphingY = cMathUtil::Round(GraphingY);
+	GraphingY = WWMath::Round(GraphingY);
 
 	//
 	// Draw scaling bar
 	//
 	const float bar_length			= 200.0f;
-	const float bar_height			= cMathUtil::Round(renderer->Peek_Font()->Char_Height());
-	const float y_increment			= cMathUtil::Round(bar_height * 1.25f);
+	const float bar_height			= WWMath::Round(float(renderer->Peek_Font()->Char_Height()));
+	const float y_increment			= WWMath::Round(bar_height * 1.25f);
 
 	renderer->Draw_Block(RectClass(0, GraphingY, bar_length, GraphingY + bar_height), COLOR_BLACK);
 
@@ -146,13 +146,13 @@ void cNetwork::Packet_Graph(Render2DTextClass * renderer, cMsgStatList * p_stat_
 //-----------------------------------------------------------------------------
 void cNetwork::Watch_Packets(Render2DTextClass * renderer)
 {
-	WWASSERT(renderer		!= NULL);
+	WWASSERT(renderer		!= nullptr);
 
 	char					text[100]		= "";
-	cMsgStatList *		p_stat_list		= NULL;
+	cMsgStatList *		p_stat_list		= nullptr;
 	int					watch_type		= -1;
 
-	if (cDevOptions::PacketsSentServer.Is_True() && PServerStatListGroup != NULL) {
+	if (cDevOptions::PacketsSentServer.Is_True() && PServerStatListGroup != nullptr) {
 		sprintf(text, "PacketsSentServer");
 		p_stat_list = PServerStatListGroup->Get_Stat_List(cMsgStatListGroup::ALL_LISTS);
 		watch_type = 0;
@@ -164,7 +164,7 @@ void cNetwork::Watch_Packets(Render2DTextClass * renderer)
 		watch_type = 0;
 	}
 
-	if (cDevOptions::PacketsRecdServer.Is_True() && PServerStatListGroup != NULL) {
+	if (cDevOptions::PacketsRecdServer.Is_True() && PServerStatListGroup != nullptr) {
 		sprintf(text, "PacketsRecdServer");
 		p_stat_list = PServerStatListGroup->Get_Stat_List(cMsgStatListGroup::ALL_LISTS);
 		watch_type = 2;
@@ -176,7 +176,7 @@ void cNetwork::Watch_Packets(Render2DTextClass * renderer)
 		watch_type = 2;
 	}
 
-	if (cDevOptions::AvgSizePacketsSentServer.Is_True() && PServerStatListGroup != NULL) {
+	if (cDevOptions::AvgSizePacketsSentServer.Is_True() && PServerStatListGroup != nullptr) {
 		sprintf(text, "AvgSizePacketsSentServer");
 		p_stat_list = PServerStatListGroup->Get_Stat_List(cMsgStatListGroup::ALL_LISTS);
 		watch_type = 4;
@@ -188,7 +188,7 @@ void cNetwork::Watch_Packets(Render2DTextClass * renderer)
 		watch_type = 4;
 	}
 
-	if (cDevOptions::AvgSizePacketsRecdServer.Is_True() && PServerStatListGroup != NULL) {
+	if (cDevOptions::AvgSizePacketsRecdServer.Is_True() && PServerStatListGroup != nullptr) {
 		sprintf(text, "AvgSizePacketsRecdServer");
 		p_stat_list = PServerStatListGroup->Get_Stat_List(cMsgStatListGroup::ALL_LISTS);
 		watch_type = 5;
@@ -200,7 +200,7 @@ void cNetwork::Watch_Packets(Render2DTextClass * renderer)
 		watch_type = 5;
 	}
 
-	if (cDevOptions::BytesSentServer.Is_True() && PServerStatListGroup != NULL) {
+	if (cDevOptions::BytesSentServer.Is_True() && PServerStatListGroup != nullptr) {
 		sprintf(text, "BytesSentServer");
 		p_stat_list = PServerStatListGroup->Get_Stat_List(cMsgStatListGroup::ALL_LISTS);
 		watch_type = 1;
@@ -212,7 +212,7 @@ void cNetwork::Watch_Packets(Render2DTextClass * renderer)
 		watch_type = 1;
 	}
 
-	if (cDevOptions::BytesRecdServer.Is_True() && PServerStatListGroup != NULL) {
+	if (cDevOptions::BytesRecdServer.Is_True() && PServerStatListGroup != nullptr) {
 		sprintf(text, "BytesRecdServer");
 		p_stat_list = PServerStatListGroup->Get_Stat_List(cMsgStatListGroup::ALL_LISTS);
 		watch_type = 3;
@@ -227,73 +227,73 @@ void cNetwork::Watch_Packets(Render2DTextClass * renderer)
 
 
 
-	if (cDevOptions::WwnetPacketsSentServer.Is_True() && PServerConnection != NULL) {
+	if (cDevOptions::WwnetPacketsSentServer.Is_True() && PServerConnection != nullptr) {
 		sprintf(text, "WwnetPacketsSentServer");
 		p_stat_list = PServerConnection->Get_Stat_List();
 		watch_type = 0;
 	}
 
-	if (cDevOptions::WwnetPacketsSentClient.Is_True() && PClientConnection != NULL) {
+	if (cDevOptions::WwnetPacketsSentClient.Is_True() && PClientConnection != nullptr) {
 		sprintf(text, "WwnetPacketsSentClient");
 		p_stat_list = PClientConnection->Get_Stat_List();
 		watch_type = 0;
 	}
 
-	if (cDevOptions::WwnetPacketsRecdServer.Is_True() && PServerConnection != NULL) {
+	if (cDevOptions::WwnetPacketsRecdServer.Is_True() && PServerConnection != nullptr) {
 		sprintf(text, "WwnetPacketsRecdServer");
 		p_stat_list = PServerConnection->Get_Stat_List();
 		watch_type = 2;
 	}
 
-	if (cDevOptions::WwnetPacketsRecdClient.Is_True() && PClientConnection != NULL) {
+	if (cDevOptions::WwnetPacketsRecdClient.Is_True() && PClientConnection != nullptr) {
 		sprintf(text, "WwnetPacketsRecdClient");
 		p_stat_list = PClientConnection->Get_Stat_List();
 		watch_type = 2;
 	}
 
-	if (cDevOptions::WwnetAvgSizePacketsSentServer.Is_True() && PServerConnection != NULL) {
+	if (cDevOptions::WwnetAvgSizePacketsSentServer.Is_True() && PServerConnection != nullptr) {
 		sprintf(text, "WwnetAvgSizePacketsSentServer");
 		p_stat_list = PServerConnection->Get_Stat_List();
 		watch_type = 4;
 	}
 
-	if (cDevOptions::WwnetAvgSizePacketsSentClient.Is_True() && PClientConnection != NULL) {
+	if (cDevOptions::WwnetAvgSizePacketsSentClient.Is_True() && PClientConnection != nullptr) {
 		sprintf(text, "WwnetAvgSizePacketsSentClient");
 		p_stat_list = PClientConnection->Get_Stat_List();
 		watch_type = 4;
 	}
 
-	if (cDevOptions::WwnetAvgSizePacketsRecdServer.Is_True() && PServerConnection != NULL) {
+	if (cDevOptions::WwnetAvgSizePacketsRecdServer.Is_True() && PServerConnection != nullptr) {
 		sprintf(text, "WwnetAvgSizePacketsRecdServer");
 		p_stat_list = PServerConnection->Get_Stat_List();
 		watch_type = 5;
 	}
 
-	if (cDevOptions::WwnetAvgSizePacketsRecdClient.Is_True() && PClientConnection != NULL) {
+	if (cDevOptions::WwnetAvgSizePacketsRecdClient.Is_True() && PClientConnection != nullptr) {
 		sprintf(text, "WwnetAvgSizePacketsRecdClient");
 		p_stat_list = PClientConnection->Get_Stat_List();
 		watch_type = 5;
 	}
 
-	if (cDevOptions::WwnetBytesSentServer.Is_True() && PServerConnection != NULL) {
+	if (cDevOptions::WwnetBytesSentServer.Is_True() && PServerConnection != nullptr) {
 		sprintf(text, "WwnetBytesSentServer");
 		p_stat_list = PServerConnection->Get_Stat_List();
 		watch_type = 1;
 	}
 
-	if (cDevOptions::WwnetBytesSentClient.Is_True() && PClientConnection != NULL) {
+	if (cDevOptions::WwnetBytesSentClient.Is_True() && PClientConnection != nullptr) {
 		sprintf(text, "WwnetBytesSentClient");
 		p_stat_list = PClientConnection->Get_Stat_List();
 		watch_type = 1;
 	}
 
-	if (cDevOptions::WwnetBytesRecdServer.Is_True() && PServerConnection != NULL) {
+	if (cDevOptions::WwnetBytesRecdServer.Is_True() && PServerConnection != nullptr) {
 		sprintf(text, "WwnetBytesRecdServer");
 		p_stat_list = PServerConnection->Get_Stat_List();
 		watch_type = 3;
 	}
 
-	if (cDevOptions::WwnetBytesRecdClient.Is_True() && PClientConnection != NULL) {
+	if (cDevOptions::WwnetBytesRecdClient.Is_True() && PClientConnection != nullptr) {
 		sprintf(text, "WwnetBytesRecdClient");
 		p_stat_list = PClientConnection->Get_Stat_List();
 		watch_type = 3;
@@ -301,7 +301,7 @@ void cNetwork::Watch_Packets(Render2DTextClass * renderer)
 
 
 
-	if (p_stat_list != NULL)
+	if (p_stat_list != nullptr)
 	{
 		WWASSERT(watch_type != -1);
 
@@ -315,16 +315,16 @@ void cNetwork::Bandwidth_Graph(Render2DTextClass * renderer,
 	float packetloss_pc, const int bar_color, bool is_send,
 	float threshold_priority)
 {
-	WWASSERT(renderer != NULL);
-	WWASSERT(label != NULL);
+	WWASSERT(renderer != nullptr);
+	WWASSERT(label != nullptr);
 
-	const int screen_width	= Render2DClass::Get_Screen_Resolution().Width();
-	const int screen_height = Render2DClass::Get_Screen_Resolution().Height();
+	const float screen_width	= WWMath::Trunc(Render2DClass::Get_Screen_Resolution().Width());
+	const float screen_height = WWMath::Trunc(Render2DClass::Get_Screen_Resolution().Height());
 
 	WWASSERT(packetloss_pc > -MISCUTIL_EPSILON && packetloss_pc < 100 + MISCUTIL_EPSILON);
 
-	const float bar_height		= cMathUtil::Round(renderer->Peek_Font()->Char_Height());
-	const float y_increment		= cMathUtil::Round(bar_height * 1.25f);
+	const float bar_height		= WWMath::Round(float(renderer->Peek_Font()->Char_Height()));
+	const float y_increment		= WWMath::Round(bar_height * 1.25f);
 
 	float end_x;
 	float full_x;
@@ -427,10 +427,10 @@ void cNetwork::Bandwidth_Graph(Render2DTextClass * renderer,
 	// Render object prioritys so can compare against threshold priority
 	//
 	if (cNetwork::I_Am_Server())	{
-		int top = (int)(0.2 * screen_height);
+		float top = WWMath::Trunc(0.2f * screen_height);
 		int obj_count = NetworkObjectMgrClass::Get_Object_Count();
 
-		int x_pos = screen_width - 75;
+		float x_pos = screen_width - 75;
 
 		renderer->Set_Location(Vector2(x_pos, 300));
 		renderer->Draw_Text("UNKNOWN", COLOR_BLACK);
@@ -459,13 +459,13 @@ void cNetwork::Bandwidth_Graph(Render2DTextClass * renderer,
 		for (int index = 0; index < obj_count; index ++) {
 
 			NetworkObjectClass * p_object = NetworkObjectMgrClass::Get_Object(index);
-			WWASSERT(p_object != NULL);
+			WWASSERT(p_object != nullptr);
 			float priority = 0;//XXX p_object->Get_Cached_Priority();
 
 			if (priority > 0) {
 
 				RectClass rect;
-				rect.Left	= (int)(priority * screen_width) - 3;
+				rect.Left	= WWMath::Trunc((priority * screen_width) - 3);
 				rect.Right	= rect.Left + 6;
 				rect.Top		= top;
 				rect.Bottom	= rect.Top + 1;
@@ -499,7 +499,7 @@ void cNetwork::Bandwidth_Graph(Render2DTextClass * renderer,
 
 				renderer->Draw_Block(rect, color);
 
-				top += 3;
+				top += 3.0f;
 			}
 		}
 	}
@@ -508,7 +508,7 @@ void cNetwork::Bandwidth_Graph(Render2DTextClass * renderer,
 //-----------------------------------------------------------------------------
 void cNetwork::Watch_Bandwidth(Render2DTextClass * renderer)
 {
-	WWASSERT(renderer != NULL);
+	WWASSERT(renderer != nullptr);
 
 	bool bail = true;
 
@@ -525,9 +525,9 @@ void cNetwork::Watch_Bandwidth(Render2DTextClass * renderer)
 	//
 	// Draw the scale at the top
 	//
-	const int	screen_width	= Render2DClass::Get_Screen_Resolution().Width();
-	const float	bar_height		= cMathUtil::Round(renderer->Peek_Font()->Char_Height());
-	const float y_increment		= cMathUtil::Round(bar_height * 1.25f);
+	const float	screen_width	= WWMath::Trunc(Render2DClass::Get_Screen_Resolution().Width());
+	const float	bar_height		= WWMath::Round(float(renderer->Peek_Font()->Char_Height()));
+	const float y_increment		= WWMath::Round(bar_height * 1.25f);
 
 	//BandwidthBarLength = screen_width / 8.0f;
 	BandwidthBarLength = screen_width / 10.0f;
@@ -565,10 +565,10 @@ void cNetwork::Watch_Bandwidth(Render2DTextClass * renderer)
 			//XXX Get_Client_Rhost()->Get_Stats().StatSnapshot[STAT_BitsSent],
 			Get_Client_Rhost()->Get_Stats().StatMacroSnapshot[STAT_BitsSent],
 			Get_Client_Rhost()->Get_Target_Bps(),
-         Get_Client_Rhost()->Get_Stats().Get_Pc_Packetloss_Sent(),
+         float(Get_Client_Rhost()->Get_Stats().Get_Pc_Packetloss_Sent()),
 			COLOR_RED,
          true,
-			Get_Client_Rhost()->Get_Threshold_Priority());
+			float(Get_Client_Rhost()->Get_Threshold_Priority()));
 
 		sprintf(text, "c%d<-s", Get_My_Id());
 		Bandwidth_Graph(
@@ -577,7 +577,7 @@ void cNetwork::Watch_Bandwidth(Render2DTextClass * renderer)
 			//XXX Get_Client_Rhost()->Get_Stats().StatSnapshot[STAT_BitsRcv],
 			Get_Client_Rhost()->Get_Stats().StatMacroSnapshot[STAT_BitsRcv],
 			-1,
-         Get_Client_Rhost()->Get_Stats().Get_Pc_Packetloss_Received(),
+         float(Get_Client_Rhost()->Get_Stats().Get_Pc_Packetloss_Received()),
          COLOR_RED,
          false,
 			-1);
@@ -590,7 +590,7 @@ void cNetwork::Watch_Bandwidth(Render2DTextClass * renderer)
       */
 	}
 
-	if (PServerConnection != NULL) {
+	if (PServerConnection != nullptr) {
 
 		Bandwidth_Graph(
 			renderer,
@@ -614,7 +614,7 @@ void cNetwork::Watch_Bandwidth(Render2DTextClass * renderer)
          false,
 			-1);
 
-	   for (int i = PServerConnection->Get_Min_RHost(); i <= PServerConnection->Get_Max_RHost(); i++) {
+	   for (i = PServerConnection->Get_Min_RHost(); i <= PServerConnection->Get_Max_RHost(); i++) {
 
 			WWASSERT(
 				i >= cNetwork::PServerConnection->Get_Min_RHost() &&
@@ -622,7 +622,7 @@ void cNetwork::Watch_Bandwidth(Render2DTextClass * renderer)
 
 			cRemoteHost * p_rhost = Get_Server_Rhost(i);
 
-			if (p_rhost != NULL) {
+			if (p_rhost != nullptr) {
 
 				sprintf(text, "s->c%d", i);
 				Bandwidth_Graph(
@@ -631,10 +631,10 @@ void cNetwork::Watch_Bandwidth(Render2DTextClass * renderer)
 					//XXX p_rhost->Get_Stats().StatSnapshot[STAT_BitsSent],
 					p_rhost->Get_Stats().StatMacroSnapshot[STAT_BitsSent],
 					p_rhost->Get_Target_Bps(),
-               p_rhost->Get_Stats().Get_Pc_Packetloss_Sent(),
+               float(p_rhost->Get_Stats().Get_Pc_Packetloss_Sent()),
 					COLOR_RED,
                true,
-					p_rhost->Get_Threshold_Priority());
+					float(p_rhost->Get_Threshold_Priority()));
 
 				sprintf(text, "s<-c%d", i);
 				Bandwidth_Graph(
@@ -643,7 +643,7 @@ void cNetwork::Watch_Bandwidth(Render2DTextClass * renderer)
 					//XXX p_rhost->Get_Stats().StatSnapshot[STAT_BitsRcv],
 					p_rhost->Get_Stats().StatMacroSnapshot[STAT_BitsRcv],
                -1,
-					p_rhost->Get_Stats().Get_Pc_Packetloss_Received(),
+					float(p_rhost->Get_Stats().Get_Pc_Packetloss_Received()),
 					COLOR_RED,
                false,
 					-1);
@@ -663,9 +663,9 @@ void cNetwork::Watch_Bandwidth(Render2DTextClass * renderer)
 void cNetwork::Latency_Graph(Render2DTextClass * renderer, LPCSTR label,
 	const float bar_length, cRemoteHost * p_rhost)
 {
-	WWASSERT(renderer != NULL);
-	WWASSERT(label != NULL);
-	WWASSERT(p_rhost != NULL);
+	WWASSERT(renderer != nullptr);
+	WWASSERT(label != nullptr);
+	WWASSERT(p_rhost != nullptr);
 
 	int count = p_rhost->Get_Average_Internal_Pingtime_Ms();
 
@@ -701,7 +701,7 @@ void cNetwork::Latency_Graph(Render2DTextClass * renderer, LPCSTR label,
 //-----------------------------------------------------------------------------
 void cNetwork::Watch_Latency(Render2DTextClass * renderer)
 {
-	WWASSERT(renderer != NULL);
+	WWASSERT(renderer != nullptr);
 
 	if (cDevOptions::ShowLatency.Is_False()) {
 		return;
@@ -729,7 +729,7 @@ void cNetwork::Watch_Latency(Render2DTextClass * renderer)
 
 	if (I_Am_Server()) {
 	   for (int i = PServerConnection->Get_Min_RHost(); i <= PServerConnection->Get_Max_RHost(); i++) {
-			if (Get_Server_Rhost(i) != NULL) {
+			if (Get_Server_Rhost(i) != nullptr) {
 				sprintf(text, "s->c%d", i);
 				Latency_Graph(renderer, text, bar_length, Get_Server_Rhost(i));
 			}
@@ -742,9 +742,9 @@ void cNetwork::Last_Contact_Graph(Render2DTextClass * renderer,
 	LPCSTR label, const float bar_length,
 	cRemoteHost * p_rhost)
 {
-	WWASSERT(renderer != NULL);
-	WWASSERT(label != NULL);
-	WWASSERT(p_rhost != NULL);
+	WWASSERT(renderer != nullptr);
+	WWASSERT(label != nullptr);
+	WWASSERT(p_rhost != nullptr);
 
 	int count = TIMEGETTIME() - p_rhost->Get_Last_Contact_Time();
 	WWASSERT(count >= 0);
@@ -769,7 +769,7 @@ void cNetwork::Last_Contact_Graph(Render2DTextClass * renderer,
 //-----------------------------------------------------------------------------
 void cNetwork::Watch_Last_Contact(Render2DTextClass * renderer)
 {
-	WWASSERT(renderer != NULL);
+	WWASSERT(renderer != nullptr);
 
 	if (cDevOptions::ShowLastContact.Is_False()) {
 		return;
@@ -797,7 +797,7 @@ void cNetwork::Watch_Last_Contact(Render2DTextClass * renderer)
 
 	if (I_Am_Server()) {
 	   for (int i = PServerConnection->Get_Min_RHost(); i <= PServerConnection->Get_Max_RHost(); i++) {
-			if (Get_Server_Rhost(i) != NULL) {
+			if (Get_Server_Rhost(i) != nullptr) {
 				sprintf(text, "s->c%d", i);
 				Last_Contact_Graph(renderer, text, bar_length, Get_Server_Rhost(i));
 			}
@@ -809,8 +809,8 @@ void cNetwork::Watch_Last_Contact(Render2DTextClass * renderer)
 void cNetwork::List_Size_Graph(Render2DTextClass * renderer,
 	LPCSTR label, const float bar_length, int count)
 {
-	WWASSERT(renderer != NULL);
-	WWASSERT(label != NULL);
+	WWASSERT(renderer != nullptr);
+	WWASSERT(label != nullptr);
 
 	const float bar_width = 12;
 	const float list_size_block = 10.0f;
@@ -830,8 +830,8 @@ void cNetwork::List_Size_Graph(Render2DTextClass * renderer,
 void cNetwork::List_Time_Graph(Render2DTextClass * renderer,
 	LPCSTR label, const float bar_length, int time_ms)
 {
-	WWASSERT(renderer != NULL);
-	WWASSERT(label != NULL);
+	WWASSERT(renderer != nullptr);
+	WWASSERT(label != nullptr);
 
 	const float bar_width = 12;
 	const float list_block = 50.0f;
@@ -850,8 +850,8 @@ void cNetwork::List_Time_Graph(Render2DTextClass * renderer,
 void cNetwork::List_Packet_Size_Graph(Render2DTextClass * renderer,
 	LPCSTR label, const float bar_length, int count)
 {
-	WWASSERT(renderer != NULL);
-	WWASSERT(label != NULL);
+	WWASSERT(renderer != nullptr);
+	WWASSERT(label != nullptr);
 
 	const float bar_width = 12;
 	const float list_block = 200.0f;
@@ -870,7 +870,7 @@ void cNetwork::List_Packet_Size_Graph(Render2DTextClass * renderer,
 //-----------------------------------------------------------------------------
 void cNetwork::Watch_Size_Lists(Render2DTextClass * renderer)
 {
-	WWASSERT(renderer != NULL);
+	WWASSERT(renderer != nullptr);
 
 	if (cDevOptions::ShowListSizes.Is_False()) {
 		return;
@@ -912,7 +912,7 @@ void cNetwork::Watch_Size_Lists(Render2DTextClass * renderer)
 
    if (I_Am_Server()) {
 	   for (int i = PServerConnection->Get_Min_RHost(); i <= PServerConnection->Get_Max_RHost(); i++) {
-			if (Get_Server_Rhost(i) != NULL) {
+			if (Get_Server_Rhost(i) != nullptr) {
 
             sprintf(text, "s rsnd %d", i);
 				List_Size_Graph(renderer,  text, bar_length,
@@ -937,7 +937,7 @@ void cNetwork::Watch_Size_Lists(Render2DTextClass * renderer)
 //-----------------------------------------------------------------------------
 void cNetwork::Watch_Time_Lists(Render2DTextClass * renderer)
 {
-	WWASSERT(renderer != NULL);
+	WWASSERT(renderer != nullptr);
 
 	if (cDevOptions::ShowListTimes.Is_False()) {
 		return;
@@ -987,7 +987,7 @@ void cNetwork::Watch_Time_Lists(Render2DTextClass * renderer)
    /*
 	if (I_Am_Server()) {
 		for (int i = 0; i < MAX_RHOSTS; i++) {
-			if (Get_Server_Rhost(i) != NULL) {
+			if (Get_Server_Rhost(i) != nullptr) {
 
             sprintf(text, "s rsnd %d", i);
 		      List_Size_Graph(p_text_drawer, p_graph_drawer,
@@ -1021,7 +1021,7 @@ void cNetwork::Watch_Time_Lists(Render2DTextClass * renderer)
 //-----------------------------------------------------------------------------
 void cNetwork::Watch_Packet_Size_Lists(Render2DTextClass * renderer)
 {
-	WWASSERT(renderer != NULL);
+	WWASSERT(renderer != nullptr);
 
 	if (cDevOptions::ShowListPacketSizes.Is_False()) {
 		return;
@@ -1074,7 +1074,7 @@ void cNetwork::Watch_Packet_Size_Lists(Render2DTextClass * renderer)
    /*
 	if (I_Am_Server()) {
 		for (int i = 0; i < MAX_RHOSTS; i++) {
-			if (Get_Server_Rhost(i) != NULL) {
+			if (Get_Server_Rhost(i) != nullptr) {
 
             sprintf(text, "s rsnd %d", i);
 		      List_Size_Graph(p_text_drawer, p_graph_drawer,
@@ -1108,7 +1108,7 @@ void cNetwork::Watch_Packet_Size_Lists(Render2DTextClass * renderer)
 //-----------------------------------------------------------------------------
 void cNetwork::Simulation_Warnings(Render2DTextClass * renderer)
 {
-	WWASSERT(renderer != NULL);
+	WWASSERT(renderer != nullptr);
 
    static int color_cycle = 0;
 	int color = (++color_cycle & 64) ? COLOR_WHITE : COLOR_GREEN;
@@ -1151,14 +1151,14 @@ void cNetwork::Simulation_Warnings(Render2DTextClass * renderer)
 //-----------------------------------------------------------------------------
 void cNetwork::Priorities_Graph(Render2DTextClass * renderer
 {
-	WWASSERT(p_text_drawer != NULL);
-	WWASSERT(p_graph_drawer != NULL);
+	WWASSERT(p_text_drawer != nullptr);
+	WWASSERT(p_graph_drawer != nullptr);
 
 	if (cDevOptions::ShowPriorities.Is_False()) {
 		return;
 	}
 
-	cRemoteHost * p_rhost = NULL;
+	cRemoteHost * p_rhost = nullptr;
 	int rhost_index;
 	if (cNetwork::I_Am_Client_Server()) {
 		p_rhost = cNetwork::Get_Server_Rhost(2);
@@ -1171,7 +1171,7 @@ void cNetwork::Priorities_Graph(Render2DTextClass * renderer
 		rhost_index = 0;
 	}
 
-	if (p_rhost != NULL) {
+	if (p_rhost != nullptr) {
 		p_graph_drawer->Set_Shader(ShaderClass::_PresetOpaqueSolidShader);
 
 		float priority;
@@ -1228,7 +1228,7 @@ void cNetwork::Priorities_Graph(Render2DTextClass * renderer
 //-----------------------------------------------------------------------------
 void cNetwork::Watch_Bandwidth_Budget_Out(Render2DTextClass * renderer)
 {
-	WWASSERT(renderer != NULL);
+	WWASSERT(renderer != nullptr);
 
 	return;
 
@@ -1237,7 +1237,7 @@ void cNetwork::Watch_Bandwidth_Budget_Out(Render2DTextClass * renderer)
 	}
 
 	char text[200];
-   WWASSERT(PServerConnection != NULL);
+   WWASSERT(PServerConnection != nullptr);
 	sprintf(text, "BBO: %d bps", PServerConnection->Get_Bandwidth_Budget_Out());
 	renderer->Set_Location(Vector2(2, 25));
 	renderer->Draw_Text(text);
