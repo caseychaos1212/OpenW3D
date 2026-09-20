@@ -1846,9 +1846,6 @@ public:
 		float move = TimeManager::Get_Total_Seconds() * ErrorScale;
 
 		float attack_error = WWMath::Fabs(Action->Get_Parameters().AttackError);
-		if ( IS_COOP_MISSION ) {
-			attack_error *= cGameType::Get_Coop_AI_Weapon_Error_Multiplier();
-		}
 
 		float error_angle = attack_error +
 									WWMath::Fabs(obj->Get_Weapon_Error());
@@ -1876,6 +1873,9 @@ public:
 		// If AttackErrorOverride, only use AttackError
 		if ( Action->Get_Parameters().AttackErrorOverride ) {
 			error_angle = attack_error;
+		}
+		if ( IS_COOP_MISSION ) {
+			error_angle *= cGameType::Get_Coop_AI_Weapon_Error_Multiplier();
 		}
 
 		error.Rotate_Z( DEG_TO_RADF( WWMath::Sin( move * 1.7f ) * error_angle ) );

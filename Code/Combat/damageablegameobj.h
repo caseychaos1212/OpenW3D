@@ -113,6 +113,7 @@ public:
 	// Save / Load
 	virtual	bool	Save( ChunkSaveClass & csave ) override;
 	virtual	bool	Load( ChunkLoadClass & cload ) override;
+	virtual	void	On_Post_Load(void) override;
 
 	DefenseObjectClass *	Get_Defense_Object( void )						{ return &DefenseObject; }
 	virtual	void	Apply_Damage( const OffenseObjectClass & damager, float scale = 1.0f, int alternate_skin = -1 );

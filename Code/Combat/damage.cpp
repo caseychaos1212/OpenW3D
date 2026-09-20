@@ -46,6 +46,7 @@
 #include "wwpacket.h"
 #include "playerdata.h"
 #include "soldier.h"
+#include "vehicle.h"
 #include "weapons.h"
 #include "diaglog.h"
 #include "playertype.h"
@@ -818,8 +819,10 @@ float	DefenseObjectClass::Do_Damage( const OffenseObjectClass & offense, float s
 
 	float damage = offense.Get_Damage() * scale;
 
-	// Scale damage by difficulty if star is applying
-	if ( IS_MISSION && offense.Get_Owner() == COMBAT_STAR ) {
+	// Co-op difficulty bonuses belong to every human soldier, including guests.
+	if ( IS_MISSION && (IS_COOP_MISSION
+		? smart != nullptr && smart->Is_Human_Controlled()
+		: offense.Get_Owner() == COMBAT_STAR) ) {
 		switch ( CombatManager::Get_Difficulty_Level() ) {
 			case 0:	damage *= 2.0f;		break;
 			case 1:	damage *= 1.333f;	break;
@@ -827,11 +830,19 @@ float	DefenseObjectClass::Do_Damage( const OffenseObjectClass & offense, float s
 		};
 	}
 
-	if (IS_COOP_MISSION && damage > 0.0f && offense.Get_Owner() != NULL && Get_Owner() != NULL) {
-		SoldierGameObj *victim_soldier = Get_Owner()->As_SoldierGameObj();
-		if (victim_soldier != NULL &&
-			 victim_soldier->Is_Human_Controlled() &&
-			 Player_Types_Are_Enemies(victim_soldier->Get_Player_Type(), offense.Get_Owner()->Get_Player_Type())) {
+	if (IS_COOP_MISSION && damage > 0.0f && offense.Get_Owner() != nullptr && Get_Owner() != nullptr) {
+		SmartGameObj *victim = Get_Owner()->As_SmartGameObj();
+		bool human_target = victim != nullptr && victim->Is_Human_Controlled();
+		VehicleGameObj *vehicle = Get_Owner()->As_VehicleGameObj();
+		if (vehicle != nullptr) {
+			SoldierGameObj *driver = vehicle->Get_Driver();
+			SoldierGameObj *gunner = vehicle->Get_Actual_Gunner();
+			human_target = human_target ||
+				(driver != nullptr && driver->Is_Human_Controlled()) ||
+				(gunner != nullptr && gunner->Is_Human_Controlled());
+		}
+		if (human_target &&
+			Player_Types_Are_Enemies(Get_Owner()->Get_Player_Type(), offense.Get_Owner()->Get_Player_Type())) {
 			damage *= cGameType::Get_Coop_Enemy_Damage_Multiplier();
 		}
 	}
@@ -1108,6 +1119,15 @@ bool DefenseObjectClass::Would_Damage( const OffenseObjectClass	& offense, float
 
 void DefenseObjectClass::Import(BitStreamClass & packet)
 {
+	if (IS_COOP_MISSION) {
+		float health_max;
+		float shield_strength_max;
+		packet.Get(health_max);
+		packet.Get(shield_strength_max);
+		Set_Health_Max(health_max);
+		Set_Shield_Strength_Max(shield_strength_max);
+	}
+
 	bool is_health_zero = packet.Get(is_health_zero);
 
 	int health				= packet.Get(health, BITPACK_HEALTH);
@@ -1131,6 +1151,12 @@ void DefenseObjectClass::Import(BitStreamClass & packet)
 
 void DefenseObjectClass::Export(BitStreamClass & packet)
 {
+	if (IS_COOP_MISSION) {
+		// Presets alone cannot describe scaled enemies or mission-specific overrides.
+		packet.Add(Get_Health_Max());
+		packet.Add(Get_Shield_Strength_Max());
+	}
+
 	//
 	// N.B. The funky syntax is to prevent datasafe asserts
 	//

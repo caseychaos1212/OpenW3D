@@ -1,0 +1,378 @@
+/*
+** Copyright 2026 OpenW3D Contributors.
+** SPDX-License-Identifier: GPL-3.0-or-later
+*/
+#include "always.h"
+#include "gdcoopmission.h"
+#include "gamemode.h"
+#include "gametype.h"
+#include "combat.h"
+#include "smartgameobj.h"
+#include "soldier.h"
+#include "vehicle.h"
+#include "pscene.h"
+#include "humanphys.h"
+#include "nullrobj.h"
+#include "playertype.h"
+#include "damage.h"
+#include "chunkio.h"
+#include "saveload.h"
+#include "ramfile.h"
+#include "ffactory.h"
+#include "bitstream.h"
+#include "bitpackids.h"
+#include "wwpacket.h"
+#include "null/NullAudio.h"
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+namespace {
+
+void Check(bool condition, const char *message)
+{
+	if (!condition) {
+		std::fprintf(stderr, "FAIL: %s\n", message);
+		std::exit(1);
+	}
+}
+
+void Near(float actual, float expected, const char *message)
+{
+	if (std::fabs(actual - expected) > 0.002f || !std::isfinite(actual)) {
+		std::fprintf(stderr, "FAIL: %s (expected %.3f, got %.3f)\n", message, expected, actual);
+		std::exit(1);
+	}
+}
+
+// Use real armor parsing and damage calculations without installed game assets.
+class TestFileFactory final : public FileFactoryClass {
+public:
+	FileClass *Get_File(const char *filename) override
+	{
+		static char armor[] =
+			"[Armor_Types]\n0=Test\n"
+			"[Warhead_Types]\n0=Test\n"
+			"[Armor_Save_IDs]\nTest=0\n"
+			"[Warhead_Save_IDs]\nTest=0\n"
+			"[Scale_Test]\nTest=1\n"
+			"[Shield_Test]\nTest=0\n";
+		return std::strcmp(filename, "armor.ini") == 0
+			? new RAMFileClass(armor, sizeof(armor) - 1) : nullptr;
+	}
+	void Return_File(FileClass *file) override { delete file; }
+};
+
+class InactiveWolMode final : public GameModeClass {
+public:
+	const char *Name() override { return "WOL"; }
+	void Init() override {}
+	void Shutdown() override {}
+	void Render() override {}
+	void Think() override {}
+};
+
+class TestSaveLoadSystem : public SaveLoadSystemClass {
+public:
+	static void Finish()
+	{
+		PointerRemapper.Process();
+		ResetPointerRemapper();
+		Post_Load_Processing(nullptr);
+	}
+};
+
+// Leave physics uninitialized; exercise the real damageable load callback.
+class TestSmartGameObj final : public SmartGameObj {
+public:
+	void Init() override {}
+	const PersistFactoryClass &Get_Factory() const override { std::abort(); }
+	void On_Post_Load() override { DamageableGameObj::On_Post_Load(); }
+};
+
+// Restore the physics reference through the same public load/remap interface
+// used by saved levels. A null model provides transforms without a graphics device.
+void Attach_Test_Physics(PhysicalGameObj &object, PhysClass *physics)
+{
+	Null3DObjClass *model = new Null3DObjClass;
+	physics->PhysClass::Set_Model(model);
+	model->Release_Ref();
+	char bytes[128] = {};
+	RAMFileClass file(bytes, sizeof(bytes));
+	file.Open(FileClass::WRITE);
+	ChunkSaveClass save(&file);
+	save.Begin_Chunk(910991146);
+	CombatPhysObserverClass *observer = &object;
+	WRITE_MICRO_CHUNK_PTR(save, 3, observer);
+	WRITE_MICRO_CHUNK_PTR(save, 10, physics);
+	save.End_Chunk();
+	file.Close();
+	file.Open(FileClass::READ);
+	ChunkLoadClass load(&file);
+	object.PhysicalGameObj::Load(load);
+	void *saved_id = reinterpret_cast<void *>(
+		static_cast<uintptr_t>(SaveLoadSystemClass::Serialize_Pointer(physics)));
+	SaveLoadSystemClass::Register_Pointer(saved_id, physics);
+	TestSaveLoadSystem::Finish();
+	Check(object.Peek_Physical_Object() == physics, "restore physics fixture reference");
+	physics->Release_Ref();
+}
+
+class TestSoldierGameObj final : public SoldierGameObj {
+public:
+	TestSoldierGameObj() { Attach_Test_Physics(*this, new HumanPhysClass); }
+	void On_Post_Load() override { DamageableGameObj::On_Post_Load(); }
+};
+
+class TestVehicleGameObj final : public VehicleGameObj {
+public:
+	TestVehicleGameObj() { Attach_Test_Physics(*this, new HumanPhysClass); }
+	void On_Post_Load() override { DamageableGameObj::On_Post_Load(); }
+	void Set_Test_Driver(SoldierGameObj *driver)
+	{
+		SeatOccupants.Resize(2);
+		SeatOccupants[0] = driver;
+		SeatOccupants[1] = nullptr;
+		OccupiedSeats = driver == nullptr ? 0 : 1;
+	}
+	~TestVehicleGameObj() override { Set_Test_Driver(nullptr); }
+};
+
+void Check_Settings_Isolation()
+{
+	cGameDataCoopMission active;
+	PTheGameData = &active;
+	active.Set_Enemy_Health_Multiplier(2.5f);
+	active.Set_Enemy_Damage_Multiplier(0.5f);
+	active.Set_AI_Hearing_Multiplier(3.0f);
+	active.Set_Sprint_Enabled(false);
+	active.Set_Difficulty_Level(2);
+
+	{
+		// This constructor runs on every incoming co-op LAN advertisement.
+		cGameDataCoopMission advertised;
+		Near(cGameType::Get_Coop_Enemy_Health_Multiplier(), 2.5f, "LAN description preserves health setting");
+		Near(cGameType::Get_Coop_Enemy_Damage_Multiplier(), 0.5f, "LAN description preserves damage setting");
+		Check(!cGameType::Is_Coop_Sprint_Enabled(), "LAN description preserves sprint setting");
+		advertised.Set_Enemy_Health_Multiplier(4.0f);
+		advertised.Set_Enemy_Damage_Multiplier(4.0f);
+		advertised.Set_AI_Hearing_Multiplier(1.0f);
+		advertised.Set_Sprint_Enabled(true);
+		advertised.Set_Difficulty_Level(0);
+		advertised.Apply_Global_Settings();
+		Near(cGameType::Get_Coop_Enemy_Health_Multiplier(), 2.5f, "inactive setters preserve active health");
+		Near(cGameType::Get_Coop_AI_Hearing_Multiplier(), 3.0f, "inactive setters preserve active hearing");
+		Check(CombatManager::Get_Difficulty_Level() == 2, "inactive settings preserve active difficulty");
+
+		PTheGameData = &advertised;
+		advertised.Apply_Global_Settings();
+		Near(cGameType::Get_Coop_Enemy_Health_Multiplier(), 4.0f, "selected game applies its settings");
+		cPacket settings;
+		active.Export_Tier_2_Data(settings);
+		advertised.Import_Tier_2_Data(settings);
+		Near(cGameType::Get_Coop_Enemy_Health_Multiplier(), 2.5f, "network import applies health setting");
+		Near(cGameType::Get_Coop_Enemy_Damage_Multiplier(), 0.5f, "network import applies damage setting");
+		Check(!cGameType::Is_Coop_Sprint_Enabled(), "network import applies sprint setting");
+	}
+	PTheGameData = nullptr;
+}
+
+template<class T>
+void Write_Micro(ChunkSaveClass &save, unsigned id, const T &value)
+{
+	save.Begin_Micro_Chunk(id);
+	save.Write(&value, sizeof(value));
+	save.End_Micro_Chunk();
+}
+
+void Load_Defense_Fixture(TestSmartGameObj &object, int team, float health_max,
+	float health, float armor_max, float armor, float applied_multiplier = 0.0f)
+{
+	// Legacy DamageableGameObj chunk IDs. Original mission objects lack
+	// microchunk 3; co-op saves include it to prevent repeated scaling.
+	char bytes[4096] = {};
+	RAMFileClass file(bytes, sizeof(bytes));
+	Check(file.Open(FileClass::WRITE) != 0, "open memory save");
+	ChunkSaveClass save(&file);
+	save.Begin_Chunk(207011214);
+	Write_Micro(save, 1, team);
+	if (applied_multiplier > 0.0f) {
+		Write_Micro(save, 3, applied_multiplier);
+	}
+	save.End_Chunk();
+	DefenseObjectDefClass definition;
+	DefenseObjectClass defense;
+	defense.Init(definition, nullptr);
+	defense.Set_Health_Max(health_max);
+	defense.Set_Health(health);
+	defense.Set_Shield_Strength_Max(armor_max);
+	defense.Set_Shield_Strength(armor);
+	save.Begin_Chunk(207011213);
+	defense.Save(save);
+	save.End_Chunk();
+	file.Close();
+	Check(file.Open(FileClass::READ) != 0, "reopen memory save");
+	ChunkLoadClass load(&file);
+	Check(object.DamageableGameObj::Load(load), "load level defense fixture");
+	TestSaveLoadSystem::Finish();
+	object.On_Post_Load();
+}
+
+void Check_Enemy_Health()
+{
+	cGameType::Set_Game_Type(GAMETYPE_COOP_MISSION);
+	cGameType::Set_Coop_Enemy_Health_Multiplier(2.0f);
+	CombatManager::Set_I_Am_Server(true);
+	TestSmartGameObj enemy;
+	Load_Defense_Fixture(enemy, PLAYERTYPE_NOD, 100, 75, 50, 20);
+	TestSmartGameObj spawned_enemy;
+	spawned_enemy.Get_Defense_Object()->Set_Health_Max(100);
+	spawned_enemy.Get_Defense_Object()->Set_Health(100);
+	spawned_enemy.Set_Player_Type(PLAYERTYPE_NOD);
+	Near(spawned_enemy.Get_Defense_Object()->Get_Health_Max(), 200, "spawned enemy health scales");
+	auto *defense = enemy.Get_Defense_Object();
+	Near(defense->Get_Health_Max(), 200, "placed enemy maximum health scales");
+	Near(defense->Get_Health(), 150, "placed enemy current health scales");
+	Near(defense->Get_Shield_Strength_Max(), 100, "placed enemy maximum armor scales");
+	Near(defense->Get_Shield_Strength(), 40, "placed enemy current armor scales");
+	enemy.On_Post_Load();
+	enemy.Set_Player_Type(PLAYERTYPE_NOD);
+	Near(defense->Get_Health_Max(), 200, "repeated post-load/team update is idempotent");
+
+	TestSmartGameObj saved_enemy;
+	Load_Defense_Fixture(saved_enemy, PLAYERTYPE_NOD, 200, 150, 100, 40, 2.0f);
+	Near(saved_enemy.Get_Defense_Object()->Get_Health(), 150, "saved co-op health is not multiplied again");
+	cGameType::Set_Coop_Enemy_Health_Multiplier(3.0f);
+	saved_enemy.On_Post_Load();
+	Near(saved_enemy.Get_Defense_Object()->Get_Health_Max(), 300, "saved health rescales to a changed setting");
+	Near(saved_enemy.Get_Defense_Object()->Get_Health(), 225, "rescaling preserves wounds");
+
+	TestSmartGameObj ally;
+	Load_Defense_Fixture(ally, PLAYERTYPE_GDI, 100, 75, 50, 20);
+	Near(ally.Get_Defense_Object()->Get_Health_Max(), 100, "allied health stays unchanged");
+	CombatManager::Set_I_Am_Server(false);
+	enemy.Set_Player_Type(PLAYERTYPE_NOD);
+	Near(defense->Get_Health_Max(), 200, "client team updates cannot rescale authoritative health");
+
+	cGameType::Set_Game_Type(GAMETYPE_MISSION);
+	CombatManager::Set_I_Am_Server(true);
+	TestSmartGameObj solo_enemy;
+	Load_Defense_Fixture(solo_enemy, PLAYERTYPE_NOD, 100, 75, 50, 20);
+	Near(solo_enemy.Get_Defense_Object()->Get_Health_Max(), 100, "single-player health stays unchanged");
+}
+
+void Check_Defense_Replication()
+{
+	cGameType::Set_Game_Type(GAMETYPE_COOP_MISSION);
+	DefenseObjectClass server, client;
+	server.Set_Health_Max(350);
+	server.Set_Health(275);
+	server.Set_Shield_Strength_Max(180);
+	server.Set_Shield_Strength(90);
+	BitStreamClass packet;
+	server.Export(packet);
+	client.Import(packet);
+	Near(client.Get_Health_Max(), 350, "client receives enemy maximum health");
+	Near(client.Get_Health(), 275, "client receives current health");
+	Near(client.Get_Shield_Strength_Max(), 180, "client receives enemy maximum armor");
+	Near(client.Get_Shield_Strength(), 90, "client receives current armor");
+
+	cGameType::Set_Game_Type(GAMETYPE_MULTIPLAY);
+	BitStreamClass legacy;
+	server.Export(legacy);
+	bool zero;
+	int health, armor;
+	unsigned shield_type;
+	legacy.Get(zero);
+	legacy.Get(health, BITPACK_HEALTH);
+	legacy.Get(armor, BITPACK_SHIELD_STRENGTH);
+	legacy.Get(shield_type, BITPACK_SHIELD_TYPE);
+	Check(!zero && health == 275 && armor == 90 && shield_type == 0, "multiplayer defense wire format is unchanged");
+}
+
+void Reset_Health(DamageableGameObj &object)
+{
+	auto *defense = object.Get_Defense_Object();
+	defense->Set_Owner(&object);
+	defense->Set_Health_Max(1000);
+	defense->Set_Health(1000);
+	defense->Set_Shield_Strength_Max(0);
+	defense->Set_Shield_Strength(0);
+}
+
+void Check_Enemy_Damage()
+{
+	PhysicsSceneClass scene;
+	cGameType::Set_Game_Type(GAMETYPE_COOP_MISSION);
+	cGameType::Set_Coop_Enemy_Health_Multiplier(1.0f);
+	cGameType::Set_Coop_Enemy_Damage_Multiplier(3.0f);
+	CombatManager::Set_I_Am_Server(true);
+	CombatManager::Set_Difficulty_Level(2);
+	TestSmartGameObj enemy;
+	enemy.Set_Player_Type(PLAYERTYPE_NOD);
+	TestSoldierGameObj player;
+	player.Set_Control_Owner(2);
+	player.Set_Player_Type(PLAYERTYPE_GDI);
+	Reset_Health(player);
+	OffenseObjectClass hit(10, 0, &enemy);
+	player.Get_Defense_Object()->Do_Damage(hit);
+	Near(player.Get_Defense_Object()->Get_Health(), 970, "enemy damage scales against a guest");
+
+	TestVehicleGameObj vehicle;
+	vehicle.Set_Test_Driver(&player);
+	Reset_Health(vehicle);
+	vehicle.Get_Defense_Object()->Do_Damage(hit);
+	Near(vehicle.Get_Defense_Object()->Get_Health(), 970, "enemy damage scales against a guest's vehicle");
+	cGameType::Set_Coop_Enemy_Damage_Multiplier(0.0f);
+	vehicle.Get_Defense_Object()->Do_Damage(hit);
+	Near(vehicle.Get_Defense_Object()->Get_Health(), 970, "zero enemy damage makes driven vehicle immune");
+	OffenseObjectClass repair(-10, 0, &enemy);
+	vehicle.Get_Defense_Object()->Do_Damage(repair);
+	Near(vehicle.Get_Defense_Object()->Get_Health(), 980, "enemy damage setting does not disable repairs");
+
+	CombatManager::Set_Difficulty_Level(0);
+	Reset_Health(enemy);
+	OffenseObjectClass player_hit(10, 0, &player);
+	enemy.Get_Defense_Object()->Do_Damage(player_hit);
+	Near(enemy.Get_Defense_Object()->Get_Health(), 980, "guest receives easy-difficulty outgoing damage bonus");
+	cGameType::Set_Game_Type(GAMETYPE_MULTIPLAY);
+	Reset_Health(player);
+	player.Get_Defense_Object()->Do_Damage(hit);
+	Near(player.Get_Defense_Object()->Get_Health(), 990, "co-op damage setting does not affect multiplayer");
+	CombatManager::Set_I_Am_Server(false);
+}
+
+} // namespace
+
+int main()
+{
+	std::setvbuf(stdout, nullptr, _IONBF, 0);
+#ifdef _WIN32
+	SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+#endif
+	std::puts("Initializing null audio...");
+	NullAudioClass audio(true);
+	TestFileFactory files;
+	FileFactoryClass *previous_files = _TheFileFactory;
+	_TheFileFactory = &files;
+	std::puts("Initializing armor data...");
+	ArmorWarheadManager::Init();
+	DefenseObjectClass::Set_Precision();
+	InactiveWolMode wol;
+	GameModeManager::Add(&wol);
+
+	std::puts("Checking settings isolation and network import...");
+	Check_Settings_Isolation();
+	std::puts("Checking loaded enemy health and save compatibility...");
+	Check_Enemy_Health();
+	std::puts("Checking defense replication...");
+	Check_Defense_Replication();
+	std::puts("Checking infantry/vehicle damage and guest difficulty...");
+	Check_Enemy_Damage();
+
+	GameModeManager::Remove(&wol);
+	ArmorWarheadManager::Shutdown();
+	_TheFileFactory = previous_files;
+	std::puts("All co-op gameplay regression checks passed.");
+	return 0;
+}

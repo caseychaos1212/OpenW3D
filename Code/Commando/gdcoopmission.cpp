@@ -138,7 +138,6 @@ cGameDataCoopMission::cGameDataCoopMission(void) :
 	AIEnableDamageRetarget(DEFAULT_COOP_AI_ENABLE_DAMAGE_RETARGET),
 	AIEnableUnitCombatTypes(DEFAULT_COOP_AI_ENABLE_UNIT_COMBAT_TYPES)
 {
-	Apply_Global_Settings();
 	Set_Ini_Filename("svrcfg_coop.ini");
 	Set_Ip_And_Port();
 	Set_Game_Title(U_CHAR("Co-op Campaign"));
@@ -186,132 +185,137 @@ void cGameDataCoopMission::Set_Difficulty_Level(int level)
 	}
 
 	DifficultyLevel = level;
-	CombatManager::Set_Difficulty_Level(DifficultyLevel);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_Sprint_Enabled(bool enabled)
 {
 	EnableSprint = enabled;
-	cGameType::Set_Coop_Sprint_Enabled(EnableSprint);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_Health_Pickups_Disabled(bool disabled)
 {
 	DisableHealthPickups = disabled;
-	cGameType::Set_Coop_Health_Pickups_Disabled(DisableHealthPickups);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_Armor_Pickups_Disabled(bool disabled)
 {
 	DisableArmorPickups = disabled;
-	cGameType::Set_Coop_Armor_Pickups_Disabled(DisableArmorPickups);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_Ammo_Pickups_Disabled(bool disabled)
 {
 	DisableAmmoPickups = disabled;
-	cGameType::Set_Coop_Ammo_Pickups_Disabled(DisableAmmoPickups);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_Enemy_Health_Multiplier(float multiplier)
 {
 	EnemyHealthMultiplier = Clamp_Coop_Percent_Multiplier(multiplier, 0.01f);
-	cGameType::Set_Coop_Enemy_Health_Multiplier(EnemyHealthMultiplier);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_Enemy_Damage_Multiplier(float multiplier)
 {
 	EnemyDamageMultiplier = Clamp_Coop_Percent_Multiplier(multiplier, 0.0f);
-	cGameType::Set_Coop_Enemy_Damage_Multiplier(EnemyDamageMultiplier);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_Death_Score_Penalty(int penalty)
 {
 	DeathScorePenalty = Clamp_Coop_Death_Score_Penalty(penalty);
-	cGameType::Set_Coop_Death_Score_Penalty(DeathScorePenalty);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_AI_Sight_Multiplier(float multiplier)
 {
 	AISightMultiplier = Clamp_Coop_Percent_Multiplier(multiplier, 0.0f);
-	cGameType::Set_Coop_AI_Sight_Multiplier(AISightMultiplier);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_AI_Hearing_Multiplier(float multiplier)
 {
 	AIHearingMultiplier = Clamp_Coop_Percent_Multiplier(multiplier, 0.0f);
-	cGameType::Set_Coop_AI_Hearing_Multiplier(AIHearingMultiplier);
-	LogicalListenerClass::Set_Global_Scale_Multiplier(AIHearingMultiplier);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_AI_Aggressiveness_Bonus(float bonus)
 {
 	AIAggressivenessBonus = Clamp_Coop_AI_Probability_Bonus(bonus);
-	cGameType::Set_Coop_AI_Aggressiveness_Bonus(AIAggressivenessBonus);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_AI_Take_Cover_Bonus(float bonus)
 {
 	AITakeCoverBonus = Clamp_Coop_AI_Probability_Bonus(bonus);
-	cGameType::Set_Coop_AI_Take_Cover_Bonus(AITakeCoverBonus);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_AI_Share_Info_Radius(float radius)
 {
 	AIShareInfoRadius = Clamp_Coop_AI_Radius(radius);
-	cGameType::Set_Coop_AI_Share_Info_Radius(AIShareInfoRadius);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_AI_Weapon_Error_Multiplier(float multiplier)
 {
 	AIWeaponErrorMultiplier = Clamp_Coop_Percent_Multiplier(multiplier, 0.0f);
-	cGameType::Set_Coop_AI_Weapon_Error_Multiplier(AIWeaponErrorMultiplier);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_AI_Special_Damage_State_Lock_Chance(float chance)
 {
 	AISpecialDamageStateLockChance = Clamp_Coop_AI_Chance(chance);
-	cGameType::Set_Coop_AI_Special_Damage_State_Lock_Chance(AISpecialDamageStateLockChance);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_AI_Attack_Wander_Enabled(bool enabled)
 {
 	AIEnableAttackWander = enabled;
-	cGameType::Set_Coop_AI_Attack_Wander_Enabled(AIEnableAttackWander);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_AI_Damage_Retarget_Enabled(bool enabled)
 {
 	AIEnableDamageRetarget = enabled;
-	cGameType::Set_Coop_AI_Damage_Retarget_Enabled(AIEnableDamageRetarget);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Set_AI_Unit_Combat_Types_Enabled(bool enabled)
 {
 	AIEnableUnitCombatTypes = enabled;
-	cGameType::Set_Coop_AI_Unit_Combat_Types_Enabled(AIEnableUnitCombatTypes);
+	Apply_Global_Settings();
 }
 
 //-----------------------------------------------------------------------------
 void cGameDataCoopMission::Apply_Global_Settings(void) const
 {
+	// LAN advertisements and connection attempts also construct game descriptions.
+	// Only the selected session may change the running game's settings.
+	if (The_Game() != this) {
+		return;
+	}
+
 	CombatManager::Set_Difficulty_Level(DifficultyLevel);
 	cGameType::Set_Coop_Sprint_Enabled(EnableSprint);
 	cGameType::Set_Coop_Health_Pickups_Disabled(DisableHealthPickups);

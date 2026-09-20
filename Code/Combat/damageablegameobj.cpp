@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "damageablegameobj.h"
+#include "combat.h"
 #include "debug.h"
 #include "armedgameobj.h"
 #include "gametype.h"
@@ -304,6 +305,15 @@ bool	DamageableGameObj::Load( ChunkLoadClass &cload )
 	return true;
 }
 
+void DamageableGameObj::On_Post_Load(void)
+{
+	ScriptableGameObj::On_Post_Load();
+
+	// Placed level objects restore their team and defense directly, bypassing Init
+	// and Set_Player_Type. Saved games remember the multiplier already applied.
+	Apply_Coop_Enemy_Health_Multiplier();
+}
+
 void	DamageableGameObj::Apply_Damage( const OffenseObjectClass & damager, float scale, int alternate_skin )
 {
 	if ( DefenseObject.Get_Health() <= 0 ) {
@@ -449,6 +459,12 @@ void DamageableGameObj::Set_Player_Type(int id)
 //-----------------------------------------------------------------------------
 void DamageableGameObj::Apply_Coop_Enemy_Health_Multiplier(void)
 {
+	// Clients receive both current and maximum defense values from the server.
+	// Reapplying the multiplier during team replication would scale them twice.
+	if (!CombatManager::I_Am_Server()) {
+		return;
+	}
+
 	float target_multiplier = 1.0f;
 	if (IS_COOP_MISSION &&
 		 As_SmartGameObj() != NULL &&

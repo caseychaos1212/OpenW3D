@@ -519,3 +519,17 @@ if(W3D_FDS) # Dedicated headless server
 
     target_compile_definitions(renegadeserver PRIVATE FREEDEDICATEDSERVER)
 endif()
+
+# Opt-in integration checks use the real game code, with no window or game assets.
+option(W3D_BUILD_COOP_TESTS "Build headless co-op gameplay regression tests" OFF)
+if(BUILD_TESTING AND W3D_BUILD_COOP_TESTS)
+    add_executable(coop_gameplay_tests tests/CoopGameplayTests.cpp ${COMMANDO_SRC})
+    target_include_directories(coop_gameplay_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_link_libraries(coop_gameplay_tests PRIVATE commando)
+    if(MSVC)
+        # winmain_compat.h requests the game entry point through a linker pragma.
+        target_link_options(coop_gameplay_tests PRIVATE "/ENTRY:mainCRTStartup")
+    endif()
+    add_test(NAME coop_gameplay_tests COMMAND coop_gameplay_tests)
+    set_tests_properties(coop_gameplay_tests PROPERTIES TIMEOUT 30)
+endif()
