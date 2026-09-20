@@ -46,6 +46,8 @@
 #include "apppackettypes.h"
 #include "gamedataupdateevent.h"
 #include "coopobjectivesyncevent.h"
+#include "coopcameraevent.h"
+#include "coopcontrollockevent.h"
 #include "gametype.h"
 
 
@@ -88,9 +90,12 @@ cLoadingEvent::Act(void)
 	if (p_player != nullptr)
 	{
 		p_player->Set_Is_In_Game(!IsLoading);
-		p_player->Mark_As_Modified();
+        p_player->Mark_As_Modified();
+        if (cNetwork::PServerConnection != nullptr) {
+            cNetwork::PServerConnection->Set_Rhost_Is_In_Game(p_player->Get_Id(), !IsLoading);
+        }
 
-		if (p_player->Get_Is_In_Game().Is_True())
+        if (p_player->Get_Is_In_Game().Is_True())
 		{
 			if (cNetwork::PServerConnection != nullptr) {
 				cNetwork::PServerConnection->Set_Rhost_Expect_Packet_Flood(p_player->Get_Id(), true);
@@ -103,7 +108,9 @@ cLoadingEvent::Act(void)
 			//
 			cGameDataUpdateEvent * p_event = new cGameDataUpdateEvent();
 			p_event->Init(p_player->Get_Id());
-			cCoopObjectiveSyncEvent::Send_Snapshot(p_player->Get_Id());
+            cCoopObjectiveSyncEvent::Send_Snapshot(p_player->Get_Id());
+            cCoopCameraEvent::Sync_Current_Camera_State(p_player->Get_Id());
+            cCoopControlLockEvent::Sync_Current_Control_State(p_player->Get_Id());
 		}
 	}
 

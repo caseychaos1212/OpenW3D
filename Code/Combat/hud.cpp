@@ -2335,11 +2335,10 @@ static	void	Objective_Update( void )
 	TeammateArrowRenderer->Reset();
 	TeammateTextRenderer->Reset();
 	if (IS_COOP_MISSION && COMBAT_STAR != nullptr) {
-		SoldierGameObj *teammate = GameObjManager::Find_Different_Player_Soldier(COMBAT_STAR->Get_Control_Owner());
-		if (teammate != nullptr &&
-			 !teammate->Is_Dead() &&
-			 teammate->Get_Defense_Object() != nullptr &&
-			 teammate->Get_Defense_Object()->Get_Health() > 0.0f) {
+        DynamicVectorClass<SoldierGameObj *> teammates;
+        GameObjManager::Get_Living_Teammates(COMBAT_STAR, teammates);
+        for (int index = 0; index < teammates.Count(); ++index) {
+            SoldierGameObj *teammate = teammates[index];
 			Vector3 teammate_pos;
 			teammate->Get_Position(&teammate_pos);
 

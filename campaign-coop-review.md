@@ -22,6 +22,46 @@ Main implementation locations:
 - [Damage and defense replication](Code/Combat/damage.cpp): Do_Damage, Import, Export.
 - [AI accuracy](Code/Combat/action.cpp): Attack_Absolute.
 
+## Three-player playtest follow-up
+
+The reported session began with all participants in the lobby, loaded the
+opening mission (reported as M13), and then transitioned to M01. The host saw
+only one teammate marker; guests missed the host and other replicated objects,
+missed an opening cinematic, and could remain in a cinematic after changing maps.
+
+Code fixes:
+
+- The HUD now collects every living human teammate. The original lookup returned
+  only the first other soldier.
+- Starting a map explicitly sends the transition to every active participant,
+  then marks each player as loading before the host can publish new world
+  objects. This covers the initial lobby start as well as later missions.
+  Previously, reliable creation packets could be acknowledged and discarded by
+  clients inside their loading loop, permanently consuming their creation bits.
+- Players who already joined the lobby send a loading-complete event instead of
+  resending their bio. The old bio path deletes/recreates an existing player's
+  body. The host also preserves a fast guest's completed acknowledgement instead
+  of resetting it again when its own restart begins.
+- Mission startup waits for all active players to load, creates their bodies,
+  then attaches the mission-start script. Disconnecting players do not hold the
+  barrier indefinitely.
+- Camera updates retain their desired state until the camera/model exists.
+  Every packet contains a complete camera snapshot with ordering and map name.
+  A newer release cancels an older pending host and force-look.
+- Joining/respawning clients receive targeted camera/control snapshots.
+  Control locks survive arrival before the local body is created.
+- Camera/control state is cleared during map teardown/load and connection
+  cleanup. Clients discard authored camera attachments after loading their map
+  template and accept the server's cinematic state. Old-map packets are ignored.
+
+Regression coverage adds three/four-player teammate lists, staggered readiness
+and disconnection, actual cinematic event serialization/import, targeted updates
+for three guests, missing local cameras, release ordering, pre-spawn control
+locks, and M13-to-M01 stale-state rejection. These tests use the engine's memory
+transport and fixtures; they do not replace a graphical session on three PCs.
+
+All participants need this updated build: camera/control packet layouts changed.
+
 ## Cinematic findings requiring follow-up
 
 ### P1: One player's cinematic can freeze everyone outside the intended area
@@ -45,27 +85,11 @@ A fix should retain the participating players for the duration of the sequence,
 place them safely inside the arena, and restore their individual control and
 visibility on completion, abort, death, and disconnect.
 
-### P1: Camera events can arrive before the camera object exists
+### Resolved: Dropped camera events and stale camera/control state
 
-[cCoopCameraEvent::Act](Code/Commando/coopcameraevent.cpp) looks up the host
-object once. A missing object or combat camera causes the operation to do
-nothing. Import_Creation then deletes the event, so the requested camera is
-never applied when the model arrives later.
-
-The follow-up needs pending camera state that resolves after object creation,
-with ordering so an old pending camera cannot override a newer release event.
-
-### P2: Cached cinematic state survives mission/session boundaries
-
-CurrentCoopCameraHostId and the force-look state in
-[coopcameraevent.cpp](Code/Commando/coopcameraevent.cpp) have no level/session
-reset. [god.cpp](Code/Commando/god.cpp) rebroadcasts this cached state to all
-clients when a player receives a body or respawns.
-
-A later map can therefore replay an old object ID or force-look target. Camera
-state needs a level/session reset and synchronization targeted at the joining or
-respawning client. Control locks also lack equivalent persistent state for a
-player whose soldier did not exist when the event arrived.
+The follow-up above adds pending camera state, ordered complete snapshots,
+per-map checks, targeted resynchronization, and map/session resets. The M11
+participant positioning issue described above remains separate and unresolved.
 
 ## Verification
 
@@ -109,7 +133,12 @@ The default session size is four; the lobby currently tracks up to sixteen.
 5. Start M11's Petrova midtro with one player inside the trigger and another
    outside the arena. Swap who triggers it. Check each player's position,
    visibility, controls, and camera after both midtros.
-6. Join or respawn during a cinematic, then transition to another mission and
+6. Start three players in the lobby with deliberately different load times.
+   Verify all see both teammates and the opening cinematic. Complete M13 and
+   load M01 together; compare visible players, enemies, vehicles and props.
+7. Repeat with four players, then disconnect the slowest loader and verify the
+   remaining players can start.
+8. Join or respawn during a cinematic, then transition to another mission and
    respawn again. Check for a missing camera, stale camera attachment, or lock.
 
 All co-op participants need matching updated client/server builds because the

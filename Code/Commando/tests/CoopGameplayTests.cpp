@@ -23,6 +23,15 @@
 #include "bitpackids.h"
 #include "wwpacket.h"
 #include "null/NullAudio.h"
+#include "gameobjmanager.h"
+#include "playermanager.h"
+#include "player.h"
+#include "cnetwork.h"
+#include "connect.h"
+#include "singlepl.h"
+#include "coopcameraevent.h"
+#include "coopcamerastate.h"
+#include "coopcontrollockevent.h"
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -342,6 +351,219 @@ void Check_Enemy_Damage()
 	CombatManager::Set_I_Am_Server(false);
 }
 
+void Check_Multiplayer_Teammates_And_Readiness()
+{
+    cGameType::Set_Game_Type(GAMETYPE_COOP_MISSION);
+    CombatManager::Set_I_Am_Server(false);
+    TestSoldierGameObj soldiers[4];
+    DynamicVectorClass<SoldierGameObj *> teammates;
+    for (int i = 0; i < 4; ++i) {
+        soldiers[i].Set_Control_Owner(i + 1);
+        soldiers[i].Set_Player_Type(PLAYERTYPE_GDI);
+        Reset_Health(soldiers[i]);
+    }
+    for (int i = 0; i < 4; ++i) {
+        GameObjManager::Get_Living_Teammates(&soldiers[i], teammates);
+        Check(teammates.Count() == 3, "each of four players sees all three teammates");
+        for (int j = 0; j < teammates.Count(); ++j) {
+            Check(teammates[j] != &soldiers[i], "teammate markers exclude the viewer");
+        }
+    }
+    soldiers[3].Set_Control_Owner(-1);
+    for (int i = 0; i < 3; ++i) {
+        GameObjManager::Get_Living_Teammates(&soldiers[i], teammates);
+        Check(teammates.Count() == 2, "each of three players sees both teammates");
+    }
+    soldiers[1].Get_Defense_Object()->Set_Health(0);
+    GameObjManager::Get_Living_Teammates(&soldiers[0], teammates);
+    Check(teammates.Count() == 1 && teammates[0] == &soldiers[2], "dead teammates do not hide later players");
+    soldiers[2].Set_Player_Type(PLAYERTYPE_NOD);
+    GameObjManager::Get_Living_Teammates(&soldiers[0], teammates);
+    Check(teammates.Count() == 0, "enemy players are not teammate markers");
+
+    Check(!cPlayerManager::All_Active_Players_In_Game(), "empty lobby cannot start a mission");
+    cPlayer *players[4] = { new cPlayer, new cPlayer, new cPlayer, new cPlayer };
+    for (int i = 0; i < 4; ++i) {
+        players[i]->Set_Id(i + 1);
+        players[i]->Set_Is_Active(true);
+        players[i]->Set_Is_In_Game(false);
+    }
+    players[0]->Set_Is_In_Game(true);
+    players[1]->Set_Is_In_Game(true);
+    Check(!cPlayerManager::All_Active_Players_In_Game(), "host and one guest cannot start ahead of other loaders");
+    players[2]->Set_Is_In_Game(true);
+    Check(!cPlayerManager::All_Active_Players_In_Game(), "a fourth loader holds the readiness barrier");
+    players[3]->Set_Is_Active(false);
+    Check(cPlayerManager::All_Active_Players_In_Game(), "a disconnected fourth player does not block the three-player start");
+    players[1]->Set_Is_In_Game(false);
+    Check(!cPlayerManager::All_Active_Players_In_Game(), "next map waits for each loading acknowledgement again");
+    players[1]->Set_Is_In_Game(true);
+    Check(cPlayerManager::All_Active_Players_In_Game(), "all three loading acknowledgements release the barrier");
+    for (auto *player : players) { static_cast<NetworkObjectClass *>(player)->Delete(); }
+}
+
+struct CameraSnapshot {
+    int HostId;
+    bool HasLook;
+    Vector3 Look;
+};
+CameraSnapshot Read_Camera_Snapshot(BitStreamClass &packet)
+{
+    char map[256];
+    unsigned int sequence;
+    CameraSnapshot snapshot;
+    packet.Get_Terminated_String(map, sizeof(map), true);
+    packet.Get(sequence);
+    packet.Get(snapshot.HasLook);
+    packet.Get(snapshot.HostId);
+    packet.Get(snapshot.Look.X);
+    packet.Get(snapshot.Look.Y);
+    packet.Get(snapshot.Look.Z);
+    return snapshot;
+}
+
+CameraSnapshot Read_Targeted_Camera_Snapshot(int client_id)
+{
+    int count = NetworkObjectMgrClass::Get_Object_Count();
+    cCoopCameraEvent::Sync_Current_Camera_State(client_id);
+    Check(NetworkObjectMgrClass::Get_Object_Count() == count + 1, "camera synchronization creates one complete snapshot");
+    cCoopCameraEvent *event = nullptr;
+    for (int i = 0; i < NetworkObjectMgrClass::Get_Object_Count(); ++i) {
+        auto *object = NetworkObjectMgrClass::Get_Object(i);
+        if (object->Get_Network_Class_ID() == NETCLASSID_COOPCAMERAEVENT &&
+            (event == nullptr || event->Get_Network_ID() < object->Get_Network_ID())) {
+            event = static_cast<cCoopCameraEvent *>(object);
+        }
+    }
+    Check(event != nullptr, "targeted camera event exists");
+    for (int peer = 1; peer <= 4; ++peer) {
+        Check(event->Get_Object_Dirty_Bit(peer, NetworkObjectClass::BIT_CREATION) == (peer == client_id),
+            "a respawn snapshot is sent only to its intended player");
+    }
+    BitStreamClass packet;
+    event->Export_Creation(packet);
+    CameraSnapshot snapshot = Read_Camera_Snapshot(packet);
+    delete event;
+    return snapshot;
+}
+
+void Check_Cinematic_Replication()
+{
+    CoopCameraState pending;
+    pending.Set_Host(123);
+    pending.Set_Look(Vector3(4, 5, 6));
+    Check(pending.HostPending && pending.LookPending, "camera and look remain pending until the model is ready");
+    pending.Set_Host(0);
+    Check(pending.HostPending && pending.HostId == 0 && !pending.LookPending && !pending.HasLook,
+        "release cancels a missing camera and its pending look");
+    pending.Set_Host(456);
+    pending.Host_Was_Applied();
+    Check(pending.HostApplied && !pending.HostPending, "applied host is tracked for deletion handling");
+    pending.Reset();
+    Check(!pending.HostApplied && !pending.HostPending && pending.HostId == 0,
+        "map reset cannot replay an old cinematic host");
+
+    cGameType::Set_Game_Type(GAMETYPE_COOP_MISSION);
+    cGameDataCoopMission game;
+    PTheGameData = &game;
+    StringClass first_map("M13.mix");
+    game.Set_Map_Name(first_map);
+    cCoopCameraEvent::Reset(true);
+    cCoopControlLockEvent::Reset(true);
+    // The engine's in-memory transport avoids binding sockets or contacting
+    // peers; event serialization/import and per-client dirty bits remain real.
+    cSinglePlayerData::Init();
+    {
+        cConnection connection;
+        connection.Init_As_Client(0UL, 0);
+        auto server = [&]() {
+            cNetwork::PClientConnection = nullptr;
+            cNetwork::PServerConnection = &connection;
+            NetworkObjectClass::Set_Is_Server(true);
+        };
+        auto client = [&]() {
+            cNetwork::PServerConnection = nullptr;
+            cNetwork::PClientConnection = &connection;
+            NetworkObjectClass::Set_Is_Server(false);
+        };
+        server();
+        TestSoldierGameObj host_model;
+        int host_id = host_model.Get_ID();
+        cCoopCameraEvent host, look, release;
+        host.Init_Camera_Host(&host_model);
+        look.Init_Force_Look(Vector3(10, 20, 30));
+        BitStreamClass host_packet, look_packet, release_packet;
+        host.Export_Creation(host_packet);
+        look.Export_Creation(look_packet);
+        for (int peer = 2; peer <= 4; ++peer) {
+            CameraSnapshot snapshot = Read_Targeted_Camera_Snapshot(peer);
+            Check(snapshot.HostId == host_id && snapshot.HasLook, "all guests receive the camera host and look together");
+            Near(snapshot.Look.Y, 20, "camera look target survives serialization");
+        }
+        release.Init_Camera_Host(nullptr);
+        release.Export_Creation(release_packet);
+
+        cCoopCameraEvent::Reset();
+        client();
+        cCoopCameraEvent received;
+        received.Import_Creation(look_packet); // Deliberately arrive before host/model.
+        server();
+        CameraSnapshot snapshot = Read_Targeted_Camera_Snapshot(3);
+        Check(snapshot.HostId == host_id && snapshot.HasLook, "missing local camera retains the full desired snapshot");
+        client();
+        received.Import_Creation(release_packet);
+        received.Import_Creation(host_packet); // A late older host must not relock.
+        server();
+        snapshot = Read_Targeted_Camera_Snapshot(3);
+        Check(snapshot.HostId == 0 && !snapshot.HasLook, "late camera packets cannot override a release");
+
+        cCoopControlLockEvent lock, unlock;
+        lock.Init(false);
+        unlock.Init(true);
+        BitStreamClass lock_packet, unlock_packet;
+        lock.Export_Creation(lock_packet);
+        unlock.Export_Creation(unlock_packet);
+        cCoopControlLockEvent::Reset();
+        client();
+        cCoopControlLockEvent received_control;
+        received_control.Import_Creation(lock_packet);
+        TestSoldierGameObj new_body;
+        cCoopControlLockEvent::Apply_Current_Control_State(&new_body);
+        Check(!new_body.Is_Control_Enabled(), "control lock survives arrival before the player's body");
+        received_control.Import_Creation(unlock_packet);
+        cCoopControlLockEvent::Apply_Current_Control_State(&new_body);
+        Check(new_body.Is_Control_Enabled(), "unlock restores a subsequently created body");
+
+        server();
+        cCoopCameraEvent stale_camera;
+        stale_camera.Init_Camera_Host(&host_model);
+        cCoopControlLockEvent stale_lock;
+        stale_lock.Init(false);
+        BitStreamClass stale_camera_packet, stale_lock_packet;
+        stale_camera.Export_Creation(stale_camera_packet);
+        stale_lock.Export_Creation(stale_lock_packet);
+        StringClass next_map("M01.mix");
+        game.Set_Map_Name(next_map);
+        cCoopCameraEvent::Reset();
+        cCoopControlLockEvent::Reset();
+        client();
+        received.Import_Creation(stale_camera_packet);
+        received_control.Import_Creation(stale_lock_packet);
+        cCoopControlLockEvent::Apply_Current_Control_State(&new_body);
+        Check(new_body.Is_Control_Enabled(), "previous map's lock cannot freeze the new mission");
+        server();
+        snapshot = Read_Targeted_Camera_Snapshot(2);
+        Check(snapshot.HostId == 0 && !snapshot.HasLook, "M13 camera state cannot leak into M01");
+
+        cCoopCameraEvent::Reset(true);
+        cCoopControlLockEvent::Reset(true);
+        cNetwork::PServerConnection = nullptr;
+        cNetwork::PClientConnection = nullptr;
+        NetworkObjectClass::Set_Is_Server(false);
+    }
+    cSinglePlayerData::Cleanup();
+    PTheGameData = nullptr;
+}
 } // namespace
 
 int main()
@@ -370,7 +592,12 @@ int main()
 	std::puts("Checking infantry/vehicle damage and guest difficulty...");
 	Check_Enemy_Damage();
 
-	GameModeManager::Remove(&wol);
+    std::puts("Checking three/four-player markers and loading readiness...");
+    Check_Multiplayer_Teammates_And_Readiness();
+    std::puts("Checking cinematic snapshots, delayed objects, release and map resets...");
+    Check_Cinematic_Replication();
+
+    GameModeManager::Remove(&wol);
 	ArmorWarheadManager::Shutdown();
 	_TheFileFactory = previous_files;
 	std::puts("All co-op gameplay regression checks passed.");

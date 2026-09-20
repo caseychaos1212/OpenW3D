@@ -64,6 +64,7 @@ typedef TypedActionPtr<PLAYERMGR_ACTION, cPlayer> PlayerMgrEvent;
 class cPlayerManager {
 
 public:
+    static bool All_Active_Players_In_Game();
 
 	static void							Onetime_Init(void);
 	static void							Onetime_Shutdown(void);
@@ -132,8 +133,3 @@ private:
 //-----------------------------------------------------------------------------
 
 #endif // PLAYERMANAGER_H
-
-
-
-
-

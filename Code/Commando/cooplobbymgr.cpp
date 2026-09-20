@@ -120,8 +120,22 @@ void CoopLobbyMgrClass::Start_Pending_Map(void)
 	Broadcast_State();
 
 	cCoopLevelTransitionEvent *transition_event = new cCoopLevelTransitionEvent;
-	transition_event->Init(map_name, difficulty_level);
-	cNetwork::Flush();
+    transition_event->Init(map_name, difficulty_level);
+    // Send the transition to every participant before closing the replication
+    // gate. A bandwidth-limited general flush can leave some peers on the old map.
+    for (SLNode<cPlayer> *node = cPlayerManager::Get_Player_Object_List()->Head(); node; node = node->Next()) {
+        cPlayer *player = node->Data();
+        if (!player->Is_Active() || player->Get_Id() <= 0) {
+            continue;
+        }
+        if (!cNetwork::I_Am_Client() || player->Get_Id() != cNetwork::Get_My_Id()) {
+            cNetwork::Send_Object_Update(transition_event, player->Get_Id());
+        }
+        player->Set_Is_In_Game(false);
+        cNetwork::PServerConnection->Set_Rhost_Is_In_Game(player->Get_Id(), false);
+    }
+    transition_event->Set_Delete_Pending();
+    cNetwork::Flush();
 
 	Close();
 	GameInitMgrClass::Queue_Coop_Level_Transition(map_name, difficulty_level);

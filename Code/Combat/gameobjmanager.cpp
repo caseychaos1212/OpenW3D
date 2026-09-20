@@ -372,6 +372,23 @@ SoldierGameObj * GameObjManager::Find_Soldier_Of_Client_ID(int client_id)
 /*
 ** searches for a player commando other than my own
 */
+void GameObjManager::Get_Living_Teammates(SoldierGameObj *viewer, DynamicVectorClass<SoldierGameObj *> &teammates)
+{
+    teammates.Reset_Active();
+    if (viewer == nullptr) {
+        return;
+    }
+    for (SLNode<SoldierGameObj> *node = Get_Star_Game_Obj_List()->Head(); node; node = node->Next()) {
+        SoldierGameObj *soldier = node->Data();
+        if (soldier != viewer && soldier->Get_Control_Owner() > 0 &&
+            soldier->Get_Control_Owner() != viewer->Get_Control_Owner() &&
+            !soldier->Is_Delete_Pending() && !soldier->Is_Dead() &&
+            soldier->Get_Defense_Object()->Get_Health() > 0.0f && viewer->Is_Teammate(soldier)) {
+            teammates.Add(soldier);
+        }
+    }
+}
+
 SoldierGameObj * GameObjManager::Find_Different_Player_Soldier(int my_id)
 {
 	for (
@@ -652,5 +669,3 @@ bool	GameObjManager::Is_In_Environment_Zone( Vector3 & pos )
 		}
 	}
 }*/
-
-

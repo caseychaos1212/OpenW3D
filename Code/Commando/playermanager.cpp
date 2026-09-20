@@ -1562,3 +1562,19 @@ bool cPlayerManager::Load(ChunkLoadClass &cload)
 //-----------------------------------------------------------------------------
 
 
+
+bool cPlayerManager::All_Active_Players_In_Game()
+{
+    bool has_player = false;
+    for (SLNode<cPlayer> *node = Get_Player_Object_List()->Head(); node; node = node->Next()) {
+        cPlayer *player = node->Data();
+        if (!player->Is_Active() || player->Get_Id() <= 0) {
+            continue;
+        }
+        has_player = true;
+        if (player->Get_Is_In_Game().Is_False()) {
+            return false;
+        }
+    }
+    return has_player;
+}

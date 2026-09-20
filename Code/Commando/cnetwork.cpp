@@ -71,6 +71,8 @@
 #include "clientgoodbyeevent.h"
 #include "coopdebuglog.h"
 #include "cooplobbymgr.h"
+#include "coopcameraevent.h"
+#include "coopcontrollockevent.h"
 //#include "helptext.h"
 #include	"natter.h"
 #include	"vistable.h"
@@ -373,6 +375,8 @@ void cNetwork::Cleanup_Client(void)
    }
 
 	CombatManager::Set_I_Am_Client(false);
+    cCoopCameraEvent::Reset(true);
+    cCoopControlLockEvent::Reset(true);
 
 	delete PClientStatList;
 	PClientStatList = nullptr;
@@ -847,6 +851,8 @@ void cNetwork::Cleanup_Server(void)
    }
 
    CombatManager::Set_I_Am_Server(false);
+    cCoopCameraEvent::Reset(true);
+    cCoopControlLockEvent::Reset(true);
 
 	delete PServerStatListGroup;
 	PServerStatListGroup = nullptr;

@@ -39,6 +39,8 @@
 #include "input.h"
 #include "cnetwork.h"
 #include "coopdebuglog.h"
+#include "coopcameraevent.h"
+#include "coopcontrollockevent.h"
 #include "AudibleSound.h"
 #include "debug.h"
 #include "registry.h"
@@ -626,7 +628,11 @@ void CombatGameModeClass::Load_Level( void )
 {
 	WWLOG_PREPARE_TIME_AND_MEMORY("CombatGameModeClass::Load_Level");
 	WWMEMLOG(MEM_GAMEDATA);
-	Debug_Say(("CombatGameModeClass::Load_Level\n"));
+    Debug_Say(("CombatGameModeClass::Load_Level\n"));
+    if (IS_COOP_MISSION) {
+        cCoopCameraEvent::Reset();
+        cCoopControlLockEvent::Reset();
+    }
 
 	ConsoleBox.Print("Loading level %s\n", The_Game()->Get_Map_Name().Peek_Buffer());
 
@@ -829,8 +835,12 @@ void CombatGameModeClass::Load_Level( void )
 */
 
 	LOADTIME_NETWORK_UPDATE;
-	AssetStatusClass::Peek_Instance()->Enable_Load_On_Demand_Reporting(true);
-	g_is_loading = false;
+    AssetStatusClass::Peek_Instance()->Enable_Load_On_Demand_Reporting(true);
+    if (IS_COOP_MISSION && cNetwork::I_Am_Only_Client()) {
+        cCoopCameraEvent::Reset();
+        cCoopControlLockEvent::Reset();
+    }
+    g_is_loading = false;
 
 	ConsoleBox.Print("Load %d%% complete\n", 100);
 	ConsoleBox.Print("Level loaded OK\n");
@@ -871,7 +881,11 @@ void CombatGameModeClass::Load_Level( void )
 
 void 	CombatGameModeClass::Core_Shutdown()
 {
-	Debug_Say(("CombatGameModeClass::Core_Shutdown\n"));
+    Debug_Say(("CombatGameModeClass::Core_Shutdown\n"));
+    if (IS_COOP_MISSION) {
+        cCoopCameraEvent::Reset();
+        cCoopControlLockEvent::Reset();
+    }
 
 	//
 	// Switch to the in-game sound page to ensure all those sounds get freed
@@ -1305,7 +1319,9 @@ void 	CombatGameModeClass::Think()
 	if (log_coop_think) {
 		CoopDebugLog::Log("CombatGameModeClass::Think CombatManager::Think start");
 	}
-	CombatManager::Think();
+    cCoopCameraEvent::Update();
+    cCoopControlLockEvent::Update();
+    CombatManager::Think();
 	if (log_coop_think) {
 		CoopDebugLog::Log("CombatGameModeClass::Think CombatManager::Think done");
 	}
@@ -1401,21 +1417,8 @@ void 	CombatGameModeClass::Think()
 
 		g_b_core_restart = false;
 
-		if (IS_COOP_MISSION && cNetwork::I_Am_Server()) {
-			for (SLNode<cPlayer> *player_node = cPlayerManager::Get_Player_Object_List()->Head();
-				player_node != NULL;
-				player_node = player_node->Next()) {
-				cPlayer *player = player_node->Data();
-				if (player == NULL || !player->Is_Human()) {
-					continue;
-				}
-
-				player->Set_Is_In_Game(false);
-				if (cNetwork::PServerConnection != NULL) {
-					cNetwork::PServerConnection->Set_Rhost_Is_In_Game(player->Get_Id(), false);
-				}
-			}
-		}
+        // Co-op closes each player's replication gate when it sends the level
+        // transition. Do not reset completed acknowledgements again here.
 
 		//Core_Restart();
 

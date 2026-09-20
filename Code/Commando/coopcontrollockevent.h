@@ -13,13 +13,19 @@
 
 #include "netclassids.h"
 #include "netevent.h"
+#include "wwstring.h"
+class SoldierGameObj;
 
 class cCoopControlLockEvent : public cNetEvent
 {
 public:
 	cCoopControlLockEvent(void);
 
-	void Init(bool enabled);
+	    void Init(bool enabled);
+    static void Reset(bool new_session = false);
+    static void Update();
+    static void Sync_Current_Control_State(int client_id);
+    static void Apply_Current_Control_State(SoldierGameObj *soldier);
 
 	virtual void Export_Creation(BitStreamClass &packet) override;
 	virtual void Import_Creation(BitStreamClass &packet) override;
@@ -28,7 +34,9 @@ public:
 private:
 	virtual void Act(void) override;
 
-	bool Enabled;
+    StringClass MapName;
+    unsigned int Sequence;
+    bool Enabled;
 };
 
 #endif

@@ -92,6 +92,7 @@
 #include "ccamera.h"
 #include "coopdebuglog.h"
 #include "cooplobbymgr.h"
+#include "loadingevent.h"
 #include "bones.h"
 #include "surfaceeffects.h"
 #include "ffactory.h"
@@ -277,7 +278,12 @@ GameInitMgrClass::Start_Game (const char *map_name, int teamChoice, unsigned int
 	//
 	//	Send team/player information to the server (if necessary)
 	//
-	Transmit_Player_Data (teamChoice, clanID);
+    if (IS_COOP_MISSION && cNetwork::Get_My_Player_Object() != nullptr) {
+        cLoadingEvent *loaded = new cLoadingEvent;
+        loaded->Init(false);
+    } else {
+        Transmit_Player_Data(teamChoice, clanID);
+    }
 
 	//
 	// Set the auto restart flag if required.

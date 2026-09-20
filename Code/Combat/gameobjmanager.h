@@ -136,6 +136,7 @@ public:
 	// Find Game Objs
    static   SoldierGameObj    *Find_Soldier_Of_Client_ID(int client_id);
    static   SoldierGameObj    *Find_Different_Player_Soldier(int my_id);
+    static void Get_Living_Teammates(SoldierGameObj *viewer, DynamicVectorClass<SoldierGameObj *> &teammates);
 	static	SoldierGameObj		*Find_Soldier_Of_Player_Type(int player_type);
 	static	PhysicalGameObj	*Find_PhysicalGameObj( int id );
 	static	SmartGameObj		*Find_SmartGameObj( int id );

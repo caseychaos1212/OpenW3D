@@ -34,6 +34,7 @@
 #include "coopdebuglog.h"
 #include "coopinventory.h"
 #include "coopcameraevent.h"
+#include "coopcontrollockevent.h"
 #include "cooprespawnstateevent.h"
 #include "crandom.h"
 #include "playertype.h"
@@ -737,21 +738,38 @@ void cGod::Think(void)
 		State = GOD_STATE_SINGLE_RUNNING;
 	}
 
-	if ( State == GOD_STATE_COOP_INIT ) {
+    if (State == GOD_STATE_COOP_INIT) {
+        // Starting the mission script for the first loader loses the intro for
+        // slower peers. All active players must finish loading before it runs.
+        if (!cPlayerManager::All_Active_Players_In_Game()) {
+            return;
+        }
 
-		cPlayer * first_player = Get_First_Active_In_Game_Player();
+        cPlayer * first_player = Get_First_Active_In_Game_Player();
 		if (first_player == NULL) {
 			CoopDebugLog::Log("cGod::Think COOP_INIT waiting for first active in-game player");
 			return;
 		}
 
 		CoopDebugLog::Log("cGod::Think COOP_INIT spawning first player id=%d", first_player->Get_Id());
-		CoopInventoryManager::Reset();
-
-		SoldierGameObj * soldier = Create_Commando(first_player);
-		CoopDebugLog::Log("cGod::Think COOP_INIT first player soldier=%p net_id=%d",
-			soldier, soldier != NULL ? soldier->Get_Network_ID() : 0);
-		Attach_Mission_Start_Script(soldier);
+        SoldierGameObj *soldier = GameObjManager::Find_Soldier_Of_Client_ID(first_player->Get_Id());
+        if (soldier == nullptr) {
+            CoopInventoryManager::Reset();
+            soldier = Create_Commando(first_player);
+        }
+        if (soldier == nullptr) {
+            return;
+        }
+        // Everyone needs a body before cinematic commands lock or move players.
+        for (SLNode<cPlayer> *node = cPlayerManager::Get_Player_Object_List()->Head(); node; node = node->Next()) {
+            cPlayer *player = node->Data();
+            if (player->Is_Active() && player->Get_Id() > 0 &&
+                GameObjManager::Find_Soldier_Of_Client_ID(player->Get_Id()) == nullptr &&
+                Create_Commando(player) == nullptr) {
+                return;
+            }
+        }
+        Attach_Mission_Start_Script(soldier);
 
 		CoopDebugLog::Log("cGod::Think transition COOP_INIT -> COOP_RUNNING");
 		State = GOD_STATE_COOP_RUNNING;
@@ -810,7 +828,8 @@ void cGod::Think(void)
 				SoldierGameObj * soldier = Create_Commando(p_player, State == GOD_STATE_COOP_RUNNING);
 				if (State == GOD_STATE_COOP_RUNNING) {
 					if (soldier != NULL) {
-						cCoopCameraEvent::Sync_Current_Camera_State();
+                        cCoopCameraEvent::Sync_Current_Camera_State(p_player->Get_Id());
+                        cCoopControlLockEvent::Sync_Current_Control_State(p_player->Get_Id());
 					}
 				}
 			}
@@ -1033,7 +1052,8 @@ SoldierGameObj * cGod::Create_Commando(int client_id, int player_type, bool pref
 
 	p_soldier->Set_Control_Owner(client_id);
 	cPlayer * player = cPlayerManager::Find_Player( client_id );
-	p_soldier->Set_Player_Data( player );
+    p_soldier->Set_Player_Data( player );
+    cCoopControlLockEvent::Apply_Current_Control_State(p_soldier);
 
 	if ( The_Game()->Remember_Inventory() ) {
 		if (IS_MISSION) {
@@ -1168,7 +1188,8 @@ SoldierGameObj * cGod::Coop_Respawn_Player(int client_id)
 
 	SoldierGameObj *soldier = Create_Commando(player, true);
 	if (soldier != NULL) {
-		cCoopCameraEvent::Sync_Current_Camera_State();
+        cCoopCameraEvent::Sync_Current_Camera_State(client_id);
+        cCoopControlLockEvent::Sync_Current_Control_State(client_id);
 	}
 	return soldier;
 }
