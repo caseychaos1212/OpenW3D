@@ -50,16 +50,7 @@
 #include "ConsoleMode.h"
 #include "demosupport.h"
 
-static const int COOP_NETWORK_UPDATE_RATE = 30;
-
-static int Get_Effective_Net_Update_Rate(void)
-{
-	if (IS_COOP_MISSION) {
-		return COOP_NETWORK_UPDATE_RATE;
-	}
-
-	return cUserOptions::NetUpdateRate.Get();
-}
+#include "coopnetupdatetimer.h"
 
 //-----------------------------------------------------------------------------
 void	CombatNetworkReceiverInstanceClass::Print( const char *format, ... )
@@ -157,9 +148,12 @@ bool CombatNetworkReceiverInstanceClass::Server_Update_Dynamic_Objects(bool is_u
 	// This saves bandwidth at the cost of added latency.
 	//
 	static DWORD last_update_time = 0;
+	static CoopNetUpdateTimer coop_timer;
    DWORD time_now = TIMEGETTIME();
-	int net_update_rate = Get_Effective_Net_Update_Rate();
-	if (!is_urgent && (time_now - last_update_time < 1000 / (float) net_update_rate)) {
+	int net_update_rate = cUserOptions::Get_Net_Update_Rate();
+	if (IS_COOP_MISSION
+		? !coop_timer.Is_Due(time_now, net_update_rate, is_urgent)
+		: (!is_urgent && (time_now - last_update_time < 1000 / (float) net_update_rate))) {
 		return(false);
 	}
 	last_update_time = time_now;
@@ -268,10 +262,11 @@ bool CombatNetworkReceiverInstanceClass::Client_Update_Dynamic_Objects(bool is_u
 	WWASSERT(cNetwork::I_Am_Client());
 
 	static DWORD last_update_time_ms = 0;
+	static CoopNetUpdateTimer coop_timer;
    DWORD time_now_ms = TIMEGETTIME();
 	DWORD time_elapsed_ms = time_now_ms - last_update_time_ms;
 
-	int net_update_rate = Get_Effective_Net_Update_Rate();
+	int net_update_rate = cUserOptions::Get_Net_Update_Rate();
 	int max_updates_per_second = net_update_rate;
 	WWASSERT(cServerFps::Get_Instance() != nullptr);
 	int server_fps = cServerFps::Get_Instance()->Get_Fps();
@@ -283,7 +278,9 @@ bool CombatNetworkReceiverInstanceClass::Client_Update_Dynamic_Objects(bool is_u
 
 	//is_urgent = true;//XXX
 
-	if (is_urgent || (time_elapsed_ms >= min_delay_ms)) {
+	if (IS_COOP_MISSION
+		? coop_timer.Is_Due(time_now_ms, max_updates_per_second, is_urgent)
+		: (is_urgent || (time_elapsed_ms >= min_delay_ms))) {
 		last_update_time_ms = time_now_ms;
 		cNetwork::Tell_Server_About_Dynamic_Objects();
 		return(true);

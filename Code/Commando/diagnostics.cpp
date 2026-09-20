@@ -362,7 +362,7 @@ void cDiagnostics::Render(void)
 
 		Add_Diagnostic("I_Am_Client:        %d",		cNetwork::I_Am_Client());
 		Add_Diagnostic("I_Am_Server:        %d",		cNetwork::I_Am_Server());
-		Add_Diagnostic("NetUpdateRate:      %d",		cUserOptions::NetUpdateRate.Get());
+		Add_Diagnostic("NetUpdateRate:      %d",		cUserOptions::Get_Net_Update_Rate());
 		Add_Diagnostic("ClientHintFactor:   %5.2f",	cUserOptions::ClientHintFactor.Get());
 		Add_Diagnostic("MaxFacingPenalty:   %5.2f",	cUserOptions::MaxFacingPenalty.Get());
 

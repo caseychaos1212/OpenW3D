@@ -31,6 +31,10 @@
 #include "singlepl.h"
 #include "coopcameraevent.h"
 #include "coopcamerastate.h"
+#include "coopnetupdatetimer.h"
+#include "useroptions.h"
+#include "consolefunction.h"
+#include "registry.h"
 #include "coopcontrollockevent.h"
 #include <cmath>
 #include <cstdio>
@@ -147,6 +151,75 @@ public:
 	~TestVehicleGameObj() override { Set_Test_Driver(nullptr); }
 };
 
+void Check_Network_Update_Rate()
+{
+	const GameTypeEnum saved_type = cGameType::Get_Game_Type();
+	const int saved_coop_rate = cUserOptions::CoopNetUpdateRate.Get();
+	const int saved_rate = cUserOptions::NetUpdateRate.Get();
+	RegistryClass::Set_Read_Only(true);
+	cUserOptions::NetUpdateRate.Set(10);
+	cUserOptions::CoopNetUpdateRate.Set(cUserOptions::DEFAULT_COOP_NET_UPDATE_RATE);
+	cGameType::Set_Game_Type(GAMETYPE_COOP_MISSION);
+	Check(cUserOptions::Get_Net_Update_Rate() == 60, "co-op defaults to 60 independently of old multiplayer preference");
+	ConsoleFunctionManager::Init();
+	ConsoleFunctionManager::Parse_Input("nur 120");
+	Check(cUserOptions::Get_Net_Update_Rate() == 120, "nur alias changes effective co-op scheduler/budget rate");
+	ConsoleFunctionManager::Parse_Input("net_update_rate 60");
+	Check(cUserOptions::Get_Net_Update_Rate() == 60, "full command changes effective co-op rate");
+	for (const char *command : {"nur", "nur 0", "nur -1", "nur 4", "nur 121", "nur 999999999999999999999", "nur 60garbage", "nur text"}) {
+		ConsoleFunctionManager::Parse_Input(command);
+		Check(cUserOptions::Get_Net_Update_Rate() == 60, "query and invalid input preserve rate");
+	}
+	ConsoleFunctionManager::Parse_Input("nur 5");
+	Check(cUserOptions::Get_Net_Update_Rate() == 5, "co-op honors reductions below original hardcoded 30");
+	cUserOptions::CoopNetUpdateRate.Set(0);
+	Check(cUserOptions::Get_Net_Update_Rate() == 5, "invalid saved zero cannot divide by zero in budget/scheduler");
+	cUserOptions::CoopNetUpdateRate.Set(999);
+	Check(cUserOptions::Get_Net_Update_Rate() == 120, "invalid saved high value is bounded");
+	ConsoleFunctionManager::Parse_Input("nur 90");
+	cGameType::Set_Game_Type(GAMETYPE_MULTIPLAY);
+	Check(cUserOptions::Get_Net_Update_Rate() == 10, "co-op command preserves regular multiplayer preference");
+	ConsoleFunctionManager::Parse_Input("nur 60");
+	Check(cUserOptions::Get_Net_Update_Rate() == 10, "regular multiplayer retains 30 Hz maximum");
+	ConsoleFunctionManager::Parse_Input("nur 30");
+	Check(cUserOptions::Get_Net_Update_Rate() == 30, "regular multiplayer command still works");
+	cGameType::Set_Game_Type(GAMETYPE_COOP_MISSION);
+	Check(cUserOptions::Get_Net_Update_Rate() == 90, "co-op preference survives leaving and reentering mode");
+	ConsoleFunctionManager::Shutdown();
+	cUserOptions::NetUpdateRate.Set(saved_rate);
+	cUserOptions::CoopNetUpdateRate.Set(saved_coop_rate);
+	RegistryClass::Set_Read_Only(false);
+	cGameType::Set_Game_Type(saved_type);
+
+	// Simulate integer-ms timestamps produced by common render rates for 10s.
+	// Check actual sends, including when rendering cannot keep up with nur.
+	for (int fps : {30, 60, 120, 144, 240}) {
+		for (int rate : {5, 30, 60, 90, 120}) {
+			CoopNetUpdateTimer timer;
+			int sends = 0;
+			for (int frame = 0; frame <= fps * 10; ++frame) {
+				const uint32_t now = static_cast<uint32_t>((uint64_t(frame) * 1000) / fps);
+				if (timer.Is_Due(now, rate)) ++sends;
+				Check(!timer.Is_Due(now, rate), "timer never sends twice on the same timestamp");
+			}
+			const int expected = (fps < rate ? fps : rate) * 10 + 1;
+			if (std::abs(sends - expected) > 1) {
+				std::fprintf(stderr, "FAIL: %d FPS / %d Hz produced %d sends, expected %d\n", fps, rate, sends, expected);
+				std::exit(1);
+			}
+		}
+	}
+	CoopNetUpdateTimer timer;
+	Check(timer.Is_Due(0xfffffff0u, 60), "first update is immediate");
+	Check(timer.Is_Due(1, 60), "timer handles millisecond clock wrap");
+	Check(!timer.Is_Due(2, 60), "normal rate limit follows wrapped clock");
+	Check(timer.Is_Due(2, 60, true), "urgent load/disconnect flush bypasses limit");
+	Check(!timer.Is_Due(3, 60), "urgent send resets accumulated credit");
+	Check(timer.Is_Due(3, 120), "runtime rate change applies immediately");
+	Check(timer.Is_Due(10003, 120), "first frame after stall sends once");
+	Check(!timer.Is_Due(10003, 120), "stall does not cause catch-up burst");
+	Check(!timer.Is_Due(10004, 0), "invalid rate is safe");
+}
 void Check_Settings_Isolation()
 {
 	cGameDataCoopMission active;
@@ -583,6 +656,8 @@ int main()
 	InactiveWolMode wol;
 	GameModeManager::Add(&wol);
 
+	std::puts("Checking nur command, mode isolation and 5-120 Hz pacing...");
+	Check_Network_Update_Rate();
 	std::puts("Checking settings isolation and network import...");
 	Check_Settings_Isolation();
 	std::puts("Checking loaded enemy health and save compatibility...");

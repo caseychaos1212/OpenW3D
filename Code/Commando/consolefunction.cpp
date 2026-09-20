@@ -3837,27 +3837,32 @@ public:
 
 class NetUpdateRateConsoleFunctionClass : public ConsoleFunctionClass {
 public:
-	virtual	const char * Get_Name( void ) override	{ return "net_update_rate"; }
-	virtual	const char * Get_Alias( void ) override{ return "nur"; }
-	virtual	const char * Get_Help( void ) override	{ return "NET_UPDATE_RATE - set the max. net update think rate (times per second)."; }
-	virtual	void Activate( const char * input ) override {
-      WWASSERT(input != nullptr);
-		int rate = ::atoi(input);
-#ifdef WWDEBUG
-		if (rate > 0) {
-#else //WWDEBUG
-		if (rate >= 5 && rate <= 30) {
-#endif //WWDEBUG
-			cUserOptions::NetUpdateRate.Set(rate);
-         Print( "NetUpdateRate set to %d.", rate);
-		} else {
-		   Print("%s", Get_Help());
+	virtual const char * Get_Name(void) override { return "net_update_rate"; }
+	virtual const char * Get_Alias(void) override { return "nur"; }
+	virtual const char * Get_Help(void) override {
+		return "NET_UPDATE_RATE [rate] - show/set local max updates/sec (co-op: 5-120, default 60; other modes: 5-30).";
+	}
+	virtual void Activate(const char *input) override {
+		WWASSERT(input != nullptr);
+		if (*input == '\0') {
+			Print("%sNetUpdateRate: %d updates/sec (allowed %d-%d).\n",
+				IS_COOP_MISSION ? "Co-op " : "", cUserOptions::Get_Net_Update_Rate(),
+				cUserOptions::MIN_NET_UPDATE_RATE, cUserOptions::Get_Max_Net_Update_Rate());
+			return;
 		}
+		char *end = nullptr;
+		const long rate = ::strtol(input, &end, 10);
+		while (*end == ' ') ++end;
+		if (end == input || *end != '\0' || rate < cUserOptions::MIN_NET_UPDATE_RATE ||
+			rate > cUserOptions::Get_Max_Net_Update_Rate() ||
+			!cUserOptions::Set_Net_Update_Rate(static_cast<int>(rate))) {
+			Print("%s\n", Get_Help());
+			return;
+		}
+		Print("%sNetUpdateRate set to %d updates/sec on this machine.\n",
+			IS_COOP_MISSION ? "Co-op " : "", cUserOptions::Get_Net_Update_Rate());
 	}
 };
-
-
-
 
 class GameInfoConsoleFunctionClass : public ConsoleFunctionClass {
 public:

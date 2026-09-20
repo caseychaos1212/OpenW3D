@@ -266,7 +266,7 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 	/*
 	** We have NetUpdateRate updates per second.
 	*/
-	int net_update_rate = cUserOptions::NetUpdateRate.Get();
+	int net_update_rate = cUserOptions::Get_Net_Update_Rate();
 
 	/*
 	** Work out how many bytes we can send per update.
@@ -504,7 +504,7 @@ if (cDevOptions::UseNewTCADO.Is_False()) {
 	/*
 	** We have NetUpdateRate updates per second.
 	*/
-	int net_update_rate = cUserOptions::NetUpdateRate.Get();
+	int net_update_rate = cUserOptions::Get_Net_Update_Rate();
 
 	/*
 	** Work out how many bytes we can send per update.

@@ -388,6 +388,14 @@ bool ServerSettingsClass::Parse(bool apply)
 			return(false);
 		}
 		cUserOptions::NetUpdateRate.Set(nur);
+		int coop_nur = ini.Get_Int(MasterServerSection, "CoopNetUpdateRate",
+			cUserOptions::DEFAULT_COOP_NET_UPDATE_RATE);
+		if (coop_nur < cUserOptions::MIN_NET_UPDATE_RATE || coop_nur > cUserOptions::MAX_COOP_NET_UPDATE_RATE) {
+			ConsoleBox.Print("Error - CoopNetUpdateRate must be between 5 and 120 - aborting\n");
+			ConsoleBox.Wait_For_Keypress();
+			return false;
+		}
+		cUserOptions::CoopNetUpdateRate.Set(coop_nur);
 
 		/*
 		** Get the remote admin settings.

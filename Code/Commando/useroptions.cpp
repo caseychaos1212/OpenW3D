@@ -24,6 +24,7 @@
 //
 
 #include "useroptions.h"
+#include "gametype.h"
 
 #include "_globals.h"
 #include "wwdebug.h"
@@ -50,7 +51,6 @@
 #include "netinterface.h"
 #include "specialbuilds.h"
 #include "openw3d.h"
-#include "useroptions.h"
 
 extern char DefaultRegistryModifier[1024];
 
@@ -81,11 +81,36 @@ cRegistryBool		cUserOptions::DoneClientBandwidthTest(			APPLICATION_SUB_KEY_NAME
 
 cRegistryInt cUserOptions::PreferredLanNic(						APPLICATION_SUB_KEY_NAME_NETOPTIONS, "PreferredLanNic",					0);
 cRegistryInt cUserOptions::NetUpdateRate(							APPLICATION_SUB_KEY_NAME_NETOPTIONS, "NetUpdateRate",						10);
+cRegistryInt cUserOptions::CoopNetUpdateRate(APPLICATION_SUB_KEY_NAME_NETOPTIONS, "CoopNetUpdateRate", DEFAULT_COOP_NET_UPDATE_RATE);
 cRegistryFloat cUserOptions::ClientHintFactor(					APPLICATION_SUB_KEY_NAME_NETOPTIONS, "ClientHintFactor",					10.0f);
 cRegistryFloat cUserOptions::MaxFacingPenalty(					APPLICATION_SUB_KEY_NAME_NETOPTIONS, "MaxFacingPenalty",					0.3f);
 cRegistryFloat cUserOptions::IrrelevancePenalty(				APPLICATION_SUB_KEY_NAME_NETOPTIONS, "IrrelevancePenalty",				0.2f);
 
 cRegistryInt cUserOptions::ResultsLogNumber(						APPLICATION_SUB_KEY_NAME_NETOPTIONS, "ResultsLogNumber",					1);
+
+// Use the same setting for send scheduling, priority updates and packet budgets.
+// Keep co-op separate so existing 10/30 Hz multiplayer preferences do not lower
+// its default, and switching game modes preserves each preference.
+int cUserOptions::Get_Max_Net_Update_Rate()
+{
+	return IS_COOP_MISSION ? MAX_COOP_NET_UPDATE_RATE : MAX_NET_UPDATE_RATE;
+}
+
+int cUserOptions::Get_Net_Update_Rate()
+{
+	const int rate = IS_COOP_MISSION ? CoopNetUpdateRate.Get() : NetUpdateRate.Get();
+	const int maximum = Get_Max_Net_Update_Rate();
+	return rate < MIN_NET_UPDATE_RATE ? MIN_NET_UPDATE_RATE : (rate > maximum ? maximum : rate);
+}
+
+bool cUserOptions::Set_Net_Update_Rate(int rate)
+{
+	if (rate < MIN_NET_UPDATE_RATE || rate > Get_Max_Net_Update_Rate()) {
+		return false;
+	}
+	(IS_COOP_MISSION ? CoopNetUpdateRate : NetUpdateRate).Set(rate);
+	return true;
+}
 
 //-----------------------------------------------------------------------------
 cUserOptions::ParseResult cUserOptions::Parse_Command_Line(int argc, char *argv[])

@@ -88,6 +88,16 @@ class cUserOptions
 		static cRegistryInt PreferredLanNic;
 
 		static cRegistryInt NetUpdateRate;
+		static cRegistryInt CoopNetUpdateRate;
+		enum {
+			MIN_NET_UPDATE_RATE = 5,
+			MAX_NET_UPDATE_RATE = 30,
+			MAX_COOP_NET_UPDATE_RATE = 120,
+			DEFAULT_COOP_NET_UPDATE_RATE = 60,
+		};
+		static int Get_Net_Update_Rate();
+		static int Get_Max_Net_Update_Rate();
+		static bool Set_Net_Update_Rate(int rate);
 		static cRegistryFloat ClientHintFactor;
 		static cRegistryFloat MaxFacingPenalty;
 		static cRegistryFloat IrrelevancePenalty;

@@ -91,6 +91,36 @@ The follow-up above adds pending camera state, ordered complete snapshots,
 per-map checks, targeted resynchronization, and map/session resets. The M11
 participant positioning issue described above remains separate and unresolved.
 
+## Client jitter and network update rate follow-up
+
+The next user playtest improved visibility/cinematics but still had client jitter.
+Co-op previously forced a 30 Hz scheduling limit while the nur command changed
+only the older NetUpdateRate value used to calculate packet budgets.
+
+- Co-op now defaults to 60 updates/sec and accepts nur 5 through nur 120 during
+  a co-op session. Enter nur without a value to read the effective local limit.
+- The co-op preference is stored separately as CoopNetUpdateRate. Existing
+  regular multiplayer preferences retain their 5-30 range. Changing nur affects
+  the machine where the command runs; it does not change every player's setting.
+- Both send schedulers, server priority refresh, both object-budget paths and
+  diagnostics use the same effective rate. Invalid saved values are bounded.
+- Co-op scheduling carries fractional milliseconds between frames so 60/120 Hz
+  do not lose updates to integer clock rounding. Stalls do not cause catch-up
+  bursts, urgent transition/disconnect flushes remain immediate, and clients
+  still limit sending to the server's reported frame rate.
+- Dedicated server.ini supports CoopNetUpdateRate=60 in its [Server] section;
+  allowed values are 5-120. The existing NetUpdateRate entry remains separate.
+
+The Release regression suite exercises the actual nur/NET_UPDATE_RATE commands,
+invalid input, query behavior, mode isolation, corrupt saved values, 25 simulated
+rate/frame-rate combinations, clock wrap, stalls, and urgent flushes. The client,
+server, scripts and configuration utility build and both CTest suites pass.
+
+For the next playtest, start at the default 60 on all machines. Compare teammate
+movement and local movement correction with nur 30, then try nur 90 or nur 120
+while in co-op. Actual object updates also depend on frame rate, object priority
+and bandwidth; this change has not yet been tested in a live multiplayer session
+and does not establish that increased nur resolves all reported jitter.
 ## Verification
 
 The opt-in W3D_BUILD_COOP_TESTS CMake option adds
