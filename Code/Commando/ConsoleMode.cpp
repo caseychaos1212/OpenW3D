@@ -55,6 +55,7 @@
 #include <limits>
 #ifdef FREEDEDICATEDSERVER
 #include "console/ConsoleHost.h"
+#include "gamedata.h"
 #endif
 
 /*
@@ -572,9 +573,15 @@ void ConsoleModeClass::Think(void)
 			ConsoleFunctionManager::Parse_Input("quit");
 			return;
 		}
+		if (cGameData::Is_Manual_Exit()) return;
 		std::vector<std::string> commands;
 		Host->Poll(commands);
-		for (const auto &command : commands) ConsoleFunctionManager::Parse_Input(command.c_str());
+		for (const auto &command : commands) {
+			ConsoleFunctionManager::Parse_Input(command.c_str());
+			// quit/restart request exit asynchronously. Leave their restart choice
+			// intact instead of executing the rest of a piped command batch.
+			if (cGameData::Is_Manual_Exit()) return;
+		}
 	}
 #endif
 	static char string[256] = ">";
